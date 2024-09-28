@@ -11,7 +11,7 @@ export const orgs = sqliteTable("orgs", {
 // Users table
 export const users = sqliteTable("users", {
     userId: integer("userId").primaryKey({ autoIncrement: true }),
-    orgId: integer("orgId").references(() => orgs.orgId),
+    orgId: integer("orgId").references(() => orgs.orgId, { onDelete: "cascade" }),
     name: text("name").notNull(),
     email: text("email").notNull(),
     groups: text("groups"),
@@ -20,8 +20,8 @@ export const users = sqliteTable("users", {
 // Sites table
 export const sites = sqliteTable("sites", {
     siteId: integer("siteId").primaryKey({ autoIncrement: true }),
-    orgId: integer("orgId").references(() => orgs.orgId),
-    exitNode: integer("exitNode").references(() => exitNodes.exitNodeId),
+    orgId: integer("orgId").references(() => orgs.orgId, { onDelete: "cascade" }),
+    exitNode: integer("exitNode").references(() => exitNodes.exitNodeId, { onDelete: "set null" }),
     name: text("name").notNull(),
     subdomain: text("subdomain"),
     pubKey: text("pubKey"),
@@ -30,10 +30,20 @@ export const sites = sqliteTable("sites", {
 
 // Resources table
 export const resources = sqliteTable("resources", {
-    resourceId: integer("resourceId").primaryKey({ autoIncrement: true }),
-    siteId: integer("siteId").references(() => sites.siteId),
+    resourceId: text("resourceId", { length: 2048 }).primaryKey(),
+    siteId: integer("siteId").references(() => sites.siteId, { onDelete: "cascade" }),
     name: text("name").notNull(),
     subdomain: text("subdomain"),
+});
+
+// Targets table
+export const targets = sqliteTable("targets", {
+    targetId: integer("targetId").primaryKey({ autoIncrement: true }),
+    resourceId: text("resourceId").references(() => resources.resourceId, { onDelete: "cascade" }),
+    ip: text("ip").notNull(),
+    method: text("method"),
+    port: integer("port"),
+    protocol: text("protocol"),
 });
 
 // Exit Nodes table
@@ -48,18 +58,8 @@ export const exitNodes = sqliteTable("exitNodes", {
 // Routes table
 export const routes = sqliteTable("routes", {
     routeId: integer("routeId").primaryKey({ autoIncrement: true }),
-    exitNodeId: integer("exitNodeId").references(() => exitNodes.exitNodeId),
+    exitNodeId: integer("exitNodeId").references(() => exitNodes.exitNodeId, { onDelete: "cascade" }),
     subnet: text("subnet").notNull(),
-});
-
-// Targets table
-export const targets = sqliteTable("targets", {
-    targetId: integer("targetId").primaryKey({ autoIncrement: true }),
-    resourceId: integer("resourceId").references(() => resources.resourceId),
-    ip: text("ip").notNull(),
-    method: text("method"),
-    port: integer("port"),
-    protocol: text("protocol"),
 });
 
 // Define the model types for type inference

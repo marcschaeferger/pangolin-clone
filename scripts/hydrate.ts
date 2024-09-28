@@ -25,43 +25,56 @@ async function insertDummyData() {
   ]);
 
   // Insert dummy exit nodes
-  const exitNode1 = await db.insert(exitNodes).values({
+  const exitNode1 = db.insert(exitNodes).values({
     name: 'Exit Node 1',
-    address: '192.168.1.1'
+    address: '10.0.0.1/24',
+    privateKey: 'sKQlCNErB2n+dV8eLp5Yw/avsjK/zkrxJE0n48hjb10=',
+    listenPort: 51820
   }).returning().get();
 
-  const exitNode2 = await db.insert(exitNodes).values({
+  const exitNode2 = db.insert(exitNodes).values({
     name: 'Exit Node 2',
-    address: '192.168.1.2'
+    address: '172.16.1.1/24',
+    privateKey: 'ACaw+q5vHVm8Xb0jIgIkMzlkJiriC7cURuOiNbGsGHg=',
+    listenPort: 51820
   }).returning().get();
 
   // Insert dummy sites
-  const site1 = await db.insert(sites).values({
+  const site1 = db.insert(sites).values({
     orgId: org1.orgId,
     exitNode: exitNode1.exitNodeId,
     name: 'Main Site',
     subdomain: 'main',
-    pubKey: 'abc123',
-    subnet: '10.0.0.0/24'
+    pubKey: 'Kn4eD0kvcTwjO//zqH/CtNVkMNdMiUkbqFxysEym2D8=',
+    subnet: '10.0.0.16/28'
   }).returning().get();
 
-  const site2 = await db.insert(sites).values({
+  const site2 = db.insert(sites).values({
     orgId: org2.orgId,
     exitNode: exitNode2.exitNodeId,
     name: 'Dev Site',
     subdomain: 'dev',
-    pubKey: 'def456',
-    subnet: '10.0.1.0/24'
+    pubKey: 'V329Uf/vhnBwYxAuT/ZlMZuLokHy5tug/sGsLfIMK1w=',
+    subnet: '172.16.1.16/28'
   }).returning().get();
 
   // Insert dummy resources
-  const resource1 = await db.insert(resources).values({
+  const resource1 = db.insert(resources).values({
+    resourceId: `web.${site1.subdomain}.${org1.domain}`,
     siteId: site1.siteId,
     name: 'Web Server',
     subdomain: 'web'
   }).returning().get();
 
-  const resource2 = await db.insert(resources).values({
+  const resource2 = db.insert(resources).values({
+    resourceId: `web2.${site1.subdomain}.${org1.domain}`,
+    siteId: site1.siteId,
+    name: 'Web Server 2',
+    subdomain: 'web2'
+  }).returning().get();
+
+  const resource3 = db.insert(resources).values({
+    resourceId: `db.${site2.subdomain}.${org2.domain}`,
     siteId: site2.siteId,
     name: 'Database',
     subdomain: 'db'
@@ -69,14 +82,15 @@ async function insertDummyData() {
 
   // Insert dummy routes
   await db.insert(routes).values([
-    { exitNodeId: exitNode1.exitNodeId, subnet: '192.168.0.0/24' },
-    { exitNodeId: exitNode2.exitNodeId, subnet: '172.16.0.0/24' }
+    { exitNodeId: exitNode1.exitNodeId, subnet: '10.0.0.0/24' },
+    { exitNodeId: exitNode2.exitNodeId, subnet: '172.16.1.1/24' }
   ]);
 
   // Insert dummy targets
   await db.insert(targets).values([
-    { resourceId: resource1.resourceId, ip: '10.0.0.10', method: 'GET', port: 80, protocol: 'http' },
-    { resourceId: resource2.resourceId, ip: '10.0.1.20', method: 'TCP', port: 5432, protocol: 'postgresql' }
+    { resourceId: resource1.resourceId, ip: '10.0.0.16', method: 'https', port: 443, protocol: 'TCP' },
+    { resourceId: resource2.resourceId, ip: '10.0.0.17', method: 'http', port: 80, protocol: 'TCP' },
+    { resourceId: resource3.resourceId, ip: '172.16.1.16', method: 'http', port: 80, protocol: 'TCP' }
   ]);
 
   console.log('Dummy data inserted successfully');

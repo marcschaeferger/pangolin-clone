@@ -13,18 +13,18 @@ CREATE TABLE `orgs` (
 );
 --> statement-breakpoint
 CREATE TABLE `resources` (
-	`resourceId` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`resourceId` text(2048) PRIMARY KEY NOT NULL,
 	`siteId` integer,
 	`name` text NOT NULL,
 	`subdomain` text,
-	FOREIGN KEY (`siteId`) REFERENCES `sites`(`siteId`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`siteId`) REFERENCES `sites`(`siteId`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `routes` (
 	`routeId` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`exitNodeId` integer,
 	`subnet` text NOT NULL,
-	FOREIGN KEY (`exitNodeId`) REFERENCES `exitNodes`(`exitNodeId`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`exitNodeId`) REFERENCES `exitNodes`(`exitNodeId`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `sites` (
@@ -35,18 +35,18 @@ CREATE TABLE `sites` (
 	`subdomain` text,
 	`pubKey` text,
 	`subnet` text,
-	FOREIGN KEY (`orgId`) REFERENCES `orgs`(`orgId`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`exitNode`) REFERENCES `exitNodes`(`exitNodeId`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`orgId`) REFERENCES `orgs`(`orgId`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`exitNode`) REFERENCES `exitNodes`(`exitNodeId`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
 CREATE TABLE `targets` (
 	`targetId` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`resourceId` integer,
+	`resourceId` text,
 	`ip` text NOT NULL,
 	`method` text,
 	`port` integer,
 	`protocol` text,
-	FOREIGN KEY (`resourceId`) REFERENCES `resources`(`resourceId`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`resourceId`) REFERENCES `resources`(`resourceId`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `users` (
@@ -55,5 +55,5 @@ CREATE TABLE `users` (
 	`name` text NOT NULL,
 	`email` text NOT NULL,
 	`groups` text,
-	FOREIGN KEY (`orgId`) REFERENCES `orgs`(`orgId`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`orgId`) REFERENCES `orgs`(`orgId`) ON UPDATE no action ON DELETE cascade
 );

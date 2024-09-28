@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "369f669c-f220-4706-9a5c-8a66ab5653b2",
+  "id": "379ca2f9-068a-4289-8a23-001e7dc269b1",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "exitNodes": {
@@ -83,10 +83,10 @@
       "columns": {
         "resourceId": {
           "name": "resourceId",
-          "type": "integer",
+          "type": "text(2048)",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "siteId": {
           "name": "siteId",
@@ -122,7 +122,7 @@
           "columnsTo": [
             "siteId"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -166,7 +166,7 @@
           "columnsTo": [
             "exitNodeId"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -238,7 +238,7 @@
           "columnsTo": [
             "orgId"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "sites_exitNode_exitNodes_exitNodeId_fk": {
@@ -251,7 +251,7 @@
           "columnsTo": [
             "exitNodeId"
           ],
-          "onDelete": "no action",
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
@@ -270,7 +270,7 @@
         },
         "resourceId": {
           "name": "resourceId",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -316,7 +316,7 @@
           "columnsTo": [
             "resourceId"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -374,7 +374,7 @@
           "columnsTo": [
             "orgId"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
