@@ -1,7 +1,5 @@
 import { Router } from "express";
 import badger from "./badger/badger";
-import gerbil from "./gerbil/gerbil";
-import newt from "./newt/newt";
 import pangolin from "./pangolin/pangolin";
 
 const unauth = Router();
@@ -11,6 +9,6 @@ unauth.get("/", (_, res) => {
 });
 
 unauth.use("/newt", badger);
-unauth.use("/pangolin", badger);
+unauth.use("/pangolin", pangolin);
 
 export default unauth;
