@@ -1,8 +1,8 @@
 import express, { Request, Response } from "express";
 import next from "next";
 import { parse } from "url";
-import environment from "./environment";
-import logger from "@/server/logger";
+import environment from "@server/environment";
+import logger from "@server/logger";
 import helmet from "helmet";
 import cors from "cors";
 import unauth from "@server/routers/unauth";
