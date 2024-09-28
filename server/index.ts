@@ -5,52 +5,64 @@ import environment from "@server/environment";
 import logger from "@server/logger";
 import helmet from "helmet";
 import cors from "cors";
-import unauth from "@server/routers/unauth";
+import internal from "@server/routers/internal";
+import external from "@server/routers/external";
 import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 
 const dev = environment.ENVIRONMENT !== "prod";
 const app = next({ dev });
 const handle = app.getRequestHandler();
-const port = environment.PORT;
-
+const mainPort = environment.PORT;
+const internalPort = environment.INTERNAL_PORT;
 let db: Database.Database;
 
 app.prepare().then(() => {
     // Open the SQLite database connection
     const sqlite = new Database(`${environment.CONFIG_PATH}/db/db.sqlite`, { verbose: console.log });
     const db = drizzle(sqlite);
-    
 
-    const server = express();
-    server.use(helmet());
-    server.use(cors());
+    // Main server
+    const mainServer = express();
+    mainServer.use(helmet());
+    mainServer.use(cors());
 
-    // Run migrations (if you're using Drizzle's migration system)
-    // migrate(db, { migrationsFolder: './drizzle' });
-    
     // Middleware to attach the database to the request
-    server.use((req, res, next) => {
-      (req as any).db = db;
-      next();
+    mainServer.use((req, res, next) => {
+        (req as any).db = db;
+        next();
     });
-    
+
     const prefix = `/api/${environment.API_VERSION}`;
-
-    server.use(prefix, express.json(), unauth);
-
+    mainServer.use(prefix, express.json(), external);
 
     // We are using NEXT from here on
-    server.all("*", (req: Request, res: Response) => {
+    mainServer.all("*", (req: Request, res: Response) => {
         const parsedUrl = parse(req.url!, true);
         handle(req, res, parsedUrl);
     });
 
-    server.listen(port, (err?: any) => {
-        if (err) {
-            throw err;
-        }
-        logger.info(`Server is running on http://localhost:${port}`);
+    mainServer.listen(mainPort, (err?: any) => {
+        if (err) throw err;
+        logger.info(`Main server is running on http://localhost:${mainPort}`);
+    });
+
+    // Internal server
+    const internalServer = express();
+    internalServer.use(helmet());
+    internalServer.use(cors());
+
+    // Middleware to attach the database to the request
+    internalServer.use((req, res, next) => {
+        (req as any).db = db;
+        next();
+    });
+
+    internalServer.use(prefix, express.json(), internal);
+
+    internalServer.listen(internalPort, (err?: any) => {
+        if (err) throw err;
+        logger.info(`Internal server is running on http://localhost:${internalPort}`);
     });
 });
 

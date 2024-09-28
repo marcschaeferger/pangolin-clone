@@ -12,7 +12,5 @@ unauth.get("/", (_, res) => {
 
 unauth.use("/badger", badger);
 unauth.use("/gerbil", badger);
-unauth.use("/newt", badger);
-unauth.use("/pangolin", badger);
 
 export default unauth;
