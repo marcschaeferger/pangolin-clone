@@ -72,4 +72,13 @@ const logger = winston.createLogger({
     transports,
 });
 
+process.on("uncaughtException", (error) => {
+    logger.error("Uncaught Exception:", { error, stack: error.stack });
+    process.exit(1);
+});
+
+process.on("unhandledRejection", (reason, _) => {
+    logger.error("Unhandled Rejection:", { reason });
+});
+
 export default logger;
