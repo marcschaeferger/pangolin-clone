@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "9b039f4c-6867-4b08-8aa9-bc184c37b910",
+  "id": "369f669c-f220-4706-9a5c-8a66ab5653b2",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "exitNodes": {
@@ -26,6 +26,20 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false
+        },
+        "privateKey": {
+          "name": "privateKey",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "listenPort": {
+          "name": "listenPort",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         }
       },

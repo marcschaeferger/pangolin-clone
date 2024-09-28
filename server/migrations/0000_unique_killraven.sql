@@ -1,7 +1,9 @@
 CREATE TABLE `exitNodes` (
 	`exitNodeId` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`name` text NOT NULL,
-	`address` text NOT NULL
+	`address` text NOT NULL,
+	`privateKey` text,
+	`listenPort` integer
 );
 --> statement-breakpoint
 CREATE TABLE `orgs` (
