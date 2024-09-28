@@ -5,7 +5,7 @@
     "scripts": {
         "dev": "dotenvx run -- tsx watch server/index.ts",
         "db:generate": "drizzle-kit generate",
-        "db:push": "drizzle-kit push",
+        "db:push": "npx tsx scripts/runMigrations.ts",
         "db:studio": "drizzle-kit studio"
     },
     "dependencies": {

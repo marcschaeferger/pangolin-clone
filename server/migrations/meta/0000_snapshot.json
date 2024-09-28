@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "a06283ff-bd4b-4994-988c-4db3279f73dd",
+  "id": "9b039f4c-6867-4b08-8aa9-bc184c37b910",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "exitNodes": {
@@ -18,14 +18,14 @@
           "name": "name",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "address": {
           "name": "address",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         }
       },
@@ -34,8 +34,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "org": {
-      "name": "org",
+    "orgs": {
+      "name": "orgs",
       "columns": {
         "orgId": {
           "name": "orgId",
@@ -46,6 +46,13 @@
         },
         "name": {
           "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "domain": {
+          "name": "domain",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -78,32 +85,11 @@
           "name": "name",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
-        "targetIp": {
-          "name": "targetIp",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "method": {
-          "name": "method",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "port": {
-          "name": "port",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "proto": {
-          "name": "proto",
+        "subdomain": {
+          "name": "subdomain",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -139,18 +125,18 @@
           "notNull": true,
           "autoincrement": true
         },
-        "subnet": {
-          "name": "subnet",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "exitNodeId": {
           "name": "exitNodeId",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
+          "autoincrement": false
+        },
+        "subnet": {
+          "name": "subnet",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
           "autoincrement": false
         }
       },
@@ -190,15 +176,22 @@
           "notNull": false,
           "autoincrement": false
         },
-        "name": {
-          "name": "name",
-          "type": "text",
+        "exitNode": {
+          "name": "exitNode",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "autoSubdomain": {
-          "name": "autoSubdomain",
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "subdomain": {
+          "name": "subdomain",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -206,7 +199,7 @@
         },
         "pubKey": {
           "name": "pubKey",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -217,21 +210,14 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
-        },
-        "exitNode": {
-          "name": "exitNode",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "sites_orgId_org_orgId_fk": {
-          "name": "sites_orgId_org_orgId_fk",
+        "sites_orgId_orgs_orgId_fk": {
+          "name": "sites_orgId_orgs_orgId_fk",
           "tableFrom": "sites",
-          "tableTo": "org",
+          "tableTo": "orgs",
           "columnsFrom": [
             "orgId"
           ],
@@ -258,11 +244,76 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
+    "targets": {
+      "name": "targets",
+      "columns": {
+        "targetId": {
+          "name": "targetId",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "resourceId": {
+          "name": "resourceId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "ip": {
+          "name": "ip",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "method": {
+          "name": "method",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "port": {
+          "name": "port",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "protocol": {
+          "name": "protocol",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "targets_resourceId_resources_resourceId_fk": {
+          "name": "targets_resourceId_resources_resourceId_fk",
+          "tableFrom": "targets",
+          "tableTo": "resources",
+          "columnsFrom": [
+            "resourceId"
+          ],
+          "columnsTo": [
+            "resourceId"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "users": {
       "name": "users",
       "columns": {
-        "uid": {
-          "name": "uid",
+        "userId": {
+          "name": "userId",
           "type": "integer",
           "primaryKey": true,
           "notNull": true,
@@ -279,14 +330,14 @@
           "name": "name",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "email": {
           "name": "email",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "groups": {
@@ -299,10 +350,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "users_orgId_org_orgId_fk": {
-          "name": "users_orgId_org_orgId_fk",
+        "users_orgId_orgs_orgId_fk": {
+          "name": "users_orgId_orgs_orgId_fk",
           "tableFrom": "users",
-          "tableTo": "org",
+          "tableTo": "orgs",
           "columnsFrom": [
             "orgId"
           ],

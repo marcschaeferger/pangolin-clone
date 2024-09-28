@@ -19,7 +19,8 @@ let db: Database.Database;
 
 app.prepare().then(() => {
     // Open the SQLite database connection
-    const sqlite = new Database(`${environment.CONFIG_PATH}/db/db.sqlite`, { verbose: console.log });
+    // const sqlite = new Database(`${environment.CONFIG_PATH}/db/db.sqlite`, { verbose: console.log });
+    const sqlite = new Database(`${environment.CONFIG_PATH}/db/db.sqlite`);
     const db = drizzle(sqlite);
 
     // Main server
