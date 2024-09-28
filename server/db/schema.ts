@@ -1,10 +1,12 @@
 import { InferSelectModel } from "drizzle-orm";
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
-export const schools = sqliteTable("schools", {
-    id: integer("id").primaryKey({ autoIncrement: true }),
-    name: text("name"),
-    abbreviation: text("abbreviation"),
+export const proxyTargets = sqliteTable("proxyTargets", {
+    id: text("id").unique().notNull().primaryKey(),
+    target: text("target").notNull(),
+    rule: text("rule").notNull(),
+    entryPoint: text("entryPoint").notNull(),
+    enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
 });
 
-export type SelectSchoolType = InferSelectModel<typeof schools>;
+export type SelectProxyTargets = InferSelectModel<typeof proxyTargets>;
