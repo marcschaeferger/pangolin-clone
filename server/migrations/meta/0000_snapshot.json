@@ -1,59 +1,318 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "341a41b7-2cc2-4967-b0cf-ec35f6d0486a",
+  "id": "a06283ff-bd4b-4994-988c-4db3279f73dd",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "proxyTargets": {
-      "name": "proxyTargets",
+    "exitNodes": {
+      "name": "exitNodes",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
+        "exitNodeId": {
+          "name": "exitNodeId",
+          "type": "integer",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": true
         },
-        "target": {
-          "name": "target",
+        "name": {
+          "name": "name",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         },
-        "rule": {
-          "name": "rule",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "entryPoint": {
-          "name": "entryPoint",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "enabled": {
-          "name": "enabled",
+        "address": {
+          "name": "address",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 1
+          "notNull": false,
+          "autoincrement": false
         }
       },
-      "indexes": {
-        "proxyTargets_id_unique": {
-          "name": "proxyTargets_id_unique",
-          "columns": [
-            "id"
-          ],
-          "isUnique": true
-        }
-      },
+      "indexes": {},
       "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "org": {
+      "name": "org",
+      "columns": {
+        "orgId": {
+          "name": "orgId",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "resources": {
+      "name": "resources",
+      "columns": {
+        "resourceId": {
+          "name": "resourceId",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "siteId": {
+          "name": "siteId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "targetIp": {
+          "name": "targetIp",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "method": {
+          "name": "method",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "port": {
+          "name": "port",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "proto": {
+          "name": "proto",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "resources_siteId_sites_siteId_fk": {
+          "name": "resources_siteId_sites_siteId_fk",
+          "tableFrom": "resources",
+          "tableTo": "sites",
+          "columnsFrom": [
+            "siteId"
+          ],
+          "columnsTo": [
+            "siteId"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "routes": {
+      "name": "routes",
+      "columns": {
+        "routeId": {
+          "name": "routeId",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "subnet": {
+          "name": "subnet",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "exitNodeId": {
+          "name": "exitNodeId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "routes_exitNodeId_exitNodes_exitNodeId_fk": {
+          "name": "routes_exitNodeId_exitNodes_exitNodeId_fk",
+          "tableFrom": "routes",
+          "tableTo": "exitNodes",
+          "columnsFrom": [
+            "exitNodeId"
+          ],
+          "columnsTo": [
+            "exitNodeId"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "sites": {
+      "name": "sites",
+      "columns": {
+        "siteId": {
+          "name": "siteId",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "orgId": {
+          "name": "orgId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "autoSubdomain": {
+          "name": "autoSubdomain",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "pubKey": {
+          "name": "pubKey",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "subnet": {
+          "name": "subnet",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "exitNode": {
+          "name": "exitNode",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "sites_orgId_org_orgId_fk": {
+          "name": "sites_orgId_org_orgId_fk",
+          "tableFrom": "sites",
+          "tableTo": "org",
+          "columnsFrom": [
+            "orgId"
+          ],
+          "columnsTo": [
+            "orgId"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "sites_exitNode_exitNodes_exitNodeId_fk": {
+          "name": "sites_exitNode_exitNodes_exitNodeId_fk",
+          "tableFrom": "sites",
+          "tableTo": "exitNodes",
+          "columnsFrom": [
+            "exitNode"
+          ],
+          "columnsTo": [
+            "exitNodeId"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "users": {
+      "name": "users",
+      "columns": {
+        "uid": {
+          "name": "uid",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "orgId": {
+          "name": "orgId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "groups": {
+          "name": "groups",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "users_orgId_org_orgId_fk": {
+          "name": "users_orgId_org_orgId_fk",
+          "tableFrom": "users",
+          "tableTo": "org",
+          "columnsFrom": [
+            "orgId"
+          ],
+          "columnsTo": [
+            "orgId"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     }
