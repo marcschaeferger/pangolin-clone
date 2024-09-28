@@ -1,26 +1,43 @@
 {
-  "name": "pangolin",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
-  "dependencies": {
-    "react": "^18",
-    "react-dom": "^18",
-    "next": "14.2.13"
-  },
-  "devDependencies": {
-    "typescript": "^5",
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
-    "eslint": "^8",
-    "eslint-config-next": "14.2.13"
-  }
+    "name": "@fossorial/pangolin",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "dotenvx run -- tsx watch server/index.ts",
+        "db:generate": "drizzle-kit generate",
+        "db:push": "drizzle-kit push",
+        "db:studio": "drizzle-kit studio"
+    },
+    "dependencies": {
+        "axios": "1.7.7",
+        "better-sqlite3": "11.3.0",
+        "cors": "2.8.5",
+        "drizzle-orm": "0.33.0",
+        "expo-sqlite": "14.0.6",
+        "express": "4.21.0",
+        "helmet": "7.1.0",
+        "next": "14.2.13",
+        "react": "^18",
+        "react-dom": "^18",
+        "winston": "3.14.2",
+        "winston-daily-rotate-file": "5.0.0",
+        "zod": "3.23.8",
+        "zod-validation-error": "3.4.0"
+    },
+    "devDependencies": {
+        "@dotenvx/dotenvx": "1.14.2",
+        "@types/better-sqlite3": "7.6.11",
+        "@types/cors": "2.8.17",
+        "@types/express": "5.0.0",
+        "@types/node": "^20",
+        "@types/react": "^18",
+        "@types/react-dom": "^18",
+        "drizzle-kit": "0.24.2",
+        "eslint": "^8",
+        "eslint-config-next": "14.2.13",
+        "postcss": "^8",
+        "tailwindcss": "^3.4.1",
+        "tsx": "4.19.1",
+        "typescript": "^5"
+    }
 }
