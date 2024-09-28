@@ -1,11 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
-import { Database } from 'better-sqlite3';
+import { DrizzleError } from 'drizzle-orm';
+import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
+import { sites, Site } from '../../db/schema';
 
 interface CustomRequest extends Request {
-  db?: Database;
+  db?: BetterSQLite3Database;
 }
 
-export const getConfig = (req: Request, res: Response, next: NextFunction): void => {
+export const getConfig = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const customReq = req as CustomRequest;
     const db = customReq.db;
@@ -14,13 +16,15 @@ export const getConfig = (req: Request, res: Response, next: NextFunction): void
       throw new Error('Database is not attached to the request');
     }
 
-    const query = 'SELECT * FROM sites';
-    const statement = db.prepare(query);
-    const results = statement.all();
+    const results: Site[] = db.select().from(sites).all();
 
     res.json(results);
   } catch (error) {
     console.error('Error querying database:', error);
-    next(error);
+    if (error instanceof DrizzleError) {
+      res.status(500).json({ error: 'Database query error', message: error.message });
+    } else {
+      next(error);
+    }
   }
 };

@@ -7,6 +7,7 @@ import helmet from "helmet";
 import cors from "cors";
 import unauth from "@server/routers/unauth";
 import Database from 'better-sqlite3';
+import { drizzle } from 'drizzle-orm/better-sqlite3';
 
 const dev = environment.ENVIRONMENT !== "prod";
 const app = next({ dev });
@@ -17,22 +18,29 @@ let db: Database.Database;
 
 app.prepare().then(() => {
     // Open the SQLite database connection
-    db = new Database(`${environment.CONFIG_PATH}/db/db.sqlite`, { verbose: console.log });
+    const sqlite = new Database(`${environment.CONFIG_PATH}/db/db.sqlite`, { verbose: console.log });
+    const db = drizzle(sqlite);
+    
 
     const server = express();
     server.use(helmet());
     server.use(cors());
 
-    const prefix = `/api/${environment.API_VERSION}`;
-
-    // Middleware to attach db to req object
-    server.use((req: Request & { db?: Database.Database }, res: Response, next) => {
-        req.db = db;
-        next();
+    // Run migrations (if you're using Drizzle's migration system)
+    // migrate(db, { migrationsFolder: './drizzle' });
+    
+    // Middleware to attach the database to the request
+    server.use((req, res, next) => {
+      (req as any).db = db;
+      next();
     });
+    
+    const prefix = `/api/${environment.API_VERSION}`;
 
     server.use(prefix, express.json(), unauth);
 
+
+    // We are using NEXT from here on
     server.all("*", (req: Request, res: Response) => {
         const parsedUrl = parse(req.url!, true);
         handle(req, res, parsedUrl);
