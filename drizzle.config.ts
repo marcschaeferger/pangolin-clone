@@ -1,5 +1,6 @@
 import { defineConfig } from "drizzle-kit";
-import environment from "@server/environment"
+import environment from "@server/environment";
+import path from "path";
 
 export default defineConfig({
     dialect: "sqlite",
@@ -7,6 +8,6 @@ export default defineConfig({
     out: "server/migrations",
     verbose: true,
     dbCredentials: {
-        url: `${environment.CONFIG_PATH}/db/db.sqlite`
+        url: path.join(environment.CONFIG_PATH, "db", "db.sqlite"),
     },
 });

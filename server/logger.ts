@@ -1,7 +1,7 @@
 import "winston-daily-rotate-file";
-
 import environment from "@server/environment";
 import * as winston from "winston";
+import path from "path";
 
 const hformat = winston.format.printf(
     ({ level, label, message, timestamp, ...metadata }) => {
@@ -27,7 +27,11 @@ const transports: any = [
 if (environment.SAVE_LOGS) {
     transports.push(
         new winston.transports.DailyRotateFile({
-            filename: `${environment.CONFIG_PATH}/logs/pangolin-%DATE%.log`,
+            filename: path.join(
+                environment.CONFIG_PATH,
+                "logs",
+                "pangolin-%DATE%.log",
+            ),
             datePattern: "YYYY-MM-DD",
             zippedArchive: true,
             maxSize: "20m",
@@ -38,7 +42,11 @@ if (environment.SAVE_LOGS) {
     );
     transports.push(
         new winston.transports.DailyRotateFile({
-            filename: `${environment.CONFIG_PATH}/logs/.machinelogs-%DATE%.json`,
+            filename: path.join(
+                environment.CONFIG_PATH,
+                "logs",
+                ".machinelogs-%DATE%.json",
+            ),
             datePattern: "YYYY-MM-DD",
             zippedArchive: true,
             maxSize: "20m",
@@ -46,7 +54,7 @@ if (environment.SAVE_LOGS) {
             createSymlink: true,
             symlinkName: ".machinelogs.json",
             format: winston.format.combine(
-				winston.format.timestamp(),
+                winston.format.timestamp(),
                 winston.format.splat(),
                 winston.format.json(),
             ),

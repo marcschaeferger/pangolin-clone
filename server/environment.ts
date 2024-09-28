@@ -1,13 +1,26 @@
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
+import path from "path";
 
 const environmentSchema = z.object({
-    ENVIRONMENT: z.string(),
-    LOG_LEVEL: z.string(),
+    ENVIRONMENT: z.enum(["dev", "prod"]),
+    LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]),
     SAVE_LOGS: z.string().transform((val) => val === "true"),
-    PORT: z.string(),
-    INTERNAL_PORT: z.string(),
-    CONFIG_PATH: z.string(),
+    EXTERNAL_PORT: z
+        .string()
+        .transform((val) => parseInt(val, 10))
+        .pipe(z.number()),
+    INTERNAL_PORT: z
+        .string()
+        .transform((val) => parseInt(val, 10))
+        .pipe(z.number()),
+    CONFIG_PATH: z.string().transform((val) => {
+        // validate the path and remove any trailing slashes
+        const resolvedPath = path.resolve(val);
+        return resolvedPath.endsWith(path.sep)
+            ? resolvedPath.slice(0, -1)
+            : resolvedPath;
+    }),
     API_VERSION: z.string(),
 });
 
@@ -15,9 +28,10 @@ const environment = {
     ENVIRONMENT: (process.env.ENVIRONMENT as string) || "dev",
     LOG_LEVEL: (process.env.LOG_LEVEL as string) || "debug",
     SAVE_LOGS: (process.env.SAVE_LOGS as string) || "false",
-    PORT: (process.env.PORT as string) || "3000",
+    EXTERNAL_PORT: (process.env.EXTERNAL_PORT as string) || "3000",
     INTERNAL_PORT: (process.env.INTERNAL_PORT as string) || "3001",
-    CONFIG_PATH: process.env.CONFIG_PATH as string,
+    CONFIG_PATH:
+        (process.env.CONFIG_PATH as string) || path.join(__dirname, "config"),
     API_VERSION: (process.env.API_VERSION as string) || "v1",
 };
 

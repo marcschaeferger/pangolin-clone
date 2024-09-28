@@ -11,7 +11,7 @@ import external from "@server/routers/external";
 const dev = environment.ENVIRONMENT !== "prod";
 const app = next({ dev });
 const handle = app.getRequestHandler();
-const mainPort = environment.PORT;
+const mainPort = environment.EXTERNAL_PORT;
 const internalPort = environment.INTERNAL_PORT;
 
 app.prepare().then(() => {
