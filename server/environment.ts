@@ -7,6 +7,7 @@ const environmentSchema = z.object({
     SAVE_LOGS: z.string().transform((val) => val === "true"),
     PORT: z.string(),
     CONFIG_PATH: z.string(),
+    API_VERSION: z.string(),
 });
 
 const environment = {
@@ -15,6 +16,7 @@ const environment = {
     SAVE_LOGS: (process.env.SAVE_LOGS as string) || "false",
     PORT: (process.env.PORT as string) || "3000",
     CONFIG_PATH: process.env.CONFIG_PATH as string,
+    API_VERSION: process.env.API_VERSION as string,
 };
 
 const parsedConfig = environmentSchema.safeParse(environment);
