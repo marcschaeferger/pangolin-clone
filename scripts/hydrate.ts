@@ -147,7 +147,7 @@ async function insertDummyData() {
             resourceId: resource1.resourceId,
             ip: "10.0.0.16",
             method: "http",
-            port: 80,
+            port: 4200,
             protocol: "TCP",
         },
         {
