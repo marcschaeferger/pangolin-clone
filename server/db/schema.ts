@@ -43,9 +43,10 @@ export const targets = sqliteTable("targets", {
     targetId: integer("targetId").primaryKey({ autoIncrement: true }),
     resourceId: text("resourceId").references(() => resources.resourceId, { onDelete: "cascade" }),
     ip: text("ip").notNull(),
-    method: text("method"),
-    port: integer("port"),
+    method: text("method").notNull(),
+    port: integer("port").notNull(),
     protocol: text("protocol"),
+    enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
 });
 
 // Exit Nodes table
