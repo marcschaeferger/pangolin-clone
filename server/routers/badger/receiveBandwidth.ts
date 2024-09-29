@@ -27,7 +27,7 @@ export const receiveBandwidth = async (req: Request, res: Response, next: NextFu
       });
 
       if (!site) {
-        console.warn(`Site not found for public key: ${publicKey}`);
+        logger.warn(`Site not found for public key: ${publicKey}`);
         continue;
       }
 

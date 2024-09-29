@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { DrizzleError, eq } from 'drizzle-orm';
 import { sites, resources, targets, exitNodes } from '@server/db/schema';
 import db from '@server/db';
+import logger from '@server/logger';
 
 export const getConfig = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -53,7 +54,7 @@ export const getConfig = async (req: Request, res: Response, next: NextFunction)
 
         res.json(config);
     } catch (error) {
-        console.error('Error querying database:', error);
+        logger.error('Error querying database:', error);
         if (error instanceof DrizzleError) {
             res.status(500).json({ error: 'Database query error', message: error.message });
         } else {
