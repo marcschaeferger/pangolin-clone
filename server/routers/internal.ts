@@ -1,6 +1,6 @@
 import { Router } from "express";
-import badger from "./badger/badger";
 import gerbil from "./gerbil/gerbil";
+import badger from "./badger/badger";
 import { traefikConfigProvider } from "@server/traefik-config-provider";
 
 const unauth = Router();
