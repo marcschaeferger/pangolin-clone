@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { DrizzleError, eq } from 'drizzle-orm';
-import { sites, resources, targets, exitNodes } from '../../db/schema';
-import db from '../../db';
+import { sites, resources, targets, exitNodes } from '@server/db/schema';
+import db from '@server/db';
 
 export const getConfig = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -50,7 +50,6 @@ export const getConfig = async (req: Request, res: Response, next: NextFunction)
             ipAddress: exitNode.address,
             peers,
         };
-
 
         res.json(config);
     } catch (error) {

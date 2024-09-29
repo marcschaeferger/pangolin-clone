@@ -26,6 +26,8 @@ export const sites = sqliteTable("sites", {
     subdomain: text("subdomain"),
     pubKey: text("pubKey"),
     subnet: text("subnet"),
+    megabytesIn: integer("bytesIn"),
+    megabytesOut: integer("bytesOut")
 });
 
 // Resources table

@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "379ca2f9-068a-4289-8a23-001e7dc269b1",
+  "id": "8f8a2cda-fb58-438b-bc67-e5c34eda0580",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "exitNodes": {
@@ -221,6 +221,20 @@
         "subnet": {
           "name": "subnet",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "bytesIn": {
+          "name": "bytesIn",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "bytesOut": {
+          "name": "bytesOut",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false

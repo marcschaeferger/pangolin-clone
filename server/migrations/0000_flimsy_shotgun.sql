@@ -35,6 +35,8 @@ CREATE TABLE `sites` (
 	`subdomain` text,
 	`pubKey` text,
 	`subnet` text,
+	`bytesIn` integer,
+	`bytesOut` integer,
 	FOREIGN KEY (`orgId`) REFERENCES `orgs`(`orgId`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`exitNode`) REFERENCES `exitNodes`(`exitNodeId`) ON UPDATE no action ON DELETE set null
 );
