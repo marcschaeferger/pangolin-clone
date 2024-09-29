@@ -44,6 +44,7 @@ export const targets = sqliteTable("targets", {
     method: text("method").notNull(),
     port: integer("port").notNull(),
     protocol: text("protocol"),
+    enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
 });
 
 // Exit Nodes table

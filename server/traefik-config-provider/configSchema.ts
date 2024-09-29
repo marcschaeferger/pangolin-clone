@@ -1,11 +1,11 @@
 export type DynamicTraefikConfig = {
-    http: Http;
+    http?: Http;
 };
 
 export type Http = {
-    routers: Routers;
-    services: Services;
-    middlewares: Middlewares;
+    routers?: Routers;
+    services?: Services;
+    middlewares?: Middlewares;
 };
 
 export type Routers = {
