@@ -45,7 +45,7 @@ export const receiveBandwidth = async (req: Request, res: Response, next: NextFu
 
     res.status(200).json({ message: 'Bandwidth data updated successfully' });
   } catch (error) {
-    console.error('Error updating bandwidth data:', error);
+    logger.error('Error updating bandwidth data:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
