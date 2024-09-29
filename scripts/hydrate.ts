@@ -14,8 +14,8 @@ async function insertDummyData() {
     const org1 = db
         .insert(orgs)
         .values({
-            name: "Fosrl",
-            domain: "fosrl.io",
+            name: "Fossorial",
+            domain: "localhost",
         })
         .returning()
         .get();
@@ -23,8 +23,8 @@ async function insertDummyData() {
     const org2 = db
         .insert(orgs)
         .values({
-            name: "Fossorial",
-            domain: "fossorial.io",
+            name: "Fosrl",
+            domain: "fosrl.io",
         })
         .returning()
         .get();
@@ -146,15 +146,15 @@ async function insertDummyData() {
         {
             resourceId: resource1.resourceId,
             ip: "10.0.0.16",
-            method: "https",
-            port: 443,
+            method: "http",
+            port: 80,
             protocol: "TCP",
         },
         {
             resourceId: resource2.resourceId,
             ip: "10.0.0.17",
-            method: "http",
-            port: 80,
+            method: "https",
+            port: 443,
             protocol: "TCP",
         },
         {
