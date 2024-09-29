@@ -31,8 +31,8 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/dist ./dist
 
 # Expose the ports the app runs on
-EXPOSE ${EXTERNAL_PORT}
-EXPOSE ${INTERNAL_PORT}
+EXPOSE 3000
+EXPOSE 3001
 
 # Start the application
 CMD ["npm", "start"]

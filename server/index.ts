@@ -11,8 +11,8 @@ import external from "@server/routers/external";
 const dev = environment.ENVIRONMENT !== "prod";
 const app = next({ dev });
 const handle = app.getRequestHandler();
-const mainPort = environment.EXTERNAL_PORT;
-const internalPort = environment.INTERNAL_PORT;
+const mainPort = 3000;
+const internalPort = 3001;
 
 app.prepare().then(() => {
     // Main server
@@ -20,7 +20,7 @@ app.prepare().then(() => {
     mainServer.use(helmet());
     mainServer.use(cors());
 
-    const prefix = `/api/${environment.API_VERSION}`;
+    const prefix = `/api/v1`;
     mainServer.use(prefix, express.json(), external);
 
     // We are using NEXT from here on

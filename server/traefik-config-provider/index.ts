@@ -9,7 +9,7 @@ export async function traefikConfigProvider(_: Request, res: Response) {
     try {
         const targets = await getAllTargets();
         const traefikConfig = buildTraefikConfig(targets);
-        logger.debug("Built traefik config");
+        // logger.debug("Built traefik config");
         res.status(200).send(traefikConfig);
     } catch (e) {
         logger.error(`Failed to build traefik config: ${e}`);
@@ -20,7 +20,7 @@ export async function traefikConfigProvider(_: Request, res: Response) {
 export function buildTraefikConfig(
     targets: schema.Target[],
 ): DynamicTraefikConfig {
-    const middlewareName = "gerbil";
+    const middlewareName = "badger";
 
     if (!targets.length) {
         return {};
@@ -29,18 +29,18 @@ export function buildTraefikConfig(
     const http: DynamicTraefikConfig["http"] = {
         routers: {},
         services: {},
-        // middlewares: {
-        // [middlewareName]: {
-        //     plugin: {
-        //         [middlewareName]: {
-        //             // These are temporary values
-        //             APIEndpoint:
-        //                 "http://host.docker.internal:3001/api/v1/gerbil",
-        //             ValidToken: "abc123",
-        //         },
-        //     },
-        // },
-        // },
+        middlewares: {
+            [middlewareName]: {
+                plugin: {
+                    [middlewareName]: {
+                        // These are temporary values
+                        apiAddress:
+                            "http://host.docker.internal:3001/api/v1/badger",
+                        validToken: "abc123",
+                    },
+                },
+            },
+        },
     };
 
     for (const target of targets) {
@@ -49,7 +49,7 @@ export function buildTraefikConfig(
 
         http.routers![routerName] = {
             entryPoints: [target.method],
-            middlewares: [],
+            middlewares: [middlewareName],
             service: serviceName,
             rule: `Host(\`${target.resourceId}\`)`, // assuming resourceId is a valid full hostname
         };
