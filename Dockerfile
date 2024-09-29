@@ -18,6 +18,8 @@ RUN npm run build
 # Stage 2: Run the application
 FROM node:18-alpine AS runner
 
+RUN apk add --no-cache curl
+
 WORKDIR /app
 
 # Copy package.json and package-lock.json
