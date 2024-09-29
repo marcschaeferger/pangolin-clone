@@ -7,7 +7,9 @@
         "db:generate": "drizzle-kit generate",
         "db:push": "npx tsx scripts/migrate.ts",
         "db:hydrate": "npx tsx scripts/hydrate.ts",
-        "db:studio": "drizzle-kit studio"
+        "db:studio": "drizzle-kit studio",
+        "build": "next build && tsc --project tsconfig.server.json && tsc-alias -p tsconfig.server.json",
+        "start": "NODE_ENV=production node dist/server/index.js"
     },
     "dependencies": {
         "axios": "1.7.7",
@@ -37,6 +39,7 @@
         "eslint-config-next": "14.2.13",
         "postcss": "^8",
         "tailwindcss": "^3.4.1",
+        "tsc-alias": "1.8.10",
         "tsx": "4.19.1",
         "typescript": "^5"
     }

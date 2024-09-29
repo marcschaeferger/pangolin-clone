@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import { DrizzleError, eq } from 'drizzle-orm';
-import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { sites, resources, targets, exitNodes } from '../../db/schema';
 import db from '../../db';
 
