@@ -2,9 +2,7 @@ import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import db from "@server/db";
 import path from "path";
 
-const migrationsFolder = path.join(__dirname, "../server/migrations");
-console.log(migrationsFolder);
-
+const migrationsFolder = path.join("server/migrations");
 
 const runMigrations = async () => {
     console.log("Running migrations...");
