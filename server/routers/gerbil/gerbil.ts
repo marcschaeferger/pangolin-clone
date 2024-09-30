@@ -8,7 +8,7 @@ gerbil.get("/", (_, res) => {
     res.status(200).json({ message: "Healthy" });
 });
 
-gerbil.get("/getConfig", getConfig);
-gerbil.post("/receiveBandwidth", receiveBandwidth);
+gerbil.get("/get-config", getConfig);
+gerbil.post("/receive-bandwidth", receiveBandwidth);
 
 export default gerbil;

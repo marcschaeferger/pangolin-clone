@@ -27,7 +27,9 @@ const environment = {
     ENVIRONMENT: (process.env.ENVIRONMENT as string) || "dev",
     LOG_LEVEL: (process.env.LOG_LEVEL as string) || "debug",
     SAVE_LOGS: (process.env.SAVE_LOGS as string) || "false",
-    CONFIG_PATH: (process.env.CONFIG_PATH as string) || path.join("config"),
+    CONFIG_PATH:
+        (process.env.CONFIG_PATH && path.join(process.env.CONFIG_PATH)) ||
+        path.join("config"),
     EXTERNAL_PORT: (process.env.EXTERNAL_PORT as string) || "3000",
     INTERNAL_PORT: (process.env.INTERNAL_PORT as string) || "3001",
 };
