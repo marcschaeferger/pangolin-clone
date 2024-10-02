@@ -18,8 +18,6 @@ import { createTarget } from "./target/createTarget";
 import { updateTarget } from "./target/updateTarget";
 import { deleteTarget } from "./target/deleteTarget";
 import { getUser } from "./user/getUser";
-import { createUser } from "./user/createUser";
-import { updateUser } from "./user/updateUser";
 import { deleteUser } from "./user/deleteUser";
 
 const global = Router();
