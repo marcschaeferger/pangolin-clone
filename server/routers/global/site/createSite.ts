@@ -2,11 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 
-interface CreateSiteRequest {
-    publicKey: string;
-    name: string;
-    orgId: number;
-}
+// define zod type here
 
 export async function createSite(req: Request, res: Response, next: NextFunction) {
   return res.status(HttpCode.OK).send(

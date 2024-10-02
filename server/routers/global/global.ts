@@ -28,26 +28,28 @@ global.get("/", (_, res) => {
     res.status(200).json({ message: "Healthy" });
 });
 
-global.get("/site", getSite);
 global.put("/site", createSite);
-global.post("/site", updateSite);
-global.delete("/site", deleteSite);
-global.get("/org", getOrg);
+global.get("/site/:siteId", getSite);
+global.post("/site/:siteId", updateSite);
+global.delete("/site/:siteId", deleteSite);
+
 global.put("/org", createOrg);
-global.post("/org", updateOrg);
-global.delete("/org", deleteOrg);
-global.get("/resource", getResource);
+global.get("/org/:orgId", getOrg);
+global.post("/org/:orgId", updateOrg);
+global.delete("/org/:orgId", deleteOrg);
+
 global.put("/resource", createResource);
-global.post("/resource", updateResource);
-global.delete("/resource", deleteResource);
-global.get("/target", getTarget);
+global.get("/resource/resourceId", getResource);
+global.post("/resource/resourceId", updateResource);
+global.delete("/resource/resourceId", deleteResource);
+
 global.put("/target", createTarget);
-global.post("/target", updateTarget);
-global.delete("/target", deleteTarget);
-global.get("/user", getUser);
-global.put("/user", createUser);
-global.post("/user", updateUser);
-global.delete("/user", deleteUser);
+global.get("/target/:targetId", getTarget);
+global.post("/target/:targetId", updateTarget);
+global.delete("/target/:targetId", deleteTarget);
+
+global.get("/user/:userId", getUser);
+global.delete("/user/:userId", deleteUser);
 
 // auth
 global.post("/signup", signup);
