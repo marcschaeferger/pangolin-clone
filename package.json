@@ -12,12 +12,16 @@
         "start": "ENVIRONMENT=prod node dist/server/index.js"
     },
     "dependencies": {
+        "@lucia-auth/adapter-drizzle": "1.1.0",
+        "@node-rs/argon2": "1.8.3",
         "axios": "1.7.7",
         "better-sqlite3": "11.3.0",
         "cors": "2.8.5",
         "drizzle-orm": "0.33.0",
         "express": "4.21.0",
         "helmet": "7.1.0",
+        "http-errors": "2.0.0",
+        "lucia": "3.2.0",
         "next": "14.2.13",
         "react": "^18",
         "react-dom": "^18",

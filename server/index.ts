@@ -7,6 +7,8 @@ import helmet from "helmet";
 import cors from "cors";
 import internal from "@server/routers/internal";
 import external from "@server/routers/external";
+import notFoundMiddleware from "./middlewares/notFound";
+import { errorHandlerMiddleware } from "./middlewares/formatError";
 
 const dev = environment.ENVIRONMENT !== "prod";
 const app = next({ dev });
@@ -33,6 +35,9 @@ app.prepare().then(() => {
         if (err) throw err;
         logger.info(`Main server is running on http://localhost:${mainPort}`);
     });
+
+    mainServer.use(notFoundMiddleware);
+    mainServer.use(errorHandlerMiddleware);
 
     // Internal server
     const internalServer = express();

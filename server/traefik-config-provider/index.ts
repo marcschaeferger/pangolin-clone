@@ -4,16 +4,19 @@ import * as schema from "@server/db/schema";
 import { DynamicTraefikConfig } from "./configSchema";
 import { and, like, eq } from "drizzle-orm";
 import logger from "@server/logger";
+import HttpCode from "@server/types/HttpCode";
 
 export async function traefikConfigProvider(_: Request, res: Response) {
     try {
         const targets = await getAllTargets();
         const traefikConfig = buildTraefikConfig(targets);
         // logger.debug("Built traefik config");
-        res.status(200).send(traefikConfig);
+        res.status(HttpCode.OK).json(traefikConfig);
     } catch (e) {
         logger.error(`Failed to build traefik config: ${e}`);
-        res.status(500).send({ message: "Failed to build traefik config" });
+        res.status(HttpCode.INTERNAL_SERVER_ERROR).json({
+            error: "Failed to build traefik config",
+        });
     }
 }
 
