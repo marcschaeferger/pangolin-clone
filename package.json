@@ -5,7 +5,7 @@
     "scripts": {
         "dev": "dotenvx run -- tsx watch server/index.ts",
         "db:generate": "drizzle-kit generate",
-        "db:push": "npx tsx scripts/migrate.ts",
+        "db:push": "npx tsx db/migrate.ts",
         "db:hydrate": "npx tsx scripts/hydrate.ts",
         "db:studio": "drizzle-kit studio",
         "build": "next build && tsc --project tsconfig.server.json && tsc-alias -p tsconfig.server.json",
@@ -16,9 +16,11 @@
         "@node-rs/argon2": "1.8.3",
         "axios": "1.7.7",
         "better-sqlite3": "11.3.0",
+        "cookie-parser": "1.4.6",
         "cors": "2.8.5",
         "drizzle-orm": "0.33.0",
         "express": "4.21.0",
+        "express-rate-limit": "7.4.0",
         "helmet": "7.1.0",
         "http-errors": "2.0.0",
         "lucia": "3.2.0",
@@ -33,6 +35,7 @@
     "devDependencies": {
         "@dotenvx/dotenvx": "1.14.2",
         "@types/better-sqlite3": "7.6.11",
+        "@types/cookie-parser": "1.4.7",
         "@types/cors": "2.8.17",
         "@types/express": "5.0.0",
         "@types/node": "^20",

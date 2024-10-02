@@ -1,17 +1,48 @@
 import { Router } from "express";
-import gerbil from "./gerbil/gerbil";
-import pangolin from "./pangolin/pangolin";
-import global from "./global/global";
+import * as site from "./site";
+import * as org from "./org";
+import * as resource from "./resource";
+import * as target from "./target";
+import * as user from "./user";
+import * as auth from "./auth";
+import HttpCode from "@server/types/HttpCode";
 
-const unauth = Router();
+// Root routes
+export const unauthenticated = Router();
 
-unauth.get("/", (_, res) => {
-    res.status(200).json({ message: "Healthy" });
+unauthenticated.get("/", (_, res) => {
+    res.status(HttpCode.OK).json({ message: "Healthy" });
 });
 
-unauth.use("/newt", gerbil);
-unauth.use("/pangolin", pangolin);
+// Authenticated Root routes
+export const authenticated = Router();
 
-unauth.use("/", global)
+authenticated.put("/site", site.createSite);
+authenticated.get("/site/:siteId", site.getSite);
+authenticated.post("/site/:siteId", site.updateSite);
+authenticated.delete("/site/:siteId", site.deleteSite);
 
-export default unauth;
+authenticated.put("/org", org.createOrg);
+authenticated.get("/org/:orgId", org.getOrg);
+authenticated.post("/org/:orgId", org.updateOrg);
+authenticated.delete("/org/:orgId", org.deleteOrg);
+
+authenticated.put("/resource", resource.createResource);
+authenticated.get("/resource/:resourceId", resource.getResource);
+authenticated.post("/resource/:resourceId", resource.updateResource);
+authenticated.delete("/resource/:resourceId", resource.deleteResource);
+
+authenticated.put("/target", target.createTarget);
+authenticated.get("/target/:targetId", target.getTarget);
+authenticated.post("/target/:targetId", target.updateTarget);
+authenticated.delete("/target/:targetId", target.deleteTarget);
+
+authenticated.get("/user/:userId", user.getUser);
+authenticated.delete("/user/:userId", user.deleteUser);
+
+// Auth routes
+const authRouter = Router();
+unauthenticated.use("/auth", authRouter);
+
+authRouter.put("/signup", auth.signup);
+authRouter.post("/login", auth.login);

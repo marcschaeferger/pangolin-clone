@@ -9,7 +9,7 @@ const adapter = new DrizzleSQLiteAdapter(db, sessions, users);
 export const lucia = new Lucia(adapter, {
     getUserAttributes: (attributes) => {
         return {
-            username: attributes.username,
+            email: attributes.email,
         };
     },
     // getSessionAttributes: (attributes) => {
@@ -19,7 +19,7 @@ export const lucia = new Lucia(adapter, {
     // },
     sessionCookie: {
         name: "session",
-        expires: false, // session cookies have very long lifespan (2 years)
+        expires: false,
         attributes: {
             secure: environment.ENVIRONMENT === "prod",
             sameSite: "strict",
@@ -31,7 +31,6 @@ export const lucia = new Lucia(adapter, {
 
 export default lucia;
 
-// IMPORTANT!
 declare module "lucia" {
     interface Register {
         Lucia: typeof lucia;
@@ -41,7 +40,7 @@ declare module "lucia" {
 }
 
 interface DatabaseUserAttributes {
-    username: string;
+    email: string;
     passwordHash: string;
 }
 

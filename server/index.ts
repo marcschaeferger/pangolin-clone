@@ -5,46 +5,60 @@ import environment from "@server/environment";
 import logger from "@server/logger";
 import helmet from "helmet";
 import cors from "cors";
+import {
+    errorHandlerMiddleware,
+    rateLimitMiddleware,
+} from "@server/middlewares";
 import internal from "@server/routers/internal";
-import external from "@server/routers/external";
-import notFoundMiddleware from "./middlewares/notFound";
-import { errorHandlerMiddleware } from "./middlewares/formatError";
+import { authenticated, unauthenticated } from "@server/routers/external";
+import cookieParser from "cookie-parser";
 
 const dev = environment.ENVIRONMENT !== "prod";
+
 const app = next({ dev });
 const handle = app.getRequestHandler();
-const mainPort = environment.EXTERNAL_PORT;
+
+const externalPort = environment.EXTERNAL_PORT;
 const internalPort = environment.INTERNAL_PORT;
 
 app.prepare().then(() => {
-    // Main server
-    const mainServer = express();
-    mainServer.use(helmet());
-    mainServer.use(cors());
+    // External server
+    const externalServer = express();
+
+    externalServer.use(helmet());
+    externalServer.use(cors());
+    externalServer.use(cookieParser());
+    externalServer.use(express.json());
+    externalServer.use(rateLimitMiddleware);
 
     const prefix = `/api/v1`;
-    mainServer.use(prefix, express.json(), external);
+    externalServer.use(prefix, unauthenticated);
+    externalServer.use(prefix, authenticated);
 
     // We are using NEXT from here on
-    mainServer.all("*", (req: Request, res: Response) => {
+    externalServer.all("*", (req: Request, res: Response) => {
         const parsedUrl = parse(req.url!, true);
         handle(req, res, parsedUrl);
     });
 
-    mainServer.listen(mainPort, (err?: any) => {
+    externalServer.listen(externalPort, (err?: any) => {
         if (err) throw err;
-        logger.info(`Main server is running on http://localhost:${mainPort}`);
+        logger.info(
+            `Main server is running on http://localhost:${externalPort}`,
+        );
     });
 
-    mainServer.use(notFoundMiddleware);
-    mainServer.use(errorHandlerMiddleware);
+    externalServer.use(errorHandlerMiddleware);
 
     // Internal server
     const internalServer = express();
+
     internalServer.use(helmet());
     internalServer.use(cors());
+    internalServer.use(cookieParser());
+    internalServer.use(express.json());
 
-    internalServer.use(prefix, express.json(), internal);
+    internalServer.use(prefix, internal);
 
     internalServer.listen(internalPort, (err?: any) => {
         if (err) throw err;
@@ -52,8 +66,4 @@ app.prepare().then(() => {
             `Internal server is running on http://localhost:${internalPort}`,
         );
     });
-});
-
-process.on("SIGINT", () => {
-    process.exit(0);
 });

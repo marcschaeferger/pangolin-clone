@@ -10,7 +10,6 @@ export const errorHandlerMiddleware: ErrorRequestHandler = (
     res: Response<ErrorResponse>,
     next: NextFunction,
 ) => {
-    logger.error(error);
     const statusCode = error.statusCode || HttpCode.INTERNAL_SERVER_ERROR;
     res?.status(statusCode).send({
         data: null,

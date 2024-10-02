@@ -1,17 +1,23 @@
 import { Router } from "express";
-import gerbil from "./gerbil/gerbil";
-import badger from "./badger/badger";
-import { traefikConfigProvider } from "@server/traefik-config-provider";
+import * as gerbil from "@server/routers/gerbil";
+import * as traefik from "@server/routers/traefik";
+import HttpCode from "@server/types/HttpCode";
 
-const unauth = Router();
+// Root routes
+const internalRouter = Router();
 
-unauth.get("/", (_, res) => {
-    res.status(200).json({ message: "Healthy" });
+internalRouter.get("/", (_, res) => {
+    res.status(HttpCode.OK).json({ message: "Healthy" });
 });
 
-unauth.use("/badger", badger);
-unauth.use("/gerbil", gerbil);
+internalRouter.get("/traefik-config", traefik.traefikConfigProvider);
 
-unauth.get("/traefik-config-provider", traefikConfigProvider);
+// Gerbil routes
+const gerbilRouter = Router();
 
-export default unauth;
+gerbilRouter.get("/get-config", gerbil.getConfig);
+gerbilRouter.post("/receive-bandwidth", gerbil.receiveBandwidth);
+
+internalRouter.use("/gerbil", gerbilRouter);
+
+export default internalRouter;
