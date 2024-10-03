@@ -6,6 +6,7 @@ import * as target from "./target";
 import * as user from "./user";
 import * as auth from "./auth";
 import HttpCode from "@server/types/HttpCode";
+import { verifySessionMiddleware } from "@server/middlewares";
 
 // Root routes
 export const unauthenticated = Router();
@@ -16,6 +17,7 @@ unauthenticated.get("/", (_, res) => {
 
 // Authenticated Root routes
 export const authenticated = Router();
+authenticated.use(verifySessionMiddleware);
 
 authenticated.put("/org", org.createOrg);
 authenticated.get("/orgs", org.listOrgs);
