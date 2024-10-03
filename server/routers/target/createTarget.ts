@@ -32,7 +32,7 @@ export async function createTarget(req: Request, res: Response, next: NextFuncti
     const newTarget = await db.insert(targets).values(targetData).returning();
 
     return res.status(HttpCode.CREATED).send(
-      response({
+      response(res, {
         data: newTarget[0],
         success: true,
         error: false,

@@ -68,7 +68,7 @@ export async function updateSite(req: Request, res: Response, next: NextFunction
     }
 
     return res.status(HttpCode.OK).send(
-      response({
+      response(res, {
         data: updatedSite[0],
         success: true,
         error: false,

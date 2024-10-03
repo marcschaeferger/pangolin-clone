@@ -31,7 +31,7 @@ export async function createOrg(req: Request, res: Response, next: NextFunction)
     }).returning();
 
     return res.status(HttpCode.CREATED).send(
-      response({
+      response(res, {
         data: newOrg[0],
         success: true,
         error: false,

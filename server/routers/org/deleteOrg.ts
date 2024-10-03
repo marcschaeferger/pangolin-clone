@@ -39,7 +39,7 @@ export async function deleteOrg(req: Request, res: Response, next: NextFunction)
     }
 
     return res.status(HttpCode.OK).send(
-      response({
+      response(res, {
         data: null,
         success: true,
         error: false,

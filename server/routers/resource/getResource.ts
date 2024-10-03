@@ -43,7 +43,7 @@ export async function getResource(req: Request, res: Response, next: NextFunctio
     }
 
     return res.status(HttpCode.OK).send(
-      response({
+      response(res, {
         data: resource[0],
         success: true,
         error: false,

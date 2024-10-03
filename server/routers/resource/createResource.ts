@@ -40,7 +40,7 @@ export async function createResource(req: Request, res: Response, next: NextFunc
     }).returning();
 
     return res.status(HttpCode.CREATED).send(
-      response({
+      response(res, {
         data: newResource[0],
         success: true,
         error: false,

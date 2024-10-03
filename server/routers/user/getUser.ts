@@ -43,7 +43,7 @@ export async function getUser(req: Request, res: Response, next: NextFunction): 
     const { passwordHash: _, ...userWithoutPassword } = user[0];
 
     return res.status(HttpCode.OK).send(
-      response({
+      response(res, {
         data: userWithoutPassword,
         success: true,
         error: false,

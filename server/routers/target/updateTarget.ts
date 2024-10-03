@@ -61,7 +61,7 @@ export async function updateTarget(req: Request, res: Response, next: NextFuncti
     }
 
     return res.status(HttpCode.OK).send(
-      response({
+      response(res, {
         data: updatedTarget[0],
         success: true,
         error: false,

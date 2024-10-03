@@ -40,7 +40,7 @@ export async function getOrg(req: Request, res: Response, next: NextFunction): P
     }
 
     return res.status(HttpCode.OK).send(
-      response({
+      response(res, {
         data: org[0],
         success: true,
         error: false,

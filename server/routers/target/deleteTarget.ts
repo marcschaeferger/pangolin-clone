@@ -39,7 +39,7 @@ export async function deleteTarget(req: Request, res: Response, next: NextFuncti
     }
 
     return res.status(HttpCode.OK).send(
-      response({
+      response(res, {
         data: null,
         success: true,
         error: false,
