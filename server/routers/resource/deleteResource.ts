@@ -42,7 +42,7 @@ export async function deleteResource(req: Request, res: Response, next: NextFunc
     }
 
     return res.status(HttpCode.OK).send(
-      response({
+      response(res, {
         data: null,
         success: true,
         error: false,

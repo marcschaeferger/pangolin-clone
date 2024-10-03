@@ -58,7 +58,7 @@ export async function updateOrg(req: Request, res: Response, next: NextFunction)
     }
 
     return res.status(HttpCode.OK).send(
-      response({
+      response(res, {
         data: updatedOrg[0],
         success: true,
         error: false,

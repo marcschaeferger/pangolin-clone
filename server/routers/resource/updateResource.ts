@@ -63,7 +63,7 @@ export async function updateResource(req: Request, res: Response, next: NextFunc
     }
 
     return res.status(HttpCode.OK).send(
-      response({
+      response(res, {
         data: updatedResource[0],
         success: true,
         error: false,

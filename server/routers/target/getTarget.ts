@@ -40,7 +40,7 @@ export async function getTarget(req: Request, res: Response, next: NextFunction)
     }
 
     return res.status(HttpCode.OK).send(
-      response({
+      response(res, {
         data: target[0],
         success: true,
         error: false,
