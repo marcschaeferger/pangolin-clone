@@ -30,26 +30,20 @@ async function insertDummyData() {
         .get();
 
     // Insert dummy users
-    await db.insert(users).values([
-        {
-            orgId: org1.orgId,
-            name: "John Doe",
-            email: "john@fossorial.com",
-            groups: "admin,developer",
-        },
-        {
-            orgId: org1.orgId,
-            name: "Jane Smith",
-            email: "jane@fossorial.com",
-            groups: "developer",
-        },
-        {
-            orgId: org2.orgId,
-            name: "Bob Johnson",
-            email: "bob@fosrl.io",
-            groups: "admin",
-        },
-    ]);
+    // await db.insert(users).values([
+    //     {
+    //         email: "john@fossorial.com",
+    //         groups: "admin,developer",
+    //     },
+    //     {
+    //         email: "jane@fossorial.com",
+    //         groups: "developer",
+    //     },
+    //     {
+    //         email: "bob@fosrl.io",
+    //         groups: "admin",
+    //     },
+    // ]);
 
     // Insert dummy exit nodes
     const exitNode1 = db
@@ -107,6 +101,7 @@ async function insertDummyData() {
         .values({
             resourceId: `web.${site1.subdomain}.${org1.domain}`,
             siteId: site1.siteId,
+            orgId: site1.orgId,
             name: "Web Server",
             subdomain: "web",
         })
@@ -118,6 +113,7 @@ async function insertDummyData() {
         .values({
             resourceId: `web2.${site1.subdomain}.${org1.domain}`,
             siteId: site1.siteId,
+            orgId: site1.orgId,
             name: "Web Server 2",
             subdomain: "web2",
         })
@@ -129,6 +125,7 @@ async function insertDummyData() {
         .values({
             resourceId: `db.${site2.subdomain}.${org2.domain}`,
             siteId: site2.siteId,
+            orgId: site2.orgId,
             name: "Database",
             subdomain: "db",
         })

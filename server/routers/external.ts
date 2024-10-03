@@ -17,32 +17,34 @@ unauthenticated.get("/", (_, res) => {
 // Authenticated Root routes
 export const authenticated = Router();
 
-authenticated.put("/site", site.createSite);
-authenticated.get("/site/:siteId", site.getSite);
-authenticated.get("/sites", site.listSites);
-authenticated.post("/site/:siteId", site.updateSite);
-authenticated.delete("/site/:siteId", site.deleteSite);
-
 authenticated.put("/org", org.createOrg);
-authenticated.get("/org/:orgId", org.getOrg);
 authenticated.get("/orgs", org.listOrgs);
+authenticated.get("/org/:orgId", org.getOrg);
 authenticated.post("/org/:orgId", org.updateOrg);
 authenticated.delete("/org/:orgId", org.deleteOrg);
 
-authenticated.put("/resource", resource.createResource);
+authenticated.put("/org/:orgId/site", site.createSite);
+authenticated.get("/org/:orgId/sites", site.listSites);
+authenticated.get("/site/:siteId", site.getSite);
+authenticated.post("/site/:siteId", site.updateSite);
+authenticated.delete("/site/:siteId", site.deleteSite);
+
+authenticated.put("/org/:orgId/site/:siteId/resource", resource.createResource);
+authenticated.get("/site/:siteId/resources", resource.listResources);
+authenticated.get("/org/:orgId/resources", resource.listResources);
 authenticated.get("/resource/:resourceId", resource.getResource);
-authenticated.get("/resources", resource.listResources);
 authenticated.post("/resource/:resourceId", resource.updateResource);
 authenticated.delete("/resource/:resourceId", resource.deleteResource);
 
-authenticated.put("/target", target.createTarget);
+authenticated.put("/resource/:resourceId/target", target.createTarget);
+authenticated.get("/resource/:resourceId/targets", target.listTargets);
 authenticated.get("/target/:targetId", target.getTarget);
-authenticated.get("/targets", target.listTargets);
 authenticated.post("/target/:targetId", target.updateTarget);
 authenticated.delete("/target/:targetId", target.deleteTarget);
 
-authenticated.get("/user/:userId", user.getUser);
 authenticated.get("/users", user.listUsers);
+// authenticated.get("/org/:orgId/users", user.???); // TODO: Implement this
+authenticated.get("/user/:userId", user.getUser);
 authenticated.delete("/user/:userId", user.deleteUser);
 
 // Auth routes

@@ -31,6 +31,9 @@ export const resources = sqliteTable("resources", {
     siteId: integer("siteId").references(() => sites.siteId, {
         onDelete: "cascade",
     }),
+    orgId: integer("orgId").references(() => orgs.orgId, {
+        onDelete: "cascade",
+    }),
     name: text("name").notNull(),
     subdomain: text("subdomain"),
 });

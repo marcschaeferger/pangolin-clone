@@ -7,10 +7,13 @@ import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
 import { sql, eq } from 'drizzle-orm';
 
+const listSitesParamsSchema = z.object({
+    orgId: z.string().optional().transform(Number).pipe(z.number().int().positive()),
+});
+
 const listSitesSchema = z.object({
   limit: z.string().optional().transform(Number).pipe(z.number().int().positive().default(10)),
   offset: z.string().optional().transform(Number).pipe(z.number().int().nonnegative().default(0)),
-  orgId: z.string().optional().transform(Number).pipe(z.number().int().positive()),
 });
 
 export async function listSites(req: Request, res: Response, next: NextFunction): Promise<any> {
@@ -25,7 +28,19 @@ export async function listSites(req: Request, res: Response, next: NextFunction)
       );
     }
 
-    const { limit, offset, orgId } = parsedQuery.data;
+    const { limit, offset } = parsedQuery.data;
+
+    const parsedParams = listSitesParamsSchema.safeParse(req.params);
+    if (!parsedParams.success) {
+      return next(
+        createHttpError(
+          HttpCode.BAD_REQUEST,
+          parsedParams.error.errors.map(e => e.message).join(', ')
+        )
+      );
+    }
+
+    const { orgId } = parsedParams.data;
 
     let baseQuery: any = db
       .select({
