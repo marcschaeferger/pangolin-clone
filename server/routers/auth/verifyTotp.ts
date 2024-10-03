@@ -80,7 +80,9 @@ export async function verifyTotp(
         data: { valid },
         success: true,
         error: false,
-        message: valid ? "Code is valid" : "Code is invalid",
+        message: valid
+            ? "Code is valid. Two-factor is now enabled"
+            : "Code is invalid",
         status: HttpCode.OK,
     });
 }

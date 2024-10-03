@@ -54,3 +54,4 @@ authRouter.post("/login", auth.login);
 authRouter.post("/logout", auth.logout);
 authRouter.post("/verify-totp", auth.verifyTotp);
 authRouter.post("/request-totp-secret", auth.requestTotpSecret);
+authRouter.post("/disable-2fa", auth.disable2fa);
