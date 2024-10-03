@@ -1,3 +1,6 @@
+export * from "./unauthorizedResponse";
+export * from "./verifySession";
+
 import { Lucia, TimeSpan } from "lucia";
 import { DrizzleSQLiteAdapter } from "@lucia-auth/adapter-drizzle";
 import db from "@server/db";

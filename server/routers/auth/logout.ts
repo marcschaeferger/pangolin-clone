@@ -23,13 +23,11 @@ export async function logout(
     await lucia.invalidateSession(sessionId);
     res.setHeader("Set-Cookie", lucia.createBlankSessionCookie().serialize());
 
-    return res.status(HttpCode.OK).send(
-        response<null>({
-            data: null,
-            success: true,
-            error: false,
-            message: "Logged out successfully",
-            status: HttpCode.OK,
-        }),
-    );
+    return response<null>(res, {
+        data: null,
+        success: true,
+        error: false,
+        message: "Logged out successfully",
+        status: HttpCode.OK,
+    });
 }

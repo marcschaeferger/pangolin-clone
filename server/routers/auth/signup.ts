@@ -28,7 +28,11 @@ export const signupBodySchema = z.object({
 
 export type SignUpBody = z.infer<typeof signupBodySchema>;
 
-export async function signup(req: Request, res: Response, next: NextFunction): Promise<any> {
+export async function signup(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+): Promise<any> {
     const parsedBody = signupBodySchema.safeParse(req.body);
 
     if (!parsedBody.success) {
@@ -64,15 +68,13 @@ export async function signup(req: Request, res: Response, next: NextFunction): P
             lucia.createSessionCookie(session.id).serialize(),
         );
 
-        return res.status(HttpCode.OK).send(
-            response<null>({
-                data: null,
-                success: true,
-                error: false,
-                message: "User created successfully",
-                status: HttpCode.OK,
-            }),
-        );
+        return response<null>(res, {
+            data: null,
+            success: true,
+            error: false,
+            message: "User created successfully",
+            status: HttpCode.OK,
+        });
     } catch (e) {
         if (e instanceof SqliteError && e.code === "SQLITE_CONSTRAINT_UNIQUE") {
             return next(

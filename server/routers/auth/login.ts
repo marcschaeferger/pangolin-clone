@@ -7,10 +7,10 @@ import response from "@server/utils/response";
 import { eq } from "drizzle-orm";
 import { NextFunction, Request, Response } from "express";
 import createHttpError from "http-errors";
-import { z } from "zod";
-import { fromError } from "zod-validation-error";
 import { decodeHex } from "oslo/encoding";
 import { TOTPController } from "oslo/otp";
+import { z } from "zod";
+import { fromError } from "zod-validation-error";
 
 export const loginBodySchema = z.object({
     email: z.string().email(),
@@ -45,15 +45,13 @@ export async function login(
     const sessionId = req.cookies[lucia.sessionCookieName];
     const { session: existingSession } = await lucia.validateSession(sessionId);
     if (existingSession) {
-        return res.status(HttpCode.OK).send(
-            response<null>({
-                data: null,
-                success: true,
-                error: false,
-                message: "Already logged in",
-                status: HttpCode.OK,
-            }),
-        );
+        return response<null>(res, {
+            data: null,
+            success: true,
+            error: false,
+            message: "Already logged in",
+            status: HttpCode.OK,
+        });
     }
 
     const existingUserRes = await db
@@ -89,15 +87,13 @@ export async function login(
 
     if (existingUser.twoFactorEnabled) {
         if (!code) {
-            return res.status(HttpCode.ACCEPTED).send(
-                response<{ codeRequested: boolean }>({
-                    data: { codeRequested: true },
-                    success: true,
-                    error: false,
-                    message: "Two-factor authentication required",
-                    status: HttpCode.ACCEPTED,
-                }),
-            );
+            return response<{ codeRequested: boolean }>(res, {
+                data: { codeRequested: true },
+                success: true,
+                error: false,
+                message: "Two-factor authentication required",
+                status: HttpCode.ACCEPTED,
+            });
         }
 
         if (!existingUser.twoFactorSecret) {
@@ -131,13 +127,11 @@ export async function login(
         lucia.createSessionCookie(session.id).serialize(),
     );
 
-    return res.status(HttpCode.OK).send(
-        response<null>({
-            data: null,
-            success: true,
-            error: false,
-            message: "Logged in successfully",
-            status: HttpCode.OK,
-        }),
-    );
+    return response<null>(res, {
+        data: null,
+        success: true,
+        error: false,
+        message: "Logged in successfully",
+        status: HttpCode.OK,
+    });
 }
