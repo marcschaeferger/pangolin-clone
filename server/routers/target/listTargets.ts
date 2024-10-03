@@ -8,7 +8,7 @@ import createHttpError from 'http-errors';
 import { sql, eq } from 'drizzle-orm';
 
 const listTargetsParamsSchema = z.object({
-    resourceId: z.string().optional(),
+    resourceId: z.string().optional()
 });
 
 const listTargetsSchema = z.object({

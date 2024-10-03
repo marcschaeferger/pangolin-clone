@@ -8,13 +8,15 @@ import createHttpError from 'http-errors';
 import { sql, eq } from 'drizzle-orm';
 
 const listResourcesParamsSchema = z.object({
-    siteId: z.string().optional().transform(Number).pipe(z.number().int().positive()),
-    orgId: z.string().optional().transform(Number).pipe(z.number().int().positive()),
+    siteId: z.coerce.number().int().positive().optional(),
+    orgId: z.coerce.number().int().positive().optional(),
+}).refine(data => !!data.siteId !== !!data.orgId, {
+    message: "Either siteId or orgId must be provided, but not both",
 });
 
 const listResourcesSchema = z.object({
-  limit: z.string().optional().transform(Number).pipe(z.number().int().positive().default(10)),
-  offset: z.string().optional().transform(Number).pipe(z.number().int().nonnegative().default(0)),
+  limit: z.coerce.number().int().positive().default(10),
+  offset: z.coerce.number().int().nonnegative().default(0),
 });
 
 export async function listResources(req: Request, res: Response, next: NextFunction): Promise<any> {
@@ -59,13 +61,6 @@ export async function listResources(req: Request, res: Response, next: NextFunct
     } else if (orgId) {
       baseQuery = baseQuery.where(eq(resources.orgId, orgId));
       countQuery = countQuery.where(eq(resources.orgId, orgId));
-    } else {
-      return next(
-        createHttpError(
-          HttpCode.BAD_REQUEST,
-          'Either siteId or orgId must be provided'
-        )
-      );
     }
 
     const resourcesList = await baseQuery.limit(limit).offset(offset);

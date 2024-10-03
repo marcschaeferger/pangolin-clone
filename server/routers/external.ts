@@ -43,7 +43,7 @@ authenticated.post("/target/:targetId", target.updateTarget);
 authenticated.delete("/target/:targetId", target.deleteTarget);
 
 authenticated.get("/users", user.listUsers);
-authenticated.get("/org/:orgId/users", user.listUsers);
+// authenticated.get("/org/:orgId/users", user.???); // TODO: Implement this
 authenticated.get("/user/:userId", user.getUser);
 authenticated.delete("/user/:userId", user.deleteUser);
 
