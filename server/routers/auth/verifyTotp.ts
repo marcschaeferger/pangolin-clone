@@ -5,7 +5,11 @@ import { fromError } from "zod-validation-error";
 import { decodeHex } from "oslo/encoding";
 import { TOTPController } from "oslo/otp";
 import HttpCode from "@server/types/HttpCode";
-import { verifySession, lucia, unauthorized } from "@server/auth";
+import { verifySession, unauthorized } from "@server/auth";
+import { response } from "@server/utils";
+import { db } from "@server/db";
+import { users } from "@server/db/schema";
+import { eq } from "drizzle-orm";
 
 export const verifyTotpBody = z.object({
     code: z.string(),
@@ -39,4 +43,33 @@ export async function verifyTotp(
     if (!session) {
         return unauthorized();
     }
+
+    if (!user.twoFactorSecret) {
+        return createHttpError(
+            HttpCode.BAD_REQUEST,
+            "User has not requested two-factor authentication",
+        );
+    }
+
+    const totpController = new TOTPController();
+    const valid = await totpController.verify(
+        user.twoFactorSecret,
+        decodeHex(code),
+    );
+
+    if (valid) {
+        // if valid, enable two-factor authentication; the totp secret is no longer temporary
+        await db
+            .update(users)
+            .set({ twoFactorEnabled: true })
+            .where(eq(users.id, user.id));
+    }
+
+    return response<{ valid: boolean }>(res, {
+        data: { valid },
+        success: true,
+        error: false,
+        message: valid ? "Code is valid" : "Code is invalid",
+        status: HttpCode.OK,
+    });
 }
