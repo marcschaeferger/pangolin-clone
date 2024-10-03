@@ -46,3 +46,4 @@ unauthenticated.use("/auth", authRouter);
 
 authRouter.put("/signup", auth.signup);
 authRouter.post("/login", auth.login);
+authRouter.post("/logout", auth.logout);
