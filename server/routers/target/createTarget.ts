@@ -6,8 +6,11 @@ import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
 
-const createTargetSchema = z.object({
+const createTargetParamsSchema = z.object({
   resourceId: z.string().uuid(),
+});
+
+const createTargetSchema = z.object({
   ip: z.string().ip(),
   method: z.string().min(1).max(10),
   port: z.number().int().min(1).max(65535),
@@ -29,7 +32,22 @@ export async function createTarget(req: Request, res: Response, next: NextFuncti
 
     const targetData = parsedBody.data;
 
-    const newTarget = await db.insert(targets).values(targetData).returning();
+    const parsedParams = createTargetParamsSchema.safeParse(req.params);
+    if (!parsedParams.success) {
+      return next(
+        createHttpError(
+          HttpCode.BAD_REQUEST,
+          parsedParams.error.errors.map(e => e.message).join(', ')
+        )
+      );
+    }
+
+    const { resourceId } = parsedParams.data;
+
+    const newTarget = await db.insert(targets).values({
+      resourceId,
+      ...targetData
+    }).returning();
 
     return res.status(HttpCode.CREATED).send(
       response(res, {

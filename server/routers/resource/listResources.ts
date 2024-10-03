@@ -7,10 +7,14 @@ import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
 import { sql, eq } from 'drizzle-orm';
 
+const listResourcesParamsSchema = z.object({
+    siteId: z.string().optional().transform(Number).pipe(z.number().int().positive()),
+    orgId: z.string().optional().transform(Number).pipe(z.number().int().positive()),
+});
+
 const listResourcesSchema = z.object({
   limit: z.string().optional().transform(Number).pipe(z.number().int().positive().default(10)),
   offset: z.string().optional().transform(Number).pipe(z.number().int().nonnegative().default(0)),
-  siteId: z.string().optional().transform(Number).pipe(z.number().int().positive()),
 });
 
 export async function listResources(req: Request, res: Response, next: NextFunction): Promise<any> {
@@ -24,10 +28,20 @@ export async function listResources(req: Request, res: Response, next: NextFunct
         )
       );
     }
+    const { limit, offset } = parsedQuery.data;
 
-    const { limit, offset, siteId } = parsedQuery.data;
+    const parsedParams = listResourcesParamsSchema.safeParse(req.params);
+    if (!parsedParams.success) {
+      return next(
+        createHttpError(
+          HttpCode.BAD_REQUEST,
+          parsedParams.error.errors.map(e => e.message).join(', ')
+        )
+      );
+    }
+    const { siteId, orgId } = parsedParams.data;
 
-    let baseQuery = db
+    let baseQuery: any = db
       .select({
         resourceId: resources.resourceId,
         name: resources.name,
@@ -37,11 +51,21 @@ export async function listResources(req: Request, res: Response, next: NextFunct
       .from(resources)
       .leftJoin(sites, eq(resources.siteId, sites.siteId));
 
-    let countQuery = db.select({ count: sql<number>`cast(count(*) as integer)` }).from(resources);
+    let countQuery: any = db.select({ count: sql<number>`cast(count(*) as integer)` }).from(resources);
 
     if (siteId) {
       baseQuery = baseQuery.where(eq(resources.siteId, siteId));
       countQuery = countQuery.where(eq(resources.siteId, siteId));
+    } else if (orgId) {
+      baseQuery = baseQuery.where(eq(resources.orgId, orgId));
+      countQuery = countQuery.where(eq(resources.orgId, orgId));
+    } else {
+      return next(
+        createHttpError(
+          HttpCode.BAD_REQUEST,
+          'Either siteId or orgId must be provided'
+        )
+      );
     }
 
     const resourcesList = await baseQuery.limit(limit).offset(offset);
