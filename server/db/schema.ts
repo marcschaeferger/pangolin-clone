@@ -71,6 +71,10 @@ export const users = sqliteTable("user", {
     id: text("id").primaryKey(), // has to be id not userId for lucia
     email: text("email").notNull().unique(),
     passwordHash: text("passwordHash").notNull(),
+    twoFactorEnabled: integer("twoFactorEnabled", { mode: "boolean" })
+        .notNull()
+        .default(false),
+    twoFactorSecret: text("twoFactorSecret"),
 });
 
 // Sessions table

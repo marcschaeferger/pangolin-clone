@@ -10,6 +10,8 @@ export const lucia = new Lucia(adapter, {
     getUserAttributes: (attributes) => {
         return {
             email: attributes.email,
+            twoFactorEnabled: attributes.twoFactorEnabled,
+            twoFactorSecret: attributes.twoFactorSecret,
         };
     },
     // getSessionAttributes: (attributes) => {
@@ -42,6 +44,8 @@ declare module "lucia" {
 interface DatabaseUserAttributes {
     email: string;
     passwordHash: string;
+    twoFactorEnabled: boolean;
+    twoFactorSecret: string | null;
 }
 
 interface DatabaseSessionAttributes {
