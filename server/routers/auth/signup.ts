@@ -16,7 +16,7 @@ export const signupBodySchema = z.object({
     password: z
         .string()
         .min(8, { message: "Password must be at least 8 characters long" })
-        .max(31, { message: "Password must be at most 31 characters long" })
+        .max(64, { message: "Password must be at most 64 characters long" })
         .regex(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).*$/, {
             message: `Your password must meet the following conditions:
 - At least one uppercase English letter.
