@@ -21,6 +21,19 @@ const environmentSchema = z.object({
         .string()
         .transform((val) => parseInt(val, 10))
         .pipe(z.number()),
+    EMAIL_SMTP_HOST: z.string().optional(),
+    EMAIL_SMTP_PORT: z
+        .string()
+        .optional()
+        .transform((val) => {
+            if (val) {
+                return parseInt(val, 10);
+            }
+            return val;
+        })
+        .pipe(z.number().optional()),
+    EMAIL_SMTP_USER: z.string().optional(),
+    EMAIL_SMTP_PASS: z.string().optional(),
 });
 
 const environment = {
@@ -32,6 +45,10 @@ const environment = {
         path.join("config"),
     EXTERNAL_PORT: (process.env.EXTERNAL_PORT as string) || "3000",
     INTERNAL_PORT: (process.env.INTERNAL_PORT as string) || "3001",
+    EMAIL_SMTP_HOST: process.env.EMAIL_SMTP_HOST as string,
+    EMAIL_SMTP_PORT: process.env.EMAIL_SMTP_PORT as string,
+    EMAIL_SMTP_USER: process.env.EMAIL_SMTP_USER as string,
+    EMAIL_SMTP_PASS: process.env.EMAIL_SMTP_PASS as string,
 };
 
 const parsedConfig = environmentSchema.safeParse(environment);
