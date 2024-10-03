@@ -19,25 +19,30 @@ export const authenticated = Router();
 
 authenticated.put("/site", site.createSite);
 authenticated.get("/site/:siteId", site.getSite);
+authenticated.get("/sites", site.listSites);
 authenticated.post("/site/:siteId", site.updateSite);
 authenticated.delete("/site/:siteId", site.deleteSite);
 
 authenticated.put("/org", org.createOrg);
 authenticated.get("/org/:orgId", org.getOrg);
+authenticated.get("/orgs", org.listOrgs);
 authenticated.post("/org/:orgId", org.updateOrg);
 authenticated.delete("/org/:orgId", org.deleteOrg);
 
 authenticated.put("/resource", resource.createResource);
 authenticated.get("/resource/:resourceId", resource.getResource);
+authenticated.get("/resources", resource.listResources);
 authenticated.post("/resource/:resourceId", resource.updateResource);
 authenticated.delete("/resource/:resourceId", resource.deleteResource);
 
 authenticated.put("/target", target.createTarget);
 authenticated.get("/target/:targetId", target.getTarget);
+authenticated.get("/targets", target.listTargets);
 authenticated.post("/target/:targetId", target.updateTarget);
 authenticated.delete("/target/:targetId", target.deleteTarget);
 
 authenticated.get("/user/:userId", user.getUser);
+authenticated.get("/users", user.listUsers);
 authenticated.delete("/user/:userId", user.deleteUser);
 
 // Auth routes
