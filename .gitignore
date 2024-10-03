@@ -22,3 +22,4 @@ next-env.d.ts
 *.log
 .machinelogs*.json
 *-audit.json
+migrations

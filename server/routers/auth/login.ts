@@ -1,5 +1,5 @@
 import { verify } from "@node-rs/argon2";
-import lucia from "@server/auth";
+import lucia, { verifySession } from "@server/auth";
 import db from "@server/db";
 import { users } from "@server/db/schema";
 import HttpCode from "@server/types/HttpCode";
@@ -42,8 +42,7 @@ export async function login(
 
     const { email, password, code } = parsedBody.data;
 
-    const sessionId = req.cookies[lucia.sessionCookieName];
-    const { session: existingSession } = await lucia.validateSession(sessionId);
+    const { session: existingSession } = await verifySession(req);
     if (existingSession) {
         return response<null>(res, {
             data: null,
@@ -62,7 +61,7 @@ export async function login(
         return next(
             createHttpError(
                 HttpCode.BAD_REQUEST,
-                "A user with that email address does not exist",
+                "Username or password is incorrect",
             ),
         );
     }
@@ -80,7 +79,7 @@ export async function login(
         return next(
             createHttpError(
                 HttpCode.BAD_REQUEST,
-                "The password you entered is incorrect",
+                "Username or password is incorrect",
             ),
         );
     }

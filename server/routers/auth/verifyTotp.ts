@@ -41,20 +41,31 @@ export async function verifyTotp(
 
     const { session, user } = await verifySession(req);
     if (!session) {
-        return unauthorized();
+        return next(unauthorized());
+    }
+
+    if (user.twoFactorEnabled) {
+        return next(
+            createHttpError(
+                HttpCode.BAD_REQUEST,
+                "Two-factor authentication is already enabled",
+            ),
+        );
     }
 
     if (!user.twoFactorSecret) {
-        return createHttpError(
-            HttpCode.BAD_REQUEST,
-            "User has not requested two-factor authentication",
+        return next(
+            createHttpError(
+                HttpCode.BAD_REQUEST,
+                "User has not requested two-factor authentication",
+            ),
         );
     }
 
     const totpController = new TOTPController();
     const valid = await totpController.verify(
-        user.twoFactorSecret,
-        decodeHex(code),
+        code,
+        decodeHex(user.twoFactorSecret),
     );
 
     if (valid) {

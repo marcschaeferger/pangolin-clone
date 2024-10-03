@@ -47,4 +47,5 @@ unauthenticated.use("/auth", authRouter);
 authRouter.put("/signup", auth.signup);
 authRouter.post("/login", auth.login);
 authRouter.post("/logout", auth.logout);
-authRouter.post("/verify-totp", auth.logout);
+authRouter.post("/verify-totp", auth.verifyTotp);
+authRouter.post("/request-totp-secret", auth.requestTotpSecret);
