@@ -21,6 +21,15 @@ const environmentSchema = z.object({
         .string()
         .transform((val) => parseInt(val, 10))
         .pipe(z.number()),
+    RATE_LIMIT_WINDOW_MIN: z
+        .string()
+        .transform((val) => parseInt(val, 10))
+        .pipe(z.number()),
+    RATE_LIMIT_MAX: z
+        .string()
+        .transform((val) => parseInt(val, 10))
+        .pipe(z.number()),
+    APP_NAME: z.string(),
     EMAIL_SMTP_HOST: z.string().optional(),
     EMAIL_SMTP_PORT: z
         .string()
@@ -45,6 +54,9 @@ const environment = {
         path.join("config"),
     EXTERNAL_PORT: (process.env.EXTERNAL_PORT as string) || "3000",
     INTERNAL_PORT: (process.env.INTERNAL_PORT as string) || "3001",
+    RATE_LIMIT_WINDOW_MIN: (process.env.RATE_LIMIT_WINDOW_MIN as string) || "1",
+    RATE_LIMIT_MAX: (process.env.RATE_LIMIT_MAX as string) || "100",
+    APP_NAME: (process.env.APP_NAME as string) || "Pangolin",
     EMAIL_SMTP_HOST: process.env.EMAIL_SMTP_HOST as string,
     EMAIL_SMTP_PORT: process.env.EMAIL_SMTP_PORT as string,
     EMAIL_SMTP_USER: process.env.EMAIL_SMTP_USER as string,

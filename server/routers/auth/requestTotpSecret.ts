@@ -11,6 +11,7 @@ import { User, users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import { verify } from "@node-rs/argon2";
 import { createTOTPKeyURI } from "oslo/otp";
+import env from "@server/environment";
 
 export const requestTotpSecretBody = z.object({
     password: z.string(),
@@ -64,7 +65,7 @@ export async function requestTotpSecret(
 
     const hex = crypto.getRandomValues(new Uint8Array(20));
     const secret = encodeHex(hex);
-    const uri = createTOTPKeyURI("pangolin", user.email, hex);
+    const uri = createTOTPKeyURI(env.APP_NAME, user.email, hex);
 
     await db
         .update(users)

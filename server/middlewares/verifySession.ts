@@ -1,4 +1,4 @@
-import { NextFunction, Response, Request } from "express";
+import { NextFunction, Response } from "express";
 import ErrorResponse from "@server/types/ErrorResponse";
 import { unauthorized, verifySession } from "@server/auth";
 import { db } from "@server/db";

@@ -3,9 +3,10 @@ import createHttpError from "http-errors";
 import { NextFunction, Request, Response } from "express";
 import logger from "@server/logger";
 import HttpCode from "@server/types/HttpCode";
+import environment from "@server/environment";
 
-const limit = 100;
-const minutes = 1;
+const limit = environment.RATE_LIMIT_MAX;
+const minutes = environment.RATE_LIMIT_WINDOW_MIN;
 
 export const rateLimitMiddleware = rateLimit({
     windowMs: minutes * 60 * 1000,
