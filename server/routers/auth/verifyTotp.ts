@@ -5,10 +5,9 @@ import { fromError } from "zod-validation-error";
 import { decodeHex } from "oslo/encoding";
 import { TOTPController } from "oslo/otp";
 import HttpCode from "@server/types/HttpCode";
-import { verifySession, unauthorized } from "@server/auth";
 import { response } from "@server/utils";
 import { db } from "@server/db";
-import { users } from "@server/db/schema";
+import { User, users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 
 export const verifyTotpBody = z.object({
@@ -39,10 +38,7 @@ export async function verifyTotp(
 
     const { code } = parsedBody.data;
 
-    const { session, user } = await verifySession(req);
-    if (!session) {
-        return next(unauthorized());
-    }
+    const user = req.user as User;
 
     if (user.twoFactorEnabled) {
         return next(

@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import { verifySession } from "@server/auth";
 import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
 import { fromError } from "zod-validation-error";
@@ -7,7 +6,7 @@ import { unauthorized } from "@server/auth";
 import { z } from "zod";
 import { verify } from "@node-rs/argon2";
 import { db } from "@server/db";
-import { users } from "@server/db/schema";
+import { User, users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import { response } from "@server/utils";
 
@@ -34,24 +33,9 @@ export async function disable2fa(
     }
 
     const { password } = parsedBody.data;
+    const user = req.user as User;
 
-    const { session, user } = await verifySession(req);
-    if (!session) {
-        return next(unauthorized());
-    }
-
-    const existingUser = await db
-        .select()
-        .from(users)
-        .where(eq(users.id, user.id));
-
-    if (!existingUser || !existingUser[0]) {
-        return next(
-            createHttpError(HttpCode.BAD_REQUEST, "User does not exist"),
-        );
-    }
-
-    const validPassword = await verify(existingUser[0].passwordHash, password, {
+    const validPassword = await verify(user.passwordHash, password, {
         memoryCost: 19456,
         timeCost: 2,
         outputLen: 32,

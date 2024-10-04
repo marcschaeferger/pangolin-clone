@@ -2,6 +2,8 @@ import { verify } from "@node-rs/argon2";
 import lucia, { verifySession } from "@server/auth";
 import db from "@server/db";
 import { users } from "@server/db/schema";
+import { sendEmail } from "@server/emails";
+import { VerifyEmail } from "@server/emails/templates/verifyEmailCode";
 import HttpCode from "@server/types/HttpCode";
 import response from "@server/utils/response";
 import { eq } from "drizzle-orm";

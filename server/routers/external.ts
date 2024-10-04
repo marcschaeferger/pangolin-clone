@@ -50,12 +50,9 @@ authenticated.get("/user/:userId", user.getUser);
 authenticated.delete("/user/:userId", user.deleteUser);
 
 // Auth routes
-const authRouter = Router();
-unauthenticated.use("/auth", authRouter);
-
-authRouter.put("/signup", auth.signup);
-authRouter.post("/login", auth.login);
-authRouter.post("/logout", auth.logout);
-authRouter.post("/verify-totp", auth.verifyTotp);
-authRouter.post("/request-totp-secret", auth.requestTotpSecret);
-authRouter.post("/disable-2fa", auth.disable2fa);
+unauthenticated.put("/auth/signup", auth.signup);
+unauthenticated.post("/auth/login", auth.login);
+unauthenticated.post("/auth/logout", auth.logout);
+authenticated.post("/auth/verify-totp", auth.verifyTotp);
+authenticated.post("/auth/request-totp-secret", auth.requestTotpSecret);
+authenticated.post("/auth/disable-2fa", auth.disable2fa);

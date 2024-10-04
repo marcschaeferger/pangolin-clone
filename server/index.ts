@@ -12,6 +12,7 @@ import {
 import internal from "@server/routers/internal";
 import { authenticated, unauthenticated } from "@server/routers/external";
 import cookieParser from "cookie-parser";
+import { User } from "@server/db/schema";
 
 const dev = environment.ENVIRONMENT !== "prod";
 
@@ -67,3 +68,11 @@ app.prepare().then(() => {
         );
     });
 });
+
+declare global {
+    namespace Express {
+        interface Request {
+            user?: User;
+        }
+    }
+}
