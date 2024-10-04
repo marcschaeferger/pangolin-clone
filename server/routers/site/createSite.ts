@@ -5,6 +5,9 @@ import { sites } from '@server/db/schema';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
+import fetch from 'node-fetch';
+
+const API_BASE_URL = "http://localhost:3000";
 
 const createSiteParamsSchema = z.object({ 
     orgId: z.number().int().positive(),
@@ -68,3 +71,28 @@ export async function createSite(req: Request, res: Response, next: NextFunction
     next(error);
   }
 }
+
+
+async function addPeer(peer: string) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/peer`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(peer),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: any = await response.json();
+    console.log('Peer added successfully:', data.status);
+    return data;
+  } catch (error: any) {
+    console.error('Error adding peer:', error.message);
+    throw error;
+  }
+}
+

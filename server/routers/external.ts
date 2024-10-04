@@ -7,6 +7,7 @@ import * as user from "./user";
 import * as auth from "./auth";
 import HttpCode from "@server/types/HttpCode";
 import { verifySessionMiddleware } from "@server/middlewares";
+import { verifyOrgAccess, getUserOrgs, verifySiteAccess, verifyResourceAccess, verifyTargetAccess } from "./auth";
 
 // Root routes
 export const unauthenticated = Router();
@@ -19,30 +20,30 @@ unauthenticated.get("/", (_, res) => {
 export const authenticated = Router();
 authenticated.use(verifySessionMiddleware);
 
-authenticated.put("/org", org.createOrg);
-authenticated.get("/orgs", org.listOrgs);
-authenticated.get("/org/:orgId", org.getOrg);
-authenticated.post("/org/:orgId", org.updateOrg);
-authenticated.delete("/org/:orgId", org.deleteOrg);
+authenticated.put("/org", getUserOrgs, org.createOrg);
+authenticated.get("/orgs", getUserOrgs, org.listOrgs); // TODO we need to check the orgs here
+authenticated.get("/org/:orgId", verifyOrgAccess, org.getOrg);
+authenticated.post("/org/:orgId", verifyOrgAccess, org.updateOrg);
+authenticated.delete("/org/:orgId", verifyOrgAccess, org.deleteOrg);
 
-authenticated.put("/org/:orgId/site", site.createSite);
-authenticated.get("/org/:orgId/sites", site.listSites);
-authenticated.get("/site/:siteId", site.getSite);
-authenticated.post("/site/:siteId", site.updateSite);
-authenticated.delete("/site/:siteId", site.deleteSite);
+authenticated.put("/org/:orgId/site", verifyOrgAccess, site.createSite);
+authenticated.get("/org/:orgId/sites", verifyOrgAccess, site.listSites);
+authenticated.get("/site/:siteId", verifySiteAccess, site.getSite);
+authenticated.post("/site/:siteId", verifySiteAccess, site.updateSite);
+authenticated.delete("/site/:siteId", verifySiteAccess, site.deleteSite);
 
-authenticated.put("/org/:orgId/site/:siteId/resource", resource.createResource);
+authenticated.put("/org/:orgId/site/:siteId/resource", verifyOrgAccess, resource.createResource);
 authenticated.get("/site/:siteId/resources", resource.listResources);
-authenticated.get("/org/:orgId/resources", resource.listResources);
-authenticated.get("/resource/:resourceId", resource.getResource);
-authenticated.post("/resource/:resourceId", resource.updateResource);
-authenticated.delete("/resource/:resourceId", resource.deleteResource);
+authenticated.get("/org/:orgId/resources", verifyOrgAccess, resource.listResources);
+authenticated.get("/resource/:resourceId", verifyResourceAccess, resource.getResource);
+authenticated.post("/resource/:resourceId", verifyResourceAccess, resource.updateResource);
+authenticated.delete("/resource/:resourceId", verifyResourceAccess, resource.deleteResource);
 
-authenticated.put("/resource/:resourceId/target", target.createTarget);
-authenticated.get("/resource/:resourceId/targets", target.listTargets);
-authenticated.get("/target/:targetId", target.getTarget);
-authenticated.post("/target/:targetId", target.updateTarget);
-authenticated.delete("/target/:targetId", target.deleteTarget);
+authenticated.put("/resource/:resourceId/target", verifyResourceAccess, target.createTarget);
+authenticated.get("/resource/:resourceId/targets", verifyResourceAccess, target.listTargets);
+authenticated.get("/target/:targetId", verifyTargetAccess, target.getTarget);
+authenticated.post("/target/:targetId", verifyTargetAccess, target.updateTarget);
+authenticated.delete("/target/:targetId", verifyTargetAccess, target.deleteTarget);
 
 authenticated.get("/users", user.listUsers);
 // authenticated.get("/org/:orgId/users", user.???); // TODO: Implement this
