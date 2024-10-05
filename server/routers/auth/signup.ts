@@ -11,21 +11,11 @@ import createHttpError from "http-errors";
 import response from "@server/utils/response";
 import { SqliteError } from "better-sqlite3";
 import { sendEmailVerificationCode } from "./sendEmailVerificationCode";
-import logger from "@server/logger";
+import { passwordSchema } from "./passwordSchema";
 
 export const signupBodySchema = z.object({
     email: z.string().email(),
-    password: z
-        .string()
-        .min(8, { message: "Password must be at least 8 characters long" })
-        .max(64, { message: "Password must be at most 64 characters long" })
-        .regex(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).*$/, {
-            message: `Your password must meet the following conditions:
-- At least one uppercase English letter.
-- At least one lowercase English letter.
-- At least one digit.
-- At least one special character.`,
-        }),
+    password: passwordSchema,
 });
 
 export type SignUpBody = z.infer<typeof signupBodySchema>;
@@ -53,7 +43,6 @@ export async function signup(
     const { email, password } = parsedBody.data;
 
     const passwordHash = await hash(password, {
-        // recommended minimum parameters
         memoryCost: 19456,
         timeCost: 2,
         outputLen: 32,

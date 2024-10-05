@@ -14,6 +14,7 @@ import { decodeHex } from "oslo/encoding";
 import { TOTPController } from "oslo/otp";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
+import { verifyTotpCode } from "./verifyTotpCode";
 
 export const loginBodySchema = z.object({
     email: z.string().email(),
@@ -104,22 +105,12 @@ export async function login(
                 });
             }
 
-            if (!existingUser.twoFactorSecret) {
-                return next(
-                    createHttpError(
-                        HttpCode.INTERNAL_SERVER_ERROR,
-                        "Failed to authenticate user",
-                    ),
-                );
-            }
-
-            const validOTP = await new TOTPController().verify(
+            const validOTP = await verifyTotpCode(
                 code,
-                decodeHex(existingUser.twoFactorSecret),
+                existingUser.twoFactorSecret!,
             );
 
             if (!validOTP) {
-                await new Promise((resolve) => setTimeout(resolve, 250)); // delay to prevent brute force attacks
                 return next(
                     createHttpError(
                         HttpCode.BAD_REQUEST,

@@ -29,16 +29,6 @@ unauthenticated.get("/", (_, res) => {
 // Authenticated Root routes
 export const authenticated = Router();
 authenticated.use(verifySessionUserMiddleware);
-unauthenticated.use(
-    rateLimitMiddleware({
-        windowMin: 60,
-        max: 5,
-        type: "IP_AND_PATH",
-        skipCondition: (req) => {
-            return !["/auth/request-email-code"].includes(req.path);
-        },
-    }),
-);
 
 authenticated.put("/org", getUserOrgs, org.createOrg);
 authenticated.get("/orgs", getUserOrgs, org.listOrgs); // TODO we need to check the orgs here
@@ -107,19 +97,34 @@ authenticated.get("/user/:userId", user.getUser);
 authenticated.delete("/user/:userId", user.deleteUser);
 
 // Auth routes
-unauthenticated.put("/auth/signup", auth.signup);
-unauthenticated.post("/auth/login", auth.login);
-unauthenticated.post("/auth/logout", auth.logout);
-authenticated.post("/auth/verify-totp", auth.verifyTotp);
-authenticated.post("/auth/request-totp-secret", auth.requestTotpSecret);
-authenticated.post("/auth/disable-2fa", auth.disable2fa);
-unauthenticated.post(
-    "/auth/verify-email",
-    verifySessionMiddleware,
-    auth.verifyEmail,
+export const authRouter = Router();
+unauthenticated.use("/auth", authRouter);
+authRouter.use(
+    rateLimitMiddleware({
+        windowMin: 10,
+        max: 15,
+        type: "IP_AND_PATH",
+    }),
 );
-unauthenticated.post(
-    "/auth/request-email-code",
+
+authRouter.put("/signup", auth.signup);
+authRouter.post("/login", auth.login);
+authRouter.post("/logout", auth.logout);
+authRouter.post("/verify-totp", verifySessionUserMiddleware, auth.verifyTotp);
+authRouter.post(
+    "/request-totp-secret",
+    verifySessionUserMiddleware,
+    auth.requestTotpSecret,
+);
+authRouter.post("/disable-2fa", verifySessionUserMiddleware, auth.disable2fa);
+authRouter.post("/verify-email", verifySessionMiddleware, auth.verifyEmail);
+authRouter.post(
+    "/request-email-code",
     verifySessionMiddleware,
     auth.requestEmailVerificationCode,
+);
+authRouter.post(
+    "/change-password",
+    verifySessionUserMiddleware,
+    auth.changePassword,
 );

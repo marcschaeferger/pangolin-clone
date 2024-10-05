@@ -2,32 +2,35 @@ import { Request, Response, NextFunction } from "express";
 import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
 import { fromError } from "zod-validation-error";
-import { unauthorized } from "@server/auth";
+import lucia, { unauthorized } from "@server/auth";
 import { z } from "zod";
 import { db } from "@server/db";
 import { User, users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import { response } from "@server/utils";
-import { verifyPassword } from "./password";
+import { hashPassword, verifyPassword } from "./password";
 import { verifyTotpCode } from "./verifyTotpCode";
+import { passwordSchema } from "./passwordSchema";
+import logger from "@server/logger";
 
-export const disable2faBody = z.object({
-    password: z.string(),
+export const changePasswordBody = z.object({
+    oldPassword: z.string(),
+    newPassword: passwordSchema,
     code: z.string().optional(),
 });
 
-export type Disable2faBody = z.infer<typeof disable2faBody>;
+export type ChangePasswordBody = z.infer<typeof changePasswordBody>;
 
-export type Disable2faResponse = {
+export type ChangePasswordResponse = {
     codeRequested?: boolean;
 };
 
-export async function disable2fa(
+export async function changePassword(
     req: Request,
     res: Response,
     next: NextFunction,
 ): Promise<any> {
-    const parsedBody = disable2faBody.safeParse(req.body);
+    const parsedBody = changePasswordBody.safeParse(req.body);
 
     if (!parsedBody.success) {
         return next(
@@ -38,23 +41,28 @@ export async function disable2fa(
         );
     }
 
-    const { password, code } = parsedBody.data;
+    const { newPassword, oldPassword, code } = parsedBody.data;
     const user = req.user as User;
 
     try {
-        const validPassword = await verifyPassword(password, user.passwordHash);
+        if (newPassword === oldPassword) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    "New password cannot be the same as the old password",
+                ),
+            );
+        }
+
+        const validPassword = await verifyPassword(
+            oldPassword,
+            user.passwordHash,
+        );
         if (!validPassword) {
             return next(unauthorized());
         }
 
-        if (!user.twoFactorEnabled) {
-            return next(
-                createHttpError(
-                    HttpCode.BAD_REQUEST,
-                    "Two-factor authentication is already disabled",
-                ),
-            );
-        } else {
+        if (user.twoFactorEnabled) {
             if (!code) {
                 return response<{ codeRequested: boolean }>(res, {
                     data: { codeRequested: true },
@@ -64,36 +72,41 @@ export async function disable2fa(
                     status: HttpCode.ACCEPTED,
                 });
             }
+            const validOTP = await verifyTotpCode(code!, user.twoFactorSecret!);
+
+            if (!validOTP) {
+                return next(
+                    createHttpError(
+                        HttpCode.BAD_REQUEST,
+                        "The two-factor code you entered is incorrect",
+                    ),
+                );
+            }
         }
 
-        const validOTP = await verifyTotpCode(code, user.twoFactorSecret!);
-
-        if (!validOTP) {
-            return next(
-                createHttpError(
-                    HttpCode.BAD_REQUEST,
-                    "The two-factor code you entered is incorrect",
-                ),
-            );
-        }
+        const hash = await hashPassword(newPassword);
 
         await db
             .update(users)
-            .set({ twoFactorEnabled: false })
+            .set({
+                passwordHash: hash,
+            })
             .where(eq(users.id, user.id));
 
-        return response<null>(res, {
+        await lucia.invalidateUserSessions(user.id);
+
+        return response(res, {
             data: null,
             success: true,
             error: false,
-            message: "Two-factor authentication disabled",
+            message: "Password changed successfully",
             status: HttpCode.OK,
         });
     } catch (error) {
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,
-                "Failed to disable two-factor authentication",
+                "Failed to authenticate user",
             ),
         );
     }
