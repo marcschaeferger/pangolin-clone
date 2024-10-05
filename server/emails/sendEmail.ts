@@ -16,6 +16,11 @@ export async function sendEmail(
         return;
     }
 
+    if (!opts.from || !opts.to || !opts.subject) {
+        logger.error("Email missing required fields", opts);
+        return;
+    }
+
     const emailHtml = await render(template);
 
     const options = {
@@ -26,8 +31,6 @@ export async function sendEmail(
     };
 
     await emailClient.sendMail(options);
-
-    logger.debug(`Sent email to ${opts.to}`);
 }
 
 export default sendEmail;

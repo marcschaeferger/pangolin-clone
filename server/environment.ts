@@ -43,6 +43,7 @@ const environmentSchema = z.object({
         .pipe(z.number().optional()),
     EMAIL_SMTP_USER: z.string().optional(),
     EMAIL_SMTP_PASS: z.string().optional(),
+    EMAIL_NOREPLY: z.string().optional(),
 });
 
 const environment = {
