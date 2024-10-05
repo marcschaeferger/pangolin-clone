@@ -80,7 +80,6 @@ export async function login(
             },
         );
         if (!validPassword) {
-            await new Promise((resolve) => setTimeout(resolve, 250)); // delay to prevent brute force attacks
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,

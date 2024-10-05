@@ -10,10 +10,6 @@ export async function verifyPassword(
         outputLen: 32,
         parallelism: 1,
     });
-    if (!validPassword) {
-        await new Promise((resolve) => setTimeout(resolve, 250)); // delay to prevent brute force attacks
-    }
-
     return validPassword;
 }
 

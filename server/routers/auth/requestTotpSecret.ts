@@ -51,7 +51,6 @@ export async function requestTotpSecret(
             parallelism: 1,
         });
         if (!validPassword) {
-            await new Promise((resolve) => setTimeout(resolve, 250)); // delay to prevent brute force attacks
             return next(unauthorized());
         }
 

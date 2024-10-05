@@ -110,20 +110,16 @@ authRouter.use(
 authRouter.put("/signup", auth.signup);
 authRouter.post("/login", auth.login);
 authRouter.post("/logout", auth.logout);
+authRouter.post("/2fa/enable", verifySessionUserMiddleware, auth.verifyTotp);
 authRouter.post(
-    "/2fa/verify-code",
-    verifySessionUserMiddleware,
-    auth.verifyTotp,
-);
-authRouter.post(
-    "/2fa/request-secret",
+    "/2fa/request",
     verifySessionUserMiddleware,
     auth.requestTotpSecret,
 );
 authRouter.post("/2fa/disable", verifySessionUserMiddleware, auth.disable2fa);
 authRouter.post("/verify-email", verifySessionMiddleware, auth.verifyEmail);
 authRouter.post(
-    "/request-email-code",
+    "/verify-email/request",
     verifySessionMiddleware,
     auth.requestEmailVerificationCode,
 );
@@ -132,3 +128,5 @@ authRouter.post(
     verifySessionUserMiddleware,
     auth.changePassword,
 );
+authRouter.post("/reset-password/request", auth.requestPasswordReset);
+authRouter.post("/reset-password/", auth.resetPassword);

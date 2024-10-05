@@ -12,3 +12,5 @@ export * from "./verifyTargetAccess";
 export * from "./verifyEmail";
 export * from "./requestEmailVerificationCode";
 export * from "./changePassword";
+export * from "./requestPasswordReset";
+export * from "./resetPassword";

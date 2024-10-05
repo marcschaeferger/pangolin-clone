@@ -19,7 +19,7 @@ export type VerifyTotpBody = z.infer<typeof verifyTotpBody>;
 
 export type VerifyTotpResponse = {
     valid: boolean;
-    backupCodes: string[];
+    backupCodes?: string[];
 };
 
 export async function verifyTotp(
@@ -63,26 +63,33 @@ export async function verifyTotp(
     try {
         const valid = await verifyTotpCode(code, user.twoFactorSecret, user.id);
 
-        const backupCodes = await generateBackupCodes();
-        for (const code of backupCodes) {
-            const hash = await hashPassword(code);
-
-            await db.insert(twoFactorBackupCodes).values({
-                userId: user.id,
-                codeHash: hash,
-            });
-        }
-
+        let codes;
         if (valid) {
             // if valid, enable two-factor authentication; the totp secret is no longer temporary
             await db
                 .update(users)
                 .set({ twoFactorEnabled: true })
                 .where(eq(users.id, user.id));
+
+            const backupCodes = await generateBackupCodes();
+            codes = backupCodes;
+            for (const code of backupCodes) {
+                const hash = await hashPassword(code);
+
+                await db.insert(twoFactorBackupCodes).values({
+                    userId: user.id,
+                    codeHash: hash,
+                });
+            }
         }
 
+        // TODO: send email to user confirming two-factor authentication is enabled
+
         return response<VerifyTotpResponse>(res, {
-            data: { valid, backupCodes },
+            data: {
+                valid,
+                ...(valid && codes ? { backupCodes: codes } : {}),
+            },
             success: true,
             error: false,
             message: valid

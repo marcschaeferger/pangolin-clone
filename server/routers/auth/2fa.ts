@@ -19,10 +19,6 @@ export async function verifyTotpCode(
             decodeHex(secret),
         );
 
-        if (!validOTP) {
-            await new Promise((resolve) => setTimeout(resolve, 250)); // delay to prevent brute force attack
-        }
-
         return validOTP;
     }
 }

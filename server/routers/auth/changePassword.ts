@@ -98,6 +98,8 @@ export async function changePassword(
 
         await lucia.invalidateUserSessions(user.id);
 
+        // TODO: send email to user confirming password change
+
         return response(res, {
             data: null,
             success: true,

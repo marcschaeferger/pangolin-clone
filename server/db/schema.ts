@@ -120,6 +120,15 @@ export const emailVerificationCodes = sqliteTable("emailVerificationCodes", {
     expiresAt: integer("expiresAt").notNull(),
 });
 
+export const passwordResetTokens = sqliteTable("passwordResetTokens", {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: text("userId")
+        .notNull()
+        .references(() => users.id, { onDelete: "cascade" }),
+    tokenHash: text("tokenHash").notNull(),
+    expiresAt: integer("expiresAt").notNull(),
+});
+
 // Define the model types for type inference
 export type Org = InferSelectModel<typeof orgs>;
 export type User = InferSelectModel<typeof users>;
@@ -133,3 +142,4 @@ export type EmailVerificationCode = InferSelectModel<
     typeof emailVerificationCodes
 >;
 export type TwoFactorBackupCode = InferSelectModel<typeof twoFactorBackupCodes>;
+export type PasswordResetToken = InferSelectModel<typeof passwordResetTokens>;

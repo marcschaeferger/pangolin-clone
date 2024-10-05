@@ -90,6 +90,8 @@ export async function disable2fa(
             .delete(twoFactorBackupCodes)
             .where(eq(twoFactorBackupCodes.userId, user.id));
 
+        // TODO: send email to user confirming two-factor authentication is disabled
+
         return response<null>(res, {
             data: null,
             success: true,
