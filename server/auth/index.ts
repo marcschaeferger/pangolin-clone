@@ -49,7 +49,7 @@ interface DatabaseUserAttributes {
     email: string;
     passwordHash: string;
     twoFactorEnabled: boolean;
-    twoFactorSecret: string | null;
+    twoFactorSecret?: string;
     emailVerified: boolean;
 }
 

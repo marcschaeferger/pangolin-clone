@@ -83,6 +83,14 @@ export const users = sqliteTable("user", {
         .default(false),
 });
 
+export const twoFactorBackupCodes = sqliteTable("twoFactorBackupCodes", {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: text("userId")
+        .notNull()
+        .references(() => users.id, { onDelete: "cascade" }),
+    codeHash: text("codeHash").notNull(),
+});
+
 // Sessions table
 export const sessions = sqliteTable("session", {
     id: text("id").primaryKey(), // has to be id not sessionId for lucia
@@ -124,3 +132,4 @@ export type Session = InferSelectModel<typeof sessions>;
 export type EmailVerificationCode = InferSelectModel<
     typeof emailVerificationCodes
 >;
+export type TwoFactorBackupCode = InferSelectModel<typeof twoFactorBackupCodes>;

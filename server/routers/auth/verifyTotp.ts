@@ -7,8 +7,10 @@ import { TOTPController } from "oslo/otp";
 import HttpCode from "@server/types/HttpCode";
 import { response } from "@server/utils";
 import { db } from "@server/db";
-import { User, users } from "@server/db/schema";
+import { twoFactorBackupCodes, User, users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
+import { alphabet, generateRandomString } from "oslo/crypto";
+import { hashPassword } from "./password";
 
 export const verifyTotpBody = z.object({
     code: z.string(),
@@ -18,6 +20,7 @@ export type VerifyTotpBody = z.infer<typeof verifyTotpBody>;
 
 export type VerifyTotpResponse = {
     valid: boolean;
+    backupCodes: string[];
 };
 
 export async function verifyTotp(
@@ -65,6 +68,16 @@ export async function verifyTotp(
             decodeHex(user.twoFactorSecret),
         );
 
+        const backupCodes = await generateBackupCodes();
+        for (const code of backupCodes) {
+            const hash = await hashPassword(code);
+
+            await db.insert(twoFactorBackupCodes).values({
+                userId: user.id,
+                codeHash: hash,
+            });
+        }
+
         if (valid) {
             // if valid, enable two-factor authentication; the totp secret is no longer temporary
             await db
@@ -73,8 +86,8 @@ export async function verifyTotp(
                 .where(eq(users.id, user.id));
         }
 
-        return response<{ valid: boolean }>(res, {
-            data: { valid },
+        return response<VerifyTotpResponse>(res, {
+            data: { valid, backupCodes },
             success: true,
             error: false,
             message: valid
@@ -90,4 +103,13 @@ export async function verifyTotp(
             ),
         );
     }
+}
+
+async function generateBackupCodes(): Promise<string[]> {
+    const codes = [];
+    for (let i = 0; i < 10; i++) {
+        const code = generateRandomString(8, alphabet("0-9", "A-Z", "a-z"));
+        codes.push(code);
+    }
+    return codes;
 }

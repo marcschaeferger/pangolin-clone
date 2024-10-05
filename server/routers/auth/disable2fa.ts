@@ -5,7 +5,7 @@ import { fromError } from "zod-validation-error";
 import { unauthorized } from "@server/auth";
 import { z } from "zod";
 import { db } from "@server/db";
-import { User, users } from "@server/db/schema";
+import { twoFactorBackupCodes, User, users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import { response } from "@server/utils";
 import { verifyPassword } from "./password";
@@ -81,6 +81,10 @@ export async function disable2fa(
             .update(users)
             .set({ twoFactorEnabled: false })
             .where(eq(users.id, user.id));
+
+        await db
+            .delete(twoFactorBackupCodes)
+            .where(eq(twoFactorBackupCodes.userId, user.id));
 
         return response<null>(res, {
             data: null,
