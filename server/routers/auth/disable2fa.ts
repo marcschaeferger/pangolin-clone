@@ -9,7 +9,7 @@ import { twoFactorBackupCodes, User, users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import { response } from "@server/utils";
 import { verifyPassword } from "./password";
-import { verifyTotpCode } from "./verifyTotpCode";
+import { verifyTotpCode } from "./2fa";
 
 export const disable2faBody = z.object({
     password: z.string(),
@@ -66,7 +66,11 @@ export async function disable2fa(
             }
         }
 
-        const validOTP = await verifyTotpCode(code, user.twoFactorSecret!);
+        const validOTP = await verifyTotpCode(
+            code,
+            user.twoFactorSecret!,
+            user.id,
+        );
 
         if (!validOTP) {
             return next(

@@ -2,19 +2,14 @@ import { verify } from "@node-rs/argon2";
 import lucia, { verifySession } from "@server/auth";
 import db from "@server/db";
 import { users } from "@server/db/schema";
-import { sendEmail } from "@server/emails";
-import { VerifyEmail } from "@server/emails/templates/verifyEmailCode";
-import logger from "@server/logger";
 import HttpCode from "@server/types/HttpCode";
 import response from "@server/utils/response";
 import { eq } from "drizzle-orm";
 import { NextFunction, Request, Response } from "express";
 import createHttpError from "http-errors";
-import { decodeHex } from "oslo/encoding";
-import { TOTPController } from "oslo/otp";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
-import { verifyTotpCode } from "./verifyTotpCode";
+import { verifyTotpCode } from "./2fa";
 
 export const loginBodySchema = z.object({
     email: z.string().email(),
@@ -108,6 +103,7 @@ export async function login(
             const validOTP = await verifyTotpCode(
                 code,
                 existingUser.twoFactorSecret!,
+                existingUser.id,
             );
 
             if (!validOTP) {

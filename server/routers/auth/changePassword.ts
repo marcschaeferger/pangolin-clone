@@ -9,9 +9,8 @@ import { User, users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import { response } from "@server/utils";
 import { hashPassword, verifyPassword } from "./password";
-import { verifyTotpCode } from "./verifyTotpCode";
+import { verifyTotpCode } from "./2fa";
 import { passwordSchema } from "./passwordSchema";
-import logger from "@server/logger";
 
 export const changePasswordBody = z.object({
     oldPassword: z.string(),
@@ -72,7 +71,11 @@ export async function changePassword(
                     status: HttpCode.ACCEPTED,
                 });
             }
-            const validOTP = await verifyTotpCode(code!, user.twoFactorSecret!);
+            const validOTP = await verifyTotpCode(
+                code!,
+                user.twoFactorSecret!,
+                user.id,
+            );
 
             if (!validOTP) {
                 return next(

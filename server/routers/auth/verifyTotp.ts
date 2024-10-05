@@ -2,8 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import createHttpError from "http-errors";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
-import { decodeHex } from "oslo/encoding";
-import { TOTPController } from "oslo/otp";
 import HttpCode from "@server/types/HttpCode";
 import { response } from "@server/utils";
 import { db } from "@server/db";
@@ -11,6 +9,7 @@ import { twoFactorBackupCodes, User, users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import { alphabet, generateRandomString } from "oslo/crypto";
 import { hashPassword } from "./password";
+import { verifyTotpCode } from "./2fa";
 
 export const verifyTotpBody = z.object({
     code: z.string(),
@@ -62,11 +61,7 @@ export async function verifyTotp(
     }
 
     try {
-        const totpController = new TOTPController();
-        const valid = await totpController.verify(
-            code,
-            decodeHex(user.twoFactorSecret),
-        );
+        const valid = await verifyTotpCode(code, user.twoFactorSecret, user.id);
 
         const backupCodes = await generateBackupCodes();
         for (const code of backupCodes) {
