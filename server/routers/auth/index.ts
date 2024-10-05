@@ -4,3 +4,8 @@ export * from "./logout";
 export * from "./verifyTotp";
 export * from "./requestTotpSecret";
 export * from "./disable2fa";
+export * from "./verifyOrgAccess";
+export * from "./getUserOrgs";
+export * from "./verifySiteAccess";
+export * from "./verifyResourceAccess";
+export * from "./verifyTargetAccess";

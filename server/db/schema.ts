@@ -89,6 +89,16 @@ export const sessions = sqliteTable("session", {
     expiresAt: integer("expiresAt").notNull(),
 });
 
+export const userOrgs = sqliteTable("userOrgs", {
+    userId: text("userId")
+        .notNull()
+        .references(() => users.id),
+    orgId: integer("orgId")
+        .notNull()
+        .references(() => orgs.orgId),
+    role: text("role").notNull(), // e.g., 'admin', 'member', etc.
+});
+
 // Define the model types for type inference
 export type Org = InferSelectModel<typeof orgs>;
 export type User = InferSelectModel<typeof users>;

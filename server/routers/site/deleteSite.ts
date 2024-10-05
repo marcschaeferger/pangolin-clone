@@ -7,6 +7,9 @@ import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
 
+
+const API_BASE_URL = "http://localhost:3000";
+
 // Define Zod schema for request parameters validation
 const deleteSiteSchema = z.object({
   siteId: z.string().transform(Number).pipe(z.number().int().positive())
@@ -52,5 +55,25 @@ export async function deleteSite(req: Request, res: Response, next: NextFunction
     );
   } catch (error) {
     next(error);
+  }
+}
+
+
+async function removePeer(publicKey: string) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/peer?public_key=${encodeURIComponent(publicKey)}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('Peer removed successfully:', data.status);
+    return data;
+  } catch (error: any) {
+    console.error('Error removing peer:', error.message);
+    throw error;
   }
 }
