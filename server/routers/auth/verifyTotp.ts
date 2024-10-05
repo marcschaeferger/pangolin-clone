@@ -58,27 +58,36 @@ export async function verifyTotp(
         );
     }
 
-    const totpController = new TOTPController();
-    const valid = await totpController.verify(
-        code,
-        decodeHex(user.twoFactorSecret),
-    );
+    try {
+        const totpController = new TOTPController();
+        const valid = await totpController.verify(
+            code,
+            decodeHex(user.twoFactorSecret),
+        );
 
-    if (valid) {
-        // if valid, enable two-factor authentication; the totp secret is no longer temporary
-        await db
-            .update(users)
-            .set({ twoFactorEnabled: true })
-            .where(eq(users.id, user.id));
+        if (valid) {
+            // if valid, enable two-factor authentication; the totp secret is no longer temporary
+            await db
+                .update(users)
+                .set({ twoFactorEnabled: true })
+                .where(eq(users.id, user.id));
+        }
+
+        return response<{ valid: boolean }>(res, {
+            data: { valid },
+            success: true,
+            error: false,
+            message: valid
+                ? "Code is valid. Two-factor is now enabled"
+                : "Code is invalid",
+            status: HttpCode.OK,
+        });
+    } catch (error) {
+        return next(
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "Failed to verify two-factor authentication code",
+            ),
+        );
     }
-
-    return response<{ valid: boolean }>(res, {
-        data: { valid },
-        success: true,
-        error: false,
-        message: valid
-            ? "Code is valid. Two-factor is now enabled"
-            : "Code is invalid",
-        status: HttpCode.OK,
-    });
 }

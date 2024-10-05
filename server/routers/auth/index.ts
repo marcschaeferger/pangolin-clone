@@ -9,3 +9,5 @@ export * from "./getUserOrgs";
 export * from "./verifySiteAccess";
 export * from "./verifyResourceAccess";
 export * from "./verifyTargetAccess";
+export * from "./verifyEmail";
+export * from "./requestEmailVerificationCode";

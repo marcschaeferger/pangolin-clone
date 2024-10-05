@@ -62,6 +62,7 @@ const environment = {
     EMAIL_SMTP_PORT: process.env.EMAIL_SMTP_PORT as string,
     EMAIL_SMTP_USER: process.env.EMAIL_SMTP_USER as string,
     EMAIL_SMTP_PASS: process.env.EMAIL_SMTP_PASS as string,
+    EMAIL_NOREPLY: process.env.EMAIL_NOREPLY as string,
 };
 
 const parsedConfig = environmentSchema.safeParse(environment);

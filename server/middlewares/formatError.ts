@@ -11,6 +11,9 @@ export const errorHandlerMiddleware: ErrorRequestHandler = (
     next: NextFunction,
 ) => {
     const statusCode = error.statusCode || HttpCode.INTERNAL_SERVER_ERROR;
+    if (environment.ENVIRONMENT !== "prod") {
+        logger.error(error);
+    }
     res?.status(statusCode).send({
         data: null,
         success: false,

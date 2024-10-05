@@ -43,44 +43,53 @@ export async function requestTotpSecret(
 
     const user = req.user as User;
 
-    const validPassword = await verify(user.passwordHash, password, {
-        memoryCost: 19456,
-        timeCost: 2,
-        outputLen: 32,
-        parallelism: 1,
-    });
-    if (!validPassword) {
-        await new Promise((resolve) => setTimeout(resolve, 250)); // delay to prevent brute force attacks
-        return next(unauthorized());
-    }
+    try {
+        const validPassword = await verify(user.passwordHash, password, {
+            memoryCost: 19456,
+            timeCost: 2,
+            outputLen: 32,
+            parallelism: 1,
+        });
+        if (!validPassword) {
+            await new Promise((resolve) => setTimeout(resolve, 250)); // delay to prevent brute force attacks
+            return next(unauthorized());
+        }
 
-    if (user.twoFactorEnabled) {
+        if (user.twoFactorEnabled) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    "User has already enabled two-factor authentication",
+                ),
+            );
+        }
+
+        const hex = crypto.getRandomValues(new Uint8Array(20));
+        const secret = encodeHex(hex);
+        const uri = createTOTPKeyURI(env.APP_NAME, user.email, hex);
+
+        await db
+            .update(users)
+            .set({
+                twoFactorSecret: secret,
+            })
+            .where(eq(users.id, user.id));
+
+        return response<RequestTotpSecretResponse>(res, {
+            data: {
+                secret: uri,
+            },
+            success: true,
+            error: false,
+            message: "TOTP secret generated successfully",
+            status: HttpCode.OK,
+        });
+    } catch (error) {
         return next(
             createHttpError(
-                HttpCode.BAD_REQUEST,
-                "User has already enabled two-factor authentication",
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "Failed to generate TOTP secret",
             ),
         );
     }
-
-    const hex = crypto.getRandomValues(new Uint8Array(20));
-    const secret = encodeHex(hex);
-    const uri = createTOTPKeyURI(env.APP_NAME, user.email, hex);
-
-    await db
-        .update(users)
-        .set({
-            twoFactorSecret: secret,
-        })
-        .where(eq(users.id, user.id));
-
-    return response<RequestTotpSecretResponse>(res, {
-        data: {
-            secret: uri,
-        },
-        success: true,
-        error: false,
-        message: "TOTP secret generated successfully",
-        status: HttpCode.OK,
-    });
 }

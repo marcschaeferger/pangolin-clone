@@ -10,6 +10,8 @@ import { fromError } from "zod-validation-error";
 import createHttpError from "http-errors";
 import response from "@server/utils/response";
 import { SqliteError } from "better-sqlite3";
+import { sendEmailVerificationCode } from "./sendEmailVerificationCode";
+import logger from "@server/logger";
 
 export const signupBodySchema = z.object({
     email: z.string().email(),
@@ -27,6 +29,10 @@ export const signupBodySchema = z.object({
 });
 
 export type SignUpBody = z.infer<typeof signupBodySchema>;
+
+export type SignUpResponse = {
+    emailVerificationRequired: boolean;
+};
 
 export async function signup(
     req: Request,
@@ -68,11 +74,15 @@ export async function signup(
             lucia.createSessionCookie(session.id).serialize(),
         );
 
-        return response<null>(res, {
-            data: null,
+        sendEmailVerificationCode(email, userId);
+
+        return response<SignUpResponse>(res, {
+            data: {
+                emailVerificationRequired: true,
+            },
             success: true,
             error: false,
-            message: "User created successfully",
+            message: `User created successfully. We sent an email to ${email} with a verification code.`,
             status: HttpCode.OK,
         });
     } catch (e) {

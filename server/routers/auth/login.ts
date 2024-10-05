@@ -4,6 +4,7 @@ import db from "@server/db";
 import { users } from "@server/db/schema";
 import { sendEmail } from "@server/emails";
 import { VerifyEmail } from "@server/emails/templates/verifyEmailCode";
+import logger from "@server/logger";
 import HttpCode from "@server/types/HttpCode";
 import response from "@server/utils/response";
 import { eq } from "drizzle-orm";
@@ -24,6 +25,7 @@ export type LoginBody = z.infer<typeof loginBodySchema>;
 
 export type LoginResponse = {
     codeRequested?: boolean;
+    emailVerificationRequired?: boolean;
 };
 
 export async function login(
@@ -44,95 +46,118 @@ export async function login(
 
     const { email, password, code } = parsedBody.data;
 
-    const { session: existingSession } = await verifySession(req);
-    if (existingSession) {
-        return response<null>(res, {
-            data: null,
-            success: true,
-            error: false,
-            message: "Already logged in",
-            status: HttpCode.OK,
-        });
-    }
-
-    const existingUserRes = await db
-        .select()
-        .from(users)
-        .where(eq(users.email, email));
-    if (!existingUserRes || !existingUserRes.length) {
-        return next(
-            createHttpError(
-                HttpCode.BAD_REQUEST,
-                "Username or password is incorrect",
-            ),
-        );
-    }
-
-    const existingUser = existingUserRes[0];
-
-    const validPassword = await verify(existingUser.passwordHash, password, {
-        memoryCost: 19456,
-        timeCost: 2,
-        outputLen: 32,
-        parallelism: 1,
-    });
-    if (!validPassword) {
-        await new Promise((resolve) => setTimeout(resolve, 250)); // delay to prevent brute force attacks
-        return next(
-            createHttpError(
-                HttpCode.BAD_REQUEST,
-                "Username or password is incorrect",
-            ),
-        );
-    }
-
-    if (existingUser.twoFactorEnabled) {
-        if (!code) {
-            return response<{ codeRequested: boolean }>(res, {
-                data: { codeRequested: true },
+    try {
+        const { session: existingSession } = await verifySession(req);
+        if (existingSession) {
+            return response<null>(res, {
+                data: null,
                 success: true,
                 error: false,
-                message: "Two-factor authentication required",
-                status: HttpCode.ACCEPTED,
+                message: "Already logged in",
+                status: HttpCode.OK,
             });
         }
 
-        if (!existingUser.twoFactorSecret) {
+        const existingUserRes = await db
+            .select()
+            .from(users)
+            .where(eq(users.email, email));
+        if (!existingUserRes || !existingUserRes.length) {
             return next(
                 createHttpError(
-                    HttpCode.INTERNAL_SERVER_ERROR,
-                    "Failed to authenticate user",
+                    HttpCode.BAD_REQUEST,
+                    "Username or password is incorrect",
                 ),
             );
         }
 
-        const validOTP = await new TOTPController().verify(
-            code,
-            decodeHex(existingUser.twoFactorSecret),
-        );
+        const existingUser = existingUserRes[0];
 
-        if (!validOTP) {
+        const validPassword = await verify(
+            existingUser.passwordHash,
+            password,
+            {
+                memoryCost: 19456,
+                timeCost: 2,
+                outputLen: 32,
+                parallelism: 1,
+            },
+        );
+        if (!validPassword) {
             await new Promise((resolve) => setTimeout(resolve, 250)); // delay to prevent brute force attacks
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    "The two-factor code you entered is incorrect",
+                    "Username or password is incorrect",
                 ),
             );
         }
+
+        if (existingUser.twoFactorEnabled) {
+            if (!code) {
+                return response<{ codeRequested: boolean }>(res, {
+                    data: { codeRequested: true },
+                    success: true,
+                    error: false,
+                    message: "Two-factor authentication required",
+                    status: HttpCode.ACCEPTED,
+                });
+            }
+
+            if (!existingUser.twoFactorSecret) {
+                return next(
+                    createHttpError(
+                        HttpCode.INTERNAL_SERVER_ERROR,
+                        "Failed to authenticate user",
+                    ),
+                );
+            }
+
+            const validOTP = await new TOTPController().verify(
+                code,
+                decodeHex(existingUser.twoFactorSecret),
+            );
+
+            if (!validOTP) {
+                await new Promise((resolve) => setTimeout(resolve, 250)); // delay to prevent brute force attacks
+                return next(
+                    createHttpError(
+                        HttpCode.BAD_REQUEST,
+                        "The two-factor code you entered is incorrect",
+                    ),
+                );
+            }
+        }
+
+        const session = await lucia.createSession(existingUser.id, {});
+        res.appendHeader(
+            "Set-Cookie",
+            lucia.createSessionCookie(session.id).serialize(),
+        );
+
+        if (!existingUser.emailVerified) {
+            return response<LoginResponse>(res, {
+                data: { emailVerificationRequired: true },
+                success: true,
+                error: false,
+                message: "Email verification code sent",
+                status: HttpCode.ACCEPTED,
+            });
+        }
+
+        return response<null>(res, {
+            data: null,
+            success: true,
+            error: false,
+            message: "Logged in successfully",
+            status: HttpCode.OK,
+        });
+    } catch (e) {
+        return next(
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "Failed to authenticate user",
+            ),
+        );
     }
-
-    const session = await lucia.createSession(existingUser.id, {});
-    res.appendHeader(
-        "Set-Cookie",
-        lucia.createSessionCookie(session.id).serialize(),
-    );
-
-    return response<null>(res, {
-        data: null,
-        success: true,
-        error: false,
-        message: "Logged in successfully",
-        status: HttpCode.OK,
-    });
 }

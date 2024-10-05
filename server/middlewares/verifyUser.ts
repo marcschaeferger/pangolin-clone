@@ -7,7 +7,7 @@ import { eq } from "drizzle-orm";
 import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
 
-export const verifySessionMiddleware = async (
+export const verifySessionUserMiddleware = async (
     req: any,
     res: Response<ErrorResponse>,
     next: NextFunction,
@@ -30,6 +30,12 @@ export const verifySessionMiddleware = async (
 
     req.user = existingUser[0];
     req.session = session;
+
+    if (!existingUser[0].emailVerified) {
+        return next(
+            createHttpError(HttpCode.BAD_REQUEST, "Email is not verified"), // Might need to change the response type?
+        );
+    }
 
     next();
 };

@@ -78,6 +78,9 @@ export const users = sqliteTable("user", {
         .notNull()
         .default(false),
     twoFactorSecret: text("twoFactorSecret"),
+    emailVerified: integer("emailVerified", { mode: "boolean" })
+        .notNull()
+        .default(false),
 });
 
 // Sessions table
@@ -85,7 +88,7 @@ export const sessions = sqliteTable("session", {
     id: text("id").primaryKey(), // has to be id not sessionId for lucia
     userId: text("userId")
         .notNull()
-        .references(() => users.id),
+        .references(() => users.id, { onDelete: "cascade" }),
     expiresAt: integer("expiresAt").notNull(),
 });
 
@@ -99,6 +102,16 @@ export const userOrgs = sqliteTable("userOrgs", {
     role: text("role").notNull(), // e.g., 'admin', 'member', etc.
 });
 
+export const emailVerificationCodes = sqliteTable("emailVerificationCodes", {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: text("userId")
+        .notNull()
+        .references(() => users.id, { onDelete: "cascade" }),
+    email: text("email").notNull(),
+    code: text("code").notNull(),
+    expiresAt: integer("expiresAt").notNull(),
+});
+
 // Define the model types for type inference
 export type Org = InferSelectModel<typeof orgs>;
 export type User = InferSelectModel<typeof users>;
@@ -108,3 +121,6 @@ export type ExitNode = InferSelectModel<typeof exitNodes>;
 export type Route = InferSelectModel<typeof routes>;
 export type Target = InferSelectModel<typeof targets>;
 export type Session = InferSelectModel<typeof sessions>;
+export type EmailVerificationCode = InferSelectModel<
+    typeof emailVerificationCodes
+>;

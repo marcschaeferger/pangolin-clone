@@ -35,36 +35,45 @@ export async function disable2fa(
     const { password } = parsedBody.data;
     const user = req.user as User;
 
-    const validPassword = await verify(user.passwordHash, password, {
-        memoryCost: 19456,
-        timeCost: 2,
-        outputLen: 32,
-        parallelism: 1,
-    });
-    if (!validPassword) {
-        await new Promise((resolve) => setTimeout(resolve, 250)); // delay to prevent brute force attacks
-        return next(unauthorized());
-    }
+    try {
+        const validPassword = await verify(user.passwordHash, password, {
+            memoryCost: 19456,
+            timeCost: 2,
+            outputLen: 32,
+            parallelism: 1,
+        });
+        if (!validPassword) {
+            await new Promise((resolve) => setTimeout(resolve, 250)); // delay to prevent brute force attacks
+            return next(unauthorized());
+        }
 
-    if (!user.twoFactorEnabled) {
+        if (!user.twoFactorEnabled) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    "Two-factor authentication is already disabled",
+                ),
+            );
+        }
+
+        await db
+            .update(users)
+            .set({ twoFactorEnabled: false })
+            .where(eq(users.id, user.id));
+
+        return response<null>(res, {
+            data: null,
+            success: true,
+            error: false,
+            message: "Two-factor authentication disabled",
+            status: HttpCode.OK,
+        });
+    } catch (error) {
         return next(
             createHttpError(
-                HttpCode.BAD_REQUEST,
-                "Two-factor authentication is already disabled",
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "Failed to disable two-factor authentication",
             ),
         );
     }
-
-    await db
-        .update(users)
-        .set({ twoFactorEnabled: false })
-        .where(eq(users.id, user.id));
-
-    return response<null>(res, {
-        data: null,
-        success: true,
-        error: false,
-        message: "Two-factor authentication disabled",
-        status: HttpCode.OK,
-    });
 }

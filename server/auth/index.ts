@@ -15,6 +15,7 @@ export const lucia = new Lucia(adapter, {
             email: attributes.email,
             twoFactorEnabled: attributes.twoFactorEnabled,
             twoFactorSecret: attributes.twoFactorSecret,
+            emailVerified: attributes.emailVerified,
         };
     },
     // getSessionAttributes: (attributes) => {
@@ -49,6 +50,7 @@ interface DatabaseUserAttributes {
     passwordHash: string;
     twoFactorEnabled: boolean;
     twoFactorSecret: string | null;
+    emailVerified: boolean;
 }
 
 interface DatabaseSessionAttributes {
