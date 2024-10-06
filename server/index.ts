@@ -76,6 +76,9 @@ app.prepare().then(() => {
             `Internal server is running on http://localhost:${internalPort}`,
         );
     });
+
+    internalServer.use(notFoundMiddleware)
+    internalServer.use(errorHandlerMiddleware);
 });
 
 declare global {

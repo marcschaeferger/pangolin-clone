@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 const font = Roboto({ subsets: ["latin"], style: "normal", weight: "400" });
 
-export default function RootLayout({
+export default async function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
