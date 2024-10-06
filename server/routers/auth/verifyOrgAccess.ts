@@ -7,7 +7,7 @@ import HttpCode from '@server/types/HttpCode';
 import { AuthenticatedRequest } from '@server/types/Auth';
 
 export function verifyOrgAccess(req: Request, res: Response, next: NextFunction) {
-  const userId = req.user.id; // Assuming you have user information in the request
+  const userId = req.user!.id; // Assuming you have user information in the request
   const orgId = parseInt(req.params.orgId);
 
   if (!userId) {

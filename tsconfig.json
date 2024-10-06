@@ -15,7 +15,8 @@
         "baseUrl": "src",
         "paths": {
             "@server/*": ["../server/*"],
-            "@app/*": ["*"]
+            "@app/*": ["*"],
+            "@/*": ["./*"]
         },
         "plugins": [
             {

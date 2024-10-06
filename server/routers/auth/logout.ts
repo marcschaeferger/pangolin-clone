@@ -36,6 +36,7 @@ export async function logout(
             status: HttpCode.OK,
         });
     } catch (error) {
+        logger.error("Failed to log out", error);
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,
