@@ -73,8 +73,7 @@ export async function listTargets(req: Request, res: Response, next: NextFunctio
     const totalCountResult = await countQuery;
     const totalCount = totalCountResult[0].count;
 
-    return res.status(HttpCode.OK).send(
-      response(res, {
+    return response(res, {
         data: {
           targets: targetsList,
           pagination: {
@@ -88,8 +87,9 @@ export async function listTargets(req: Request, res: Response, next: NextFunctio
         message: "Targets retrieved successfully",
         status: HttpCode.OK,
       })
-    );
   } catch (error) {
-    next(error);
+    console.log(error);
+    
+    return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "sadfdf"));
   }
 }

@@ -202,6 +202,14 @@ export const userResources = sqliteTable("userResources", {
         .references(() => resources.resourceId, { onDelete: "cascade" }),
 });
 
+export const limitsTable = sqliteTable("limits", {
+    limitId: integer("limitId").primaryKey({ autoIncrement: true }),
+    orgId: integer("orgId").references(() => orgs.orgId, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    value: integer("value").notNull(),
+    description: text("description"),
+});
+
 // Define the model types for type inference
 export type Org = InferSelectModel<typeof orgs>;
 export type User = InferSelectModel<typeof users>;
@@ -224,3 +232,4 @@ export type RoleSite = InferSelectModel<typeof roleSites>;
 export type UserSite = InferSelectModel<typeof userSites>;
 export type RoleResource = InferSelectModel<typeof roleResources>;
 export type UserResource = InferSelectModel<typeof userResources>;
+export type Limit = InferSelectModel<typeof limitsTable>;
