@@ -6,6 +6,7 @@ import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
 import fetch from 'node-fetch';
+import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 
 const API_BASE_URL = "http://localhost:3000";
 
@@ -33,7 +34,7 @@ export async function createSite(req: Request, res: Response, next: NextFunction
         )
       );
     }
-
+    
     const { name, subdomain, pubKey, subnet } = parsedBody.data;
 
     // Validate request params
@@ -48,6 +49,12 @@ export async function createSite(req: Request, res: Response, next: NextFunction
     }
 
     const { orgId } = parsedParams.data;
+
+    // Check if the user has permission to list sites
+    const hasPermission = await checkUserActionPermission(ActionsEnum.createSite, req);
+    if (!hasPermission) {
+      return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
+    }
 
     // Create new site in the database
     const newSite = await db.insert(sites).values({

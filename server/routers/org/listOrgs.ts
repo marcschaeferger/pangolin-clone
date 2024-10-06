@@ -6,6 +6,7 @@ import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
 import { sql, inArray } from 'drizzle-orm';
+import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 
 const listOrgsSchema = z.object({
   limit: z.string().optional().transform(Number).pipe(z.number().int().positive().default(10)),
@@ -26,8 +27,14 @@ export async function listOrgs(req: Request, res: Response, next: NextFunction):
 
     const { limit, offset } = parsedQuery.data;
 
+    // Check if the user has permission to list sites
+    const hasPermission = await checkUserActionPermission(ActionsEnum.listOrgs, req);
+    if (!hasPermission) {
+      return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
+    }
+
     // Use the userOrgs passed from the middleware
-    const userOrgIds = req.userOrgs;
+    const userOrgIds = req.userOrgIds;
 
     if (!userOrgIds || userOrgIds.length === 0) {
       return res.status(HttpCode.OK).send(

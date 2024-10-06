@@ -1,9 +1,41 @@
 import { Request } from 'express';
 import { db } from '@server/db';
 import { userActions, roleActions, userOrgs } from '@server/db/schema';
-import { and, eq, or } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import createHttpError from 'http-errors';
 import HttpCode from '@server/types/HttpCode';
+
+export const ActionsEnum = {
+
+    createOrg: 1,
+    deleteOrg: 2,
+    getOrg: 3,
+    listOrgs: 4,
+    updateOrg: 5,
+    
+    createSite: 6,
+    deleteSite: 7,
+    getSite: 8,
+    listSites: 9,
+    updateSite: 10,
+
+    createResource: 11,
+    deleteResource: 12,
+    getResource: 13,
+    listResources: 14,
+    updateResource: 15,
+
+    createTarget: 16,
+    deleteTarget: 17,
+    getTarget: 18,
+    listTargets: 19,
+    updateTarget: 20,
+
+    getUser: 21,
+    deleteUser: 22,
+    listUsers: 23
+
+}
 
 export async function checkUserActionPermission(actionId: number, req: Request): Promise<boolean> {
   const userId = req.user?.id;
@@ -12,11 +44,37 @@ export async function checkUserActionPermission(actionId: number, req: Request):
     throw createHttpError(HttpCode.UNAUTHORIZED, 'User not authenticated');
   }
 
+  if (!req.userOrgId) {
+    throw createHttpError(HttpCode.BAD_REQUEST, 'Organization ID is required');
+  }
+
   try {
-    // Check if the user has direct permission for the action
+    let userOrgRoleId = req.userOrgRoleId;
+
+    // If userOrgRoleId is not available on the request, fetch it
+    if (userOrgRoleId === undefined) {
+      const userOrgRole = await db.select()
+        .from(userOrgs)
+        .where(and(eq(userOrgs.userId, userId), eq(userOrgs.orgId, req.userOrgId)))
+        .limit(1);
+
+      if (userOrgRole.length === 0) {
+        throw createHttpError(HttpCode.FORBIDDEN, 'User does not have access to this organization');
+      }
+
+      userOrgRoleId = userOrgRole[0].roleId;
+    }
+
+    // Check if the user has direct permission for the action in the current org
     const userActionPermission = await db.select()
       .from(userActions)
-      .where(and(eq(userActions.userId, userId), eq(userActions.actionId, actionId)))
+      .where(
+        and(
+          eq(userActions.userId, userId),
+          eq(userActions.actionId, actionId),
+          eq(userActions.orgId, req.userOrgId)
+        )
+      )
       .limit(1);
 
     if (userActionPermission.length > 0) {
@@ -24,22 +82,13 @@ export async function checkUserActionPermission(actionId: number, req: Request):
     }
 
     // If no direct permission, check role-based permission
-    const userOrgRoles = await db.select()
-      .from(userOrgs)
-      .where(eq(userOrgs.userId, userId));
-
-    if (userOrgRoles.length === 0) {
-      return false; // User doesn't belong to any organization
-    }
-
-    const roleIds = userOrgRoles.map(role => role.roleId);
-
     const roleActionPermission = await db.select()
       .from(roleActions)
       .where(
         and(
           eq(roleActions.actionId, actionId),
-          or(...roleIds.map(roleId => eq(roleActions.roleId, roleId)))
+          eq(roleActions.roleId, userOrgRoleId),
+          eq(roleActions.orgId, req.userOrgId)
         )
       )
       .limit(1);

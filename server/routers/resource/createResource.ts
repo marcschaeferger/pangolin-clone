@@ -5,6 +5,7 @@ import { resources } from '@server/db/schema';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
+import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 
 const createResourceParamsSchema = z.object({
   siteId: z.number().int().positive(),
@@ -44,6 +45,12 @@ export async function createResource(req: Request, res: Response, next: NextFunc
     }
 
     const { siteId, orgId } = parsedParams.data;
+
+    // Check if the user has permission to list sites
+    const hasPermission = await checkUserActionPermission(ActionsEnum.createResource, req);
+    if (!hasPermission) {
+      return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
+    }    
 
     // Generate a unique resourceId
     const resourceId = "subdomain" // TODO: create the subdomain here

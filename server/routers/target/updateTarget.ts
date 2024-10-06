@@ -6,6 +6,7 @@ import { eq } from 'drizzle-orm';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
+import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 
 const updateTargetParamsSchema = z.object({
   targetId: z.string().transform(Number).pipe(z.number().int().positive())
@@ -45,6 +46,12 @@ export async function updateTarget(req: Request, res: Response, next: NextFuncti
 
     const { targetId } = parsedParams.data;
     const updateData = parsedBody.data;
+
+    // Check if the user has permission to list sites
+    const hasPermission = await checkUserActionPermission(ActionsEnum.updateTarget, req);
+    if (!hasPermission) {
+      return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
+    }
 
     const updatedTarget = await db.update(targets)
       .set(updateData)

@@ -6,6 +6,7 @@ import { eq } from 'drizzle-orm';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
+import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 
 const getOrgSchema = z.object({
   orgId: z.string().transform(Number).pipe(z.number().int().positive())
@@ -24,6 +25,12 @@ export async function getOrg(req: Request, res: Response, next: NextFunction): P
     }
 
     const { orgId } = parsedParams.data;
+
+    // Check if the user has permission to list sites
+    const hasPermission = await checkUserActionPermission(ActionsEnum.getOrg, req);
+    if (!hasPermission) {
+      return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
+    }
 
     const org = await db.select()
       .from(orgs)

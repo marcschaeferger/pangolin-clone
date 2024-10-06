@@ -6,6 +6,7 @@ import { eq } from 'drizzle-orm';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
+import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 
 // Define Zod schema for request parameters validation
 const getSiteSchema = z.object({
@@ -26,6 +27,12 @@ export async function getSite(req: Request, res: Response, next: NextFunction): 
     }
 
     const { siteId } = parsedParams.data;
+
+    // Check if the user has permission to list sites
+    const hasPermission = await checkUserActionPermission(ActionsEnum.updateSite, req);
+    if (!hasPermission) {
+      return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
+    }
 
     // Fetch the site from the database
     const site = await db.select()

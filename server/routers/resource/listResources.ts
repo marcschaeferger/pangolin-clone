@@ -6,6 +6,7 @@ import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
 import { sql, eq, and, or, inArray } from 'drizzle-orm';
+import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 
 const listResourcesParamsSchema = z.object({
     siteId: z.coerce.number().int().positive().optional(),
@@ -26,13 +27,6 @@ interface RequestWithOrgAndRole extends Request {
 
 export async function listResources(req: RequestWithOrgAndRole, res: Response, next: NextFunction): Promise<any> {
   try {
-    // Check if the user has permission to list resources
-    // const LIST_RESOURCES_ACTION_ID = 3; // Assume 3 is the action ID for listing resources
-    // const hasPermission = await checkUserActionPermission(LIST_RESOURCES_ACTION_ID, req);
-    // if (!hasPermission) {
-    //   return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list resources'));
-    // }
-
     const parsedQuery = listResourcesSchema.safeParse(req.query);
     if (!parsedQuery.success) {
       return next(createHttpError(HttpCode.BAD_REQUEST, parsedQuery.error.errors.map(e => e.message).join(', ')));
@@ -45,6 +39,12 @@ export async function listResources(req: RequestWithOrgAndRole, res: Response, n
     }
     const { siteId, orgId } = parsedParams.data;
 
+    // Check if the user has permission to list sites
+    const hasPermission = await checkUserActionPermission(ActionsEnum.listResources, req);
+    if (!hasPermission) {
+      return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
+    }
+    
     if (orgId && orgId !== req.orgId) {
       return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have access to this organization'));
     }

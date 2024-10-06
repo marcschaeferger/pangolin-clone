@@ -5,6 +5,7 @@ import { targets } from '@server/db/schema';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
+import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 
 const createTargetParamsSchema = z.object({
   resourceId: z.string().uuid(),
@@ -43,6 +44,12 @@ export async function createTarget(req: Request, res: Response, next: NextFuncti
     }
 
     const { resourceId } = parsedParams.data;
+
+    // Check if the user has permission to list sites
+    const hasPermission = await checkUserActionPermission(ActionsEnum.createTarget, req);
+    if (!hasPermission) {
+      return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
+    }
 
     const newTarget = await db.insert(targets).values({
       resourceId,

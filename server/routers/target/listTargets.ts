@@ -6,6 +6,7 @@ import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
 import { sql, eq } from 'drizzle-orm';
+import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 
 const listTargetsParamsSchema = z.object({
     resourceId: z.string().optional()
@@ -41,6 +42,12 @@ export async function listTargets(req: Request, res: Response, next: NextFunctio
     }
 
     const { resourceId } = parsedParams.data;
+    
+    // Check if the user has permission to list sites
+    const hasPermission = await checkUserActionPermission(ActionsEnum.listTargets, req);
+    if (!hasPermission) {
+      return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
+    }
 
     let baseQuery: any = db
       .select({

@@ -6,6 +6,7 @@ import { eq } from 'drizzle-orm';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
+import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 
 // Define Zod schema for request parameters validation
 const deleteResourceSchema = z.object({
@@ -26,6 +27,12 @@ export async function deleteResource(req: Request, res: Response, next: NextFunc
     }
 
     const { resourceId } = parsedParams.data;
+
+    // Check if the user has permission to list sites
+    const hasPermission = await checkUserActionPermission(ActionsEnum.deleteResource, req);
+    if (!hasPermission) {
+      return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
+    }    
 
     // Delete the resource from the database
     const deletedResource = await db.delete(resources)

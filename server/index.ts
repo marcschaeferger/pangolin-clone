@@ -84,6 +84,7 @@ declare global {
             user?: User;
             userOrgRoleId?: number;
             userOrgId?: number;
+            userOrgIds?: number[];
         }
     }
 }

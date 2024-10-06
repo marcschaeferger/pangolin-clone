@@ -6,6 +6,7 @@ import { eq } from 'drizzle-orm';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
+import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 
 
 const API_BASE_URL = "http://localhost:3000";
@@ -27,8 +28,14 @@ export async function deleteSite(req: Request, res: Response, next: NextFunction
         )
       );
     }
-
+    
     const { siteId } = parsedParams.data;
+
+    // Check if the user has permission to list sites
+    const hasPermission = await checkUserActionPermission(ActionsEnum.deleteSite, req);
+    if (!hasPermission) {
+      return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
+    }
 
     // Delete the site from the database
     const deletedSite = await db.delete(sites)

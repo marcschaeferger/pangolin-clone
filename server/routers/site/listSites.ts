@@ -6,7 +6,7 @@ import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
 import { sql, eq, and, or, inArray } from 'drizzle-orm';
-// import { checkUserActionPermission } from './checkUserActionPermission'; // Import the function we created earlier
+import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 
 const listSitesParamsSchema = z.object({
     orgId: z.string().optional().transform(Number).pipe(z.number().int().positive()),
@@ -19,25 +19,25 @@ const listSitesSchema = z.object({
 
 export async function listSites(req: Request, res: Response, next: NextFunction): Promise<any> {
   try {
-    // Check if the user has permission to list sites
-    // const LIST_SITES_ACTION_ID = 1; // Assume 1 is the action ID for listing sites
-    // const hasPermission = await checkUserActionPermission(LIST_SITES_ACTION_ID, req);
-    // if (!hasPermission) {
-    //   return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
-    // }
-
     const parsedQuery = listSitesSchema.safeParse(req.query);
     if (!parsedQuery.success) {
       return next(createHttpError(HttpCode.BAD_REQUEST, parsedQuery.error.errors.map(e => e.message).join(', ')));
     }
     const { limit, offset } = parsedQuery.data;
 
+    
     const parsedParams = listSitesParamsSchema.safeParse(req.params);
     if (!parsedParams.success) {
       return next(createHttpError(HttpCode.BAD_REQUEST, parsedParams.error.errors.map(e => e.message).join(', ')));
     }
     const { orgId } = parsedParams.data;
-
+    
+    // Check if the user has permission to list sites
+    const hasPermission = await checkUserActionPermission(ActionsEnum.listSites, req);
+    if (!hasPermission) {
+      return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
+    }
+    
     if (orgId && orgId !== req.userOrgId) {
       return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have access to this organization'));
     }

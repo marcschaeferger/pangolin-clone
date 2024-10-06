@@ -6,6 +6,7 @@ import { eq } from 'drizzle-orm';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
+import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 
 const deleteTargetSchema = z.object({
   targetId: z.string().transform(Number).pipe(z.number().int().positive())
@@ -24,6 +25,12 @@ export async function deleteTarget(req: Request, res: Response, next: NextFuncti
     }
 
     const { targetId } = parsedParams.data;
+
+    // Check if the user has permission to list sites
+    const hasPermission = await checkUserActionPermission(ActionsEnum.deleteTarget, req);
+    if (!hasPermission) {
+      return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
+    }
 
     const deletedTarget = await db.delete(targets)
       .where(eq(targets.targetId, targetId))

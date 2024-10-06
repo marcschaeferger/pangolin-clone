@@ -5,6 +5,7 @@ import { orgs } from '@server/db/schema';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
+import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 
 const createOrgSchema = z.object({
   name: z.string().min(1).max(255),
@@ -25,7 +26,7 @@ export async function createOrg(req: Request, res: Response, next: NextFunction)
       );
     }
 
-    const userOrgIds = req.userOrgs;
+    const userOrgIds = req.userOrgIds;
     if (userOrgIds && userOrgIds.length > MAX_ORGS) {
       return next(
         createHttpError(
@@ -33,6 +34,12 @@ export async function createOrg(req: Request, res: Response, next: NextFunction)
           `Maximum number of organizations reached.`
         )
       );
+    }
+
+    // Check if the user has permission to list sites
+    const hasPermission = await checkUserActionPermission(ActionsEnum.createOrg, req);
+    if (!hasPermission) {
+      return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
     }
 
     const { name, domain } = parsedBody.data;
