@@ -2,7 +2,11 @@ import LoginForm from "@app/components/LoginForm";
 import { verifySession } from "@app/lib/verifySession";
 import { redirect } from "next/navigation";
 
-export default async function Page() {
+export async function Page({
+    searchParams,
+}: {
+    searchParams: { [key: string]: string | string[] | undefined };
+}) {
     const user = await verifySession();
 
     if (user) {
@@ -11,7 +15,9 @@ export default async function Page() {
 
     return (
         <>
-            <LoginForm redirect={"test"} />
+            <LoginForm redirect={searchParams.redirect as string} />
         </>
     );
 }
+
+export default Page;
