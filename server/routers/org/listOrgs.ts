@@ -62,7 +62,7 @@ export async function listOrgs(req: Request, res: Response, next: NextFunction):
     // // Add the user's role for each organization
     // const organizationsWithRoles = organizations.map(org => ({
     //   ...org,
-    //   userRole: req.userOrgRoles[org.orgId],
+    //   userRole: req.userOrgRoleIds[org.orgId],
     // }));
 
     return res.status(HttpCode.OK).send(

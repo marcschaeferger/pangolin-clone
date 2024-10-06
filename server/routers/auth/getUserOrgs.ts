@@ -21,7 +21,7 @@ export async function getUserOrgs(req: Request, res: Response, next: NextFunctio
       .where(eq(userOrgs.userId, userId));
 
     req.userOrgs = userOrganizations.map(org => org.orgId);
-    // req.userOrgRoles = userOrganizations.reduce((acc, org) => {
+    // req.userOrgRoleIds = userOrganizations.reduce((acc, org) => {
     //   acc[org.orgId] = org.role;
     //   return acc;
     // }, {} as Record<number, string>);

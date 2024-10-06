@@ -5,5 +5,5 @@ import { Session } from "lucia";
 export interface AuthenticatedRequest extends Request {
     user: User;
     session: Session;
-    userOrgRole?: string;
+    userOrgRoleId?: number;
 }

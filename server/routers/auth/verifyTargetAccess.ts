@@ -73,7 +73,8 @@ export async function verifyTargetAccess(req: Request, res: Response, next: Next
         next(createHttpError(HttpCode.FORBIDDEN, 'User does not have access to this organization'));
       } else {
         // User has access, attach the user's role to the request for potential future use
-        req.userOrgRole = result[0].role;
+        req.userOrgRoleId = result[0].roleId;
+        req.userOrgId = resource[0].orgId!;
         next();
       }
     })

@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { db } from '@server/db';
-import { resources, sites } from '@server/db/schema';
+import { resources, sites, userResources, roleResources } from '@server/db/schema';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
-import { sql, eq } from 'drizzle-orm';
+import { sql, eq, and, or, inArray } from 'drizzle-orm';
 
 const listResourcesParamsSchema = z.object({
     siteId: z.coerce.number().int().positive().optional(),
@@ -19,29 +19,49 @@ const listResourcesSchema = z.object({
   offset: z.coerce.number().int().nonnegative().default(0),
 });
 
-export async function listResources(req: Request, res: Response, next: NextFunction): Promise<any> {
+interface RequestWithOrgAndRole extends Request {
+  userOrgRoleId?: number;
+  orgId?: number;
+}
+
+export async function listResources(req: RequestWithOrgAndRole, res: Response, next: NextFunction): Promise<any> {
   try {
+    // Check if the user has permission to list resources
+    // const LIST_RESOURCES_ACTION_ID = 3; // Assume 3 is the action ID for listing resources
+    // const hasPermission = await checkUserActionPermission(LIST_RESOURCES_ACTION_ID, req);
+    // if (!hasPermission) {
+    //   return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list resources'));
+    // }
+
     const parsedQuery = listResourcesSchema.safeParse(req.query);
     if (!parsedQuery.success) {
-      return next(
-        createHttpError(
-          HttpCode.BAD_REQUEST,
-          parsedQuery.error.errors.map(e => e.message).join(', ')
-        )
-      );
+      return next(createHttpError(HttpCode.BAD_REQUEST, parsedQuery.error.errors.map(e => e.message).join(', ')));
     }
     const { limit, offset } = parsedQuery.data;
 
     const parsedParams = listResourcesParamsSchema.safeParse(req.params);
     if (!parsedParams.success) {
-      return next(
-        createHttpError(
-          HttpCode.BAD_REQUEST,
-          parsedParams.error.errors.map(e => e.message).join(', ')
-        )
-      );
+      return next(createHttpError(HttpCode.BAD_REQUEST, parsedParams.error.errors.map(e => e.message).join(', ')));
     }
     const { siteId, orgId } = parsedParams.data;
+
+    if (orgId && orgId !== req.orgId) {
+      return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have access to this organization'));
+    }
+
+    // Get the list of resources the user has access to
+    const accessibleResources = await db
+      .select({ resourceId: sql<string>`COALESCE(${userResources.resourceId}, ${roleResources.resourceId})` })
+      .from(userResources)
+      .fullJoin(roleResources, eq(userResources.resourceId, roleResources.resourceId))
+      .where(
+        or(
+          eq(userResources.userId, req.user!.id),
+          eq(roleResources.roleId, req.userOrgRoleId!)
+        )
+      );
+
+    const accessibleResourceIds = accessibleResources.map(resource => resource.resourceId);
 
     let baseQuery: any = db
       .select({
@@ -51,16 +71,21 @@ export async function listResources(req: Request, res: Response, next: NextFunct
         siteName: sites.name,
       })
       .from(resources)
-      .leftJoin(sites, eq(resources.siteId, sites.siteId));
+      .leftJoin(sites, eq(resources.siteId, sites.siteId))
+      .where(inArray(resources.resourceId, accessibleResourceIds));
 
-    let countQuery: any = db.select({ count: sql<number>`cast(count(*) as integer)` }).from(resources);
+    let countQuery: any = db
+      .select({ count: sql<number>`cast(count(*) as integer)` })
+      .from(resources)
+      .where(inArray(resources.resourceId, accessibleResourceIds));
 
     if (siteId) {
       baseQuery = baseQuery.where(eq(resources.siteId, siteId));
       countQuery = countQuery.where(eq(resources.siteId, siteId));
-    } else if (orgId) {
-      baseQuery = baseQuery.where(eq(resources.orgId, orgId));
-      countQuery = countQuery.where(eq(resources.orgId, orgId));
+    } else {
+      // If orgId is provided, it's already checked to match req.orgId
+      baseQuery = baseQuery.where(eq(resources.orgId, req.orgId!));
+      countQuery = countQuery.where(eq(resources.orgId, req.orgId!));
     }
 
     const resourcesList = await baseQuery.limit(limit).offset(offset);

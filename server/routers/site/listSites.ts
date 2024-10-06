@@ -1,11 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { db } from '@server/db';
-import { sites, orgs, exitNodes } from '@server/db/schema';
+import { sites, orgs, exitNodes, userSites, roleSites } from '@server/db/schema';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
-import { sql, eq } from 'drizzle-orm';
+import { sql, eq, and, or, inArray } from 'drizzle-orm';
+// import { checkUserActionPermission } from './checkUserActionPermission'; // Import the function we created earlier
 
 const listSitesParamsSchema = z.object({
     orgId: z.string().optional().transform(Number).pipe(z.number().int().positive()),
@@ -18,29 +19,41 @@ const listSitesSchema = z.object({
 
 export async function listSites(req: Request, res: Response, next: NextFunction): Promise<any> {
   try {
+    // Check if the user has permission to list sites
+    // const LIST_SITES_ACTION_ID = 1; // Assume 1 is the action ID for listing sites
+    // const hasPermission = await checkUserActionPermission(LIST_SITES_ACTION_ID, req);
+    // if (!hasPermission) {
+    //   return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
+    // }
+
     const parsedQuery = listSitesSchema.safeParse(req.query);
     if (!parsedQuery.success) {
-      return next(
-        createHttpError(
-          HttpCode.BAD_REQUEST,
-          parsedQuery.error.errors.map(e => e.message).join(', ')
-        )
-      );
+      return next(createHttpError(HttpCode.BAD_REQUEST, parsedQuery.error.errors.map(e => e.message).join(', ')));
     }
-
     const { limit, offset } = parsedQuery.data;
 
     const parsedParams = listSitesParamsSchema.safeParse(req.params);
     if (!parsedParams.success) {
-      return next(
-        createHttpError(
-          HttpCode.BAD_REQUEST,
-          parsedParams.error.errors.map(e => e.message).join(', ')
-        )
-      );
+      return next(createHttpError(HttpCode.BAD_REQUEST, parsedParams.error.errors.map(e => e.message).join(', ')));
+    }
+    const { orgId } = parsedParams.data;
+
+    if (orgId && orgId !== req.userOrgId) {
+      return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have access to this organization'));
     }
 
-    const { orgId } = parsedParams.data;
+    const accessibleSites = await db
+      .select({ siteId: sql<number>`COALESCE(${userSites.siteId}, ${roleSites.siteId})` })
+      .from(userSites)
+      .fullJoin(roleSites, eq(userSites.siteId, roleSites.siteId))
+      .where(
+        or(
+          eq(userSites.userId, req.user!.id),
+          eq(roleSites.roleId, req.userOrgRoleId!)
+        )
+      );
+
+    const accessibleSiteIds = accessibleSites.map(site => site.siteId);
 
     let baseQuery: any = db
       .select({
@@ -56,9 +69,12 @@ export async function listSites(req: Request, res: Response, next: NextFunction)
       })
       .from(sites)
       .leftJoin(orgs, eq(sites.orgId, orgs.orgId))
-      .leftJoin(exitNodes, eq(sites.exitNode, exitNodes.exitNodeId));
+      .where(inArray(sites.siteId, accessibleSiteIds));
 
-    let countQuery: any = db.select({ count: sql<number>`cast(count(*) as integer)` }).from(sites);
+    let countQuery: any = db
+      .select({ count: sql<number>`cast(count(*) as integer)` })
+      .from(sites)
+      .where(inArray(sites.siteId, accessibleSiteIds));
 
     if (orgId) {
       baseQuery = baseQuery.where(eq(sites.orgId, orgId));

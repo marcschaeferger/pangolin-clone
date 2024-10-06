@@ -107,7 +107,7 @@ export const userOrgs = sqliteTable("userOrgs", {
     orgId: integer("orgId")
         .notNull()
         .references(() => orgs.orgId),
-    role: text("role").notNull(), // e.g., 'admin', 'member', etc.
+    roleId: integer("roleId").notNull().references(() => roles.roleId),
 });
 
 export const emailVerificationCodes = sqliteTable("emailVerificationCodes", {
@@ -149,6 +149,9 @@ export const roleActions = sqliteTable("roleActions", {
     actionId: integer("actionId")
         .notNull()
         .references(() => actions.actionId, { onDelete: "cascade" }),
+    orgId: integer("orgId")
+        .notNull()
+        .references(() => orgs.orgId, { onDelete: "cascade" }),
 });
 
 export const userActions = sqliteTable("userActions", {
@@ -158,10 +161,13 @@ export const userActions = sqliteTable("userActions", {
     actionId: integer("actionId")
         .notNull()
         .references(() => actions.actionId, { onDelete: "cascade" }),
+    orgId: integer("orgId")
+        .notNull()
+        .references(() => orgs.orgId, { onDelete: "cascade" }),
 });
 
-export const roleSites = sqliteTable("roleActions", {
-    roleId: integer("role]Id")
+export const roleSites = sqliteTable("roleSites", {
+    roleId: integer("roleId")
         .notNull()
         .references(() => roles.roleId, { onDelete: "cascade" }),
     siteId: integer("siteId")
@@ -169,8 +175,8 @@ export const roleSites = sqliteTable("roleActions", {
         .references(() => sites.siteId, { onDelete: "cascade" }),
 });
 
-export const userSites = sqliteTable("userActions", {
-    userId: text("user]Id")
+export const userSites = sqliteTable("userSites", {
+    userId: text("userId")
         .notNull()
         .references(() => users.id, { onDelete: "cascade" }),
     siteId: integer("siteId")
@@ -178,20 +184,20 @@ export const userSites = sqliteTable("userActions", {
         .references(() => sites.siteId, { onDelete: "cascade" }),
 });
 
-export const roleResources = sqliteTable("roleActions", {
-    roleId: integer("role]Id")
+export const roleResources = sqliteTable("roleResources", {
+    roleId: integer("roleId")
         .notNull()
         .references(() => roles.roleId, { onDelete: "cascade" }),
-    resourceId: integer("resourceId")
+    resourceId: text("resourceId")
         .notNull()
         .references(() => resources.resourceId, { onDelete: "cascade" }),
 });
 
-export const userResources = sqliteTable("userActions", {
-    userId: text("user]Id")
+export const userResources = sqliteTable("userResources", {
+    userId: text("userId")
         .notNull()
         .references(() => users.id, { onDelete: "cascade" }),
-    resourceId: integer("resourceId")
+    resourceId: text("resourceId")
         .notNull()
         .references(() => resources.resourceId, { onDelete: "cascade" }),
 });
