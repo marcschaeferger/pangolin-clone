@@ -129,6 +129,73 @@ export const passwordResetTokens = sqliteTable("passwordResetTokens", {
     expiresAt: integer("expiresAt").notNull(),
 });
 
+export const actions = sqliteTable("actions", {
+    actionId: integer("actionId").primaryKey({ autoIncrement: true }),
+    name: text("name").notNull(),
+    description: text("description"),
+});
+
+export const roles = sqliteTable("roles", {
+    roleId: integer("roleId").primaryKey({ autoIncrement: true }),
+    orgId: integer("orgId").references(() => orgs.orgId, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    description: text("description"),
+});
+
+export const roleActions = sqliteTable("roleActions", {
+    roleId: integer("roleId")
+        .notNull()
+        .references(() => roles.roleId, { onDelete: "cascade" }),
+    actionId: integer("actionId")
+        .notNull()
+        .references(() => actions.actionId, { onDelete: "cascade" }),
+});
+
+export const userActions = sqliteTable("userActions", {
+    userId: text("userId")
+        .notNull()
+        .references(() => users.id, { onDelete: "cascade" }),
+    actionId: integer("actionId")
+        .notNull()
+        .references(() => actions.actionId, { onDelete: "cascade" }),
+});
+
+export const roleSites = sqliteTable("roleActions", {
+    roleId: integer("role]Id")
+        .notNull()
+        .references(() => roles.roleId, { onDelete: "cascade" }),
+    siteId: integer("siteId")
+        .notNull()
+        .references(() => sites.siteId, { onDelete: "cascade" }),
+});
+
+export const userSites = sqliteTable("userActions", {
+    userId: text("user]Id")
+        .notNull()
+        .references(() => users.id, { onDelete: "cascade" }),
+    siteId: integer("siteId")
+        .notNull()
+        .references(() => sites.siteId, { onDelete: "cascade" }),
+});
+
+export const roleResources = sqliteTable("roleActions", {
+    roleId: integer("role]Id")
+        .notNull()
+        .references(() => roles.roleId, { onDelete: "cascade" }),
+    resourceId: integer("resourceId")
+        .notNull()
+        .references(() => resources.resourceId, { onDelete: "cascade" }),
+});
+
+export const userResources = sqliteTable("userActions", {
+    userId: text("user]Id")
+        .notNull()
+        .references(() => users.id, { onDelete: "cascade" }),
+    resourceId: integer("resourceId")
+        .notNull()
+        .references(() => resources.resourceId, { onDelete: "cascade" }),
+});
+
 // Define the model types for type inference
 export type Org = InferSelectModel<typeof orgs>;
 export type User = InferSelectModel<typeof users>;
@@ -143,3 +210,11 @@ export type EmailVerificationCode = InferSelectModel<
 >;
 export type TwoFactorBackupCode = InferSelectModel<typeof twoFactorBackupCodes>;
 export type PasswordResetToken = InferSelectModel<typeof passwordResetTokens>;
+export type Role = InferSelectModel<typeof roles>;
+export type Action = InferSelectModel<typeof actions>;
+export type RoleAction = InferSelectModel<typeof roleActions>;
+export type UserAction = InferSelectModel<typeof userActions>;
+export type RoleSite = InferSelectModel<typeof roleSites>;
+export type UserSite = InferSelectModel<typeof userSites>;
+export type RoleResource = InferSelectModel<typeof roleResources>;
+export type UserResource = InferSelectModel<typeof userResources>;
