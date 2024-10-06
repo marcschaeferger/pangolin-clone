@@ -3,7 +3,7 @@ import { LandingProvider } from "@app/providers/LandingProvider";
 import { redirect } from "next/navigation";
 
 export default async function Page() {
-    const { user } = await verifySession();
+    const user = await verifySession();
 
     if (!user) {
         redirect("/auth/login");
@@ -12,7 +12,7 @@ export default async function Page() {
     return (
         <>
             <LandingProvider user={user}>
-                <p>You're logged in!</p>
+                <p>You are logged in!</p>
             </LandingProvider>
         </>
     );

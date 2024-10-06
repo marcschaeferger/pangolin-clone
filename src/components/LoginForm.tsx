@@ -25,7 +25,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { LoginResponse } from "@server/routers/auth";
 import { api } from "@app/api";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 type LoginFormProps = {
     redirect?: string;

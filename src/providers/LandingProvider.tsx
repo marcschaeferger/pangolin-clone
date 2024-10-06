@@ -4,7 +4,7 @@ import { UserContext } from "@app/contexts/userContext";
 import { ReactNode } from "react";
 
 type LandingProviderProps = {
-    user: any;
+    user: boolean ;
     children: ReactNode;
 };
 

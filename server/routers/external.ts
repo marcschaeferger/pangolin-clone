@@ -93,7 +93,8 @@ authenticated.delete(
 
 authenticated.get("/users", user.listUsers);
 // authenticated.get("/org/:orgId/users", user.???); // TODO: Implement this
-authenticated.get("/user/:userId", user.getUser);
+authenticated.get("/user", user.getUser);
+// authenticated.get("/user/:userId", user.getUser);
 authenticated.delete("/user/:userId", user.deleteUser);
 
 // Auth routes

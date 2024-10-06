@@ -1,3 +1,3 @@
 import { createContext } from "react";
 
-export const UserContext = createContext<{ id: string } | null>(null);
+export const UserContext = createContext<boolean | null>(null);

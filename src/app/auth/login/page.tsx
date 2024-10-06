@@ -2,8 +2,8 @@ import LoginForm from "@app/components/LoginForm";
 import { verifySession } from "@app/lib/verifySession";
 import { redirect } from "next/navigation";
 
-export async function Page() {
-    const { user } = await verifySession();
+export default async function Page() {
+    const user = await verifySession();
 
     if (user) {
         redirect("/");
@@ -15,6 +15,3 @@ export async function Page() {
         </>
     );
 }
-
-export default Page;
-
