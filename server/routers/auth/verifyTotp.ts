@@ -8,8 +8,8 @@ import { db } from "@server/db";
 import { twoFactorBackupCodes, User, users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import { alphabet, generateRandomString } from "oslo/crypto";
-import { hashPassword } from "./password";
-import { verifyTotpCode } from "./2fa";
+import { hashPassword } from "@server/auth/password";
+import { verifyTotpCode } from "@server/auth/2fa";
 
 export const verifyTotpBody = z.object({
     code: z.string(),

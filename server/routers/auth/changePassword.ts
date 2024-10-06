@@ -8,9 +8,9 @@ import { db } from "@server/db";
 import { User, users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import { response } from "@server/utils";
-import { hashPassword, verifyPassword } from "./password";
-import { verifyTotpCode } from "./2fa";
-import { passwordSchema } from "./passwordSchema";
+import { hashPassword, verifyPassword } from "@server/auth/password";
+import { verifyTotpCode } from "@server/auth/2fa";
+import { passwordSchema } from "@server/auth/passwordSchema";
 
 export const changePasswordBody = z.object({
     oldPassword: z.string(),

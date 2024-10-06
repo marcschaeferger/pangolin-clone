@@ -9,7 +9,7 @@ import { NextFunction, Request, Response } from "express";
 import createHttpError from "http-errors";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
-import { verifyTotpCode } from "./2fa";
+import { verifyTotpCode } from "@server/auth/2fa";
 
 export const loginBodySchema = z.object({
     email: z.string().email(),

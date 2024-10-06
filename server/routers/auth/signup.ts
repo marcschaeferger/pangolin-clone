@@ -11,7 +11,7 @@ import createHttpError from "http-errors";
 import response from "@server/utils/response";
 import { SqliteError } from "better-sqlite3";
 import { sendEmailVerificationCode } from "./sendEmailVerificationCode";
-import { passwordSchema } from "./passwordSchema";
+import { passwordSchema } from "@server/auth/passwordSchema";
 
 export const signupBodySchema = z.object({
     email: z.string().email(),

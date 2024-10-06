@@ -8,8 +8,8 @@ import { db } from "@server/db";
 import { twoFactorBackupCodes, User, users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import { response } from "@server/utils";
-import { verifyPassword } from "./password";
-import { verifyTotpCode } from "./2fa";
+import { verifyPassword } from "@server/auth/password";
+import { verifyTotpCode } from "@server/auth/2fa";
 
 export const disable2faBody = z.object({
     password: z.string(),
