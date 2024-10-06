@@ -107,7 +107,7 @@ export const userOrgs = sqliteTable("userOrgs", {
     orgId: integer("orgId")
         .notNull()
         .references(() => orgs.orgId),
-    role: text("role").notNull(), // e.g., 'admin', 'member', etc.
+    roleId: integer("roleId").notNull().references(() => roles.roleId),
 });
 
 export const emailVerificationCodes = sqliteTable("emailVerificationCodes", {
@@ -130,7 +130,7 @@ export const passwordResetTokens = sqliteTable("passwordResetTokens", {
 });
 
 export const actions = sqliteTable("actions", {
-    actionId: integer("actionId").primaryKey({ autoIncrement: true }),
+    actionId: text("actionId").primaryKey(),
     name: text("name").notNull(),
     description: text("description"),
 });
@@ -146,22 +146,28 @@ export const roleActions = sqliteTable("roleActions", {
     roleId: integer("roleId")
         .notNull()
         .references(() => roles.roleId, { onDelete: "cascade" }),
-    actionId: integer("actionId")
+    actionId: text("actionId")
         .notNull()
         .references(() => actions.actionId, { onDelete: "cascade" }),
+    orgId: integer("orgId")
+        .notNull()
+        .references(() => orgs.orgId, { onDelete: "cascade" }),
 });
 
 export const userActions = sqliteTable("userActions", {
     userId: text("userId")
         .notNull()
         .references(() => users.id, { onDelete: "cascade" }),
-    actionId: integer("actionId")
+    actionId: text("actionId")
         .notNull()
         .references(() => actions.actionId, { onDelete: "cascade" }),
+    orgId: integer("orgId")
+        .notNull()
+        .references(() => orgs.orgId, { onDelete: "cascade" }),
 });
 
-export const roleSites = sqliteTable("roleActions", {
-    roleId: integer("role]Id")
+export const roleSites = sqliteTable("roleSites", {
+    roleId: integer("roleId")
         .notNull()
         .references(() => roles.roleId, { onDelete: "cascade" }),
     siteId: integer("siteId")
@@ -169,8 +175,8 @@ export const roleSites = sqliteTable("roleActions", {
         .references(() => sites.siteId, { onDelete: "cascade" }),
 });
 
-export const userSites = sqliteTable("userActions", {
-    userId: text("user]Id")
+export const userSites = sqliteTable("userSites", {
+    userId: text("userId")
         .notNull()
         .references(() => users.id, { onDelete: "cascade" }),
     siteId: integer("siteId")
@@ -178,22 +184,30 @@ export const userSites = sqliteTable("userActions", {
         .references(() => sites.siteId, { onDelete: "cascade" }),
 });
 
-export const roleResources = sqliteTable("roleActions", {
-    roleId: integer("role]Id")
+export const roleResources = sqliteTable("roleResources", {
+    roleId: integer("roleId")
         .notNull()
         .references(() => roles.roleId, { onDelete: "cascade" }),
-    resourceId: integer("resourceId")
+    resourceId: text("resourceId")
         .notNull()
         .references(() => resources.resourceId, { onDelete: "cascade" }),
 });
 
-export const userResources = sqliteTable("userActions", {
-    userId: text("user]Id")
+export const userResources = sqliteTable("userResources", {
+    userId: text("userId")
         .notNull()
         .references(() => users.id, { onDelete: "cascade" }),
-    resourceId: integer("resourceId")
+    resourceId: text("resourceId")
         .notNull()
         .references(() => resources.resourceId, { onDelete: "cascade" }),
+});
+
+export const limitsTable = sqliteTable("limits", {
+    limitId: integer("limitId").primaryKey({ autoIncrement: true }),
+    orgId: integer("orgId").references(() => orgs.orgId, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    value: integer("value").notNull(),
+    description: text("description"),
 });
 
 // Define the model types for type inference
@@ -218,3 +232,4 @@ export type RoleSite = InferSelectModel<typeof roleSites>;
 export type UserSite = InferSelectModel<typeof userSites>;
 export type RoleResource = InferSelectModel<typeof roleResources>;
 export type UserResource = InferSelectModel<typeof userResources>;
+export type Limit = InferSelectModel<typeof limitsTable>;

@@ -85,8 +85,9 @@ declare global {
     namespace Express {
         interface Request {
             user?: User;
-            userOrgRole?: string;
-            userOrgs?: number[];
+            userOrgRoleId?: number;
+            userOrgId?: number;
+            userOrgIds?: number[];
         }
     }
 }
