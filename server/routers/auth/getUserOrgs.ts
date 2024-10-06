@@ -6,28 +6,28 @@ import createHttpError from 'http-errors';
 import HttpCode from '@server/types/HttpCode';
 
 export async function getUserOrgs(req: Request, res: Response, next: NextFunction) {
-  const userId = req.user?.id; // Assuming you have user information in the request
+    const userId = req.user?.id; // Assuming you have user information in the request
 
-  if (!userId) {
-    return next(createHttpError(HttpCode.UNAUTHORIZED, 'User not authenticated'));
-  }
+    if (!userId) {
+        return next(createHttpError(HttpCode.UNAUTHORIZED, 'User not authenticated'));
+    }
 
-  try {
-    const userOrganizations = await db.select({
-      orgId: userOrgs.orgId,
-      role: userOrgs.role,
-    })
-      .from(userOrgs)
-      .where(eq(userOrgs.userId, userId));
+    try {
+        const userOrganizations = await db.select({
+            orgId: userOrgs.orgId,
+            roleId: userOrgs.roleId,
+        })
+            .from(userOrgs)
+            .where(eq(userOrgs.userId, userId));
 
-    req.userOrgs = userOrganizations.map(org => org.orgId);
-    // req.userOrgRoleIds = userOrganizations.reduce((acc, org) => {
-    //   acc[org.orgId] = org.role;
-    //   return acc;
-    // }, {} as Record<number, string>);
+        req.userOrgIds = userOrganizations.map(org => org.orgId);
+        // req.userOrgRoleIds = userOrganizations.reduce((acc, org) => {
+        //   acc[org.orgId] = org.role;
+        //   return acc;
+        // }, {} as Record<number, string>);
 
-    next();
-  } catch (error) {
-    next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, 'Error retrieving user organizations'));
-  }
+        next();
+    } catch (error) {
+        next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, 'Error retrieving user organizations'));
+    }
 }

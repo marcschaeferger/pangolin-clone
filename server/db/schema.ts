@@ -130,7 +130,7 @@ export const passwordResetTokens = sqliteTable("passwordResetTokens", {
 });
 
 export const actions = sqliteTable("actions", {
-    actionId: integer("actionId").primaryKey({ autoIncrement: true }),
+    actionId: text("actionId").primaryKey(),
     name: text("name").notNull(),
     description: text("description"),
 });
@@ -146,7 +146,7 @@ export const roleActions = sqliteTable("roleActions", {
     roleId: integer("roleId")
         .notNull()
         .references(() => roles.roleId, { onDelete: "cascade" }),
-    actionId: integer("actionId")
+    actionId: text("actionId")
         .notNull()
         .references(() => actions.actionId, { onDelete: "cascade" }),
     orgId: integer("orgId")
@@ -158,7 +158,7 @@ export const userActions = sqliteTable("userActions", {
     userId: text("userId")
         .notNull()
         .references(() => users.id, { onDelete: "cascade" }),
-    actionId: integer("actionId")
+    actionId: text("actionId")
         .notNull()
         .references(() => actions.actionId, { onDelete: "cascade" }),
     orgId: integer("orgId")

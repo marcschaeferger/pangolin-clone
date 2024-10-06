@@ -6,74 +6,74 @@ import createHttpError from 'http-errors';
 import HttpCode from '@server/types/HttpCode';
 
 export async function verifySiteAccess(req: Request, res: Response, next: NextFunction) {
-  const userId = req.user!.id; // Assuming you have user information in the request
-  const siteId = parseInt(req.params.siteId);
+    const userId = req.user!.id; // Assuming you have user information in the request
+    const siteId = parseInt(req.params.siteId);
 
-  if (!userId) {
-    return next(createHttpError(HttpCode.UNAUTHORIZED, 'User not authenticated'));
-  }
-
-  if (isNaN(siteId)) {
-    return next(createHttpError(HttpCode.BAD_REQUEST, 'Invalid site ID'));
-  }
-
-  try {
-    // Get the site
-    const site = await db.select().from(sites).where(eq(sites.siteId, siteId)).limit(1);
-
-    if (site.length === 0) {
-      return next(createHttpError(HttpCode.NOT_FOUND, `Site with ID ${siteId} not found`));
+    if (!userId) {
+        return next(createHttpError(HttpCode.UNAUTHORIZED, 'User not authenticated'));
     }
 
-    if (!site[0].orgId) {
-      return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, `Site with ID ${siteId} does not have an organization ID`));
+    if (isNaN(siteId)) {
+        return next(createHttpError(HttpCode.BAD_REQUEST, 'Invalid site ID'));
     }
 
-    // Get user's role ID in the organization
-    const userOrgRole = await db.select()
-      .from(userOrgs)
-      .where(and(eq(userOrgs.userId, userId), eq(userOrgs.orgId, site[0].orgId)))
-      .limit(1);
+    try {
+        // Get the site
+        const site = await db.select().from(sites).where(eq(sites.siteId, siteId)).limit(1);
 
-    if (userOrgRole.length === 0) {
-      return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have access to this organization'));
+        if (site.length === 0) {
+            return next(createHttpError(HttpCode.NOT_FOUND, `Site with ID ${siteId} not found`));
+        }
+
+        if (!site[0].orgId) {
+            return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, `Site with ID ${siteId} does not have an organization ID`));
+        }
+
+        // Get user's role ID in the organization
+        const userOrgRole = await db.select()
+            .from(userOrgs)
+            .where(and(eq(userOrgs.userId, userId), eq(userOrgs.orgId, site[0].orgId)))
+            .limit(1);
+
+        if (userOrgRole.length === 0) {
+            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have access to this organization'));
+        }
+
+        const userOrgRoleId = userOrgRole[0].roleId;
+        req.userOrgRoleId = userOrgRoleId;
+        req.userOrgId = site[0].orgId;
+
+        // Check role-based site access first
+        const roleSiteAccess = await db.select()
+            .from(roleSites)
+            .where(
+                and(
+                    eq(roleSites.siteId, siteId),
+                    eq(roleSites.roleId, userOrgRoleId)
+                )
+            )
+            .limit(1);
+
+        if (roleSiteAccess.length > 0) {
+            // User's role has access to the site
+            return next();
+        }
+
+        // If role doesn't have access, check user-specific site access
+        const userSiteAccess = await db.select()
+            .from(userSites)
+            .where(and(eq(userSites.userId, userId), eq(userSites.siteId, siteId)))
+            .limit(1);
+
+        if (userSiteAccess.length > 0) {
+            // User has direct access to the site
+            return next();
+        }
+
+        // If we reach here, the user doesn't have access to the site
+        return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have access to this site'));
+
+    } catch (error) {
+        return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, 'Error verifying site access'));
     }
-
-    const userOrgRoleId = userOrgRole[0].roleId;
-    req.userOrgRoleId = userOrgRoleId;
-    req.userOrgId = site[0].orgId;
-
-    // Check role-based site access first
-    const roleSiteAccess = await db.select()
-      .from(roleSites)
-      .where(
-        and(
-          eq(roleSites.siteId, siteId),
-          eq(roleSites.roleId, userOrgRoleId)
-        )
-      )
-      .limit(1);
-
-    if (roleSiteAccess.length > 0) {
-      // User's role has access to the site
-      return next();
-    }
-
-    // If role doesn't have access, check user-specific site access
-    const userSiteAccess = await db.select()
-      .from(userSites)
-      .where(and(eq(userSites.userId, userId), eq(userSites.siteId, siteId)))
-      .limit(1);
-
-    if (userSiteAccess.length > 0) {
-      // User has direct access to the site
-      return next();
-    }
-
-    // If we reach here, the user doesn't have access to the site
-    return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have access to this site'));
-
-  } catch (error) {
-    return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, 'Error verifying site access'));
-  }
 }

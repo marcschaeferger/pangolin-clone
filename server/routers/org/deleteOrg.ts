@@ -7,54 +7,54 @@ import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
 import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
+import logger from '@server/logger';
 
 const deleteOrgSchema = z.object({
-  orgId: z.string().transform(Number).pipe(z.number().int().positive())
+    orgId: z.string().transform(Number).pipe(z.number().int().positive())
 });
 
 export async function deleteOrg(req: Request, res: Response, next: NextFunction): Promise<any> {
-  try {
-    const parsedParams = deleteOrgSchema.safeParse(req.params);
-    if (!parsedParams.success) {
-      return next(
-        createHttpError(
-          HttpCode.BAD_REQUEST,
-          parsedParams.error.errors.map(e => e.message).join(', ')
-        )
-      );
+    try {
+        const parsedParams = deleteOrgSchema.safeParse(req.params);
+        if (!parsedParams.success) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    parsedParams.error.errors.map(e => e.message).join(', ')
+                )
+            );
+        }
+
+        const { orgId } = parsedParams.data;
+
+        // Check if the user has permission to list sites
+        const hasPermission = await checkUserActionPermission(ActionsEnum.deleteOrg, req);
+        if (!hasPermission) {
+            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
+        }
+
+        const deletedOrg = await db.delete(orgs)
+            .where(eq(orgs.orgId, orgId))
+            .returning();
+
+        if (deletedOrg.length === 0) {
+            return next(
+                createHttpError(
+                    HttpCode.NOT_FOUND,
+                    `Organization with ID ${orgId} not found`
+                )
+            );
+        }
+
+        return response(res, {
+            data: null,
+            success: true,
+            error: false,
+            message: "Organization deleted successfully",
+            status: HttpCode.OK,
+        });
+    } catch (error) {
+        logger.error(error);
+        return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred..."));
     }
-
-    const { orgId } = parsedParams.data;
-
-    // Check if the user has permission to list sites
-    const hasPermission = await checkUserActionPermission(ActionsEnum.deleteOrg, req);
-    if (!hasPermission) {
-      return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
-    }
-
-    const deletedOrg = await db.delete(orgs)
-      .where(eq(orgs.orgId, orgId))
-      .returning();
-
-    if (deletedOrg.length === 0) {
-      return next(
-        createHttpError(
-          HttpCode.NOT_FOUND,
-          `Organization with ID ${orgId} not found`
-        )
-      );
-    }
-
-    return res.status(HttpCode.OK).send(
-      response(res, {
-        data: null,
-        success: true,
-        error: false,
-        message: "Organization deleted successfully",
-        status: HttpCode.OK,
-      })
-    );
-  } catch (error) {
-    next(error);
-  }
 }

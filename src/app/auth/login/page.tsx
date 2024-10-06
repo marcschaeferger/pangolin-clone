@@ -55,7 +55,7 @@ export default function LoginForm() {
             .catch((e) => {
                 setError(
                     e.response?.data?.message ||
-                        "An error occurred while logging in",
+                    "An error occurred while logging in",
                 );
             });
     }

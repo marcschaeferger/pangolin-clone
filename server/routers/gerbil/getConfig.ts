@@ -3,6 +3,8 @@ import { DrizzleError, eq } from 'drizzle-orm';
 import { sites, resources, targets, exitNodes } from '@server/db/schema';
 import db from '@server/db';
 import logger from '@server/logger';
+import HttpCode from '@server/types/HttpCode';
+import createHttpError from 'http-errors';
 
 export const getConfig = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -55,11 +57,7 @@ export const getConfig = async (req: Request, res: Response, next: NextFunction)
         res.json(config);
     } catch (error) {
         logger.error('Error querying database:', error);
-        if (error instanceof DrizzleError) {
-            res.status(500).json({ error: 'Database query error', message: error.message });
-        } else {
-            next(error);
-        }
+        return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred..."));
     }
 };
 
