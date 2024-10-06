@@ -44,7 +44,7 @@ const environmentSchema = z.object({
     EMAIL_SMTP_USER: z.string().optional(),
     EMAIL_SMTP_PASS: z.string().optional(),
     EMAIL_NOREPLY: z.string().email().optional(),
-    SITE_DOMAIN: z
+    BASE_URL: z
         .string()
         .optional()
         .transform((val) => {
@@ -73,7 +73,7 @@ const environment = {
     EMAIL_SMTP_USER: process.env.EMAIL_SMTP_USER as string,
     EMAIL_SMTP_PASS: process.env.EMAIL_SMTP_PASS as string,
     EMAIL_NOREPLY: process.env.EMAIL_NOREPLY as string,
-    SITE_DOMAIN: process.env.NEXT_PUBLIC_SITE_DOMAIN as string,
+    BASE_URL: process.env.BASE_URL as string,
 };
 
 const parsedConfig = environmentSchema.safeParse(environment);

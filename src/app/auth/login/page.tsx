@@ -24,8 +24,8 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
-import api from "@app/api";
-import { LoginBody, LoginResponse } from "@server/routers/auth";
+import { LoginResponse } from "@server/routers/auth";
+import { api } from "@app/api";
 
 const formSchema = z.object({
     email: z.string().email({ message: "Invalid email address" }),
@@ -48,7 +48,7 @@ export default function LoginForm() {
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const { email, password } = values;
         const res = await api
-            .post<LoginBody, LoginResponse>("/auth/login", {
+            .post<LoginResponse>("/auth/login", {
                 email,
                 password,
             })
