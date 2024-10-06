@@ -26,7 +26,7 @@ app.prepare().then(() => {
     // External server
     const externalServer = express();
 
-    externalServer.use(helmet());
+    // externalServer.use(helmet()); // Disabled because causes issues with Next.js
     externalServer.use(cors());
     externalServer.use(cookieParser());
     externalServer.use(express.json());

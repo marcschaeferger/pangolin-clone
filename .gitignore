@@ -24,3 +24,4 @@ next-env.d.ts
 *-audit.json
 migrations
 package-lock.json
+tsconfig.tsbuildinfo
