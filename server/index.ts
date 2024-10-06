@@ -7,6 +7,7 @@ import helmet from "helmet";
 import cors from "cors";
 import {
     errorHandlerMiddleware,
+    notFoundMiddleware,
     rateLimitMiddleware,
 } from "@server/middlewares";
 import internal from "@server/routers/internal";
@@ -41,6 +42,8 @@ app.prepare().then(() => {
     const prefix = `/api/v1`;
     externalServer.use(prefix, unauthenticated);
     externalServer.use(prefix, authenticated);
+
+    externalServer.use(notFoundMiddleware)
 
     // We are using NEXT from here on
     externalServer.all("*", (req: Request, res: Response) => {

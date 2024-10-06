@@ -24,6 +24,8 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import api from "@app/api";
+import { LoginBody, LoginResponse } from "@server/routers/auth";
 
 const formSchema = z.object({
     email: z.string().email({ message: "Invalid email address" }),
@@ -43,9 +45,19 @@ export default function LoginForm() {
         },
     });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values);
-        setError("Invalid email or password. Please try again.");
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        const { email, password } = values;
+        const res = await api
+            .post<LoginBody, LoginResponse>("/auth/login", {
+                email,
+                password,
+            })
+            .catch((e) => {
+                setError(
+                    e.response?.data?.message ||
+                        "An error occurred while logging in",
+                );
+            });
     }
 
     return (

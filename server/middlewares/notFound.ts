@@ -7,8 +7,11 @@ export function notFoundMiddleware(
     res: Response,
     next: NextFunction,
 ) {
-    const message = `The requests url is not found - ${req.originalUrl}`;
-    return next(createHttpError(HttpCode.NOT_FOUND, message));
+    if (req.path.startsWith("/api")) {
+        const message = `The requests url is not found - ${req.originalUrl}`;
+        return next(createHttpError(HttpCode.NOT_FOUND, message));
+    }
+    return next();
 }
 
 export default notFoundMiddleware;

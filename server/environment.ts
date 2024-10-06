@@ -43,7 +43,17 @@ const environmentSchema = z.object({
         .pipe(z.number().optional()),
     EMAIL_SMTP_USER: z.string().optional(),
     EMAIL_SMTP_PASS: z.string().optional(),
-    EMAIL_NOREPLY: z.string().optional(),
+    EMAIL_NOREPLY: z.string().email().optional(),
+    SITE_DOMAIN: z
+        .string()
+        .optional()
+        .transform((val) => {
+            if (!val) {
+                return `http://localhost:${environment.EXTERNAL_PORT}`;
+            }
+            return val;
+        })
+        .pipe(z.string().url()),
 });
 
 const environment = {
@@ -63,6 +73,7 @@ const environment = {
     EMAIL_SMTP_USER: process.env.EMAIL_SMTP_USER as string,
     EMAIL_SMTP_PASS: process.env.EMAIL_SMTP_PASS as string,
     EMAIL_NOREPLY: process.env.EMAIL_NOREPLY as string,
+    SITE_DOMAIN: process.env.NEXT_PUBLIC_SITE_DOMAIN as string,
 };
 
 const parsedConfig = environmentSchema.safeParse(environment);

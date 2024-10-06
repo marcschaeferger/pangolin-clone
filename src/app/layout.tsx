@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Noto_Sans } from "next/font/google";
+import { Roboto } from "next/font/google";
 
 export const metadata: Metadata = {
     title: "Pangolin",
     description: "",
 };
 
-const inter = Noto_Sans({ subsets: ["latin"] });
+const font = Roboto({ subsets: ["latin"], style: "normal", weight: "400" });
 
 export default function RootLayout({
     children,
@@ -16,7 +16,7 @@ export default function RootLayout({
 }>) {
     return (
         <html>
-            <body className={`${inter.className}`}>
+            <body className={`${font.className}`}>
                 <main>{children}</main>
             </body>
         </html>
