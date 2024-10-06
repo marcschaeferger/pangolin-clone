@@ -1,5 +1,6 @@
 import { Router } from "express";
 import * as gerbil from "@server/routers/gerbil";
+import * as badger from "@server/routers/badger";
 import * as traefik from "@server/routers/traefik";
 import HttpCode from "@server/types/HttpCode";
 
@@ -14,10 +15,15 @@ internalRouter.get("/traefik-config", traefik.traefikConfigProvider);
 
 // Gerbil routes
 const gerbilRouter = Router();
+internalRouter.use("/gerbil", gerbilRouter);
 
 gerbilRouter.get("/get-config", gerbil.getConfig);
 gerbilRouter.post("/receive-bandwidth", gerbil.receiveBandwidth);
 
-internalRouter.use("/gerbil", gerbilRouter);
+// Badger routes
+const badgerRouter = Router();
+internalRouter.use("/badger", badgerRouter);
+
+internalRouter.get("/verify-user", badger.verifyUser)
 
 export default internalRouter;

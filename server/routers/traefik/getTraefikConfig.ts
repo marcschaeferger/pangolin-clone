@@ -5,6 +5,7 @@ import { DynamicTraefikConfig } from "./configSchema";
 import { and, like, eq } from "drizzle-orm";
 import logger from "@server/logger";
 import HttpCode from "@server/types/HttpCode";
+import env from "@server/environment";
 
 export async function traefikConfigProvider(_: Request, res: Response) {
     try {
@@ -36,10 +37,8 @@ export function buildTraefikConfig(
             [middlewareName]: {
                 plugin: {
                     [middlewareName]: {
-                        // These are temporary values
-                        apiAddress:
-                            "http://host.docker.internal:3001/api/v1/badger",
-                        validToken: "abc123",
+                        apiBaseUrl: "http://localhost:3001/api/v1",
+                        appBaseUrl: env.BASE_URL,
                     },
                 },
             },
