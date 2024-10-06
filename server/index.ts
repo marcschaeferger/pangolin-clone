@@ -24,6 +24,9 @@ const externalPort = environment.EXTERNAL_PORT;
 const internalPort = environment.INTERNAL_PORT;
 
 app.prepare().then(() => {
+
+    
+
     // External server
     const externalServer = express();
 

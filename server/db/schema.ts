@@ -131,7 +131,7 @@ export const passwordResetTokens = sqliteTable("passwordResetTokens", {
 
 export const actions = sqliteTable("actions", {
     actionId: text("actionId").primaryKey(),
-    name: text("name").notNull(),
+    name: text("name"),
     description: text("description"),
 });
 
