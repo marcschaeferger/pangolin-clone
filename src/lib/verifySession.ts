@@ -5,7 +5,7 @@ export async function verifySession() {
     const sessionId = cookies().get("session")?.value ?? null;
 
     try {
-        const res = await api.get("/user", {
+        await api.get("/user", {
             headers: {
                 Cookie: `session=${sessionId}`
             }
