@@ -27,9 +27,10 @@ export const lucia = new Lucia(adapter, {
         name: "session",
         expires: false,
         attributes: {
-            secure: environment.ENVIRONMENT === "prod",
-            sameSite: "strict",
-            // domain: "example.com"
+            // secure: environment.ENVIRONMENT === "prod",
+            // sameSite: "strict",
+            secure: false,
+            domain: ".testing123.io"
         },
     },
     sessionExpiresIn: new TimeSpan(2, "w"),

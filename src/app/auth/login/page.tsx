@@ -2,7 +2,7 @@ import LoginForm from "@app/components/LoginForm";
 import { verifySession } from "@app/lib/verifySession";
 import { redirect } from "next/navigation";
 
-export async function Page({
+export default async function Page({
     searchParams,
 }: {
     searchParams: { [key: string]: string | string[] | undefined };
@@ -19,5 +19,3 @@ export async function Page({
         </>
     );
 }
-
-export default Page;

@@ -10,6 +10,7 @@ import createHttpError from "http-errors";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
 import { verifyTotpCode } from "@server/auth/2fa";
+import logger from "@server/logger";
 
 export const loginBodySchema = z.object({
     email: z.string().email(),
@@ -116,9 +117,11 @@ export async function login(
         }
 
         const session = await lucia.createSession(existingUser.id, {});
+        const cookie = lucia.createSessionCookie(session.id).serialize();
+        logger.debug("Session cookie", JSON.stringify(cookie, null, 2));
         res.appendHeader(
             "Set-Cookie",
-            lucia.createSessionCookie(session.id).serialize(),
+            cookie
         );
 
         if (!existingUser.emailVerified) {

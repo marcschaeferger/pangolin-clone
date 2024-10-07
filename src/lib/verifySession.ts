@@ -1,11 +1,11 @@
-import api from "@app/api";
+import { internal } from "@app/api";
 import { cookies } from "next/headers";
 
 export async function verifySession() {
     const sessionId = cookies().get("session")?.value ?? null;
 
     try {
-        const res = await api.get("/user", {
+        await internal.get("/user", {
             headers: {
                 Cookie: `session=${sessionId}`
             }

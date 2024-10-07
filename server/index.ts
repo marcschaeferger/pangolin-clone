@@ -23,12 +23,11 @@ const handle = app.getRequestHandler();
 const externalPort = environment.EXTERNAL_PORT;
 const internalPort = environment.INTERNAL_PORT;
 
-app.prepare().then(() => {
-
+app.prepare().then(() => {    
     
-
     // External server
     const externalServer = express();
+    externalServer.set("trust proxy", 1);
 
     // externalServer.use(helmet()); // Disabled because causes issues with Next.js
     externalServer.use(cors());

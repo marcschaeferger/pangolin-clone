@@ -5,6 +5,7 @@ import createHttpError from "http-errors";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
 import { response } from "@server/utils/response";
+import logger from "@server/logger";
 
 export const verifyUserBody = z.object({
     sessionId: z.string(),
@@ -23,6 +24,8 @@ export async function verifyUser(
 ): Promise<any> {
     const parsedBody = verifyUserBody.safeParse(req.query);
 
+    logger.debug("Parsed body", parsedBody);
+
     if (!parsedBody.success) {
         return next(
             createHttpError(
@@ -36,6 +39,9 @@ export async function verifyUser(
 
     try {
         const { session, user } = await lucia.validateSession(sessionId);
+
+        logger.debug("Session", session);
+        logger.debug("User", user);
 
         if (!session || !user) {
             return next(
