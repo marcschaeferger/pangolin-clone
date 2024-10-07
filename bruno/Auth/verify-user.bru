@@ -1,0 +1,15 @@
+meta {
+  name: verify-user
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localhost:3000/badger/verify-user?sessionId=asdf
+  body: none
+  auth: none
+}
+
+params:query {
+  sessionId: asdf
+}

@@ -6,6 +6,7 @@ import { and, like, eq } from "drizzle-orm";
 import logger from "@server/logger";
 import HttpCode from "@server/types/HttpCode";
 import env from "@server/environment";
+import environment from "@server/environment";
 
 export async function traefikConfigProvider(_: Request, res: Response) {
     try {
@@ -31,14 +32,35 @@ export function buildTraefikConfig(
     }
 
     const http: DynamicTraefikConfig["http"] = {
-        routers: {},
-        services: {},
+        routers: {
+            "themainwebpage": {
+                "entryPoints": [
+                  "http"
+                ],
+                "middlewares": [
+                ],
+                "service": "service-themainwebpage",
+                "rule": "Host(`testing123.io`)"
+              },  
+        },
+        services: {
+            "service-themainwebpage": {
+                "loadBalancer": {
+                  "servers": [
+                    {
+                      "url": `http://${environment.APP_NAME.toLowerCase()}:3000`
+                    }
+                  ]
+                }
+              },
+        },
         middlewares: {
             [middlewareName]: {
                 plugin: {
                     [middlewareName]: {
-                        apiBaseUrl: "http://localhost:3001/api/v1",
-                        appBaseUrl: env.BASE_URL,
+                        apiBaseUrl: `http://${environment.APP_NAME.toLowerCase()}:3001/api/v1`,
+                        // appBaseUrl: env.BASE_URL,
+                        appBaseUrl: "http://testing123.io:8081",
                     },
                 },
             },
