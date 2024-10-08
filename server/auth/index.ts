@@ -5,7 +5,6 @@ import { Lucia, TimeSpan } from "lucia";
 import { DrizzleSQLiteAdapter } from "@lucia-auth/adapter-drizzle";
 import db from "@server/db";
 import { sessions, users } from "@server/db/schema";
-import environment from "@server/environment";
 
 const adapter = new DrizzleSQLiteAdapter(db, sessions, users);
 
@@ -16,6 +15,7 @@ export const lucia = new Lucia(adapter, {
             twoFactorEnabled: attributes.twoFactorEnabled,
             twoFactorSecret: attributes.twoFactorSecret,
             emailVerified: attributes.emailVerified,
+            dateCreated: attributes.dateCreated,
         };
     },
     // getSessionAttributes: (attributes) => {
@@ -30,7 +30,7 @@ export const lucia = new Lucia(adapter, {
             // secure: environment.ENVIRONMENT === "prod",
             // sameSite: "strict",
             secure: false,
-            domain: ".testing123.io"
+            domain: ".testing123.io",
         },
     },
     sessionExpiresIn: new TimeSpan(2, "w"),
@@ -52,6 +52,7 @@ interface DatabaseUserAttributes {
     twoFactorEnabled: boolean;
     twoFactorSecret?: string;
     emailVerified: boolean;
+    dateCreated: string;
 }
 
 interface DatabaseSessionAttributes {

@@ -12,6 +12,8 @@ import response from "@server/utils/response";
 import { SqliteError } from "better-sqlite3";
 import { sendEmailVerificationCode } from "./sendEmailVerificationCode";
 import { passwordSchema } from "@server/auth/passwordSchema";
+import { eq } from "drizzle-orm";
+import moment from "moment";
 
 export const signupBodySchema = z.object({
     email: z.string().email(),
@@ -51,10 +53,47 @@ export async function signup(
     const userId = generateId(15);
 
     try {
+        const existing = await db
+            .select()
+            .from(users)
+            .where(eq(users.email, email));
+
+        if (existing && existing.length > 0) {
+            const user = existing[0];
+
+            // If the user is already verified, we don't want to create a new user
+            if (user.emailVerified) {
+                return next(
+                    createHttpError(
+                        HttpCode.BAD_REQUEST,
+                        "A user with that email address already exists",
+                    ),
+                );
+            }
+
+            const dateCreated = moment(user.dateCreated);
+            const now = moment();
+            const diff = now.diff(dateCreated, "hours");
+
+            if (diff < 2) {
+                // If the user was created less than 2 hours ago, we don't want to create a new user
+                return next(
+                    createHttpError(
+                        HttpCode.BAD_REQUEST,
+                        "A verification email was already sent to this email address. Please check your email for the verification code.",
+                    ),
+                );
+            } else {
+                // If the user was created more than 2 hours ago, we want to delete the old user and create a new one
+                await db.delete(users).where(eq(users.id, user.id));
+            }
+        }
+
         await db.insert(users).values({
             id: userId,
             email: email,
             passwordHash,
+            dateCreated: moment().toISOString(),
         });
 
         const session = await lucia.createSession(userId, {});

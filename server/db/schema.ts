@@ -81,6 +81,7 @@ export const users = sqliteTable("user", {
     emailVerified: integer("emailVerified", { mode: "boolean" })
         .notNull()
         .default(false),
+    dateCreated: text("dateCreated").notNull(),
 });
 
 export const twoFactorBackupCodes = sqliteTable("twoFactorBackupCodes", {
@@ -107,7 +108,9 @@ export const userOrgs = sqliteTable("userOrgs", {
     orgId: integer("orgId")
         .notNull()
         .references(() => orgs.orgId),
-    roleId: integer("roleId").notNull().references(() => roles.roleId),
+    roleId: integer("roleId")
+        .notNull()
+        .references(() => roles.roleId),
 });
 
 export const emailVerificationCodes = sqliteTable("emailVerificationCodes", {
@@ -137,7 +140,9 @@ export const actions = sqliteTable("actions", {
 
 export const roles = sqliteTable("roles", {
     roleId: integer("roleId").primaryKey({ autoIncrement: true }),
-    orgId: integer("orgId").references(() => orgs.orgId, { onDelete: "cascade" }),
+    orgId: integer("orgId").references(() => orgs.orgId, {
+        onDelete: "cascade",
+    }),
     name: text("name").notNull(),
     description: text("description"),
 });
@@ -204,7 +209,9 @@ export const userResources = sqliteTable("userResources", {
 
 export const limitsTable = sqliteTable("limits", {
     limitId: integer("limitId").primaryKey({ autoIncrement: true }),
-    orgId: integer("orgId").references(() => orgs.orgId, { onDelete: "cascade" }),
+    orgId: integer("orgId").references(() => orgs.orgId, {
+        onDelete: "cascade",
+    }),
     name: text("name").notNull(),
     value: integer("value").notNull(),
     description: text("description"),
