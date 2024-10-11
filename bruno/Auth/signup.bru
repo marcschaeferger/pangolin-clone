@@ -4,8 +4,15 @@ meta {
   seq: 2
 }
 
-get {
-  url: 
-  body: none
+put {
+  url: http://localhost:3000/api/v1/auth/signup
+  body: json
   auth: none
+}
+
+body:json {
+  {
+    "email": "milo@fossorial.io",
+    "password": "Password123!"
+  }
 }

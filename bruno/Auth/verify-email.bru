@@ -1,18 +1,17 @@
 meta {
   name: verify-email
   type: http
-  seq: 3
+  seq: 7
 }
 
-put {
-  url: http://localhost:3000/api/v1/auth/signup
+post {
+  url: http://localhost:3000/api/v1/auth/verify-email
   body: json
   auth: none
 }
 
 body:json {
   {
-    "email": "owen@fossorial.io",
-    "password": "Password123!"
+      "code": "50317187"
   }
 }
