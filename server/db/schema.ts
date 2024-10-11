@@ -138,6 +138,7 @@ export const actions = sqliteTable("actions", {
 export const roles = sqliteTable("roles", {
     roleId: integer("roleId").primaryKey({ autoIncrement: true }),
     orgId: integer("orgId").references(() => orgs.orgId, { onDelete: "cascade" }),
+    isSuperuserRole: integer("isSuperuserRole", { mode: "boolean" }),
     name: text("name").notNull(),
     description: text("description"),
 });

@@ -8,42 +8,31 @@ import {
     targets,
 } from "@server/db/schema";
 import db from "@server/db";
+import { createSuperuserRole } from "@server/db/ensureActions";
 
 async function insertDummyData() {
     // Insert dummy orgs
     const org1 = db
         .insert(orgs)
         .values({
-            name: "Fossorial",
-            domain: "localhost",
-        })
-        .returning()
-        .get();
-
-    const org2 = db
-        .insert(orgs)
-        .values({
-            name: "Fosrl",
+            name: "Default",
             domain: "fosrl.io",
         })
         .returning()
         .get();
 
-    // Insert dummy users
-    // await db.insert(users).values([
-    //     {
-    //         email: "john@fossorial.com",
-    //         groups: "admin,developer",
-    //     },
-    //     {
-    //         email: "jane@fossorial.com",
-    //         groups: "developer",
-    //     },
-    //     {
-    //         email: "bob@fosrl.io",
-    //         groups: "admin",
-    //     },
-    // ]);
+    await createSuperuserRole(org1.orgId);
+
+    const org2 = db
+        .insert(orgs)
+        .values({
+            name: "Fossorial",
+            domain: "fossorial.io",
+        })
+        .returning()
+        .get();
+
+    await createSuperuserRole(org2.orgId);
 
     // Insert dummy exit nodes
     const exitNode1 = db

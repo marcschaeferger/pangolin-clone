@@ -14,6 +14,7 @@ import internal from "@server/routers/internal";
 import { authenticated, unauthenticated } from "@server/routers/external";
 import cookieParser from "cookie-parser";
 import { User } from "@server/db/schema";
+import { ensureActions } from "./db/ensureActions";
 
 const dev = environment.ENVIRONMENT !== "prod";
 
@@ -25,6 +26,8 @@ const internalPort = environment.INTERNAL_PORT;
 
 app.prepare().then(() => {    
     
+    ensureActions(); // This loads the actions into the database
+
     // External server
     const externalServer = express();
     externalServer.set("trust proxy", 1);

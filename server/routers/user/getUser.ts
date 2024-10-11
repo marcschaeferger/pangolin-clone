@@ -18,12 +18,6 @@ export async function getUser(req: Request, res: Response, next: NextFunction): 
             return next(createHttpError(HttpCode.UNAUTHORIZED, "User not found"));
         }
 
-        // // Check if the user has permission to list sites
-        // const hasPermission = await checkUserActionPermission(ActionsEnum.getUser, req);
-        // if (!hasPermission) {
-        //     return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
-        // }
-
         const user = await db.select()
             .from(users)
             .where(eq(users.id, userId))

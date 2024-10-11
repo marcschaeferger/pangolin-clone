@@ -26,7 +26,6 @@ export enum ActionsEnum {
     getTarget = "getTarget",
     listTargets = "listTargets",
     updateTarget = "updateTarget",
-    getUser = "getUser",
     deleteUser = "deleteUser",
     listUsers = "listUsers"
 }
