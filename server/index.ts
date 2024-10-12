@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import next from "next";
 import { parse } from "url";
-import environment from "@server/environment";
+import config from "@server/config";
 import logger from "@server/logger";
 import helmet from "helmet";
 import cors from "cors";
@@ -15,16 +15,16 @@ import { authenticated, unauthenticated } from "@server/routers/external";
 import cookieParser from "cookie-parser";
 import { User } from "@server/db/schema";
 
-const dev = environment.ENVIRONMENT !== "prod";
+const dev = config.app.environment !== "prod";
 
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
-const externalPort = environment.EXTERNAL_PORT;
-const internalPort = environment.INTERNAL_PORT;
+const externalPort = config.server.external_port;
+const internalPort = config.server.internal_port;
 
-app.prepare().then(() => {    
-    
+app.prepare().then(() => {
+
     // External server
     const externalServer = express();
     externalServer.set("trust proxy", 1);

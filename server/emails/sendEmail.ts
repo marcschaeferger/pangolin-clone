@@ -6,8 +6,8 @@ import logger from "@server/logger";
 export async function sendEmail(
     template: ReactElement,
     opts: {
-        from: string;
-        to: string;
+        from: string | undefined;
+        to: string | undefined;
         subject: string;
     },
 ) {

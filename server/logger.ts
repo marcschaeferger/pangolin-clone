@@ -1,5 +1,5 @@
 import "winston-daily-rotate-file";
-import environment from "@server/environment";
+import config, { APP_PATH } from "@server/config";
 import * as winston from "winston";
 import path from "path";
 
@@ -24,11 +24,11 @@ const transports: any = [
     }),
 ];
 
-if (environment.SAVE_LOGS) {
+if (config.app.save_logs) {
     transports.push(
         new winston.transports.DailyRotateFile({
             filename: path.join(
-                environment.CONFIG_PATH,
+                APP_PATH,
                 "logs",
                 "pangolin-%DATE%.log",
             ),
@@ -43,7 +43,7 @@ if (environment.SAVE_LOGS) {
     transports.push(
         new winston.transports.DailyRotateFile({
             filename: path.join(
-                environment.CONFIG_PATH,
+                APP_PATH,
                 "logs",
                 ".machinelogs-%DATE%.json",
             ),
@@ -63,7 +63,7 @@ if (environment.SAVE_LOGS) {
 }
 
 const logger = winston.createLogger({
-    level: environment.LOG_LEVEL.toLowerCase(),
+    level: config.app.log_level.toLowerCase(),
     format: winston.format.combine(
         winston.format.splat(),
         winston.format.timestamp(),

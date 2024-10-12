@@ -5,6 +5,7 @@ import { Lucia, TimeSpan } from "lucia";
 import { DrizzleSQLiteAdapter } from "@lucia-auth/adapter-drizzle";
 import db from "@server/db";
 import { sessions, users } from "@server/db/schema";
+import config from "@server/config";
 
 const adapter = new DrizzleSQLiteAdapter(db, sessions, users);
 
@@ -18,19 +19,18 @@ export const lucia = new Lucia(adapter, {
             dateCreated: attributes.dateCreated,
         };
     },
-    // getSessionAttributes: (attributes) => {
-    //     return {
-    //         country: attributes.country,
-    //     };
-    // },
     sessionCookie: {
         name: "session",
         expires: false,
         attributes: {
-            // secure: environment.ENVIRONMENT === "prod",
-            // sameSite: "strict",
-            secure: false,
-            domain: ".testing123.io",
+            sameSite: "strict",
+            secure: config.app.secure_cookies || false,
+            domain:
+                "." +
+                config.app.external_base_url
+                    .split("://")[1]
+                    .split(":")[0]
+                    .split("/")[0],
         },
     },
     sessionExpiresIn: new TimeSpan(2, "w"),
@@ -42,7 +42,6 @@ declare module "lucia" {
     interface Register {
         Lucia: typeof lucia;
         DatabaseUserAttributes: DatabaseUserAttributes;
-        DatabaseSessionAttributes: DatabaseSessionAttributes;
     }
 }
 
@@ -53,8 +52,4 @@ interface DatabaseUserAttributes {
     twoFactorSecret?: string;
     emailVerified: boolean;
     dateCreated: string;
-}
-
-interface DatabaseSessionAttributes {
-    // country: string;
 }

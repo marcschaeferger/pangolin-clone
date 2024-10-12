@@ -5,14 +5,13 @@ import { DynamicTraefikConfig } from "./configSchema";
 import { and, like, eq } from "drizzle-orm";
 import logger from "@server/logger";
 import HttpCode from "@server/types/HttpCode";
-import env from "@server/environment";
-import environment from "@server/environment";
+import env from "@server/config";
+import config from "@server/config";
 
 export async function traefikConfigProvider(_: Request, res: Response) {
     try {
         const targets = await getAllTargets();
         const traefikConfig = buildTraefikConfig(targets);
-        // logger.debug("Built traefik config");
         res.status(HttpCode.OK).json(traefikConfig);
     } catch (e) {
         logger.error(`Failed to build traefik config: ${e}`);
@@ -32,35 +31,13 @@ export function buildTraefikConfig(
     }
 
     const http: DynamicTraefikConfig["http"] = {
-        routers: {
-            "themainwebpage": {
-                "entryPoints": [
-                  "http"
-                ],
-                "middlewares": [
-                ],
-                "service": "service-themainwebpage",
-                "rule": "Host(`testing123.io`)"
-              },  
-        },
-        services: {
-            "service-themainwebpage": {
-                "loadBalancer": {
-                  "servers": [
-                    {
-                      "url": `http://${environment.APP_NAME.toLowerCase()}:3000`
-                    }
-                  ]
-                }
-              },
-        },
+        routers: {},
+        services: {},
         middlewares: {
             [middlewareName]: {
                 plugin: {
                     [middlewareName]: {
-                        apiBaseUrl: `http://${environment.APP_NAME.toLowerCase()}:3001/api/v1`,
-                        // appBaseUrl: env.BASE_URL,
-                        appBaseUrl: "http://testing123.io:8081",
+                        apiBaseUrl: config.app.internal_base_url,
                     },
                 },
             },

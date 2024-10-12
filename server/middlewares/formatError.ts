@@ -2,7 +2,7 @@ import { ErrorRequestHandler, NextFunction, Response } from "express";
 import ErrorResponse from "@server/types/ErrorResponse";
 import HttpCode from "@server/types/HttpCode";
 import logger from "@server/logger";
-import environment from "@server/environment";
+import config from "@server/config";
 
 export const errorHandlerMiddleware: ErrorRequestHandler = (
     error,
@@ -11,7 +11,7 @@ export const errorHandlerMiddleware: ErrorRequestHandler = (
     next: NextFunction,
 ) => {
     const statusCode = error.statusCode || HttpCode.INTERNAL_SERVER_ERROR;
-    if (environment.ENVIRONMENT !== "prod") {
+    if (config.app.environment !== "prod") {
         logger.error(error);
     }
     res?.status(statusCode).send({
@@ -20,6 +20,6 @@ export const errorHandlerMiddleware: ErrorRequestHandler = (
         error: true,
         message: error.message || "Internal Server Error",
         status: statusCode,
-        stack: environment.ENVIRONMENT === "prod" ? null : error.stack,
+        stack: config.app.environment === "prod" ? null : error.stack,
     });
 };

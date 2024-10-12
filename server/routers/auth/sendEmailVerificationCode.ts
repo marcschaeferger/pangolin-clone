@@ -5,7 +5,7 @@ import { users, emailVerificationCodes } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import { sendEmail } from "@server/emails";
 import VerifyEmail from "@server/emails/templates/verifyEmailCode";
-import env from "@server/environment";
+import config from "@server/config";
 
 export async function sendEmailVerificationCode(
     email: string,
@@ -15,7 +15,7 @@ export async function sendEmailVerificationCode(
 
     await sendEmail(VerifyEmail({ username: email, verificationCode: code }), {
         to: email,
-        from: env.EMAIL_NOREPLY!,
+        from: config.email?.no_reply,
         subject: "Verify your email address",
     });
 }
