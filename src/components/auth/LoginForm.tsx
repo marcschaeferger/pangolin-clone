@@ -69,8 +69,6 @@ export default function LoginForm({ redirect }: LoginFormProps) {
         if (res && res.status === 200) {
             setError(null);
 
-            console.log(res)
-
             if (res.data?.data?.emailVerificationRequired) {
                 router.push("/auth/verify-email");
                 return;
