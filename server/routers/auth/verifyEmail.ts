@@ -59,12 +59,19 @@ export async function verifyEmail(
                     emailVerified: true,
                 })
                 .where(eq(users.id, user.id));
+        } else {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    "Invalid verification code",
+                ),
+            );
         }
 
         return response<VerifyEmailResponse>(res, {
             success: true,
             error: false,
-            message: valid ? "Code is valid" : "Code is invalid",
+            message: "Email verified",
             status: HttpCode.OK,
             data: {
                 valid,

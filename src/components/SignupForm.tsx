@@ -22,23 +22,28 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { LoginResponse } from "@server/routers/auth";
+import { SignUpResponse } from "@server/routers/auth";
 import { api } from "@app/api";
 import { useRouter } from "next/navigation";
+import { passwordSchema } from "@server/auth/passwordSchema";
 import { AxiosResponse } from "axios";
 
-type LoginFormProps = {
+type SignupFormProps = {
     redirect?: string;
 };
 
-const formSchema = z.object({
-    email: z.string().email({ message: "Invalid email address" }),
-    password: z
-        .string()
-        .min(8, { message: "Password must be at least 8 characters" }),
-});
+const formSchema = z
+    .object({
+        email: z.string().email({ message: "Invalid email address" }),
+        password: passwordSchema,
+        confirmPassword: passwordSchema,
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+        path: ["confirmPassword"],
+        message: "Passwords do not match",
+    });
 
-export default function LoginForm({ redirect }: LoginFormProps) {
+export default function SignupForm({ redirect }: SignupFormProps) {
     const router = useRouter();
 
     const [error, setError] = useState<string | null>(null);
@@ -48,13 +53,14 @@ export default function LoginForm({ redirect }: LoginFormProps) {
         defaultValues: {
             email: "",
             password: "",
+            confirmPassword: "",
         },
     });
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const { email, password } = values;
         const res = await api
-            .post<AxiosResponse<LoginResponse>>("/auth/login", {
+            .put<AxiosResponse<SignUpResponse>>("/auth/signup", {
                 email,
                 password,
             })
@@ -62,34 +68,32 @@ export default function LoginForm({ redirect }: LoginFormProps) {
                 console.error(e);
                 setError(
                     e.response?.data?.message ||
-                        "An error occurred while logging in",
+                        "An error occurred while signing up",
                 );
             });
 
         if (res && res.status === 200) {
             setError(null);
 
-            console.log(res)
-
-            if (res.data?.data?.emailVerificationRequired) {
+            if (res.data.data.emailVerificationRequired) {
                 router.push("/auth/verify-email");
                 return;
             }
 
             if (redirect && typeof redirect === "string") {
                 window.location.href = redirect;
-            } else {
-                router.push("/");
             }
+
+            router.push("/");
         }
     }
 
     return (
         <Card className="w-full max-w-md mx-auto">
             <CardHeader>
-                <CardTitle>Login</CardTitle>
+                <CardTitle>Create Account</CardTitle>
                 <CardDescription>
-                    Enter your credentials to access your dashboard
+                    Enter your details to create an account
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -105,10 +109,7 @@ export default function LoginForm({ redirect }: LoginFormProps) {
                                 <FormItem>
                                     <FormLabel>Email</FormLabel>
                                     <FormControl>
-                                        <Input
-                                            placeholder="Enter your email"
-                                            {...field}
-                                        />
+                                        <Input placeholder="Email" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -123,7 +124,7 @@ export default function LoginForm({ redirect }: LoginFormProps) {
                                     <FormControl>
                                         <Input
                                             type="password"
-                                            placeholder="Enter your password"
+                                            placeholder="Password"
                                             {...field}
                                         />
                                     </FormControl>
@@ -131,13 +132,32 @@ export default function LoginForm({ redirect }: LoginFormProps) {
                                 </FormItem>
                             )}
                         />
+                        <FormField
+                            control={form.control}
+                            name="confirmPassword"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Confirm Password</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="password"
+                                            placeholder="Confirm Password"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
                         {error && (
                             <Alert>
                                 <AlertDescription>{error}</AlertDescription>
                             </Alert>
                         )}
+
                         <Button type="submit" className="w-full">
-                            Login
+                            Create Account
                         </Button>
                     </form>
                 </Form>

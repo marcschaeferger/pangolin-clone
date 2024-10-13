@@ -21,7 +21,7 @@ import {
     verifyRoleAccess,
     verifySuperuser,
     verifyUserInRole,
-    verifyUserAccess
+    verifyUserAccess,
 } from "./auth";
 
 // Root routes
@@ -102,6 +102,11 @@ authenticated.delete(
     target.deleteTarget,
 );
 
+authenticated.get("/users", user.listUsers);
+// authenticated.get("/org/:orgId/users", user.???); // TODO: Implement this
+unauthenticated.get("/user", verifySessionMiddleware, user.getUser);
+// authenticated.get("/user/:userId", user.getUser);
+authenticated.delete("/user/:userId", user.deleteUser);
 authenticated.put(
     "/org/:orgId/role",
     verifyOrgAccess,
@@ -109,7 +114,12 @@ authenticated.put(
     role.createRole,
 );
 authenticated.get("/org/:orgId/roles", verifyOrgAccess, role.listRoles);
-authenticated.get("/role/:roleId", verifyRoleAccess, verifyUserInRole, role.getRole);
+authenticated.get(
+    "/role/:roleId",
+    verifyRoleAccess,
+    verifyUserInRole,
+    role.getRole,
+);
 authenticated.post(
     "/role/:roleId",
     verifyRoleAccess,
@@ -182,8 +192,18 @@ authenticated.get(
 
 authenticated.get("/user", user.getUser);
 authenticated.get("/org/:orgId/users", verifyOrgAccess, user.listUsers);
-authenticated.delete("/org/:orgId/user/:userId", verifyOrgAccess, verifyUserAccess, user.removeUserOrg);
-authenticated.put("/org/:orgId/user/:userId", verifyOrgAccess, verifyUserAccess, user.addUserOrg);
+authenticated.delete(
+    "/org/:orgId/user/:userId",
+    verifyOrgAccess,
+    verifyUserAccess,
+    user.removeUserOrg,
+);
+authenticated.put(
+    "/org/:orgId/user/:userId",
+    verifyOrgAccess,
+    verifyUserAccess,
+    user.addUserOrg,
+);
 
 authenticated.put(
     "/user/:userId/site",
