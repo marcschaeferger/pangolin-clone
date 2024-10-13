@@ -1,10 +1,11 @@
 "use client";
 
 import { UserContext } from "@app/contexts/userContext";
+import { GetUserResponse } from "@server/routers/user";
 import { ReactNode } from "react";
 
 type LandingProviderProps = {
-    user: boolean ;
+    user: GetUserResponse;
     children: ReactNode;
 };
 

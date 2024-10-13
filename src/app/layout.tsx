@@ -3,7 +3,7 @@ import "./globals.css";
 import { Roboto } from "next/font/google";
 
 export const metadata: Metadata = {
-    title: "Pangolin",
+    title: process.env.NEXT_PUBLIC_APP_NAME,
     description: "",
 };
 

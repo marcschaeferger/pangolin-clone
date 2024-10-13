@@ -9,10 +9,12 @@ export default async function Page() {
         redirect("/auth/login");
     }
 
+    console.log(user);
+
     return (
         <>
             <LandingProvider user={user}>
-                <p>You are logged in!</p>
+                <p>Logged in as {user.email}</p>
             </LandingProvider>
         </>
     );

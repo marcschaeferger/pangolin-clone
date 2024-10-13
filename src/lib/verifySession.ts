@@ -1,17 +1,23 @@
 import { internal } from "@app/api";
+import { GetUserResponse } from "@server/routers/user";
+import { AxiosResponse } from "axios";
 import { cookies } from "next/headers";
 
-export async function verifySession() {
+export async function verifySession(): Promise<GetUserResponse | null> {
     const sessionId = cookies().get("session")?.value ?? null;
 
     try {
-        await internal.get("/user", {
-            headers: {
-                Cookie: `session=${sessionId}`
-            }
-        });
-        return true;
+        const res = await internal.get<AxiosResponse<GetUserResponse>>(
+            "/user",
+            {
+                headers: {
+                    Cookie: `session=${sessionId}`,
+                },
+            },
+        );
+
+        return res.data.data;
     } catch {
-        return false
+        return null;
     }
 }
