@@ -75,7 +75,7 @@ export async function createSite(req: Request, res: Response, next: NextFunction
         .from(roles)
         .where(and(eq(roles.isSuperuserRole, true), eq(roles.orgId, orgId)))
         .limit(1);
-        
+
         if (superuserRole.length === 0) {
             return next(
                 createHttpError(
@@ -84,20 +84,20 @@ export async function createSite(req: Request, res: Response, next: NextFunction
                 )
             );
         }
-        
-        await db.insert(roleSites).values({ 
+
+        await db.insert(roleSites).values({
             roleId: superuserRole[0].roleId,
             siteId: newSite[0].siteId,
         });
 
         if (req.userOrgRoleId != superuserRole[0].roleId) {
             // make sure the user can access the site
-            db.insert(userSites).values({ 
-                userId: req.user?.id!,
+            db.insert(userSites).values({
+                userId: req.user?.userId!,
                 siteId: newSite[0].siteId,
             });
         }
-        
+
         return response(res, {
             data: newSite[0],
             success: true,

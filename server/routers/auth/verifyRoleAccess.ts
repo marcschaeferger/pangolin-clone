@@ -7,7 +7,7 @@ import HttpCode from '@server/types/HttpCode';
 import logger from '@server/logger';
 
 export async function verifyRoleAccess(req: Request, res: Response, next: NextFunction) {
-    const userId = req.user?.id; // Assuming you have user information in the request
+    const userId = req.user?.userId; // Assuming you have user information in the request
     const roleId = parseInt(req.params.roleId || req.body.roleId || req.query.roleId);
 
     if (!userId) {

@@ -6,7 +6,7 @@ import createHttpError from 'http-errors';
 import HttpCode from '@server/types/HttpCode';
 
 export async function verifyTargetAccess(req: Request, res: Response, next: NextFunction) {
-    const userId = req.user!.id; // Assuming you have user information in the request
+    const userId = req.user!.userId; // Assuming you have user information in the request
     const targetId = parseInt(req.params.targetId);
 
     if (!userId) {

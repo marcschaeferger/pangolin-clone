@@ -6,7 +6,7 @@ import createHttpError from 'http-errors';
 import HttpCode from '@server/types/HttpCode';
 
 export async function verifyUserAccess(req: Request, res: Response, next: NextFunction) {
-    const userId = req.user!.id; // Assuming you have user information in the request
+    const userId = req.user!.userId; // Assuming you have user information in the request
     const reqUserId = req.params.userId || req.body.userId || req.query.userId;
 
     if (!userId) {
@@ -18,7 +18,7 @@ export async function verifyUserAccess(req: Request, res: Response, next: NextFu
     }
 
     try {
-        
+
         const userOrg = await db.select()
             .from(userOrgs)
             .where(and(eq(userOrgs.userId, userId), eq(userOrgs.orgId, req.userOrgId!)))

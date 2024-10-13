@@ -95,7 +95,7 @@ export async function createResource(req: Request, res: Response, next: NextFunc
         if (req.userOrgRoleId != superuserRole[0].roleId) {
             // make sure the user can access the resource
             await db.insert(userResources).values({
-                userId: req.user?.id!,
+                userId: req.user?.userId!,
                 resourceId: newResource[0].resourceId,
             });
         }

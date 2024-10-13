@@ -6,7 +6,7 @@ import createHttpError from 'http-errors';
 import HttpCode from '@server/types/HttpCode';
 
 export async function verifySiteAccess(req: Request, res: Response, next: NextFunction) {
-    const userId = req.user!.id; // Assuming you have user information in the request
+    const userId = req.user!.userId; // Assuming you have user information in the request
     const siteId = parseInt(req.params.siteId || req.body.siteId || req.query.siteId);
 
     if (!userId) {

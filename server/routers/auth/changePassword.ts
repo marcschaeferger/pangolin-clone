@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
 import { fromError } from "zod-validation-error";
-import lucia, { unauthorized } from "@server/auth";
+import { unauthorized, invalidateAllSessions } from "@server/auth";
 import { z } from "zod";
 import { db } from "@server/db";
 import { User, users } from "@server/db/schema";
@@ -74,7 +74,7 @@ export async function changePassword(
             const validOTP = await verifyTotpCode(
                 code!,
                 user.twoFactorSecret!,
-                user.id,
+                user.userId,
             );
 
             if (!validOTP) {
@@ -94,9 +94,9 @@ export async function changePassword(
             .set({
                 passwordHash: hash,
             })
-            .where(eq(users.id, user.id));
+            .where(eq(users.userId, user.userId));
 
-        await lucia.invalidateUserSessions(user.id);
+        await invalidateAllSessions(user.userId);
 
         // TODO: send email to user confirming password change
 

@@ -1,9 +1,9 @@
 import { Request } from "express";
-import { lucia } from "@server/auth";
+import { validateSessionToken, SESSION_COOKIE_NAME } from "@server/auth";
 
 export async function verifySession(req: Request) {
-    const res = await lucia.validateSession(
-        req.cookies[lucia.sessionCookieName],
+    const res = await validateSessionToken(
+        req.cookies[SESSION_COOKIE_NAME] ?? "",
     );
     return res;
 }
