@@ -75,16 +75,22 @@ export default function SignupForm({ redirect }: SignupFormProps) {
         if (res && res.status === 200) {
             setError(null);
 
-            if (res.data.data.emailVerificationRequired) {
-                router.push("/auth/verify-email");
+            if (res.data?.data?.emailVerificationRequired) {
+                if (redirect) {
+                    router.push(`/auth/verify-email?redirect=${redirect}`);
+                } else {
+                    router.push("/auth/verify-email");
+                }
                 return;
             }
 
-            if (redirect && typeof redirect === "string") {
+            if (redirect && redirect.includes("http")) {
                 window.location.href = redirect;
+            } else if (redirect) {
+                router.push(redirect);
+            } else {
+                router.push("/");
             }
-
-            router.push("/");
         }
     }
 

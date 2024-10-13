@@ -2,7 +2,11 @@ import VerifyEmailForm from "@app/components/auth/VerifyEmailForm";
 import { verifySession } from "@app/lib/auth/verifySession";
 import { redirect } from "next/navigation";
 
-export default async function Page() {
+export default async function Page({
+    searchParams,
+}: {
+    searchParams: { [key: string]: string | string[] | undefined };
+}) {
     const user = await verifySession();
 
     if (!user) {
@@ -13,11 +17,12 @@ export default async function Page() {
         redirect("/");
     }
 
-    console.log(user.email)
-
     return (
         <>
-            <VerifyEmailForm email={user.email}/>
+            <VerifyEmailForm
+                email={user.email}
+                redirect={searchParams.redirect as string}
+            />
         </>
     );
 }

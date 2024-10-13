@@ -2,7 +2,11 @@ import SignupForm from "@app/components/auth/SignupForm";
 import { verifySession } from "@app/lib/auth/verifySession";
 import { redirect } from "next/navigation";
 
-export default async function Page() {
+export default async function Page({
+    searchParams,
+}: {
+    searchParams: { [key: string]: string | string[] | undefined };
+}) {
     const user = await verifySession();
 
     if (user) {
@@ -11,7 +15,7 @@ export default async function Page() {
 
     return (
         <>
-            <SignupForm />
+            <SignupForm redirect={searchParams.redirect as string} />
         </>
     );
 }

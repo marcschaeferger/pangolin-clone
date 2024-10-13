@@ -44,9 +44,13 @@ const FormSchema = z.object({
 
 export type VerifyEmailFormProps = {
     email: string;
+    redirect?: string;
 };
 
-export default function VerifyEmailForm({ email }: VerifyEmailFormProps) {
+export default function VerifyEmailForm({
+    email,
+    redirect,
+}: VerifyEmailFormProps) {
     const router = useRouter();
 
     const [error, setError] = useState<string | null>(null);
@@ -82,7 +86,14 @@ export default function VerifyEmailForm({ email }: VerifyEmailFormProps) {
                 "Email successfully verified! Redirecting you...",
             );
             setTimeout(() => {
-                router.push("/");
+                if (redirect && redirect.includes("http")) {
+                    window.location.href = redirect;
+                }
+                if (redirect) {
+                    router.push(redirect);
+                } else {
+                    router.push("/");
+                }
                 setIsSubmitting(false);
             }, 3000);
         }
