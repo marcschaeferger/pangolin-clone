@@ -5,6 +5,7 @@ import * as resource from "./resource";
 import * as target from "./target";
 import * as user from "./user";
 import * as auth from "./auth";
+import * as role from "./role";
 import HttpCode from "@server/types/HttpCode";
 import {
     rateLimitMiddleware,
@@ -17,6 +18,9 @@ import {
     verifySiteAccess,
     verifyResourceAccess,
     verifyTargetAccess,
+    verifyRoleAccess,
+    verifySuperuser,
+    verifyUserInRole
 } from "./auth";
 
 // Root routes
@@ -39,6 +43,7 @@ authenticated.delete("/org/:orgId", verifyOrgAccess, org.deleteOrg);
 authenticated.put("/org/:orgId/site", verifyOrgAccess, site.createSite);
 authenticated.get("/org/:orgId/sites", verifyOrgAccess, site.listSites);
 authenticated.get("/site/:siteId", verifySiteAccess, site.getSite);
+authenticated.get("/site/:siteId/roles", verifySiteAccess, site.listSiteRoles);
 authenticated.post("/site/:siteId", verifySiteAccess, site.updateSite);
 authenticated.delete("/site/:siteId", verifySiteAccess, site.deleteSite);
 
@@ -52,6 +57,11 @@ authenticated.get(
     "/org/:orgId/resources",
     verifyOrgAccess,
     resource.listResources,
+);
+authenticated.get(
+    "/resource/:resourceId/roles",
+    verifyResourceAccess,
+    resource.listResourceRoles,
 );
 authenticated.get(
     "/resource/:resourceId",
@@ -91,9 +101,86 @@ authenticated.delete(
     target.deleteTarget,
 );
 
+authenticated.put(
+    "/org/:orgId/role",
+    verifyOrgAccess,
+    verifySuperuser,
+    role.createRole,
+);
+authenticated.get("/org/:orgId/roles", verifyOrgAccess, role.listRoles);
+authenticated.get("/role/:roleId", verifyRoleAccess, verifyUserInRole, role.getRole);
+authenticated.post(
+    "/role/:roleId",
+    verifyRoleAccess,
+    verifySuperuser,
+    role.updateRole,
+);
+authenticated.delete(
+    "/role/:roleId",
+    verifyRoleAccess,
+    verifySuperuser,
+    role.deleteRole,
+);
+
+authenticated.put(
+    "/role/:roleId/site",
+    verifyRoleAccess,
+    verifyUserInRole,
+    role.addRoleSite,
+);
+authenticated.delete(
+    "/role/:roleId/site",
+    verifyRoleAccess,
+    verifyUserInRole,
+    role.removeRoleSite,
+);
+authenticated.get(
+    "/role/:roleId/sites",
+    verifyRoleAccess,
+    verifyUserInRole,
+    role.listRoleSites,
+);
+authenticated.put(
+    "/role/:roleId/resource",
+    verifyRoleAccess,
+    verifyUserInRole,
+    role.addRoleResource,
+);
+authenticated.delete(
+    "/role/:roleId/resource",
+    verifyRoleAccess,
+    verifyUserInRole,
+    role.removeRoleResource,
+);
+authenticated.get(
+    "/role/:roleId/resources",
+    verifyRoleAccess,
+    verifyUserInRole,
+    role.listRoleResources,
+);
+authenticated.put(
+    "/role/:roleId/action",
+    verifyRoleAccess,
+    verifyUserInRole,
+    role.addRoleAction,
+);
+authenticated.delete(
+    "/role/:roleId/action",
+    verifyRoleAccess,
+    verifyUserInRole,
+    role.removeRoleAction,
+);
+authenticated.get(
+    "/role/:roleId/actions",
+    verifyRoleAccess,
+    verifyUserInRole,
+    role.listRoleActions,
+);
+
 authenticated.get("/users", user.listUsers);
 // authenticated.get("/org/:orgId/users", user.???); // TODO: Implement this
 authenticated.get("/user", user.getUser);
+authenticated.get("/user/roles", user.listUserRoles);
 // authenticated.get("/user/:userId", user.getUser);
 authenticated.delete("/user/:userId", user.deleteUser);
 

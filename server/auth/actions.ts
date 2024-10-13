@@ -26,8 +26,24 @@ export enum ActionsEnum {
     getTarget = "getTarget",
     listTargets = "listTargets",
     updateTarget = "updateTarget",
+    createRole = "createRole",
+    deleteRole = "deleteRole",
+    getRole = "getRole",
+    listRoles = "listRoles",
+    updateRole = "updateRole",
     deleteUser = "deleteUser",
-    listUsers = "listUsers"
+    listUsers = "listUsers",
+    listSiteRoles = "listSiteRoles",
+    listUserRoles = "listUserRoles",
+    listResourceRoles = "listResourceRoles",
+    addRoleSite = "addRoleSite",
+    addRoleResource = "addRoleResource",
+    removeRoleResource = "removeRoleResource",
+    removeRoleSite = "removeRoleSite",
+    addRoleAction = "addRoleAction",
+    removeRoleAction = "removeRoleAction",
+    listRoleSites = "listRoleSites",
+    listRoleResources = "listRoleResources",
 }
 
 export async function checkUserActionPermission(actionId: string, req: Request): Promise<boolean> {

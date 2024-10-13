@@ -1,28 +1,25 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { db } from '@server/db';
-import { orgs } from '@server/db/schema';
-import { eq } from 'drizzle-orm';
+import { roleActions } from '@server/db/schema';
+import { and, eq } from 'drizzle-orm';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
 import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
 
-const updateOrgParamsSchema = z.object({
-    orgId: z.string().transform(Number).pipe(z.number().int().positive())
+const removeRoleActionParamsSchema = z.object({
+    roleId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
 
-const updateOrgBodySchema = z.object({
-    name: z.string().min(1).max(255).optional(),
-    domain: z.string().min(1).max(255).optional(),
-}).refine(data => Object.keys(data).length > 0, {
-    message: "At least one field must be provided for update"
+const removeRoleActionSchema = z.object({
+    actionId: z.string(),
 });
 
-export async function updateOrg(req: Request, res: Response, next: NextFunction): Promise<any> {
+export async function removeRoleAction(req: Request, res: Response, next: NextFunction): Promise<any> {
     try {
-        const parsedParams = updateOrgParamsSchema.safeParse(req.params);
+        const parsedParams = removeRoleActionSchema.safeParse(req.params);
         if (!parsedParams.success) {
             return next(
                 createHttpError(
@@ -32,7 +29,9 @@ export async function updateOrg(req: Request, res: Response, next: NextFunction)
             );
         }
 
-        const parsedBody = updateOrgBodySchema.safeParse(req.body);
+        const { actionId } = parsedParams.data;
+
+        const parsedBody = removeRoleActionParamsSchema.safeParse(req.body);
         if (!parsedBody.success) {
             return next(
                 createHttpError(
@@ -42,35 +41,32 @@ export async function updateOrg(req: Request, res: Response, next: NextFunction)
             );
         }
 
-        const { orgId } = parsedParams.data;
-        const updateData = parsedBody.data;
+        const { roleId } = parsedBody.data;
 
-
-        // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(ActionsEnum.updateOrg, req);
+        // Check if the user has permission to remove role actions
+        const hasPermission = await checkUserActionPermission(ActionsEnum.removeRoleAction, req);
         if (!hasPermission) {
             return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
         }
 
-        const updatedOrg = await db.update(orgs)
-            .set(updateData)
-            .where(eq(orgs.orgId, orgId))
+        const deletedRoleAction = await db.delete(roleActions)
+            .where(and(eq(roleActions.roleId, roleId), eq(roleActions.actionId, actionId)))
             .returning();
 
-        if (updatedOrg.length === 0) {
+        if (deletedRoleAction.length === 0) {
             return next(
                 createHttpError(
                     HttpCode.NOT_FOUND,
-                    `Organization with ID ${orgId} not found`
+                    `Action with ID ${actionId} not found for role with ID ${roleId}`
                 )
             );
         }
 
         return response(res, {
-            data: updatedOrg[0],
+            data: null,
             success: true,
             error: false,
-            message: "Organization updated successfully",
+            message: "Action removed from role successfully",
             status: HttpCode.OK,
         });
     } catch (error) {

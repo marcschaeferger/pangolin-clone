@@ -1,12 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { db } from '@server/db';
-import { resources } from '@server/db/schema';
+import { resources, roleResources, roles, userResources } from '@server/db/schema';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
 import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
+import { eq, and } from 'drizzle-orm';
 
 const createResourceParamsSchema = z.object({
     siteId: z.number().int().positive(),
@@ -50,7 +51,11 @@ export async function createResource(req: Request, res: Response, next: NextFunc
         // Check if the user has permission to list sites
         const hasPermission = await checkUserActionPermission(ActionsEnum.createResource, req);
         if (!hasPermission) {
-            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
+            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
+        }
+
+        if (!req.userOrgRoleId) {
+            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have a role'));
         }
 
         // Generate a unique resourceId
@@ -64,6 +69,36 @@ export async function createResource(req: Request, res: Response, next: NextFunc
             name,
             subdomain,
         }).returning();
+
+
+
+        // find the superuser roleId and also add the resource to the superuser role
+        const superuserRole = await db.select()
+            .from(roles)
+            .where(and(eq(roles.isSuperuserRole, true), eq(roles.orgId, orgId)))
+            .limit(1);
+
+        if (superuserRole.length === 0) {
+            return next(
+                createHttpError(
+                    HttpCode.NOT_FOUND,
+                    `Superuser role not found`
+                )
+            );
+        }
+
+        await db.insert(roleResources).values({
+            roleId: superuserRole[0].roleId,
+            resourceId: newResource[0].resourceId,
+        });
+
+        if (req.userOrgRoleId != superuserRole[0].roleId) {
+            // make sure the user can access the resource
+            await db.insert(userResources).values({
+                userId: req.user?.id!,
+                resourceId: newResource[0].resourceId,
+            });
+        }
 
         response(res, {
             data: newResource[0],

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { db } from '@server/db';
-import { targets } from '@server/db/schema';
+import { roleSites, roles } from '@server/db/schema';
 import { eq } from 'drizzle-orm';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
@@ -9,13 +9,13 @@ import createHttpError from 'http-errors';
 import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
 
-const deleteTargetSchema = z.object({
-    targetId: z.string().transform(Number).pipe(z.number().int().positive())
+const listSiteRolesSchema = z.object({
+    siteId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
 
-export async function deleteTarget(req: Request, res: Response, next: NextFunction): Promise<any> {
+export async function listSiteRoles(req: Request, res: Response, next: NextFunction): Promise<any> {
     try {
-        const parsedParams = deleteTargetSchema.safeParse(req.params);
+        const parsedParams = listSiteRolesSchema.safeParse(req.params);
         if (!parsedParams.success) {
             return next(
                 createHttpError(
@@ -25,32 +25,30 @@ export async function deleteTarget(req: Request, res: Response, next: NextFuncti
             );
         }
 
-        const { targetId } = parsedParams.data;
+        const { siteId } = parsedParams.data;
 
-        // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(ActionsEnum.deleteTarget, req);
+        // Check if the user has permission to list site roles
+        const hasPermission = await checkUserActionPermission(ActionsEnum.listSiteRoles, req);
         if (!hasPermission) {
             return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
         }
 
-        const deletedTarget = await db.delete(targets)
-            .where(eq(targets.targetId, targetId))
-            .returning();
-
-        if (deletedTarget.length === 0) {
-            return next(
-                createHttpError(
-                    HttpCode.NOT_FOUND,
-                    `Target with ID ${targetId} not found`
-                )
-            );
-        }
+        const siteRolesList = await db
+            .select({
+                roleId: roles.roleId,
+                name: roles.name,
+                description: roles.description,
+                isSuperuserRole: roles.isSuperuserRole,
+            })
+            .from(roleSites)
+            .innerJoin(roles, eq(roleSites.roleId, roles.roleId))
+            .where(eq(roleSites.siteId, siteId));
 
         return response(res, {
-            data: null,
+            data: siteRolesList,
             success: true,
             error: false,
-            message: "Target deleted successfully",
+            message: "Site roles retrieved successfully",
             status: HttpCode.OK,
         });
     } catch (error) {

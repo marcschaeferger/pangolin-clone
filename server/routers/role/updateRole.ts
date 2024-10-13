@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { db } from '@server/db';
-import { orgs } from '@server/db/schema';
+import { roles } from '@server/db/schema';
 import { eq } from 'drizzle-orm';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
@@ -9,20 +9,20 @@ import createHttpError from 'http-errors';
 import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
 
-const updateOrgParamsSchema = z.object({
-    orgId: z.string().transform(Number).pipe(z.number().int().positive())
+const updateRoleParamsSchema = z.object({
+    roleId: z.string().transform(Number).pipe(z.number().int().positive())
 });
 
-const updateOrgBodySchema = z.object({
+const updateRoleBodySchema = z.object({
     name: z.string().min(1).max(255).optional(),
-    domain: z.string().min(1).max(255).optional(),
+    description: z.string().optional(),
 }).refine(data => Object.keys(data).length > 0, {
     message: "At least one field must be provided for update"
 });
 
-export async function updateOrg(req: Request, res: Response, next: NextFunction): Promise<any> {
+export async function updateRole(req: Request, res: Response, next: NextFunction): Promise<any> {
     try {
-        const parsedParams = updateOrgParamsSchema.safeParse(req.params);
+        const parsedParams = updateRoleParamsSchema.safeParse(req.params);
         if (!parsedParams.success) {
             return next(
                 createHttpError(
@@ -32,7 +32,7 @@ export async function updateOrg(req: Request, res: Response, next: NextFunction)
             );
         }
 
-        const parsedBody = updateOrgBodySchema.safeParse(req.body);
+        const parsedBody = updateRoleBodySchema.safeParse(req.body);
         if (!parsedBody.success) {
             return next(
                 createHttpError(
@@ -42,35 +42,57 @@ export async function updateOrg(req: Request, res: Response, next: NextFunction)
             );
         }
 
-        const { orgId } = parsedParams.data;
+        const { roleId } = parsedParams.data;
         const updateData = parsedBody.data;
 
-
-        // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(ActionsEnum.updateOrg, req);
+        // Check if the user has permission to update roles
+        const hasPermission = await checkUserActionPermission(ActionsEnum.updateRole, req);
         if (!hasPermission) {
             return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
         }
 
-        const updatedOrg = await db.update(orgs)
-            .set(updateData)
-            .where(eq(orgs.orgId, orgId))
-            .returning();
+        const role = await db.select()
+        .from(roles)
+        .where(eq(roles.roleId, roleId))
+        .limit(1);
 
-        if (updatedOrg.length === 0) {
+        if (role.length === 0) {
             return next(
                 createHttpError(
                     HttpCode.NOT_FOUND,
-                    `Organization with ID ${orgId} not found`
+                    `Role with ID ${roleId} not found`
+                )
+            );
+        }
+
+        if (role[0].isSuperuserRole) {
+            return next(
+                createHttpError(
+                    HttpCode.FORBIDDEN,
+                    `Cannot update a superuser role`
+                )
+            );
+        }
+
+        const updatedRole = await db.update(roles)
+            .set(updateData)
+            .where(eq(roles.roleId, roleId))
+            .returning();
+
+        if (updatedRole.length === 0) {
+            return next(
+                createHttpError(
+                    HttpCode.NOT_FOUND,
+                    `Role with ID ${roleId} not found`
                 )
             );
         }
 
         return response(res, {
-            data: updatedOrg[0],
+            data: updatedRole[0],
             success: true,
             error: false,
-            message: "Organization updated successfully",
+            message: "Role updated successfully",
             status: HttpCode.OK,
         });
     } catch (error) {

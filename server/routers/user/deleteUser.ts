@@ -30,7 +30,7 @@ export async function deleteUser(req: Request, res: Response, next: NextFunction
         // Check if the user has permission to list sites
         const hasPermission = await checkUserActionPermission(ActionsEnum.deleteUser, req);
         if (!hasPermission) {
-            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
+            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
         }
 
         const deletedUser = await db.delete(users)

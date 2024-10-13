@@ -43,7 +43,7 @@ export async function listResources(req: RequestWithOrgAndRole, res: Response, n
         // Check if the user has permission to list sites
         const hasPermission = await checkUserActionPermission(ActionsEnum.listResources, req);
         if (!hasPermission) {
-            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
+            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
         }
 
         if (orgId && orgId !== req.orgId) {

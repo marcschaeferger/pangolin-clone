@@ -1,24 +1,25 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { db } from '@server/db';
-import { orgs } from '@server/db/schema';
+import { roles } from '@server/db/schema';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
 import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
-import { createSuperuserRole } from '@server/db/ensureActions';
 
-const createOrgSchema = z.object({
-    name: z.string().min(1).max(255),
-    domain: z.string().min(1).max(255),
+const createRoleParamsSchema = z.object({
+    orgId: z.number().int().positive()
 });
 
-const MAX_ORGS = 5;
+const createRoleSchema = z.object({
+    name: z.string().min(1).max(255),
+    description: z.string().optional(),
+});
 
-export async function createOrg(req: Request, res: Response, next: NextFunction): Promise<any> {
+export async function createRole(req: Request, res: Response, next: NextFunction): Promise<any> {
     try {
-        const parsedBody = createOrgSchema.safeParse(req.body);
+        const parsedBody = createRoleSchema.safeParse(req.body);
         if (!parsedBody.success) {
             return next(
                 createHttpError(
@@ -28,36 +29,36 @@ export async function createOrg(req: Request, res: Response, next: NextFunction)
             );
         }
 
-        const userOrgIds = req.userOrgIds;
-        if (userOrgIds && userOrgIds.length > MAX_ORGS) {
+        const roleData = parsedBody.data;
+
+        const parsedParams = createRoleParamsSchema.safeParse(req.params);
+        if (!parsedParams.success) {
             return next(
                 createHttpError(
-                    HttpCode.FORBIDDEN,
-                    `Maximum number of organizations reached.`
+                    HttpCode.BAD_REQUEST,
+                    parsedParams.error.errors.map(e => e.message).join(', ')
                 )
             );
         }
 
-        // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(ActionsEnum.createOrg, req);
+        const { orgId } = parsedParams.data;
+
+        // Check if the user has permission to create roles
+        const hasPermission = await checkUserActionPermission(ActionsEnum.createRole, req);
         if (!hasPermission) {
             return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
         }
 
-        const { name, domain } = parsedBody.data;
-
-        const newOrg = await db.insert(orgs).values({
-            name,
-            domain,
+        const newRole = await db.insert(roles).values({
+            ...roleData,
+            orgId,
         }).returning();
 
-        await createSuperuserRole(newOrg[0].orgId);
-
         return response(res, {
-            data: newOrg[0],
+            data: newRole[0],
             success: true,
             error: false,
-            message: "Organization created successfully",
+            message: "Role created successfully",
             status: HttpCode.CREATED,
         });
     } catch (error) {

@@ -1,28 +1,25 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { db } from '@server/db';
-import { targets } from '@server/db/schema';
+import { resources, roleResources, roleSites } from '@server/db/schema';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
 import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
+import { eq } from 'drizzle-orm';
 
-const createTargetParamsSchema = z.object({
-    resourceId: z.string().uuid(),
+const addRoleSiteParamsSchema = z.object({
+    roleId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
 
-const createTargetSchema = z.object({
-    ip: z.string().ip(),
-    method: z.string().min(1).max(10),
-    port: z.number().int().min(1).max(65535),
-    protocol: z.string().optional(),
-    enabled: z.boolean().default(true),
+const addRoleSiteSchema = z.object({
+    siteId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
 
-export async function createTarget(req: Request, res: Response, next: NextFunction): Promise<any> {
+export async function addRoleSite(req: Request, res: Response, next: NextFunction): Promise<any> {
     try {
-        const parsedBody = createTargetSchema.safeParse(req.body);
+        const parsedBody = addRoleSiteSchema.safeParse(req.body);
         if (!parsedBody.success) {
             return next(
                 createHttpError(
@@ -32,9 +29,9 @@ export async function createTarget(req: Request, res: Response, next: NextFuncti
             );
         }
 
-        const targetData = parsedBody.data;
+        const { siteId } = parsedBody.data;
 
-        const parsedParams = createTargetParamsSchema.safeParse(req.params);
+        const parsedParams = addRoleSiteParamsSchema.safeParse(req.params);
         if (!parsedParams.success) {
             return next(
                 createHttpError(
@@ -44,24 +41,35 @@ export async function createTarget(req: Request, res: Response, next: NextFuncti
             );
         }
 
-        const { resourceId } = parsedParams.data;
+        const { roleId } = parsedParams.data;
 
-        // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(ActionsEnum.createTarget, req);
+        // Check if the user has permission to add role sites
+        const hasPermission = await checkUserActionPermission(ActionsEnum.addRoleSite, req);
         if (!hasPermission) {
             return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
         }
 
-        const newTarget = await db.insert(targets).values({
-            resourceId,
-            ...targetData
+        const newRoleSite = await db.insert(roleSites).values({
+            roleId,
+            siteId,
         }).returning();
 
+        const siteResources = await db.select()
+            .from(resources)
+            .where(eq(resources.siteId, siteId));
+
+        for (const resource of siteResources) {
+            await db.insert(roleResources).values({
+                roleId,
+                resourceId: resource.resourceId,
+            });
+        }
+
         return response(res, {
-            data: newTarget[0],
+            data: newRoleSite[0],
             success: true,
             error: false,
-            message: "Target created successfully",
+            message: "Site added to role successfully",
             status: HttpCode.CREATED,
         });
     } catch (error) {
