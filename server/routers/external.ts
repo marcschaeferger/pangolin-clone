@@ -102,11 +102,6 @@ authenticated.delete(
     target.deleteTarget,
 );
 
-authenticated.get("/users", user.listUsers);
-// authenticated.get("/org/:orgId/users", user.???); // TODO: Implement this
-unauthenticated.get("/user", verifySessionMiddleware, user.getUser);
-// authenticated.get("/user/:userId", user.getUser);
-authenticated.delete("/user/:userId", user.deleteUser);
 authenticated.put(
     "/org/:orgId/role",
     verifyOrgAccess,
@@ -190,7 +185,7 @@ authenticated.get(
     role.listRoleActions,
 );
 
-authenticated.get("/user", user.getUser);
+authenticated.get("/user", verifySessionMiddleware, user.getUser);
 authenticated.get("/org/:orgId/users", verifyOrgAccess, user.listUsers);
 authenticated.delete(
     "/org/:orgId/user/:userId",
