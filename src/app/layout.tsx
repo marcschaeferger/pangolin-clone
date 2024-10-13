@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Roboto } from "next/font/google";
+import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
     title: process.env.NEXT_PUBLIC_APP_NAME,
@@ -18,6 +19,7 @@ export default async function RootLayout({
         <html>
             <body className={`${font.className}`}>
                 <main>{children}</main>
+                <Toaster />
             </body>
         </html>
     );
