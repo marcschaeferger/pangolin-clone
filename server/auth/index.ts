@@ -24,13 +24,9 @@ export const lucia = new Lucia(adapter, {
         expires: false,
         attributes: {
             sameSite: "strict",
-            secure: config.app.secure_cookies || false,
+            secure: config.server.secure_cookies || false,
             domain:
-                "." +
-                config.app.external_base_url
-                    .split("://")[1]
-                    .split(":")[0]
-                    .split("/")[0],
+                "." + new URL(config.app.base_url).hostname.split(".").slice(-2).join("."),
         },
     },
     sessionExpiresIn: new TimeSpan(2, "w"),

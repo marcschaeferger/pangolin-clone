@@ -118,7 +118,7 @@ export async function login(
 
         const session = await lucia.createSession(existingUser.id, {});
         const cookie = lucia.createSessionCookie(session.id).serialize();
-        logger.debug("Session cookie", JSON.stringify(cookie, null, 2));
+
         res.appendHeader(
             "Set-Cookie",
             cookie

@@ -37,7 +37,10 @@ export function buildTraefikConfig(
             [middlewareName]: {
                 plugin: {
                     [middlewareName]: {
-                        apiBaseUrl: config.app.internal_base_url,
+                        apiBaseUrl: new URL(
+                            "/api/v1",
+                            `http://${config.server.internal_hostname}:${config.server.internal_port}`,
+                        ).href,
                     },
                 },
             },

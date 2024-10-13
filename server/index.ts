@@ -1,7 +1,7 @@
+import config from "@server/config";
 import express, { Request, Response } from "express";
 import next from "next";
 import { parse } from "url";
-import config from "@server/config";
 import logger from "@server/logger";
 import helmet from "helmet";
 import cors from "cors";

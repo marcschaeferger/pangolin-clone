@@ -10,11 +10,9 @@ const environmentSchema = z.object({
     app: z.object({
         name: z.string(),
         environment: z.enum(["dev", "prod"]),
-        external_base_url: z.string().url(),
-        internal_base_url: z.string().url(),
+        base_url: z.string().url(),
         log_level: z.enum(["debug", "info", "warn", "error"]),
         save_logs: z.string().transform((val) => val === "true"),
-        secure_cookies: z.string().transform((val) => val === "true"),
     }),
     server: z.object({
         external_port: z
@@ -25,6 +23,8 @@ const environmentSchema = z.object({
             .string()
             .transform((val) => parseInt(val, 10))
             .pipe(z.number()),
+        internal_hostname: z.string(),
+        secure_cookies: z.string().transform((val) => val === "true"),
     }),
     rate_limit: z.object({
         window_minutes: z
@@ -71,9 +71,19 @@ const loadConfig = (configPath: string) => {
     }
 };
 
-const configFilePath = path.join(APP_PATH, "config.yml");
+const configFilePath1 = path.join(APP_PATH, "config.yml");
+const configFilePath2 = path.join(APP_PATH, "config.yaml");
 
-const environment = loadConfig(configFilePath);
+let environment: any;
+if (fs.existsSync(configFilePath1)) {
+    environment = loadConfig(configFilePath1);
+} else if (fs.existsSync(configFilePath2)) {
+    environment = loadConfig(configFilePath2);
+}
+
+if (!environment) {
+    throw new Error("No configuration file found");
+}
 
 const parsedConfig = environmentSchema.safeParse(environment);
 
@@ -81,5 +91,14 @@ if (!parsedConfig.success) {
     const errors = fromError(parsedConfig.error);
     throw new Error(`Invalid configuration file: ${errors}`);
 }
+
+process.env.NEXT_PUBLIC_EXTERNAL_API_BASE_URL = new URL(
+    "/api/v1",
+    parsedConfig.data.app.base_url,
+).href;
+process.env.NEXT_PUBLIC_INTERNAL_API_BASE_URL = new URL(
+    "/api/v1",
+    `http://${parsedConfig.data.server.internal_hostname}:${parsedConfig.data.server.external_port}`,
+).href;
 
 export default parsedConfig.data;
