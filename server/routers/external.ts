@@ -20,7 +20,8 @@ import {
     verifyTargetAccess,
     verifyRoleAccess,
     verifySuperuser,
-    verifyUserInRole
+    verifyUserInRole,
+    verifyUserAccess
 } from "./auth";
 
 // Root routes
@@ -168,21 +169,60 @@ authenticated.delete(
     "/role/:roleId/action",
     verifyRoleAccess,
     verifyUserInRole,
+    verifySuperuser,
     role.removeRoleAction,
 );
 authenticated.get(
     "/role/:roleId/actions",
     verifyRoleAccess,
     verifyUserInRole,
+    verifySuperuser,
     role.listRoleActions,
 );
 
-authenticated.get("/users", user.listUsers);
-// authenticated.get("/org/:orgId/users", user.???); // TODO: Implement this
 authenticated.get("/user", user.getUser);
-authenticated.get("/user/roles", user.listUserRoles);
-// authenticated.get("/user/:userId", user.getUser);
-authenticated.delete("/user/:userId", user.deleteUser);
+authenticated.get("/org/:orgId/users", verifyOrgAccess, user.listUsers);
+authenticated.delete("/org/:orgId/user/:userId", verifyOrgAccess, verifyUserAccess, user.removeUserOrg);
+authenticated.put("/org/:orgId/user/:userId", verifyOrgAccess, verifyUserAccess, user.addUserOrg);
+
+authenticated.put(
+    "/user/:userId/site",
+    verifySiteAccess,
+    verifyUserAccess,
+    role.addRoleSite,
+);
+authenticated.delete(
+    "/user/:userId/site",
+    verifySiteAccess,
+    verifyUserAccess,
+    role.removeRoleSite,
+);
+authenticated.put(
+    "/user/:userId/resource",
+    verifyResourceAccess,
+    verifyUserAccess,
+    role.addRoleResource,
+);
+authenticated.delete(
+    "/user/:userId/resource",
+    verifyResourceAccess,
+    verifyUserAccess,
+    role.removeRoleResource,
+);
+authenticated.put(
+    "/org/:orgId/user/:userId/action",
+    verifyOrgAccess,
+    verifyUserAccess,
+    verifySuperuser,
+    role.addRoleAction,
+);
+authenticated.delete(
+    "/org/:orgId/user/:userId/action",
+    verifyOrgAccess,
+    verifyUserAccess,
+    verifySuperuser,
+    role.removeRoleAction,
+);
 
 // Auth routes
 export const authRouter = Router();

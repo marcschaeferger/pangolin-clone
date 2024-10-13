@@ -7,7 +7,7 @@ import HttpCode from '@server/types/HttpCode';
 
 export async function verifySiteAccess(req: Request, res: Response, next: NextFunction) {
     const userId = req.user!.id; // Assuming you have user information in the request
-    const siteId = parseInt(req.params.siteId);
+    const siteId = parseInt(req.params.siteId || req.body.siteId || req.query.siteId);
 
     if (!userId) {
         return next(createHttpError(HttpCode.UNAUTHORIZED, 'User not authenticated'));
