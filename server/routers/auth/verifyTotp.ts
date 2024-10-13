@@ -61,7 +61,7 @@ export async function verifyTotp(
     }
 
     try {
-        const valid = await verifyTotpCode(code, user.twoFactorSecret, user.id);
+        const valid = await verifyTotpCode(code, user.twoFactorSecret, user.userId);
 
         let codes;
         if (valid) {
@@ -69,7 +69,7 @@ export async function verifyTotp(
             await db
                 .update(users)
                 .set({ twoFactorEnabled: true })
-                .where(eq(users.id, user.id));
+                .where(eq(users.userId, user.userId));
 
             const backupCodes = await generateBackupCodes();
             codes = backupCodes;
@@ -77,7 +77,7 @@ export async function verifyTotp(
                 const hash = await hashPassword(code);
 
                 await db.insert(twoFactorBackupCodes).values({
-                    userId: user.id,
+                    userId: user.userId,
                     codeHash: hash,
                 });
             }

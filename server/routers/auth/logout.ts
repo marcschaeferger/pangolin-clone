@@ -1,16 +1,20 @@
 import { Request, Response, NextFunction } from "express";
-import { lucia } from "@server/auth";
 import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
 import response from "@server/utils/response";
 import logger from "@server/logger";
+import {
+    createBlankSessionTokenCookie,
+    invalidateSession,
+    SESSION_COOKIE_NAME,
+} from "@server/auth";
 
 export async function logout(
     req: Request,
     res: Response,
     next: NextFunction,
 ): Promise<any> {
-    const sessionId = req.cookies[lucia.sessionCookieName];
+    const sessionId = req.cookies[SESSION_COOKIE_NAME];
 
     if (!sessionId) {
         return next(
@@ -22,11 +26,8 @@ export async function logout(
     }
 
     try {
-        await lucia.invalidateSession(sessionId);
-        res.setHeader(
-            "Set-Cookie",
-            lucia.createBlankSessionCookie().serialize(),
-        );
+        await invalidateSession(sessionId);
+        res.setHeader("Set-Cookie", createBlankSessionTokenCookie());
 
         return response<null>(res, {
             data: null,

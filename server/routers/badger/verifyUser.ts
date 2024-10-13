@@ -1,11 +1,10 @@
-import lucia from "@server/auth";
 import HttpCode from "@server/types/HttpCode";
 import { NextFunction, Request, Response } from "express";
 import createHttpError from "http-errors";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
 import { response } from "@server/utils/response";
-import logger from "@server/logger";
+import { validateSessionToken } from "@server/auth";
 
 export const verifyUserBody = z.object({
     sessionId: z.string(),
@@ -36,7 +35,7 @@ export async function verifyUser(
     const { sessionId } = parsedBody.data;
 
     try {
-        const { session, user } = await lucia.validateSession(sessionId);
+        const { session, user } = await validateSessionToken(sessionId);
 
         if (!session || !user) {
             return next(

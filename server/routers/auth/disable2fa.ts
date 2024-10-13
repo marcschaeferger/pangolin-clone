@@ -69,7 +69,7 @@ export async function disable2fa(
         const validOTP = await verifyTotpCode(
             code,
             user.twoFactorSecret!,
-            user.id,
+            user.userId,
         );
 
         if (!validOTP) {
@@ -84,11 +84,11 @@ export async function disable2fa(
         await db
             .update(users)
             .set({ twoFactorEnabled: false })
-            .where(eq(users.id, user.id));
+            .where(eq(users.userId, user.userId));
 
         await db
             .delete(twoFactorBackupCodes)
-            .where(eq(twoFactorBackupCodes.userId, user.id));
+            .where(eq(twoFactorBackupCodes.userId, user.userId));
 
         // TODO: send email to user confirming two-factor authentication is disabled
 

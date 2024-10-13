@@ -13,7 +13,7 @@ import { verifyTotpCode } from "@server/auth/2fa";
 import { passwordSchema } from "@server/auth/passwordSchema";
 import { encodeHex } from "oslo/encoding";
 import { isWithinExpirationDate } from "oslo";
-import lucia from "@server/auth";
+import { invalidateAllSessions } from "@server/auth";
 
 export const resetPasswordBody = z.object({
     token: z.string(),
@@ -71,7 +71,7 @@ export async function resetPassword(
         const user = await db
             .select()
             .from(users)
-            .where(eq(users.id, resetRequest[0].userId));
+            .where(eq(users.userId, resetRequest[0].userId));
 
         if (!user || !user.length) {
             return next(
@@ -96,7 +96,7 @@ export async function resetPassword(
             const validOTP = await verifyTotpCode(
                 code!,
                 user[0].twoFactorSecret!,
-                user[0].id,
+                user[0].userId,
             );
 
             if (!validOTP) {
@@ -111,12 +111,12 @@ export async function resetPassword(
 
         const passwordHash = await hashPassword(newPassword);
 
-        await lucia.invalidateUserSessions(resetRequest[0].userId);
+        await invalidateAllSessions(resetRequest[0].userId);
 
         await db
             .update(users)
             .set({ passwordHash })
-            .where(eq(users.id, resetRequest[0].userId));
+            .where(eq(users.userId, resetRequest[0].userId));
 
         await db
             .delete(passwordResetTokens)

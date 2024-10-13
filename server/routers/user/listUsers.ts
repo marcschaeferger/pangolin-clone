@@ -52,7 +52,7 @@ export async function listUsers(req: Request, res: Response, next: NextFunction)
         // Query to join users, userOrgs, and roles tables
         const usersWithRoles = await db
             .select({
-                id: users.id,
+                id: users.userId,
                 email: users.email,
                 emailVerified: users.emailVerified,
                 dateCreated: users.dateCreated,
@@ -61,7 +61,7 @@ export async function listUsers(req: Request, res: Response, next: NextFunction)
                 roleName: roles.name,
             })
             .from(users)
-            .leftJoin(userOrgs, sql`${users.id} = ${userOrgs.userId}`)
+            .leftJoin(userOrgs, sql`${users.userId} = ${userOrgs.userId}`)
             .leftJoin(roles, sql`${userOrgs.roleId} = ${roles.roleId}`)
             .where(sql`${userOrgs.orgId} = ${orgId}`)
             .limit(limit)

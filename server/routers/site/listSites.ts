@@ -49,7 +49,7 @@ export async function listSites(req: Request, res: Response, next: NextFunction)
             .fullJoin(roleSites, eq(userSites.siteId, roleSites.siteId))
             .where(
                 or(
-                    eq(userSites.userId, req.user!.id),
+                    eq(userSites.userId, req.user!.userId),
                     eq(roleSites.roleId, req.userOrgRoleId!)
                 )
             );

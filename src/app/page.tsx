@@ -9,8 +9,6 @@ export default async function Page() {
         redirect("/auth/login");
     }
 
-    console.log(user);
-
     return (
         <>
             <LandingProvider user={user}>

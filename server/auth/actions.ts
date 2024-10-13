@@ -55,8 +55,7 @@ export enum ActionsEnum {
 }
 
 export async function checkUserActionPermission(actionId: string, req: Request): Promise<boolean> {
-    const userId = req.user?.id;
-
+    const userId = req.user?.userId;
     if (!userId) {
         throw createHttpError(HttpCode.UNAUTHORIZED, 'User not authenticated');
     }

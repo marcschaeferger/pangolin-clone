@@ -6,7 +6,7 @@ import createHttpError from 'http-errors';
 import HttpCode from '@server/types/HttpCode';
 
 export async function getUserOrgs(req: Request, res: Response, next: NextFunction) {
-    const userId = req.user?.id; // Assuming you have user information in the request
+    const userId = req.user?.userId; // Assuming you have user information in the request
 
     if (!userId) {
         return next(createHttpError(HttpCode.UNAUTHORIZED, 'User not authenticated'));

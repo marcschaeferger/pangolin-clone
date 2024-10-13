@@ -21,7 +21,7 @@ export async function getUser(
     next: NextFunction,
 ): Promise<any> {
     try {
-        const userId = req.user?.id;
+        const userId = req.user?.userId;
 
         if (!userId) {
             return next(
@@ -32,7 +32,7 @@ export async function getUser(
         const user = await db
             .select()
             .from(users)
-            .where(eq(users.id, userId))
+            .where(eq(users.userId, userId))
             .limit(1);
 
         if (user.length === 0) {

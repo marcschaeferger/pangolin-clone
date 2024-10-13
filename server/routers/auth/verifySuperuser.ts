@@ -7,7 +7,7 @@ import HttpCode from '@server/types/HttpCode';
 import logger from '@server/logger';
 
 export async function verifySuperuser(req: Request, res: Response, next: NextFunction) {
-    const userId = req.user?.id; // Assuming you have user information in the request
+    const userId = req.user?.userId; // Assuming you have user information in the request
     const orgId = req.userOrgId;
 
     if (!userId) {
@@ -18,7 +18,7 @@ export async function verifySuperuser(req: Request, res: Response, next: NextFun
         return next(createHttpError(HttpCode.UNAUTHORIZED, 'User not authenticated'));
     }
 
-    try {     
+    try {
         // Check if the user has a role in the organization
         const userOrgRole = await db.select()
             .from(userOrgs)
@@ -35,7 +35,7 @@ export async function verifySuperuser(req: Request, res: Response, next: NextFun
             .from(roles)
             .where(eq(roles.roleId, userOrgRole[0].roleId))
             .limit(1);
-            
+
         if (userRole.length === 0 || !userRole[0].isSuperuserRole) {
             return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have superuser access'));
         }

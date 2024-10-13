@@ -57,7 +57,7 @@ export async function listResources(req: RequestWithOrgAndRole, res: Response, n
             .fullJoin(roleResources, eq(userResources.resourceId, roleResources.resourceId))
             .where(
                 or(
-                    eq(userResources.userId, req.user!.id),
+                    eq(userResources.userId, req.user!.userId),
                     eq(roleResources.roleId, req.userOrgRoleId!)
                 )
             );

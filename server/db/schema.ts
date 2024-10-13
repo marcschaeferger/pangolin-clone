@@ -1,14 +1,12 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { InferSelectModel } from "drizzle-orm";
 
-// Orgs table
 export const orgs = sqliteTable("orgs", {
     orgId: integer("orgId").primaryKey({ autoIncrement: true }),
     name: text("name").notNull(),
     domain: text("domain").notNull(),
 });
 
-// Sites table
 export const sites = sqliteTable("sites", {
     siteId: integer("siteId").primaryKey({ autoIncrement: true }),
     orgId: integer("orgId").references(() => orgs.orgId, {
@@ -25,7 +23,6 @@ export const sites = sqliteTable("sites", {
     megabytesOut: integer("bytesOut"),
 });
 
-// Resources table
 export const resources = sqliteTable("resources", {
     resourceId: text("resourceId", { length: 2048 }).primaryKey(),
     siteId: integer("siteId").references(() => sites.siteId, {
@@ -38,7 +35,6 @@ export const resources = sqliteTable("resources", {
     subdomain: text("subdomain"),
 });
 
-// Targets table
 export const targets = sqliteTable("targets", {
     targetId: integer("targetId").primaryKey({ autoIncrement: true }),
     resourceId: text("resourceId").references(() => resources.resourceId, {
@@ -51,7 +47,6 @@ export const targets = sqliteTable("targets", {
     enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
 });
 
-// Exit Nodes table
 export const exitNodes = sqliteTable("exitNodes", {
     exitNodeId: integer("exitNodeId").primaryKey({ autoIncrement: true }),
     name: text("name").notNull(),
@@ -60,7 +55,6 @@ export const exitNodes = sqliteTable("exitNodes", {
     listenPort: integer("listenPort"),
 });
 
-// Routes table
 export const routes = sqliteTable("routes", {
     routeId: integer("routeId").primaryKey({ autoIncrement: true }),
     exitNodeId: integer("exitNodeId").references(() => exitNodes.exitNodeId, {
@@ -69,9 +63,8 @@ export const routes = sqliteTable("routes", {
     subnet: text("subnet").notNull(),
 });
 
-// Users table
 export const users = sqliteTable("user", {
-    id: text("id").primaryKey(), // has to be id not userId for lucia
+    userId: text("id").primaryKey(),
     email: text("email").notNull().unique(),
     passwordHash: text("passwordHash").notNull(),
     twoFactorEnabled: integer("twoFactorEnabled", { mode: "boolean" })
@@ -85,26 +78,25 @@ export const users = sqliteTable("user", {
 });
 
 export const twoFactorBackupCodes = sqliteTable("twoFactorBackupCodes", {
-    id: integer("id").primaryKey({ autoIncrement: true }),
+    codeId: integer("id").primaryKey({ autoIncrement: true }),
     userId: text("userId")
         .notNull()
-        .references(() => users.id, { onDelete: "cascade" }),
+        .references(() => users.userId, { onDelete: "cascade" }),
     codeHash: text("codeHash").notNull(),
 });
 
-// Sessions table
 export const sessions = sqliteTable("session", {
-    id: text("id").primaryKey(), // has to be id not sessionId for lucia
+    sessionId: text("id").primaryKey(),
     userId: text("userId")
         .notNull()
-        .references(() => users.id, { onDelete: "cascade" }),
+        .references(() => users.userId, { onDelete: "cascade" }),
     expiresAt: integer("expiresAt").notNull(),
 });
 
 export const userOrgs = sqliteTable("userOrgs", {
     userId: text("userId")
         .notNull()
-        .references(() => users.id),
+        .references(() => users.userId),
     orgId: integer("orgId")
         .notNull()
         .references(() => orgs.orgId),
@@ -114,20 +106,20 @@ export const userOrgs = sqliteTable("userOrgs", {
 });
 
 export const emailVerificationCodes = sqliteTable("emailVerificationCodes", {
-    id: integer("id").primaryKey({ autoIncrement: true }),
+    codeId: integer("id").primaryKey({ autoIncrement: true }),
     userId: text("userId")
         .notNull()
-        .references(() => users.id, { onDelete: "cascade" }),
+        .references(() => users.userId, { onDelete: "cascade" }),
     email: text("email").notNull(),
     code: text("code").notNull(),
     expiresAt: integer("expiresAt").notNull(),
 });
 
 export const passwordResetTokens = sqliteTable("passwordResetTokens", {
-    id: integer("id").primaryKey({ autoIncrement: true }),
+    tokenId: integer("id").primaryKey({ autoIncrement: true }),
     userId: text("userId")
         .notNull()
-        .references(() => users.id, { onDelete: "cascade" }),
+        .references(() => users.userId, { onDelete: "cascade" }),
     tokenHash: text("tokenHash").notNull(),
     expiresAt: integer("expiresAt").notNull(),
 });
@@ -140,7 +132,9 @@ export const actions = sqliteTable("actions", {
 
 export const roles = sqliteTable("roles", {
     roleId: integer("roleId").primaryKey({ autoIncrement: true }),
-    orgId: integer("orgId").references(() => orgs.orgId, { onDelete: "cascade" }),
+    orgId: integer("orgId").references(() => orgs.orgId, {
+        onDelete: "cascade",
+    }),
     isSuperuserRole: integer("isSuperuserRole", { mode: "boolean" }),
     name: text("name").notNull(),
     description: text("description"),
@@ -161,7 +155,7 @@ export const roleActions = sqliteTable("roleActions", {
 export const userActions = sqliteTable("userActions", {
     userId: text("userId")
         .notNull()
-        .references(() => users.id, { onDelete: "cascade" }),
+        .references(() => users.userId, { onDelete: "cascade" }),
     actionId: text("actionId")
         .notNull()
         .references(() => actions.actionId, { onDelete: "cascade" }),
@@ -182,7 +176,7 @@ export const roleSites = sqliteTable("roleSites", {
 export const userSites = sqliteTable("userSites", {
     userId: text("userId")
         .notNull()
-        .references(() => users.id, { onDelete: "cascade" }),
+        .references(() => users.userId, { onDelete: "cascade" }),
     siteId: integer("siteId")
         .notNull()
         .references(() => sites.siteId, { onDelete: "cascade" }),
@@ -200,7 +194,7 @@ export const roleResources = sqliteTable("roleResources", {
 export const userResources = sqliteTable("userResources", {
     userId: text("userId")
         .notNull()
-        .references(() => users.id, { onDelete: "cascade" }),
+        .references(() => users.userId, { onDelete: "cascade" }),
     resourceId: text("resourceId")
         .notNull()
         .references(() => resources.resourceId, { onDelete: "cascade" }),
@@ -216,7 +210,6 @@ export const limitsTable = sqliteTable("limits", {
     description: text("description"),
 });
 
-// Define the model types for type inference
 export type Org = InferSelectModel<typeof orgs>;
 export type User = InferSelectModel<typeof users>;
 export type Site = InferSelectModel<typeof sites>;

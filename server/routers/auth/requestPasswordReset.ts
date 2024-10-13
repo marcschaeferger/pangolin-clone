@@ -8,10 +8,11 @@ import { db } from "@server/db";
 import { passwordResetTokens, users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import { sha256 } from "oslo/crypto";
-import { generateIdFromEntropySize, TimeSpan } from "lucia";
 import { encodeHex } from "oslo/encoding";
 import { createDate } from "oslo";
 import logger from "@server/logger";
+import { generateIdFromEntropySize } from "@server/auth";
+import { TimeSpan } from "oslo";
 
 export const requestPasswordResetBody = z.object({
     email: z.string().email(),
@@ -58,7 +59,7 @@ export async function requestPasswordReset(
 
         await db
             .delete(passwordResetTokens)
-            .where(eq(passwordResetTokens.userId, existingUser[0].id));
+            .where(eq(passwordResetTokens.userId, existingUser[0].userId));
 
         const token = generateIdFromEntropySize(25);
         const tokenHash = encodeHex(
@@ -66,7 +67,7 @@ export async function requestPasswordReset(
         );
 
         await db.insert(passwordResetTokens).values({
-            userId: existingUser[0].id,
+            userId: existingUser[0].userId,
             tokenHash,
             expiresAt: createDate(new TimeSpan(2, "h")).getTime(),
         });
@@ -89,7 +90,7 @@ export async function requestPasswordReset(
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,
-                "Failed to process password reset request"
+                "Failed to process password reset request",
             ),
         );
     }

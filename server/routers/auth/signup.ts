@@ -3,9 +3,7 @@ import db from "@server/db";
 import { hash } from "@node-rs/argon2";
 import HttpCode from "@server/types/HttpCode";
 import { z } from "zod";
-import { generateId } from "lucia";
 import { users } from "@server/db/schema";
-import lucia from "@server/auth";
 import { fromError } from "zod-validation-error";
 import createHttpError from "http-errors";
 import response from "@server/utils/response";
@@ -14,6 +12,12 @@ import { sendEmailVerificationCode } from "./sendEmailVerificationCode";
 import { passwordSchema } from "@server/auth/passwordSchema";
 import { eq } from "drizzle-orm";
 import moment from "moment";
+import {
+    createSession,
+    generateId,
+    generateSessionToken,
+    serializeSessionCookie,
+} from "@server/auth";
 
 export const signupBodySchema = z.object({
     email: z.string().email(),
@@ -85,22 +89,21 @@ export async function signup(
                 );
             } else {
                 // If the user was created more than 2 hours ago, we want to delete the old user and create a new one
-                await db.delete(users).where(eq(users.id, user.id));
+                await db.delete(users).where(eq(users.userId, user.userId));
             }
         }
 
         await db.insert(users).values({
-            id: userId,
+            userId: userId,
             email: email,
             passwordHash,
             dateCreated: moment().toISOString(),
         });
 
-        const session = await lucia.createSession(userId, {});
-        res.appendHeader(
-            "Set-Cookie",
-            lucia.createSessionCookie(session.id).serialize(),
-        );
+        const token = generateSessionToken();
+        await createSession(token, userId);
+        const cookie = serializeSessionCookie(token);
+        res.appendHeader("Set-Cookie", cookie);
 
         sendEmailVerificationCode(email, userId);
 

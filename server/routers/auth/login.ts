@@ -1,5 +1,10 @@
 import { verify } from "@node-rs/argon2";
-import lucia, { verifySession } from "@server/auth";
+import {
+    createSession,
+    generateSessionToken,
+    serializeSessionCookie,
+    verifySession,
+} from "@server/auth";
 import db from "@server/db";
 import { users } from "@server/db/schema";
 import HttpCode from "@server/types/HttpCode";
@@ -102,7 +107,7 @@ export async function login(
             const validOTP = await verifyTotpCode(
                 code,
                 existingUser.twoFactorSecret!,
-                existingUser.id,
+                existingUser.userId,
             );
 
             if (!validOTP) {
@@ -115,13 +120,11 @@ export async function login(
             }
         }
 
-        const session = await lucia.createSession(existingUser.id, {});
-        const cookie = lucia.createSessionCookie(session.id).serialize();
+        const token = generateSessionToken();
+        await createSession(token, existingUser.userId);
+        const cookie = serializeSessionCookie(token);
 
-        res.appendHeader(
-            "Set-Cookie",
-            cookie
-        );
+        res.appendHeader("Set-Cookie", cookie);
 
         if (!existingUser.emailVerified) {
             return response<LoginResponse>(res, {

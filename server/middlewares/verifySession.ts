@@ -20,7 +20,7 @@ export const verifySessionMiddleware = async (
     const existingUser = await db
         .select()
         .from(users)
-        .where(eq(users.id, user.id));
+        .where(eq(users.userId, user.userId));
 
     if (!existingUser || !existingUser[0]) {
         return next(

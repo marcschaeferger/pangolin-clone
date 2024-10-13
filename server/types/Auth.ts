@@ -1,6 +1,6 @@
 import { Request } from "express";
 import { User } from "@server/db/schema";
-import { Session } from "lucia";
+import { Session } from "@server/db/schema";
 
 export interface AuthenticatedRequest extends Request {
     user: User;

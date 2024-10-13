@@ -36,7 +36,7 @@ export async function addUserAction(req: Request, res: Response, next: NextFunct
         }
 
         // Check if the user exists
-        const user = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+        const user = await db.select().from(users).where(eq(users.userId, userId)).limit(1);
         if (user.length === 0) {
             return next(createHttpError(HttpCode.NOT_FOUND, `User with ID ${userId} not found`));
         }

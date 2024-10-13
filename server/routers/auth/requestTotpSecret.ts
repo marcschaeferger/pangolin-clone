@@ -72,7 +72,7 @@ export async function requestTotpSecret(
             .set({
                 twoFactorSecret: secret,
             })
-            .where(eq(users.id, user.id));
+            .where(eq(users.userId, user.userId));
 
         return response<RequestTotpSecretResponse>(res, {
             data: {

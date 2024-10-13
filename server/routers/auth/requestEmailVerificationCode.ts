@@ -26,7 +26,7 @@ export async function requestEmailVerificationCode(
             );
         }
 
-        await sendEmailVerificationCode(user.email, user.id);
+        await sendEmailVerificationCode(user.email, user.userId);
 
         return response<RequestEmailVerificationCodeResponse>(res, {
             data: {

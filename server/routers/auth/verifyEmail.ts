@@ -51,14 +51,14 @@ export async function verifyEmail(
         if (valid) {
             await db
                 .delete(emailVerificationCodes)
-                .where(eq(emailVerificationCodes.userId, user.id));
+                .where(eq(emailVerificationCodes.userId, user.userId));
 
             await db
                 .update(users)
                 .set({
                     emailVerified: true,
                 })
-                .where(eq(users.id, user.id));
+                .where(eq(users.userId, user.userId));
         } else {
             return next(
                 createHttpError(
@@ -93,7 +93,7 @@ async function isValidCode(user: User, code: string): Promise<boolean> {
     const codeRecord = await db
         .select()
         .from(emailVerificationCodes)
-        .where(eq(emailVerificationCodes.userId, user.id))
+        .where(eq(emailVerificationCodes.userId, user.userId))
         .limit(1);
 
     if (user.email !== codeRecord[0].email) {

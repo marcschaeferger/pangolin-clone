@@ -45,14 +45,14 @@ export async function verifyBackUpCode(
             parallelism: 1,
         });
         if (validCode) {
-            validId = hashedCode.id;
+            validId = hashedCode.codeId;
         }
     }
 
     if (validId) {
         await db
             .delete(twoFactorBackupCodes)
-            .where(eq(twoFactorBackupCodes.id, validId));
+            .where(eq(twoFactorBackupCodes.codeId, validId));
     }
 
     return validId ? true : false;
