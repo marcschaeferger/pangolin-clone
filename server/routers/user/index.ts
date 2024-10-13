@@ -1,3 +1,5 @@
 export * from "./getUser";
-export * from "./deleteUser";
+export * from "./removeUserOrg";
+export * from "./addUserOrg";
 export * from "./listUsers";
+export * from "./setUserRole";

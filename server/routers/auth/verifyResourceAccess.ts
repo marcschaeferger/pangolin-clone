@@ -7,7 +7,7 @@ import HttpCode from '@server/types/HttpCode';
 
 export async function verifyResourceAccess(req: Request, res: Response, next: NextFunction) {
     const userId = req.user!.id; // Assuming you have user information in the request
-    const resourceId = req.params.resourceId;
+    const resourceId = req.params.resourceId || req.body.resourceId || req.query.resourceId;
 
     if (!userId) {
         return next(createHttpError(HttpCode.UNAUTHORIZED, 'User not authenticated'));

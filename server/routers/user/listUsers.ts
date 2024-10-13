@@ -1,13 +1,17 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { db } from '@server/db';
-import { users } from '@server/db/schema';
+import { roles, userOrgs, users } from '@server/db/schema';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
 import { sql } from 'drizzle-orm';
 import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
+
+const listUsersParamsSchema = z.object({
+    orgId: z.string().optional().transform(Number).pipe(z.number().int().positive()),
+});
 
 const listUsersSchema = z.object({
     limit: z.string().optional().transform(Number).pipe(z.number().int().positive().default(10)),
@@ -25,33 +29,54 @@ export async function listUsers(req: Request, res: Response, next: NextFunction)
                 )
             );
         }
-
         const { limit, offset } = parsedQuery.data;
 
-        // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(ActionsEnum.listUsers, req);
-        if (!hasPermission) {
-            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
+        const parsedParams = listUsersParamsSchema.safeParse(req.params);
+        if (!parsedParams.success) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    parsedParams.error.errors.map(e => e.message).join(', ')
+                )
+            );
         }
 
-        const usersList = await db.select()
+        const { orgId } = parsedParams.data;
+
+        // Check if the user has permission to list users
+        const hasPermission = await checkUserActionPermission(ActionsEnum.listUsers, req);
+        if (!hasPermission) {
+            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
+        }
+
+        // Query to join users, userOrgs, and roles tables
+        const usersWithRoles = await db
+            .select({
+                id: users.id,
+                email: users.email,
+                emailVerified: users.emailVerified,
+                dateCreated: users.dateCreated,
+                orgId: userOrgs.orgId,
+                roleId: userOrgs.roleId,
+                roleName: roles.name,
+            })
             .from(users)
+            .leftJoin(userOrgs, sql`${users.id} = ${userOrgs.userId}`)
+            .leftJoin(roles, sql`${userOrgs.roleId} = ${roles.roleId}`)
+            .where(sql`${userOrgs.orgId} = ${orgId}`)
             .limit(limit)
             .offset(offset);
 
-        const totalCountResult = await db
-            .select({ count: sql<number>`cast(count(*) as integer)` })
+        // Count total users
+        const [{ count }] = await db
+            .select({ count: sql<number>`count(*)` })
             .from(users);
-        const totalCount = totalCountResult[0].count;
-
-        // Remove passwordHash from each user object
-        const usersWithoutPassword = usersList.map(({ passwordHash, ...userWithoutPassword }) => userWithoutPassword);
 
         return response(res, {
             data: {
-                users: usersWithoutPassword,
+                users: usersWithRoles,
                 pagination: {
-                    total: totalCount,
+                    total: count,
                     limit,
                     offset,
                 },

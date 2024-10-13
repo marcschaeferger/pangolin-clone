@@ -57,7 +57,7 @@ export async function updateSite(req: Request, res: Response, next: NextFunction
         // Check if the user has permission to list sites
         const hasPermission = await checkUserActionPermission(ActionsEnum.updateSite, req);
         if (!hasPermission) {
-            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
+            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
         }
 
         // Update the site in the database

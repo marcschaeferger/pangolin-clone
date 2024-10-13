@@ -1,21 +1,22 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { db } from '@server/db';
-import { users } from '@server/db/schema';
-import { eq } from 'drizzle-orm';
+import { userOrgs, users } from '@server/db/schema';
+import { and, eq } from 'drizzle-orm';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
 import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
 
-const deleteUserSchema = z.object({
-    userId: z.string().uuid()
+const removeUserSchema = z.object({
+    userId: z.string().uuid(),
+    orgId: z.number().int().positive(),
 });
 
-export async function deleteUser(req: Request, res: Response, next: NextFunction): Promise<any> {
+export async function removeUserOrg(req: Request, res: Response, next: NextFunction): Promise<any> {
     try {
-        const parsedParams = deleteUserSchema.safeParse(req.params);
+        const parsedParams = removeUserSchema.safeParse(req.params);
         if (!parsedParams.success) {
             return next(
                 createHttpError(
@@ -25,26 +26,17 @@ export async function deleteUser(req: Request, res: Response, next: NextFunction
             );
         }
 
-        const { userId } = parsedParams.data;
+        const { userId, orgId } = parsedParams.data;
 
         // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(ActionsEnum.deleteUser, req);
+        const hasPermission = await checkUserActionPermission(ActionsEnum.removeUser, req);
         if (!hasPermission) {
-            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
+            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
         }
 
-        const deletedUser = await db.delete(users)
-            .where(eq(users.id, userId))
-            .returning();
-
-        if (deletedUser.length === 0) {
-            return next(
-                createHttpError(
-                    HttpCode.NOT_FOUND,
-                    `User with ID ${userId} not found`
-                )
-            );
-        }
+        // remove the user from the userOrgs table
+        await db.delete(userOrgs)
+            .where(and(eq(userOrgs.userId, userId), eq(userOrgs.orgId, orgId)));
 
         return response(res, {
             data: null,

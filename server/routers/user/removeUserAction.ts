@@ -1,28 +1,26 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { db } from '@server/db';
-import { orgs } from '@server/db/schema';
-import { eq } from 'drizzle-orm';
+import { userActions } from '@server/db/schema';
+import { and, eq } from 'drizzle-orm';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
 import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
 
-const updateOrgParamsSchema = z.object({
-    orgId: z.string().transform(Number).pipe(z.number().int().positive())
+const removeUserActionParamsSchema = z.object({
+    userId: z.string(),
 });
 
-const updateOrgBodySchema = z.object({
-    name: z.string().min(1).max(255).optional(),
-    domain: z.string().min(1).max(255).optional(),
-}).refine(data => Object.keys(data).length > 0, {
-    message: "At least one field must be provided for update"
+const removeUserActionSchema = z.object({
+    actionId: z.string(),
+    orgId: z.number().int().positive(),
 });
 
-export async function updateOrg(req: Request, res: Response, next: NextFunction): Promise<any> {
+export async function removeUserAction(req: Request, res: Response, next: NextFunction): Promise<any> {
     try {
-        const parsedParams = updateOrgParamsSchema.safeParse(req.params);
+        const parsedParams = removeUserActionParamsSchema.safeParse(req.params);
         if (!parsedParams.success) {
             return next(
                 createHttpError(
@@ -32,7 +30,9 @@ export async function updateOrg(req: Request, res: Response, next: NextFunction)
             );
         }
 
-        const parsedBody = updateOrgBodySchema.safeParse(req.body);
+        const { userId } = parsedParams.data;
+
+        const parsedBody = removeUserActionSchema.safeParse(req.body);
         if (!parsedBody.success) {
             return next(
                 createHttpError(
@@ -42,35 +42,36 @@ export async function updateOrg(req: Request, res: Response, next: NextFunction)
             );
         }
 
-        const { orgId } = parsedParams.data;
-        const updateData = parsedBody.data;
+        const { actionId, orgId } = parsedBody.data;
 
-
-        // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(ActionsEnum.updateOrg, req);
+        // Check if the user has permission to remove user actions
+        const hasPermission = await checkUserActionPermission(ActionsEnum.removeUserAction, req);
         if (!hasPermission) {
             return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
         }
 
-        const updatedOrg = await db.update(orgs)
-            .set(updateData)
-            .where(eq(orgs.orgId, orgId))
+        const deletedUserAction = await db.delete(userActions)
+            .where(and(
+                eq(userActions.userId, userId),
+                eq(userActions.actionId, actionId),
+                eq(userActions.orgId, orgId)
+            ))
             .returning();
 
-        if (updatedOrg.length === 0) {
+        if (deletedUserAction.length === 0) {
             return next(
                 createHttpError(
                     HttpCode.NOT_FOUND,
-                    `Organization with ID ${orgId} not found`
+                    `Action with ID ${actionId} not found for user with ID ${userId} in organization ${orgId}`
                 )
             );
         }
 
         return response(res, {
-            data: updatedOrg[0],
+            data: null,
             success: true,
             error: false,
-            message: "Organization updated successfully",
+            message: "Action removed from user successfully",
             status: HttpCode.OK,
         });
     } catch (error) {

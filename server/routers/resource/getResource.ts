@@ -32,7 +32,7 @@ export async function getResource(req: Request, res: Response, next: NextFunctio
         // Check if the user has permission to list sites
         const hasPermission = await checkUserActionPermission(ActionsEnum.getResource, req);
         if (!hasPermission) {
-            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to list sites'));
+            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
         }
 
         // Fetch the resource from the database
