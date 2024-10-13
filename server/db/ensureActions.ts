@@ -2,6 +2,7 @@ import { ActionsEnum } from "@server/auth/actions";
 import { db } from "@server/db";
 import { actions, roles, roleActions } from "./schema";
 import { eq, and, inArray, notInArray } from "drizzle-orm";
+import logger from "@server/logger";
 
 export async function ensureActions() {
     const actionIds = Object.values(ActionsEnum);
@@ -16,6 +17,11 @@ export async function ensureActions() {
         .from(roles)
         .where(eq(roles.isSuperuserRole, true))
         .execute();
+
+    if (defaultRoles.length === 0) {
+        logger.info('No default roles to assign');
+        return;
+    }
 
     // Add new actions
     for (const actionId of actionsToAdd) {
