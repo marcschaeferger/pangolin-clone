@@ -185,7 +185,8 @@ authenticated.get(
     role.listRoleActions,
 );
 
-authenticated.get("/user", verifySessionMiddleware, user.getUser);
+unauthenticated.get("/user", verifySessionMiddleware, user.getUser);
+
 authenticated.get("/org/:orgId/users", verifyOrgAccess, user.listUsers);
 authenticated.delete(
     "/org/:orgId/user/:userId",

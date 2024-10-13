@@ -13,6 +13,8 @@ export default async function Page() {
         redirect("/");
     }
 
+    console.log(user.email)
+
     return (
         <>
             <VerifyEmailForm email={user.email}/>
