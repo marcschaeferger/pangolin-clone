@@ -1,10 +1,9 @@
-import VerifyEmailForm from "@app/components/VerifyEmailForm";
-import { verifySession } from "@app/lib/verifySession";
+import VerifyEmailForm from "@app/components/auth/VerifyEmailForm";
+import { verifySession } from "@app/lib/auth/verifySession";
 import { redirect } from "next/navigation";
 
 export default async function Page() {
     const user = await verifySession();
-    console.log(user)
 
     if (!user) {
         redirect("/");

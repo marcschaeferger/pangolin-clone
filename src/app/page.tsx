@@ -1,4 +1,4 @@
-import { verifySession } from "@app/lib/verifySession";
+import { verifySession } from "@app/lib/auth/verifySession";
 import { LandingProvider } from "@app/providers/LandingProvider";
 import { redirect } from "next/navigation";
 

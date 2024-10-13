@@ -31,7 +31,7 @@ import api from "@app/api";
 import { AxiosResponse } from "axios";
 import { VerifyEmailResponse } from "@server/routers/auth";
 import { Loader2 } from "lucide-react";
-import { Alert, AlertDescription } from "./ui/alert";
+import { Alert, AlertDescription } from "../ui/alert";
 import { useToast } from "@app/hooks/use-toast";
 import { useRouter } from "next/navigation";
 

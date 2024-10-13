@@ -1,5 +1,5 @@
-import SignupForm from "@app/components/SignupForm";
-import { verifySession } from "@app/lib/verifySession";
+import SignupForm from "@app/components/auth/SignupForm";
+import { verifySession } from "@app/lib/auth/verifySession";
 import { redirect } from "next/navigation";
 
 export default async function Page() {

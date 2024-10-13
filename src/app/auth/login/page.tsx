@@ -1,5 +1,5 @@
-import LoginForm from "@app/components/LoginForm";
-import { verifySession } from "@app/lib/verifySession";
+import LoginForm from "@app/components/auth/LoginForm";
+import { verifySession } from "@app/lib/auth/verifySession";
 import { redirect } from "next/navigation";
 
 export default async function Page({
