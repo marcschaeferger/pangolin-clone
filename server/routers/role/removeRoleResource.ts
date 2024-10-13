@@ -9,8 +9,11 @@ import createHttpError from 'http-errors';
 import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
 
-const removeRoleResourceSchema = z.object({
+const removeRoleResourceParamsSchema = z.object({
     roleId: z.string().transform(Number).pipe(z.number().int().positive()),
+});
+
+const removeRoleResourceSchema = z.object({
     resourceId: z.string(),
 });
 
@@ -26,7 +29,19 @@ export async function removeRoleResource(req: Request, res: Response, next: Next
             );
         }
 
-        const { roleId, resourceId } = parsedParams.data;
+        const { resourceId } = parsedParams.data;
+
+        const parsedBody = removeRoleResourceParamsSchema.safeParse(req.body);
+        if (!parsedBody.success) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    parsedBody.error.errors.map(e => e.message).join(', ')
+                )
+            );
+        }
+
+        const { roleId } = parsedBody.data;
 
         // Check if the user has permission to remove role resources
         const hasPermission = await checkUserActionPermission(ActionsEnum.removeRoleResource, req);

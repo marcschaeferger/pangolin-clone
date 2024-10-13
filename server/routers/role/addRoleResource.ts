@@ -8,8 +8,11 @@ import createHttpError from 'http-errors';
 import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
 
-const addRoleResourceSchema = z.object({
+const addRoleResourceParamsSchema = z.object({
     roleId: z.string().transform(Number).pipe(z.number().int().positive()),
+});
+
+const addRoleResourceSchema = z.object({
     resourceId: z.string(),
 });
 
@@ -25,7 +28,19 @@ export async function addRoleResource(req: Request, res: Response, next: NextFun
             );
         }
 
-        const { roleId, resourceId } = parsedBody.data;
+        const { resourceId } = parsedBody.data;
+
+        const parsedParams = addRoleResourceParamsSchema.safeParse(req.params);
+        if (!parsedParams.success) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    parsedParams.error.errors.map(e => e.message).join(', ')
+                )
+            );
+        }
+
+        const { roleId } = parsedParams.data;
 
         // Check if the user has permission to add role resources
         const hasPermission = await checkUserActionPermission(ActionsEnum.addRoleResource, req);

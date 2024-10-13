@@ -35,7 +35,6 @@ export enum ActionsEnum {
     removeUser = "removeUser",
     listUsers = "listUsers",
     listSiteRoles = "listSiteRoles",
-    listUserRoles = "listUserRoles",
     listResourceRoles = "listResourceRoles",
     addRoleSite = "addRoleSite",
     addRoleResource = "addRoleResource",

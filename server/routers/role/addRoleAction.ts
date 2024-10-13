@@ -7,9 +7,13 @@ import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
 import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
+import { eq } from 'drizzle-orm';
+
+const addRoleActionParamSchema = z.object({
+    roleId: z.string().transform(Number).pipe(z.number().int().positive()),
+});
 
 const addRoleActionSchema = z.object({
-    roleId: z.string().transform(Number).pipe(z.number().int().positive()),
     actionId: z.string(),
 });
 
@@ -25,7 +29,19 @@ export async function addRoleAction(req: Request, res: Response, next: NextFunct
             );
         }
 
-        const { roleId, actionId } = parsedBody.data;
+        const { actionId } = parsedBody.data;
+
+        const parsedParams = addRoleActionParamSchema.safeParse(req.params);
+        if (!parsedParams.success) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    parsedParams.error.errors.map(e => e.message).join(', ')
+                )
+            );
+        }
+
+        const { roleId } = parsedParams.data;
 
         // Check if the user has permission to add role actions
         const hasPermission = await checkUserActionPermission(ActionsEnum.addRoleAction, req);
@@ -42,7 +58,7 @@ export async function addRoleAction(req: Request, res: Response, next: NextFunct
         const newRoleAction = await db.insert(roleActions).values({
             roleId,
             actionId,
-            orgId: role[0].orgId,
+            orgId: role[0].orgId!,
         }).returning();
 
         return response(res, {
