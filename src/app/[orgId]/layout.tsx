@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { TopbarNav } from "./components/TopbarNav";
-import { Cog, LayoutGrid, Tent, Users } from "lucide-react";
+import { Cog, Combine, LayoutGrid, Tent, Users, Waypoints } from "lucide-react";
 import Header from "./components/Header";
 import { verifySession } from "@app/lib/auth/verifySession";
 import { redirect } from "next/navigation";
@@ -14,12 +14,12 @@ const topNavItems = [
     {
         title: "Sites",
         href: "/{orgId}/sites",
-        icon: <Tent />,
+        icon: <Combine />,
     },
     {
         title: "Resources",
         href: "/{orgId}/resources",
-        icon: <LayoutGrid />,
+        icon: <Waypoints />,
     },
     {
         title: "Users",
@@ -50,13 +50,10 @@ export default async function ConfigurationLaytout({
 
     return (
         <>
-            <div className="w-full bg-stone-200 border-b border-stone-300 mb-6 select-none sm:px-0 px-3">
+            <div className="w-full bg-stone-200 border-b border-stone-300 mb-8 select-none sm:px-0 px-3">
                 <div className="container mx-auto flex flex-col content-between gap-4 pt-2">
-                    <Header
-                        email={user.email}
-                        orgName={params.orgId}
-                    />
-                    <TopbarNav items={topNavItems} orgId={params.orgId}/>
+                    <Header email={user.email} orgName={params.orgId} />
+                    <TopbarNav items={topNavItems} orgId={params.orgId} />
                 </div>
             </div>
 

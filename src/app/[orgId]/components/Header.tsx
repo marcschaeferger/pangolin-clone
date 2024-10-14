@@ -39,16 +39,16 @@ export default function Header({ email, orgName, name }: HeaderProps) {
                     </Badge>
 
                     <div className="hidden md:block">
-                        <div className="flex items-center gap-4 ml-6">
+                        <div className="flex items-center gap-4 ml-4">
                             <Link
                                 href="/docs"
-                                className="text-stone-400 hover:text-stone-600"
+                                className="text-stone-500 hover:text-stone-600"
                             >
                                 Documentation
                             </Link>
                             <Link
                                 href="/support"
-                                className="text-stone-400 hover:text-stone-600"
+                                className="text-stone-500 hover:text-stone-600"
                             >
                                 Support
                             </Link>
@@ -56,7 +56,7 @@ export default function Header({ email, orgName, name }: HeaderProps) {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4">
                     {/* Make the text truncate on smaller screens */}
                     <span className="text-lg font-medium truncate max-w-[150px] md:max-w-none">
                         {name || email}
