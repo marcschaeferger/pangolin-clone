@@ -1,13 +1,13 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { CalendarIcon, CaretSortIcon, CheckIcon } from "@radix-ui/react-icons"
+import { CalendarIcon, CaretSortIcon, CheckIcon, ChevronDownIcon } from "@radix-ui/react-icons"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
 import { cn } from "@/lib/utils"
 import { toast } from "@/hooks/use-toast"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import {
     Command,
     CommandEmpty,
@@ -37,6 +37,7 @@ import { api } from "@/api";
 import { AxiosResponse } from "axios"
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
+import { Checkbox } from "@app/components/ui/checkbox"
 
 const method = [
     { label: "Wireguard", value: "wg" },
@@ -62,9 +63,7 @@ const accountFormSchema = z.object({
         .max(30, {
             message: "Subdomain must not be longer than 30 characters.",
         }),
-    method: z.string({
-        required_error: "Please select a method.",
-    }),
+    method: z.enum(["wg", "newt"]),
 });
 
 type AccountFormValues = z.infer<typeof accountFormSchema>;
@@ -75,13 +74,17 @@ const defaultValues: Partial<AccountFormValues> = {
 };
 
 export function CreateSiteForm() {
-    const [methodValue, setMethodValue] = useState("wg");
-    const [keypair, setKeypair] = useState<{ publicKey: string; privateKey: string } | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-
     const params = useParams();
     const orgId = params.orgId;
     const router = useRouter();
+
+    const [keypair, setKeypair] = useState<{ publicKey: string; privateKey: string } | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isChecked, setIsChecked] = useState(false);
+
+    const handleCheckboxChange = (checked: boolean) => {
+        setIsChecked(checked);
+    };
 
     const form = useForm<AccountFormValues>({
         resolver: zodResolver(accountFormSchema),
@@ -124,15 +127,15 @@ export function CreateSiteForm() {
 
     const wgConfig = keypair
         ? `[Interface]
-  Address = 10.0.0.2/24
-  ListenPort = 51820
-  PrivateKey = ${keypair.privateKey}
-  
-  [Peer]
-  PublicKey = ${keypair.publicKey}
-  AllowedIPs = 0.0.0.0/0, ::/0
-  Endpoint = myserver.dyndns.org:51820
-  PersistentKeepalive = 5`
+Address = 10.0.0.2/24
+ListenPort = 51820
+PrivateKey = ${keypair.privateKey}
+
+[Peer]
+PublicKey = ${keypair.publicKey}
+AllowedIPs = 0.0.0.0/0, ::/0
+Endpoint = myserver.dyndns.org:51820
+PersistentKeepalive = 5`
         : "";
 
     const newtConfig = `curl -fsSL https://get.docker.com -o get-docker.sh
@@ -178,59 +181,23 @@ sh get-docker.sh`;
                         control={form.control}
                         name="method"
                         render={({ field }) => (
-                            <FormItem className="flex flex-col">
+                            <FormItem>
                                 <FormLabel>Method</FormLabel>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <FormControl>
-                                            <Button
-                                                variant="outline"
-                                                role="combobox"
-                                                className={cn(
-                                                    "w-[200px] justify-between",
-                                                    !field.value && "text-muted-foreground"
-                                                )}
-                                            >
-                                                {field.value
-                                                    ? method.find(
-                                                        (method) => method.value === field.value
-                                                    )?.label
-                                                    : "Select method"}
-                                                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                            </Button>
-                                        </FormControl>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-[200px] p-0">
-                                        <Command>
-                                            <CommandInput placeholder="Search method..." />
-                                            <CommandList>
-                                                <CommandEmpty>No method found.</CommandEmpty>
-                                                <CommandGroup>
-                                                    {method.map((method) => (
-                                                        <CommandItem
-                                                            value={method.label}
-                                                            key={method.value}
-                                                            onSelect={() => {
-                                                                form.setValue("method", method.value);
-                                                                setMethodValue(method.value);
-                                                            }}
-                                                        >
-                                                            <CheckIcon
-                                                                className={cn(
-                                                                    "mr-2 h-4 w-4",
-                                                                    method.value === field.value
-                                                                        ? "opacity-100"
-                                                                        : "opacity-0"
-                                                                )}
-                                                            />
-                                                            {method.label}
-                                                        </CommandItem>
-                                                    ))}
-                                                </CommandGroup>
-                                            </CommandList>
-                                        </Command>
-                                    </PopoverContent>
-                                </Popover>
+                                <div className="relative w-max">
+                                    <FormControl>
+                                        <select
+                                            className={cn(
+                                                buttonVariants({ variant: "outline" }),
+                                                "w-[200px] appearance-none font-normal"
+                                            )}
+                                            {...field}
+                                        >
+                                            <option value="wg">WireGuard</option>
+                                            <option value="newt">Newt</option>
+                                        </select>
+                                    </FormControl>
+                                    <ChevronDownIcon className="absolute right-3 top-2.5 h-4 w-4 opacity-50" />
+                                </div>
                                 <FormDescription>
                                     This is how you will connect your site to Fossorial.
                                 </FormDescription>
@@ -238,18 +205,28 @@ sh get-docker.sh`;
                             </FormItem>
                         )}
                     />
-                    {methodValue === "wg" && !isLoading ? (
+                    {form.watch("method") === "wg" && !isLoading ? (
                         <pre className="mt-2 w-full rounded-md bg-slate-950 p-4 overflow-x-auto">
                             <code className="text-white whitespace-pre-wrap">{wgConfig}</code>
                         </pre>
-                    ) : methodValue === "wg" && isLoading ? (
+                    ) : form.watch("method") === "wg" && isLoading ? (
                         <p>Loading WireGuard configuration...</p>
                     ) : (
                         <pre className="mt-2 w-full rounded-md bg-slate-950 p-4 overflow-x-auto">
                             <code className="text-white whitespace-pre-wrap">{newtConfig}</code>
                         </pre>
                     )}
-                    <Button type="submit">Create Site</Button>
+                    <div className="flex items-center space-x-2">
+                        <Checkbox id="terms" checked={isChecked}
+                            onCheckedChange={handleCheckboxChange} />
+                        <label
+                            htmlFor="terms"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                            I have copied the config
+                        </label>
+                    </div>
+                    <Button type="submit" disabled={!isChecked}>Create Site</Button>
                 </form>
             </Form>
         </>

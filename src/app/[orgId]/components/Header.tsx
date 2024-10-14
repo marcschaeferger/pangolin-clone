@@ -93,7 +93,7 @@ export default function Header({ email, orgName, name }: HeaderProps) {
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuGroup>
-                                <DropdownMenuItem>Profile</DropdownMenuItem>
+                                <Link href="/profile"><DropdownMenuItem>Profile</DropdownMenuItem></Link>
                                 <DropdownMenuItem>Log out</DropdownMenuItem>
                             </DropdownMenuGroup>
                         </DropdownMenuContent>

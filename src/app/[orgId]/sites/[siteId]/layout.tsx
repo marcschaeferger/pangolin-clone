@@ -78,7 +78,7 @@ export default async function SettingsLayout({ children, params }: SettingsLayou
                 <div className="space-y-0.5">
                     <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
                     <p className="text-muted-foreground">
-                        { params.siteId == "create" ? "Create site..." : "Manage settings on site " + params.siteId }.
+                        { params.siteId == "create" ? "Create site..." : "Manage settings on " + site?.name || ""}.
                     </p>
                 </div>
                 <Separator className="my-6" />
