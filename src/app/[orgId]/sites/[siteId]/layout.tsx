@@ -3,6 +3,8 @@ import Image from "next/image"
 
 import { Separator } from "@/components/ui/separator"
 import { SidebarNav } from "@/components/sidebar-nav"
+import SiteProvider from "@app/providers/SiteProvider"
+import api from "@app/api"
 
 export const metadata: Metadata = {
     title: "Forms",
@@ -37,7 +39,22 @@ interface SettingsLayoutProps {
     params: { siteId: string }
 }
 
-export default function SettingsLayout({ children, params }: SettingsLayoutProps) {
+export default async function SettingsLayout({ children, params }: SettingsLayoutProps) {
+    const res = await api
+    .get(`/site/${params.siteId}`, {})
+    .catch((e) => {
+        console.error("Failed to fetch site", e);
+    });
+
+    console.log(res);
+    
+    console.log(params.siteId);
+    
+    // const site = res!.data.data;
+
+    // console.log(site);
+    const site: any = {};
+
     return (
         <>
             <div className="md:hidden">
@@ -68,7 +85,11 @@ export default function SettingsLayout({ children, params }: SettingsLayoutProps
                     <aside className="-mx-4 lg:w-1/5">
                         <SidebarNav items={sidebarNavItems.map(i => { i.href = i.href.replace("{siteId}", params.siteId); return i})} disabled={params.siteId == "create"} />
                     </aside>
-                    <div className="flex-1 lg:max-w-2xl">{children}</div>
+                    <div className="flex-1 lg:max-w-2xl">
+                    <SiteProvider site={site}>
+                        {children}
+                    </SiteProvider>
+                        </div>
                 </div>
             </div>
         </>

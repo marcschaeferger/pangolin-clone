@@ -22,10 +22,10 @@ const sidebarNavItems = [
 
 interface SettingsLayoutProps {
     children: React.ReactNode,
-    params: { siteId: string }
+    params: { siteId: string, orgId: string }
 }
 
-export default function SettingsLayout({ children, params }: SettingsLayoutProps) {
+export default async function SettingsLayout({ children, params }: SettingsLayoutProps) {
     return (
         <>
             <div className="md:hidden">
@@ -56,7 +56,9 @@ export default function SettingsLayout({ children, params }: SettingsLayoutProps
                     <aside className="-mx-4 lg:w-1/5">
                         <SidebarNav items={sidebarNavItems.map(i => { i.href = i.href.replace("{siteId}", params.siteId); return i})} disabled={params.siteId == "create"} />
                     </aside>
-                    <div className="flex-1 lg:max-w-2xl">{children}</div>
+                    <div className="flex-1 lg:max-w-2xl">
+                            {children}
+                    </div>
                 </div>
             </div>
         </>

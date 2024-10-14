@@ -15,7 +15,7 @@ const removeUserActionParamsSchema = z.object({
 
 const removeUserActionSchema = z.object({
     actionId: z.string(),
-    orgId: z.number().int().positive(),
+    orgId: z.string().transform(Number).pipe(z.number().int().positive())
 });
 
 export async function removeUserAction(req: Request, res: Response, next: NextFunction): Promise<any> {

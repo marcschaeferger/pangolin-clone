@@ -14,6 +14,14 @@ const getSiteSchema = z.object({
     siteId: z.string().transform(Number).pipe(z.number().int().positive())
 });
 
+export type GetSiteResponse = {
+    siteId: number;
+    name: string;
+    subdomain: string;
+    pubKey: string;
+    subnet: string;
+}
+
 export async function getSite(req: Request, res: Response, next: NextFunction): Promise<any> {
     try {
         // Validate request parameters

@@ -35,6 +35,8 @@ import { generateKeypair } from "./wireguard-config";
 import React, { useState, useEffect } from "react";
 import { api } from "@/api";
 import { AxiosResponse } from "axios"
+import { useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const method = [
     { label: "Wireguard", value: "wg" },
@@ -49,6 +51,16 @@ const accountFormSchema = z.object({
         })
         .max(30, {
             message: "Name must not be longer than 30 characters.",
+        }),
+    subdomain: z
+        .string()
+        // cant be too long and cant have spaces or special characters
+        .regex(/^[a-zA-Z0-9-]+$/)
+        .min(2, {
+            message: "Subdomain must be at least 2 characters.",
+        })
+        .max(30, {
+            message: "Subdomain must not be longer than 30 characters.",
         }),
     method: z.string({
         required_error: "Please select a method.",
@@ -67,6 +79,10 @@ export function CreateSiteForm() {
     const [keypair, setKeypair] = useState<{ publicKey: string; privateKey: string } | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
+    const params = useParams();
+    const orgId = params.orgId;
+    const router = useRouter();
+
     const form = useForm<AccountFormValues>({
         resolver: zodResolver(accountFormSchema),
         defaultValues,
@@ -80,28 +96,30 @@ export function CreateSiteForm() {
         }
     }, []);
 
-    async function onSubmit(data: AccountFormValues) {
-        toast({
-            title: "You submitted the following values:",
-            description: (
-                <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-                    <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-                </pre>
-            ),
-        });
-        // const res = await api
-        // .post<AxiosResponse<any>>(`/org/:orgId/site/:siteId/resource`, {
-        //     email,
-        //     password,
-        // })
-        // .catch((e) => {
-        //     console.error(e);
-        //     setError(
-        //         e.response?.data?.message ||
-        //             "An error occurred while logging in",
-        //     );
-        // });
+    const name = form.watch("name");
+    useEffect(() => {
+        const subdomain = name.toLowerCase().replace(/\s+/g, "-");
+        form.setValue("subdomain", subdomain, { shouldValidate: true });
+    }, [name, form]);
 
+    async function onSubmit(data: AccountFormValues) {
+        const res = await api
+            .put(`/org/${orgId}/site/`, {
+                name: data.name,
+                subdomain: data.subdomain,
+                pubKey: keypair?.publicKey,
+            })
+            .catch((e) => {
+                toast({
+                    title: "Error creating site..."
+                });
+            });
+
+        if (res && res.status === 201) {
+            const siteId = res.data.data.siteId;
+            // navigate to the site page
+            router.push(`/${orgId}/sites/${siteId}`);
+        }
     }
 
     const wgConfig = keypair
@@ -142,6 +160,22 @@ sh get-docker.sh`;
                     />
                     <FormField
                         control={form.control}
+                        name="subdomain"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Subdomain</FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormDescription>
+                                    The subdomain of the site. This will be used to access resources on the site.
+                                </FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
                         name="method"
                         render={({ field }) => (
                             <FormItem className="flex flex-col">
@@ -159,9 +193,9 @@ sh get-docker.sh`;
                                             >
                                                 {field.value
                                                     ? method.find(
-                                                        (language) => language.value === field.value
+                                                        (method) => method.value === field.value
                                                     )?.label
-                                                    : "Select language"}
+                                                    : "Select method"}
                                                 <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                             </Button>
                                         </FormControl>
@@ -204,17 +238,17 @@ sh get-docker.sh`;
                             </FormItem>
                         )}
                     />
-            {methodValue === "wg" && !isLoading ? (
-                <pre className="mt-2 w-full rounded-md bg-slate-950 p-4 overflow-x-auto">
-                    <code className="text-white whitespace-pre-wrap">{wgConfig}</code>
-                </pre>
-            ) : methodValue === "wg" && isLoading ? (
-                <p>Loading WireGuard configuration...</p>
-            ) : (
-                <pre className="mt-2 w-full rounded-md bg-slate-950 p-4 overflow-x-auto">
-                <code className="text-white whitespace-pre-wrap">{newtConfig}</code>
-              </pre>
-            )}
+                    {methodValue === "wg" && !isLoading ? (
+                        <pre className="mt-2 w-full rounded-md bg-slate-950 p-4 overflow-x-auto">
+                            <code className="text-white whitespace-pre-wrap">{wgConfig}</code>
+                        </pre>
+                    ) : methodValue === "wg" && isLoading ? (
+                        <p>Loading WireGuard configuration...</p>
+                    ) : (
+                        <pre className="mt-2 w-full rounded-md bg-slate-950 p-4 overflow-x-auto">
+                            <code className="text-white whitespace-pre-wrap">{newtConfig}</code>
+                        </pre>
+                    )}
                     <Button type="submit">Create Site</Button>
                 </form>
             </Form>
