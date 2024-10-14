@@ -18,6 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { useSiteContext } from "@app/hooks/useSiteContext"
 
 const appearanceFormSchema = z.object({
   theme: z.enum(["light", "dark"], {
@@ -37,6 +38,10 @@ const defaultValues: Partial<AppearanceFormValues> = {
 }
 
 export function AppearanceForm() {
+    const site = useSiteContext();
+
+    console.log(site);
+    
   const form = useForm<AppearanceFormValues>({
     resolver: zodResolver(appearanceFormSchema),
     defaultValues,

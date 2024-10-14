@@ -54,13 +54,14 @@ export async function createSuperuserRole(orgId: number) {
 
     const roleId = insertedRole.roleId;
 
-    // Add all current actions to the new Default role
-    const actionIds = Object.values(ActionsEnum);
+    const actionIds = await db.select().from(actions).execute();
+
+    if (actionIds.length === 0) {
+        logger.info('No actions to assign to the Superuser role');
+        return;
+    }
+
     await db.insert(roleActions)
-        .values(actionIds.map(actionId => ({
-            roleId,
-            actionId: actionId,
-            orgId
-        })))
+        .values(actionIds.map(action => ({ roleId, actionId: action.actionId, orgId })))
         .execute();
 }

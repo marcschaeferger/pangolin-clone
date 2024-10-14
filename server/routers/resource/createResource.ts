@@ -11,7 +11,7 @@ import { eq, and } from 'drizzle-orm';
 
 const createResourceParamsSchema = z.object({
     siteId: z.number().int().positive(),
-    orgId: z.number().int().positive(),
+    orgId: z.string().transform(Number).pipe(z.number().int().positive())
 });
 
 // Define Zod schema for request body validation

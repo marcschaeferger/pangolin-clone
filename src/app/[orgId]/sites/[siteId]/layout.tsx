@@ -3,6 +3,11 @@ import Image from "next/image"
 
 import { Separator } from "@/components/ui/separator"
 import { SidebarNav } from "@/components/sidebar-nav"
+import SiteProvider from "@app/providers/SiteProvider"
+import { internal } from "@app/api"
+import { cookies } from "next/headers"
+import { GetSiteResponse } from "@server/routers/site"
+import { AxiosResponse } from "axios"
 
 export const metadata: Metadata = {
     title: "Forms",
@@ -37,7 +42,21 @@ interface SettingsLayoutProps {
     params: { siteId: string }
 }
 
-export default function SettingsLayout({ children, params }: SettingsLayoutProps) {
+export default async function SettingsLayout({ children, params }: SettingsLayoutProps) {
+    const sessionId = cookies().get("session")?.value ?? null;
+    const res = await internal
+    .get<AxiosResponse<GetSiteResponse>>(`/site/${params.siteId}`,          {
+        headers: {
+            Cookie: `session=${sessionId}`,
+        },
+    });
+
+    if (!res || res.status !== 200) {
+        return <div>Failed to load site</div>;
+    }
+
+    const site = res.data.data;
+
     return (
         <>
             <div className="md:hidden">
@@ -68,7 +87,11 @@ export default function SettingsLayout({ children, params }: SettingsLayoutProps
                     <aside className="-mx-4 lg:w-1/5">
                         <SidebarNav items={sidebarNavItems.map(i => { i.href = i.href.replace("{siteId}", params.siteId); return i})} disabled={params.siteId == "create"} />
                     </aside>
-                    <div className="flex-1 lg:max-w-2xl">{children}</div>
+                    <div className="flex-1 lg:max-w-2xl">
+                    <SiteProvider site={site}>
+                        {children}
+                    </SiteProvider>
+                        </div>
                 </div>
             </div>
         </>

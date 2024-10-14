@@ -11,7 +11,7 @@ import logger from '@server/logger';
 
 const addUserParamsSchema = z.object({
     userId: z.string().uuid(),
-    orgId: z.number().int().positive(),
+    orgId: z.string().transform(Number).pipe(z.number().int().positive())
 });
 
 const addUserSchema = z.object({
