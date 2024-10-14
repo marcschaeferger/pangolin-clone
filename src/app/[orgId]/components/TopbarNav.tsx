@@ -40,8 +40,8 @@ export function TopbarNav({
                     className={cn(
                         "px-2 py-3 text-md",
                         pathname.startsWith(item.href.replace("{orgId}", orgId))
-                            ? "border-b-2 border-base-600 text-base-600"
-                            : "hover:text-gray-600 text-base-400",
+                            ? "border-b-2 border-stone-600 text-stone-600"
+                            : "hover:text-gray-600 text-stone-400",
                         "whitespace-nowrap",
                         disabled && "cursor-not-allowed",
                     )}
