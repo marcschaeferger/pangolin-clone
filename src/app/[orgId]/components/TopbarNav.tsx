@@ -12,12 +12,14 @@ interface TopbarNavProps extends React.HTMLAttributes<HTMLElement> {
         icon: React.ReactNode;
     }[];
     disabled?: boolean;
+    orgId: string;
 }
 
 export function TopbarNav({
     className,
     items,
     disabled = false,
+    orgId,
     ...props
 }: TopbarNavProps) {
     const pathname = usePathname();
@@ -34,10 +36,10 @@ export function TopbarNav({
             {items.map((item) => (
                 <Link
                     key={item.href}
-                    href={item.href}
+                    href={item.href.replace("{orgId}", orgId)}
                     className={cn(
                         "px-2 py-3 text-md",
-                        pathname === item.href
+                        pathname === item.href.replace("{orgId}", orgId)
                             ? "border-b-2 border-stone-600 text-stone-600"
                             : "hover:text-gray-600 text-stone-400",
                         "whitespace-nowrap",
