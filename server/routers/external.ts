@@ -35,6 +35,7 @@ unauthenticated.get("/", (_, res) => {
 export const authenticated = Router();
 authenticated.use(verifySessionUserMiddleware);
 
+authenticated.get("/org/checkId", org.checkId);
 authenticated.put("/org", getUserOrgs, org.createOrg);
 authenticated.get("/orgs", getUserOrgs, org.listOrgs); // TODO we need to check the orgs here
 authenticated.get("/org/:orgId", verifyOrgAccess, org.getOrg);

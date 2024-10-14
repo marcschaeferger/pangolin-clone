@@ -64,4 +64,6 @@ export async function createSuperuserRole(orgId: string) {
     await db.insert(roleActions)
         .values(actionIds.map(action => ({ roleId, actionId: action.actionId, orgId })))
         .execute();
+
+    return roleId;
 }

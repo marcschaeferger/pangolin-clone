@@ -3,7 +3,7 @@ import db from "@server/db";
 import { hash } from "@node-rs/argon2";
 import HttpCode from "@server/types/HttpCode";
 import { z } from "zod";
-import { users } from "@server/db/schema";
+import { userActions, users } from "@server/db/schema";
 import { fromError } from "zod-validation-error";
 import createHttpError from "http-errors";
 import response from "@server/utils/response";
@@ -18,6 +18,7 @@ import {
     generateSessionToken,
     serializeSessionCookie,
 } from "@server/auth";
+import { ActionsEnum } from "@server/auth/actions";
 
 export const signupBodySchema = z.object({
     email: z.string().email(),
@@ -99,6 +100,13 @@ export async function signup(
             passwordHash,
             dateCreated: moment().toISOString(),
         });
+
+        // give the user their default permissions: 
+        // await db.insert(userActions).values({
+        //     userId: userId,
+        //     actionId: ActionsEnum.createOrg,
+        //     orgId: null,
+        // });
 
         const token = generateSessionToken();
         await createSession(token, userId);

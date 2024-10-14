@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { db } from '@server/db';
-import { orgs } from '@server/db/schema';
+import { eq } from 'drizzle-orm';
+import { orgs, userOrgs } from '@server/db/schema';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
@@ -10,8 +11,9 @@ import logger from '@server/logger';
 import { createSuperuserRole } from '@server/db/ensureActions';
 
 const createOrgSchema = z.object({
+    orgId: z.string(),
     name: z.string().min(1).max(255),
-    domain: z.string().min(1).max(255),
+    // domain: z.string().min(1).max(255).optional(),
 });
 
 const MAX_ORGS = 5;
@@ -38,20 +40,53 @@ export async function createOrg(req: Request, res: Response, next: NextFunction)
             );
         }
 
-        // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(ActionsEnum.createOrg, req);
-        if (!hasPermission) {
-            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
+        // TODO: we cant do this when they create an org because they are not in an org yet... maybe we need to make the org id optional on the userActions table
+        // Check if the user has permission 
+        // const hasPermission = await checkUserActionPermission(ActionsEnum.createOrg, req);
+        // if (!hasPermission) {
+        //     return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
+        // }
+
+        const { orgId, name } = parsedBody.data;
+
+        // make sure the orgId is unique
+        const orgExists = await db.select()
+            .from(orgs)
+            .where(eq(orgs.orgId, orgId))
+            .limit(1);
+        
+        if (orgExists.length > 0) {
+            return next(
+                createHttpError(
+                    HttpCode.CONFLICT,
+                    `Organization with ID ${orgId} already exists`
+                )
+            );
         }
 
-        const { name, domain } = parsedBody.data;
-
         const newOrg = await db.insert(orgs).values({
+            orgId,
             name,
-            domain,
+            domain: ""
         }).returning();
 
-        await createSuperuserRole(newOrg[0].orgId);
+        const roleId = await createSuperuserRole(newOrg[0].orgId);
+
+        if (!roleId) {
+            return next(
+                createHttpError(
+                    HttpCode.INTERNAL_SERVER_ERROR,
+                    `Error creating superuser role`
+                )
+            );
+        }
+
+        // put the user in the super user role
+        await db.insert(userOrgs).values({
+            userId: req.user!.userId,
+            orgId: newOrg[0].orgId,
+            roleId: roleId,
+        }).execute();
 
         return response(res, {
             data: newOrg[0],

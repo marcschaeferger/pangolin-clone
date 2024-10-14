@@ -56,11 +56,17 @@ export enum ActionsEnum {
 
 export async function checkUserActionPermission(actionId: string, req: Request): Promise<boolean> {
     const userId = req.user?.userId;
+    let onlyCheckUser = false;
+
+    if (actionId = ActionsEnum.createOrg) {
+        onlyCheckUser = true;
+    }
+
     if (!userId) {
         throw createHttpError(HttpCode.UNAUTHORIZED, 'User not authenticated');
     }
 
-    if (!req.userOrgId) {
+    if (!req.userOrgId && !onlyCheckUser) {
         throw createHttpError(HttpCode.BAD_REQUEST, 'Organization ID is required');
     }
 
@@ -68,10 +74,10 @@ export async function checkUserActionPermission(actionId: string, req: Request):
         let userOrgRoleId = req.userOrgRoleId;
 
         // If userOrgRoleId is not available on the request, fetch it
-        if (userOrgRoleId === undefined) {
+        if (userOrgRoleId === undefined && !onlyCheckUser) {
             const userOrgRole = await db.select()
                 .from(userOrgs)
-                .where(and(eq(userOrgs.userId, userId), eq(userOrgs.orgId, req.userOrgId)))
+                .where(and(eq(userOrgs.userId, userId), eq(userOrgs.orgId, req.userOrgId!)))
                 .limit(1);
 
             if (userOrgRole.length === 0) {
@@ -88,7 +94,7 @@ export async function checkUserActionPermission(actionId: string, req: Request):
                 and(
                     eq(userActions.userId, userId),
                     eq(userActions.actionId, actionId),
-                    eq(userActions.orgId, req.userOrgId)
+                    eq(userActions.orgId, req.userOrgId!) // TODO: we cant pass the org id if we are not checking the org
                 )
             )
             .limit(1);
@@ -96,20 +102,24 @@ export async function checkUserActionPermission(actionId: string, req: Request):
         if (userActionPermission.length > 0) {
             return true;
         }
+        if (!onlyCheckUser) {
 
-        // If no direct permission, check role-based permission
-        const roleActionPermission = await db.select()
-            .from(roleActions)
-            .where(
-                and(
-                    eq(roleActions.actionId, actionId),
-                    eq(roleActions.roleId, userOrgRoleId),
-                    eq(roleActions.orgId, req.userOrgId)
+            // If no direct permission, check role-based permission
+            const roleActionPermission = await db.select()
+                .from(roleActions)
+                .where(
+                    and(
+                        eq(roleActions.actionId, actionId),
+                        eq(roleActions.roleId, userOrgRoleId!),
+                        eq(roleActions.orgId, req.userOrgId!)
+                    )
                 )
-            )
-            .limit(1);
+                .limit(1);
 
-        return roleActionPermission.length > 0;
+            return roleActionPermission.length > 0;
+        }
+
+        return false;
 
     } catch (error) {
         console.error('Error checking user action permission:', error);
