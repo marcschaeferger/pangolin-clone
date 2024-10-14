@@ -11,7 +11,7 @@ import logger from '@server/logger';
 
 const removeUserSchema = z.object({
     userId: z.string().uuid(),
-    orgId: z.string().transform(Number).pipe(z.number().int().positive())
+    orgId: z.string()
 });
 
 export async function removeUserOrg(req: Request, res: Response, next: NextFunction): Promise<any> {

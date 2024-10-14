@@ -13,7 +13,7 @@ import { eq, and } from 'drizzle-orm';
 const API_BASE_URL = "http://localhost:3000";
 
 const createSiteParamsSchema = z.object({
-    orgId: z.string().transform(Number).pipe(z.number().int().positive())
+    orgId: z.string()
 });
 
 // Define Zod schema for request body validation

@@ -14,24 +14,26 @@ async function insertDummyData() {
     const org1 = db
         .insert(orgs)
         .values({
+            orgId: "default",
             name: "Default",
             domain: "fosrl.io",
         })
         .returning()
         .get();
 
-    await createSuperuserRole(org1.orgId);
+    await createSuperuserRole(org1.orgId!);
 
     const org2 = db
         .insert(orgs)
         .values({
+            orgId: "fossorial",
             name: "Fossorial",
             domain: "fossorial.io",
         })
         .returning()
         .get();
 
-    await createSuperuserRole(org2.orgId);
+    await createSuperuserRole(org2.orgId!);
 
     // Insert dummy exit nodes
     const exitNode1 = db

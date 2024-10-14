@@ -39,7 +39,7 @@ export async function ensureActions() {
     }
 }
 
-export async function createSuperuserRole(orgId: number) {
+export async function createSuperuserRole(orgId: string) {
     // Create the Default role if it doesn't exist
     const [insertedRole] = await db
         .insert(roles)

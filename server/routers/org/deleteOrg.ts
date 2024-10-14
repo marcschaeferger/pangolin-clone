@@ -10,7 +10,7 @@ import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
 
 const deleteOrgSchema = z.object({
-    orgId: z.string().transform(Number).pipe(z.number().int().positive())
+    orgId: z.string()
 });
 
 export async function deleteOrg(req: Request, res: Response, next: NextFunction): Promise<any> {

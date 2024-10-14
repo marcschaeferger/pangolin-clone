@@ -2,14 +2,14 @@ import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { InferSelectModel } from "drizzle-orm";
 
 export const orgs = sqliteTable("orgs", {
-    orgId: integer("orgId").primaryKey({ autoIncrement: true }),
+    orgId: text("orgId").primaryKey(),
     name: text("name").notNull(),
     domain: text("domain").notNull(),
 });
 
 export const sites = sqliteTable("sites", {
     siteId: integer("siteId").primaryKey({ autoIncrement: true }),
-    orgId: integer("orgId").references(() => orgs.orgId, {
+    orgId: text("orgId").references(() => orgs.orgId, {
         onDelete: "cascade",
     }),
     exitNode: integer("exitNode").references(() => exitNodes.exitNodeId, {
@@ -28,7 +28,7 @@ export const resources = sqliteTable("resources", {
     siteId: integer("siteId").references(() => sites.siteId, {
         onDelete: "cascade",
     }),
-    orgId: integer("orgId").references(() => orgs.orgId, {
+    orgId: text("orgId").references(() => orgs.orgId, {
         onDelete: "cascade",
     }),
     name: text("name").notNull(),
@@ -97,7 +97,7 @@ export const userOrgs = sqliteTable("userOrgs", {
     userId: text("userId")
         .notNull()
         .references(() => users.userId),
-    orgId: integer("orgId")
+    orgId: text("orgId")
         .notNull()
         .references(() => orgs.orgId),
     roleId: integer("roleId")
@@ -132,7 +132,7 @@ export const actions = sqliteTable("actions", {
 
 export const roles = sqliteTable("roles", {
     roleId: integer("roleId").primaryKey({ autoIncrement: true }),
-    orgId: integer("orgId").references(() => orgs.orgId, {
+    orgId: text("orgId").references(() => orgs.orgId, {
         onDelete: "cascade",
     }),
     isSuperuserRole: integer("isSuperuserRole", { mode: "boolean" }),
@@ -147,7 +147,7 @@ export const roleActions = sqliteTable("roleActions", {
     actionId: text("actionId")
         .notNull()
         .references(() => actions.actionId, { onDelete: "cascade" }),
-    orgId: integer("orgId")
+    orgId: text("orgId")
         .notNull()
         .references(() => orgs.orgId, { onDelete: "cascade" }),
 });
@@ -159,7 +159,7 @@ export const userActions = sqliteTable("userActions", {
     actionId: text("actionId")
         .notNull()
         .references(() => actions.actionId, { onDelete: "cascade" }),
-    orgId: integer("orgId")
+    orgId: text("orgId")
         .notNull()
         .references(() => orgs.orgId, { onDelete: "cascade" }),
 });
@@ -202,7 +202,7 @@ export const userResources = sqliteTable("userResources", {
 
 export const limitsTable = sqliteTable("limits", {
     limitId: integer("limitId").primaryKey({ autoIncrement: true }),
-    orgId: integer("orgId").references(() => orgs.orgId, {
+    orgId: text("orgId").references(() => orgs.orgId, {
         onDelete: "cascade",
     }),
     name: text("name").notNull(),
