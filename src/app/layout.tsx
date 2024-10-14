@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Inter, Roboto } from "next/font/google";
+import { Inter, Open_Sans, Roboto } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
+import { ThemeProvider } from "@app/providers/ThemeProvider";
 
 export const metadata: Metadata = {
     title: process.env.NEXT_PUBLIC_APP_NAME,
@@ -9,6 +10,7 @@ export const metadata: Metadata = {
 };
 
 const font = Inter({ subsets: ["latin"] });
+// const font = Open_Sans({ subsets: ["latin"] });
 
 export default async function RootLayout({
     children,
@@ -16,10 +18,17 @@ export default async function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html>
+        <html suppressHydrationWarning>
             <body className={`${font.className} pb-3`}>
-                <main>{children}</main>
-                <Toaster />
+                <ThemeProvider
+                    attribute="class"
+                    defaultTheme="system"
+                    enableSystem
+                    disableTransitionOnChange
+                >
+                    {children}
+                    <Toaster />
+                </ThemeProvider>
             </body>
         </html>
     );

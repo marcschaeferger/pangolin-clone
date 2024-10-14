@@ -4,6 +4,7 @@ import { Cog, Combine, LayoutGrid, Tent, Users, Waypoints } from "lucide-react";
 import Header from "./components/Header";
 import { verifySession } from "@app/lib/auth/verifySession";
 import { redirect } from "next/navigation";
+import { cache } from "react";
 
 export const metadata: Metadata = {
     title: "Configuration",
@@ -42,7 +43,9 @@ export default async function ConfigurationLaytout({
     children,
     params,
 }: ConfigurationLaytoutProps) {
-    const user = await verifySession();
+    const loadUser = cache(async () => await verifySession());
+
+    const user = await loadUser();
 
     if (!user) {
         redirect("/auth/login");
@@ -50,7 +53,7 @@ export default async function ConfigurationLaytout({
 
     return (
         <>
-            <div className="w-full bg-neutral-100 border-b border-neutral-200 mb-6 select-none sm:px-0 px-3 pt-3">
+            <div className="w-full bg-neutral-100 dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-900 mb-6 select-none sm:px-0 px-3 pt-3">
                 <div className="container mx-auto flex flex-col content-between gap-4">
                     <Header email={user.email} orgName={params.orgId} />
                     <TopbarNav items={topNavItems} orgId={params.orgId} />
