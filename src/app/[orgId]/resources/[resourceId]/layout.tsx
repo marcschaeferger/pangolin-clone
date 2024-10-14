@@ -22,10 +22,6 @@ const sidebarNavItems = [
         title: "Notifications",
         href: "/{orgId}/resources/{resourceId}/notifications",
     },
-    {
-        title: "Display",
-        href: "/{orgId}/resources/{resourceId}/display",
-    },
 ]
 
 interface SettingsLayoutProps {
@@ -36,23 +32,7 @@ interface SettingsLayoutProps {
 export default function SettingsLayout({ children, params }: SettingsLayoutProps) {
     return (
         <>
-            <div className="md:hidden">
-                <Image
-                    src="/configuration/forms-light.png"
-                    width={1280}
-                    height={791}
-                    alt="Forms"
-                    className="block dark:hidden"
-                />
-                <Image
-                    src="/configuration/forms-dark.png"
-                    width={1280}
-                    height={791}
-                    alt="Forms"
-                    className="hidden dark:block"
-                />
-            </div>
-            <div className="hidden space-y-6 p-10 pb-16 md:block">
+            <div>
                 <div className="space-y-0.5">
                     <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
                     <p className="text-muted-foreground">
