@@ -5,7 +5,7 @@ import { GetSiteResponse } from "@server/routers/site/getSite";
 import { ReactNode } from "react";
 
 type LandingProviderProps = {
-    site: GetSiteResponse;
+    site: GetSiteResponse | null;
     children: ReactNode;
 };
 

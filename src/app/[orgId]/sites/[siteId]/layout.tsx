@@ -17,46 +17,45 @@ export const metadata: Metadata = {
 const sidebarNavItems = [
     {
         title: "Profile",
-        href: "/configuration/sites/{siteId}/",
-    },
-    {
-        title: "Account",
-        href: "/configuration/sites/{siteId}/account",
+        href: "/{orgId}/sites/{siteId}/",
     },
     {
         title: "Appearance",
-        href: "/configuration/sites/{siteId}/appearance",
+        href: "/{orgId}/sites/{siteId}/appearance",
     },
     {
         title: "Notifications",
-        href: "/configuration/sites/{siteId}/notifications",
+        href: "/{orgId}/sites/{siteId}/notifications",
     },
     {
         title: "Display",
-        href: "/configuration/sites/{siteId}/display",
+        href: "/{orgId}/sites/{siteId}/display",
     },
 ]
 
 interface SettingsLayoutProps {
     children: React.ReactNode,
-    params: { siteId: string }
+    params: { siteId: string, orgId: string }
 }
 
 export default async function SettingsLayout({ children, params }: SettingsLayoutProps) {
-    const sessionId = cookies().get("session")?.value ?? null;
-    const res = await internal
-    .get<AxiosResponse<GetSiteResponse>>(`/site/${params.siteId}`,          {
-        headers: {
-            Cookie: `session=${sessionId}`,
-        },
-    });
+    let site = null;
+    if (params.siteId !== "create") {
+        try {
+            const sessionId = cookies().get("session")?.value ?? null;
+            const res = await internal
+            .get<AxiosResponse<GetSiteResponse>>(`/site/${params.siteId}`,          {
+                headers: {
+                    Cookie: `session=${sessionId}`,
+                },
+            });
 
-    if (!res || res.status !== 200) {
-        return <div>Failed to load site</div>;
+            site = res.data.data;
+        } catch {
+            return null;
+        }
     }
-
-    const site = res.data.data;
-
+    
     return (
         <>
             <div className="md:hidden">
@@ -85,7 +84,7 @@ export default async function SettingsLayout({ children, params }: SettingsLayou
                 <Separator className="my-6" />
                 <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
                     <aside className="-mx-4 lg:w-1/5">
-                        <SidebarNav items={sidebarNavItems.map(i => { i.href = i.href.replace("{siteId}", params.siteId); return i})} disabled={params.siteId == "create"} />
+                        <SidebarNav items={sidebarNavItems} disabled={params.siteId == "create"} />
                     </aside>
                     <div className="flex-1 lg:max-w-2xl">
                     <SiteProvider site={site}>
