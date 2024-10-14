@@ -5,9 +5,10 @@ import { Separator } from "@/components/ui/separator"
 import { SidebarNav } from "@/components/sidebar-nav"
 import SiteProvider from "@app/providers/SiteProvider"
 import { internal } from "@app/api"
-import { cookies } from "next/headers"
 import { GetSiteResponse } from "@server/routers/site"
 import { AxiosResponse } from "axios"
+import { redirect } from "next/navigation"
+import { authCookieHeader } from "@app/api/cookies"
 
 export const metadata: Metadata = {
     title: "Forms",
@@ -42,17 +43,10 @@ export default async function SettingsLayout({ children, params }: SettingsLayou
     let site = null;
     if (params.siteId !== "create") {
         try {
-            const sessionId = cookies().get("session")?.value ?? null;
-            const res = await internal
-            .get<AxiosResponse<GetSiteResponse>>(`/site/${params.siteId}`,          {
-                headers: {
-                    Cookie: `session=${sessionId}`,
-                },
-            });
-
+            const res = await internal.get<AxiosResponse<GetSiteResponse>>(`/site/${params.siteId}`, authCookieHeader());
             site = res.data.data;
         } catch {
-            return null;
+            redirect(`/${params.orgId}/sites`)
         }
     }
 
@@ -78,7 +72,7 @@ export default async function SettingsLayout({ children, params }: SettingsLayou
                 <div className="space-y-0.5">
                     <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
                     <p className="text-muted-foreground">
-                        { params.siteId == "create" ? "Create site..." : "Manage settings on " + site?.name || ""}.
+                        {params.siteId == "create" ? "Create site..." : "Manage settings on " + site?.name || ""}.
                     </p>
                 </div>
                 <Separator className="my-6" />
@@ -87,10 +81,10 @@ export default async function SettingsLayout({ children, params }: SettingsLayou
                         <SidebarNav items={sidebarNavItems} disabled={params.siteId == "create"} />
                     </aside>
                     <div className="flex-1 lg:max-w-2xl">
-                    <SiteProvider site={site}>
-                        {children}
-                    </SiteProvider>
-                        </div>
+                        <SiteProvider site={site}>
+                            {children}
+                        </SiteProvider>
+                    </div>
                 </div>
             </div>
         </>
