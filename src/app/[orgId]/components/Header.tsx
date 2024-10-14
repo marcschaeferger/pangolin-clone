@@ -34,7 +34,7 @@ export default function Header({ email, orgName, name }: HeaderProps) {
         <>
             <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                    <Badge variant="secondary" className="text-md font-bold">
+                    <Badge variant="default" className="text-md font-bold">
                         {orgName}
                     </Badge>
 
@@ -42,13 +42,13 @@ export default function Header({ email, orgName, name }: HeaderProps) {
                         <div className="flex items-center gap-4 ml-4">
                             <Link
                                 href="/docs"
-                                className="text-stone-500 hover:text-stone-600"
+                                className="text-primary hover:text-primary"
                             >
                                 Documentation
                             </Link>
                             <Link
                                 href="/support"
-                                className="text-stone-500 hover:text-stone-600"
+                                className="text-primary hover:text-primary"
                             >
                                 Support
                             </Link>
