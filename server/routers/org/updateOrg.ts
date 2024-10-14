@@ -10,7 +10,7 @@ import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
 
 const updateOrgParamsSchema = z.object({
-    orgId: z.string().transform(Number).pipe(z.number().int().positive())
+    orgId: z.string()
 });
 
 const updateOrgBodySchema = z.object({

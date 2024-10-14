@@ -5,7 +5,7 @@ import createHttpError from 'http-errors';
 import HttpCode from '@server/types/HttpCode';
 
 interface CheckLimitOptions {
-    orgId: number;
+    orgId: string;
     limitName: string;
     currentValue: number;
     increment?: number;

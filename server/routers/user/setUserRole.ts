@@ -12,7 +12,7 @@ import logger from '@server/logger';
 const addUserRoleSchema = z.object({
     userId: z.string(),
     roleId: z.number().int().positive(),
-    orgId: z.string().transform(Number).pipe(z.number().int().positive())
+    orgId: z.string()
 });
 
 export async function addUserRole(req: Request, res: Response, next: NextFunction): Promise<any> {

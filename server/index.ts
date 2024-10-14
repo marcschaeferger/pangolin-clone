@@ -91,8 +91,8 @@ declare global {
         interface Request {
             user?: User;
             userOrgRoleId?: number;
-            userOrgId?: number;
-            userOrgIds?: number[];
+            userOrgId?: string;
+            userOrgIds?: string[];
         }
     }
 }

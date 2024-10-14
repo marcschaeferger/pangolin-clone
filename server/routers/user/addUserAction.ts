@@ -12,7 +12,7 @@ import { eq } from 'drizzle-orm';
 const addUserActionSchema = z.object({
     userId: z.string(),
     actionId: z.string(),
-    orgId: z.string().transform(Number).pipe(z.number().int().positive()),
+    orgId: z.string(),
 });
 
 export async function addUserAction(req: Request, res: Response, next: NextFunction): Promise<any> {

@@ -8,13 +8,13 @@ import { AuthenticatedRequest } from '@server/types/Auth';
 
 export function verifyOrgAccess(req: Request, res: Response, next: NextFunction) {
     const userId = req.user!.userId; // Assuming you have user information in the request
-    const orgId = parseInt(req.params.orgId);
+    const orgId = req.params.orgId;
 
     if (!userId) {
         return next(createHttpError(HttpCode.UNAUTHORIZED, 'User not authenticated'));
     }
 
-    if (isNaN(orgId)) {
+    if (!orgId) {
         return next(createHttpError(HttpCode.BAD_REQUEST, 'Invalid organization ID'));
     }
 
