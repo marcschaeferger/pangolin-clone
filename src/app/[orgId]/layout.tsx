@@ -50,8 +50,8 @@ export default async function ConfigurationLaytout({
 
     return (
         <>
-            <div className="w-full bg-stone-200 border-b border-stone-300 mb-5 select-none sm:px-0 px-3">
-                <div className="container mx-auto flex flex-col content-between gap-3 pt-2">
+            <div className="w-full bg-stone-200 border-b border-stone-300 mb-6 select-none sm:px-0 px-3">
+                <div className="container mx-auto flex flex-col content-between gap-4 pt-2">
                     <Header
                         email={user.email}
                         orgName={params.orgId}

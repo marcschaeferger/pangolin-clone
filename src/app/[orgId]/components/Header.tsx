@@ -10,9 +10,9 @@ import {
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
-    DropdownMenuShortcut,
     DropdownMenuTrigger,
 } from "@app/components/ui/dropdown-menu";
+import { Separator } from "@app/components/ui/separator";
 import Link from "next/link";
 
 type HeaderProps = {
@@ -33,53 +33,71 @@ export default function Header({ email, orgName, name }: HeaderProps) {
     return (
         <>
             <div className="flex items-center justify-between">
-                <Badge variant="outline" className="text-md font-bold">
-                    {orgName}
-                </Badge>
-
                 <div className="flex items-center">
-                    <div className="flex items-center gap-3">
-                        <span className="text-lg font-medium">
-                            {name || email}
-                        </span>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    className="relative h-10 w-10 rounded-full"
-                                >
-                                    <Avatar className="h-10 w-10">
-                                        <AvatarFallback>
-                                            {getInitials()}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                                className="w-56"
-                                align="end"
-                                forceMount
+                    <Badge variant="secondary" className="text-md font-bold">
+                        {orgName}
+                    </Badge>
+
+                    <div className="hidden md:block">
+                        <div className="flex items-center gap-4 ml-6">
+                            <Link
+                                href="/docs"
+                                className="text-stone-400 hover:text-stone-600"
                             >
-                                <DropdownMenuLabel className="font-normal">
-                                    <div className="flex flex-col space-y-1">
-                                        {name && (
-                                            <p className="text-sm font-medium leading-none">
-                                                {name}
-                                            </p>
-                                        )}
-                                        <p className="text-xs leading-none text-muted-foreground">
-                                            {email}
-                                        </p>
-                                    </div>
-                                </DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuGroup>
-                                    <DropdownMenuItem>Profile</DropdownMenuItem>
-                                    <DropdownMenuItem>Log out</DropdownMenuItem>
-                                </DropdownMenuGroup>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                                Documentation
+                            </Link>
+                            <Link
+                                href="/support"
+                                className="text-stone-400 hover:text-stone-600"
+                            >
+                                Support
+                            </Link>
+                        </div>
                     </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                    {/* Make the text truncate on smaller screens */}
+                    <span className="text-lg font-medium truncate max-w-[150px] md:max-w-none">
+                        {name || email}
+                    </span>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                className="relative h-10 w-10 rounded-full"
+                            >
+                                <Avatar className="h-10 w-10">
+                                    <AvatarFallback>
+                                        {getInitials()}
+                                    </AvatarFallback>
+                                </Avatar>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                            className="w-56"
+                            align="end"
+                            forceMount
+                        >
+                            <DropdownMenuLabel className="font-normal">
+                                <div className="flex flex-col space-y-1">
+                                    {name && (
+                                        <p className="text-sm font-medium leading-none truncate">
+                                            {name}
+                                        </p>
+                                    )}
+                                    <p className="text-xs leading-none text-muted-foreground truncate">
+                                        {email}
+                                    </p>
+                                </div>
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuGroup>
+                                <DropdownMenuItem>Profile</DropdownMenuItem>
+                                <DropdownMenuItem>Log out</DropdownMenuItem>
+                            </DropdownMenuGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             </div>
         </>
