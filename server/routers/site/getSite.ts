@@ -18,7 +18,6 @@ export type GetSiteResponse = {
     siteId: number;
     name: string;
     subdomain: string;
-    pubKey: string;
     subnet: string;
 }
 
@@ -59,7 +58,12 @@ export async function getSite(req: Request, res: Response, next: NextFunction): 
         }
 
         return response(res, {
-            data: site[0],
+            data: {
+                siteId: site[0].siteId,
+                name: site[0].name,
+                subdomain: site[0].subdomain,
+                subnet: site[0].subnet,
+            },
             success: true,
             error: false,
             message: "Site retrieved successfully",

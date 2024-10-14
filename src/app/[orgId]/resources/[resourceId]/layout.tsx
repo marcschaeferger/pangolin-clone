@@ -12,29 +12,25 @@ export const metadata: Metadata = {
 const sidebarNavItems = [
     {
         title: "Profile",
-        href: "/configuration/resources/{resourceId}/",
-    },
-    {
-        title: "Account",
-        href: "/configuration/resources/{resourceId}/account",
+        href: "/{orgId}/resources/{resourceId}/",
     },
     {
         title: "Appearance",
-        href: "/configuration/resources/{resourceId}/appearance",
+        href: "/{orgId}/resources/{resourceId}/appearance",
     },
     {
         title: "Notifications",
-        href: "/configuration/resources/{resourceId}/notifications",
+        href: "/{orgId}/resources/{resourceId}/notifications",
     },
     {
         title: "Display",
-        href: "/configuration/resources/{resourceId}/display",
+        href: "/{orgId}/resources/{resourceId}/display",
     },
 ]
 
 interface SettingsLayoutProps {
     children: React.ReactNode,
-    params: { resourceId: string }
+    params: { resourceId: string, orgId: string }
 }
 
 export default function SettingsLayout({ children, params }: SettingsLayoutProps) {
@@ -66,7 +62,7 @@ export default function SettingsLayout({ children, params }: SettingsLayoutProps
                 <Separator className="my-6" />
                 <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
                     <aside className="-mx-4 lg:w-1/5">
-                        <SidebarNav items={sidebarNavItems.map(i => { i.href = i.href.replace("{resourceId}", params.resourceId); return i})} />
+                        <SidebarNav items={sidebarNavItems.map(i => { i.href = i.href.replace("{resourceId}", params.resourceId).replace("{orgId}", params.orgId); return i})} />
                     </aside>
                     <div className="flex-1 lg:max-w-2xl">{children}</div>
                 </div>
