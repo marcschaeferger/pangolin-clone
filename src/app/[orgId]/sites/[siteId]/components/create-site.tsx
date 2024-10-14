@@ -32,8 +32,9 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import { generateKeypair } from "./wireguard-config";
-import { NewtConfig } from "./newt-config";
-import { useState } from "react"
+import React, { useState, useEffect } from "react";
+import { api } from "@/api";
+import { AxiosResponse } from "axios"
 
 const method = [
     { label: "Wireguard", value: "wg" },
@@ -63,13 +64,23 @@ const defaultValues: Partial<AccountFormValues> = {
 
 export function CreateSiteForm() {
     const [methodValue, setMethodValue] = useState("wg");
+    const [keypair, setKeypair] = useState<{ publicKey: string; privateKey: string } | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     const form = useForm<AccountFormValues>({
         resolver: zodResolver(accountFormSchema),
         defaultValues,
     });
 
-    function onSubmit(data: AccountFormValues) {
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const generatedKeypair = generateKeypair();
+            setKeypair(generatedKeypair);
+            setIsLoading(false);
+        }
+    }, []);
+
+    async function onSubmit(data: AccountFormValues) {
         toast({
             title: "You submitted the following values:",
             description: (
@@ -78,11 +89,23 @@ export function CreateSiteForm() {
                 </pre>
             ),
         });
+        // const res = await api
+        // .post<AxiosResponse<any>>(`/org/:orgId/site/:siteId/resource`, {
+        //     email,
+        //     password,
+        // })
+        // .catch((e) => {
+        //     console.error(e);
+        //     setError(
+        //         e.response?.data?.message ||
+        //             "An error occurred while logging in",
+        //     );
+        // });
+
     }
 
-    const keypair = generateKeypair();
-
-    const config = `[Interface]
+    const wgConfig = keypair
+        ? `[Interface]
   Address = 10.0.0.2/24
   ListenPort = 51820
   PrivateKey = ${keypair.privateKey}
@@ -91,8 +114,11 @@ export function CreateSiteForm() {
   PublicKey = ${keypair.publicKey}
   AllowedIPs = 0.0.0.0/0, ::/0
   Endpoint = myserver.dyndns.org:51820
-  PersistentKeepalive = 5`;
+  PersistentKeepalive = 5`
+        : "";
 
+    const newtConfig = `curl -fsSL https://get.docker.com -o get-docker.sh
+sh get-docker.sh`;
 
     return (
         <>
@@ -178,12 +204,20 @@ export function CreateSiteForm() {
                             </FormItem>
                         )}
                     />
+            {methodValue === "wg" && !isLoading ? (
+                <pre className="mt-2 w-full rounded-md bg-slate-950 p-4 overflow-x-auto">
+                    <code className="text-white whitespace-pre-wrap">{wgConfig}</code>
+                </pre>
+            ) : methodValue === "wg" && isLoading ? (
+                <p>Loading WireGuard configuration...</p>
+            ) : (
+                <pre className="mt-2 w-full rounded-md bg-slate-950 p-4 overflow-x-auto">
+                <code className="text-white whitespace-pre-wrap">{newtConfig}</code>
+              </pre>
+            )}
                     <Button type="submit">Create Site</Button>
                 </form>
             </Form>
-            {methodValue === "wg" ? <pre className="mt-2 w-full rounded-md bg-slate-950 p-4 overflow-x-auto">
-                <code className="text-white whitespace-pre-wrap">{config}</code>
-            </pre> : <NewtConfig />}
         </>
     );
 }
