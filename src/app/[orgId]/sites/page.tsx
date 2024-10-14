@@ -3,8 +3,14 @@ import Link from "next/link";
 export default async function Page() {
     return (
         <>
-           <p>This is where the table goes...</p>
-            <Link href="/configuration/sites/123">Open up the site 123</Link>
+            <div className="space-y-0.5 select-none">
+                <h2 className="text-2xl font-bold tracking-tight">
+                    Manage Sites
+                </h2>
+                <p className="text-muted-foreground">
+                    Manage your existing sites here or create a new one.
+                </p>
+            </div>
         </>
     );
 }

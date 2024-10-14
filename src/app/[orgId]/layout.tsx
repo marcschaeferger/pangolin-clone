@@ -1,66 +1,49 @@
-import { Metadata } from "next"
-import Image from "next/image"
-
-import { Separator } from "@/components/ui/separator"
-import { SidebarNav } from "@/components/sidebar-nav"
+import { Metadata } from "next";
+import { TopbarNav } from "./components/TopbarNav";
+import { LayoutGrid, Tent } from "lucide-react";
+import Header from "./components/Header";
 
 export const metadata: Metadata = {
-    title: "Forms",
-    description: "Advanced form example using react-hook-form and Zod.",
-}
+    title: "Configuration",
+    description: "",
+};
 
-const sidebarNavItems = [
+const topNavItems = [
     {
         title: "Sites",
         href: "/configuration/sites",
+        icon: <Tent />,
     },
     {
         title: "Resources",
         href: "/configuration/resources",
+        icon: <LayoutGrid />,
     },
-]
+];
 
-interface SettingsLayoutProps {
-    children: React.ReactNode,
-    params: { siteId: string, orgId: string }
+interface ConfigurationLaytoutProps {
+    children: React.ReactNode;
+    params: { siteId: string };
 }
 
-export default async function SettingsLayout({ children, params }: SettingsLayoutProps) {
+export default async function ConfigurationLaytout({
+    children,
+    params,
+}: ConfigurationLaytoutProps) {
     return (
         <>
-            <div className="md:hidden">
-                <Image
-                    src="/configuration/forms-light.png"
-                    width={1280}
-                    height={791}
-                    alt="Forms"
-                    className="block dark:hidden"
-                />
-                <Image
-                    src="/configuration/forms-dark.png"
-                    width={1280}
-                    height={791}
-                    alt="Forms"
-                    className="hidden dark:block"
-                />
-            </div>
-            <div className="hidden space-y-6 p-10 pb-16 md:block">
-                <div className="space-y-0.5">
-                    <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
-                    <p className="text-muted-foreground">
-                        { params.siteId == "create" ? "Create site..." : "Manage settings on site " + params.siteId }.
-                    </p>
-                </div>
-                <Separator className="my-6" />
-                <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
-                    <aside className="-mx-4 lg:w-1/5">
-                        <SidebarNav items={sidebarNavItems.map(i => { i.href = i.href.replace("{siteId}", params.siteId); return i})} disabled={params.siteId == "create"} />
-                    </aside>
-                    <div className="flex-1 lg:max-w-2xl">
-                            {children}
-                    </div>
+            <div className="w-full bg-stone-200 border-b border-stone-300 mb-5 select-none px-3">
+                <div className="container mx-auto flex flex-col content-between gap-3 pt-2">
+                    <Header
+                        email="mschwartz10612@gmail.com"
+                        orgName="Home Lab 1"
+                        name="Milo Schwartz"
+                    />
+                    <TopbarNav items={topNavItems} />
                 </div>
             </div>
+
+            <div className="container mx-auto px-3">{children}</div>
         </>
-    )
+    );
 }
