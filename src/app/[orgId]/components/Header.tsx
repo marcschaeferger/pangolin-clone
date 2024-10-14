@@ -1,7 +1,6 @@
 "use client";
 
 import { Avatar, AvatarFallback } from "@app/components/ui/avatar";
-import { Badge } from "@app/components/ui/badge";
 import { Button } from "@app/components/ui/button";
 import {
     DropdownMenu,
@@ -12,7 +11,14 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@app/components/ui/dropdown-menu";
-import { Separator } from "@app/components/ui/separator";
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@app/components/ui/select";
 import Link from "next/link";
 
 type HeaderProps = {
@@ -33,41 +39,14 @@ export default function Header({ email, orgName, name }: HeaderProps) {
     return (
         <>
             <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                    <Badge variant="default" className="text-md font-bold">
-                        {orgName}
-                    </Badge>
-
-                    <div className="hidden md:block">
-                        <div className="flex items-center gap-4 ml-4">
-                            <Link
-                                href="/docs"
-                                className="text-primary hover:text-primary"
-                            >
-                                Documentation
-                            </Link>
-                            <Link
-                                href="/support"
-                                className="text-primary hover:text-primary"
-                            >
-                                Support
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-
                 <div className="flex items-center gap-4">
-                    {/* Make the text truncate on smaller screens */}
-                    <span className="text-lg font-medium truncate max-w-[150px] md:max-w-none">
-                        {name || email}
-                    </span>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button
-                                variant="ghost"
+                                variant="outline"
                                 className="relative h-10 w-10 rounded-full"
                             >
-                                <Avatar className="h-10 w-10">
+                                <Avatar className="h-9 w-9">
                                     <AvatarFallback>
                                         {getInitials()}
                                     </AvatarFallback>
@@ -76,7 +55,7 @@ export default function Header({ email, orgName, name }: HeaderProps) {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
                             className="w-56"
-                            align="end"
+                            align="start"
                             forceMount
                         >
                             <DropdownMenuLabel className="font-normal">
@@ -93,11 +72,46 @@ export default function Header({ email, orgName, name }: HeaderProps) {
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuGroup>
-                                <Link href="/profile"><DropdownMenuItem>Profile</DropdownMenuItem></Link>
+                                <DropdownMenuItem>Profile</DropdownMenuItem>
                                 <DropdownMenuItem>Log out</DropdownMenuItem>
                             </DropdownMenuGroup>
                         </DropdownMenuContent>
                     </DropdownMenu>
+                    <span className="truncate max-w-[150px] md:max-w-none">
+                        {name || email}
+                    </span>
+                </div>
+
+                <div className="flex items-center">
+                    <div className="hidden md:block">
+                        <div className="flex items-center gap-4 mr-4">
+                            <Link
+                                href="/docs"
+                                className="text-muted-foreground hover:text-black"
+                            >
+                                Documentation
+                            </Link>
+                            <Link
+                                href="/support"
+                                className="text-muted-foreground hover:text-black"
+                            >
+                                Support
+                            </Link>
+                        </div>
+                    </div>
+
+                    <Select defaultValue={orgName}>
+                        <SelectTrigger className="w-[100px] md:w-[180px]">
+                            <SelectValue placeholder="Select an org" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                <SelectItem value={orgName}>
+                                    {orgName}
+                                </SelectItem>
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
                 </div>
             </div>
         </>

@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Roboto } from "next/font/google";
-import { Toaster } from "@/components/ui/toaster"
+import { Inter, Roboto } from "next/font/google";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
     title: process.env.NEXT_PUBLIC_APP_NAME,
     description: "",
 };
 
-const font = Roboto({ subsets: ["latin"], style: "normal", weight: "400" });
+const font = Inter({ subsets: ["latin"] });
 
 export default async function RootLayout({
     children,
@@ -17,7 +17,7 @@ export default async function RootLayout({
 }>) {
     return (
         <html>
-            <body className={`${font.className}`}>
+            <body className={`${font.className} pb-3`}>
                 <main>{children}</main>
                 <Toaster />
             </body>
