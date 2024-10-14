@@ -4,7 +4,10 @@ import Image from "next/image"
 import { Separator } from "@/components/ui/separator"
 import { SidebarNav } from "@/components/sidebar-nav"
 import SiteProvider from "@app/providers/SiteProvider"
-import api from "@app/api"
+import { internal } from "@app/api"
+import { cookies } from "next/headers"
+import { GetSiteResponse } from "@server/routers/site"
+import { AxiosResponse } from "axios"
 
 export const metadata: Metadata = {
     title: "Forms",
@@ -40,20 +43,19 @@ interface SettingsLayoutProps {
 }
 
 export default async function SettingsLayout({ children, params }: SettingsLayoutProps) {
-    const res = await api
-    .get(`/site/${params.siteId}`, {})
-    .catch((e) => {
-        console.error("Failed to fetch site", e);
+    const sessionId = cookies().get("session")?.value ?? null;
+    const res = await internal
+    .get<AxiosResponse<GetSiteResponse>>(`/site/${params.siteId}`,          {
+        headers: {
+            Cookie: `session=${sessionId}`,
+        },
     });
 
-    console.log(res);
-    
-    console.log(params.siteId);
-    
-    // const site = res!.data.data;
+    if (!res || res.status !== 200) {
+        return <div>Failed to load site</div>;
+    }
 
-    // console.log(site);
-    const site: any = {};
+    const site = res.data.data;
 
     return (
         <>
