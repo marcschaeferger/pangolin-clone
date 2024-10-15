@@ -73,7 +73,7 @@ export async function createSite(req: Request, res: Response, next: NextFunction
             return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have a role'));
         }
 
-        const niceId = getUniqueName();
+        const niceId = await getUniqueName(orgId);
 
         // TODO: pick a subnet
 

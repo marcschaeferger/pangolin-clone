@@ -21,7 +21,7 @@ export async function getUniqueName(orgId: string): Promise<string> {
         }
 
         const name = generateName();
-        const count = await db.select({niceId: sites.niceId, orgId: sites.orgId}).from(sites).where(and(eq(sites.niceId, name), eq(sites.orgId, orgId)));
+        const count = await db.select({ niceId: sites.niceId, orgId: sites.orgId }).from(sites).where(and(eq(sites.niceId, name), eq(sites.orgId, orgId)));
         if (count.length === 0) {
             return name;
         }
