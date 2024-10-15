@@ -9,14 +9,6 @@ import { cn } from "@/lib/utils"
 import { toast } from "@/hooks/use-toast"
 import { Button, buttonVariants } from "@/components/ui/button"
 import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from "@/components/ui/command"
-import {
     Form,
     FormControl,
     FormDescription,
@@ -26,15 +18,9 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover"
 import { generateKeypair } from "./wireguard-config";
 import React, { useState, useEffect } from "react";
 import { api } from "@/api";
-import { AxiosResponse } from "axios"
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { Checkbox } from "@app/components/ui/checkbox"
@@ -89,12 +75,6 @@ export function CreateSiteForm() {
         }
     }, []);
 
-    // const name = form.watch("name");
-    // useEffect(() => {
-    //     const subdomain = name.toLowerCase().replace(/\s+/g, "-");
-    //     form.setValue("subdomain", subdomain, { shouldValidate: true });
-    // }, [name, form]);
-
     async function onSubmit(data: AccountFormValues) {
         const res = await api
             .put(`/org/${orgId}/site/`, {
@@ -109,9 +89,9 @@ export function CreateSiteForm() {
             });
 
         if (res && res.status === 201) {
-            const siteId = res.data.data.siteId;
+            const niceId = res.data.data.niceId;
             // navigate to the site page
-            router.push(`/${orgId}/sites/${siteId}`);
+            router.push(`/${orgId}/sites/${niceId}`);
         }
     }
 

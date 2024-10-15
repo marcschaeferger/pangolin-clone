@@ -12,7 +12,7 @@ export const names = JSON.parse(readFileSync(file, 'utf-8'));
 
 export function getUniqueName(): string {
     return (
-        names.animals[Math.floor(Math.random() * names.animals.length)] +
-        names.descriptor[Math.floor(Math.random() * names.descriptor.length)]
-    ).toLowerCase();
+        names.descriptors[Math.floor(Math.random() * names.descriptors.length)] + "-" +
+        names.animals[Math.floor(Math.random() * names.animals.length)]
+    ).toLowerCase().replace(/\s/g, '-');
 }

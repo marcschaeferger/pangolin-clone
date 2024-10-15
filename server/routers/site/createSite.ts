@@ -82,7 +82,6 @@ export async function createSite(req: Request, res: Response, next: NextFunction
             orgId,
             name,
             niceId,
-            subdomain,
             pubKey,
             subnet,
         }).returning();
@@ -129,7 +128,7 @@ export async function createSite(req: Request, res: Response, next: NextFunction
             status: HttpCode.CREATED,
         });
     } catch (error) {
-        logger.error(error);
+        throw error;
         return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred..."));
     }
 }

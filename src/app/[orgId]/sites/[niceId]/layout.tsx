@@ -18,32 +18,32 @@ export const metadata: Metadata = {
 const sidebarNavItems = [
     {
         title: "Profile",
-        href: "/{orgId}/sites/{siteId}",
+        href: "/{orgId}/sites/{niceId}",
     },
     {
         title: "Appearance",
-        href: "/{orgId}/sites/{siteId}/appearance",
+        href: "/{orgId}/sites/{niceId}/appearance",
     },
     {
         title: "Notifications",
-        href: "/{orgId}/sites/{siteId}/notifications",
+        href: "/{orgId}/sites/{niceId}/notifications",
     },
     {
         title: "Display",
-        href: "/{orgId}/sites/{siteId}/display",
+        href: "/{orgId}/sites/{niceId}/display",
     },
 ]
 
 interface SettingsLayoutProps {
     children: React.ReactNode,
-    params: { siteId: string, orgId: string }
+    params: { niceId: string, orgId: string }
 }
 
 export default async function SettingsLayout({ children, params }: SettingsLayoutProps) {
     let site = null;
-    if (params.siteId !== "create") {
+    if (params.niceId !== "create") {
         try {
-            const res = await internal.get<AxiosResponse<GetSiteResponse>>(`/site/${params.siteId}`, authCookieHeader());
+            const res = await internal.get<AxiosResponse<GetSiteResponse>>(`/org/${params.orgId}/site/${params.niceId}`, authCookieHeader());
             site = res.data.data;
         } catch {
             redirect(`/${params.orgId}/sites`)
@@ -72,13 +72,13 @@ export default async function SettingsLayout({ children, params }: SettingsLayou
                 <div className="space-y-0.5">
                     <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
                     <p className="text-muted-foreground">
-                        {params.siteId == "create" ? "Create site..." : "Manage settings on " + site?.name || ""}.
+                        {params.niceId == "create" ? "Create site..." : "Manage settings on " + site?.name || ""}.
                     </p>
                 </div>
                 <Separator className="my-6" />
                 <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
                     <aside className="-mx-4 lg:w-1/5">
-                        <SidebarNav items={sidebarNavItems} disabled={params.siteId == "create"} />
+                        <SidebarNav items={sidebarNavItems} disabled={params.niceId == "create"} />
                     </aside>
                     <div className="flex-1 lg:max-w-2xl">
                         <SiteProvider site={site}>

@@ -17,7 +17,7 @@ export function SidebarNav({ className, items, disabled = false, ...props }: Sid
     const pathname = usePathname();
     const params = useParams();
     const orgId = params.orgId as string;
-    const siteId = params.siteId as string;
+    const niceId = params.niceId as string;
     const resourceId = params.resourceId as string;
 
     return (
@@ -31,11 +31,11 @@ export function SidebarNav({ className, items, disabled = false, ...props }: Sid
         >
             {items.map((item) => (
                 <Link
-                    key={item.href.replace("{orgId}", orgId).replace("{siteId}", siteId).replace("{resourceId}", resourceId)}
-                    href={item.href.replace("{orgId}", orgId).replace("{siteId}", siteId).replace("{resourceId}", resourceId)}
+                    key={item.href.replace("{orgId}", orgId).replace("{niceId}", niceId).replace("{resourceId}", resourceId)}
+                    href={item.href.replace("{orgId}", orgId).replace("{niceId}", niceId).replace("{resourceId}", resourceId)}
                     className={cn(
                         buttonVariants({ variant: "ghost" }),
-                        pathname === item.href.replace("{orgId}", orgId).replace("{siteId}", siteId).replace("{resourceId}", resourceId)
+                        pathname === item.href.replace("{orgId}", orgId).replace("{niceId}", niceId).replace("{resourceId}", resourceId)
                             ? "bg-muted hover:bg-muted"
                             : "hover:bg-transparent hover:underline",
                         "justify-start",
