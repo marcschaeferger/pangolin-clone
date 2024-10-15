@@ -1,5 +1,5 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
-import { InferSelectModel } from "drizzle-orm";
+import { InferSelectModel} from "drizzle-orm";
 
 export const orgs = sqliteTable("orgs", {
     orgId: text("orgId").primaryKey(),
@@ -17,7 +17,6 @@ export const sites = sqliteTable("sites", {
         onDelete: "set null",
     }),
     name: text("name").notNull(),
-    subdomain: text("subdomain"),
     pubKey: text("pubKey"),
     subnet: text("subnet"),
     megabytesIn: integer("bytesIn"),

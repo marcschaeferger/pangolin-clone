@@ -1,9 +1,9 @@
-import { Request } from 'express';
-import { db } from '@server/db';
-import { userActions, roleActions, userOrgs } from '@server/db/schema';
-import { and, eq } from 'drizzle-orm';
-import createHttpError from 'http-errors';
-import HttpCode from '@server/types/HttpCode';
+import { Request } from "express";
+import { db } from "@server/db";
+import { userActions, roleActions, userOrgs } from "@server/db/schema";
+import { and, eq } from "drizzle-orm";
+import createHttpError from "http-errors";
+import HttpCode from "@server/types/HttpCode";
 
 export enum ActionsEnum {
     createOrg = "createOrg",
@@ -54,75 +54,87 @@ export enum ActionsEnum {
     removeUserSite = "removeUserSite",
 }
 
-export async function checkUserActionPermission(actionId: string, req: Request): Promise<boolean> {
+export async function checkUserActionPermission(
+    actionId: string,
+    req: Request,
+): Promise<boolean> {
     const userId = req.user?.userId;
-    let onlyCheckUser = false;
-
-    if (actionId = ActionsEnum.createOrg) {
-        onlyCheckUser = true;
-    }
 
     if (!userId) {
-        throw createHttpError(HttpCode.UNAUTHORIZED, 'User not authenticated');
+        throw createHttpError(HttpCode.UNAUTHORIZED, "User not authenticated");
     }
 
-    if (!req.userOrgId && !onlyCheckUser) {
-        throw createHttpError(HttpCode.BAD_REQUEST, 'Organization ID is required');
+    if (!req.userOrgId) {
+        throw createHttpError(
+            HttpCode.BAD_REQUEST,
+            "Organization ID is required",
+        );
     }
 
     try {
         let userOrgRoleId = req.userOrgRoleId;
 
         // If userOrgRoleId is not available on the request, fetch it
-        if (userOrgRoleId === undefined && !onlyCheckUser) {
-            const userOrgRole = await db.select()
+        if (userOrgRoleId === undefined) {
+            const userOrgRole = await db
+                .select()
                 .from(userOrgs)
-                .where(and(eq(userOrgs.userId, userId), eq(userOrgs.orgId, req.userOrgId!)))
+                .where(
+                    and(
+                        eq(userOrgs.userId, userId),
+                        eq(userOrgs.orgId, req.userOrgId!),
+                    ),
+                )
                 .limit(1);
 
             if (userOrgRole.length === 0) {
-                throw createHttpError(HttpCode.FORBIDDEN, 'User does not have access to this organization');
+                throw createHttpError(
+                    HttpCode.FORBIDDEN,
+                    "User does not have access to this organization",
+                );
             }
 
             userOrgRoleId = userOrgRole[0].roleId;
         }
 
         // Check if the user has direct permission for the action in the current org
-        const userActionPermission = await db.select()
+        const userActionPermission = await db
+            .select()
             .from(userActions)
             .where(
                 and(
                     eq(userActions.userId, userId),
                     eq(userActions.actionId, actionId),
-                    eq(userActions.orgId, req.userOrgId!) // TODO: we cant pass the org id if we are not checking the org
-                )
+                    eq(userActions.orgId, req.userOrgId!), // TODO: we cant pass the org id if we are not checking the org
+                ),
             )
             .limit(1);
 
         if (userActionPermission.length > 0) {
             return true;
         }
-        if (!onlyCheckUser) {
 
-            // If no direct permission, check role-based permission
-            const roleActionPermission = await db.select()
-                .from(roleActions)
-                .where(
-                    and(
-                        eq(roleActions.actionId, actionId),
-                        eq(roleActions.roleId, userOrgRoleId!),
-                        eq(roleActions.orgId, req.userOrgId!)
-                    )
-                )
-                .limit(1);
+        // If no direct permission, check role-based permission
+        const roleActionPermission = await db
+            .select()
+            .from(roleActions)
+            .where(
+                and(
+                    eq(roleActions.actionId, actionId),
+                    eq(roleActions.roleId, userOrgRoleId!),
+                    eq(roleActions.orgId, req.userOrgId!),
+                ),
+            )
+            .limit(1);
 
-            return roleActionPermission.length > 0;
-        }
+        return roleActionPermission.length > 0;
 
         return false;
-
     } catch (error) {
-        console.error('Error checking user action permission:', error);
-        throw createHttpError(HttpCode.INTERNAL_SERVER_ERROR, 'Error checking action permission');
+        console.error("Error checking user action permission:", error);
+        throw createHttpError(
+            HttpCode.INTERNAL_SERVER_ERROR,
+            "Error checking action permission",
+        );
     }
 }
