@@ -53,7 +53,7 @@ export default async function ConfigurationLaytout({
 
     return (
         <>
-            <div className="w-full bg-neutral-100 dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-900 mb-6 select-none sm:px-0 px-3 pt-3">
+            <div className="w-full bg-muted border-b border-bg mb-6 select-none sm:px-0 px-3 pt-3">
                 <div className="container mx-auto flex flex-col content-between gap-4">
                     <Header email={user.email} orgName={params.orgId} />
                     <TopbarNav items={topNavItems} orgId={params.orgId} />
