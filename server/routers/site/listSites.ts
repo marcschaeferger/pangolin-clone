@@ -32,6 +32,7 @@ function querySites(orgId: string, accessibleSiteIds: number[]) {
     return db
         .select({
             siteId: sites.siteId,
+            niceId: sites.niceId,
             name: sites.name,
             pubKey: sites.pubKey,
             subnet: sites.subnet,

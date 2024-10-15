@@ -6,9 +6,9 @@ import { CreateSiteForm } from "./components/create-site";
 export default function SettingsProfilePage({
     params,
 }: {
-    params: { siteId: string };
+    params: { niceId: string };
 }) {
-    const isCreateForm = params.siteId === "create";
+    const isCreateForm = params.niceId === "create";
 
     return (
         <div className="space-y-6">

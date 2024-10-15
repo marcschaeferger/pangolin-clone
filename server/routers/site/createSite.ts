@@ -9,6 +9,7 @@ import fetch from 'node-fetch';
 import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
 import { eq, and } from 'drizzle-orm';
+import { getUniqueName } from '@server/db/names';
 
 const API_BASE_URL = "http://localhost:3000";
 
@@ -23,6 +24,16 @@ const createSiteSchema = z.object({
     pubKey: z.string().optional(),
     subnet: z.string().optional(),
 });
+
+export type GetSiteResponse = {
+    name: string;
+    siteId: number;
+    orgId: string;
+    niceId: string;
+    // niceId: string;
+    // subdomain: string;
+    // subnet: string;
+};
 
 export async function createSite(req: Request, res: Response, next: NextFunction): Promise<any> {
     try {
@@ -62,11 +73,15 @@ export async function createSite(req: Request, res: Response, next: NextFunction
             return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have a role'));
         }
 
+        const niceId = await getUniqueName(orgId);
+
+        // TODO: pick a subnet
+
         // Create new site in the database
-        const newSite = await db.insert(sites).values({
+        const [newSite] = await db.insert(sites).values({
             orgId,
             name,
-            subdomain,
+            niceId,
             pubKey,
             subnet,
         }).returning();
@@ -87,26 +102,33 @@ export async function createSite(req: Request, res: Response, next: NextFunction
 
         await db.insert(roleSites).values({
             roleId: superuserRole[0].roleId,
-            siteId: newSite[0].siteId,
+            siteId: newSite.siteId,
         });
 
         if (req.userOrgRoleId != superuserRole[0].roleId) {
             // make sure the user can access the site
             db.insert(userSites).values({
                 userId: req.user?.userId!,
-                siteId: newSite[0].siteId,
+                siteId: newSite.siteId,
             });
         }
 
         return response(res, {
-            data: newSite[0],
+            data: {
+                name: newSite.name,
+                niceId: newSite.niceId,
+                siteId: newSite.siteId,
+                orgId: newSite.orgId,
+                // subdomain: newSite.subdomain,
+                // subnet: newSite.subnet,
+            },
             success: true,
             error: false,
             message: "Site created successfully",
             status: HttpCode.CREATED,
         });
     } catch (error) {
-        logger.error(error);
+        throw error;
         return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred..."));
     }
 }

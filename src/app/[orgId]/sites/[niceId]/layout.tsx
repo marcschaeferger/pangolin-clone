@@ -20,25 +20,25 @@ export const metadata: Metadata = {
 const sidebarNavItems = [
     {
         title: "Profile",
-        href: "/{orgId}/sites/{siteId}",
+        href: "/{orgId}/sites/{niceId}",
     },
     {
         title: "Appearance",
-        href: "/{orgId}/sites/{siteId}/appearance",
+        href: "/{orgId}/sites/{niceId}/appearance",
     },
     {
         title: "Notifications",
-        href: "/{orgId}/sites/{siteId}/notifications",
+        href: "/{orgId}/sites/{niceId}/notifications",
     },
     {
         title: "Display",
-        href: "/{orgId}/sites/{siteId}/display",
+        href: "/{orgId}/sites/{niceId}/display",
     },
 ];
 
 interface SettingsLayoutProps {
     children: React.ReactNode;
-    params: { siteId: string; orgId: string };
+    params: { niceId: string; orgId: string };
 }
 
 export default async function SettingsLayout({
@@ -46,10 +46,10 @@ export default async function SettingsLayout({
     params,
 }: SettingsLayoutProps) {
     let site = null;
-    if (params.siteId !== "create") {
+    if (params.niceId !== "create") {
         try {
             const res = await internal.get<AxiosResponse<GetSiteResponse>>(
-                `/site/${params.siteId}`,
+                `/org/${params.orgId}/site/${params.niceId}`,
                 authCookieHeader(),
             );
             site = res.data.data;
@@ -78,27 +78,26 @@ export default async function SettingsLayout({
             </div>
 
             <div className="mb-4">
-            <Link
-                href={`/${params.orgId}/sites`}
-                className="text-primary font-medium"
-            >
-                <div className="flex items-center gap-0.5 hover:underline">
-                    <ChevronLeft />
-                    <span>View all sites</span>
-                </div>
-            </Link>
+                <Link
+                    href={`/${params.orgId}/sites`}
+                    className="text-primary font-medium"
+                >
+                    <div className="flex items-center gap-0.5 hover:underline">
+                        <ChevronLeft />
+                        <span>View all sites</span>
+                    </div>
+                </Link>
             </div>
 
             <div className="hidden space-y-6 0 pb-16 md:block">
                 <div className="space-y-0.5">
                     <h2 className="text-2xl font-bold tracking-tight">
-                        {params.siteId == "create"
+                        {params.niceId == "create"
                             ? "New Site"
-                            : site?.name + " Settings" || "Site Settings"
-                        }
+                            : site?.name + " Settings" || "Site Settings"}
                     </h2>
                     <p className="text-muted-foreground">
-                        {params.siteId == "create"
+                        {params.niceId == "create"
                             ? "Create a new site"
                             : "Configure the settings on your site: " +
                                   site?.name || ""}
@@ -109,7 +108,7 @@ export default async function SettingsLayout({
                     <aside className="-mx-4 lg:w-1/5">
                         <SidebarNav
                             items={sidebarNavItems}
-                            disabled={params.siteId == "create"}
+                            disabled={params.niceId == "create"}
                         />
                     </aside>
                     <div className="flex-1 lg:max-w-2xl">
