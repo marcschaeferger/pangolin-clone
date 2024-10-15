@@ -1,11 +1,6 @@
 import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
 import { db } from "@server/db";
-import {
-    orgs,
-    roleSites,
-    sites,
-    userSites,
-} from "@server/db/schema";
+import { orgs, roleSites, sites, userSites } from "@server/db/schema";
 import HttpCode from "@server/types/HttpCode";
 import response from "@server/utils/response";
 import { and, eq, inArray, or, sql } from "drizzle-orm";
@@ -38,7 +33,6 @@ function querySites(orgId: string, accessibleSiteIds: number[]) {
         .select({
             siteId: sites.siteId,
             name: sites.name,
-            subdomain: sites.subdomain,
             pubKey: sites.pubKey,
             subnet: sites.subnet,
             megabytesIn: sites.megabytesIn,
