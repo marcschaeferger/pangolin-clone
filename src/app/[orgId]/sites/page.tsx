@@ -16,6 +16,7 @@ export default async function Page({ params }: SitesPageProps) {
         );
         sites = res.data.data.sites;
     } catch (e) {
+        console.error("Error fetching sites", e);
     }
 
     return (
