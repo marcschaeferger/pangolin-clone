@@ -53,16 +53,6 @@ const accountFormSchema = z.object({
         .max(30, {
             message: "Name must not be longer than 30 characters.",
         }),
-    subdomain: z
-        .string()
-        // cant be too long and cant have spaces or special characters
-        .regex(/^[a-zA-Z0-9-]+$/)
-        .min(2, {
-            message: "Subdomain must be at least 2 characters.",
-        })
-        .max(30, {
-            message: "Subdomain must not be longer than 30 characters.",
-        }),
     method: z.enum(["wg", "newt"]),
 });
 
@@ -99,17 +89,17 @@ export function CreateSiteForm() {
         }
     }, []);
 
-    const name = form.watch("name");
-    useEffect(() => {
-        const subdomain = name.toLowerCase().replace(/\s+/g, "-");
-        form.setValue("subdomain", subdomain, { shouldValidate: true });
-    }, [name, form]);
+    // const name = form.watch("name");
+    // useEffect(() => {
+    //     const subdomain = name.toLowerCase().replace(/\s+/g, "-");
+    //     form.setValue("subdomain", subdomain, { shouldValidate: true });
+    // }, [name, form]);
 
     async function onSubmit(data: AccountFormValues) {
         const res = await api
             .put(`/org/${orgId}/site/`, {
                 name: data.name,
-                subdomain: data.subdomain,
+                // subdomain: data.subdomain,
                 pubKey: keypair?.publicKey,
             })
             .catch((e) => {
@@ -161,7 +151,7 @@ sh get-docker.sh`;
                             </FormItem>
                         )}
                     />
-                    <FormField
+                    {/* <FormField
                         control={form.control}
                         name="subdomain"
                         render={({ field }) => (
@@ -176,7 +166,7 @@ sh get-docker.sh`;
                                 <FormMessage />
                             </FormItem>
                         )}
-                    />
+                    /> */}
                     <FormField
                         control={form.control}
                         name="method"

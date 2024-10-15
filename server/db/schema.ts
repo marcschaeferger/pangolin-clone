@@ -12,6 +12,7 @@ export const sites = sqliteTable("sites", {
     orgId: text("orgId").references(() => orgs.orgId, {
         onDelete: "cascade",
     }),
+    niceId: text("niceId"),
     exitNode: integer("exitNode").references(() => exitNodes.exitNodeId, {
         onDelete: "set null",
     }),
