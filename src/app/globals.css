@@ -38,7 +38,7 @@
         --chart-4: 23.33 8.82% 60%;
         --chart-5: 24 8.98% 67.25%;
 
-        --radius: 0.5rem;
+        --radius: 0.25rem;
     }
     .dark {
         --background: 0 0% 10.98%;
@@ -50,7 +50,7 @@
         --card: 0 0% 8.63%;
         --card-foreground: 24 9.09% 89.22%;
 
-        --popover: 0 0% 4.71%;
+        --popover: 0 0% 10.98%;
         --popover-foreground: 24 9.09% 89.22%;
 
         --secondary: 23.33 28.13% 12.55%;
@@ -75,7 +75,7 @@
         --chart-4: 23.33 23.68% 14.9%;
         --chart-5: 24 23.81% 12.35%;
 
-        --radius: 0.5rem;
+        --radius: 0.25rem;
     }
 }
 

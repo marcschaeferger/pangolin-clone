@@ -176,13 +176,13 @@ sh get-docker.sh`;
                         )}
                     />
                     {form.watch("method") === "wg" && !isLoading ? (
-                        <pre className="mt-2 w-full rounded-md bg-slate-950 p-4 overflow-x-auto">
-                            <code className="text-white whitespace-pre-wrap">{wgConfig}</code>
+                        <pre className="mt-2 w-full rounded-md bg-muted p-4 overflow-x-auto">
+                            <code className="text-white whitespace-pre-wrap font-mono">{wgConfig}</code>
                         </pre>
                     ) : form.watch("method") === "wg" && isLoading ? (
                         <p>Loading WireGuard configuration...</p>
                     ) : (
-                        <pre className="mt-2 w-full rounded-md bg-slate-950 p-4 overflow-x-auto">
+                        <pre className="mt-2 w-full rounded-md bg-muted p-4 overflow-x-auto">
                             <code className="text-white whitespace-pre-wrap">{newtConfig}</code>
                         </pre>
                     )}
