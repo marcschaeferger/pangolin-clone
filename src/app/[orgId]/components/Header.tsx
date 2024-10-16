@@ -87,13 +87,13 @@ export default function Header({ email, orgName, name }: HeaderProps) {
                         <div className="flex items-center gap-4 mr-4">
                             <Link
                                 href="/docs"
-                                className="text-muted-foreground hover:text-black"
+                                className="text-muted-foreground hover:text-foreground"
                             >
                                 Documentation
                             </Link>
                             <Link
                                 href="/support"
-                                className="text-muted-foreground hover:text-black"
+                                className="text-muted-foreground hover:text-foreground"
                             >
                                 Support
                             </Link>

@@ -15,22 +15,22 @@ const topNavItems = [
     {
         title: "Sites",
         href: "/{orgId}/sites",
-        icon: <Combine />,
+        icon: <Combine className="h-5 w-5"/>,
     },
     {
         title: "Resources",
         href: "/{orgId}/resources",
-        icon: <Waypoints />,
+        icon: <Waypoints className="h-5 w-5"/>,
     },
     {
         title: "Users",
         href: "/{orgId}/users",
-        icon: <Users />,
+        icon: <Users className="h-5 w-5"/>,
     },
     {
         title: "General",
         href: "/{orgId}/general",
-        icon: <Cog />,
+        icon: <Cog className="h-5 w-5"/>,
     },
 ];
 
@@ -53,8 +53,8 @@ export default async function ConfigurationLaytout({
 
     return (
         <>
-            <div className="w-full bg-muted border-b border-bg mb-6 select-none sm:px-0 px-3 pt-3">
-                <div className="container mx-auto flex flex-col content-between gap-4">
+            <div className="w-full bg-muted mb-6 select-none sm:px-0 px-3 pt-3 border-b border-border">
+                <div className="container mx-auto flex flex-col content-between gap-4 ">
                     <Header email={user.email} orgName={params.orgId} />
                     <TopbarNav items={topNavItems} orgId={params.orgId} />
                 </div>

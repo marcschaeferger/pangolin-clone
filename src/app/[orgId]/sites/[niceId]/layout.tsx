@@ -82,10 +82,6 @@ export default async function SettingsLayout({
                     href={`/${params.orgId}/sites`}
                     className="text-primary font-medium"
                 >
-                    <div className="flex items-center gap-0.5 hover:underline">
-                        <ChevronLeft />
-                        <span>View all sites</span>
-                    </div>
                 </Link>
             </div>
 

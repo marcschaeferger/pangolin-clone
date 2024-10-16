@@ -9,8 +9,8 @@ export const metadata: Metadata = {
     description: "",
 };
 
-const font = Inter({ subsets: ["latin"] });
-// const font = Open_Sans({ subsets: ["latin"] });
+// const font = Inter({ subsets: ["latin"] });
+const font = Open_Sans({ subsets: ["latin"] });
 
 export default async function RootLayout({
     children,
