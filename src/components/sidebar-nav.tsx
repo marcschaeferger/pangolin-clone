@@ -35,7 +35,7 @@ export function SidebarNav({ className, items, disabled = false, ...props }: Sid
                     href={item.href.replace("{orgId}", orgId).replace("{niceId}", niceId).replace("{resourceId}", resourceId)}
                     className={cn(
                         buttonVariants({ variant: "ghost" }),
-                        pathname === item.href.replace("{orgId}", orgId).replace("{niceId}", niceId).replace("{resourceId}", resourceId)
+                        pathname === item.href.replace("{orgId}", orgId).replace("{niceId}", niceId).replace("{resourceId}", resourceId) && !pathname.includes("create")
                             ? "bg-muted hover:bg-muted"
                             : "hover:bg-transparent hover:underline",
                         "justify-start",

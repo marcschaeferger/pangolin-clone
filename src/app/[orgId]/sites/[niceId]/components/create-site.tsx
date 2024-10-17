@@ -45,7 +45,7 @@ const accountFormSchema = z.object({
 type AccountFormValues = z.infer<typeof accountFormSchema>;
 
 const defaultValues: Partial<AccountFormValues> = {
-    name: "Wombat",
+    name: "",
     method: "wg"
 };
 
