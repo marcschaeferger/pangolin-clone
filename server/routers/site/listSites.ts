@@ -3,7 +3,7 @@ import { db } from "@server/db";
 import { orgs, roleSites, sites, userSites } from "@server/db/schema";
 import HttpCode from "@server/types/HttpCode";
 import response from "@server/utils/response";
-import { and, eq, inArray, or, sql } from "drizzle-orm";
+import { and, count, eq, inArray, or, sql } from "drizzle-orm";
 import { NextFunction, Request, Response } from "express";
 import createHttpError from "http-errors";
 import { z } from "zod";
@@ -123,7 +123,7 @@ export async function listSites(
         const baseQuery = querySites(orgId, accessibleSiteIds);
 
         let countQuery = db
-            .select({ count: sql<number>`cast(count(*) as integer)` })
+            .select({ count: count() })
             .from(sites)
             .where(
                 and(

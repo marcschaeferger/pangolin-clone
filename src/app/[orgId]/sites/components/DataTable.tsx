@@ -69,7 +69,7 @@ export function DataTable<TData, TValue>({
                             .getColumn("name")
                             ?.setFilterValue(event.target.value)
                     }
-                    className="max-w-sm"
+                    className="max-w-sm mr-2"
                 />
                 <Button onClick={() => {
                     if (addSite) {
