@@ -36,7 +36,7 @@ export function SidebarNav({ className, items, disabled = false, ...props }: Sid
                     className={cn(
                         buttonVariants({ variant: "ghost" }),
                         pathname === item.href.replace("{orgId}", orgId).replace("{niceId}", niceId).replace("{resourceId}", resourceId) && !pathname.includes("create")
-                            ? "bg-muted hover:bg-muted"
+                            ? "bg-muted hover:bg-muted dark:bg-border dark:hover:bg-border"
                             : "hover:bg-transparent hover:underline",
                         "justify-start",
                         disabled && "cursor-not-allowed"
