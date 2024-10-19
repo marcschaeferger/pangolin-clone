@@ -79,7 +79,7 @@ export function DataTable<TData, TValue>({
                     <Plus className="mr-2 h-4 w-4" /> Add Site
                 </Button>
             </div>
-            <div className="rounded-md border">
+            <div>
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
