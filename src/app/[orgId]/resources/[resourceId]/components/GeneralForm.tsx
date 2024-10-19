@@ -27,8 +27,7 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { useSiteContext } from "@app/hooks/useSiteContext"
-import api from "@app/api"
+import { useResourceContext } from "@app/hooks/useResourceContext"
 
 const GeneralFormSchema = z.object({
     name: z.string()
@@ -50,12 +49,12 @@ const GeneralFormSchema = z.object({
 type GeneralFormValues = z.infer<typeof GeneralFormSchema>
 
 export function GeneralForm() {
-    const { site, updateSite } = useSiteContext();
+    const { resource, updateResource } = useResourceContext();
 
     const form = useForm<GeneralFormValues>({
         resolver: zodResolver(GeneralFormSchema),
         defaultValues: {
-            name: site?.name
+            name: resource?.name
         },
         mode: "onChange",
     })
@@ -66,7 +65,7 @@ export function GeneralForm() {
     //   })
 
     async function onSubmit(data: GeneralFormValues) {
-        await updateSite({ name: data.name });
+        await updateResource({ name: data.name });
     }
 
     return (
@@ -82,7 +81,7 @@ export function GeneralForm() {
                                 <Input {...field} />
                             </FormControl>
                             <FormDescription>
-                                This is the display name of the site.
+                                This is the display name of the resource.
                             </FormDescription>
                             <FormMessage />
                         </FormItem>
@@ -147,7 +146,7 @@ export function GeneralForm() {
                     URLs
                   </FormLabel>
                   <FormDescription className={cn(index !== 0 && "sr-only")}>
-                    Add links to your website, blog, or social media profiles.
+                    Add links to your webresource, blog, or social media profiles.
                   </FormDescription>
                   <FormControl>
                     <Input {...field} />
@@ -167,7 +166,7 @@ export function GeneralForm() {
             Add URL
           </Button>
         </div> */}
-                <Button type="submit">Update Site</Button>
+                <Button type="submit">Update Resource</Button>
             </form>
         </Form>
     )

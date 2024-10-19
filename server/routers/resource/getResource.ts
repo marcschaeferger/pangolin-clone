@@ -70,7 +70,7 @@ export async function getResource(req: Request, res: Response, next: NextFunctio
             status: HttpCode.OK,
         });
     } catch (error) {
-        logger.error(error);
+        throw error;
         return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred..."));
     }
 }

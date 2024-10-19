@@ -11,7 +11,7 @@ import logger from '@server/logger';
 
 // Define Zod schema for request parameters validation
 const updateResourceParamsSchema = z.object({
-    resourceId: z.string().uuid()
+    resourceId: z.string()
 });
 
 // Define Zod schema for request body validation
