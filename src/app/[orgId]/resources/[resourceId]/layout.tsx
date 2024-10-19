@@ -34,7 +34,7 @@ export default async function SettingsLayout({
     if (params.resourceId !== "create") {
         try {
             const res = await internal.get<AxiosResponse<GetResourceResponse>>(
-                `/org/${params.orgId}/resource/${params.resourceId}`,
+                `/resource/${params.resourceId}`,
                 authCookieHeader(),
             );
             resource = res.data.data;

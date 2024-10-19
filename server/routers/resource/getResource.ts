@@ -11,7 +11,7 @@ import logger from '@server/logger';
 
 // Define Zod schema for request parameters validation
 const getResourceSchema = z.object({
-    resourceId: z.string().uuid()
+    resourceId: z.string()
 });
 
 export type GetResourceResponse = {
