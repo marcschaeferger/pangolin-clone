@@ -11,7 +11,7 @@ import { GetOrgResponse, ListOrgsResponse } from "@server/routers/org";
 import { authCookieHeader } from "@app/api/cookies";
 
 export const metadata: Metadata = {
-    title: "Configuration",
+    title: `Configuration - ${process.env.NEXT_PUBLIC_APP_NAME}`,
     description: "",
 };
 

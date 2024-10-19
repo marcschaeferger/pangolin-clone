@@ -15,10 +15,10 @@ import { useEffect, useState } from "react";
 import { toast } from "@app/hooks/use-toast";
 import { ClientLayout } from "./components/ClientLayout";
 
-export const metadata: Metadata = {
-    title: "Forms",
-    description: "Advanced form example using react-hook-form and Zod.",
-};
+// export const metadata: Metadata = {
+//     title: "Forms",
+//     description: "Advanced form example using react-hook-form and Zod.",
+// };
 
 interface SettingsLayoutProps {
     children: React.ReactNode;
@@ -70,7 +70,7 @@ export default async function SettingsLayout({
                 </Link>
             </div>
 
-            <SiteProvider site={site}>                
+            <SiteProvider site={site}>
                 <ClientLayout
                 isCreate={params.niceId === "create"}
             >

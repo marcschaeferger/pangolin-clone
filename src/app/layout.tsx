@@ -10,7 +10,7 @@ import { authCookieHeader } from "@app/api/cookies";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-    title: process.env.NEXT_PUBLIC_APP_NAME,
+    title: `Dashboard - ${process.env.NEXT_PUBLIC_APP_NAME}`,
     description: "",
 };
 
