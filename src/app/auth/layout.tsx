@@ -5,7 +5,7 @@ type AuthLayoutProps = {
 export default async function AuthLayout({ children }: AuthLayoutProps) {
     return (
         <>
-            <div className="mt-32">
+            <div className="p-3 md:mt-32">
                 {children}
             </div>
         </>

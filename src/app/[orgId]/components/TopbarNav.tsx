@@ -40,8 +40,8 @@ export function TopbarNav({
                     className={cn(
                         "px-2 py-3 text-md",
                         pathname.startsWith(item.href.replace("{orgId}", orgId))
-                            ? "border-b-2 border-secondary text-secondary font-medium"
-                            : "hover:secondary-primary text-muted-foreground font-medium",
+                            ? "border-b-2 border-primary text-primary font-medium"
+                            : "hover:text-primary text-muted-foreground font-medium",
                         "whitespace-nowrap",
                         disabled && "cursor-not-allowed",
                     )}
@@ -51,9 +51,7 @@ export function TopbarNav({
                 >
                     <div className="flex items-center gap-2">
                         {item.icon && (
-                            <div className="hidden md:block">
-                                {item.icon}
-                            </div>
+                            <div className="hidden md:block">{item.icon}</div>
                         )}
                         {item.title}
                     </div>

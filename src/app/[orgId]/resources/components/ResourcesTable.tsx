@@ -17,6 +17,8 @@ export type ResourceRow = {
     id: string;
     name: string;
     orgId: string;
+    domain: string;
+    site: string;
 };
 
 export const columns: ColumnDef<ResourceRow>[] = [
@@ -35,6 +37,26 @@ export const columns: ColumnDef<ResourceRow>[] = [
                 </Button>
             );
         },
+    },
+    {
+        accessorKey: "site",
+        header: ({ column }) => {
+            return (
+                <Button
+                    variant="ghost"
+                    onClick={() =>
+                        column.toggleSorting(column.getIsSorted() === "asc")
+                    }
+                >
+                    Site
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+            );
+        },
+    },
+    {
+        accessorKey: "domain",
+        header: "Domain",
     },
     {
         id: "actions",
