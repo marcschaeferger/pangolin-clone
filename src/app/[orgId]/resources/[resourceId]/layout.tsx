@@ -20,21 +20,6 @@ export const metadata: Metadata = {
     description: "Advanced form example using react-hook-form and Zod.",
 };
 
-const sidebarNavItems = [
-    {
-        title: "Profile",
-        href: "/{orgId}/resources/{resourceId}",
-    },
-    // {
-    //     title: "Appearance",
-    //     href: "/{orgId}/resources/{resourceId}/appearance",
-    // },
-    // {
-    //     title: "Notifications",
-    //     href: "/{orgId}/resources/{resourceId}/notifications",
-    // },
-]
-
 interface SettingsLayoutProps {
     children: React.ReactNode;
     params: { resourceId: string; orgId: string };

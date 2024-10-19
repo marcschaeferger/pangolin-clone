@@ -11,11 +11,11 @@ type ResourcesPageProps = {
 export default async function Page({ params }: ResourcesPageProps) {
     let resources: ListResourcesResponse["resources"] = [];
     try {
-        // const res = await internal.get<AxiosResponse<ListResourcesResponse>>(
-        //     `/org/${params.orgId}/resources`,
-        //     authCookieHeader(),
-        // );
-        // resources = res.data.data.resources;
+        const res = await internal.get<AxiosResponse<ListResourcesResponse>>(
+            `/org/${params.orgId}/resources`,
+            authCookieHeader(),
+        );
+        resources = res.data.data.resources;
     } catch (e) {
         console.error("Error fetching resources", e);
     }

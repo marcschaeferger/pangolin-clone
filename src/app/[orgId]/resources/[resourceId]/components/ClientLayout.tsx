@@ -5,19 +5,18 @@ import { useResourceContext } from "@app/hooks/useResourceContext";
 
 const sidebarNavItems = [
     {
-        title: "General",
+        title: "Create",
         href: "/{orgId}/resources/{resourceId}",
     },
-    // {
-    //     title: "Appearance",
-    //     href: "/{orgId}/resources/{resourceId}/appearance",
-    // },
+    {
+        title: "Targets",
+        href: "/{orgId}/resources/{resourceId}/targets",
+    },
     // {
     //     title: "Notifications",
     //     href: "/{orgId}/resources/{resourceId}/notifications",
     // },
 ]
-
 
 export function ClientLayout({ isCreate, children }: { isCreate: boolean; children: React.ReactNode }) {
     const { resource } = useResourceContext();

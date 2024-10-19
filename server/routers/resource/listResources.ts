@@ -13,10 +13,11 @@ import createHttpError from "http-errors";
 import { sql, eq, or, inArray, and, count } from "drizzle-orm";
 import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
 import logger from "@server/logger";
+import stoi from "@server/utils/stoi";
 
 const listResourcesParamsSchema = z
     .object({
-        siteId: z.string().optional().transform(Number).pipe(z.number().int().positive()),
+        siteId: z.string().optional().transform(stoi).pipe(z.number().int().positive().optional()),
         orgId: z.string().optional(),
     })
     .refine((data) => !!data.siteId !== !!data.orgId, {
@@ -27,7 +28,7 @@ const listResourcesSchema = z.object({
     limit: z
         .string()
         .optional()
-        .default("0")
+        .default("1000")
         .transform(Number)
         .pipe(z.number().int().nonnegative()),
 
@@ -90,6 +91,8 @@ export async function listResources(
     next: NextFunction,
 ): Promise<any> {
     try {
+        logger.info(JSON.stringify(req.query, null, 2));
+        logger.info(JSON.stringify(req.params, null, 2));
         const parsedQuery = listResourcesSchema.safeParse(req.query);
         if (!parsedQuery.success) {
             return next(

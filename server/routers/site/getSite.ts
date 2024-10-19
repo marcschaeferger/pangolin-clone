@@ -8,10 +8,11 @@ import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
 import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
+import stoi from '@server/utils/stoi';
 
 // Define Zod schema for request parameters validation
 const getSiteSchema = z.object({
-    siteId: z.string().transform(Number).pipe(z.number().int().positive()).optional(),
+            siteId: z.string().optional().transform(stoi).pipe(z.number().int().positive().optional()).optional(),
     niceId: z.string().optional(),
     orgId: z.string().optional(),
 });

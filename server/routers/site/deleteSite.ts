@@ -9,7 +9,6 @@ import createHttpError from 'http-errors';
 import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
 
-
 const API_BASE_URL = "http://localhost:3000";
 
 // Define Zod schema for request parameters validation

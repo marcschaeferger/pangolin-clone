@@ -36,13 +36,15 @@ app.prepare().then(() => {
     externalServer.use(cors());
     externalServer.use(cookieParser());
     externalServer.use(express.json());
-    externalServer.use(
-        rateLimitMiddleware({
-            windowMin: 1,
-            max: 100,
-            type: "IP_ONLY",
-        }),
-    );
+    if (!dev) {
+        externalServer.use(
+            rateLimitMiddleware({
+                windowMin: 1,
+                max: 100,
+                type: "IP_ONLY",
+            }),
+        );
+    }
 
     const prefix = `/api/v1`;
     externalServer.use(prefix, unauthenticated);

@@ -9,7 +9,7 @@ import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
 
 const createRoleParamsSchema = z.object({
-    orgId: z.number().int().positive()
+    orgId: z.string()
 });
 
 const createRoleSchema = z.object({

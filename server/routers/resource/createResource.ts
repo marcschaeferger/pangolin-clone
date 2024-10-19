@@ -8,9 +8,10 @@ import createHttpError from 'http-errors';
 import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
 import { eq, and } from 'drizzle-orm';
+import stoi from '@server/utils/stoi';
 
 const createResourceParamsSchema = z.object({
-    siteId: z.string().transform(Number).pipe(z.number().int().positive()),
+            siteId: z.string().optional().transform(stoi).pipe(z.number().int().positive().optional()),
     orgId: z.string()
 });
 

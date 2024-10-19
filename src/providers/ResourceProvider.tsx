@@ -32,6 +32,7 @@ export function ResourceProvider({ children, resource: serverResource }: Resourc
         } catch (error) {
             console.error(error);
             toast({
+                variant: "destructive",
                 title: "Error updating resource...",
             })
         }
