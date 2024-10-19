@@ -14,6 +14,13 @@ const getResourceSchema = z.object({
     resourceId: z.string().uuid()
 });
 
+export type GetResourceResponse = {
+    resourceId: string;
+    siteId: number;
+    orgId: string;
+    name: string;
+}
+
 export async function getResource(req: Request, res: Response, next: NextFunction): Promise<any> {
     try {
         // Validate request parameters
@@ -51,7 +58,12 @@ export async function getResource(req: Request, res: Response, next: NextFunctio
         }
 
         return response(res, {
-            data: resource[0],
+            data: {
+                resourceId: resource[0].resourceId,
+                siteId: resource[0].siteId,
+                orgId: resource[0].orgId,
+                name: resource[0].name
+            },
             success: true,
             error: false,
             message: "Resource retrieved successfully",

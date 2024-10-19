@@ -1,41 +1,38 @@
 "use client";
 
 import { SidebarNav } from "@app/components/sidebar-nav";
-import { useSiteContext } from "@app/hooks/useSiteContext";
+import { useResourceContext } from "@app/hooks/useResourceContext";
 
 const sidebarNavItems = [
     {
         title: "General",
-        href: "/{orgId}/sites/{niceId}",
+        href: "/{orgId}/resources/{resourceId}",
     },
     // {
     //     title: "Appearance",
-    //     href: "/{orgId}/sites/{niceId}/appearance",
+    //     href: "/{orgId}/resources/{resourceId}/appearance",
     // },
     // {
     //     title: "Notifications",
-    //     href: "/{orgId}/sites/{niceId}/notifications",
+    //     href: "/{orgId}/resources/{resourceId}/notifications",
     // },
-    // {
-    //     title: "Display",
-    //     href: "/{orgId}/sites/{niceId}/display",
-    // },
-];
+]
+
 
 export function ClientLayout({ isCreate, children }: { isCreate: boolean; children: React.ReactNode }) {
-    const { site } = useSiteContext();
+    const { resource } = useResourceContext();
     return (<div className="hidden space-y-6 0 pb-16 md:block">
         <div className="space-y-0.5">
             <h2 className="text-2xl font-bold tracking-tight">
                 {isCreate
-                    ? "New Site"
-                    : site?.name + " Settings"}
+                    ? "New Resource"
+                    : resource?.name + " Settings"}
             </h2>
             <p className="text-muted-foreground">
                 {isCreate
-                    ? "Create a new site"
-                    : "Configure the settings on your site: " +
-                    site?.name || ""}
+                    ? "Create a new resource"
+                    : "Configure the settings on your resource: " +
+                    resource?.name || ""}
                 .
             </p>
         </div>

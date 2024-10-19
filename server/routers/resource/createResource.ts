@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { db } from '@server/db';
-import { resources, roleResources, roles, userResources } from '@server/db/schema';
+import { orgs, resources, roleResources, roles, userResources } from '@server/db/schema';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
@@ -10,7 +10,7 @@ import logger from '@server/logger';
 import { eq, and } from 'drizzle-orm';
 
 const createResourceParamsSchema = z.object({
-    siteId: z.number().int().positive(),
+    siteId: z.string().transform(Number).pipe(z.number().int().positive()),
     orgId: z.string()
 });
 
@@ -58,8 +58,23 @@ export async function createResource(req: Request, res: Response, next: NextFunc
             return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have a role'));
         }
 
+        // get the org
+        const org = await db.select()
+            .from(orgs)
+            .where(eq(orgs.orgId, orgId))
+            .limit(1);
+        
+        if (org.length === 0) {
+            return next(
+                createHttpError(
+                    HttpCode.NOT_FOUND,
+                    `Organization with ID ${orgId} not found`
+                )
+            );
+        }
+
         // Generate a unique resourceId
-        const resourceId = "subdomain" // TODO: create the subdomain here
+        const resourceId = `${subdomain}.${org[0].domain}`;
 
         // Create new resource in the database
         const newResource = await db.insert(resources).values({
@@ -69,8 +84,6 @@ export async function createResource(req: Request, res: Response, next: NextFunc
             name,
             subdomain,
         }).returning();
-
-
 
         // find the superuser roleId and also add the resource to the superuser role
         const superuserRole = await db.select()
@@ -108,7 +121,7 @@ export async function createResource(req: Request, res: Response, next: NextFunc
             status: HttpCode.CREATED,
         });
     } catch (error) {
-        logger.error(error);
+        throw error;
         return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred..."));
     }
 }

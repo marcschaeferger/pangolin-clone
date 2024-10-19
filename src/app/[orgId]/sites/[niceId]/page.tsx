@@ -3,7 +3,7 @@ import { Separator } from "@/components/ui/separator";
 import { CreateSiteForm } from "./components/CreateSite";
 import { GeneralForm } from "./components/GeneralForm";
 
-export default function SettingsProfilePage({
+export default function SettingsPage({
     params,
 }: {
     params: { niceId: string };
@@ -14,12 +14,12 @@ export default function SettingsProfilePage({
         <div className="space-y-6">
             <div>
                 <h3 className="text-lg font-medium">
-                    {isCreate ? "Create Site" : "Profile"}
+                    {isCreate ? "Create Site" : "General"}
                 </h3>
                 <p className="text-sm text-muted-foreground">
                     {isCreate
-                        ? "Create a new site for your profile."
-                        : "This is how others will see you on the site."}
+                        ? "Create a new site"
+                        : "Edit basic site settings"}
                 </p>
             </div>
             <Separator />

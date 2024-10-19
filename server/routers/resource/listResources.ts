@@ -16,7 +16,7 @@ import logger from "@server/logger";
 
 const listResourcesParamsSchema = z
     .object({
-        siteId: z.number().int().positive().optional(),
+        siteId: z.string().optional().transform(Number).pipe(z.number().int().positive()),
         orgId: z.string().optional(),
     })
     .refine((data) => !!data.siteId !== !!data.orgId, {

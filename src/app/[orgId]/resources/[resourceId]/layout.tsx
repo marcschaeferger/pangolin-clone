@@ -1,52 +1,81 @@
-import { Metadata } from "next"
-import Image from "next/image"
+import { Metadata } from "next";
+import Image from "next/image";
 
-import { Separator } from "@/components/ui/separator"
-import { SidebarNav } from "@/components/sidebar-nav"
+import { Separator } from "@/components/ui/separator";
+import { SidebarNav } from "@/components/sidebar-nav";
+import ResourceProvider from "@app/providers/ResourceProvider";
+import { internal } from "@app/api";
+import { GetResourceResponse } from "@server/routers/resource";
+import { AxiosResponse } from "axios";
+import { redirect } from "next/navigation";
+import { authCookieHeader } from "@app/api/cookies";
+import Link from "next/link";
+import { ArrowLeft, ChevronLeft } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "@app/hooks/use-toast";
+import { ClientLayout } from "./components/ClientLayout";
 
 export const metadata: Metadata = {
     title: "Forms",
     description: "Advanced form example using react-hook-form and Zod.",
-}
-
-const sidebarNavItems = [
-    {
-        title: "Profile",
-        href: "/{orgId}/resources/{resourceId}",
-    },
-    {
-        title: "Appearance",
-        href: "/{orgId}/resources/{resourceId}/appearance",
-    },
-    {
-        title: "Notifications",
-        href: "/{orgId}/resources/{resourceId}/notifications",
-    },
-]
+};
 
 interface SettingsLayoutProps {
-    children: React.ReactNode,
-    params: { resourceId: string, orgId: string }
+    children: React.ReactNode;
+    params: { resourceId: string; orgId: string };
 }
 
-export default function SettingsLayout({ children, params }: SettingsLayoutProps) {
+export default async function SettingsLayout({
+    children,
+    params,
+}: SettingsLayoutProps) {
+    let resource = null;
+
+    if (params.resourceId !== "create") {
+        try {
+            const res = await internal.get<AxiosResponse<GetResourceResponse>>(
+                `/org/${params.orgId}/resource/${params.resourceId}`,
+                authCookieHeader(),
+            );
+            resource = res.data.data;
+        } catch {
+            redirect(`/${params.orgId}/resources`);
+        }
+    }
+
     return (
         <>
-            <div>
-                <div className="space-y-0.5">
-                    <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
-                    <p className="text-muted-foreground">
-                        Manage your account settings and set e-mail preferences.
-                    </p>
-                </div>
-                <Separator className="my-6" />
-                <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
-                    <aside className="-mx-4 lg:w-1/5">
-                        <SidebarNav items={sidebarNavItems.map(i => { i.href = i.href.replace("{resourceId}", params.resourceId).replace("{orgId}", params.orgId); return i})} />
-                    </aside>
-                    <div className="flex-1 lg:max-w-2xl">{children}</div>
-                </div>
+            <div className="md:hidden">
+                <Image
+                    src="/configuration/forms-light.png"
+                    width={1280}
+                    height={791}
+                    alt="Forms"
+                    className="block dark:hidden"
+                />
+                <Image
+                    src="/configuration/forms-dark.png"
+                    width={1280}
+                    height={791}
+                    alt="Forms"
+                    className="hidden dark:block"
+                />
             </div>
+
+            <div className="mb-4">
+                <Link
+                    href={`/${params.orgId}/resources`}
+                    className="text-primary font-medium"
+                >
+                </Link>
+            </div>
+
+            <ResourceProvider resource={resource}>                
+                <ClientLayout
+                isCreate={params.resourceId === "create"}
+            >
+                {children}
+            </ClientLayout></ResourceProvider>
         </>
-    )
+    );
 }
