@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { SitesDataTable } from "./SitesDataTable";
+import { ResourcesDataTable } from "./ResourcesDataTable";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -13,15 +13,13 @@ import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-export type SiteRow = {
+export type ResourceRow = {
     id: string;
     name: string;
-    mbIn: number;
-    mbOut: number;
     orgId: string;
 };
 
-export const columns: ColumnDef<SiteRow>[] = [
+export const columns: ColumnDef<ResourceRow>[] = [
     {
         accessorKey: "name",
         header: ({ column }) => {
@@ -39,33 +37,9 @@ export const columns: ColumnDef<SiteRow>[] = [
         },
     },
     {
-        accessorKey: "id",
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() =>
-                        column.toggleSorting(column.getIsSorted() === "asc")
-                    }
-                >
-                    Site
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-            );
-        },
-    },
-    {
-        accessorKey: "mbIn",
-        header: "MB In",
-    },
-    {
-        accessorKey: "mbOut",
-        header: "MB Out",
-    },
-    {
         id: "actions",
         cell: ({ row }) => {
-            const siteRow = row.original;
+            const resourceRow = row.original;
 
             return (
                 <DropdownMenu>
@@ -78,7 +52,7 @@ export const columns: ColumnDef<SiteRow>[] = [
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem>
                             <Link
-                                href={`/${siteRow.orgId}/sites/${siteRow.id}`}
+                                href={`/${resourceRow.orgId}/resources/${resourceRow.id}`}
                             >
                                 View settings
                             </Link>
@@ -90,20 +64,20 @@ export const columns: ColumnDef<SiteRow>[] = [
     },
 ];
 
-type SitesTableProps = {
-    sites: SiteRow[];
+type ResourcesTableProps = {
+    resources: ResourceRow[];
     orgId: string;
 };
 
-export default function SitesTable({ sites, orgId }: SitesTableProps) {
+export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
     const router = useRouter();
 
     return (
-        <SitesDataTable
+        <ResourcesDataTable
             columns={columns}
-            data={sites}
-            addSite={() => {
-                router.push(`/${orgId}/sites/create`);
+            data={resources}
+            addResource={() => {
+                router.push(`/${orgId}/resources/create`);
             }}
         />
     );

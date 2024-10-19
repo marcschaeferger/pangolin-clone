@@ -5,6 +5,10 @@ import Header from "./components/Header";
 import { verifySession } from "@app/lib/auth/verifySession";
 import { redirect } from "next/navigation";
 import { cache } from "react";
+import { internal } from "@app/api";
+import { AxiosResponse } from "axios";
+import { GetOrgResponse } from "@server/routers/org";
+import { authCookieHeader } from "@app/api/cookies";
 
 export const metadata: Metadata = {
     title: "Configuration",
@@ -15,22 +19,22 @@ const topNavItems = [
     {
         title: "Sites",
         href: "/{orgId}/sites",
-        icon: <Combine className="h-5 w-5"/>,
+        icon: <Combine className="h-5 w-5" />,
     },
     {
         title: "Resources",
         href: "/{orgId}/resources",
-        icon: <Waypoints className="h-5 w-5"/>,
+        icon: <Waypoints className="h-5 w-5" />,
     },
     {
         title: "Users",
         href: "/{orgId}/users",
-        icon: <Users className="h-5 w-5"/>,
+        icon: <Users className="h-5 w-5" />,
     },
     {
         title: "General",
         href: "/{orgId}/general",
-        icon: <Cog className="h-5 w-5"/>,
+        icon: <Cog className="h-5 w-5" />,
     },
 ];
 
@@ -43,12 +47,19 @@ export default async function ConfigurationLaytout({
     children,
     params,
 }: ConfigurationLaytoutProps) {
-    const loadUser = cache(async () => await verifySession());
-
-    const user = await loadUser();
+    const user = await verifySession();
 
     if (!user) {
         redirect("/auth/login");
+    }
+
+    try {
+        await internal.get<AxiosResponse<GetOrgResponse>>(
+            `/org/${params.orgId}`,
+            authCookieHeader(),
+        );
+    } catch {
+        redirect(`/`);
     }
 
     return (

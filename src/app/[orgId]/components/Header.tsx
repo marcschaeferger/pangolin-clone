@@ -77,7 +77,7 @@ export default function Header({ email, orgName, name }: HeaderProps) {
                             </DropdownMenuGroup>
                         </DropdownMenuContent>
                     </DropdownMenu>
-                    <span className="truncate max-w-[150px] md:max-w-none">
+                    <span className="truncate max-w-[150px] md:max-w-none font-medium">
                         {name || email}
                     </span>
                 </div>

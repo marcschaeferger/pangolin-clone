@@ -23,20 +23,20 @@ import {
 import { Button } from "@app/components/ui/button";
 import { useState } from "react";
 import { Input } from "@app/components/ui/input";
-import { DataTablePagination } from "./DataTablePagination";
+import { DataTablePagination } from "@app/components/DataTablePagination";
 import { Plus } from "lucide-react";
 
-interface DataTableProps<TData, TValue> {
+interface ResourcesDataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
-    addSite?: () => void;
+    addResource?: () => void;
 }
 
-export function DataTable<TData, TValue>({
-    addSite,
+export function ResourcesDataTable<TData, TValue>({
+    addResource,
     columns,
     data,
-}: DataTableProps<TData, TValue>) {
+}: ResourcesDataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
@@ -59,7 +59,7 @@ export function DataTable<TData, TValue>({
         <div>
             <div className="flex items-center justify-between pb-4">
                 <Input
-                    placeholder="Search sites"
+                    placeholder="Search your resources"
                     value={
                         (table.getColumn("name")?.getFilterValue() as string) ??
                         ""
@@ -71,12 +71,14 @@ export function DataTable<TData, TValue>({
                     }
                     className="max-w-sm mr-2"
                 />
-                <Button onClick={() => {
-                    if (addSite) {
-                        addSite();
-                    }
-                }}>
-                    <Plus className="mr-2 h-4 w-4" /> Add Site
+                <Button
+                    onClick={() => {
+                        if (addResource) {
+                            addResource();
+                        }
+                    }}
+                >
+                    <Plus className="mr-2 h-4 w-4" /> Add Resource
                 </Button>
             </div>
             <div>
@@ -125,7 +127,7 @@ export function DataTable<TData, TValue>({
                                     colSpan={columns.length}
                                     className="h-24 text-center"
                                 >
-                                    No sites. Create one to get started.
+                                    No resources. Create one to get started.
                                 </TableCell>
                             </TableRow>
                         )}

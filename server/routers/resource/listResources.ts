@@ -79,7 +79,7 @@ function queryResources(
     }
 }
 
-export type ListSitesResponse = {
+export type ListResourcesResponse = {
     resources: NonNullable<Awaited<ReturnType<typeof queryResources>>>;
     pagination: { total: number; limit: number; offset: number };
 };
@@ -126,7 +126,7 @@ export async function listResources(
             );
         }
 
-        if (orgId && orgId !== req.orgId) {
+        if (orgId && orgId !== req.userOrgId) {
             return next(
                 createHttpError(
                     HttpCode.FORBIDDEN,
@@ -167,7 +167,7 @@ export async function listResources(
         const totalCountResult = await countQuery;
         const totalCount = totalCountResult[0].count;
 
-        return response<ListSitesResponse>(res, {
+        return response<ListResourcesResponse>(res, {
             data: {
                 resources: resourcesList,
                 pagination: {
