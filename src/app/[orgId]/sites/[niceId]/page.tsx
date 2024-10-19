@@ -1,30 +1,30 @@
 import React from "react";
 import { Separator } from "@/components/ui/separator";
-import { ProfileForm } from "@app/components/profile-form";
-import { CreateSiteForm } from "./components/create-site";
+import { CreateSiteForm } from "./components/CreateSite";
+import { GeneralForm } from "./components/GeneralForm";
 
 export default function SettingsProfilePage({
     params,
 }: {
     params: { niceId: string };
 }) {
-    const isCreateForm = params.niceId === "create";
+    const isCreate = params.niceId === "create";
 
     return (
         <div className="space-y-6">
             <div>
                 <h3 className="text-lg font-medium">
-                    {isCreateForm ? "Create Site" : "Profile"}
+                    {isCreate ? "Create Site" : "Profile"}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                    {isCreateForm
+                    {isCreate
                         ? "Create a new site for your profile."
                         : "This is how others will see you on the site."}
                 </p>
             </div>
             <Separator />
 
-            {isCreateForm ? <CreateSiteForm /> : <ProfileForm />}
+            {isCreate ? <CreateSiteForm /> : <GeneralForm />}
         </div>
     );
 }
