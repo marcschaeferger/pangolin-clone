@@ -1,5 +1,6 @@
-import SignupForm from "@app/components/auth/SignupForm";
+import SignupForm from "@app/app/auth/signup/SignupForm";
 import { verifySession } from "@app/lib/auth/verifySession";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function Page({
@@ -16,6 +17,13 @@ export default async function Page({
     return (
         <>
             <SignupForm redirect={searchParams.redirect as string} />
+
+            <p className="text-center text-muted-foreground mt-4">
+                Already have an account?{" "}
+                <Link href="/auth/login" className="underline">
+                    Log in
+                </Link>
+            </p>
         </>
     );
 }

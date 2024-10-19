@@ -13,17 +13,19 @@ const listOrgsSchema = z.object({
     limit: z
         .string()
         .optional()
+        .default("1000")
         .transform(Number)
-        .pipe(z.number().int().positive().default(10)),
+        .pipe(z.number().int().positive()),
     offset: z
         .string()
         .optional()
+        .default("0")
         .transform(Number)
-        .pipe(z.number().int().nonnegative().default(0)),
+        .pipe(z.number().int().nonnegative()),
 });
 
 export type ListOrgsResponse = {
-    organizations: Org[];
+    orgs: Org[];
     pagination: { total: number; limit: number; offset: number };
 };
 
@@ -45,27 +47,13 @@ export async function listOrgs(
 
         const { limit, offset } = parsedQuery.data;
 
-        // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(
-            ActionsEnum.listOrgs,
-            req,
-        );
-        if (!hasPermission) {
-            return next(
-                createHttpError(
-                    HttpCode.FORBIDDEN,
-                    "User does not have permission to perform this action",
-                ),
-            );
-        }
-
         // Use the userOrgs passed from the middleware
         const userOrgIds = req.userOrgIds;
 
         if (!userOrgIds || userOrgIds.length === 0) {
             return response<ListOrgsResponse>(res, {
                 data: {
-                    organizations: [],
+                    orgs: [],
                     pagination: {
                         total: 0,
                         limit,
@@ -94,7 +82,7 @@ export async function listOrgs(
 
         return response<ListOrgsResponse>(res, {
             data: {
-                organizations,
+                orgs: organizations,
                 pagination: {
                     total: totalCount,
                     limit,

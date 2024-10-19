@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import { internal } from "@app/api";
 import { AxiosResponse } from "axios";
-import { GetOrgResponse } from "@server/routers/org";
+import { GetOrgResponse, ListOrgsResponse } from "@server/routers/org";
 import { authCookieHeader } from "@app/api/cookies";
 
 export const metadata: Metadata = {
@@ -62,11 +62,28 @@ export default async function ConfigurationLaytout({
         redirect(`/`);
     }
 
+    let orgs: ListOrgsResponse["orgs"] = [];
+    try {
+        const res = await internal.get<AxiosResponse<ListOrgsResponse>>(
+            `/orgs`,
+            authCookieHeader(),
+        );
+        if (res && res.data.data.orgs) {
+            orgs = res.data.data.orgs;
+        }
+    } catch (e) {
+        console.error("Error fetching orgs", e);
+    }
+
     return (
         <>
             <div className="w-full bg-muted mb-6 select-none sm:px-0 px-3 pt-3">
                 <div className="container mx-auto flex flex-col content-between gap-4 ">
-                    <Header email={user.email} orgName={params.orgId} />
+                    <Header
+                        email={user.email}
+                        orgName={params.orgId}
+                        orgs={orgs}
+                    />
                     <TopbarNav items={topNavItems} orgId={params.orgId} />
                 </div>
             </div>
