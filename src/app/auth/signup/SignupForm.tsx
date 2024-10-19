@@ -157,7 +157,7 @@ export default function SignupForm({ redirect }: SignupFormProps) {
                         />
 
                         {error && (
-                            <Alert>
+                            <Alert variant="destructive">
                                 <AlertDescription>{error}</AlertDescription>
                             </Alert>
                         )}

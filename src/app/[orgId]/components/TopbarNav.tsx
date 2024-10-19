@@ -51,9 +51,7 @@ export function TopbarNav({
                 >
                     <div className="flex items-center gap-2">
                         {item.icon && (
-                            <div className="hidden md:block">
-                                {item.icon}
-                            </div>
+                            <div className="hidden md:block">{item.icon}</div>
                         )}
                         {item.title}
                     </div>

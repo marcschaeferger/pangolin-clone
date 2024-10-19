@@ -1,5 +1,6 @@
 "use client";
 
+import api from "@app/api";
 import { Avatar, AvatarFallback } from "@app/components/ui/avatar";
 import { Button } from "@app/components/ui/button";
 import {
@@ -19,21 +20,42 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@app/components/ui/select";
+import { useToast } from "@app/hooks/use-toast";
+import { ListOrgsResponse } from "@server/routers/org";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type HeaderProps = {
     name?: string;
     email: string;
     orgName: string;
+    orgs: ListOrgsResponse["orgs"];
 };
 
-export default function Header({ email, orgName, name }: HeaderProps) {
+export default function Header({ email, orgName, name, orgs }: HeaderProps) {
+    const { toast } = useToast();
+
+    const router = useRouter();
+
     function getInitials() {
         if (name) {
             const [firstName, lastName] = name.split(" ");
             return `${firstName[0]}${lastName[0]}`;
         }
         return email.substring(0, 2).toUpperCase();
+    }
+
+    function logout() {
+        api.post("/auth/logout")
+            .catch((e) => {
+                console.error("Error logging out", e);
+                toast({
+                    title: "Error logging out",
+                });
+            })
+            .then(() => {
+                router.push("/auth/login");
+            });
     }
 
     return (
@@ -72,8 +94,9 @@ export default function Header({ email, orgName, name }: HeaderProps) {
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuGroup>
-                                <DropdownMenuItem>Profile</DropdownMenuItem>
-                                <DropdownMenuItem>Log out</DropdownMenuItem>
+                                <DropdownMenuItem onClick={logout}>
+                                    Log out
+                                </DropdownMenuItem>
                             </DropdownMenuGroup>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -106,9 +129,14 @@ export default function Header({ email, orgName, name }: HeaderProps) {
                         </SelectTrigger>
                         <SelectContent>
                             <SelectGroup>
-                                <SelectItem value={orgName}>
-                                    {orgName}
-                                </SelectItem>
+                                {orgs.map((org) => (
+                                    <SelectItem
+                                        value={org.name}
+                                        key={org.orgId}
+                                    >
+                                        {org.name}
+                                    </SelectItem>
+                                ))}
                             </SelectGroup>
                         </SelectContent>
                     </Select>

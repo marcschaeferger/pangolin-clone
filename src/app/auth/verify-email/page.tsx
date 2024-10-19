@@ -1,4 +1,4 @@
-import VerifyEmailForm from "@app/components/auth/VerifyEmailForm";
+import VerifyEmailForm from "@app/app/auth/verify-email/VerifyEmailForm";
 import { verifySession } from "@app/lib/auth/verifySession";
 import { redirect } from "next/navigation";
 

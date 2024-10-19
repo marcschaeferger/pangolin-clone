@@ -136,7 +136,7 @@ export default function LoginForm({ redirect }: LoginFormProps) {
                             )}
                         />
                         {error && (
-                            <Alert>
+                            <Alert variant="destructive">
                                 <AlertDescription>{error}</AlertDescription>
                             </Alert>
                         )}

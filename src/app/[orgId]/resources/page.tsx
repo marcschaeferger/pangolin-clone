@@ -25,6 +25,8 @@ export default async function Page({ params }: ResourcesPageProps) {
             id: resource.resourceId.toString(),
             name: resource.name,
             orgId: params.orgId,
+            domain: resource.subdomain || "",
+            site: resource.siteName || "None",
         };
     });
 
