@@ -11,6 +11,8 @@ import { redirect } from "next/navigation";
 import { authCookieHeader } from "@app/api/cookies";
 import Link from "next/link";
 import { ArrowLeft, ChevronLeft } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "@app/hooks/use-toast";
 
 export const metadata: Metadata = {
     title: "Forms",
@@ -46,6 +48,7 @@ export default async function SettingsLayout({
     params,
 }: SettingsLayoutProps) {
     let site = null;
+
     if (params.niceId !== "create") {
         try {
             const res = await internal.get<AxiosResponse<GetSiteResponse>>(
@@ -96,7 +99,7 @@ export default async function SettingsLayout({
                         {params.niceId == "create"
                             ? "Create a new site"
                             : "Configure the settings on your site: " +
-                                  site?.name || ""}
+                            site?.name || ""}
                         .
                     </p>
                 </div>

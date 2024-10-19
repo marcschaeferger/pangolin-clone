@@ -1,7 +1,7 @@
 import React from "react";
 import { Separator } from "@/components/ui/separator";
-import { ProfileForm } from "@app/components/profile-form";
-import { CreateSiteForm } from "./components/create-site";
+import { CreateSiteForm } from "./components/CreateSite";
+import { GeneralForm } from "./components/GeneralForm";
 
 export default function SettingsProfilePage({
     params,
@@ -24,7 +24,7 @@ export default function SettingsProfilePage({
             </div>
             <Separator />
 
-            {isCreateForm ? <CreateSiteForm /> : <ProfileForm />}
+            {isCreateForm ? <CreateSiteForm /> : <GeneralForm />}
         </div>
     );
 }
