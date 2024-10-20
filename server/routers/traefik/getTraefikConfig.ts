@@ -32,10 +32,16 @@ export function buildTraefikConfig(
                 entryPoints: ["https"],
                 middlewares: [],
                 service: "service-main",
-                rule: "Host(`" + new URL(config.app.base_url).hostname + "`)",
+                rule: "Host(`fossorial.io`)",
                 tls: {
                     certResolver: "letsencrypt",
-                }
+                    domains: [
+                        {
+                            main: "fossorial.io",
+                            sans: ["*.fossorial.io"],
+                        },
+                    ],
+                },
             },
         },
         services: {
