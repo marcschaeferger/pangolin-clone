@@ -28,7 +28,6 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { useSiteContext } from "@app/hooks/useSiteContext"
-import api from "@app/api"
 
 const GeneralFormSchema = z.object({
     name: z.string()

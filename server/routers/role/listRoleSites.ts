@@ -37,7 +37,6 @@ export async function listRoleSites(req: Request, res: Response, next: NextFunct
             .select({
                 siteId: sites.siteId,
                 name: sites.name,
-                subdomain: sites.subdomain,
             })
             .from(roleSites)
             .innerJoin(sites, eq(roleSites.siteId, sites.siteId))

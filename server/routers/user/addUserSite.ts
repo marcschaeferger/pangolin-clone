@@ -11,7 +11,7 @@ import { eq } from 'drizzle-orm';
 
 const addUserSiteSchema = z.object({
     userId: z.string(),
-            siteId: z.string().optional().transform(stoi).pipe(z.number().int().positive().optional()),
+    siteId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
 
 export async function addUserSite(req: Request, res: Response, next: NextFunction): Promise<any> {

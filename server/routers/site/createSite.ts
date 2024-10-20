@@ -25,7 +25,7 @@ const createSiteSchema = z.object({
     subnet: z.string().optional(),
 });
 
-export type GetSiteResponse = {
+export type CreateSiteResponse = {
     name: string;
     siteId: number;
     orgId: string;

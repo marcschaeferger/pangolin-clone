@@ -10,7 +10,7 @@ import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
 
 const listRolesParamsSchema = z.object({
-    orgId: z.string().optional().transform(Number).pipe(z.number().int().positive()),
+    orgId: z.string()
 });
 
 const listRolesSchema = z.object({
@@ -61,14 +61,11 @@ export async function listRoles(req: Request, res: Response, next: NextFunction)
                 orgName: orgs.name,
             })
             .from(roles)
-            .leftJoin(orgs, eq(roles.orgId, orgs.orgId));
+            .leftJoin(orgs, eq(roles.orgId, orgs.orgId))
+            .where(eq(roles.orgId, orgId));
 
-        let countQuery: any = db.select({ count: sql<number>`cast(count(*) as integer)` }).from(roles);
-
-        if (orgId) {
-            baseQuery = baseQuery.where(eq(roles.orgId, orgId));
-            countQuery = countQuery.where(eq(roles.orgId, orgId));
-        }
+        let countQuery: any = db.select({ count: sql<number>`cast(count(*) as integer)` }).from(roles)
+        .where(eq(roles.orgId, orgId));
 
         const rolesList = await baseQuery.limit(limit).offset(offset);
         const totalCountResult = await countQuery;
