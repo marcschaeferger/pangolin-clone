@@ -23,7 +23,8 @@ export default async function Page({ params }: SitesPageProps) {
     const siteRows: SiteRow[] = sites.map((site) => {
         return {
             name: site.name,
-            id: site.niceId.toString(),
+            id: site.siteId,
+            nice: site.niceId.toString(),
             mbIn: site.megabytesIn || 0,
             mbOut: site.megabytesOut || 0,
             orgId: params.orgId,

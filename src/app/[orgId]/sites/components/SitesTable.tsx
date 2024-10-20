@@ -12,9 +12,11 @@ import { Button } from "@app/components/ui/button";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import api from "@app/api";
 
 export type SiteRow = {
-    id: string;
+    id: number;
+    nice: string;
     name: string;
     mbIn: number;
     mbOut: number;
@@ -39,7 +41,7 @@ export const columns: ColumnDef<SiteRow>[] = [
         },
     },
     {
-        accessorKey: "id",
+        accessorKey: "nice",
         header: ({ column }) => {
             return (
                 <Button
@@ -65,7 +67,19 @@ export const columns: ColumnDef<SiteRow>[] = [
     {
         id: "actions",
         cell: ({ row }) => {
+            const router = useRouter();
+
             const siteRow = row.original;
+
+            const deleteSite = (siteId: number) => {
+                api.delete(`/site/${siteId}`)
+                    .catch((e) => {
+                        console.error("Error deleting site", e);
+                    })
+                    .then(() => {
+                        router.refresh();
+                    });
+            }
 
             return (
                 <DropdownMenu>
@@ -82,6 +96,9 @@ export const columns: ColumnDef<SiteRow>[] = [
                             >
                                 View settings
                             </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                            <button onClick={() => deleteSite(siteRow.id)} className="text-red-600 hover:text-red-800 hover:underline cursor-pointer">Delete</button>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
