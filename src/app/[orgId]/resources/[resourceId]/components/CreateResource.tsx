@@ -182,7 +182,7 @@ export function CreateResourceForm() {
                                                 variant="outline"
                                                 role="combobox"
                                                 className={cn(
-                                                    "w-[200px] justify-between",
+                                                    "w-[350px] justify-between",
                                                     !field.value && "text-muted-foreground"
                                                 )}
                                             >
@@ -195,7 +195,7 @@ export function CreateResourceForm() {
                                             </Button>
                                         </FormControl>
                                     </PopoverTrigger>
-                                    <PopoverContent className="w-[200px] p-0">
+                                    <PopoverContent className="w-[350px] p-0">
                                         <Command>
                                             <CommandInput placeholder="Search site..." />
                                             <CommandList>

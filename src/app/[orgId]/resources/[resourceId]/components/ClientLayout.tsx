@@ -5,7 +5,7 @@ import { useResourceContext } from "@app/hooks/useResourceContext";
 
 const sidebarNavItems = [
     {
-        title: "Create",
+        title: "General",
         href: "/{orgId}/resources/{resourceId}",
     },
     {
