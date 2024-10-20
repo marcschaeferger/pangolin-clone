@@ -63,6 +63,7 @@ export function buildTraefikConfig(
                             "/api/v1",
                             `http://${config.server.internal_hostname}:${config.server.internal_port}`,
                         ).href,
+                        appBaseUrl: config.app.base_url,
                     },
                 },
             },
