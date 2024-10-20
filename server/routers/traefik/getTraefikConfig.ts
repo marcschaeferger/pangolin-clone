@@ -44,7 +44,7 @@ export function buildTraefikConfig(
                 loadBalancer: {
                     servers: [
                         {
-                            url: `http://${config.server.internal_hostname}:${config.server.internal_port}`,
+                            url: `http://${config.server.internal_hostname}:${config.server.external_port}`,
                         },
                     ],
                 },
