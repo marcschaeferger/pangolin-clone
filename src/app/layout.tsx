@@ -21,22 +21,22 @@ export default async function RootLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    let orgs: ListOrgsResponse["orgs"] = [];
-    try {
-        const res = await internal.get<AxiosResponse<ListOrgsResponse>>(
-            `/orgs`,
-            authCookieHeader(),
-        );
-        if (res && res.data.data.orgs) {
-            orgs = res.data.data.orgs;
-        }
+    // let orgs: ListOrgsResponse["orgs"] = [];
+    // try {
+    //     const res = await internal.get<AxiosResponse<ListOrgsResponse>>(
+    //         `/orgs`,
+    //         authCookieHeader(),
+    //     );
+    //     if (res && res.data.data.orgs) {
+    //         orgs = res.data.data.orgs;
+    //     }
 
-        if (!orgs.length) {
-            redirect(`/setup`);
-        }
-    } catch (e) {
-        console.error("Error fetching orgs", e);
-    }
+    //     if (!orgs.length) {
+    //         redirect(`/setup`);
+    //     }
+    // } catch (e) {
+    //     console.error("Error fetching orgs", e);
+    // }
 
     return (
         <html suppressHydrationWarning>
