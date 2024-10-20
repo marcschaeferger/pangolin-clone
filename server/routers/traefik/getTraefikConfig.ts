@@ -78,6 +78,15 @@ export function buildTraefikConfig(
             middlewares: [middlewareName],
             service: serviceName,
             rule: `Host(\`${target.resourceId}\`)`, // assuming resourceId is a valid full hostname
+            tls: {
+                certResolver: "letsencrypt",
+                domains: [
+                    {
+                        main: "fossorial.io",
+                        sans: ["*.fossorial.io"],
+                    },
+                ],
+            },
         };
 
         http.services![serviceName] = {
