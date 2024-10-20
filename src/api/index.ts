@@ -9,7 +9,7 @@ export const api = axios.create({
 });
 
 export const internal = axios.create({
-    baseURL: "http://localhost:3000/api/v1",
+    baseURL: "http://pangolin:3000/api/v1",
     timeout: 10000,
     headers: {
         "Content-Type": "application/json",
