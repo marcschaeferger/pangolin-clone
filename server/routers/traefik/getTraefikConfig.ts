@@ -26,13 +26,16 @@ export function buildTraefikConfig(
 ): DynamicTraefikConfig {
     const middlewareName = "badger";
 
-    const http: DynamicTraefikConfig["http"] = {
+    const http: any = {
         routers: {
             main: {
                 entryPoints: ["https"],
                 middlewares: [],
                 service: "service-main",
                 rule: "Host(`" + new URL(config.app.base_url).hostname + "`)",
+                tls: {
+                    certResolver: "letsencrypt",
+                }
             },
         },
         services: {
