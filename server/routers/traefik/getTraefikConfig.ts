@@ -26,17 +26,13 @@ export function buildTraefikConfig(
 ): DynamicTraefikConfig {
     const middlewareName = "badger";
 
-    // if (!targets.length) {
-    //     return {};
-    // }
-
     const http: DynamicTraefikConfig["http"] = {
         routers: {
             main: {
-                entryPoints: ["http"],
+                entryPoints: ["https"],
                 middlewares: [],
                 service: "service-main",
-                rule: "Host(`fossorial.io`)",
+                rule: "Host(`" + new URL(config.app.base_url).hostname + "`)",
             },
         },
         services: {
