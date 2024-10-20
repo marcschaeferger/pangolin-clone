@@ -25,18 +25,18 @@ import { useRouter } from "next/navigation";
 import { Checkbox } from "@app/components/ui/checkbox"
 
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
 } from "@/components/ui/command"
 
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
 } from "@/components/ui/popover"
 import { ListSitesResponse } from "@server/routers/site"
 import { AxiosResponse } from "axios"
@@ -92,7 +92,7 @@ export function CreateResourceForm() {
 
     async function onSubmit(data: AccountFormValues) {
         console.log(data);
-        
+
         const res = await api
             .put(`/org/${orgId}/site/${data.siteId}/resource/`, {
                 name: data.name,
@@ -141,10 +141,10 @@ export function CreateResourceForm() {
                                 <FormControl>
                                     {/* <Input placeholder="Your name" {...field} /> */}
                                     <CustomDomainInput {...field}
-          domainSuffix={domainSuffix}
-          placeholder="Enter subdomain"
+                                        domainSuffix={domainSuffix}
+                                        placeholder="Enter subdomain"
 
-        />
+                                    />
                                 </FormControl>
                                 <FormDescription>
                                     This is the fully qualified domain name that will be used to access the resource.
@@ -169,69 +169,69 @@ export function CreateResourceForm() {
                             </FormItem>
                         )}
                     /> */}
-  <FormField
-          control={form.control}
-          name="siteId"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Site</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      className={cn(
-                        "w-[200px] justify-between",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value
-                        ? sites.find(
-                            (site) => site.siteId === field.value
-                          )?.name
-                        : "Select site"}
-                      <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0">
-                  <Command>
-                    <CommandInput placeholder="Search site..." />
-                    <CommandList>
-                      <CommandEmpty>No site found.</CommandEmpty>
-                      <CommandGroup>
-                        {sites.map((site) => (
-                          <CommandItem
-                            value={site.name}
-                            key={site.siteId}
-                            onSelect={() => {
-                              form.setValue("siteId", site.siteId)
-                            }}
-                          >
-                            <CheckIcon
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                site.siteId === field.value
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
-                            {site.name}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <FormDescription>
-                This is the site that will be used in the dashboard.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                    <FormField
+                        control={form.control}
+                        name="siteId"
+                        render={({ field }) => (
+                            <FormItem className="flex flex-col">
+                                <FormLabel>Site</FormLabel>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <FormControl>
+                                            <Button
+                                                variant="outline"
+                                                role="combobox"
+                                                className={cn(
+                                                    "w-[200px] justify-between",
+                                                    !field.value && "text-muted-foreground"
+                                                )}
+                                            >
+                                                {field.value
+                                                    ? sites.find(
+                                                        (site) => site.siteId === field.value
+                                                    )?.name
+                                                    : "Select site"}
+                                                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                            </Button>
+                                        </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-[200px] p-0">
+                                        <Command>
+                                            <CommandInput placeholder="Search site..." />
+                                            <CommandList>
+                                                <CommandEmpty>No site found.</CommandEmpty>
+                                                <CommandGroup>
+                                                    {sites.map((site) => (
+                                                        <CommandItem
+                                                            value={site.name}
+                                                            key={site.siteId}
+                                                            onSelect={() => {
+                                                                form.setValue("siteId", site.siteId)
+                                                            }}
+                                                        >
+                                                            <CheckIcon
+                                                                className={cn(
+                                                                    "mr-2 h-4 w-4",
+                                                                    site.siteId === field.value
+                                                                        ? "opacity-100"
+                                                                        : "opacity-0"
+                                                                )}
+                                                            />
+                                                            {site.name}
+                                                        </CommandItem>
+                                                    ))}
+                                                </CommandGroup>
+                                            </CommandList>
+                                        </Command>
+                                    </PopoverContent>
+                                </Popover>
+                                <FormDescription>
+                                    This is the site that will be used in the dashboard.
+                                </FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
                     <Button type="submit">Create Resource</Button>
                 </form>

@@ -13,9 +13,15 @@ import api from "@app/api"
 import { AxiosResponse } from "axios"
 import { ListTargetsResponse } from "@server/routers/target/listTargets"
 
+const isValidIPAddress = (ip: string) => {
+    const ipv4Regex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+    return ipv4Regex.test(ip);
+}
+
 export default function ReverseProxyTargets({ params }: { params: { resourceId: string } }) {
     const [targets, setTargets] = useState<ListTargetsResponse["targets"]>([])
     const [nextId, setNextId] = useState(1)
+    const [ipError, setIpError] = useState("")
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -30,35 +36,47 @@ export default function ReverseProxyTargets({ params }: { params: { resourceId: 
     const [newTarget, setNewTarget] = useState({
         resourceId: params.resourceId,
         ip: "",
-        method: "GET",
+        method: "http",
         port: 80,
-        protocol: "http",
+        protocol: "TCP",
     })
 
-    const addTarget = async () => {
-        const res = await api.put(`/resource/${params.resourceId}/target`, {
+    const addTarget = () => {
+        if (!isValidIPAddress(newTarget.ip)) {
+            setIpError("Invalid IP address format");
+            return;
+        }
+        setIpError("");
+
+        api.put(`/resource/${params.resourceId}/target`, {
             ...newTarget,
             resourceId: undefined
         })
-        .catch((err) => {
-            console.error(err)
-            
-        });
+            .catch((err) => {
+                console.error(err)
 
-        setTargets([...targets, { ...newTarget, targetId: nextId, enabled: true }])
-        setNextId(nextId + 1)
-        setNewTarget({
-            resourceId: params.resourceId,
-            ip: "",
-            method: "GET",
-            port: 80,
-            protocol: "http",
-        })
+            }).then((res) => {
+                // console.log(res)
+                setTargets([...targets, { ...newTarget, targetId: nextId, enabled: true }])
+                setNextId(nextId + 1)
+                setNewTarget({
+                    resourceId: params.resourceId,
+                    ip: "",
+                    method: "GET",
+                    port: 80,
+                    protocol: "http",
+                })
+            });
+
     }
 
-    const removeTarget = async (targetId: number) => {
-        setTargets(targets.filter((target) => target.targetId !== targetId))
-        const res = await api.delete(`/target/${targetId}`)
+    const removeTarget = (targetId: number) => {
+        api.delete(`/target/${targetId}`)
+            .catch((err) => {
+                console.error(err)
+            }).then((res) => {
+                setTargets(targets.filter((target) => target.targetId !== targetId));
+            });
     }
 
     const toggleTarget = (targetId: number) => {
@@ -67,7 +85,12 @@ export default function ReverseProxyTargets({ params }: { params: { resourceId: 
                 target.targetId === targetId ? { ...target, enabled: !target.enabled } : target
             )
         )
-        const res = api.post(`/target/${targetId}`, { enabled: !targets.find((target) => target.targetId === targetId)?.enabled })
+        api.post(`/target/${targetId}`, { enabled: !targets.find((target) => target.targetId === targetId)?.enabled })
+            .catch((err) => {
+                console.error(err)
+            }).then((res) => {
+                console.log(res)
+            });
 
         // Add a visual feedback
         const targetElement = document.getElementById(`target-${targetId}`)
@@ -81,93 +104,98 @@ export default function ReverseProxyTargets({ params }: { params: { resourceId: 
 
     return (
         <div className="space-y-6">
-            {/* <Card>
-                <CardHeader> */}
-                    {/* <CardTitle>Add New Target</CardTitle>
-                </CardHeader>
-                <CardContent> */}
-                    <form
-                        onSubmit={(e) => {
-                            e.preventDefault()
-                            addTarget()
-                        }}
-                        className="space-y-4"
-                    >
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="ip">IP Address</Label>
-                                <Input
-                                    id="ip"
-                                    value={newTarget.ip}
-                                    onChange={(e) => setNewTarget({ ...newTarget, ip: e.target.value })}
-                                    required
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="method">Method</Label>
-                                <Select
-                                    value={newTarget.method}
-                                    onValueChange={(value) => setNewTarget({ ...newTarget, method: value })}
-                                >
-                                    <SelectTrigger id="method">
-                                        <SelectValue placeholder="Select method" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="GET">GET</SelectItem>
-                                        <SelectItem value="POST">POST</SelectItem>
-                                        <SelectItem value="PUT">PUT</SelectItem>
-                                        <SelectItem value="DELETE">DELETE</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="port">Port</Label>
-                                <Input
-                                    id="port"
-                                    type="number"
-                                    value={newTarget.port}
-                                    onChange={(e) => setNewTarget({ ...newTarget, port: parseInt(e.target.value) })}
-                                    required
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="protocol">Protocol</Label>
-                                <Select
-                                    value={newTarget.protocol}
-                                    onValueChange={(value) => setNewTarget({ ...newTarget, protocol: value })}
-                                >
-                                    <SelectTrigger id="protocol">
-                                        <SelectValue placeholder="Select protocol" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="http">HTTP</SelectItem>
-                                        <SelectItem value="https">HTTPS</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-                        <Button type="submit">
-                            <PlusCircle className="mr-2 h-4 w-4" /> Add Target
-                        </Button>
-                    </form>
-                {/* </CardContent>
-            </Card> */}
+            <form
+                onSubmit={(e) => {
+                    e.preventDefault()
+                    addTarget()
+                }}
+                className="space-y-4"
+            >
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="ip">IP Address</Label>
+                        <Input
+                            id="ip"
+                            value={newTarget.ip}
+                            onChange={(e) => {
+                                setNewTarget({ ...newTarget, ip: e.target.value })
+                                setIpError("")
+                            }}
+                            required
+                        />
+                        {ipError && <p className="text-red-500 text-sm">{ipError}</p>}
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="method">Method</Label>
+                        <Select
+                            value={newTarget.method}
+                            onValueChange={(value) => setNewTarget({ ...newTarget, method: value })}
+                        >
+                            <SelectTrigger id="method">
+                                <SelectValue placeholder="Select method" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="http">HTTP</SelectItem>
+                                <SelectItem value="https">HTTPS</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="port">Port</Label>
+                        <Input
+                            id="port"
+                            type="number"
+                            value={newTarget.port}
+                            onChange={(e) => setNewTarget({ ...newTarget, port: parseInt(e.target.value) })}
+                            required
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="protocol">Protocol</Label>
+                        <Select
+                            value={newTarget.protocol}
+                            onValueChange={(value) => setNewTarget({ ...newTarget, protocol: value })}
+                        >
+                            <SelectTrigger id="protocol">
+                                <SelectValue placeholder="Select protocol" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="UDP">UDP</SelectItem>
+                                <SelectItem value="TCP">TCP</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+                <Button type="submit">
+                    <PlusCircle className="mr-2 h-4 w-4" /> Add Target
+                </Button>
+            </form>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="space-y-4">
                 {targets.map((target) => (
-                    <Card key={target.targetId} id={`target-${target.targetId}`} >
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium flex items-center">
-                                <Server className="mr-2 h-4 w-4" />
+                    <Card key={target.targetId} id={`target-${target.targetId}`} className="w-full p-4">
+                        <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2 px-0 pt-0">
+                            <CardTitle className="text-lg font-medium flex items-center">
+                                <Server className="mr-2 h-5 w-5" />
                                 Target {target.targetId}
                             </CardTitle>
-                            <Switch
-                                checked={target.enabled}
-                                onCheckedChange={() => toggleTarget(target.targetId)}
-                            />
+                            <div className="flex flex-col items-end space-y-2">
+                                <Switch
+                                    checked={target.enabled}
+                                    onCheckedChange={() => toggleTarget(target.targetId)}
+                                />
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                    onClick={() => removeTarget(target.targetId)}
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </div>
                         </CardHeader>
-                        <CardContent>
-                            <div className="grid gap-2">
+                        <CardContent className="px-0 py-2">
+                            <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
                                 <div className="flex items-center">
                                     <Globe className="mr-2 h-4 w-4 text-muted-foreground" />
                                     <span className="text-sm">{target.ip}:{target.port}</span>
@@ -181,14 +209,6 @@ export default function ReverseProxyTargets({ params }: { params: { resourceId: 
                                     <Badge variant={target.enabled ? "default" : "secondary"}>{target.protocol?.toUpperCase()}</Badge>
                                 </div>
                             </div>
-                            <Button
-                                variant="destructive"
-                                size="sm"
-                                className="mt-4 w-full"
-                                onClick={() => removeTarget(target.targetId)}
-                            >
-                                <Trash2 className="mr-2 h-4 w-4" /> Remove
-                            </Button>
                         </CardContent>
                     </Card>
                 ))}

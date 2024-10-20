@@ -33,7 +33,7 @@ export async function verifyTargetAccess(req: Request, res: Response, next: Next
 
     const resourceId = target[0].resourceId;
 
-    if (resourceId) {
+    if (!resourceId) {
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,
