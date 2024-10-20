@@ -74,7 +74,7 @@ export function buildTraefikConfig(
         const serviceName = `service-${target.targetId}`;
 
         http.routers![routerName] = {
-            entryPoints: [target.method],
+            entryPoints: ["https"],
             middlewares: [middlewareName],
             service: serviceName,
             rule: `Host(\`${target.resourceId}\`)`, // assuming resourceId is a valid full hostname
