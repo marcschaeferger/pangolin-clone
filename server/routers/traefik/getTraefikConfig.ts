@@ -33,7 +33,7 @@ export function buildTraefikConfig(
     const http: DynamicTraefikConfig["http"] = {
         routers: {
             main: {
-                entryPoints: ["http"],
+                entryPoints: ["https"],
                 middlewares: [],
                 service: "service-main",
                 rule: "Host(`fossorial.io`)",
