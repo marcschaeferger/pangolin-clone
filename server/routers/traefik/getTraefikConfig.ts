@@ -31,8 +31,25 @@ export function buildTraefikConfig(
     }
 
     const http: DynamicTraefikConfig["http"] = {
-        routers: {},
-        services: {},
+        routers: {
+            main: {
+                entryPoints: ["http"],
+                middlewares: [],
+                service: "service-main",
+                rule: "Host(`fossorial.io`)",
+            },
+        },
+        services: {
+            "service-main": {
+                loadBalancer: {
+                    servers: [
+                        {
+                            url: `http://${config.server.internal_hostname}:${config.server.internal_port}`,
+                        },
+                    ],
+                },
+            },
+        },
         middlewares: {
             [middlewareName]: {
                 plugin: {
@@ -46,7 +63,6 @@ export function buildTraefikConfig(
             },
         },
     };
-
     for (const target of targets) {
         const routerName = `router-${target.targetId}`;
         const serviceName = `service-${target.targetId}`;
