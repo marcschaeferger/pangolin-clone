@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_EXTERNAL_API_BASE_URL,
+    baseURL: "https://fossorial.io/api/v1",
     timeout: 10000,
     headers: {
         "Content-Type": "application/json",
@@ -9,7 +9,7 @@ export const api = axios.create({
 });
 
 export const internal = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_INTERNAL_API_BASE_URL,
+    baseURL: "http://pangolin:3000/api/v1",
     timeout: 10000,
     headers: {
         "Content-Type": "application/json",
