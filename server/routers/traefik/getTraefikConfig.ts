@@ -26,9 +26,9 @@ export function buildTraefikConfig(
 ): DynamicTraefikConfig {
     const middlewareName = "badger";
 
-    if (!targets.length) {
-        return {};
-    }
+    // if (!targets.length) {
+    //     return {};
+    // }
 
     const http: DynamicTraefikConfig["http"] = {
         routers: {
