@@ -24,7 +24,8 @@ export const sites = sqliteTable("sites", {
 });
 
 export const resources = sqliteTable("resources", {
-    resourceId: text("resourceId", { length: 2048 }).primaryKey(),
+    resourceId: integer("resourceId").primaryKey({ autoIncrement: true }),
+    fullDomain: text("fullDomain", { length: 2048 }),
     siteId: integer("siteId").references(() => sites.siteId, {
         onDelete: "cascade",
     }),
@@ -45,6 +46,7 @@ export const targets = sqliteTable("targets", {
     port: integer("port").notNull(),
     protocol: text("protocol"),
     enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
+    ssl: integer("ssl", { mode: "boolean" }).notNull().default(false),
 });
 
 export const exitNodes = sqliteTable("exitNodes", {

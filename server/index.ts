@@ -39,8 +39,8 @@ app.prepare().then(() => {
     if (!dev) {
         externalServer.use(
             rateLimitMiddleware({
-                windowMin: 1,
-                max: 100,
+                windowMin: config.rate_limit.window_minutes,
+                max: config.rate_limit.max_requests,
                 type: "IP_ONLY",
             }),
         );
@@ -88,7 +88,7 @@ app.prepare().then(() => {
     internalServer.use(errorHandlerMiddleware);
 });
 
-declare global {
+declare global { // TODO: eventually make seperate types that extend express.Request
     namespace Express {
         interface Request {
             user?: User;

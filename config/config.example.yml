@@ -10,6 +10,11 @@ server:
     internal_hostname: localhost
     secure_cookies: "false"
 
+traefik:
+    cert_resolver: "letsencrypt"
+    http_entrypoint: "http"
+    https_entrypoint: "https"
+
 rate_limit:
     window_minutes: "1"
     max_requests: "100"

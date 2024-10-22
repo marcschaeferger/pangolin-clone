@@ -10,7 +10,6 @@ const environmentSchema = z.object({
     app: z.object({
         name: z.string(),
         base_url: z.string().url(),
-        base_domain: z.string(),
         log_level: z.enum(["debug", "info", "warn", "error"]),
         save_logs: z.string().transform((val) => val === "true"),
     }),
@@ -25,6 +24,11 @@ const environmentSchema = z.object({
             .pipe(z.number()),
         internal_hostname: z.string(),
         secure_cookies: z.string().transform((val) => val === "true"),
+    }),
+    traefik: z.object({
+        http_entrypoint: z.string(),
+        https_entrypoint: z.string().optional(),
+        cert_resolver: z.string().optional(),
     }),
     rate_limit: z.object({
         window_minutes: z
