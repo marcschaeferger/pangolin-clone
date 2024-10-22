@@ -1,6 +1,5 @@
 app:
     name: Pangolin
-    environment: dev
     base_url: http://localhost:3000
     log_level: debug
     save_logs: "false"

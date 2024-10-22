@@ -9,7 +9,6 @@ export const APP_PATH = path.join("config");
 const environmentSchema = z.object({
     app: z.object({
         name: z.string(),
-        environment: z.enum(["dev", "prod"]),
         base_url: z.string().url(),
         base_domain: z.string(),
         log_level: z.enum(["debug", "info", "warn", "error"]),

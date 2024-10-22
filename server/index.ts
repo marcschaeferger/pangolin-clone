@@ -16,7 +16,7 @@ import cookieParser from "cookie-parser";
 import { User } from "@server/db/schema";
 import { ensureActions } from "./db/ensureActions";
 
-const dev = config.app.environment !== "prod";
+const dev = process.env.ENVIRONMENT !== "prod";
 
 const app = next({ dev });
 const handle = app.getRequestHandler();
