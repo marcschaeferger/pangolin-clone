@@ -18,18 +18,15 @@ export async function ensureActions() {
         .where(eq(roles.isSuperuserRole, true))
         .execute();
 
-    if (defaultRoles.length === 0) {
-        logger.info('No default roles to assign');
-        return;
-    }
-
     // Add new actions
     for (const actionId of actionsToAdd) {
-    await db.insert(actions).values({ actionId }).execute();
+        await db.insert(actions).values({ actionId }).execute();
         // Add new actions to the Default role
-        await db.insert(roleActions)
-            .values(defaultRoles.map(role => ({ roleId: role.roleId!, actionId, orgId: role.orgId! })))
-            .execute();
+        if (defaultRoles.length === 0) {
+            await db.insert(roleActions)
+                .values(defaultRoles.map(role => ({ roleId: role.roleId!, actionId, orgId: role.orgId! })))
+                .execute();
+        }
     }
 
     // Remove deprecated actions
