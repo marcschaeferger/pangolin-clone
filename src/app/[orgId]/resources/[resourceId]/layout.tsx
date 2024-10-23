@@ -22,20 +22,23 @@ export const metadata: Metadata = {
 
 interface SettingsLayoutProps {
     children: React.ReactNode;
-    params: { resourceId: string; orgId: string };
+    params: Promise<{ resourceId: string; orgId: string }>;
 }
 
-export default async function SettingsLayout({
-    children,
-    params,
-}: SettingsLayoutProps) {
+export default async function SettingsLayout(props: SettingsLayoutProps) {
+    const params = await props.params;
+
+    const {
+        children
+    } = props;
+
     let resource = null;
 
     if (params.resourceId !== "create") {
         try {
             const res = await internal.get<AxiosResponse<GetResourceResponse>>(
                 `/resource/${params.resourceId}`,
-                authCookieHeader(),
+                await authCookieHeader(),
             );
             resource = res.data.data;
         } catch {

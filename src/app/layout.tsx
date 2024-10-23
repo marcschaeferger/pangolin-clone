@@ -29,7 +29,7 @@ export default async function RootLayout({
         try {
             const res = await internal.get<AxiosResponse<ListOrgsResponse>>(
                 `/orgs`,
-                authCookieHeader(),
+                await authCookieHeader(),
             );
             if (res && res.data.data.orgs) {
                 orgs = res.data.data.orgs;

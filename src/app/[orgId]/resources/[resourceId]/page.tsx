@@ -3,11 +3,12 @@ import { Separator } from "@/components/ui/separator";
 import { CreateResourceForm } from "./components/CreateResource";
 import { GeneralForm } from "./components/GeneralForm";
 
-export default function SettingsPage({
-    params,
-}: {
-    params: { resourceId: string };
-}) {
+export default async function SettingsPage(
+    props: {
+        params: Promise<{ resourceId: string }>;
+    }
+) {
+    const params = await props.params;
     const isCreate = params.resourceId === "create";
 
     return (

@@ -40,23 +40,28 @@ const topNavItems = [
 
 interface ConfigurationLaytoutProps {
     children: React.ReactNode;
-    params: { orgId: string };
+    params: Promise<{ orgId: string }>;
 }
 
-export default async function ConfigurationLaytout({
-    children,
-    params,
-}: ConfigurationLaytoutProps) {
+export default async function ConfigurationLaytout(
+    props: ConfigurationLaytoutProps
+) {
+    const params = await props.params;
+
+    const { children } = props;
+
     const user = await verifySession();
 
     if (!user) {
         redirect("/auth/login");
     }
 
+    const cookie = await authCookieHeader();
+
     try {
         await internal.get<AxiosResponse<GetOrgResponse>>(
             `/org/${params.orgId}`,
-            authCookieHeader(),
+            cookie
         );
     } catch {
         redirect(`/`);
@@ -66,7 +71,7 @@ export default async function ConfigurationLaytout({
     try {
         const res = await internal.get<AxiosResponse<ListOrgsResponse>>(
             `/orgs`,
-            authCookieHeader(),
+            cookie
         );
         if (res && res.data.data.orgs) {
             orgs = res.data.data.orgs;

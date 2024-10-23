@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { PlusCircle, Trash2, Server, Globe, Cpu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,11 +25,12 @@ const isValidIPAddress = (ip: string) => {
     return ipv4Regex.test(ip);
 };
 
-export default function ReverseProxyTargets({
-    params,
-}: {
-    params: { resourceId: string };
-}) {
+export default function ReverseProxyTargets(
+    props: {
+        params: Promise<{ resourceId: string }>;
+    }
+) {
+    const params = use(props.params);
     const [targets, setTargets] = useState<ListTargetsResponse["targets"]>([]);
     const [nextId, setNextId] = useState(1);
     const [ipError, setIpError] = useState("");

@@ -5,15 +5,16 @@ import { AxiosResponse } from "axios";
 import SitesTable, { SiteRow } from "./components/SitesTable";
 
 type SitesPageProps = {
-    params: { orgId: string };
+    params: Promise<{ orgId: string }>;
 };
 
-export default async function Page({ params }: SitesPageProps) {
+export default async function Page(props: SitesPageProps) {
+    const params = await props.params;
     let sites: ListSitesResponse["sites"] = [];
     try {
         const res = await internal.get<AxiosResponse<ListSitesResponse>>(
             `/org/${params.orgId}/sites`,
-            authCookieHeader(),
+            await authCookieHeader(),
         );
         sites = res.data.data.sites;
     } catch (e) {

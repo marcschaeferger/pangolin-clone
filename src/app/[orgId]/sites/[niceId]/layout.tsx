@@ -22,20 +22,23 @@ import { ClientLayout } from "./components/ClientLayout";
 
 interface SettingsLayoutProps {
     children: React.ReactNode;
-    params: { niceId: string; orgId: string };
+    params: Promise<{ niceId: string; orgId: string }>;
 }
 
-export default async function SettingsLayout({
-    children,
-    params,
-}: SettingsLayoutProps) {
+export default async function SettingsLayout(props: SettingsLayoutProps) {
+    const params = await props.params;
+
+    const {
+        children
+    } = props;
+
     let site = null;
 
     if (params.niceId !== "create") {
         try {
             const res = await internal.get<AxiosResponse<GetSiteResponse>>(
                 `/org/${params.orgId}/site/${params.niceId}`,
-                authCookieHeader(),
+                await authCookieHeader(),
             );
             site = res.data.data;
         } catch {

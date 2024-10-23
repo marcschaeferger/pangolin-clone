@@ -31,7 +31,7 @@ const environmentSchema = z.object({
     email: z
         .object({
             smtp_host: z.string().optional(),
-            smtp_port: z.number().optional(),
+            smtp_port: z.number().positive().gt(0).lte(65535).optional(),
             smtp_user: z.string().optional(),
             smtp_pass: z.string().optional(),
             no_reply: z.string().email().optional(),
