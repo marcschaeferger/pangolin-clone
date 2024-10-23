@@ -8,6 +8,7 @@ import { internal } from "@app/api";
 import { AxiosResponse } from "axios";
 import { authCookieHeader } from "@app/api/cookies";
 import { redirect } from "next/navigation";
+import { verifySession } from "@app/lib/auth/verifySession";
 
 export const metadata: Metadata = {
     title: `Dashboard - ${process.env.NEXT_PUBLIC_APP_NAME}`,
@@ -21,22 +22,26 @@ export default async function RootLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    // let orgs: ListOrgsResponse["orgs"] = [];
-    // try {
-    //     const res = await internal.get<AxiosResponse<ListOrgsResponse>>(
-    //         `/orgs`,
-    //         authCookieHeader(),
-    //     );
-    //     if (res && res.data.data.orgs) {
-    //         orgs = res.data.data.orgs;
-    //     }
+    const user = await verifySession();
 
-    //     if (!orgs.length) {
-    //         redirect(`/setup`);
-    //     }
-    // } catch (e) {
-    //     console.error("Error fetching orgs", e);
-    // }
+    let orgs: ListOrgsResponse["orgs"] = [];
+    if (user) {
+        try {
+            const res = await internal.get<AxiosResponse<ListOrgsResponse>>(
+                `/orgs`,
+                authCookieHeader(),
+            );
+            if (res && res.data.data.orgs) {
+                orgs = res.data.data.orgs;
+            }
+    
+            if (!orgs.length) {
+                redirect(`/setup`);
+            }
+        } catch (e) {
+            console.error("Error fetching orgs", e);
+        }
+    }
 
     return (
         <html suppressHydrationWarning>

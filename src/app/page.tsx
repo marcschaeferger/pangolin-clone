@@ -13,6 +13,7 @@ export default async function Page() {
 
     if (!user) {
         redirect("/auth/login");
+        return;
     }
 
     let orgs: ListOrgsResponse["orgs"] = [];

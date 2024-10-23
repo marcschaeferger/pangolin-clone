@@ -84,6 +84,25 @@ if (fs.existsSync(configFilePath1)) {
 } else if (fs.existsSync(configFilePath2)) {
     environment = loadConfig(configFilePath2);
 }
+if (!environment) {
+    const exampleConfigPath = path.join("config.example.yml");
+    if (fs.existsSync(exampleConfigPath)) {
+        try {
+            const exampleConfigContent = fs.readFileSync(exampleConfigPath, "utf8");
+            fs.writeFileSync(configFilePath1, exampleConfigContent, "utf8");
+            environment = loadConfig(configFilePath1);
+        } catch (error) {
+            if (error instanceof Error) {
+                throw new Error(
+                    `Error creating configuration file from example: ${error.message}`,
+                );
+            }
+            throw error;
+        }
+    } else {
+        throw new Error("No configuration file found and no example configuration available");
+    }
+}
 
 if (!environment) {
     throw new Error("No configuration file found");

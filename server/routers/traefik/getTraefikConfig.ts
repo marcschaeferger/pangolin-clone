@@ -33,12 +33,6 @@ export function buildTraefikConfig(
 
     const tls = {
         certResolver: config.traefik.cert_resolver,
-        // domains: [ // TODO: figure out if this is neccessary
-        //     {
-        //         main: baseDomain,
-        //         sans: ["*." + baseDomain], 
-        //     },
-        // ],
     };
 
     const http: any = {
@@ -59,8 +53,8 @@ export function buildTraefikConfig(
         },
     };
     for (const target of targets) {
-        const routerName = `router-${target.targetId}`;
-        const serviceName = `service-${target.targetId}`;
+        const routerName = `${target.targetId}-router`;
+        const serviceName = `${target.targetId}-service`;
 
         http.routers![routerName] = {
             entryPoints: [target.ssl ? config.traefik.https_entrypoint : config.traefik.https_entrypoint],

@@ -22,6 +22,7 @@ RUN npm install --omit=dev
 
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/dist ./dist
+COPY ./config/config.example.yml /app/dist/
 COPY server/db/names.json /app/dist/names.json
 
 CMD ["npm", "start"]
