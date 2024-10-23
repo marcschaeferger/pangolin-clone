@@ -11,19 +11,13 @@ const environmentSchema = z.object({
         name: z.string(),
         base_url: z.string().url(),
         log_level: z.enum(["debug", "info", "warn", "error"]),
-        save_logs: z.string().transform((val) => val === "true"),
+        save_logs: z.boolean(),
     }),
     server: z.object({
-        external_port: z
-            .string()
-            .transform((val) => parseInt(val, 10))
-            .pipe(z.number()),
-        internal_port: z
-            .string()
-            .transform((val) => parseInt(val, 10))
-            .pipe(z.number()),
+        external_port: z.number().positive().gt(0).lte(65535),
+        internal_port: z.number().positive().gt(0).lte(65535),
         internal_hostname: z.string(),
-        secure_cookies: z.string().transform((val) => val === "true"),
+        secure_cookies: z.boolean(),
     }),
     traefik: z.object({
         http_entrypoint: z.string(),
@@ -31,28 +25,13 @@ const environmentSchema = z.object({
         cert_resolver: z.string().optional(),
     }),
     rate_limit: z.object({
-        window_minutes: z
-            .string()
-            .transform((val) => parseInt(val, 10))
-            .pipe(z.number()),
-        max_requests: z
-            .string()
-            .transform((val) => parseInt(val, 10))
-            .pipe(z.number()),
+        window_minutes: z.number().positive().gt(0),
+        max_requests: z.number().positive().gt(0),
     }),
     email: z
         .object({
             smtp_host: z.string().optional(),
-            smtp_port: z
-                .string()
-                .optional()
-                .transform((val) => {
-                    if (val) {
-                        return parseInt(val, 10);
-                    }
-                    return val;
-                })
-                .pipe(z.number().optional()),
+            smtp_port: z.number().optional(),
             smtp_user: z.string().optional(),
             smtp_pass: z.string().optional(),
             no_reply: z.string().email().optional(),
@@ -68,7 +47,7 @@ const loadConfig = (configPath: string) => {
     } catch (error) {
         if (error instanceof Error) {
             throw new Error(
-                `Error loading configuration file: ${error.message}`,
+                `Error loading configuration file: ${error.message}`
             );
         }
         throw error;
@@ -88,19 +67,24 @@ if (!environment) {
     const exampleConfigPath = path.join("config.example.yml");
     if (fs.existsSync(exampleConfigPath)) {
         try {
-            const exampleConfigContent = fs.readFileSync(exampleConfigPath, "utf8");
+            const exampleConfigContent = fs.readFileSync(
+                exampleConfigPath,
+                "utf8"
+            );
             fs.writeFileSync(configFilePath1, exampleConfigContent, "utf8");
             environment = loadConfig(configFilePath1);
         } catch (error) {
             if (error instanceof Error) {
                 throw new Error(
-                    `Error creating configuration file from example: ${error.message}`,
+                    `Error creating configuration file from example: ${error.message}`
                 );
             }
             throw error;
         }
     } else {
-        throw new Error("No configuration file found and no example configuration available");
+        throw new Error(
+            "No configuration file found and no example configuration available"
+        );
     }
 }
 
@@ -117,11 +101,11 @@ if (!parsedConfig.success) {
 
 process.env.NEXT_PUBLIC_EXTERNAL_API_BASE_URL = new URL(
     "/api/v1",
-    parsedConfig.data.app.base_url,
+    parsedConfig.data.app.base_url
 ).href;
 process.env.NEXT_PUBLIC_INTERNAL_API_BASE_URL = new URL(
     "/api/v1",
-    `http://${parsedConfig.data.server.internal_hostname}:${parsedConfig.data.server.external_port}`,
+    `http://${parsedConfig.data.server.internal_hostname}:${parsedConfig.data.server.external_port}`
 ).href;
 process.env.NEXT_PUBLIC_APP_NAME = parsedConfig.data.app.name;
 
