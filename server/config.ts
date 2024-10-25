@@ -3,6 +3,10 @@ import { fromError } from "zod-validation-error";
 import path from "path";
 import fs from "fs";
 import yaml from "js-yaml";
+import { fileURLToPath } from "url";
+
+export const __FILENAME = fileURLToPath(import.meta.url);
+export const __DIRNAME = path.dirname(__FILENAME);
 
 export const APP_PATH = path.join("config");
 
@@ -37,6 +41,12 @@ const environmentSchema = z.object({
             no_reply: z.string().email().optional(),
         })
         .optional(),
+    flags: z
+        .object({
+            allow_org_subdomain_changing: z.boolean().optional(),
+            require_email_verification: z.boolean().optional(),
+        })
+        .optional(),
 });
 
 const loadConfig = (configPath: string) => {
@@ -64,7 +74,7 @@ if (fs.existsSync(configFilePath1)) {
     environment = loadConfig(configFilePath2);
 }
 if (!environment) {
-    const exampleConfigPath = path.join("config.example.yml");
+    const exampleConfigPath = path.join(__DIRNAME, "config.example.yml");
     if (fs.existsSync(exampleConfigPath)) {
         try {
             const exampleConfigContent = fs.readFileSync(
