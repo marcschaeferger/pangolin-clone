@@ -46,11 +46,11 @@ authenticated.put("/org/:orgId/site", verifyOrgAccess, site.createSite);
 authenticated.get("/org/:orgId/sites", verifyOrgAccess, site.listSites);
 authenticated.get("/org/:orgId/site/:niceId", verifyOrgAccess, site.getSite);
 
+authenticated.get("/org/:orgId/pickSiteDefaults", verifyOrgAccess, site.pickSiteDefaults);
 authenticated.get("/site/:siteId", verifySiteAccess, site.getSite);
 authenticated.get("/site/:siteId/roles", verifySiteAccess, site.listSiteRoles);
 authenticated.post("/site/:siteId", verifySiteAccess, site.updateSite);
 authenticated.delete("/site/:siteId", verifySiteAccess, site.deleteSite);
-authenticated.delete("/site/pickSiteDefaults", site.pickSiteDefaults);
 
 authenticated.put(
     "/org/:orgId/site/:siteId/resource",

@@ -27,7 +27,7 @@ export type GetConfigResponse = {
 export async function getConfig(req: Request, res: Response, next: NextFunction): Promise<any> {
     try {
         // Validate request parameters
-        const parsedParams = getConfigSchema.safeParse(req.query);
+        const parsedParams = getConfigSchema.safeParse(req.body);
         if (!parsedParams.success) {
             return next(
                 createHttpError(
@@ -44,9 +44,9 @@ export async function getConfig(req: Request, res: Response, next: NextFunction)
         }
 
         // Fetch exit node
-        let exitNode = await db.select().from(exitNodes).where(eq(exitNodes.publicKey, publicKey));
-
-        if (!exitNode) {
+        let exitNodeQuery = await db.select().from(exitNodes).where(eq(exitNodes.publicKey, publicKey));
+        let exitNode;
+        if (exitNodeQuery.length === 0) {
             const address = await getNextAvailableSubnet();
             const listenPort = await getNextAvailablePort();
             const subEndpoint = await getUniqueExitNodeEndpointName();
@@ -61,6 +61,8 @@ export async function getConfig(req: Request, res: Response, next: NextFunction)
             }).returning().execute();
 
             logger.info(`Created new exit node ${exitNode[0].name} with address ${exitNode[0].address} and port ${exitNode[0].listenPort}`);
+        } else {
+            exitNode = exitNodeQuery;
         }
 
         if (!exitNode) {
@@ -98,16 +100,11 @@ export async function getConfig(req: Request, res: Response, next: NextFunction)
             peers,
         };
 
-        return response(res, {
-            data: configResponse,
-            success: true,
-            error: false,
-            message: "Configuration retrieved successfully",
-            status: HttpCode.OK,
-        });
+        logger.debug("Sending config: ", configResponse);
 
+        return res.status(HttpCode.OK).send(configResponse);
     } catch (error) {
-        logger.error('Error from getConfig:', error);
+        logger.error(error);
         return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred..."));
     }
 }
@@ -119,10 +116,13 @@ async function getNextAvailableSubnet(): Promise<string> {
     }).from(exitNodes);
 
     const addresses = existingAddresses.map(a => a.address);
-    const subnet = findNextAvailableCidr(addresses, config.gerbil.block_size, config.gerbil.subnet_group);
+    let subnet = findNextAvailableCidr(addresses, config.gerbil.block_size, config.gerbil.subnet_group);
     if (!subnet) {
         throw new Error('No available subnets remaining in space');
     }
+
+    // replace the last octet with 1
+    subnet = subnet.split('.').slice(0, 3).join('.') + '.1' + subnet.split('/')[1];
     return subnet;
 }
 

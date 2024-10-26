@@ -76,7 +76,7 @@ export function CreateSiteForm() {
             setIsLoading(false);
 
             api
-            .get(`/site/pickSiteDefaults`)
+            .get(`/org/${orgId}/pickSiteDefaults`)
             .catch((e) => {
                 toast({
                     title: "Error creating site..."
@@ -93,7 +93,8 @@ export function CreateSiteForm() {
         const res = await api
             .put(`/org/${orgId}/site/`, {
                 name: data.name,
-                // subdomain: data.subdomain,
+                subnet: siteDefaults?.subnet,
+                exitNodeId: siteDefaults?.exitNodeId,
                 pubKey: keypair?.publicKey,
             })
             .catch((e) => {
@@ -117,7 +118,7 @@ PrivateKey = ${keypair.privateKey}
 
 [Peer]
 PublicKey = ${siteDefaults.publicKey}
-AllowedIPs = ${siteDefaults.address}
+AllowedIPs = ${siteDefaults.address.split("/")[0]}/32
 Endpoint = ${siteDefaults.endpoint}:${siteDefaults.listenPort}
 PersistentKeepalive = 5`
         : "";

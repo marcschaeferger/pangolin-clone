@@ -17,7 +17,7 @@ internalRouter.get("/traefik-config", traefik.traefikConfigProvider);
 const gerbilRouter = Router();
 internalRouter.use("/gerbil", gerbilRouter);
 
-gerbilRouter.get("/get-config", gerbil.getConfig);
+gerbilRouter.post("/get-config", gerbil.getConfig);
 gerbilRouter.post("/receive-bandwidth", gerbil.receiveBandwidth);
 
 // Badger routes
