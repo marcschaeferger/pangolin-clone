@@ -38,7 +38,7 @@ export const resources = sqliteTable("resources", {
 
 export const targets = sqliteTable("targets", {
     targetId: integer("targetId").primaryKey({ autoIncrement: true }),
-    resourceId: text("resourceId").references(() => resources.resourceId, {
+    resourceId: integer("resourceId").references(() => resources.resourceId, {
         onDelete: "cascade",
     }),
     ip: text("ip").notNull(),
@@ -188,7 +188,7 @@ export const roleResources = sqliteTable("roleResources", {
     roleId: integer("roleId")
         .notNull()
         .references(() => roles.roleId, { onDelete: "cascade" }),
-    resourceId: text("resourceId")
+    resourceId: integer("resourceId")
         .notNull()
         .references(() => resources.resourceId, { onDelete: "cascade" }),
 });
@@ -197,7 +197,7 @@ export const userResources = sqliteTable("userResources", {
     userId: text("userId")
         .notNull()
         .references(() => users.userId, { onDelete: "cascade" }),
-    resourceId: text("resourceId")
+    resourceId: integer("resourceId")
         .notNull()
         .references(() => resources.resourceId, { onDelete: "cascade" }),
 });

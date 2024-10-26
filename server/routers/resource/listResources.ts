@@ -41,7 +41,7 @@ const listResourcesSchema = z.object({
 });
 
 function queryResources(
-    accessibleResourceIds: string[],
+    accessibleResourceIds: number[],
     siteId?: number,
     orgId?: string,
 ) {
@@ -141,7 +141,7 @@ export async function listResources(
         // Get the list of resources the user has access to
         const accessibleResources = await db
             .select({
-                resourceId: sql<string>`COALESCE(${userResources.resourceId}, ${roleResources.resourceId})`,
+                resourceId: sql<number>`COALESCE(${userResources.resourceId}, ${roleResources.resourceId})`,
             })
             .from(userResources)
             .fullJoin(

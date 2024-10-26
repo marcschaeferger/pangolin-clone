@@ -27,7 +27,7 @@ const isValidIPAddress = (ip: string) => {
 
 export default function ReverseProxyTargets(
     props: {
-        params: Promise<{ resourceId: string }>;
+        params: Promise<{ resourceId: number }>;
     }
 ) {
     const params = use(props.params);

@@ -11,7 +11,7 @@ import { fromError } from "zod-validation-error";
 import logger from "@server/logger";
 
 const listTargetsParamsSchema = z.object({
-    resourceId: z.string()
+    resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
 
 const listTargetsSchema = z.object({
@@ -29,7 +29,7 @@ const listTargetsSchema = z.object({
         .pipe(z.number().int().nonnegative()),
 });
 
-function queryTargets(resourceId: string) {
+function queryTargets(resourceId: number) {
     let baseQuery = db
         .select({
             targetId: targets.targetId,

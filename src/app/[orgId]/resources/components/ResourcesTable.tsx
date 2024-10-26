@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 import api from "@app/api";
 
 export type ResourceRow = {
-    id: string;
+    id: number;
     name: string;
     orgId: string;
     domain: string;
@@ -66,7 +66,7 @@ export const columns: ColumnDef<ResourceRow>[] = [
 
             const resourceRow = row.original;
 
-            const deleteResource = (resourceId: string) => {
+            const deleteResource = (resourceId: number) => {
                 api.delete(`/resource/${resourceId}`)
                     .catch((e) => {
                         console.error("Error deleting resource", e);

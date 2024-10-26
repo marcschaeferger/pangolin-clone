@@ -23,7 +23,7 @@ export default async function Page(props: ResourcesPageProps) {
 
     const resourceRows: ResourceRow[] = resources.map((resource) => {
         return {
-            id: resource.resourceId.toString(),
+            id: resource.resourceId,
             name: resource.name,
             orgId: params.orgId,
             domain: resource.subdomain || "",

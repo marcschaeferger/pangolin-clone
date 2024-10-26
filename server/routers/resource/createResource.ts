@@ -11,7 +11,7 @@ import { eq, and } from 'drizzle-orm';
 import stoi from '@server/utils/stoi';
 
 const createResourceParamsSchema = z.object({
-            siteId: z.string().optional().transform(stoi).pipe(z.number().int().positive().optional()),
+    siteId: z.string().optional().transform(stoi).pipe(z.number().int().positive().optional()),
     orgId: z.string()
 });
 
@@ -64,7 +64,7 @@ export async function createResource(req: Request, res: Response, next: NextFunc
             .from(orgs)
             .where(eq(orgs.orgId, orgId))
             .limit(1);
-        
+
         if (org.length === 0) {
             return next(
                 createHttpError(
@@ -75,11 +75,11 @@ export async function createResource(req: Request, res: Response, next: NextFunc
         }
 
         // Generate a unique resourceId
-        const resourceId = `${subdomain}.${org[0].orgId}.${org[0].domain}`;
+        const fullDomain = `${subdomain}.${org[0].orgId}.${org[0].domain}`;
 
         // Create new resource in the database
         const newResource = await db.insert(resources).values({
-            resourceId,
+            fullDomain,
             siteId,
             orgId,
             name,

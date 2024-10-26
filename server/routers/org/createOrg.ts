@@ -65,10 +65,13 @@ export async function createOrg(req: Request, res: Response, next: NextFunction)
             );
         }
 
+        // create a url from config.app.base_url and get the hostname
+        const domain = new URL(config.app.base_url).hostname;
+
         const newOrg = await db.insert(orgs).values({
             orgId,
             name,
-            domain: config.app.base_domain
+            domain
         }).returning();
 
         const roleId = await createSuperuserRole(newOrg[0].orgId);

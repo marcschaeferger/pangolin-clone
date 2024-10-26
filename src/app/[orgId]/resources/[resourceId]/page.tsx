@@ -5,7 +5,7 @@ import { GeneralForm } from "./components/GeneralForm";
 
 export default async function SettingsPage(
     props: {
-        params: Promise<{ resourceId: string }>;
+        params: Promise<{ resourceId: number | string }>;
     }
 ) {
     const params = await props.params;

@@ -10,7 +10,7 @@ import logger from '@server/logger';
 
 const addUserResourceSchema = z.object({
     userId: z.string(),
-    resourceId: z.string(),
+    resourceId: z.string().transform(Number).pipe(z.number().int().positive())
 });
 
 export async function addUserResource(req: Request, res: Response, next: NextFunction): Promise<any> {

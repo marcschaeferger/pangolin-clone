@@ -9,7 +9,7 @@ import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
 
 const createTargetParamsSchema = z.object({
-    resourceId: z.string(),
+    resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
 
 const createTargetSchema = z.object({

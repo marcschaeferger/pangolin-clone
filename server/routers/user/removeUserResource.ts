@@ -11,7 +11,7 @@ import logger from '@server/logger';
 
 const removeUserResourceSchema = z.object({
     userId: z.string(),
-    resourceId: z.string(),
+    resourceId: z.string().transform(Number).pipe(z.number().int().positive())
 });
 
 export async function removeUserResource(req: Request, res: Response, next: NextFunction): Promise<any> {

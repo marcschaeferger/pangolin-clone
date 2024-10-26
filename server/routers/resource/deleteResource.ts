@@ -11,7 +11,7 @@ import logger from '@server/logger';
 
 // Define Zod schema for request parameters validation
 const deleteResourceSchema = z.object({
-    resourceId: z.string()
+    resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
 
 export async function deleteResource(req: Request, res: Response, next: NextFunction): Promise<any> {

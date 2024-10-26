@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 
 interface SettingsLayoutProps {
     children: React.ReactNode;
-    params: Promise<{ resourceId: string; orgId: string }>;
+    params: Promise<{ resourceId: number | string; orgId: string }>;
 }
 
 export default async function SettingsLayout(props: SettingsLayoutProps) {

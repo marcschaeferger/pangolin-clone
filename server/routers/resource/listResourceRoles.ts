@@ -10,7 +10,7 @@ import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
 
 const listResourceRolesSchema = z.object({
-    resourceId: z.string(),
+    resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
 
 export async function listResourceRoles(req: Request, res: Response, next: NextFunction): Promise<any> {

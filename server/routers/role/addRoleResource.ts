@@ -13,7 +13,7 @@ const addRoleResourceParamsSchema = z.object({
 });
 
 const addRoleResourceSchema = z.object({
-    resourceId: z.string(),
+    resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
 
 export async function addRoleResource(req: Request, res: Response, next: NextFunction): Promise<any> {

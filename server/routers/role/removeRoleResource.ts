@@ -14,7 +14,7 @@ const removeRoleResourceParamsSchema = z.object({
 });
 
 const removeRoleResourceSchema = z.object({
-    resourceId: z.string(),
+    resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
 
 export async function removeRoleResource(req: Request, res: Response, next: NextFunction): Promise<any> {

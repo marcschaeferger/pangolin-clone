@@ -11,11 +11,11 @@ import logger from '@server/logger';
 
 // Define Zod schema for request parameters validation
 const getResourceSchema = z.object({
-    resourceId: z.string()
+    resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
 
 export type GetResourceResponse = {
-    resourceId: string;
+    resourceId: number;
     siteId: number;
     orgId: string;
     name: string;
