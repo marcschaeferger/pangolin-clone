@@ -6,7 +6,13 @@ import { eq, and } from "drizzle-orm";
 import { __DIRNAME } from "@server/config";
 
 // Load the names from the names.json file
-const file = join(__DIRNAME, "names.json");
+const dev = process.env.ENVIRONMENT !== "prod";
+let file;
+if (!dev) {
+    file = join(__DIRNAME, "names.json");
+} else {
+    file = join(__DIRNAME, "/db/names.json");
+}
 export const names = JSON.parse(readFileSync(file, "utf-8"));
 
 export async function getUniqueSiteName(orgId: string): Promise<string> {

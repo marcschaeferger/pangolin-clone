@@ -20,9 +20,10 @@ export async function ensureActions() {
 
     // Add new actions
     for (const actionId of actionsToAdd) {
+        logger.debug(`Adding action: ${actionId}`);
         await db.insert(actions).values({ actionId }).execute();
         // Add new actions to the Default role
-        if (defaultRoles.length === 0) {
+        if (defaultRoles.length != 0) {
             await db.insert(roleActions)
                 .values(defaultRoles.map(role => ({ roleId: role.roleId!, actionId, orgId: role.orgId! })))
                 .execute();
@@ -31,6 +32,7 @@ export async function ensureActions() {
 
     // Remove deprecated actions
     if (actionsToRemove.length > 0) {
+        logger.debug(`Removing actions: ${actionsToRemove.join(', ')}`);
         await db.delete(actions).where(inArray(actions.actionId, actionsToRemove)).execute();
         await db.delete(roleActions).where(inArray(roleActions.actionId, actionsToRemove)).execute();
     }

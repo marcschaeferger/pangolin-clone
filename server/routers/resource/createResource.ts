@@ -75,7 +75,7 @@ export async function createResource(req: Request, res: Response, next: NextFunc
         }
 
         // Generate a unique resourceId
-        const fullDomain = `${subdomain}.${org[0].orgId}.${org[0].domain}`;
+        const fullDomain = `${subdomain}.${org[0].domain}`;
 
         // Create new resource in the database
         const newResource = await db.insert(resources).values({
