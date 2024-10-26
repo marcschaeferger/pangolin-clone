@@ -15,6 +15,12 @@ traefik:
     http_entrypoint: web
     https_entrypoint: websecure
 
+gerbil:
+    start_port: 51820
+    base_endpoint: localhost
+    block_size: 16
+    subnet_group: 10.0.0.0/8 
+
 rate_limit:
     window_minutes: 1
     max_requests: 100

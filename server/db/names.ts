@@ -1,7 +1,7 @@
 import { join } from "path";
 import { readFileSync } from "fs";
 import { db } from "@server/db";
-import { sites } from "./schema";
+import { exitNodes, sites } from "./schema";
 import { eq, and } from "drizzle-orm";
 import { __DIRNAME } from "@server/config";
 
@@ -9,7 +9,7 @@ import { __DIRNAME } from "@server/config";
 const file = join(__DIRNAME, "names.json");
 export const names = JSON.parse(readFileSync(file, "utf-8"));
 
-export async function getUniqueName(orgId: string): Promise<string> {
+export async function getUniqueSiteName(orgId: string): Promise<string> {
     let loops = 0;
     while (true) {
         if (loops > 100) {
@@ -27,6 +27,30 @@ export async function getUniqueName(orgId: string): Promise<string> {
         loops++;
     }
 }
+
+export async function getUniqueExitNodeEndpointName(): Promise<string> {
+    let loops = 0;
+    const count = await db
+        .select()
+        .from(exitNodes);
+    while (true) {
+        if (loops > 100) {
+            throw new Error("Could not generate a unique name");
+        }
+
+        const name = generateName();
+
+        for (const node of count) {
+            if (node.endpoint.includes(name)) {
+                loops++;
+                continue;
+            }
+        }
+
+        return name;
+    }
+}
+
 
 export function generateName(): string {
     return (

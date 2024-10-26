@@ -1,14 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { sites, resources, targets, exitNodes, routes } from '@server/db/schema';
+import { sites, resources, targets, exitNodes } from '@server/db/schema';
 import { db } from '@server/db';
 import { eq } from 'drizzle-orm';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
 import logger from '@server/logger';
-import stoi from '@server/utils/stoi';
-
+import config from "@server/config";
+import { getUniqueExitNodeEndpointName } from '@server/db/names';
+import { findNextAvailableCidr } from "@server/utils/ip";
 // Define Zod schema for request validation
 const getConfigSchema = z.object({
     publicKey: z.string(),
@@ -47,19 +48,19 @@ export async function getConfig(req: Request, res: Response, next: NextFunction)
 
         if (!exitNode) {
             const address = await getNextAvailableSubnet();
+            const listenPort = await getNextAvailablePort();
+            const subEndpoint = await getUniqueExitNodeEndpointName();
+
             // create a new exit node
             exitNode = await db.insert(exitNodes).values({
                 publicKey,
+                endpoint: `${subEndpoint}.${config.gerbil.base_endpoint}`,
                 address,
-                listenPort: 51820,
+                listenPort,
                 name: `Exit Node ${publicKey.slice(0, 8)}`,
             }).returning().execute();
 
-            // create a route
-            await db.insert(routes).values({
-                exitNodeId: exitNode[0].exitNodeId,
-                subnet: address,
-            }).returning().execute();
+            logger.info(`Created new exit node ${exitNode[0].name} with address ${exitNode[0].address} and port ${exitNode[0].listenPort}`);
         }
 
         if (!exitNode) {
@@ -68,7 +69,7 @@ export async function getConfig(req: Request, res: Response, next: NextFunction)
 
         // Fetch sites for this exit node
         const sitesRes = await db.query.sites.findMany({
-            where: eq(sites.exitNode, exitNode[0].exitNodeId),
+            where: eq(sites.exitNodeId, exitNode[0].exitNodeId),
         });
 
         const peers = await Promise.all(sitesRes.map(async (site) => {
@@ -91,14 +92,14 @@ export async function getConfig(req: Request, res: Response, next: NextFunction)
             };
         }));
 
-        const config: GetConfigResponse = {
+        const configResponse: GetConfigResponse = {
             listenPort: exitNode[0].listenPort || 51820,
             ipAddress: exitNode[0].address,
             peers,
         };
 
         return response(res, {
-            data: config,
+            data: configResponse,
             success: true,
             error: false,
             message: "Configuration retrieved successfully",
@@ -113,31 +114,35 @@ export async function getConfig(req: Request, res: Response, next: NextFunction)
 
 async function getNextAvailableSubnet(): Promise<string> {
     // Get all existing subnets from routes table
-    const existingRoutes = await db.select({
-        subnet: routes.subnet
-    }).from(routes)
-        .innerJoin(exitNodes, eq(routes.exitNodeId, exitNodes.exitNodeId));
+    const existingAddresses = await db.select({
+        address: exitNodes.address,
+    }).from(exitNodes);
 
-    // Filter for only /16 subnets and extract the second octet
-    const usedSecondOctets = new Set(
-        existingRoutes
-            .map(route => route.subnet)
-            .filter(subnet => subnet.endsWith('/16'))
-            .filter(subnet => subnet.startsWith('10.'))
-            .map(subnet => {
-                const parts = subnet.split('.');
-                return parseInt(parts[1]);
-            })
-    );
+    const addresses = existingAddresses.map(a => a.address);
+    const subnet = findNextAvailableCidr(addresses, config.gerbil.block_size, config.gerbil.subnet_group);
+    if (!subnet) {
+        throw new Error('No available subnets remaining in space');
+    }
+    return subnet;
+}
 
-    // Find the first available number between 0 and 255
-    let nextOctet = 0;
-    while (usedSecondOctets.has(nextOctet)) {
-        nextOctet++;
-        if (nextOctet > 255) {
-            throw new Error('No available /16 subnets remaining in 10.0.0.0/8 space');
+async function getNextAvailablePort(): Promise<number> {
+    // Get all existing ports from exitNodes table
+    const existingPorts = await db.select({
+        listenPort: exitNodes.listenPort,
+    }).from(exitNodes);
+
+    // Find the first available port between 1024 and 65535
+    let nextPort = config.gerbil.start_port;
+    for (const port of existingPorts) {
+        if (port.listenPort > nextPort) {
+            break;
+        }
+        nextPort++;
+        if (nextPort > 65535) {
+            throw new Error('No available ports remaining in space');
         }
     }
 
-    return `10.${nextOctet}.0.0/16`;
+    return nextPort;
 }

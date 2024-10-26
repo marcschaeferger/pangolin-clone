@@ -50,6 +50,7 @@ authenticated.get("/site/:siteId", verifySiteAccess, site.getSite);
 authenticated.get("/site/:siteId/roles", verifySiteAccess, site.listSiteRoles);
 authenticated.post("/site/:siteId", verifySiteAccess, site.updateSite);
 authenticated.delete("/site/:siteId", verifySiteAccess, site.deleteSite);
+authenticated.delete("/site/pickSiteDefaults", site.pickSiteDefaults);
 
 authenticated.put(
     "/org/:orgId/site/:siteId/resource",

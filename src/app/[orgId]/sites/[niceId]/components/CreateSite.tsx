@@ -24,6 +24,7 @@ import { api } from "@/api";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { Checkbox } from "@app/components/ui/checkbox"
+import { PickSiteDefaultsResponse } from "@server/routers/site"
 
 const method = [
     { label: "Wireguard", value: "wg" },
@@ -57,6 +58,7 @@ export function CreateSiteForm() {
     const [keypair, setKeypair] = useState<{ publicKey: string; privateKey: string } | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isChecked, setIsChecked] = useState(false);
+    const [siteDefaults, setSiteDefaults] = useState<PickSiteDefaultsResponse | null>(null);
 
     const handleCheckboxChange = (checked: boolean) => {
         setIsChecked(checked);
@@ -72,6 +74,18 @@ export function CreateSiteForm() {
             const generatedKeypair = generateKeypair();
             setKeypair(generatedKeypair);
             setIsLoading(false);
+
+            api
+            .get(`/site/pickSiteDefaults`)
+            .catch((e) => {
+                toast({
+                    title: "Error creating site..."
+                });
+            }).then((res) => {
+                if (res && res.status === 200) {
+                    setSiteDefaults(res.data.data);
+                }
+            });
         }
     }, []);
 
@@ -95,16 +109,16 @@ export function CreateSiteForm() {
         }
     }
 
-    const wgConfig = keypair
+    const wgConfig = keypair && siteDefaults
         ? `[Interface]
-Address = 10.0.0.2/24
+Address = ${siteDefaults.subnet}
 ListenPort = 51820
 PrivateKey = ${keypair.privateKey}
 
 [Peer]
-PublicKey = ${keypair.publicKey}
-AllowedIPs = 0.0.0.0/0, ::/0
-Endpoint = myserver.dyndns.org:51820
+PublicKey = ${siteDefaults.publicKey}
+AllowedIPs = ${siteDefaults.address}
+Endpoint = ${siteDefaults.endpoint}:${siteDefaults.listenPort}
 PersistentKeepalive = 5`
         : "";
 

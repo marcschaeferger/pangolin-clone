@@ -13,12 +13,12 @@ export const sites = sqliteTable("sites", {
         onDelete: "cascade",
     }),
     niceId: text("niceId").notNull(),
-    exitNode: integer("exitNode").references(() => exitNodes.exitNodeId, {
+    exitNodeId: integer("exitNode").references(() => exitNodes.exitNodeId, {
         onDelete: "set null",
     }),
     name: text("name").notNull(),
-    pubKey: text("pubKey"),
-    subnet: text("subnet"),
+    pubKey: text("pubKey").notNull(),
+    subnet: text("subnet").notNull(),
     megabytesIn: integer("bytesIn"),
     megabytesOut: integer("bytesOut"),
 });
@@ -53,16 +53,9 @@ export const exitNodes = sqliteTable("exitNodes", {
     exitNodeId: integer("exitNodeId").primaryKey({ autoIncrement: true }),
     name: text("name").notNull(),
     address: text("address").notNull(),
+    endpoint: text("endpoint").notNull(),
     publicKey: text("pubicKey").notNull(),
-    listenPort: integer("listenPort"),
-});
-
-export const routes = sqliteTable("routes", {
-    routeId: integer("routeId").primaryKey({ autoIncrement: true }),
-    exitNodeId: integer("exitNodeId").references(() => exitNodes.exitNodeId, {
-        onDelete: "cascade",
-    }),
-    subnet: text("subnet").notNull(),
+    listenPort: integer("listenPort").notNull(),
 });
 
 export const users = sqliteTable("user", {
@@ -217,7 +210,6 @@ export type User = InferSelectModel<typeof users>;
 export type Site = InferSelectModel<typeof sites>;
 export type Resource = InferSelectModel<typeof resources>;
 export type ExitNode = InferSelectModel<typeof exitNodes>;
-export type Route = InferSelectModel<typeof routes>;
 export type Target = InferSelectModel<typeof targets>;
 export type Session = InferSelectModel<typeof sessions>;
 export type EmailVerificationCode = InferSelectModel<

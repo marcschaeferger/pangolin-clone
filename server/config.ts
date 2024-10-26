@@ -4,7 +4,6 @@ import path from "path";
 import fs from "fs";
 import yaml from "js-yaml";
 import { fileURLToPath } from "url";
-import { signup } from "./routers/auth";
 
 export const __FILENAME = fileURLToPath(import.meta.url);
 export const __DIRNAME = path.dirname(__FILENAME);
@@ -32,6 +31,12 @@ const environmentSchema = z.object({
         https_entrypoint: z.string().optional(),
         cert_resolver: z.string().optional(),
         prefer_wildcard_cert: z.boolean().optional(),
+    }),
+    gerbil: z.object({
+        start_port: z.number().positive().gt(0),
+        base_endpoint: z.string(),
+        subnet_group: z.string(),
+        block_size: z.number().positive().gt(0),
     }),
     rate_limit: z.object({
         window_minutes: z.number().positive().gt(0),

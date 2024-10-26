@@ -9,7 +9,7 @@ import fetch from 'node-fetch';
 import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
 import { eq, and } from 'drizzle-orm';
-import { getUniqueName } from '@server/db/names';
+import { getUniqueSiteName } from '@server/db/names';
 
 const API_BASE_URL = "http://localhost:3000";
 
@@ -20,9 +20,10 @@ const createSiteParamsSchema = z.object({
 // Define Zod schema for request body validation
 const createSiteSchema = z.object({
     name: z.string().min(1).max(255),
+    exitNodeId: z.number().int().positive(),
     subdomain: z.string().min(1).max(255).optional(),
-    pubKey: z.string().optional(),
-    subnet: z.string().optional(),
+    pubKey: z.string(),
+    subnet: z.string(),
 });
 
 export type CreateSiteResponse = {
@@ -48,7 +49,7 @@ export async function createSite(req: Request, res: Response, next: NextFunction
             );
         }
 
-        const { name, subdomain, pubKey, subnet } = parsedBody.data;
+        const { name, subdomain, exitNodeId, pubKey, subnet } = parsedBody.data;
 
         // Validate request params
         const parsedParams = createSiteParamsSchema.safeParse(req.params);
@@ -73,13 +74,12 @@ export async function createSite(req: Request, res: Response, next: NextFunction
             return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have a role'));
         }
 
-        const niceId = await getUniqueName(orgId);
-
-        // TODO: pick a subnet
+        const niceId = await getUniqueSiteName(orgId);
 
         // Create new site in the database
         const [newSite] = await db.insert(sites).values({
             orgId,
+            exitNodeId,
             name,
             niceId,
             pubKey,
