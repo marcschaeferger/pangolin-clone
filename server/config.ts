@@ -32,7 +32,7 @@ const environmentSchema = z.object({
         prefer_wildcard_cert: z.boolean().optional(),
     }),
     gerbil: z.object({
-        start_port: z.number().positive().gt(0),
+        start_port: portSchema,
         base_endpoint: z.string(),
         subnet_group: z.string(),
         block_size: z.number().positive().gt(0),
@@ -120,16 +120,9 @@ if (!parsedConfig.success) {
     throw new Error(`Invalid configuration file: ${errors}`);
 }
 
-process.env.NEXT_PUBLIC_EXTERNAL_API_BASE_URL = new URL(
-    "/api/v1",
-    parsedConfig.data.app.base_url
-).href;
-process.env.NEXT_PUBLIC_INTERNAL_API_BASE_URL = new URL(
-    "/api/v1",
-    `http://${parsedConfig.data.server.internal_hostname}:${parsedConfig.data.server.external_port}`
-).href;
-process.env.PUBLIC_FLAGS_EMAIL_VERIFICATION_REQUIRED = parsedConfig.data
-    .flags?.require_email_verification
+process.env.SERVER_EXTERNAL_PORT = parsedConfig.data.server.external_port.toString();
+process.env.FLAGS_EMAIL_VERIFICATION_REQUIRED = parsedConfig.data.flags
+    ?.require_email_verification
     ? "true"
     : "false";
 
