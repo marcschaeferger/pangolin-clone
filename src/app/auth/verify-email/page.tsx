@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 export default async function Page(props: {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-    if (!process.env.NEXT_PUBLIC_FLAGS_EMAIL_VERIFICATION_REQUIRED) {
+    if (process.env.NEXT_PUBLIC_FLAGS_EMAIL_VERIFICATION_REQUIRED !== "true") {
         redirect("/");
     }
 

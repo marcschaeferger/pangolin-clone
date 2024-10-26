@@ -4,11 +4,14 @@ import path from "path";
 import fs from "fs";
 import yaml from "js-yaml";
 import { fileURLToPath } from "url";
+import { signup } from "./routers/auth";
 
 export const __FILENAME = fileURLToPath(import.meta.url);
 export const __DIRNAME = path.dirname(__FILENAME);
 
 export const APP_PATH = path.join("config");
+
+const portSchema = z.number().positive().gt(0).lte(65535);
 
 const environmentSchema = z.object({
     app: z.object({
@@ -18,15 +21,17 @@ const environmentSchema = z.object({
         save_logs: z.boolean(),
     }),
     server: z.object({
-        external_port: z.number().positive().gt(0).lte(65535),
-        internal_port: z.number().positive().gt(0).lte(65535),
+        external_port: portSchema,
+        internal_port: portSchema,
         internal_hostname: z.string(),
         secure_cookies: z.boolean(),
+        signup_secret: z.string().optional(),
     }),
     traefik: z.object({
         http_entrypoint: z.string(),
         https_entrypoint: z.string().optional(),
         cert_resolver: z.string().optional(),
+        prefer_wildcard_cert: z.boolean().optional(),
     }),
     rate_limit: z.object({
         window_minutes: z.number().positive().gt(0),
@@ -35,7 +40,7 @@ const environmentSchema = z.object({
     email: z
         .object({
             smtp_host: z.string().optional(),
-            smtp_port: z.number().positive().gt(0).lte(65535).optional(),
+            smtp_port: portSchema.optional(),
             smtp_user: z.string().optional(),
             smtp_pass: z.string().optional(),
             no_reply: z.string().email().optional(),
@@ -45,6 +50,8 @@ const environmentSchema = z.object({
         .object({
             allow_org_subdomain_changing: z.boolean().optional(),
             require_email_verification: z.boolean().optional(),
+            disable_signup_without_invite: z.boolean().optional(),
+            require_signup_secret: z.boolean().optional(),
         })
         .optional(),
 });

@@ -33,6 +33,9 @@ export function buildTraefikConfig(
 
     const tls = {
         certResolver: config.traefik.cert_resolver,
+        ...(config.traefik.prefer_wildcard_cert
+            ? { domains: [baseDomain, `*.${baseDomain}`] }
+            : {}),
     };
 
     const http: any = {
@@ -57,7 +60,11 @@ export function buildTraefikConfig(
         const serviceName = `${target.targetId}-service`;
 
         http.routers![routerName] = {
-            entryPoints: [target.ssl ? config.traefik.https_entrypoint : config.traefik.https_entrypoint],
+            entryPoints: [
+                target.ssl
+                    ? config.traefik.https_entrypoint
+                    : config.traefik.http_entrypoint,
+            ],
             middlewares: [middlewareName],
             service: serviceName,
             rule: `Host(\`${target.resourceId}\`)`, // assuming resourceId is a valid full hostname
@@ -80,7 +87,10 @@ export async function getAllTargets(): Promise<schema.Target[]> {
     const all = await db
         .select()
         .from(schema.targets)
-        .innerJoin(schema.resources, eq(schema.targets.resourceId, schema.resources.resourceId))
+        .innerJoin(
+            schema.resources,
+            eq(schema.targets.resourceId, schema.resources.resourceId)
+        )
         .where(
             and(
                 eq(schema.targets.enabled, true),
