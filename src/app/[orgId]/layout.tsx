@@ -68,18 +68,17 @@ export default async function ConfigurationLaytout(
     }
 
     let orgs: ListOrgsResponse["orgs"] = [];
-    try {
-        const res = await internal.get<AxiosResponse<ListOrgsResponse>>(
-            `/orgs`,
-            cookie
-        );
-        if (res && res.data.data.orgs) {
-            orgs = res.data.data.orgs;
-        }
-    } catch (e) {
-        console.error("Error fetching orgs", e);
-    }
-
+    // try {
+    //     const res = await internal.get<AxiosResponse<ListOrgsResponse>>(
+    //         `/orgs`,
+    //         cookie
+    //     );
+    //     if (res && res.data.data.orgs) {
+    //         orgs = res.data.data.orgs;
+    //     }
+    // } catch (e) {
+    //     console.error("Error fetching orgs", e);
+    // }
     return (
         <>
             <div className="w-full bg-muted mb-6 select-none sm:px-0 px-3 pt-3">

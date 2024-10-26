@@ -118,7 +118,7 @@ PrivateKey = ${keypair.privateKey}
 
 [Peer]
 PublicKey = ${siteDefaults.publicKey}
-AllowedIPs = ${siteDefaults.address}
+AllowedIPs = ${siteDefaults.address.split("/")[0]}/32
 Endpoint = ${siteDefaults.endpoint}:${siteDefaults.listenPort}
 PersistentKeepalive = 5`
         : "";

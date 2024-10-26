@@ -122,7 +122,7 @@ async function getNextAvailableSubnet(): Promise<string> {
     }
 
     // replace the last octet with 1
-    subnet = subnet.split('.').slice(0, 3).join('.') + '.1';
+    subnet = subnet.split('.').slice(0, 3).join('.') + '.1' + subnet.split('/')[1];
     return subnet;
 }
 
