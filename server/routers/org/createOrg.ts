@@ -9,6 +9,7 @@ import createHttpError from 'http-errors';
 import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
 import { createSuperuserRole } from '@server/db/ensureActions';
+import config, { APP_PATH } from "@server/config";
 
 const createOrgSchema = z.object({
     orgId: z.string(),
@@ -67,7 +68,7 @@ export async function createOrg(req: Request, res: Response, next: NextFunction)
         const newOrg = await db.insert(orgs).values({
             orgId,
             name,
-            domain: ""
+            domain: config.app.base_domain
         }).returning();
 
         const roleId = await createSuperuserRole(newOrg[0].orgId);

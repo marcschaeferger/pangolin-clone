@@ -1,30 +1,74 @@
 import { Request, Response, NextFunction } from 'express';
-import { DrizzleError, eq } from 'drizzle-orm';
-import { sites, resources, targets, exitNodes } from '@server/db/schema';
-import db from '@server/db';
-import logger from '@server/logger';
+import { z } from 'zod';
+import { sites, resources, targets, exitNodes, routes } from '@server/db/schema';
+import { db } from '@server/db';
+import { eq } from 'drizzle-orm';
+import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
+import logger from '@server/logger';
+import stoi from '@server/utils/stoi';
 
-export const getConfig = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+// Define Zod schema for request validation
+const getConfigSchema = z.object({
+    publicKey: z.string(),
+});
+
+export type GetConfigResponse = {
+    listenPort: number;
+    ipAddress: string;
+    peers: {
+        publicKey: string | null;
+        allowedIps: string[];
+    }[];
+}
+
+export async function getConfig(req: Request, res: Response, next: NextFunction): Promise<any> {
     try {
-        if (!req.query.exitNodeId) {
-            throw new Error('Missing exitNodeId query parameter');
+        // Validate request parameters
+        const parsedParams = getConfigSchema.safeParse(req.query);
+        if (!parsedParams.success) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    parsedParams.error.errors.map(e => e.message).join(', ')
+                )
+            );
         }
-        const exitNodeId = parseInt(req.query.exitNodeId as string);
+
+        const { publicKey } = parsedParams.data;
+
+        if (!publicKey) {
+            return next(createHttpError(HttpCode.BAD_REQUEST, 'publicKey is required'));
+        }
 
         // Fetch exit node
-        const exitNode = await db.query.exitNodes.findFirst({
-            where: eq(exitNodes.exitNodeId, exitNodeId),
-        });
+        let exitNode = await db.select().from(exitNodes).where(eq(exitNodes.publicKey, publicKey));
 
         if (!exitNode) {
-            throw new Error('Exit node not found');
+            const address = await getNextAvailableSubnet();
+            // create a new exit node
+            exitNode = await db.insert(exitNodes).values({
+                publicKey,
+                address,
+                listenPort: 51820,
+                name: `Exit Node ${publicKey.slice(0, 8)}`,
+            }).returning().execute();
+
+            // create a route
+            await db.insert(routes).values({
+                exitNodeId: exitNode[0].exitNodeId,
+                subnet: address,
+            }).returning().execute();
+        }
+
+        if (!exitNode) {
+            return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "Failed to create exit node"));
         }
 
         // Fetch sites for this exit node
         const sitesRes = await db.query.sites.findMany({
-            where: eq(sites.exitNode, exitNodeId),
+            where: eq(sites.exitNode, exitNode[0].exitNodeId),
         });
 
         const peers = await Promise.all(sitesRes.map(async (site) => {
@@ -47,22 +91,53 @@ export const getConfig = async (req: Request, res: Response, next: NextFunction)
             };
         }));
 
-        const config = {
-            privateKey: exitNode.privateKey,
-            listenPort: exitNode.listenPort,
-            ipAddress: exitNode.address,
+        const config: GetConfigResponse = {
+            listenPort: exitNode[0].listenPort || 51820,
+            ipAddress: exitNode[0].address,
             peers,
         };
 
-        res.json(config);
+        return response(res, {
+            data: config,
+            success: true,
+            error: false,
+            message: "Configuration retrieved successfully",
+            status: HttpCode.OK,
+        });
+
     } catch (error) {
-        logger.error('Error querying database:', error);
+        logger.error('Error from getConfig:', error);
         return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred..."));
     }
-};
+}
 
-function calculateSubnet(index: number): string {
-    const baseIp = 10 << 24;
-    const subnetSize = 16;
-    return `${(baseIp | (index * subnetSize)).toString()}/28`;
+async function getNextAvailableSubnet(): Promise<string> {
+    // Get all existing subnets from routes table
+    const existingRoutes = await db.select({
+        subnet: routes.subnet
+    }).from(routes)
+        .innerJoin(exitNodes, eq(routes.exitNodeId, exitNodes.exitNodeId));
+
+    // Filter for only /16 subnets and extract the second octet
+    const usedSecondOctets = new Set(
+        existingRoutes
+            .map(route => route.subnet)
+            .filter(subnet => subnet.endsWith('/16'))
+            .filter(subnet => subnet.startsWith('10.'))
+            .map(subnet => {
+                const parts = subnet.split('.');
+                return parseInt(parts[1]);
+            })
+    );
+
+    // Find the first available number between 0 and 255
+    let nextOctet = 0;
+    while (usedSecondOctets.has(nextOctet)) {
+        nextOctet++;
+        if (nextOctet > 255) {
+            throw new Error('No available /16 subnets remaining in 10.0.0.0/8 space');
+        }
+    }
+
+    return `10.${nextOctet}.0.0/16`;
 }

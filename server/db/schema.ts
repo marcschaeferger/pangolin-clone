@@ -51,7 +51,7 @@ export const exitNodes = sqliteTable("exitNodes", {
     exitNodeId: integer("exitNodeId").primaryKey({ autoIncrement: true }),
     name: text("name").notNull(),
     address: text("address").notNull(),
-    privateKey: text("privateKey"),
+    publicKey: text("pubicKey").notNull(),
     listenPort: integer("listenPort"),
 });
 
