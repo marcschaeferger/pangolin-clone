@@ -15,6 +15,7 @@ import { authenticated, unauthenticated } from "@server/routers/external";
 import cookieParser from "cookie-parser";
 import { User } from "@server/db/schema";
 import { ensureActions } from "./db/ensureActions";
+import { logIncomingMiddleware } from "./middlewares/logIncoming";
 
 const dev = process.env.ENVIRONMENT !== "prod";
 
@@ -25,7 +26,6 @@ const externalPort = config.server.external_port;
 const internalPort = config.server.internal_port;
 
 app.prepare().then(() => {
-
     ensureActions(); // This loads the actions into the database
 
     // External server
@@ -42,15 +42,18 @@ app.prepare().then(() => {
                 windowMin: config.rate_limit.window_minutes,
                 max: config.rate_limit.max_requests,
                 type: "IP_ONLY",
-            }),
+            })
         );
     }
 
     const prefix = `/api/v1`;
+    if (dev) {
+        externalServer.use(logIncomingMiddleware);
+    }
     externalServer.use(prefix, unauthenticated);
     externalServer.use(prefix, authenticated);
 
-    externalServer.use(notFoundMiddleware)
+    externalServer.use(notFoundMiddleware);
 
     // We are using NEXT from here on
     externalServer.all("*", (req: Request, res: Response) => {
@@ -61,7 +64,7 @@ app.prepare().then(() => {
     externalServer.listen(externalPort, (err?: any) => {
         if (err) throw err;
         logger.info(
-            `Main server is running on http://localhost:${externalPort}`,
+            `Main server is running on http://localhost:${externalPort}`
         );
     });
 
@@ -80,15 +83,16 @@ app.prepare().then(() => {
     internalServer.listen(internalPort, (err?: any) => {
         if (err) throw err;
         logger.info(
-            `Internal server is running on http://localhost:${internalPort}`,
+            `Internal server is running on http://localhost:${internalPort}`
         );
     });
 
-    internalServer.use(notFoundMiddleware)
+    internalServer.use(notFoundMiddleware);
     internalServer.use(errorHandlerMiddleware);
 });
 
-declare global { // TODO: eventually make seperate types that extend express.Request
+declare global {
+    // TODO: eventually make seperate types that extend express.Request
     namespace Express {
         interface Request {
             user?: User;

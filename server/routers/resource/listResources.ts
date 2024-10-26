@@ -91,8 +91,6 @@ export async function listResources(
     next: NextFunction,
 ): Promise<any> {
     try {
-        logger.info(JSON.stringify(req.query, null, 2));
-        logger.info(JSON.stringify(req.params, null, 2));
         const parsedQuery = listResourcesSchema.safeParse(req.query);
         if (!parsedQuery.success) {
             return next(

@@ -1,5 +1,4 @@
 app:
-    name: Pangolin
     base_url: http://localhost:3000
     log_level: warning
     save_logs: false
