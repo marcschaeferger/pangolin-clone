@@ -11,7 +11,7 @@ import { redirect } from "next/navigation";
 import { verifySession } from "@app/lib/auth/verifySession";
 
 export const metadata: Metadata = {
-    title: `Dashboard - ${process.env.NEXT_PUBLIC_APP_NAME}`,
+    title: `Dashboard - Pangolin`,
     description: "",
 };
 
