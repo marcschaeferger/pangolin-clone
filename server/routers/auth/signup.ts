@@ -19,6 +19,7 @@ import {
     serializeSessionCookie,
 } from "@server/auth";
 import { ActionsEnum } from "@server/auth/actions";
+import config from "@server/config";
 
 export const signupBodySchema = z.object({
     email: z.string().email(),
@@ -28,13 +29,13 @@ export const signupBodySchema = z.object({
 export type SignUpBody = z.infer<typeof signupBodySchema>;
 
 export type SignUpResponse = {
-    emailVerificationRequired: boolean;
+    emailVerificationRequired?: boolean;
 };
 
 export async function signup(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
 ): Promise<any> {
     const parsedBody = signupBodySchema.safeParse(req.body);
 
@@ -42,8 +43,8 @@ export async function signup(
         return next(
             createHttpError(
                 HttpCode.BAD_REQUEST,
-                fromError(parsedBody.error).toString(),
-            ),
+                fromError(parsedBody.error).toString()
+            )
         );
     }
 
@@ -64,6 +65,15 @@ export async function signup(
             .where(eq(users.email, email));
 
         if (existing && existing.length > 0) {
+            if (!config.flags?.require_email_verification) {
+                return next(
+                    createHttpError(
+                        HttpCode.BAD_REQUEST,
+                        "A user with that email address already exists"
+                    )
+                );
+            }
+
             const user = existing[0];
 
             // If the user is already verified, we don't want to create a new user
@@ -71,8 +81,8 @@ export async function signup(
                 return next(
                     createHttpError(
                         HttpCode.BAD_REQUEST,
-                        "A user with that email address already exists",
-                    ),
+                        "A user with that email address already exists"
+                    )
                 );
             }
 
@@ -85,8 +95,8 @@ export async function signup(
                 return next(
                     createHttpError(
                         HttpCode.BAD_REQUEST,
-                        "A verification email was already sent to this email address. Please check your email for the verification code.",
-                    ),
+                        "A verification email was already sent to this email address. Please check your email for the verification code."
+                    )
                 );
             } else {
                 // If the user was created more than 2 hours ago, we want to delete the old user and create a new one
@@ -101,7 +111,7 @@ export async function signup(
             dateCreated: moment().toISOString(),
         });
 
-        // give the user their default permissions: 
+        // give the user their default permissions:
         // await db.insert(userActions).values({
         //     userId: userId,
         //     actionId: ActionsEnum.createOrg,
@@ -113,15 +123,25 @@ export async function signup(
         const cookie = serializeSessionCookie(token);
         res.appendHeader("Set-Cookie", cookie);
 
-        sendEmailVerificationCode(email, userId);
+        if (config.flags?.require_email_verification) {
+            sendEmailVerificationCode(email, userId);
+
+            return response<SignUpResponse>(res, {
+                data: {
+                    emailVerificationRequired: true,
+                },
+                success: true,
+                error: false,
+                message: `User created successfully. We sent an email to ${email} with a verification code.`,
+                status: HttpCode.OK,
+            });
+        }
 
         return response<SignUpResponse>(res, {
-            data: {
-                emailVerificationRequired: true,
-            },
+            data: {},
             success: true,
             error: false,
-            message: `User created successfully. We sent an email to ${email} with a verification code.`,
+            message: "User created successfully",
             status: HttpCode.OK,
         });
     } catch (e) {
@@ -129,15 +149,15 @@ export async function signup(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    "A user with that email address already exists",
-                ),
+                    "A user with that email address already exists"
+                )
             );
         } else {
             return next(
                 createHttpError(
                     HttpCode.INTERNAL_SERVER_ERROR,
-                    "Failed to create user",
-                ),
+                    "Failed to create user"
+                )
             );
         }
     }

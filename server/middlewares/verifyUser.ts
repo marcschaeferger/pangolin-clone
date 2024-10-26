@@ -6,11 +6,12 @@ import { users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
+import config from "@server/config";
 
 export const verifySessionUserMiddleware = async (
     req: any,
     res: Response<ErrorResponse>,
-    next: NextFunction,
+    next: NextFunction
 ) => {
     const { session, user } = await verifySession(req);
     if (!session || !user) {
@@ -24,16 +25,19 @@ export const verifySessionUserMiddleware = async (
 
     if (!existingUser || !existingUser[0]) {
         return next(
-            createHttpError(HttpCode.BAD_REQUEST, "User does not exist"),
+            createHttpError(HttpCode.BAD_REQUEST, "User does not exist")
         );
     }
 
     req.user = existingUser[0];
     req.session = session;
 
-    if (!existingUser[0].emailVerified) {
+    if (
+        !existingUser[0].emailVerified &&
+        config.flags?.require_email_verification
+    ) {
         return next(
-            createHttpError(HttpCode.BAD_REQUEST, "Email is not verified"), // Might need to change the response type?
+            createHttpError(HttpCode.BAD_REQUEST, "Email is not verified") // Might need to change the response type?
         );
     }
 

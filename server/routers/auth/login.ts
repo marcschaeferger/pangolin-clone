@@ -15,6 +15,7 @@ import createHttpError from "http-errors";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
 import { verifyTotpCode } from "@server/auth/2fa";
+import config from "@server/config";
 
 export const loginBodySchema = z.object({
     email: z.string().email(),
@@ -32,7 +33,7 @@ export type LoginResponse = {
 export async function login(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
 ): Promise<any> {
     const parsedBody = loginBodySchema.safeParse(req.body);
 
@@ -40,8 +41,8 @@ export async function login(
         return next(
             createHttpError(
                 HttpCode.BAD_REQUEST,
-                fromError(parsedBody.error).toString(),
-            ),
+                fromError(parsedBody.error).toString()
+            )
         );
     }
 
@@ -67,8 +68,8 @@ export async function login(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    "Username or password is incorrect",
-                ),
+                    "Username or password is incorrect"
+                )
             );
         }
 
@@ -82,14 +83,14 @@ export async function login(
                 timeCost: 2,
                 outputLen: 32,
                 parallelism: 1,
-            },
+            }
         );
         if (!validPassword) {
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    "Username or password is incorrect",
-                ),
+                    "Username or password is incorrect"
+                )
             );
         }
 
@@ -107,15 +108,15 @@ export async function login(
             const validOTP = await verifyTotpCode(
                 code,
                 existingUser.twoFactorSecret!,
-                existingUser.userId,
+                existingUser.userId
             );
 
             if (!validOTP) {
                 return next(
                     createHttpError(
                         HttpCode.BAD_REQUEST,
-                        "The two-factor code you entered is incorrect",
-                    ),
+                        "The two-factor code you entered is incorrect"
+                    )
                 );
             }
         }
@@ -126,7 +127,10 @@ export async function login(
 
         res.appendHeader("Set-Cookie", cookie);
 
-        if (!existingUser.emailVerified) {
+        if (
+            !existingUser.emailVerified &&
+            config.flags?.require_email_verification
+        ) {
             return response<LoginResponse>(res, {
                 data: { emailVerificationRequired: true },
                 success: true,
@@ -147,8 +151,8 @@ export async function login(
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,
-                "Failed to authenticate user",
-            ),
+                "Failed to authenticate user"
+            )
         );
     }
 }
