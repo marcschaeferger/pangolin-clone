@@ -1,7 +1,8 @@
 import { cookies } from "next/headers";
 
-export function authCookieHeader() {
-    const sessionId = cookies().get("session")?.value ?? null;
+export async function authCookieHeader() {
+    const allCookies = await cookies();
+    const sessionId = allCookies.get("session")?.value ?? null;
     return {
         headers: {
             Cookie: `session=${sessionId}`

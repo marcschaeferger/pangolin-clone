@@ -5,15 +5,16 @@ import { AxiosResponse } from "axios";
 import { ListResourcesResponse } from "@server/routers/resource";
 
 type ResourcesPageProps = {
-    params: { orgId: string };
+    params: Promise<{ orgId: string }>;
 };
 
-export default async function Page({ params }: ResourcesPageProps) {
+export default async function Page(props: ResourcesPageProps) {
+    const params = await props.params;
     let resources: ListResourcesResponse["resources"] = [];
     try {
         const res = await internal.get<AxiosResponse<ListResourcesResponse>>(
             `/org/${params.orgId}/resources`,
-            authCookieHeader(),
+            await authCookieHeader(),
         );
         resources = res.data.data.resources;
     } catch (e) {

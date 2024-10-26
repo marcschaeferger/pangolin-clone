@@ -8,6 +8,7 @@ import { db } from "@server/db";
 import { User, emailVerificationCodes, users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import { isWithinExpirationDate } from "oslo";
+import config from "@server/config";
 
 export const verifyEmailBody = z.object({
     code: z.string(),
@@ -22,16 +23,25 @@ export type VerifyEmailResponse = {
 export async function verifyEmail(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
 ): Promise<any> {
+    if (!config.flags?.require_email_verification) {
+        return next(
+            createHttpError(
+                HttpCode.BAD_REQUEST,
+                "Email verification is not enabled"
+            )
+        );
+    }
+
     const parsedBody = verifyEmailBody.safeParse(req.body);
 
     if (!parsedBody.success) {
         return next(
             createHttpError(
                 HttpCode.BAD_REQUEST,
-                fromError(parsedBody.error).toString(),
-            ),
+                fromError(parsedBody.error).toString()
+            )
         );
     }
 
@@ -41,7 +51,7 @@ export async function verifyEmail(
 
     if (user.emailVerified) {
         return next(
-            createHttpError(HttpCode.BAD_REQUEST, "Email is already verified"),
+            createHttpError(HttpCode.BAD_REQUEST, "Email is already verified")
         );
     }
 
@@ -63,8 +73,8 @@ export async function verifyEmail(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    "Invalid verification code",
-                ),
+                    "Invalid verification code"
+                )
             );
         }
 
@@ -81,8 +91,8 @@ export async function verifyEmail(
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,
-                "Failed to verify email",
-            ),
+                "Failed to verify email"
+            )
         );
     }
 }

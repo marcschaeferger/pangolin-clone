@@ -8,10 +8,10 @@ export const errorHandlerMiddleware: ErrorRequestHandler = (
     error,
     req,
     res: Response<ErrorResponse>,
-    next: NextFunction,
+    next: NextFunction
 ) => {
     const statusCode = error.statusCode || HttpCode.INTERNAL_SERVER_ERROR;
-    if (config.app.environment !== "prod") {
+    if (process.env.ENVIRONMENT !== "prod") {
         logger.error(error);
     }
     res?.status(statusCode).send({
@@ -20,6 +20,6 @@ export const errorHandlerMiddleware: ErrorRequestHandler = (
         error: true,
         message: error.message || "Internal Server Error",
         status: statusCode,
-        stack: config.app.environment === "prod" ? null : error.stack,
+        stack: process.env.ENVIRONMENT === "prod" ? null : error.stack,
     });
 };

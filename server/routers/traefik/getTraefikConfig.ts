@@ -2,10 +2,9 @@ import { Request, Response } from "express";
 import db from "@server/db";
 import * as schema from "@server/db/schema";
 import { DynamicTraefikConfig } from "./configSchema";
-import { and, like, eq } from "drizzle-orm";
+import { and, like, eq, isNotNull } from "drizzle-orm";
 import logger from "@server/logger";
 import HttpCode from "@server/types/HttpCode";
-import env from "@server/config";
 import config from "@server/config";
 
 export async function traefikConfigProvider(_: Request, res: Response) {
@@ -22,46 +21,33 @@ export async function traefikConfigProvider(_: Request, res: Response) {
 }
 
 export function buildTraefikConfig(
-    targets: schema.Target[],
+    targets: schema.Target[]
 ): DynamicTraefikConfig {
+    if (!targets.length) {
+        return { http: {} } as DynamicTraefikConfig;
+    }
+
     const middlewareName = "badger";
 
+    const baseDomain = new URL(config.app.base_url).hostname;
+
+    const tls = {
+        certResolver: config.traefik.cert_resolver,
+        ...(config.traefik.prefer_wildcard_cert
+            ? { domains: [baseDomain, `*.${baseDomain}`] }
+            : {}),
+    };
+
     const http: any = {
-        routers: {
-            main: {
-                entryPoints: ["https"],
-                middlewares: [],
-                service: "service-main",
-                rule: "Host(`fossorial.io`)",
-                tls: {
-                    certResolver: "letsencrypt",
-                    domains: [
-                        {
-                            main: "fossorial.io",
-                            sans: ["*.fossorial.io"],
-                        },
-                    ],
-                },
-            },
-        },
-        services: {
-            "service-main": {
-                loadBalancer: {
-                    servers: [
-                        {
-                            url: `http://${config.server.internal_hostname}:${config.server.external_port}`,
-                        },
-                    ],
-                },
-            },
-        },
+        routers: {},
+        services: {},
         middlewares: {
             [middlewareName]: {
                 plugin: {
                     [middlewareName]: {
                         apiBaseUrl: new URL(
                             "/api/v1",
-                            `http://${config.server.internal_hostname}:${config.server.internal_port}`,
+                            `http://${config.server.internal_hostname}:${config.server.internal_port}`
                         ).href,
                         appBaseUrl: config.app.base_url,
                     },
@@ -70,23 +56,19 @@ export function buildTraefikConfig(
         },
     };
     for (const target of targets) {
-        const routerName = `router-${target.targetId}`;
-        const serviceName = `service-${target.targetId}`;
+        const routerName = `${target.targetId}-router`;
+        const serviceName = `${target.targetId}-service`;
 
         http.routers![routerName] = {
-            entryPoints: ["https"],
+            entryPoints: [
+                target.ssl
+                    ? config.traefik.https_entrypoint
+                    : config.traefik.http_entrypoint,
+            ],
             middlewares: [middlewareName],
             service: serviceName,
             rule: `Host(\`${target.resourceId}\`)`, // assuming resourceId is a valid full hostname
-            tls: {
-                certResolver: "letsencrypt",
-                domains: [
-                    {
-                        main: "fossorial.io",
-                        sans: ["*.fossorial.io"],
-                    },
-                ],
-            },
+            ...(target.ssl ? { tls } : {}),
         };
 
         http.services![serviceName] = {
@@ -105,11 +87,15 @@ export async function getAllTargets(): Promise<schema.Target[]> {
     const all = await db
         .select()
         .from(schema.targets)
+        .innerJoin(
+            schema.resources,
+            eq(schema.targets.resourceId, schema.resources.resourceId)
+        )
         .where(
             and(
                 eq(schema.targets.enabled, true),
-                like(schema.targets.resourceId, "%.%"),
-            ),
-        ); // any resourceId with a dot is a valid hostname; otherwise it's a UUID placeholder
-    return all;
+                isNotNull(schema.resources.fullDomain)
+            )
+        );
+    return all.map((row) => row.targets);
 }

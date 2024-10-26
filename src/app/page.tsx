@@ -13,13 +13,14 @@ export default async function Page() {
 
     if (!user) {
         redirect("/auth/login");
+        return;
     }
 
     let orgs: ListOrgsResponse["orgs"] = [];
     try {
         const res = await internal.get<AxiosResponse<ListOrgsResponse>>(
             `/orgs`,
-            authCookieHeader(),
+            await authCookieHeader(),
         );
         if (res && res.data.data.orgs) {
             orgs = res.data.data.orgs;

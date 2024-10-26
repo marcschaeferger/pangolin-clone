@@ -4,6 +4,7 @@ import HttpCode from "@server/types/HttpCode";
 import { response } from "@server/utils";
 import { User } from "@server/db/schema";
 import { sendEmailVerificationCode } from "./sendEmailVerificationCode";
+import config from "@server/config";
 
 export type RequestEmailVerificationCodeResponse = {
     codeSent: boolean;
@@ -12,8 +13,17 @@ export type RequestEmailVerificationCodeResponse = {
 export async function requestEmailVerificationCode(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
 ): Promise<any> {
+    if (!config.flags?.require_email_verification) {
+        return next(
+            createHttpError(
+                HttpCode.BAD_REQUEST,
+                "Email verification is not enabled"
+            )
+        );
+    }
+
     try {
         const user = req.user as User;
 
@@ -21,8 +31,8 @@ export async function requestEmailVerificationCode(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    "Email is already verified",
-                ),
+                    "Email is already verified"
+                )
             );
         }
 
@@ -41,8 +51,8 @@ export async function requestEmailVerificationCode(
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,
-                "Failed to send email verification code",
-            ),
+                "Failed to send email verification code"
+            )
         );
     }
 }
