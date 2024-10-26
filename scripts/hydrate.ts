@@ -1,13 +1,13 @@
-import {
-    orgs,
-    sites,
-    resources,
-    exitNodes,
-    routes,
-    targets,
-} from "@server/db/schema";
-import db from "@server/db";
-import { createSuperuserRole } from "@server/db/ensureActions";
+// import {
+//     orgs,
+//     sites,
+//     resources,
+//     exitNodes,
+//     routes,
+//     targets,
+// } from "@server/db/schema";
+// import db from "@server/db";
+// import { createSuperuserRole } from "@server/db/ensureActions";
 
 async function insertDummyData() {
     // // Insert dummy orgs

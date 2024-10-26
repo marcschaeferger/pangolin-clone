@@ -65,7 +65,7 @@ export async function requestTotpSecret(
 
         const hex = crypto.getRandomValues(new Uint8Array(20));
         const secret = encodeHex(hex);
-        const uri = createTOTPKeyURI(config.app.name, user.email, hex);
+        const uri = createTOTPKeyURI("Pangolin", user.email, hex);
 
         await db
             .update(users)

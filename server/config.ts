@@ -14,7 +14,6 @@ const portSchema = z.number().positive().gt(0).lte(65535);
 
 const environmentSchema = z.object({
     app: z.object({
-        name: z.string(),
         base_url: z.string().url(),
         log_level: z.enum(["debug", "info", "warn", "error"]),
         save_logs: z.boolean(),
@@ -129,8 +128,7 @@ process.env.NEXT_PUBLIC_INTERNAL_API_BASE_URL = new URL(
     "/api/v1",
     `http://${parsedConfig.data.server.internal_hostname}:${parsedConfig.data.server.external_port}`
 ).href;
-process.env.NEXT_PUBLIC_APP_NAME = parsedConfig.data.app.name;
-process.env.NEXT_PUBLIC_FLAGS_EMAIL_VERIFICATION_REQUIRED = parsedConfig.data
+process.env.PUBLIC_FLAGS_EMAIL_VERIFICATION_REQUIRED = parsedConfig.data
     .flags?.require_email_verification
     ? "true"
     : "false";

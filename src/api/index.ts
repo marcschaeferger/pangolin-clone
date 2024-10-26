@@ -1,7 +1,12 @@
 import axios from "axios";
 
+// let origin;
+// if (typeof window !== "undefined") {
+//     origin = window.location.origin;
+// }
+
 export const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_EXTERNAL_API_BASE_URL,
+    baseURL: `http://localhost:3000/api/v1`,
     timeout: 10000,
     headers: {
         "Content-Type": "application/json",
@@ -9,7 +14,7 @@ export const api = axios.create({
 });
 
 export const internal = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_INTERNAL_API_BASE_URL,
+    baseURL: `http://localhost:3000/api/v1`,
     timeout: 10000,
     headers: {
         "Content-Type": "application/json",
