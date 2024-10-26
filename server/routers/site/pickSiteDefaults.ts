@@ -66,8 +66,10 @@ export async function pickSiteDefaults(
             .where(eq(sites.exitNodeId, exitNode.exitNodeId));
 
         // TODO: we need to lock this subnet for some time so someone else does not take it
-        const subnets = sitesQuery.map((site) => site.subnet);
-        const newSubnet = findNextAvailableCidr(subnets, 28, exitNode.address);
+        let subnets = sitesQuery.map((site) => site.subnet);
+        // exclude the exit node address by replacing after the / with a /28
+        subnets.push(exitNode.address.replace(/\/\d+$/, "/29"));
+        const newSubnet = findNextAvailableCidr(subnets, 29, exitNode.address);
         if (!newSubnet) {
             return next(
                 createHttpError(
