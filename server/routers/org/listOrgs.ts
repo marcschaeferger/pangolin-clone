@@ -6,7 +6,6 @@ import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import { sql, inArray } from "drizzle-orm";
-import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
 import logger from "@server/logger";
 
 const listOrgsSchema = z.object({
@@ -32,7 +31,7 @@ export type ListOrgsResponse = {
 export async function listOrgs(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
 ): Promise<any> {
     try {
         const parsedQuery = listOrgsSchema.safeParse(req.query);
@@ -40,12 +39,14 @@ export async function listOrgs(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedQuery.error.errors.map((e) => e.message).join(", "),
-                ),
+                    parsedQuery.error.errors.map((e) => e.message).join(", ")
+                )
             );
         }
 
         const { limit, offset } = parsedQuery.data;
+
+        logger.debug("here0")
 
         // Use the userOrgs passed from the middleware
         const userOrgIds = req.userOrgIds;
@@ -65,6 +66,7 @@ export async function listOrgs(
                 message: "No organizations found for the user",
                 status: HttpCode.OK,
             });
+            logger.debug("here1")
         }
 
         const organizations = await db
@@ -79,6 +81,8 @@ export async function listOrgs(
             .from(orgs)
             .where(inArray(orgs.orgId, userOrgIds));
         const totalCount = totalCountResult[0].count;
+
+        logger.debug("here2")
 
         return response<ListOrgsResponse>(res, {
             data: {
@@ -99,8 +103,8 @@ export async function listOrgs(
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred...",
-            ),
+                "An error occurred..."
+            )
         );
     }
 }

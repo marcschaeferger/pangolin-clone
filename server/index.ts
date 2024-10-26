@@ -47,9 +47,7 @@ app.prepare().then(() => {
     }
 
     const prefix = `/api/v1`;
-    if (dev) {
-        externalServer.use(logIncomingMiddleware);
-    }
+    externalServer.use(logIncomingMiddleware);
     externalServer.use(prefix, unauthenticated);
     externalServer.use(prefix, authenticated);
 
