@@ -1,13 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { db } from '@server/db';
-import { targets } from '@server/db/schema';
+import { resources, sites, targets } from '@server/db/schema';
 import { eq } from 'drizzle-orm';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
 import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
+import { addPeer } from '../gerbil/peers';
 
 const deleteTargetSchema = z.object({
     targetId: z.string().transform(Number).pipe(z.number().int().positive())
@@ -33,11 +34,12 @@ export async function deleteTarget(req: Request, res: Response, next: NextFuncti
             return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
         }
 
-        const deletedTarget = await db.delete(targets)
+
+        const [deletedTarget] = await db.delete(targets)
             .where(eq(targets.targetId, targetId))
             .returning();
 
-        if (deletedTarget.length === 0) {
+        if (!deletedTarget) {
             return next(
                 createHttpError(
                     HttpCode.NOT_FOUND,
@@ -45,6 +47,56 @@ export async function deleteTarget(req: Request, res: Response, next: NextFuncti
                 )
             );
         }
+        // get the resource
+        const [resource] = await db.select({
+            siteId: resources.siteId,
+        })
+            .from(resources)
+            .where(eq(resources.resourceId, deletedTarget.resourceId!));
+
+        if (!resource) {
+            return next(
+                createHttpError(
+                    HttpCode.NOT_FOUND,
+                    `Resource with ID ${deletedTarget.resourceId} not found`
+                )
+            );
+        }
+
+        // TODO: is this all inefficient?
+
+        // get the site
+        const [site] = await db.select()
+            .from(sites)
+            .where(eq(sites.siteId, resource.siteId!))
+            .limit(1);
+
+        if (!site) {
+            return next(
+                createHttpError(
+                    HttpCode.NOT_FOUND,
+                    `Site with ID ${resource.siteId} not found`
+                )
+            );
+        }
+
+        // Fetch resources for this site
+        const resourcesRes = await db.query.resources.findMany({
+            where: eq(resources.siteId, site.siteId),
+        });
+
+        // Fetch targets for all resources of this site
+        const targetIps = await Promise.all(resourcesRes.map(async (resource) => {
+            const targetsRes = await db.query.targets.findMany({
+                where: eq(targets.resourceId, resource.resourceId),
+            });
+            return targetsRes.map(target => `${target.ip}/32`);
+        }));
+
+        await addPeer(site.exitNodeId!, {
+            publicKey: site.pubKey,
+            allowedIps: targetIps.flat()
+        });
 
         return response(res, {
             data: null,

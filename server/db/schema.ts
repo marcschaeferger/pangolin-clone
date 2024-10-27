@@ -52,10 +52,11 @@ export const targets = sqliteTable("targets", {
 export const exitNodes = sqliteTable("exitNodes", {
     exitNodeId: integer("exitNodeId").primaryKey({ autoIncrement: true }),
     name: text("name").notNull(),
-    address: text("address").notNull(),
-    endpoint: text("endpoint").notNull(),
+    address: text("address").notNull(), // this is the address of the wireguard interface in gerbil
+    endpoint: text("endpoint").notNull(), // this is how to reach gerbil externally - gets put into the wireguard config
     publicKey: text("pubicKey").notNull(),
     listenPort: integer("listenPort").notNull(),
+    reachableAt: text("reachableAt"), // this is the internal address of the gerbil http server for command control
 });
 
 export const users = sqliteTable("user", {

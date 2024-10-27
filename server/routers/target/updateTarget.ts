@@ -14,7 +14,7 @@ const updateTargetParamsSchema = z.object({
 });
 
 const updateTargetBodySchema = z.object({
-    ip: z.string().ip().optional(),
+    // ip: z.string().ip().optional(), // for now we cant update the ip; you will have to delete
     method: z.string().min(1).max(10).optional(),
     port: z.number().int().min(1).max(65535).optional(),
     protocol: z.string().optional(),
