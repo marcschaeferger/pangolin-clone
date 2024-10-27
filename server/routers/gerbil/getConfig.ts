@@ -13,6 +13,7 @@ import { findNextAvailableCidr } from "@server/utils/ip";
 // Define Zod schema for request validation
 const getConfigSchema = z.object({
     publicKey: z.string(),
+    reachableAt: z.string().optional(),
 });
 
 export type GetConfigResponse = {
@@ -37,7 +38,7 @@ export async function getConfig(req: Request, res: Response, next: NextFunction)
             );
         }
 
-        const { publicKey } = parsedParams.data;
+        const { publicKey, reachableAt } = parsedParams.data;
 
         if (!publicKey) {
             return next(createHttpError(HttpCode.BAD_REQUEST, 'publicKey is required'));
@@ -57,6 +58,7 @@ export async function getConfig(req: Request, res: Response, next: NextFunction)
                 endpoint: `${subEndpoint}.${config.gerbil.base_endpoint}`,
                 address,
                 listenPort,
+                reachableAt,
                 name: `Exit Node ${publicKey.slice(0, 8)}`,
             }).returning().execute();
 

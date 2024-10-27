@@ -8,6 +8,7 @@ import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
 import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
+import { deletePeer } from '../gerbil/peers';
 
 const API_BASE_URL = "http://localhost:3000";
 
@@ -38,11 +39,11 @@ export async function deleteSite(req: Request, res: Response, next: NextFunction
         }
 
         // Delete the site from the database
-        const deletedSite = await db.delete(sites)
+        const [deletedSite] = await db.delete(sites)
             .where(eq(sites.siteId, siteId))
             .returning();
 
-        if (deletedSite.length === 0) {
+        if (!deletedSite) {
             return next(
                 createHttpError(
                     HttpCode.NOT_FOUND,
@@ -50,6 +51,8 @@ export async function deleteSite(req: Request, res: Response, next: NextFunction
                 )
             );
         }
+
+        await deletePeer(deletedSite.exitNodeId!, deletedSite.pubKey);
 
         return response(res, {
             data: null,

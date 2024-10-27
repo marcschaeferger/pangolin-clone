@@ -1,8 +1,5 @@
-import { Metadata } from "next";
 import Image from "next/image";
 
-import { Separator } from "@/components/ui/separator";
-import { SidebarNav } from "@/components/sidebar-nav";
 import SiteProvider from "@app/providers/SiteProvider";
 import { internal } from "@app/api";
 import { GetSiteResponse } from "@server/routers/site";
@@ -10,9 +7,6 @@ import { AxiosResponse } from "axios";
 import { redirect } from "next/navigation";
 import { authCookieHeader } from "@app/api/cookies";
 import Link from "next/link";
-import { ArrowLeft, ChevronLeft } from "lucide-react";
-import { useEffect, useState } from "react";
-import { toast } from "@app/hooks/use-toast";
 import { ClientLayout } from "./components/ClientLayout";
 
 // export const metadata: Metadata = {
@@ -75,10 +69,10 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
 
             <SiteProvider site={site}>
                 <ClientLayout
-                isCreate={params.niceId === "create"}
-            >
+                isCreate={params.niceId === "create"}>
                 {children}
-            </ClientLayout></SiteProvider>
+                </ClientLayout>
+            </SiteProvider>
         </>
     );
 }

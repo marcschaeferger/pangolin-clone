@@ -1,15 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { db } from '@server/db';
-import { roles, userSites, sites, roleSites } from '@server/db/schema';
+import { roles, userSites, sites, roleSites, exitNodes } from '@server/db/schema';
 import response from "@server/utils/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
-import fetch from 'node-fetch';
 import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
 import { eq, and } from 'drizzle-orm';
 import { getUniqueSiteName } from '@server/db/names';
+import { addPeer } from '../gerbil/peers';
 
 const API_BASE_URL = "http://localhost:3000";
 
@@ -113,6 +113,12 @@ export async function createSite(req: Request, res: Response, next: NextFunction
             });
         }
 
+        // Add the peer to the exit node
+        await addPeer(exitNodeId, {
+            publicKey: pubKey,
+            allowedIps: [],
+        });
+
         return response(res, {
             data: {
                 name: newSite.name,
@@ -128,31 +134,7 @@ export async function createSite(req: Request, res: Response, next: NextFunction
             status: HttpCode.CREATED,
         });
     } catch (error) {
-        throw error;
+        logger.error(error);
         return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred..."));
     }
 }
-
-
-async function addPeer(peer: string) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/peer`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(peer),
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data: any = await response.json();
-        logger.info('Peer added successfully:', data.status);
-        return data;
-    } catch (error: any) {
-        throw error;
-    }
-}
-
