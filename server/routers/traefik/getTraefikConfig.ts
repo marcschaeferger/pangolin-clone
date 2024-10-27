@@ -37,7 +37,12 @@ export async function traefikConfigProvider(
         const tls = {
             certResolver: config.traefik.cert_resolver,
             ...(config.traefik.prefer_wildcard_cert
-                ? { domains: [baseDomain, `*.${baseDomain}`] }
+                ? {
+                      domains: {
+                          main: baseDomain,
+                          sans: [`*.${baseDomain}`],
+                      },
+                  }
                 : {}),
         };
 
