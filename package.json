@@ -68,6 +68,7 @@
         "zod-validation-error": "3.4.0"
     },
     "devDependencies": {
+        "drizzle-kit": "0.24.2",
         "esbuild": "0.20.1",
         "esbuild-node-externals": "1.13.0",
         "yargs": "17.7.2",
@@ -83,7 +84,6 @@
         "@types/react": "npm:types-react@19.0.0-rc.1",
         "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
         "@types/yargs": "17.0.33",
-        "drizzle-kit": "0.24.2",
         "eslint": "^8",
         "eslint-config-next": "15.0.1",
         "postcss": "^8",
