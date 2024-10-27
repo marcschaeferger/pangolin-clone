@@ -16,7 +16,6 @@ export default async function Page(props: {
 
     if (!user) {
         redirect("/auth/login");
-        return;
     }
 
     let orgs: ListOrgsResponse["orgs"] = [];
@@ -25,11 +24,17 @@ export default async function Page(props: {
             `/orgs`,
             await authCookieHeader()
         );
+
         if (res && res.data.data.orgs) {
             orgs = res.data.data.orgs;
         }
+
     } catch (e) {
         console.error(e);
+    }
+    
+    if (!orgs.length) {
+        redirect("/setup");
     }
 
     return (

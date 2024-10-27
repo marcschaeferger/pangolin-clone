@@ -22,25 +22,6 @@ export default async function RootLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    const user = await verifySession();
-
-    let orgs: ListOrgsResponse["orgs"] = [];
-    if (user) {
-        try {
-            const res = await internal.get<AxiosResponse<ListOrgsResponse>>(
-                `/orgs`,
-                await authCookieHeader()
-            );
-            if (res && res.data.data.orgs) {
-                orgs = res.data.data.orgs;
-            }
-        } catch {}
-
-        if (!orgs.length) {
-            redirect(`/setup`);
-        }
-    }
-
     return (
         <html suppressHydrationWarning>
             <body className={`${font.className} pb-3`}>
