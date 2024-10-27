@@ -24,24 +24,22 @@ export default async function RootLayout({
 }>) {
     const user = await verifySession();
 
-    console.log("layout.tsx user", user);
-
     let orgs: ListOrgsResponse["orgs"] = [];
-    // if (user) {
-    //     try {
-    //         const res = await internal.get<AxiosResponse<ListOrgsResponse>>(
-    //             `/orgs`,
-    //             await authCookieHeader()
-    //         );
-    //         if (res && res.data.data.orgs) {
-    //             orgs = res.data.data.orgs;
-    //         }
-    //     } catch {}
+    if (user) {
+        try {
+            const res = await internal.get<AxiosResponse<ListOrgsResponse>>(
+                `/orgs`,
+                await authCookieHeader()
+            );
+            if (res && res.data.data.orgs) {
+                orgs = res.data.data.orgs;
+            }
+        } catch {}
 
-    //     if (!orgs.length) {
-    //         redirect(`/setup`);
-    //     }
-    // }
+        if (!orgs.length) {
+            redirect(`/setup`);
+        }
+    }
 
     return (
         <html suppressHydrationWarning>

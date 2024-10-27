@@ -4,34 +4,33 @@ import { verifySession } from "@app/lib/auth/verifySession";
 import { LandingProvider } from "@app/providers/LandingProvider";
 import { ListOrgsResponse } from "@server/routers/org";
 import { AxiosResponse } from "axios";
-import { ArrowUpLeft, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function Page(props: {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-
-    const params = await props.searchParams;
+    const params = await props.searchParams; // this is needed to prevent static optimization
     const user = await verifySession();
 
-    console.log("page.tsx user", user);
-
     if (!user) {
-        // redirect("/auth/login");
+        redirect("/auth/login");
         return;
     }
 
-    // let orgs: ListOrgsResponse["orgs"] = [];
-    // try {
-    //     const res = await internal.get<AxiosResponse<ListOrgsResponse>>(
-    //         `/orgs`,
-    //         await authCookieHeader()
-    //     );
-    //     if (res && res.data.data.orgs) {
-    //         orgs = res.data.data.orgs;
-    //     }
-    // } catch (e) {}
+    let orgs: ListOrgsResponse["orgs"] = [];
+    try {
+        const res = await internal.get<AxiosResponse<ListOrgsResponse>>(
+            `/orgs`,
+            await authCookieHeader()
+        );
+        if (res && res.data.data.orgs) {
+            orgs = res.data.data.orgs;
+        }
+    } catch (e) {
+        console.error(e);
+    }
 
     return (
         <>
@@ -39,7 +38,7 @@ export default async function Page(props: {
                 <p>Logged in as {user.email}</p>
             </LandingProvider>
 
-            {/* <div className="mt-4">
+            <div className="mt-4">
                 {orgs.map((org) => (
                     <Link
                         key={org.orgId}
@@ -52,7 +51,7 @@ export default async function Page(props: {
                         </div>
                     </Link>
                 ))}
-            </div> */}
+            </div>
         </>
     );
 }

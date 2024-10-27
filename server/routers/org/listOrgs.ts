@@ -46,8 +46,6 @@ export async function listOrgs(
 
         const { limit, offset } = parsedQuery.data;
 
-        logger.debug("here0")
-
         // Use the userOrgs passed from the middleware
         const userOrgIds = req.userOrgIds;
 
@@ -66,7 +64,6 @@ export async function listOrgs(
                 message: "No organizations found for the user",
                 status: HttpCode.OK,
             });
-            logger.debug("here1")
         }
 
         const organizations = await db
