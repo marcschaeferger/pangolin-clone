@@ -79,8 +79,6 @@ export async function listOrgs(
             .where(inArray(orgs.orgId, userOrgIds));
         const totalCount = totalCountResult[0].count;
 
-        logger.debug("here2")
-
         return response<ListOrgsResponse>(res, {
             data: {
                 orgs: organizations,

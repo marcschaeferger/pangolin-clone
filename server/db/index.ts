@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import Database from "better-sqlite3";
 import * as schema from "@server/db/schema";
-import config, { APP_PATH } from "@server/config";
+import { APP_PATH } from "@server/config";
 import path from "path";
 
 const location = path.join(APP_PATH, "db", "db.sqlite");
