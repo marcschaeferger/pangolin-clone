@@ -29,6 +29,7 @@ const environmentSchema = z.object({
         http_entrypoint: z.string(),
         https_entrypoint: z.string().optional(),
         cert_resolver: z.string().optional(),
+        prefer_wildcard_cert: z.boolean().optional(),
     }),
     gerbil: z.object({
         start_port: portSchema,

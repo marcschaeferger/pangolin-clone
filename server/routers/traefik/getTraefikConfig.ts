@@ -34,10 +34,6 @@ export async function traefikConfigProvider(
 
         // const baseDomain = new URL(config.app.base_url).hostname;
 
-        const tls = {
-            certResolver: config.traefik.cert_resolver,
-        };
-
         const http: any = {
             routers: {},
             services: {},
@@ -67,6 +63,31 @@ export async function traefikConfigProvider(
 
             const routerName = `${target.targetId}-router`;
             const serviceName = `${target.targetId}-service`;
+
+            if (!resource.fullDomain) {
+                continue;
+            }
+
+            const domainParts = resource.fullDomain.split(".");
+            let wildCard;
+            if (domainParts.length <= 2) {
+                wildCard = `*.${domainParts.join(".")}`;
+            } else {
+                wildCard = `*.${domainParts.slice(1).join(".")}`;
+            }
+
+            const tls = {
+                certResolver: config.traefik.cert_resolver,
+                ...(config.traefik.prefer_wildcard_cert
+                    ? {
+                          domains: [
+                              {
+                                  main: wildCard
+                              },
+                          ],
+                      }
+                    : {}),
+            };
 
             http.routers![routerName] = {
                 entryPoints: [
