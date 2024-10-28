@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import db from "@server/db";
 import * as schema from "@server/db/schema";
-import { DynamicTraefikConfig } from "./configSchema";
 import { and, eq, isNotNull } from "drizzle-orm";
 import logger from "@server/logger";
 import HttpCode from "@server/types/HttpCode";
@@ -27,38 +26,37 @@ export async function traefikConfigProvider(
             );
 
         if (!all.length) {
-            return { http: {} } as DynamicTraefikConfig;
+            return res.status(HttpCode.OK).json({});
         }
 
-        const middlewareName = "badger";
+        const badgerMiddlewareName = "badger";
+        const redirectMiddlewareName = "redirect-to-https";
 
-        const baseDomain = new URL(config.app.base_url).hostname;
+        // const baseDomain = new URL(config.app.base_url).hostname;
 
         const tls = {
             certResolver: config.traefik.cert_resolver,
-            ...(config.traefik.prefer_wildcard_cert
-                ? {
-                      domains: {
-                          main: baseDomain,
-                          sans: [`*.${baseDomain}`],
-                      },
-                  }
-                : {}),
         };
 
         const http: any = {
             routers: {},
             services: {},
             middlewares: {
-                [middlewareName]: {
+                [badgerMiddlewareName]: {
                     plugin: {
-                        [middlewareName]: {
+                        [badgerMiddlewareName]: {
                             apiBaseUrl: new URL(
                                 "/api/v1",
                                 `http://${config.server.internal_hostname}:${config.server.internal_port}`
                             ).href,
                             appBaseUrl: config.app.base_url,
                         },
+                    },
+                },
+                [redirectMiddlewareName]: {
+                    redirectScheme: {
+                        scheme: "https",
+                        permanent: true,
                     },
                 },
             },
@@ -76,11 +74,21 @@ export async function traefikConfigProvider(
                         ? config.traefik.https_entrypoint
                         : config.traefik.http_entrypoint,
                 ],
-                middlewares: [middlewareName],
+                middlewares: target.ssl ? [badgerMiddlewareName] : [],
                 service: serviceName,
                 rule: `Host(\`${resource.fullDomain}\`)`,
                 ...(target.ssl ? { tls } : {}),
             };
+
+            if (target.ssl) {
+                // this is a redirect router; all it does is redirect to the https version if tls is enabled
+                http.routers![routerName + "-redirect"] = {
+                    entryPoints: [config.traefik.http_entrypoint],
+                    middlewares: [redirectMiddlewareName],
+                    service: serviceName,
+                    rule: `Host(\`${resource.fullDomain}\`)`,
+                };
+            }
 
             http.services![serviceName] = {
                 loadBalancer: {

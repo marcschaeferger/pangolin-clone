@@ -28,11 +28,10 @@ export default async function Page(props: {
         if (res && res.data.data.orgs) {
             orgs = res.data.data.orgs;
         }
-
     } catch (e) {
         console.error(e);
     }
-    
+
     if (!orgs.length) {
         redirect("/setup");
     }
