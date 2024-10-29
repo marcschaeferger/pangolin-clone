@@ -82,7 +82,7 @@ export async function traefikConfigProvider(
                     ? {
                           domains: [
                               {
-                                  main: wildCard
+                                  main: wildCard,
                               },
                           ],
                       }
@@ -91,17 +91,17 @@ export async function traefikConfigProvider(
 
             http.routers![routerName] = {
                 entryPoints: [
-                    target.ssl
+                    resource.ssl
                         ? config.traefik.https_entrypoint
                         : config.traefik.http_entrypoint,
                 ],
-                middlewares: target.ssl ? [badgerMiddlewareName] : [],
+                middlewares: resource.ssl ? [badgerMiddlewareName] : [],
                 service: serviceName,
                 rule: `Host(\`${resource.fullDomain}\`)`,
-                ...(target.ssl ? { tls } : {}),
+                ...(resource.ssl ? { tls } : {}),
             };
 
-            if (target.ssl) {
+            if (resource.ssl) {
                 // this is a redirect router; all it does is redirect to the https version if tls is enabled
                 http.routers![routerName + "-redirect"] = {
                     entryPoints: [config.traefik.http_entrypoint],

@@ -1,5 +1,5 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
-import { InferSelectModel} from "drizzle-orm";
+import { InferSelectModel } from "drizzle-orm";
 
 export const orgs = sqliteTable("orgs", {
     orgId: text("orgId").primaryKey(),
@@ -34,6 +34,7 @@ export const resources = sqliteTable("resources", {
     }),
     name: text("name").notNull(),
     subdomain: text("subdomain"),
+    ssl: integer("ssl", { mode: "boolean" }).notNull().default(false),
 });
 
 export const targets = sqliteTable("targets", {
@@ -46,7 +47,6 @@ export const targets = sqliteTable("targets", {
     port: integer("port").notNull(),
     protocol: text("protocol"),
     enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
-    ssl: integer("ssl", { mode: "boolean" }).notNull().default(false),
 });
 
 export const exitNodes = sqliteTable("exitNodes", {
