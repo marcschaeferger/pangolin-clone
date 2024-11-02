@@ -59,7 +59,7 @@ export function SitesDataTable<TData, TValue>({
         <div>
             <div className="flex items-center justify-between pb-4">
                 <Input
-                    placeholder="Search your sites"
+                    placeholder="Search sites"
                     value={
                         (table.getColumn("name")?.getFilterValue() as string) ??
                         ""
@@ -94,7 +94,7 @@ export function SitesDataTable<TData, TValue>({
                                                 : flexRender(
                                                       header.column.columnDef
                                                           .header,
-                                                      header.getContext(),
+                                                      header.getContext()
                                                   )}
                                         </TableHead>
                                     );
@@ -115,7 +115,7 @@ export function SitesDataTable<TData, TValue>({
                                         <TableCell key={cell.id}>
                                             {flexRender(
                                                 cell.column.columnDef.cell,
-                                                cell.getContext(),
+                                                cell.getContext()
                                             )}
                                         </TableCell>
                                     ))}

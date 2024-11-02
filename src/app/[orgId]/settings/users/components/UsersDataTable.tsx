@@ -11,7 +11,6 @@ import {
     ColumnFiltersState,
     getFilteredRowModel,
 } from "@tanstack/react-table";
-
 import {
     Table,
     TableBody,
@@ -23,20 +22,20 @@ import {
 import { Button } from "@app/components/ui/button";
 import { useState } from "react";
 import { Input } from "@app/components/ui/input";
-import { DataTablePagination } from "@app/components/DataTablePagination";
+import { DataTablePagination } from "../../../../../components/DataTablePagination";
 import { Plus } from "lucide-react";
 
-interface ResourcesDataTableProps<TData, TValue> {
+interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
-    addResource?: () => void;
+    inviteUser?: () => void;
 }
 
-export function ResourcesDataTable<TData, TValue>({
-    addResource,
+export function UsersDataTable<TData, TValue>({
+    inviteUser,
     columns,
     data,
-}: ResourcesDataTableProps<TData, TValue>) {
+}: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
@@ -59,26 +58,27 @@ export function ResourcesDataTable<TData, TValue>({
         <div>
             <div className="flex items-center justify-between pb-4">
                 <Input
-                    placeholder="Search resources"
+                    placeholder="Search users"
                     value={
-                        (table.getColumn("name")?.getFilterValue() as string) ??
-                        ""
+                        (table
+                            .getColumn("email")
+                            ?.getFilterValue() as string) ?? ""
                     }
                     onChange={(event) =>
                         table
-                            .getColumn("name")
+                            .getColumn("email")
                             ?.setFilterValue(event.target.value)
                     }
                     className="max-w-sm mr-2"
                 />
                 <Button
                     onClick={() => {
-                        if (addResource) {
-                            addResource();
+                        if (inviteUser) {
+                            inviteUser();
                         }
                     }}
                 >
-                    <Plus className="mr-2 h-4 w-4" /> Add Resource
+                    <Plus className="mr-2 h-4 w-4" /> Invite User
                 </Button>
             </div>
             <div>
@@ -127,7 +127,8 @@ export function ResourcesDataTable<TData, TValue>({
                                     colSpan={columns.length}
                                     className="h-24 text-center"
                                 >
-                                    No resources. Create one to get started.
+                                    No Users. Invite one to share access to
+                                    resources.
                                 </TableCell>
                             </TableRow>
                         )}
