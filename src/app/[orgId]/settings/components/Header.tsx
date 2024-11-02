@@ -123,7 +123,12 @@ export default function Header({ email, orgName, name, orgs }: HeaderProps) {
                         </div>
                     </div>
 
-                    <Select defaultValue={orgName}>
+                    <Select
+                        defaultValue={orgName}
+                        onValueChange={(val) => {
+                            router.push(`/${val}/settings`);
+                        }}
+                    >
                         <SelectTrigger className="w-[100px] md:w-[180px]">
                             <SelectValue placeholder="Select an org" />
                         </SelectTrigger>
