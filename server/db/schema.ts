@@ -206,6 +206,19 @@ export const limitsTable = sqliteTable("limits", {
     description: text("description"),
 });
 
+export const userInvites = sqliteTable("userInvites", {
+    inviteId: text("inviteId").primaryKey(),
+    orgId: text("orgId")
+        .notNull()
+        .references(() => orgs.orgId),
+    email: text("email").notNull(),
+    expiresAt: integer("expiresAt").notNull(),
+    tokenHash: text("token").notNull(),
+    roleId: integer("roleId")
+        .notNull()
+        .references(() => roles.roleId),
+});
+
 export type Org = InferSelectModel<typeof orgs>;
 export type User = InferSelectModel<typeof users>;
 export type Site = InferSelectModel<typeof sites>;
@@ -227,3 +240,4 @@ export type UserSite = InferSelectModel<typeof userSites>;
 export type RoleResource = InferSelectModel<typeof roleResources>;
 export type UserResource = InferSelectModel<typeof userResources>;
 export type Limit = InferSelectModel<typeof limitsTable>;
+export type UserInvite = InferSelectModel<typeof userInvites>;

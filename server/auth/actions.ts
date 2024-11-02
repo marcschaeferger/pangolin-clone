@@ -30,7 +30,7 @@ export enum ActionsEnum {
     getRole = "getRole",
     listRoles = "listRoles",
     updateRole = "updateRole",
-    addUser = "addUser",
+    inviteUser = "inviteUser",
     removeUser = "removeUser",
     listUsers = "listUsers",
     listSiteRoles = "listSiteRoles",
@@ -55,7 +55,7 @@ export enum ActionsEnum {
 
 export async function checkUserActionPermission(
     actionId: string,
-    req: Request,
+    req: Request
 ): Promise<boolean> {
     const userId = req.user?.userId;
 
@@ -66,7 +66,7 @@ export async function checkUserActionPermission(
     if (!req.userOrgId) {
         throw createHttpError(
             HttpCode.BAD_REQUEST,
-            "Organization ID is required",
+            "Organization ID is required"
         );
     }
 
@@ -81,15 +81,15 @@ export async function checkUserActionPermission(
                 .where(
                     and(
                         eq(userOrgs.userId, userId),
-                        eq(userOrgs.orgId, req.userOrgId!),
-                    ),
+                        eq(userOrgs.orgId, req.userOrgId!)
+                    )
                 )
                 .limit(1);
 
             if (userOrgRole.length === 0) {
                 throw createHttpError(
                     HttpCode.FORBIDDEN,
-                    "User does not have access to this organization",
+                    "User does not have access to this organization"
                 );
             }
 
@@ -104,8 +104,8 @@ export async function checkUserActionPermission(
                 and(
                     eq(userActions.userId, userId),
                     eq(userActions.actionId, actionId),
-                    eq(userActions.orgId, req.userOrgId!), // TODO: we cant pass the org id if we are not checking the org
-                ),
+                    eq(userActions.orgId, req.userOrgId!) // TODO: we cant pass the org id if we are not checking the org
+                )
             )
             .limit(1);
 
@@ -121,8 +121,8 @@ export async function checkUserActionPermission(
                 and(
                     eq(roleActions.actionId, actionId),
                     eq(roleActions.roleId, userOrgRoleId!),
-                    eq(roleActions.orgId, req.userOrgId!),
-                ),
+                    eq(roleActions.orgId, req.userOrgId!)
+                )
             )
             .limit(1);
 
@@ -133,7 +133,7 @@ export async function checkUserActionPermission(
         console.error("Error checking user action permission:", error);
         throw createHttpError(
             HttpCode.INTERNAL_SERVER_ERROR,
-            "Error checking action permission",
+            "Error checking action permission"
         );
     }
 }

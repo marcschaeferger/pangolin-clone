@@ -3,3 +3,5 @@ export * from "./removeUserOrg";
 export * from "./addUserOrg";
 export * from "./listUsers";
 export * from "./setUserRole";
+export * from "./inviteUser";
+export * from "./acceptInvite";

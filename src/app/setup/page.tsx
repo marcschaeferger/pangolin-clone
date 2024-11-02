@@ -226,7 +226,7 @@ export default function StepperForm() {
                         <div className="flex items-center space-x-2">
                             {currentStep !== "org" ? (
                                 <Link
-                                    href={`/${orgId}/sites`}
+                                    href={`/${orgId}/settings/sites`}
                                     className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                 >
                                     Skip for now

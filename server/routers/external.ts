@@ -46,7 +46,11 @@ authenticated.put("/org/:orgId/site", verifyOrgAccess, site.createSite);
 authenticated.get("/org/:orgId/sites", verifyOrgAccess, site.listSites);
 authenticated.get("/org/:orgId/site/:niceId", verifyOrgAccess, site.getSite);
 
-authenticated.get("/org/:orgId/pickSiteDefaults", verifyOrgAccess, site.pickSiteDefaults);
+authenticated.get(
+    "/org/:orgId/pickSiteDefaults",
+    verifyOrgAccess,
+    site.pickSiteDefaults
+);
 authenticated.get("/site/:siteId", verifySiteAccess, site.getSite);
 authenticated.get("/site/:siteId/roles", verifySiteAccess, site.listSiteRoles);
 authenticated.post("/site/:siteId", verifySiteAccess, site.updateSite);
@@ -55,138 +59,146 @@ authenticated.delete("/site/:siteId", verifySiteAccess, site.deleteSite);
 authenticated.put(
     "/org/:orgId/site/:siteId/resource",
     verifyOrgAccess,
-    resource.createResource,
+    resource.createResource
 );
 authenticated.get("/site/:siteId/resources", resource.listResources);
 authenticated.get(
     "/org/:orgId/resources",
     verifyOrgAccess,
-    resource.listResources,
+    resource.listResources
 );
+
+authenticated.post(
+    "/org/:orgId/create-invite",
+    verifyOrgAccess,
+    user.inviteUser
+);
+authenticated.post("/org/:orgId/accept-invite", user.acceptInvite);
+
 authenticated.get(
     "/resource/:resourceId/roles",
     verifyResourceAccess,
-    resource.listResourceRoles,
+    resource.listResourceRoles
 );
 authenticated.get(
     "/resource/:resourceId",
     verifyResourceAccess,
-    resource.getResource,
+    resource.getResource
 );
 authenticated.post(
     "/resource/:resourceId",
     verifyResourceAccess,
-    resource.updateResource,
+    resource.updateResource
 );
 authenticated.delete(
     "/resource/:resourceId",
     verifyResourceAccess,
-    resource.deleteResource,
+    resource.deleteResource
 );
 
 authenticated.put(
     "/resource/:resourceId/target",
     verifyResourceAccess,
-    target.createTarget,
+    target.createTarget
 );
 authenticated.get(
     "/resource/:resourceId/targets",
     verifyResourceAccess,
-    target.listTargets,
+    target.listTargets
 );
 authenticated.get("/target/:targetId", verifyTargetAccess, target.getTarget);
 authenticated.post(
     "/target/:targetId",
     verifyTargetAccess,
-    target.updateTarget,
+    target.updateTarget
 );
 authenticated.delete(
     "/target/:targetId",
     verifyTargetAccess,
-    target.deleteTarget,
+    target.deleteTarget
 );
 
 authenticated.put(
     "/org/:orgId/role",
     verifyOrgAccess,
     verifySuperuser,
-    role.createRole,
+    role.createRole
 );
 authenticated.get("/org/:orgId/roles", verifyOrgAccess, role.listRoles);
 authenticated.get(
     "/role/:roleId",
     verifyRoleAccess,
     verifyUserInRole,
-    role.getRole,
+    role.getRole
 );
 authenticated.post(
     "/role/:roleId",
     verifyRoleAccess,
     verifySuperuser,
-    role.updateRole,
+    role.updateRole
 );
 authenticated.delete(
     "/role/:roleId",
     verifyRoleAccess,
     verifySuperuser,
-    role.deleteRole,
+    role.deleteRole
 );
 
 authenticated.put(
     "/role/:roleId/site",
     verifyRoleAccess,
     verifyUserInRole,
-    role.addRoleSite,
+    role.addRoleSite
 );
 authenticated.delete(
     "/role/:roleId/site",
     verifyRoleAccess,
     verifyUserInRole,
-    role.removeRoleSite,
+    role.removeRoleSite
 );
 authenticated.get(
     "/role/:roleId/sites",
     verifyRoleAccess,
     verifyUserInRole,
-    role.listRoleSites,
+    role.listRoleSites
 );
 authenticated.put(
     "/role/:roleId/resource",
     verifyRoleAccess,
     verifyUserInRole,
-    role.addRoleResource,
+    role.addRoleResource
 );
 authenticated.delete(
     "/role/:roleId/resource",
     verifyRoleAccess,
     verifyUserInRole,
-    role.removeRoleResource,
+    role.removeRoleResource
 );
 authenticated.get(
     "/role/:roleId/resources",
     verifyRoleAccess,
     verifyUserInRole,
-    role.listRoleResources,
+    role.listRoleResources
 );
 authenticated.put(
     "/role/:roleId/action",
     verifyRoleAccess,
     verifyUserInRole,
-    role.addRoleAction,
+    role.addRoleAction
 );
 authenticated.delete(
     "/role/:roleId/action",
     verifyRoleAccess,
     verifyUserInRole,
     verifySuperuser,
-    role.removeRoleAction,
+    role.removeRoleAction
 );
 authenticated.get(
     "/role/:roleId/actions",
     verifyRoleAccess,
     verifyUserInRole,
     verifySuperuser,
-    role.listRoleActions,
+    role.listRoleActions
 );
 
 unauthenticated.get("/user", verifySessionMiddleware, user.getUser);
@@ -196,52 +208,52 @@ authenticated.delete(
     "/org/:orgId/user/:userId",
     verifyOrgAccess,
     verifyUserAccess,
-    user.removeUserOrg,
+    user.removeUserOrg
 );
 authenticated.put(
     "/org/:orgId/user/:userId",
     verifyOrgAccess,
     verifyUserAccess,
-    user.addUserOrg,
+    user.addUserOrg
 );
 
 authenticated.put(
     "/user/:userId/site",
     verifySiteAccess,
     verifyUserAccess,
-    role.addRoleSite,
+    role.addRoleSite
 );
 authenticated.delete(
     "/user/:userId/site",
     verifySiteAccess,
     verifyUserAccess,
-    role.removeRoleSite,
+    role.removeRoleSite
 );
 authenticated.put(
     "/user/:userId/resource",
     verifyResourceAccess,
     verifyUserAccess,
-    role.addRoleResource,
+    role.addRoleResource
 );
 authenticated.delete(
     "/user/:userId/resource",
     verifyResourceAccess,
     verifyUserAccess,
-    role.removeRoleResource,
+    role.removeRoleResource
 );
 authenticated.put(
     "/org/:orgId/user/:userId/action",
     verifyOrgAccess,
     verifyUserAccess,
     verifySuperuser,
-    role.addRoleAction,
+    role.addRoleAction
 );
 authenticated.delete(
     "/org/:orgId/user/:userId/action",
     verifyOrgAccess,
     verifyUserAccess,
     verifySuperuser,
-    role.removeRoleAction,
+    role.removeRoleAction
 );
 
 // Auth routes
@@ -252,7 +264,7 @@ authRouter.use(
         windowMin: 10,
         max: 15,
         type: "IP_AND_PATH",
-    }),
+    })
 );
 
 authRouter.put("/signup", auth.signup);
@@ -262,19 +274,19 @@ authRouter.post("/2fa/enable", verifySessionUserMiddleware, auth.verifyTotp);
 authRouter.post(
     "/2fa/request",
     verifySessionUserMiddleware,
-    auth.requestTotpSecret,
+    auth.requestTotpSecret
 );
 authRouter.post("/2fa/disable", verifySessionUserMiddleware, auth.disable2fa);
 authRouter.post("/verify-email", verifySessionMiddleware, auth.verifyEmail);
 authRouter.post(
     "/verify-email/request",
     verifySessionMiddleware,
-    auth.requestEmailVerificationCode,
+    auth.requestEmailVerificationCode
 );
 authRouter.post(
     "/change-password",
     verifySessionUserMiddleware,
-    auth.changePassword,
+    auth.changePassword
 );
 authRouter.post("/reset-password/request", auth.requestPasswordReset);
 authRouter.post("/reset-password/", auth.resetPassword);
