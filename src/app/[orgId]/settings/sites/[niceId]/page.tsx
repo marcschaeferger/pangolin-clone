@@ -3,11 +3,9 @@ import { Separator } from "@/components/ui/separator";
 import { CreateSiteForm } from "./components/CreateSite";
 import { GeneralForm } from "./components/GeneralForm";
 
-export default async function SettingsPage(
-    props: {
-        params: Promise<{ niceId: string }>;
-    }
-) {
+export default async function SitePage(props: {
+    params: Promise<{ niceId: string }>;
+}) {
     const params = await props.params;
     const isCreate = params.niceId === "create";
 

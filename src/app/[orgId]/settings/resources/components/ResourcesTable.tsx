@@ -74,7 +74,7 @@ export const columns: ColumnDef<ResourceRow>[] = [
                     .then(() => {
                         router.refresh();
                     });
-            }
+            };
 
             return (
                 <DropdownMenu>
@@ -87,13 +87,18 @@ export const columns: ColumnDef<ResourceRow>[] = [
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem>
                             <Link
-                                href={`/${resourceRow.orgId}/resources/${resourceRow.id}`}
+                                href={`/${resourceRow.orgId}/settings/resources/${resourceRow.id}`}
                             >
                                 View settings
                             </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem>
-                            <button onClick={() => deleteResource(resourceRow.id)} className="text-red-600 hover:text-red-800 hover:underline cursor-pointer">Delete</button>
+                            <button
+                                onClick={() => deleteResource(resourceRow.id)}
+                                className="text-red-600 hover:text-red-800 hover:underline cursor-pointer"
+                            >
+                                Delete
+                            </button>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -115,7 +120,7 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
             columns={columns}
             data={resources}
             addResource={() => {
-                router.push(`/${orgId}/resources/create`);
+                router.push(`/${orgId}/settings/resources/create`);
             }}
         />
     );

@@ -1,51 +1,48 @@
 import { Metadata } from "next";
 import { TopbarNav } from "./components/TopbarNav";
-import { Cog, Combine, LayoutGrid, Tent, Users, Waypoints } from "lucide-react";
+import { Cog, Combine, Users, Waypoints } from "lucide-react";
 import Header from "./components/Header";
 import { verifySession } from "@app/lib/auth/verifySession";
 import { redirect } from "next/navigation";
-import { cache } from "react";
 import { internal } from "@app/api";
 import { AxiosResponse } from "axios";
 import { GetOrgResponse, ListOrgsResponse } from "@server/routers/org";
 import { authCookieHeader } from "@app/api/cookies";
 
 export const metadata: Metadata = {
-    title: `Configuration - Pangolin`,
+    title: `Settings - Pangolin`,
     description: "",
 };
 
 const topNavItems = [
     {
         title: "Sites",
-        href: "/{orgId}/sites",
+        href: "/{orgId}/settings/sites",
         icon: <Combine className="h-5 w-5" />,
     },
     {
         title: "Resources",
-        href: "/{orgId}/resources",
+        href: "/{orgId}/settings/resources",
         icon: <Waypoints className="h-5 w-5" />,
     },
     {
         title: "Users",
-        href: "/{orgId}/users",
+        href: "/{orgId}/settings/users",
         icon: <Users className="h-5 w-5" />,
     },
     {
         title: "General",
-        href: "/{orgId}/general",
+        href: "/{orgId}/settings/general",
         icon: <Cog className="h-5 w-5" />,
     },
 ];
 
-interface ConfigurationLaytoutProps {
+interface SettingsLayoutProps {
     children: React.ReactNode;
     params: Promise<{ orgId: string }>;
 }
 
-export default async function ConfigurationLaytout(
-    props: ConfigurationLaytoutProps
-) {
+export default async function SettingsLayout(props: SettingsLayoutProps) {
     const params = await props.params;
 
     const { children } = props;

@@ -23,20 +23,20 @@ import {
 import { Button } from "@app/components/ui/button";
 import { useState } from "react";
 import { Input } from "@app/components/ui/input";
-import { DataTablePagination } from "@app/components/DataTablePagination";
+import { DataTablePagination } from "../../../../../components/DataTablePagination";
 import { Plus } from "lucide-react";
 
-interface ResourcesDataTableProps<TData, TValue> {
+interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
-    addResource?: () => void;
+    addSite?: () => void;
 }
 
-export function ResourcesDataTable<TData, TValue>({
-    addResource,
+export function SitesDataTable<TData, TValue>({
+    addSite,
     columns,
     data,
-}: ResourcesDataTableProps<TData, TValue>) {
+}: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
@@ -59,7 +59,7 @@ export function ResourcesDataTable<TData, TValue>({
         <div>
             <div className="flex items-center justify-between pb-4">
                 <Input
-                    placeholder="Search your resources"
+                    placeholder="Search your sites"
                     value={
                         (table.getColumn("name")?.getFilterValue() as string) ??
                         ""
@@ -73,12 +73,12 @@ export function ResourcesDataTable<TData, TValue>({
                 />
                 <Button
                     onClick={() => {
-                        if (addResource) {
-                            addResource();
+                        if (addSite) {
+                            addSite();
                         }
                     }}
                 >
-                    <Plus className="mr-2 h-4 w-4" /> Add Resource
+                    <Plus className="mr-2 h-4 w-4" /> Add Site
                 </Button>
             </div>
             <div>
@@ -127,7 +127,7 @@ export function ResourcesDataTable<TData, TValue>({
                                     colSpan={columns.length}
                                     className="h-24 text-center"
                                 >
-                                    No resources. Create one to get started.
+                                    No sites. Create one to get started.
                                 </TableCell>
                             </TableRow>
                         )}

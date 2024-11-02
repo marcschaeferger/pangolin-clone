@@ -8,13 +8,13 @@ type ResourcesPageProps = {
     params: Promise<{ orgId: string }>;
 };
 
-export default async function Page(props: ResourcesPageProps) {
+export default async function ResourcesPage(props: ResourcesPageProps) {
     const params = await props.params;
     let resources: ListResourcesResponse["resources"] = [];
     try {
         const res = await internal.get<AxiosResponse<ListResourcesResponse>>(
             `/org/${params.orgId}/resources`,
-            await authCookieHeader(),
+            await authCookieHeader()
         );
         resources = res.data.data.resources;
     } catch (e) {

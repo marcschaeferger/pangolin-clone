@@ -16,7 +16,7 @@ export default function CustomDomainInput(
         onChange,
     }: CustomDomainInputProps = {
         domainSuffix: ".example.com",
-    },
+    }
 ) {
     const [value, setValue] = React.useState("");
 

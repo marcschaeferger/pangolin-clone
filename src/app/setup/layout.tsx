@@ -1,3 +1,10 @@
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: `Setup - Pangolin`,
+    description: "",
+};
+
 export default async function SetupLayout({
     children,
 }: {

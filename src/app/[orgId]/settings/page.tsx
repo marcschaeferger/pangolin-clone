@@ -4,9 +4,9 @@ type OrgPageProps = {
     params: Promise<{ orgId: string }>;
 };
 
-export default async function Page(props: OrgPageProps) {
+export default async function SettingsPage(props: OrgPageProps) {
     const params = await props.params;
-    redirect(`/${params.orgId}/sites`);
+    redirect(`/${params.orgId}/settings/sites`);
 
     return <></>;
 }

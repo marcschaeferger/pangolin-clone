@@ -92,7 +92,7 @@ export const columns: ColumnDef<SiteRow>[] = [
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem>
                             <Link
-                                href={`/${siteRow.orgId}/sites/${siteRow.id}`}
+                                href={`/${siteRow.orgId}/settings/sites/${siteRow.id}`}
                             >
                                 View settings
                             </Link>
@@ -120,7 +120,7 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
             columns={columns}
             data={sites}
             addSite={() => {
-                router.push(`/${orgId}/sites/create`);
+                router.push(`/${orgId}/settings/sites/create`);
             }}
         />
     );

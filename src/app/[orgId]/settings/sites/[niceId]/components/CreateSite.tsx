@@ -1,13 +1,12 @@
-"use client"
+"use client";
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { CalendarIcon, CaretSortIcon, CheckIcon, ChevronDownIcon } from "@radix-ui/react-icons"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-
-import { cn } from "@/lib/utils"
-import { toast } from "@/hooks/use-toast"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ChevronDownIcon } from "@radix-ui/react-icons";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { cn } from "@/lib/utils";
+import { toast } from "@/hooks/use-toast";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
     Form,
     FormControl,
@@ -16,15 +15,15 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { generateKeypair } from "./wireguardConfig";
 import React, { useState, useEffect } from "react";
 import { api } from "@/api";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-import { Checkbox } from "@app/components/ui/checkbox"
-import { PickSiteDefaultsResponse } from "@server/routers/site"
+import { Checkbox } from "@app/components/ui/checkbox";
+import { PickSiteDefaultsResponse } from "@server/routers/site";
 
 const method = [
     { label: "Wireguard", value: "wg" },
@@ -47,7 +46,7 @@ type AccountFormValues = z.infer<typeof accountFormSchema>;
 
 const defaultValues: Partial<AccountFormValues> = {
     name: "",
-    method: "wg"
+    method: "wg",
 };
 
 export function CreateSiteForm() {
@@ -55,10 +54,14 @@ export function CreateSiteForm() {
     const orgId = params.orgId;
     const router = useRouter();
 
-    const [keypair, setKeypair] = useState<{ publicKey: string; privateKey: string } | null>(null);
+    const [keypair, setKeypair] = useState<{
+        publicKey: string;
+        privateKey: string;
+    } | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isChecked, setIsChecked] = useState(false);
-    const [siteDefaults, setSiteDefaults] = useState<PickSiteDefaultsResponse | null>(null);
+    const [siteDefaults, setSiteDefaults] =
+        useState<PickSiteDefaultsResponse | null>(null);
 
     const handleCheckboxChange = (checked: boolean) => {
         setIsChecked(checked);
@@ -75,17 +78,17 @@ export function CreateSiteForm() {
             setKeypair(generatedKeypair);
             setIsLoading(false);
 
-            api
-            .get(`/org/${orgId}/pickSiteDefaults`)
-            .catch((e) => {
-                toast({
-                    title: "Error creating site..."
+            api.get(`/org/${orgId}/pickSiteDefaults`)
+                .catch((e) => {
+                    toast({
+                        title: "Error creating site...",
+                    });
+                })
+                .then((res) => {
+                    if (res && res.status === 200) {
+                        setSiteDefaults(res.data.data);
+                    }
                 });
-            }).then((res) => {
-                if (res && res.status === 200) {
-                    setSiteDefaults(res.data.data);
-                }
-            });
         }
     }, []);
 
@@ -99,19 +102,20 @@ export function CreateSiteForm() {
             })
             .catch((e) => {
                 toast({
-                    title: "Error creating site..."
+                    title: "Error creating site...",
                 });
             });
 
         if (res && res.status === 201) {
             const niceId = res.data.data.niceId;
             // navigate to the site page
-            router.push(`/${orgId}/sites/${niceId}`);
+            router.push(`/${orgId}/settings/sites/${niceId}`);
         }
     }
 
-    const wgConfig = keypair && siteDefaults
-        ? `[Interface]
+    const wgConfig =
+        keypair && siteDefaults
+            ? `[Interface]
 Address = ${siteDefaults.subnet}
 ListenPort = 51820
 PrivateKey = ${keypair.privateKey}
@@ -121,7 +125,7 @@ PublicKey = ${siteDefaults.publicKey}
 AllowedIPs = ${siteDefaults.address.split("/")[0]}/32
 Endpoint = ${siteDefaults.endpoint}:${siteDefaults.listenPort}
 PersistentKeepalive = 5`
-        : "";
+            : "";
 
     const newtConfig = `curl -fsSL https://get.docker.com -o get-docker.sh
 sh get-docker.sh`;
@@ -129,7 +133,10 @@ sh get-docker.sh`;
     return (
         <>
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-8"
+                >
                     <FormField
                         control={form.control}
                         name="name"
@@ -140,28 +147,13 @@ sh get-docker.sh`;
                                     <Input placeholder="Your name" {...field} />
                                 </FormControl>
                                 <FormDescription>
-                                    This is the name that will be displayed for this site.
+                                    This is the name that will be displayed for
+                                    this site.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
-                    {/* <FormField
-                        control={form.control}
-                        name="subdomain"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Subdomain</FormLabel>
-                                <FormControl>
-                                    <Input {...field} />
-                                </FormControl>
-                                <FormDescription>
-                                    The subdomain of the site. This will be used to access resources on the site.
-                                </FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    /> */}
                     <FormField
                         control={form.control}
                         name="method"
@@ -172,19 +164,24 @@ sh get-docker.sh`;
                                     <FormControl>
                                         <select
                                             className={cn(
-                                                buttonVariants({ variant: "outline" }),
+                                                buttonVariants({
+                                                    variant: "outline",
+                                                }),
                                                 "w-[200px] appearance-none font-normal"
                                             )}
                                             {...field}
                                         >
-                                            <option value="wg">WireGuard</option>
+                                            <option value="wg">
+                                                WireGuard
+                                            </option>
                                             <option value="newt">Newt</option>
                                         </select>
                                     </FormControl>
                                     <ChevronDownIcon className="absolute right-3 top-2.5 h-4 w-4 opacity-50" />
                                 </div>
                                 <FormDescription>
-                                    This is how you will connect your site to Fossorial.
+                                    This is how you will connect your site to
+                                    Fossorial.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
@@ -192,18 +189,25 @@ sh get-docker.sh`;
                     />
                     {form.watch("method") === "wg" && !isLoading ? (
                         <pre className="mt-2 w-full rounded-md bg-muted p-4 overflow-x-auto">
-                            <code className="whitespace-pre-wrap font-mono">{wgConfig}</code>
+                            <code className="whitespace-pre-wrap font-mono">
+                                {wgConfig}
+                            </code>
                         </pre>
                     ) : form.watch("method") === "wg" && isLoading ? (
                         <p>Loading WireGuard configuration...</p>
                     ) : (
                         <pre className="mt-2 w-full rounded-md bg-muted p-4 overflow-x-auto">
-                            <code className="whitespace-pre-wrap">{newtConfig}</code>
+                            <code className="whitespace-pre-wrap">
+                                {newtConfig}
+                            </code>
                         </pre>
                     )}
                     <div className="flex items-center space-x-2">
-                        <Checkbox id="terms" checked={isChecked}
-                            onCheckedChange={handleCheckboxChange} />
+                        <Checkbox
+                            id="terms"
+                            checked={isChecked}
+                            onCheckedChange={handleCheckboxChange}
+                        />
                         <label
                             htmlFor="terms"
                             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -211,7 +215,9 @@ sh get-docker.sh`;
                             I have copied the config
                         </label>
                     </div>
-                    <Button type="submit" disabled={!isChecked}>Create Site</Button>
+                    <Button type="submit" disabled={!isChecked}>
+                        Create Site
+                    </Button>
                 </form>
             </Form>
         </>

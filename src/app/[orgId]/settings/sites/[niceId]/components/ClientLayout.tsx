@@ -6,20 +6,8 @@ import { useSiteContext } from "@app/hooks/useSiteContext";
 const sidebarNavItems = [
     {
         title: "General",
-        href: "/{orgId}/sites/{niceId}",
+        href: "/{orgId}/settings/sites/{niceId}",
     },
-    // {
-    //     title: "Appearance",
-    //     href: "/{orgId}/sites/{niceId}/appearance",
-    // },
-    // {
-    //     title: "Notifications",
-    //     href: "/{orgId}/sites/{niceId}/notifications",
-    // },
-    // {
-    //     title: "Display",
-    //     href: "/{orgId}/sites/{niceId}/display",
-    // },
 ];
 
 export function ClientLayout({ isCreate, children }: { isCreate: boolean; children: React.ReactNode }) {

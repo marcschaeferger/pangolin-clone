@@ -3,7 +3,7 @@ import Image from "next/image"
 
 import { Separator } from "@/components/ui/separator"
 import { SidebarNav } from "@/components/sidebar-nav"
-import Header from "../[orgId]/components/Header"
+import Header from "../[orgId]/settings/components/Header"
 
 export const metadata: Metadata = {
   title: "Forms",

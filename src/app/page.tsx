@@ -46,7 +46,7 @@ export default async function Page(props: {
                 {orgs.map((org) => (
                     <Link
                         key={org.orgId}
-                        href={`/${org.orgId}`}
+                        href={`/${org.orgId}/settings`}
                         className="text-primary underline"
                     >
                         <div className="flex items-center">

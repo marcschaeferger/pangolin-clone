@@ -1,3 +1,10 @@
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: `Auth - Pangolin`,
+    description: "",
+};
+
 type AuthLayoutProps = {
     children: React.ReactNode;
 };
@@ -5,9 +12,7 @@ type AuthLayoutProps = {
 export default async function AuthLayout({ children }: AuthLayoutProps) {
     return (
         <>
-            <div className="p-3 md:mt-32">
-                {children}
-            </div>
+            <div className="p-3 md:mt-32">{children}</div>
         </>
     );
 }
