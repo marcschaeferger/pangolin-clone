@@ -210,13 +210,13 @@ export const userInvites = sqliteTable("userInvites", {
     inviteId: text("inviteId").primaryKey(),
     orgId: text("orgId")
         .notNull()
-        .references(() => orgs.orgId),
+        .references(() => orgs.orgId, { onDelete: "cascade" }),
     email: text("email").notNull(),
     expiresAt: integer("expiresAt").notNull(),
     tokenHash: text("token").notNull(),
     roleId: integer("roleId")
         .notNull()
-        .references(() => roles.roleId),
+        .references(() => roles.roleId, { onDelete: "cascade" }),
 });
 
 export type Org = InferSelectModel<typeof orgs>;

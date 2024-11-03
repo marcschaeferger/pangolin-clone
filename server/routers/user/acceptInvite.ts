@@ -9,13 +9,17 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
+import { isWithinExpirationDate } from "oslo";
 
 const acceptInviteBodySchema = z.object({
     token: z.string(),
     inviteId: z.string(),
 });
 
-export type AcceptInviteResponse = {};
+export type AcceptInviteResponse = {
+    accepted: boolean;
+    orgId: string;
+};
 
 export async function acceptInvite(
     req: Request,
@@ -50,6 +54,12 @@ export async function acceptInvite(
             );
         }
 
+        if (!isWithinExpirationDate(new Date(existingInvite[0].expiresAt))) {
+            return next(
+                createHttpError(HttpCode.BAD_REQUEST, "Invite has expired")
+            );
+        }
+
         const validToken = await verify(existingInvite[0].tokenHash, token, {
             memoryCost: 19456,
             timeCost: 2,
@@ -75,6 +85,15 @@ export async function acceptInvite(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
                     "User does not exist. Please create an account first."
+                )
+            );
+        }
+
+        if (existingUser[0].email !== existingInvite[0].email) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    "Invite is not for this user"
                 )
             );
         }
@@ -109,7 +128,7 @@ export async function acceptInvite(
         await db.delete(userInvites).where(eq(userInvites.inviteId, inviteId));
 
         return response<AcceptInviteResponse>(res, {
-            data: {},
+            data: { accepted: true, orgId: existingInvite[0].orgId },
             success: true,
             error: false,
             message: "Invite accepted",

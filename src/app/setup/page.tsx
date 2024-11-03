@@ -14,6 +14,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@app/components/ui/card";
+import CopyTextBox from "@app/components/CopyTextBox";
 
 type Step = "org" | "site" | "resources";
 

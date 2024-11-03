@@ -3,11 +3,9 @@ import { verifySession } from "@app/lib/auth/verifySession";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-export default async function Page(
-    props: {
-        searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-    }
-) {
+export default async function Page(props: {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
     const searchParams = await props.searchParams;
     const user = await verifySession();
 
@@ -21,7 +19,14 @@ export default async function Page(
 
             <p className="text-center text-muted-foreground mt-4">
                 Already have an account?{" "}
-                <Link href="/auth/login" className="underline">
+                <Link
+                    href={
+                        !searchParams.redirect
+                            ? `/auth/login`
+                            : `/auth/login?redirect=${searchParams.redirect}`
+                    }
+                    className="underline"
+                >
                     Log in
                 </Link>
             </p>

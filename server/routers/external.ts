@@ -72,8 +72,8 @@ authenticated.post(
     "/org/:orgId/create-invite",
     verifyOrgAccess,
     user.inviteUser
-);
-authenticated.post("/org/:orgId/accept-invite", user.acceptInvite);
+); // maybe make this /invite/create instead
+authenticated.post("/invite/accept", user.acceptInvite);
 
 authenticated.get(
     "/resource/:resourceId/roles",

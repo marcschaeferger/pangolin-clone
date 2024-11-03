@@ -24,6 +24,8 @@ const inviteUserBodySchema = z.object({
     validHours: z.number().gt(0).lte(168),
 });
 
+export type InviteUserBody = z.infer<typeof inviteUserBodySchema>;
+
 export type InviteUserResponse = {
     inviteLink: string;
     expiresAt: number;
@@ -112,7 +114,7 @@ export async function inviteUser(
             roleId,
         });
 
-        const inviteLink = `${config.app.base_url}/invite/${inviteId}-${token}`;
+        const inviteLink = `${config.app.base_url}/invite?token=${inviteId}-${token}`;
 
         return response<InviteUserResponse>(res, {
             data: {

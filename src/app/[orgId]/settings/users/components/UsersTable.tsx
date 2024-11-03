@@ -10,6 +10,15 @@ import {
 import { Button } from "@app/components/ui/button";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { UsersDataTable } from "./UsersDataTable";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from "@app/components/ui/dialog";
+import { useState } from "react";
+import InviteUserForm from "./InviteUserForm";
 
 export type UserRow = {
     id: string;
@@ -60,13 +69,29 @@ type UsersTableProps = {
 };
 
 export default function UsersTable({ users }: UsersTableProps) {
+    const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+
     return (
-        <UsersDataTable
-            columns={columns}
-            data={users}
-            inviteUser={() => {
-                console.log("Invite user");
-            }}
-        />
+        <>
+            <Dialog
+                open={isInviteModalOpen}
+                onOpenChange={setIsInviteModalOpen}
+            >
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Invite User</DialogTitle>
+                    </DialogHeader>
+                    <InviteUserForm />
+                </DialogContent>
+            </Dialog>
+
+            <UsersDataTable
+                columns={columns}
+                data={users}
+                inviteUser={() => {
+                    setIsInviteModalOpen(true);
+                }}
+            />
+        </>
     );
 }
