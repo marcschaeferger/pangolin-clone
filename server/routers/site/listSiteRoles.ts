@@ -51,7 +51,7 @@ export async function listSiteRoles(
                 roleId: roles.roleId,
                 name: roles.name,
                 description: roles.description,
-                isSuperuserRole: roles.isSuperuserRole,
+                isSuperUserRole: roles.isSuperUserRole,
             })
             .from(roleSites)
             .innerJoin(roles, eq(roleSites.roleId, roles.roleId))

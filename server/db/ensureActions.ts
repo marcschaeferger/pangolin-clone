@@ -15,7 +15,7 @@ export async function ensureActions() {
     const defaultRoles = await db
         .select()
         .from(roles)
-        .where(eq(roles.isSuperuserRole, true))
+        .where(eq(roles.isSuperUserRole, true))
         .execute();
 
     // Add new actions
@@ -38,15 +38,15 @@ export async function ensureActions() {
     }
 }
 
-export async function createSuperuserRole(orgId: string) {
+export async function createSuperUserRole(orgId: string) {
     // Create the Default role if it doesn't exist
     const [insertedRole] = await db
         .insert(roles)
         .values({
             orgId,
-            isSuperuserRole: true,
-            name: 'Superuser',
-            description: 'Superuser role with all actions'
+            isSuperUserRole: true,
+            name: 'Super User',
+            description: 'Super User role with all actions'
         })
         .returning({ roleId: roles.roleId })
         .execute();
@@ -56,7 +56,7 @@ export async function createSuperuserRole(orgId: string) {
     const actionIds = await db.select().from(actions).execute();
 
     if (actionIds.length === 0) {
-        logger.info('No actions to assign to the Superuser role');
+        logger.info('No actions to assign to the Super User role');
         return;
     }
 

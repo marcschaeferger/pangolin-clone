@@ -81,11 +81,11 @@ export async function updateRole(
             );
         }
 
-        if (role[0].isSuperuserRole) {
+        if (role[0].isSuperUserRole) {
             return next(
                 createHttpError(
                     HttpCode.FORBIDDEN,
-                    `Cannot update a superuser role`
+                    `Cannot update a Super User role`
                 )
             );
         }

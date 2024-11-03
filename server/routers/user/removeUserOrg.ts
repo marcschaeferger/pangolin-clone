@@ -11,7 +11,7 @@ import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
 const removeUserSchema = z.object({
-    userId: z.string().uuid(),
+    userId: z.string(),
     orgId: z.string(),
 });
 
@@ -33,7 +33,6 @@ export async function removeUserOrg(
 
         const { userId, orgId } = parsedParams.data;
 
-        // Check if the user has permission to list sites
         const hasPermission = await checkUserActionPermission(
             ActionsEnum.removeUser,
             req
@@ -56,7 +55,7 @@ export async function removeUserOrg(
             data: null,
             success: true,
             error: false,
-            message: "User deleted successfully",
+            message: "User remove from org successfully",
             status: HttpCode.OK,
         });
     } catch (error) {

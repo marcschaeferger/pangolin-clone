@@ -61,11 +61,11 @@ export async function deleteRole(
             );
         }
 
-        if (role[0].isSuperuserRole) {
+        if (role[0].isSuperUserRole) {
             return next(
                 createHttpError(
                     HttpCode.FORBIDDEN,
-                    `Cannot delete a superuser role`
+                    `Cannot delete a Super User role`
                 )
             );
         }

@@ -131,7 +131,7 @@ export const roles = sqliteTable("roles", {
     orgId: text("orgId").references(() => orgs.orgId, {
         onDelete: "cascade",
     }),
-    isSuperuserRole: integer("isSuperuserRole", { mode: "boolean" }),
+    isSuperUserRole: integer("isSuperUserRole", { mode: "boolean" }),
     name: text("name").notNull(),
     description: text("description"),
 });

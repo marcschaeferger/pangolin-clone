@@ -8,7 +8,7 @@ import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
 import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
-import { createSuperuserRole } from '@server/db/ensureActions';
+import { createSuperUserRole } from '@server/db/ensureActions';
 import config, { APP_PATH } from "@server/config";
 import { fromError } from 'zod-validation-error';
 
@@ -75,13 +75,13 @@ export async function createOrg(req: Request, res: Response, next: NextFunction)
             domain
         }).returning();
 
-        const roleId = await createSuperuserRole(newOrg[0].orgId);
+        const roleId = await createSuperUserRole(newOrg[0].orgId);
 
         if (!roleId) {
             return next(
                 createHttpError(
                     HttpCode.INTERNAL_SERVER_ERROR,
-                    `Error creating superuser role`
+                    `Error creating Super User role`
                 )
             );
         }

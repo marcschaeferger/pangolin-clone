@@ -87,27 +87,27 @@ export async function createResource(req: Request, res: Response, next: NextFunc
             subdomain,
         }).returning();
 
-        // find the superuser roleId and also add the resource to the superuser role
-        const superuserRole = await db.select()
+        // find the Super User roleId and also add the resource to the Super User role
+        const superUserRole = await db.select()
             .from(roles)
-            .where(and(eq(roles.isSuperuserRole, true), eq(roles.orgId, orgId)))
+            .where(and(eq(roles.isSuperUserRole, true), eq(roles.orgId, orgId)))
             .limit(1);
 
-        if (superuserRole.length === 0) {
+        if (superUserRole.length === 0) {
             return next(
                 createHttpError(
                     HttpCode.NOT_FOUND,
-                    `Superuser role not found`
+                    `Super User role not found`
                 )
             );
         }
 
         await db.insert(roleResources).values({
-            roleId: superuserRole[0].roleId,
+            roleId: superUserRole[0].roleId,
             resourceId: newResource[0].resourceId,
         });
 
-        if (req.userOrgRoleId != superuserRole[0].roleId) {
+        if (req.userOrgRoleId != superUserRole[0].roleId) {
             // make sure the user can access the resource
             await db.insert(userResources).values({
                 userId: req.user?.userId!,

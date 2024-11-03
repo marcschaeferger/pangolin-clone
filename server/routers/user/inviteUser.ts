@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { userInvites, userOrgs, users } from "@server/db/schema";
+import { orgs, userInvites, userOrgs, users } from "@server/db/schema";
 import { and, eq } from "drizzle-orm";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
@@ -13,6 +13,8 @@ import { createDate, TimeSpan } from "oslo";
 import config from "@server/config";
 import { hashPassword } from "@server/auth/password";
 import { fromError } from "zod-validation-error";
+import { sendEmail } from "@server/emails";
+import SendInviteLink from "@server/emails/templates/SendInviteLink";
 
 const inviteUserParamsSchema = z.object({
     orgId: z.string(),
@@ -30,6 +32,8 @@ export type InviteUserResponse = {
     inviteLink: string;
     expiresAt: number;
 };
+
+const inviteTracker: Record<string, { timestamps: number[] }> = {};
 
 export async function inviteUser(
     req: Request,
@@ -70,6 +74,39 @@ export async function inviteUser(
                     HttpCode.FORBIDDEN,
                     "User does not have permission to perform this action"
                 )
+            );
+        }
+
+        const currentTime = Date.now();
+        const oneHourAgo = currentTime - 3600000;
+
+        if (!inviteTracker[email]) {
+            inviteTracker[email] = { timestamps: [] };
+        }
+
+        inviteTracker[email].timestamps = inviteTracker[
+            email
+        ].timestamps.filter((timestamp) => timestamp > oneHourAgo);
+
+        if (inviteTracker[email].timestamps.length >= 3) {
+            return next(
+                createHttpError(
+                    HttpCode.TOO_MANY_REQUESTS,
+                    "User has already been invited 3 times in the last hour"
+                )
+            );
+        }
+
+        inviteTracker[email].timestamps.push(currentTime);
+
+        const org = await db
+            .select()
+            .from(orgs)
+            .where(eq(orgs.orgId, orgId))
+            .limit(1);
+        if (!org.length) {
+            return next(
+                createHttpError(HttpCode.NOT_FOUND, "Organization not found")
             );
         }
 
@@ -115,6 +152,21 @@ export async function inviteUser(
         });
 
         const inviteLink = `${config.app.base_url}/invite?token=${inviteId}-${token}`;
+
+        await sendEmail(
+            SendInviteLink({
+                email,
+                inviteLink,
+                expiresInDays: (validHours / 24).toString(),
+                orgName: orgId,
+                inviterName: req.user?.email,
+            }),
+            {
+                to: email,
+                from: config.email?.no_reply,
+                subject: "You're invited to join a Fossorial organization",
+            }
+        );
 
         return response<InviteUserResponse>(res, {
             data: {

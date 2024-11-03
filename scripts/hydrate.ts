@@ -7,7 +7,7 @@
 //     targets,
 // } from "@server/db/schema";
 // import db from "@server/db";
-// import { createSuperuserRole } from "@server/db/ensureActions";
+// import { createSuperUserRole } from "@server/db/ensureActions";
 
 async function insertDummyData() {
     // // Insert dummy orgs
@@ -21,7 +21,7 @@ async function insertDummyData() {
     //     .returning()
     //     .get();
 
-    // await createSuperuserRole(org1.orgId!);
+    // await createSuperUserRole(org1.orgId!);
 
     // const org2 = db
     //     .insert(orgs)
@@ -33,7 +33,7 @@ async function insertDummyData() {
     //     .returning()
     //     .get();
 
-    // await createSuperuserRole(org2.orgId!);
+    // await createSuperUserRole(org2.orgId!);
 
     // // Insert dummy exit nodes
     // const exitNode1 = db

@@ -1,7 +1,7 @@
 import { internal } from "@app/api";
 import { authCookieHeader } from "@app/api/cookies";
 import { verifySession } from "@app/lib/auth/verifySession";
-import { LandingProvider } from "@app/providers/LandingProvider";
+import UserProvider from "@app/providers/UserProvider";
 import { ListOrgsResponse } from "@server/routers/org";
 import { AxiosResponse } from "axios";
 import { ArrowUpRight } from "lucide-react";
@@ -42,9 +42,9 @@ export default async function Page(props: {
 
     return (
         <>
-            <LandingProvider user={user}>
+            <UserProvider user={user}>
                 <p>Logged in as {user.email}</p>
-            </LandingProvider>
+            </UserProvider>
 
             <div className="mt-4">
                 {orgs.map((org) => (

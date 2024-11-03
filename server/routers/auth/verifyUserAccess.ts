@@ -1,37 +1,62 @@
-import { Request, Response, NextFunction } from 'express';
-import { db } from '@server/db';
-import { sites, userOrgs, userSites, roleSites, roles } from '@server/db/schema';
-import { and, eq, or } from 'drizzle-orm';
-import createHttpError from 'http-errors';
-import HttpCode from '@server/types/HttpCode';
+import { Request, Response, NextFunction } from "express";
+import { db } from "@server/db";
+import {
+    sites,
+    userOrgs,
+    userSites,
+    roleSites,
+    roles,
+} from "@server/db/schema";
+import { and, eq, or } from "drizzle-orm";
+import createHttpError from "http-errors";
+import HttpCode from "@server/types/HttpCode";
 
-export async function verifyUserAccess(req: Request, res: Response, next: NextFunction) {
+export async function verifyUserAccess(
+    req: Request,
+    res: Response,
+    next: NextFunction
+) {
     const userId = req.user!.userId; // Assuming you have user information in the request
     const reqUserId = req.params.userId || req.body.userId || req.query.userId;
 
     if (!userId) {
-        return next(createHttpError(HttpCode.UNAUTHORIZED, 'User not authenticated'));
+        return next(
+            createHttpError(HttpCode.UNAUTHORIZED, "User not authenticated")
+        );
     }
 
     if (!reqUserId) {
-        return next(createHttpError(HttpCode.BAD_REQUEST, 'Invalid user ID'));
+        return next(createHttpError(HttpCode.BAD_REQUEST, "Invalid user ID"));
     }
 
     try {
-
-        const userOrg = await db.select()
+        const userOrg = await db
+            .select()
             .from(userOrgs)
-            .where(and(eq(userOrgs.userId, userId), eq(userOrgs.orgId, req.userOrgId!)))
+            .where(
+                and(
+                    eq(userOrgs.userId, reqUserId),
+                    eq(userOrgs.orgId, req.userOrgId!)
+                )
+            )
             .limit(1);
 
         if (userOrg.length === 0) {
-            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have access to this user'));
+            return next(
+                createHttpError(
+                    HttpCode.FORBIDDEN,
+                    "User does not have access to this user"
+                )
+            );
         }
 
-        // If we reach here, the user doesn't have access to the site
-        return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have access to this site'));
-
+        return next();
     } catch (error) {
-        return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, 'Error verifying site access'));
+        return next(
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "Error checking if user has access to this user"
+            )
+        );
     }
 }

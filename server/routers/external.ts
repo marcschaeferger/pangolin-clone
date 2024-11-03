@@ -19,7 +19,7 @@ import {
     verifyResourceAccess,
     verifyTargetAccess,
     verifyRoleAccess,
-    verifySuperuser,
+    verifySuperUser,
     verifyUserInRole,
     verifyUserAccess,
 } from "./auth";
@@ -40,7 +40,7 @@ authenticated.put("/org", getUserOrgs, org.createOrg);
 authenticated.get("/orgs", getUserOrgs, org.listOrgs); // TODO we need to check the orgs here
 authenticated.get("/org/:orgId", verifyOrgAccess, org.getOrg);
 authenticated.post("/org/:orgId", verifyOrgAccess, org.updateOrg);
-authenticated.delete("/org/:orgId", verifyOrgAccess, org.deleteOrg);
+// authenticated.delete("/org/:orgId", verifyOrgAccess, org.deleteOrg);
 
 authenticated.put("/org/:orgId/site", verifyOrgAccess, site.createSite);
 authenticated.get("/org/:orgId/sites", verifyOrgAccess, site.listSites);
@@ -52,7 +52,7 @@ authenticated.get(
     site.pickSiteDefaults
 );
 authenticated.get("/site/:siteId", verifySiteAccess, site.getSite);
-authenticated.get("/site/:siteId/roles", verifySiteAccess, site.listSiteRoles);
+// authenticated.get("/site/:siteId/roles", verifySiteAccess, site.listSiteRoles);
 authenticated.post("/site/:siteId", verifySiteAccess, site.updateSite);
 authenticated.delete("/site/:siteId", verifySiteAccess, site.deleteSite);
 
@@ -75,11 +75,11 @@ authenticated.post(
 ); // maybe make this /invite/create instead
 authenticated.post("/invite/accept", user.acceptInvite);
 
-authenticated.get(
-    "/resource/:resourceId/roles",
-    verifyResourceAccess,
-    resource.listResourceRoles
-);
+// authenticated.get(
+//     "/resource/:resourceId/roles",
+//     verifyResourceAccess,
+//     resource.listResourceRoles
+// );
 authenticated.get(
     "/resource/:resourceId",
     verifyResourceAccess,
@@ -121,85 +121,85 @@ authenticated.delete(
 // authenticated.put(
 //     "/org/:orgId/role",
 //     verifyOrgAccess,
-//     verifySuperuser,
+//     verifySuperUser,
 //     role.createRole
 // );
-authenticated.get("/org/:orgId/roles", verifyOrgAccess, role.listRoles);
-authenticated.get(
-    "/role/:roleId",
-    verifyRoleAccess,
-    verifyUserInRole,
-    role.getRole
-);
+// authenticated.get("/org/:orgId/roles", verifyOrgAccess, role.listRoles);
+// authenticated.get(
+//     "/role/:roleId",
+//     verifyRoleAccess,
+//     verifyUserInRole,
+//     role.getRole
+// );
 // authenticated.post(
 //     "/role/:roleId",
 //     verifyRoleAccess,
-//     verifySuperuser,
+//     verifySuperUser,
 //     role.updateRole
 // );
 // authenticated.delete(
 //     "/role/:roleId",
 //     verifyRoleAccess,
-//     verifySuperuser,
+//     verifySuperUser,
 //     role.deleteRole
 // );
 
-authenticated.put(
-    "/role/:roleId/site",
-    verifyRoleAccess,
-    verifyUserInRole,
-    role.addRoleSite
-);
-authenticated.delete(
-    "/role/:roleId/site",
-    verifyRoleAccess,
-    verifyUserInRole,
-    role.removeRoleSite
-);
-authenticated.get(
-    "/role/:roleId/sites",
-    verifyRoleAccess,
-    verifyUserInRole,
-    role.listRoleSites
-);
-authenticated.put(
-    "/role/:roleId/resource",
-    verifyRoleAccess,
-    verifyUserInRole,
-    role.addRoleResource
-);
-authenticated.delete(
-    "/role/:roleId/resource",
-    verifyRoleAccess,
-    verifyUserInRole,
-    role.removeRoleResource
-);
-authenticated.get(
-    "/role/:roleId/resources",
-    verifyRoleAccess,
-    verifyUserInRole,
-    role.listRoleResources
-);
-authenticated.put(
-    "/role/:roleId/action",
-    verifyRoleAccess,
-    verifyUserInRole,
-    role.addRoleAction
-);
-authenticated.delete(
-    "/role/:roleId/action",
-    verifyRoleAccess,
-    verifyUserInRole,
-    verifySuperuser,
-    role.removeRoleAction
-);
-authenticated.get(
-    "/role/:roleId/actions",
-    verifyRoleAccess,
-    verifyUserInRole,
-    verifySuperuser,
-    role.listRoleActions
-);
+// authenticated.put(
+//     "/role/:roleId/site",
+//     verifyRoleAccess,
+//     verifyUserInRole,
+//     role.addRoleSite
+// );
+// authenticated.delete(
+//     "/role/:roleId/site",
+//     verifyRoleAccess,
+//     verifyUserInRole,
+//     role.removeRoleSite
+// );
+// authenticated.get(
+//     "/role/:roleId/sites",
+//     verifyRoleAccess,
+//     verifyUserInRole,
+//     role.listRoleSites
+// );
+// authenticated.put(
+//     "/role/:roleId/resource",
+//     verifyRoleAccess,
+//     verifyUserInRole,
+//     role.addRoleResource
+// );
+// authenticated.delete(
+//     "/role/:roleId/resource",
+//     verifyRoleAccess,
+//     verifyUserInRole,
+//     role.removeRoleResource
+// );
+// authenticated.get(
+//     "/role/:roleId/resources",
+//     verifyRoleAccess,
+//     verifyUserInRole,
+//     role.listRoleResources
+// );
+// authenticated.put(
+//     "/role/:roleId/action",
+//     verifyRoleAccess,
+//     verifyUserInRole,
+//     role.addRoleAction
+// );
+// authenticated.delete(
+//     "/role/:roleId/action",
+//     verifyRoleAccess,
+//     verifyUserInRole,
+//     verifySuperUser,
+//     role.removeRoleAction
+// );
+// authenticated.get(
+//     "/role/:roleId/actions",
+//     verifyRoleAccess,
+//     verifyUserInRole,
+//     verifySuperUser,
+//     role.listRoleActions
+// );
 
 unauthenticated.get("/user", verifySessionMiddleware, user.getUser);
 
@@ -211,44 +211,44 @@ authenticated.delete(
     user.removeUserOrg
 );
 
-authenticated.put(
-    "/user/:userId/site",
-    verifySiteAccess,
-    verifyUserAccess,
-    role.addRoleSite
-);
-authenticated.delete(
-    "/user/:userId/site",
-    verifySiteAccess,
-    verifyUserAccess,
-    role.removeRoleSite
-);
-authenticated.put(
-    "/user/:userId/resource",
-    verifyResourceAccess,
-    verifyUserAccess,
-    role.addRoleResource
-);
-authenticated.delete(
-    "/user/:userId/resource",
-    verifyResourceAccess,
-    verifyUserAccess,
-    role.removeRoleResource
-);
-authenticated.put(
-    "/org/:orgId/user/:userId/action",
-    verifyOrgAccess,
-    verifyUserAccess,
-    verifySuperuser,
-    role.addRoleAction
-);
-authenticated.delete(
-    "/org/:orgId/user/:userId/action",
-    verifyOrgAccess,
-    verifyUserAccess,
-    verifySuperuser,
-    role.removeRoleAction
-);
+// authenticated.put(
+//     "/user/:userId/site",
+//     verifySiteAccess,
+//     verifyUserAccess,
+//     role.addRoleSite
+// );
+// authenticated.delete(
+//     "/user/:userId/site",
+//     verifySiteAccess,
+//     verifyUserAccess,
+//     role.removeRoleSite
+// );
+// authenticated.put(
+//     "/user/:userId/resource",
+//     verifyResourceAccess,
+//     verifyUserAccess,
+//     role.addRoleResource
+// );
+// authenticated.delete(
+//     "/user/:userId/resource",
+//     verifyResourceAccess,
+//     verifyUserAccess,
+//     role.removeRoleResource
+// );
+// authenticated.put(
+//     "/org/:orgId/user/:userId/action",
+//     verifyOrgAccess,
+//     verifyUserAccess,
+//     verifySuperUser,
+//     role.addRoleAction
+// );
+// authenticated.delete(
+//     "/org/:orgId/user/:userId/action",
+//     verifyOrgAccess,
+//     verifyUserAccess,
+//     verifySuperUser,
+//     role.removeRoleAction
+// );
 
 // Auth routes
 export const authRouter = Router();

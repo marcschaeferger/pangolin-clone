@@ -122,7 +122,13 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
 
     return (
         <>
-            <Credenza open={open} onOpenChange={setOpen}>
+            <Credenza open={open} onOpenChange={(val) => {
+                setOpen(val);
+                setInviteLink(null);
+                setLoading(false);
+                setExpiresInDays(1);
+                form.reset();
+            }}>
                 <CredenzaContent>
                     <CredenzaHeader>
                         <CredenzaTitle>Invite User</CredenzaTitle>
@@ -257,7 +263,7 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
                             type="submit"
                             form="invite-user-form"
                             loading={loading}
-                            disabled={inviteLink !== null}
+                            disabled={inviteLink !== null || loading}
                         >
                             Create Invitation
                         </Button>

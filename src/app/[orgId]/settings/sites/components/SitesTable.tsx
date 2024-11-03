@@ -79,7 +79,7 @@ export const columns: ColumnDef<SiteRow>[] = [
                     .then(() => {
                         router.refresh();
                     });
-            }
+            };
 
             return (
                 <DropdownMenu>
@@ -98,7 +98,12 @@ export const columns: ColumnDef<SiteRow>[] = [
                             </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem>
-                            <button onClick={() => deleteSite(siteRow.id)} className="text-red-600 hover:text-red-800 hover:underline cursor-pointer">Delete</button>
+                            <button
+                                onClick={() => deleteSite(siteRow.id)}
+                                className="text-red-600 hover:text-red-800"
+                            >
+                                Delete
+                            </button>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
