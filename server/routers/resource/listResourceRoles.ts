@@ -1,26 +1,31 @@
-import { Request, Response, NextFunction } from 'express';
-import { z } from 'zod';
-import { db } from '@server/db';
-import { roleResources, roles } from '@server/db/schema';
-import { eq } from 'drizzle-orm';
+import { Request, Response, NextFunction } from "express";
+import { z } from "zod";
+import { db } from "@server/db";
+import { roleResources, roles } from "@server/db/schema";
+import { eq } from "drizzle-orm";
 import response from "@server/utils/response";
-import HttpCode from '@server/types/HttpCode';
-import createHttpError from 'http-errors';
-import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
-import logger from '@server/logger';
+import HttpCode from "@server/types/HttpCode";
+import createHttpError from "http-errors";
+import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
+import logger from "@server/logger";
+import { fromError } from "zod-validation-error";
 
 const listResourceRolesSchema = z.object({
     resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
 
-export async function listResourceRoles(req: Request, res: Response, next: NextFunction): Promise<any> {
+export async function listResourceRoles(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<any> {
     try {
         const parsedParams = listResourceRolesSchema.safeParse(req.params);
         if (!parsedParams.success) {
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedParams.error.errors.map(e => e.message).join(', ')
+                    fromError(parsedParams.error).toString()
                 )
             );
         }
@@ -28,9 +33,17 @@ export async function listResourceRoles(req: Request, res: Response, next: NextF
         const { resourceId } = parsedParams.data;
 
         // Check if the user has permission to list resource roles
-        const hasPermission = await checkUserActionPermission(ActionsEnum.listResourceRoles, req);
+        const hasPermission = await checkUserActionPermission(
+            ActionsEnum.listResourceRoles,
+            req
+        );
         if (!hasPermission) {
-            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
+            return next(
+                createHttpError(
+                    HttpCode.FORBIDDEN,
+                    "User does not have permission to perform this action"
+                )
+            );
         }
 
         const resourceRolesList = await db
@@ -53,6 +66,11 @@ export async function listResourceRoles(req: Request, res: Response, next: NextF
         });
     } catch (error) {
         logger.error(error);
-        return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred..."));
+        return next(
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "An error occurred..."
+            )
+        );
     }
 }

@@ -1,18 +1,24 @@
-import { Request, Response, NextFunction } from 'express';
-import { z } from 'zod';
-import { db } from '@server/db';
-import { sites } from '@server/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { Request, Response, NextFunction } from "express";
+import { z } from "zod";
+import { db } from "@server/db";
+import { sites } from "@server/db/schema";
+import { eq, and } from "drizzle-orm";
 import response from "@server/utils/response";
-import HttpCode from '@server/types/HttpCode';
-import createHttpError from 'http-errors';
-import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
-import logger from '@server/logger';
-import stoi from '@server/utils/stoi';
+import HttpCode from "@server/types/HttpCode";
+import createHttpError from "http-errors";
+import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
+import logger from "@server/logger";
+import stoi from "@server/utils/stoi";
+import { fromError } from "zod-validation-error";
 
 // Define Zod schema for request parameters validation
 const getSiteSchema = z.object({
-            siteId: z.string().optional().transform(stoi).pipe(z.number().int().positive().optional()).optional(),
+    siteId: z
+        .string()
+        .optional()
+        .transform(stoi)
+        .pipe(z.number().int().positive().optional())
+        .optional(),
     niceId: z.string().optional(),
     orgId: z.string().optional(),
 });
@@ -22,9 +28,13 @@ export type GetSiteResponse = {
     name: string;
     subdomain: string;
     subnet: string;
-}
+};
 
-export async function getSite(req: Request, res: Response, next: NextFunction): Promise<any> {
+export async function getSite(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<any> {
     try {
         // Validate request parameters
         const parsedParams = getSiteSchema.safeParse(req.params);
@@ -32,7 +42,7 @@ export async function getSite(req: Request, res: Response, next: NextFunction): 
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedParams.error.errors.map(e => e.message).join(', ')
+                    fromError(parsedParams.error).toString()
                 )
             );
         }
@@ -40,27 +50,37 @@ export async function getSite(req: Request, res: Response, next: NextFunction): 
         const { siteId, niceId, orgId } = parsedParams.data;
 
         // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(ActionsEnum.updateSite, req);
+        const hasPermission = await checkUserActionPermission(
+            ActionsEnum.updateSite,
+            req
+        );
         if (!hasPermission) {
-            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
+            return next(
+                createHttpError(
+                    HttpCode.FORBIDDEN,
+                    "User does not have permission to perform this action"
+                )
+            );
         }
 
         let site;
         // Fetch the site from the database
         if (siteId) {
-            site = await db.select()
+            site = await db
+                .select()
                 .from(sites)
                 .where(eq(sites.siteId, siteId))
                 .limit(1);
         } else if (niceId && orgId) {
-            site = await db.select()
+            site = await db
+                .select()
                 .from(sites)
                 .where(and(eq(sites.niceId, niceId), eq(sites.orgId, orgId)))
                 .limit(1);
         }
 
         if (!site) {
-            return next(createHttpError(HttpCode.NOT_FOUND, 'Site not found'));
+            return next(createHttpError(HttpCode.NOT_FOUND, "Site not found"));
         }
 
         if (site.length === 0) {
@@ -86,6 +106,11 @@ export async function getSite(req: Request, res: Response, next: NextFunction): 
         });
     } catch (error) {
         logger.error("Error from getSite: ", error);
-        return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred..."));
+        return next(
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "An error occurred..."
+            )
+        );
     }
 }

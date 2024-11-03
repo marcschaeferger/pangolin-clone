@@ -3,6 +3,9 @@ import { authCookieHeader } from "@app/api/cookies";
 import { ListUsersResponse } from "@server/routers/user";
 import { AxiosResponse } from "axios";
 import UsersTable, { UserRow } from "./components/UsersTable";
+import { GetOrgResponse } from "@server/routers/org";
+import { cache } from "react";
+import OrgProvider from "@app/providers/OrgProvider";
 
 type UsersPageProps = {
     params: Promise<{ orgId: string }>;
@@ -10,15 +13,36 @@ type UsersPageProps = {
 
 export default async function UsersPage(props: UsersPageProps) {
     const params = await props.params;
+
     let users: ListUsersResponse["users"] = [];
-    try {
-        const res = await internal.get<AxiosResponse<ListUsersResponse>>(
+    const res = await internal
+        .get<AxiosResponse<ListUsersResponse>>(
             `/org/${params.orgId}/users`,
             await authCookieHeader()
-        );
+        )
+        .catch((e) => {
+            console.error(e);
+        });
+
+    if (res && res.status === 200) {
         users = res.data.data.users;
-    } catch (e) {
-        console.error("Error fetching users", e);
+    }
+
+    let org: GetOrgResponse | null = null;
+    const getOrg = cache(async () =>
+        internal
+            .get<AxiosResponse<GetOrgResponse>>(
+                `/org/${params.orgId}`,
+                await authCookieHeader()
+            )
+            .catch((e) => {
+                console.error(e);
+            })
+    );
+    const orgRes = await getOrg();
+
+    if (orgRes && orgRes.status === 200) {
+        org = orgRes.data.data;
     }
 
     const userRows: UserRow[] = users.map((user) => {
@@ -40,7 +64,9 @@ export default async function UsersPage(props: UsersPageProps) {
                 </p>
             </div>
 
-            <UsersTable users={userRows} />
+            <OrgProvider org={org}>
+                <UsersTable users={userRows} />
+            </OrgProvider>
         </>
     );
 }

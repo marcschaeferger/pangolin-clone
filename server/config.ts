@@ -120,7 +120,8 @@ if (!parsedConfig.success) {
     throw new Error(`Invalid configuration file: ${errors}`);
 }
 
-process.env.SERVER_EXTERNAL_PORT = parsedConfig.data.server.external_port.toString();
+process.env.SERVER_EXTERNAL_PORT =
+    parsedConfig.data.server.external_port.toString();
 process.env.FLAGS_EMAIL_VERIFICATION_REQUIRED = parsedConfig.data.flags
     ?.require_email_verification
     ? "true"

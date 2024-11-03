@@ -1,23 +1,28 @@
-import { Request, Response, NextFunction } from 'express';
-import { z } from 'zod';
-import { db } from '@server/db';
-import { sites } from '@server/db/schema';
-import { eq } from 'drizzle-orm';
+import { Request, Response, NextFunction } from "express";
+import { z } from "zod";
+import { db } from "@server/db";
+import { sites } from "@server/db/schema";
+import { eq } from "drizzle-orm";
 import response from "@server/utils/response";
-import HttpCode from '@server/types/HttpCode';
-import createHttpError from 'http-errors';
-import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
-import logger from '@server/logger';
-import { deletePeer } from '../gerbil/peers';
+import HttpCode from "@server/types/HttpCode";
+import createHttpError from "http-errors";
+import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
+import logger from "@server/logger";
+import { deletePeer } from "../gerbil/peers";
+import { fromError } from "zod-validation-error";
 
 const API_BASE_URL = "http://localhost:3000";
 
 // Define Zod schema for request parameters validation
 const deleteSiteSchema = z.object({
-    siteId: z.string().transform(Number).pipe(z.number().int().positive())
+    siteId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
 
-export async function deleteSite(req: Request, res: Response, next: NextFunction): Promise<any> {
+export async function deleteSite(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<any> {
     try {
         // Validate request parameters
         const parsedParams = deleteSiteSchema.safeParse(req.params);
@@ -25,7 +30,7 @@ export async function deleteSite(req: Request, res: Response, next: NextFunction
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedParams.error.errors.map(e => e.message).join(', ')
+                    fromError(parsedParams.error).toString()
                 )
             );
         }
@@ -33,13 +38,22 @@ export async function deleteSite(req: Request, res: Response, next: NextFunction
         const { siteId } = parsedParams.data;
 
         // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(ActionsEnum.deleteSite, req);
+        const hasPermission = await checkUserActionPermission(
+            ActionsEnum.deleteSite,
+            req
+        );
         if (!hasPermission) {
-            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
+            return next(
+                createHttpError(
+                    HttpCode.FORBIDDEN,
+                    "User does not have permission to perform this action"
+                )
+            );
         }
 
         // Delete the site from the database
-        const [deletedSite] = await db.delete(sites)
+        const [deletedSite] = await db
+            .delete(sites)
             .where(eq(sites.siteId, siteId))
             .returning();
 
@@ -63,26 +77,33 @@ export async function deleteSite(req: Request, res: Response, next: NextFunction
         });
     } catch (error) {
         logger.error(error);
-        return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred..."));
+        return next(
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "An error occurred..."
+            )
+        );
     }
 }
 
-
 async function removePeer(publicKey: string) {
     try {
-        const response = await fetch(`${API_BASE_URL}/peer?public_key=${encodeURIComponent(publicKey)}`, {
-            method: 'DELETE',
-        });
+        const response = await fetch(
+            `${API_BASE_URL}/peer?public_key=${encodeURIComponent(publicKey)}`,
+            {
+                method: "DELETE",
+            }
+        );
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const data = await response.json();
-        console.log('Peer removed successfully:', data.status);
+        console.log("Peer removed successfully:", data.status);
         return data;
     } catch (error: any) {
-        console.error('Error removing peer:', error.message);
+        console.error("Error removing peer:", error.message);
         throw error;
     }
 }

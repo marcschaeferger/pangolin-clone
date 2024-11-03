@@ -1,13 +1,14 @@
-import { Request, Response, NextFunction } from 'express';
-import { z } from 'zod';
-import { db } from '@server/db';
-import { userActions } from '@server/db/schema';
-import { and, eq } from 'drizzle-orm';
+import { Request, Response, NextFunction } from "express";
+import { z } from "zod";
+import { db } from "@server/db";
+import { userActions } from "@server/db/schema";
+import { and, eq } from "drizzle-orm";
 import response from "@server/utils/response";
-import HttpCode from '@server/types/HttpCode';
-import createHttpError from 'http-errors';
-import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
-import logger from '@server/logger';
+import HttpCode from "@server/types/HttpCode";
+import createHttpError from "http-errors";
+import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
+import logger from "@server/logger";
+import { fromError } from "zod-validation-error";
 
 const removeUserActionParamsSchema = z.object({
     userId: z.string(),
@@ -15,17 +16,21 @@ const removeUserActionParamsSchema = z.object({
 
 const removeUserActionSchema = z.object({
     actionId: z.string(),
-    orgId: z.string()
+    orgId: z.string(),
 });
 
-export async function removeUserAction(req: Request, res: Response, next: NextFunction): Promise<any> {
+export async function removeUserAction(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<any> {
     try {
         const parsedParams = removeUserActionParamsSchema.safeParse(req.params);
         if (!parsedParams.success) {
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedParams.error.errors.map(e => e.message).join(', ')
+                    fromError(parsedParams.error).toString()
                 )
             );
         }
@@ -37,7 +42,7 @@ export async function removeUserAction(req: Request, res: Response, next: NextFu
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedBody.error.errors.map(e => e.message).join(', ')
+                    fromError(parsedBody.error).toString()
                 )
             );
         }
@@ -45,17 +50,28 @@ export async function removeUserAction(req: Request, res: Response, next: NextFu
         const { actionId, orgId } = parsedBody.data;
 
         // Check if the user has permission to remove user actions
-        const hasPermission = await checkUserActionPermission(ActionsEnum.removeUserAction, req);
+        const hasPermission = await checkUserActionPermission(
+            ActionsEnum.removeUserAction,
+            req
+        );
         if (!hasPermission) {
-            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
+            return next(
+                createHttpError(
+                    HttpCode.FORBIDDEN,
+                    "User does not have permission to perform this action"
+                )
+            );
         }
 
-        const deletedUserAction = await db.delete(userActions)
-            .where(and(
-                eq(userActions.userId, userId),
-                eq(userActions.actionId, actionId),
-                eq(userActions.orgId, orgId)
-            ))
+        const deletedUserAction = await db
+            .delete(userActions)
+            .where(
+                and(
+                    eq(userActions.userId, userId),
+                    eq(userActions.actionId, actionId),
+                    eq(userActions.orgId, orgId)
+                )
+            )
             .returning();
 
         if (deletedUserAction.length === 0) {
@@ -76,6 +92,11 @@ export async function removeUserAction(req: Request, res: Response, next: NextFu
         });
     } catch (error) {
         logger.error(error);
-        return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred..."));
+        return next(
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "An error occurred..."
+            )
+        );
     }
 }

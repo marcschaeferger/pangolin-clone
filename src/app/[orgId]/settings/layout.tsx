@@ -8,6 +8,9 @@ import { internal } from "@app/api";
 import { AxiosResponse } from "axios";
 import { GetOrgResponse, ListOrgsResponse } from "@server/routers/org";
 import { authCookieHeader } from "@app/api/cookies";
+import { cache } from "react";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
     title: `Settings - Pangolin`,
@@ -47,7 +50,8 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
 
     const { children } = props;
 
-    const user = await verifySession();
+    const getUser = cache(verifySession);
+    const user = await getUser();
 
     if (!user) {
         redirect("/auth/login");
@@ -56,20 +60,23 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
     const cookie = await authCookieHeader();
 
     try {
-        await internal.get<AxiosResponse<GetOrgResponse>>(
-            `/org/${params.orgId}`,
-            cookie
+        const getOrg = cache(() =>
+            internal.get<AxiosResponse<GetOrgResponse>>(
+                `/org/${params.orgId}`,
+                cookie
+            )
         );
+        const org = await getOrg();
     } catch {
         redirect(`/`);
     }
 
     let orgs: ListOrgsResponse["orgs"] = [];
     try {
-        const res = await internal.get<AxiosResponse<ListOrgsResponse>>(
-            `/orgs`,
-            cookie
+        const getOrgs = cache(() =>
+            internal.get<AxiosResponse<ListOrgsResponse>>(`/orgs`, cookie)
         );
+        const res = await getOrgs();
         if (res && res.data.data.orgs) {
             orgs = res.data.data.orgs;
         }

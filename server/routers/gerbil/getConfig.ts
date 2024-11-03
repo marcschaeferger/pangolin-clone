@@ -10,6 +10,7 @@ import logger from '@server/logger';
 import config from "@server/config";
 import { getUniqueExitNodeEndpointName } from '@server/db/names';
 import { findNextAvailableCidr } from "@server/utils/ip";
+import { fromError } from 'zod-validation-error';
 // Define Zod schema for request validation
 const getConfigSchema = z.object({
     publicKey: z.string(),
@@ -33,7 +34,7 @@ export async function getConfig(req: Request, res: Response, next: NextFunction)
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedParams.error.errors.map(e => e.message).join(', ')
+                    fromError(parsedParams.error).toString() 
                 )
             );
         }

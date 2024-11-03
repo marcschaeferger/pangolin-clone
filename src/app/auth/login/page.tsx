@@ -2,12 +2,16 @@ import LoginForm from "@app/app/auth/login/LoginForm";
 import { verifySession } from "@app/lib/auth/verifySession";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { cache } from "react";
+
+export const dynamic = 'force-dynamic';
 
 export default async function Page(props: {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
     const searchParams = await props.searchParams;
-    const user = await verifySession();
+    const getUser = cache(verifySession);
+    const user = await getUser();
 
     if (user) {
         redirect("/");

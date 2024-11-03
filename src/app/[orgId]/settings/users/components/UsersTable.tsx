@@ -10,16 +10,8 @@ import {
 import { Button } from "@app/components/ui/button";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { UsersDataTable } from "./UsersDataTable";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from "@app/components/ui/dialog";
 import { useState } from "react";
 import InviteUserForm from "./InviteUserForm";
-import { Credenza, CredenzaTitle, CredenzaDescription, CredenzaHeader, CredenzaClose, CredenzaFooter, CredenzaContent, CredenzaBody } from "@app/components/Credenza";
 
 export type UserRow = {
     id: string;
@@ -74,19 +66,10 @@ export default function UsersTable({ users }: UsersTableProps) {
 
     return (
         <>
-            <Credenza open={isInviteModalOpen} onOpenChange={setIsInviteModalOpen}>
-                <CredenzaContent>
-                    <CredenzaHeader>
-                        <CredenzaTitle>Invite User</CredenzaTitle>
-                        <CredenzaDescription>
-                            Give new users access to your organization
-                        </CredenzaDescription>
-                    </CredenzaHeader>
-                    <CredenzaBody>
-                    <InviteUserForm />
-                    </CredenzaBody>
-                </CredenzaContent>
-            </Credenza>
+            <InviteUserForm
+                open={isInviteModalOpen}
+                setOpen={setIsInviteModalOpen}
+            />
 
             <UsersDataTable
                 columns={columns}

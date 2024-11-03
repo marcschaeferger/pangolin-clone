@@ -1,27 +1,32 @@
-import { Request, Response, NextFunction } from 'express';
-import { z } from 'zod';
-import { db } from '@server/db';
-import { resources, sites, targets } from '@server/db/schema';
-import { eq } from 'drizzle-orm';
+import { Request, Response, NextFunction } from "express";
+import { z } from "zod";
+import { db } from "@server/db";
+import { resources, sites, targets } from "@server/db/schema";
+import { eq } from "drizzle-orm";
 import response from "@server/utils/response";
-import HttpCode from '@server/types/HttpCode';
-import createHttpError from 'http-errors';
-import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
-import logger from '@server/logger';
-import { addPeer } from '../gerbil/peers';
+import HttpCode from "@server/types/HttpCode";
+import createHttpError from "http-errors";
+import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
+import logger from "@server/logger";
+import { addPeer } from "../gerbil/peers";
+import { fromError } from "zod-validation-error";
 
 const deleteTargetSchema = z.object({
-    targetId: z.string().transform(Number).pipe(z.number().int().positive())
+    targetId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
 
-export async function deleteTarget(req: Request, res: Response, next: NextFunction): Promise<any> {
+export async function deleteTarget(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<any> {
     try {
         const parsedParams = deleteTargetSchema.safeParse(req.params);
         if (!parsedParams.success) {
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedParams.error.errors.map(e => e.message).join(', ')
+                    fromError(parsedParams.error).toString()
                 )
             );
         }
@@ -29,13 +34,21 @@ export async function deleteTarget(req: Request, res: Response, next: NextFuncti
         const { targetId } = parsedParams.data;
 
         // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(ActionsEnum.deleteTarget, req);
+        const hasPermission = await checkUserActionPermission(
+            ActionsEnum.deleteTarget,
+            req
+        );
         if (!hasPermission) {
-            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
+            return next(
+                createHttpError(
+                    HttpCode.FORBIDDEN,
+                    "User does not have permission to perform this action"
+                )
+            );
         }
 
-
-        const [deletedTarget] = await db.delete(targets)
+        const [deletedTarget] = await db
+            .delete(targets)
             .where(eq(targets.targetId, targetId))
             .returning();
 
@@ -48,9 +61,10 @@ export async function deleteTarget(req: Request, res: Response, next: NextFuncti
             );
         }
         // get the resource
-        const [resource] = await db.select({
-            siteId: resources.siteId,
-        })
+        const [resource] = await db
+            .select({
+                siteId: resources.siteId,
+            })
             .from(resources)
             .where(eq(resources.resourceId, deletedTarget.resourceId!));
 
@@ -66,7 +80,8 @@ export async function deleteTarget(req: Request, res: Response, next: NextFuncti
         // TODO: is this all inefficient?
 
         // get the site
-        const [site] = await db.select()
+        const [site] = await db
+            .select()
             .from(sites)
             .where(eq(sites.siteId, resource.siteId!))
             .limit(1);
@@ -86,16 +101,18 @@ export async function deleteTarget(req: Request, res: Response, next: NextFuncti
         });
 
         // Fetch targets for all resources of this site
-        const targetIps = await Promise.all(resourcesRes.map(async (resource) => {
-            const targetsRes = await db.query.targets.findMany({
-                where: eq(targets.resourceId, resource.resourceId),
-            });
-            return targetsRes.map(target => `${target.ip}/32`);
-        }));
+        const targetIps = await Promise.all(
+            resourcesRes.map(async (resource) => {
+                const targetsRes = await db.query.targets.findMany({
+                    where: eq(targets.resourceId, resource.resourceId),
+                });
+                return targetsRes.map((target) => `${target.ip}/32`);
+            })
+        );
 
         await addPeer(site.exitNodeId!, {
             publicKey: site.pubKey,
-            allowedIps: targetIps.flat()
+            allowedIps: targetIps.flat(),
         });
 
         return response(res, {
@@ -107,6 +124,11 @@ export async function deleteTarget(req: Request, res: Response, next: NextFuncti
         });
     } catch (error) {
         logger.error(error);
-        return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred..."));
+        return next(
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "An error occurred..."
+            )
+        );
     }
 }

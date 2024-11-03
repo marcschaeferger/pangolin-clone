@@ -1,32 +1,38 @@
-import { Request, Response, NextFunction } from 'express';
-import { z } from 'zod';
-import { db } from '@server/db';
-import { orgs } from '@server/db/schema';
-import { eq } from 'drizzle-orm';
+import { Request, Response, NextFunction } from "express";
+import { z } from "zod";
+import { db } from "@server/db";
+import { orgs } from "@server/db/schema";
+import { eq } from "drizzle-orm";
 import response from "@server/utils/response";
-import HttpCode from '@server/types/HttpCode';
-import createHttpError from 'http-errors';
-import logger from '@server/logger';
+import HttpCode from "@server/types/HttpCode";
+import createHttpError from "http-errors";
+import logger from "@server/logger";
+import { fromError } from "zod-validation-error";
 
 const getOrgSchema = z.object({
-    orgId: z.string()
+    orgId: z.string(),
 });
 
-export async function checkId(req: Request, res: Response, next: NextFunction): Promise<any> {
+export async function checkId(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<any> {
     try {
         const parsedQuery = getOrgSchema.safeParse(req.query);
         if (!parsedQuery.success) {
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedQuery.error.errors.map(e => e.message).join(', ')
+                    fromError(parsedQuery.error).toString()
                 )
             );
         }
 
         const { orgId } = parsedQuery.data;
 
-        const org = await db.select()
+        const org = await db
+            .select()
             .from(orgs)
             .where(eq(orgs.orgId, orgId))
             .limit(1);
@@ -50,6 +56,11 @@ export async function checkId(req: Request, res: Response, next: NextFunction): 
         });
     } catch (error) {
         logger.error(error);
-        return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred..."));
+        return next(
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "An error occurred..."
+            )
+        );
     }
 }

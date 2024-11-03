@@ -6,7 +6,7 @@ import { useFieldArray, useForm } from "react-hook-form"
 import { z } from "zod"
 
 import { cn } from "@/lib/utils"
-import { toast } from "@/hooks/use-toast"
+import { toast } from "@/hooks/useToast"
 
 import { Button } from "@/components/ui/button"
 import {

@@ -8,6 +8,7 @@ import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
 import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
+import { fromError } from 'zod-validation-error';
 
 const deleteOrgSchema = z.object({
     orgId: z.string()
@@ -20,7 +21,7 @@ export async function deleteOrg(req: Request, res: Response, next: NextFunction)
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedParams.error.errors.map(e => e.message).join(', ')
+                    fromError(parsedParams.error).toString()
                 )
             );
         }

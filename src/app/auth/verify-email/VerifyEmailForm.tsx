@@ -32,7 +32,7 @@ import { AxiosResponse } from "axios";
 import { VerifyEmailResponse } from "@server/routers/auth";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "../../../components/ui/alert";
-import { useToast } from "@app/hooks/use-toast";
+import { useToast } from "@app/hooks/useToast";
 import { useRouter } from "next/navigation";
 
 const FormSchema = z.object({

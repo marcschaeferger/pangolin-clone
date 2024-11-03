@@ -36,6 +36,8 @@ import { AxiosResponse } from "axios";
 import api from "@app/api";
 import { useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { GetResourceResponse } from "@server/routers/resource";
+import { useToast } from "@app/hooks/useToast";
 
 const GeneralFormSchema = z.object({
     name: z.string(),
@@ -49,6 +51,7 @@ export function GeneralForm() {
     const orgId = params.orgId;
     const { resource, updateResource } = useResourceContext();
     const [sites, setSites] = useState<ListSitesResponse["sites"]>([]);
+    const { toast } = useToast();
 
     const form = useForm<GeneralFormValues>({
         resolver: zodResolver(GeneralFormSchema),
@@ -72,7 +75,24 @@ export function GeneralForm() {
     }, []);
 
     async function onSubmit(data: GeneralFormValues) {
-        await updateResource({ name: data.name, siteId: data.siteId });
+        updateResource({ name: data.name, siteId: data.siteId });
+        await api
+            .post<AxiosResponse<GetResourceResponse>>(
+                `resource/${resource?.resourceId}`,
+                {
+                    name: data.name,
+                    siteId: data.siteId,
+                }
+            )
+            .catch((e) => {
+                toast({
+                    variant: "destructive",
+                    title: "Failed to update resource",
+                    description:
+                        e.response?.data?.message ||
+                        "An error occurred while updating the resource",
+                });
+            });
     }
 
     return (

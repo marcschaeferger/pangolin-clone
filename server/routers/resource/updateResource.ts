@@ -1,13 +1,14 @@
-import { Request, Response, NextFunction } from 'express';
-import { z } from 'zod';
-import { db } from '@server/db';
-import { resources } from '@server/db/schema';
-import { eq } from 'drizzle-orm';
+import { Request, Response, NextFunction } from "express";
+import { z } from "zod";
+import { db } from "@server/db";
+import { resources } from "@server/db/schema";
+import { eq } from "drizzle-orm";
 import response from "@server/utils/response";
-import HttpCode from '@server/types/HttpCode';
-import createHttpError from 'http-errors';
-import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
-import logger from '@server/logger';
+import HttpCode from "@server/types/HttpCode";
+import createHttpError from "http-errors";
+import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
+import logger from "@server/logger";
+import { fromError } from "zod-validation-error";
 
 // Define Zod schema for request parameters validation
 const updateResourceParamsSchema = z.object({
@@ -15,14 +16,20 @@ const updateResourceParamsSchema = z.object({
 });
 
 // Define Zod schema for request body validation
-const updateResourceBodySchema = z.object({
-    name: z.string().min(1).max(255).optional(),
-    subdomain: z.string().min(1).max(255).optional(),
-}).refine(data => Object.keys(data).length > 0, {
-    message: "At least one field must be provided for update"
-});
+const updateResourceBodySchema = z
+    .object({
+        name: z.string().min(1).max(255).optional(),
+        subdomain: z.string().min(1).max(255).optional(),
+    })
+    .refine((data) => Object.keys(data).length > 0, {
+        message: "At least one field must be provided for update",
+    });
 
-export async function updateResource(req: Request, res: Response, next: NextFunction): Promise<any> {
+export async function updateResource(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<any> {
     try {
         // Validate request parameters
         const parsedParams = updateResourceParamsSchema.safeParse(req.params);
@@ -30,7 +37,7 @@ export async function updateResource(req: Request, res: Response, next: NextFunc
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedParams.error.errors.map(e => e.message).join(', ')
+                    fromError(parsedParams.error).toString()
                 )
             );
         }
@@ -41,7 +48,7 @@ export async function updateResource(req: Request, res: Response, next: NextFunc
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedBody.error.errors.map(e => e.message).join(', ')
+                    fromError(parsedBody.error).toString()
                 )
             );
         }
@@ -50,13 +57,22 @@ export async function updateResource(req: Request, res: Response, next: NextFunc
         const updateData = parsedBody.data;
 
         // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(ActionsEnum.updateResource, req);
+        const hasPermission = await checkUserActionPermission(
+            ActionsEnum.updateResource,
+            req
+        );
         if (!hasPermission) {
-            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
+            return next(
+                createHttpError(
+                    HttpCode.FORBIDDEN,
+                    "User does not have permission to perform this action"
+                )
+            );
         }
 
         // Update the resource in the database
-        const updatedResource = await db.update(resources)
+        const updatedResource = await db
+            .update(resources)
             .set(updateData)
             .where(eq(resources.resourceId, resourceId))
             .returning();
@@ -79,6 +95,11 @@ export async function updateResource(req: Request, res: Response, next: NextFunc
         });
     } catch (error) {
         logger.error(error);
-        return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred..."));
+        return next(
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "An error occurred..."
+            )
+        );
     }
 }

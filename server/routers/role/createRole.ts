@@ -1,15 +1,16 @@
-import { Request, Response, NextFunction } from 'express';
-import { z } from 'zod';
-import { db } from '@server/db';
-import { roles } from '@server/db/schema';
+import { Request, Response, NextFunction } from "express";
+import { z } from "zod";
+import { db } from "@server/db";
+import { roles } from "@server/db/schema";
 import response from "@server/utils/response";
-import HttpCode from '@server/types/HttpCode';
-import createHttpError from 'http-errors';
-import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
-import logger from '@server/logger';
+import HttpCode from "@server/types/HttpCode";
+import createHttpError from "http-errors";
+import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
+import logger from "@server/logger";
+import { fromError } from "zod-validation-error";
 
 const createRoleParamsSchema = z.object({
-    orgId: z.string()
+    orgId: z.string(),
 });
 
 const createRoleSchema = z.object({
@@ -17,14 +18,18 @@ const createRoleSchema = z.object({
     description: z.string().optional(),
 });
 
-export async function createRole(req: Request, res: Response, next: NextFunction): Promise<any> {
+export async function createRole(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<any> {
     try {
         const parsedBody = createRoleSchema.safeParse(req.body);
         if (!parsedBody.success) {
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedBody.error.errors.map(e => e.message).join(', ')
+                    fromError(parsedBody.error).toString()
                 )
             );
         }
@@ -36,7 +41,7 @@ export async function createRole(req: Request, res: Response, next: NextFunction
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedParams.error.errors.map(e => e.message).join(', ')
+                    fromError(parsedParams.error).toString()
                 )
             );
         }
@@ -44,15 +49,26 @@ export async function createRole(req: Request, res: Response, next: NextFunction
         const { orgId } = parsedParams.data;
 
         // Check if the user has permission to create roles
-        const hasPermission = await checkUserActionPermission(ActionsEnum.createRole, req);
+        const hasPermission = await checkUserActionPermission(
+            ActionsEnum.createRole,
+            req
+        );
         if (!hasPermission) {
-            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
+            return next(
+                createHttpError(
+                    HttpCode.FORBIDDEN,
+                    "User does not have permission to perform this action"
+                )
+            );
         }
 
-        const newRole = await db.insert(roles).values({
-            ...roleData,
-            orgId,
-        }).returning();
+        const newRole = await db
+            .insert(roles)
+            .values({
+                ...roleData,
+                orgId,
+            })
+            .returning();
 
         return response(res, {
             data: newRole[0],
@@ -63,6 +79,11 @@ export async function createRole(req: Request, res: Response, next: NextFunction
         });
     } catch (error) {
         logger.error(error);
-        return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred..."));
+        return next(
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "An error occurred..."
+            )
+        );
     }
 }

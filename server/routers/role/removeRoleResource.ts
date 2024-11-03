@@ -1,13 +1,14 @@
-import { Request, Response, NextFunction } from 'express';
-import { z } from 'zod';
-import { db } from '@server/db';
-import { roleResources } from '@server/db/schema';
-import { and, eq } from 'drizzle-orm';
+import { Request, Response, NextFunction } from "express";
+import { z } from "zod";
+import { db } from "@server/db";
+import { roleResources } from "@server/db/schema";
+import { and, eq } from "drizzle-orm";
 import response from "@server/utils/response";
-import HttpCode from '@server/types/HttpCode';
-import createHttpError from 'http-errors';
-import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
-import logger from '@server/logger';
+import HttpCode from "@server/types/HttpCode";
+import createHttpError from "http-errors";
+import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
+import logger from "@server/logger";
+import { fromError } from "zod-validation-error";
 
 const removeRoleResourceParamsSchema = z.object({
     roleId: z.string().transform(Number).pipe(z.number().int().positive()),
@@ -17,14 +18,18 @@ const removeRoleResourceSchema = z.object({
     resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
 
-export async function removeRoleResource(req: Request, res: Response, next: NextFunction): Promise<any> {
+export async function removeRoleResource(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<any> {
     try {
         const parsedParams = removeRoleResourceSchema.safeParse(req.params);
         if (!parsedParams.success) {
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedParams.error.errors.map(e => e.message).join(', ')
+                    fromError(parsedParams.error).toString()
                 )
             );
         }
@@ -36,7 +41,7 @@ export async function removeRoleResource(req: Request, res: Response, next: Next
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedBody.error.errors.map(e => e.message).join(', ')
+                    fromError(parsedBody.error).toString()
                 )
             );
         }
@@ -44,13 +49,27 @@ export async function removeRoleResource(req: Request, res: Response, next: Next
         const { roleId } = parsedBody.data;
 
         // Check if the user has permission to remove role resources
-        const hasPermission = await checkUserActionPermission(ActionsEnum.removeRoleResource, req);
+        const hasPermission = await checkUserActionPermission(
+            ActionsEnum.removeRoleResource,
+            req
+        );
         if (!hasPermission) {
-            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
+            return next(
+                createHttpError(
+                    HttpCode.FORBIDDEN,
+                    "User does not have permission to perform this action"
+                )
+            );
         }
 
-        const deletedRoleResource = await db.delete(roleResources)
-            .where(and(eq(roleResources.roleId, roleId), eq(roleResources.resourceId, resourceId)))
+        const deletedRoleResource = await db
+            .delete(roleResources)
+            .where(
+                and(
+                    eq(roleResources.roleId, roleId),
+                    eq(roleResources.resourceId, resourceId)
+                )
+            )
             .returning();
 
         if (deletedRoleResource.length === 0) {
@@ -71,6 +90,11 @@ export async function removeRoleResource(req: Request, res: Response, next: Next
         });
     } catch (error) {
         logger.error(error);
-        return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred..."));
+        return next(
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "An error occurred..."
+            )
+        );
     }
 }

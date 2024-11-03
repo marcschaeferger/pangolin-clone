@@ -3,7 +3,7 @@ import { createContext } from "react";
 
 interface SiteContextType {
     site: GetSiteResponse | null;
-    updateSite: (updatedSite: Partial<GetSiteResponse>) => Promise<void>;
+    updateSite: (updatedSite: Partial<GetSiteResponse>) => void;
 }
 
 const SiteContext = createContext<SiteContextType | undefined>(undefined);

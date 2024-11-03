@@ -5,7 +5,7 @@ import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/useToast";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
     Form,
@@ -78,7 +78,7 @@ export function CreateSiteForm() {
             setKeypair(generatedKeypair);
             setIsLoading(false);
 
-            api.get(`/org/${orgId}/pickSiteDefaults`)
+            api.get(`/org/${orgId}/pick-site-defaults`)
                 .catch((e) => {
                     toast({
                         title: "Error creating site...",

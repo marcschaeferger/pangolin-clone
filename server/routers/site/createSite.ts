@@ -1,20 +1,25 @@
-import { Request, Response, NextFunction } from 'express';
-import { z } from 'zod';
-import { db } from '@server/db';
-import { roles, userSites, sites, roleSites, exitNodes } from '@server/db/schema';
+import { Request, Response, NextFunction } from "express";
+import { z } from "zod";
+import { db } from "@server/db";
+import {
+    roles,
+    userSites,
+    sites,
+    roleSites,
+    exitNodes,
+} from "@server/db/schema";
 import response from "@server/utils/response";
-import HttpCode from '@server/types/HttpCode';
-import createHttpError from 'http-errors';
-import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
-import logger from '@server/logger';
-import { eq, and } from 'drizzle-orm';
-import { getUniqueSiteName } from '@server/db/names';
-import { addPeer } from '../gerbil/peers';
-
-const API_BASE_URL = "http://localhost:3000";
+import HttpCode from "@server/types/HttpCode";
+import createHttpError from "http-errors";
+import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
+import logger from "@server/logger";
+import { eq, and } from "drizzle-orm";
+import { getUniqueSiteName } from "@server/db/names";
+import { addPeer } from "../gerbil/peers";
+import { fromError } from "zod-validation-error";
 
 const createSiteParamsSchema = z.object({
-    orgId: z.string()
+    orgId: z.string(),
 });
 
 // Define Zod schema for request body validation
@@ -36,7 +41,11 @@ export type CreateSiteResponse = {
     // subnet: string;
 };
 
-export async function createSite(req: Request, res: Response, next: NextFunction): Promise<any> {
+export async function createSite(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<any> {
     try {
         // Validate request body
         const parsedBody = createSiteSchema.safeParse(req.body);
@@ -44,7 +53,7 @@ export async function createSite(req: Request, res: Response, next: NextFunction
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedBody.error.errors.map(e => e.message).join(', ')
+                    fromError(parsedBody.error).toString()
                 )
             );
         }
@@ -57,7 +66,7 @@ export async function createSite(req: Request, res: Response, next: NextFunction
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedParams.error.errors.map(e => e.message).join(', ')
+                    fromError(parsedParams.error).toString()
                 )
             );
         }
@@ -65,38 +74,49 @@ export async function createSite(req: Request, res: Response, next: NextFunction
         const { orgId } = parsedParams.data;
 
         // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(ActionsEnum.createSite, req);
+        const hasPermission = await checkUserActionPermission(
+            ActionsEnum.createSite,
+            req
+        );
         if (!hasPermission) {
-            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission perform this action'));
+            return next(
+                createHttpError(
+                    HttpCode.FORBIDDEN,
+                    "User does not have permission perform this action"
+                )
+            );
         }
 
         if (!req.userOrgRoleId) {
-            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have a role'));
+            return next(
+                createHttpError(HttpCode.FORBIDDEN, "User does not have a role")
+            );
         }
 
         const niceId = await getUniqueSiteName(orgId);
 
         // Create new site in the database
-        const [newSite] = await db.insert(sites).values({
-            orgId,
-            exitNodeId,
-            name,
-            niceId,
-            pubKey,
-            subnet,
-        }).returning();
+        const [newSite] = await db
+            .insert(sites)
+            .values({
+                orgId,
+                exitNodeId,
+                name,
+                niceId,
+                pubKey,
+                subnet,
+            })
+            .returning();
         // find the superuser roleId and also add the resource to the superuser role
-        const superuserRole = await db.select()
-        .from(roles)
-        .where(and(eq(roles.isSuperuserRole, true), eq(roles.orgId, orgId)))
-        .limit(1);
+        const superuserRole = await db
+            .select()
+            .from(roles)
+            .where(and(eq(roles.isSuperuserRole, true), eq(roles.orgId, orgId)))
+            .limit(1);
 
         if (superuserRole.length === 0) {
             return next(
-                createHttpError(
-                    HttpCode.NOT_FOUND,
-                    `Superuser role not found`
-                )
+                createHttpError(HttpCode.NOT_FOUND, `Superuser role not found`)
             );
         }
 
@@ -135,6 +155,11 @@ export async function createSite(req: Request, res: Response, next: NextFunction
         });
     } catch (error) {
         logger.error(error);
-        return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred..."));
+        return next(
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "An error occurred..."
+            )
+        );
     }
 }

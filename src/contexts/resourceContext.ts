@@ -3,9 +3,11 @@ import { createContext } from "react";
 
 interface ResourceContextType {
     resource: GetResourceResponse | null;
-    updateResource: (updatedResource: Partial<GetResourceResponse>) => Promise<void>;
+    updateResource: (updatedResource: Partial<GetResourceResponse>) => void;
 }
 
-const ResourceContext = createContext<ResourceContextType | undefined>(undefined);
+const ResourceContext = createContext<ResourceContextType | undefined>(
+    undefined
+);
 
 export default ResourceContext;

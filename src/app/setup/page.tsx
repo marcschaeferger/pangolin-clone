@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import api from "@app/api";
-import { toast } from "@app/hooks/use-toast";
+import { toast } from "@app/hooks/useToast";
 import { useCallback, useEffect, useState } from "react";
 import {
     Card,

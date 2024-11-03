@@ -47,7 +47,7 @@ authenticated.get("/org/:orgId/sites", verifyOrgAccess, site.listSites);
 authenticated.get("/org/:orgId/site/:niceId", verifyOrgAccess, site.getSite);
 
 authenticated.get(
-    "/org/:orgId/pickSiteDefaults",
+    "/org/:orgId/pick-site-defaults",
     verifyOrgAccess,
     site.pickSiteDefaults
 );
@@ -118,12 +118,12 @@ authenticated.delete(
     target.deleteTarget
 );
 
-authenticated.put(
-    "/org/:orgId/role",
-    verifyOrgAccess,
-    verifySuperuser,
-    role.createRole
-);
+// authenticated.put(
+//     "/org/:orgId/role",
+//     verifyOrgAccess,
+//     verifySuperuser,
+//     role.createRole
+// );
 authenticated.get("/org/:orgId/roles", verifyOrgAccess, role.listRoles);
 authenticated.get(
     "/role/:roleId",
@@ -131,18 +131,18 @@ authenticated.get(
     verifyUserInRole,
     role.getRole
 );
-authenticated.post(
-    "/role/:roleId",
-    verifyRoleAccess,
-    verifySuperuser,
-    role.updateRole
-);
-authenticated.delete(
-    "/role/:roleId",
-    verifyRoleAccess,
-    verifySuperuser,
-    role.deleteRole
-);
+// authenticated.post(
+//     "/role/:roleId",
+//     verifyRoleAccess,
+//     verifySuperuser,
+//     role.updateRole
+// );
+// authenticated.delete(
+//     "/role/:roleId",
+//     verifyRoleAccess,
+//     verifySuperuser,
+//     role.deleteRole
+// );
 
 authenticated.put(
     "/role/:roleId/site",
@@ -209,12 +209,6 @@ authenticated.delete(
     verifyOrgAccess,
     verifyUserAccess,
     user.removeUserOrg
-);
-authenticated.put(
-    "/org/:orgId/user/:userId",
-    verifyOrgAccess,
-    verifyUserAccess,
-    user.addUserOrg
 );
 
 authenticated.put(

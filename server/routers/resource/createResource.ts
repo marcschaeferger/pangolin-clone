@@ -9,6 +9,7 @@ import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
 import { eq, and } from 'drizzle-orm';
 import stoi from '@server/utils/stoi';
+import { fromError } from 'zod-validation-error';
 
 const createResourceParamsSchema = z.object({
     siteId: z.string().optional().transform(stoi).pipe(z.number().int().positive().optional()),
@@ -29,7 +30,7 @@ export async function createResource(req: Request, res: Response, next: NextFunc
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedBody.error.errors.map(e => e.message).join(', ')
+                    fromError(parsedBody.error).toString()
                 )
             );
         }
@@ -42,7 +43,7 @@ export async function createResource(req: Request, res: Response, next: NextFunc
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedParams.error.errors.map(e => e.message).join(', ')
+                    fromError(parsedParams.error).toString()
                 )
             );
         }

@@ -1,15 +1,16 @@
-import { Request, Response, NextFunction } from 'express';
-import { z } from 'zod';
-import { db } from '@server/db';
-import { resources, sites, targets } from '@server/db/schema';
+import { Request, Response, NextFunction } from "express";
+import { z } from "zod";
+import { db } from "@server/db";
+import { resources, sites, targets } from "@server/db/schema";
 import response from "@server/utils/response";
-import HttpCode from '@server/types/HttpCode';
-import createHttpError from 'http-errors';
-import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
-import logger from '@server/logger';
-import { addPeer } from '../gerbil/peers';
-import { eq, and } from 'drizzle-orm';
-import { isIpInCidr } from '@server/utils/ip';
+import HttpCode from "@server/types/HttpCode";
+import createHttpError from "http-errors";
+import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
+import logger from "@server/logger";
+import { addPeer } from "../gerbil/peers";
+import { eq, and } from "drizzle-orm";
+import { isIpInCidr } from "@server/utils/ip";
+import { fromError } from "zod-validation-error";
 
 const createTargetParamsSchema = z.object({
     resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
@@ -23,14 +24,18 @@ const createTargetSchema = z.object({
     enabled: z.boolean().default(true),
 });
 
-export async function createTarget(req: Request, res: Response, next: NextFunction): Promise<any> {
+export async function createTarget(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<any> {
     try {
         const parsedBody = createTargetSchema.safeParse(req.body);
         if (!parsedBody.success) {
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedBody.error.errors.map(e => e.message).join(', ')
+                    fromError(parsedBody.error).toString()
                 )
             );
         }
@@ -42,7 +47,7 @@ export async function createTarget(req: Request, res: Response, next: NextFuncti
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedParams.error.errors.map(e => e.message).join(', ')
+                    fromError(parsedParams.error).toString()
                 )
             );
         }
@@ -50,15 +55,24 @@ export async function createTarget(req: Request, res: Response, next: NextFuncti
         const { resourceId } = parsedParams.data;
 
         // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(ActionsEnum.createTarget, req);
+        const hasPermission = await checkUserActionPermission(
+            ActionsEnum.createTarget,
+            req
+        );
         if (!hasPermission) {
-            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
+            return next(
+                createHttpError(
+                    HttpCode.FORBIDDEN,
+                    "User does not have permission to perform this action"
+                )
+            );
         }
 
         // get the resource
-        const [resource] = await db.select({
-            siteId: resources.siteId,
-        })
+        const [resource] = await db
+            .select({
+                siteId: resources.siteId,
+            })
             .from(resources)
             .where(eq(resources.resourceId, resourceId));
 
@@ -72,9 +86,10 @@ export async function createTarget(req: Request, res: Response, next: NextFuncti
         }
 
         // TODO: is this all inefficient?
-        
+
         // get the site
-        const [site] = await db.select()
+        const [site] = await db
+            .select()
             .from(sites)
             .where(eq(sites.siteId, resource.siteId!))
             .limit(1);
@@ -98,10 +113,13 @@ export async function createTarget(req: Request, res: Response, next: NextFuncti
             );
         }
 
-        const newTarget = await db.insert(targets).values({
-            resourceId,
-            ...targetData
-        }).returning();
+        const newTarget = await db
+            .insert(targets)
+            .values({
+                resourceId,
+                ...targetData,
+            })
+            .returning();
 
         // Fetch resources for this site
         const resourcesRes = await db.query.resources.findMany({
@@ -109,16 +127,18 @@ export async function createTarget(req: Request, res: Response, next: NextFuncti
         });
 
         // Fetch targets for all resources of this site
-        const targetIps = await Promise.all(resourcesRes.map(async (resource) => {
-            const targetsRes = await db.query.targets.findMany({
-                where: eq(targets.resourceId, resource.resourceId),
-            });
-            return targetsRes.map(target => `${target.ip}/32`);
-        }));
+        const targetIps = await Promise.all(
+            resourcesRes.map(async (resource) => {
+                const targetsRes = await db.query.targets.findMany({
+                    where: eq(targets.resourceId, resource.resourceId),
+                });
+                return targetsRes.map((target) => `${target.ip}/32`);
+            })
+        );
 
         await addPeer(site.exitNodeId!, {
             publicKey: site.pubKey,
-            allowedIps: targetIps.flat()
+            allowedIps: targetIps.flat(),
         });
 
         return response(res, {
@@ -130,6 +150,11 @@ export async function createTarget(req: Request, res: Response, next: NextFuncti
         });
     } catch (error) {
         logger.error(error);
-        return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred..."));
+        return next(
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "An error occurred..."
+            )
+        );
     }
 }

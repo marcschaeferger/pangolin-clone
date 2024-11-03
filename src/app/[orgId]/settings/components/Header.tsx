@@ -20,7 +20,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@app/components/ui/select";
-import { useToast } from "@app/hooks/use-toast";
+import { useToast } from "@app/hooks/useToast";
 import { ListOrgsResponse } from "@server/routers/org";
 import Link from "next/link";
 import { useRouter } from "next/navigation";

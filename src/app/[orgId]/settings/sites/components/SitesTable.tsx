@@ -92,7 +92,7 @@ export const columns: ColumnDef<SiteRow>[] = [
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem>
                             <Link
-                                href={`/${siteRow.orgId}/settings/sites/${siteRow.id}`}
+                                href={`/${siteRow.orgId}/settings/sites/${siteRow.nice}`}
                             >
                                 View settings
                             </Link>

@@ -15,6 +15,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { useSiteContext } from "@app/hooks/useSiteContext";
 import { useForm } from "react-hook-form";
+import api from "@app/api";
+import { useToast } from "@app/hooks/useToast";
 
 const GeneralFormSchema = z.object({
     name: z.string(),
@@ -24,6 +26,7 @@ type GeneralFormValues = z.infer<typeof GeneralFormSchema>;
 
 export function GeneralForm() {
     const { site, updateSite } = useSiteContext();
+    const { toast } = useToast();
 
     const form = useForm<GeneralFormValues>({
         resolver: zodResolver(GeneralFormSchema),
@@ -34,7 +37,21 @@ export function GeneralForm() {
     });
 
     async function onSubmit(data: GeneralFormValues) {
-        await updateSite({ name: data.name });
+        updateSite({ name: data.name });
+
+        await api
+            .post(`/site/${site?.siteId}`, {
+                name: data.name,
+            })
+            .catch((e) => {
+                toast({
+                    variant: "destructive",
+                    title: "Failed to update site",
+                    description:
+                        e.message ||
+                        "An error occurred while updating the site.",
+                });
+            });
     }
 
     return (

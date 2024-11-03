@@ -18,26 +18,25 @@ export type PickSiteDefaultsResponse = {
     listenPort: number;
     endpoint: string;
     subnet: string;
-}
+};
 
 export async function pickSiteDefaults(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
 ): Promise<any> {
     try {
-
         // Check if the user has permission to list sites
         const hasPermission = await checkUserActionPermission(
             ActionsEnum.createSite,
-            req,
+            req
         );
         if (!hasPermission) {
             return next(
                 createHttpError(
                     HttpCode.FORBIDDEN,
-                    "User does not have permission to perform this action",
-                ),
+                    "User does not have permission to perform this action"
+                )
             );
         }
 
@@ -47,10 +46,7 @@ export async function pickSiteDefaults(
         const nodes = await db.select().from(exitNodes);
         if (nodes.length === 0) {
             return next(
-                createHttpError(
-                    HttpCode.NOT_FOUND,
-                    "No exit nodes available",
-                ),
+                createHttpError(HttpCode.NOT_FOUND, "No exit nodes available")
             );
         }
 
@@ -59,9 +55,10 @@ export async function pickSiteDefaults(
 
         // TODO: this probably can be optimized...
         // list all of the sites on that exit node
-        const sitesQuery = await db.select({
-            subnet: sites.subnet
-        })
+        const sitesQuery = await db
+            .select({
+                subnet: sites.subnet,
+            })
             .from(sites)
             .where(eq(sites.exitNodeId, exitNode.exitNodeId));
 
@@ -74,8 +71,8 @@ export async function pickSiteDefaults(
             return next(
                 createHttpError(
                     HttpCode.INTERNAL_SERVER_ERROR,
-                    "No available subnets",
-                ),
+                    "No available subnets"
+                )
             );
         }
 
@@ -97,11 +94,7 @@ export async function pickSiteDefaults(
     } catch (error) {
         logger.error(error);
         return next(
-            createHttpError(
-                HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred...",
-            ),
+            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
 }
-

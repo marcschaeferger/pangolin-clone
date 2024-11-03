@@ -1,13 +1,14 @@
-import { Request, Response, NextFunction } from 'express';
-import { z } from 'zod';
-import { db } from '@server/db';
-import { resources, roleResources, roleSites } from '@server/db/schema';
-import { and, eq } from 'drizzle-orm';
+import { Request, Response, NextFunction } from "express";
+import { z } from "zod";
+import { db } from "@server/db";
+import { resources, roleResources, roleSites } from "@server/db/schema";
+import { and, eq } from "drizzle-orm";
 import response from "@server/utils/response";
-import HttpCode from '@server/types/HttpCode';
-import createHttpError from 'http-errors';
-import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
-import logger from '@server/logger';
+import HttpCode from "@server/types/HttpCode";
+import createHttpError from "http-errors";
+import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
+import logger from "@server/logger";
+import { fromError } from "zod-validation-error";
 
 const removeRoleSiteParamsSchema = z.object({
     roleId: z.string().transform(Number).pipe(z.number().int().positive()),
@@ -17,14 +18,18 @@ const removeRoleSiteSchema = z.object({
     siteId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
 
-export async function removeRoleSite(req: Request, res: Response, next: NextFunction): Promise<any> {
+export async function removeRoleSite(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<any> {
     try {
         const parsedParams = removeRoleSiteSchema.safeParse(req.params);
         if (!parsedParams.success) {
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedParams.error.errors.map(e => e.message).join(', ')
+                    fromError(parsedParams.error).toString()
                 )
             );
         }
@@ -36,7 +41,7 @@ export async function removeRoleSite(req: Request, res: Response, next: NextFunc
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedBody.error.errors.map(e => e.message).join(', ')
+                    fromError(parsedBody.error).toString()
                 )
             );
         }
@@ -44,13 +49,24 @@ export async function removeRoleSite(req: Request, res: Response, next: NextFunc
         const { roleId } = parsedBody.data;
 
         // Check if the user has permission to remove role sites
-        const hasPermission = await checkUserActionPermission(ActionsEnum.removeRoleSite, req);
+        const hasPermission = await checkUserActionPermission(
+            ActionsEnum.removeRoleSite,
+            req
+        );
         if (!hasPermission) {
-            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
+            return next(
+                createHttpError(
+                    HttpCode.FORBIDDEN,
+                    "User does not have permission to perform this action"
+                )
+            );
         }
 
-        const deletedRoleSite = await db.delete(roleSites)
-            .where(and(eq(roleSites.roleId, roleId), eq(roleSites.siteId, siteId)))
+        const deletedRoleSite = await db
+            .delete(roleSites)
+            .where(
+                and(eq(roleSites.roleId, roleId), eq(roleSites.siteId, siteId))
+            )
             .returning();
 
         if (deletedRoleSite.length === 0) {
@@ -62,13 +78,20 @@ export async function removeRoleSite(req: Request, res: Response, next: NextFunc
             );
         }
 
-        const siteResources = await db.select()
-        .from(resources)
-        .where(eq(resources.siteId, siteId));
+        const siteResources = await db
+            .select()
+            .from(resources)
+            .where(eq(resources.siteId, siteId));
 
         for (const resource of siteResources) {
-            await db.delete(roleResources)
-                .where(and(eq(roleResources.roleId, roleId), eq(roleResources.resourceId, resource.resourceId)))
+            await db
+                .delete(roleResources)
+                .where(
+                    and(
+                        eq(roleResources.roleId, roleId),
+                        eq(roleResources.resourceId, resource.resourceId)
+                    )
+                )
                 .returning();
         }
 
@@ -81,6 +104,11 @@ export async function removeRoleSite(req: Request, res: Response, next: NextFunc
         });
     } catch (error) {
         logger.error(error);
-        return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred..."));
+        return next(
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "An error occurred..."
+            )
+        );
     }
 }

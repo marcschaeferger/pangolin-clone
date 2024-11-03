@@ -10,6 +10,7 @@ import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
 import logger from '@server/logger';
 import { createSuperuserRole } from '@server/db/ensureActions';
 import config, { APP_PATH } from "@server/config";
+import { fromError } from 'zod-validation-error';
 
 const createOrgSchema = z.object({
     orgId: z.string(),
@@ -26,7 +27,7 @@ export async function createOrg(req: Request, res: Response, next: NextFunction)
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedBody.error.errors.map(e => e.message).join(', ')
+                    fromError(parsedBody.error).toString()
                 )
             );
         }

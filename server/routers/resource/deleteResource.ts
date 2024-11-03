@@ -1,20 +1,25 @@
-import { Request, Response, NextFunction } from 'express';
-import { z } from 'zod';
-import { db } from '@server/db';
-import { resources } from '@server/db/schema';
-import { eq } from 'drizzle-orm';
+import { Request, Response, NextFunction } from "express";
+import { z } from "zod";
+import { db } from "@server/db";
+import { resources } from "@server/db/schema";
+import { eq } from "drizzle-orm";
 import response from "@server/utils/response";
-import HttpCode from '@server/types/HttpCode';
-import createHttpError from 'http-errors';
-import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
-import logger from '@server/logger';
+import HttpCode from "@server/types/HttpCode";
+import createHttpError from "http-errors";
+import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
+import logger from "@server/logger";
+import { fromError } from "zod-validation-error";
 
 // Define Zod schema for request parameters validation
 const deleteResourceSchema = z.object({
     resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
 
-export async function deleteResource(req: Request, res: Response, next: NextFunction): Promise<any> {
+export async function deleteResource(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<any> {
     try {
         // Validate request parameters
         const parsedParams = deleteResourceSchema.safeParse(req.params);
@@ -22,7 +27,7 @@ export async function deleteResource(req: Request, res: Response, next: NextFunc
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedParams.error.errors.map(e => e.message).join(', ')
+                    fromError(parsedParams.error).toString()
                 )
             );
         }
@@ -30,13 +35,22 @@ export async function deleteResource(req: Request, res: Response, next: NextFunc
         const { resourceId } = parsedParams.data;
 
         // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(ActionsEnum.deleteResource, req);
+        const hasPermission = await checkUserActionPermission(
+            ActionsEnum.deleteResource,
+            req
+        );
         if (!hasPermission) {
-            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
+            return next(
+                createHttpError(
+                    HttpCode.FORBIDDEN,
+                    "User does not have permission to perform this action"
+                )
+            );
         }
 
         // Delete the resource from the database
-        const deletedResource = await db.delete(resources)
+        const deletedResource = await db
+            .delete(resources)
             .where(eq(resources.resourceId, resourceId))
             .returning();
 
@@ -58,6 +72,11 @@ export async function deleteResource(req: Request, res: Response, next: NextFunc
         });
     } catch (error) {
         logger.error(error);
-        return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred..."));
+        return next(
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "An error occurred..."
+            )
+        );
     }
 }
