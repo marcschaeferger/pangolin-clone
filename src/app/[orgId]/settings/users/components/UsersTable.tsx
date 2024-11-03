@@ -19,6 +19,7 @@ import {
 } from "@app/components/ui/dialog";
 import { useState } from "react";
 import InviteUserForm from "./InviteUserForm";
+import { Credenza, CredenzaTitle, CredenzaDescription, CredenzaHeader, CredenzaClose, CredenzaFooter, CredenzaContent, CredenzaBody } from "@app/components/Credenza";
 
 export type UserRow = {
     id: string;
@@ -73,17 +74,19 @@ export default function UsersTable({ users }: UsersTableProps) {
 
     return (
         <>
-            <Dialog
-                open={isInviteModalOpen}
-                onOpenChange={setIsInviteModalOpen}
-            >
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Invite User</DialogTitle>
-                    </DialogHeader>
+            <Credenza open={isInviteModalOpen} onOpenChange={setIsInviteModalOpen}>
+                <CredenzaContent>
+                    <CredenzaHeader>
+                        <CredenzaTitle>Invite User</CredenzaTitle>
+                        <CredenzaDescription>
+                            Give new users access to your organization
+                        </CredenzaDescription>
+                    </CredenzaHeader>
+                    <CredenzaBody>
                     <InviteUserForm />
-                </DialogContent>
-            </Dialog>
+                    </CredenzaBody>
+                </CredenzaContent>
+            </Credenza>
 
             <UsersDataTable
                 columns={columns}

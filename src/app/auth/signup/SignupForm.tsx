@@ -46,6 +46,7 @@ const formSchema = z
 export default function SignupForm({ redirect }: SignupFormProps) {
     const router = useRouter();
 
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -59,6 +60,8 @@ export default function SignupForm({ redirect }: SignupFormProps) {
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const { email, password } = values;
+
+        setLoading(true);
         const res = await api
             .put<AxiosResponse<SignUpResponse>>("/auth/signup", {
                 email,
@@ -92,6 +95,8 @@ export default function SignupForm({ redirect }: SignupFormProps) {
                 router.push("/");
             }
         }
+
+        setLoading(false);
     }
 
     return (

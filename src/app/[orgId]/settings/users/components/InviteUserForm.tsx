@@ -64,7 +64,7 @@ export default function InviteUserForm() {
         resolver: zodResolver(formSchema),
         defaultValues: {
             email: "",
-            validForHours: "24",
+            validForHours: "168",
             roleId: "4",
         },
     });
@@ -189,15 +189,14 @@ export default function InviteUserForm() {
                                 </FormItem>
                             )}
                         />
-                        <div className="flex justify-center">
-                            <Button
-                                type="submit"
-                                loading={loading}
-                                disabled={inviteLink !== null}
-                            >
-                                Invite User
-                            </Button>
-                        </div>
+                        <Button
+                            type="submit"
+                            className="w-full"
+                            loading={loading}
+                            disabled={inviteLink !== null}
+                        >
+                            Invite User
+                        </Button>
                     </form>
                 </Form>
             )}
@@ -216,7 +215,7 @@ export default function InviteUserForm() {
                         </b>
                         .
                     </p>
-                    {/* <CopyTextBox text={inviteLink} wrapText={false} /> */}
+                    <CopyTextBox text={inviteLink} wrapText={false} />
                 </div>
             )}
         </>

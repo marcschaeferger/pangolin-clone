@@ -42,6 +42,7 @@ export default function LoginForm({ redirect }: LoginFormProps) {
     const router = useRouter();
 
     const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -53,6 +54,9 @@ export default function LoginForm({ redirect }: LoginFormProps) {
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const { email, password } = values;
+
+        setLoading(true);
+
         const res = await api
             .post<AxiosResponse<LoginResponse>>("/auth/login", {
                 email,
@@ -86,6 +90,8 @@ export default function LoginForm({ redirect }: LoginFormProps) {
                 router.push("/");
             }
         }
+
+        setLoading(false);
     }
 
     return (
@@ -140,7 +146,7 @@ export default function LoginForm({ redirect }: LoginFormProps) {
                                 <AlertDescription>{error}</AlertDescription>
                             </Alert>
                         )}
-                        <Button type="submit" className="w-full">
+                        <Button type="submit" className="w-full" loading={loading}>
                             Login
                         </Button>
                     </form>
