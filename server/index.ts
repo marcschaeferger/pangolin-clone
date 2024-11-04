@@ -12,6 +12,7 @@ import {
 } from "@server/middlewares";
 import internal from "@server/routers/internal";
 import { authenticated, unauthenticated } from "@server/routers/external";
+import { router as wsRouter, handleWSUpgrade } from '@server/routers/ws';
 import cookieParser from "cookie-parser";
 import { User } from "@server/db/schema";
 import { ensureActions } from "./db/ensureActions";
@@ -50,21 +51,24 @@ app.prepare().then(() => {
     externalServer.use(logIncomingMiddleware);
     externalServer.use(prefix, unauthenticated);
     externalServer.use(prefix, authenticated);
-
+    externalServer.use(`${prefix}/ws`, wsRouter);
+    
     externalServer.use(notFoundMiddleware);
-
+    
     // We are using NEXT from here on
     externalServer.all("*", (req: Request, res: Response) => {
         const parsedUrl = parse(req.url!, true);
         handle(req, res, parsedUrl);
     });
-
-    externalServer.listen(externalPort, (err?: any) => {
+    
+    const httpServer = externalServer.listen(externalPort, (err?: any) => {
         if (err) throw err;
         logger.info(
             `Main server is running on http://localhost:${externalPort}`
         );
     });
+
+    handleWSUpgrade(httpServer);
 
     externalServer.use(errorHandlerMiddleware);
 
