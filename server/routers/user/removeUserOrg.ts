@@ -32,6 +32,25 @@ export async function removeUserOrg(
 
         const { userId, orgId } = parsedParams.data;
 
+        // get the user first
+        const user = await db
+            .select()
+            .from(userOrgs)
+            .where(eq(userOrgs.userId, userId));
+
+        if (!user || user.length === 0) {
+            return next(createHttpError(HttpCode.NOT_FOUND, "User not found"));
+        }
+
+        if (user[0].isOwner) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    "Cannot remove owner from org"
+                )
+            );
+        }
+
         // remove the user from the userOrgs table
         await db
             .delete(userOrgs)

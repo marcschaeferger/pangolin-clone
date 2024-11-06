@@ -25,6 +25,7 @@ import {
 } from "./auth";
 import { verifyUserHasAction } from "./auth/verifyUserHasAction";
 import { ActionsEnum } from "@server/auth/actions";
+import { verifyUserIsOrgOwner } from "./auth/verifyUserIsOrgOwner";
 
 // Root routes
 export const unauthenticated = Router();
@@ -52,7 +53,12 @@ authenticated.post(
     verifyUserHasAction(ActionsEnum.updateOrg),
     org.updateOrg
 );
-// authenticated.delete("/org/:orgId", verifyOrgAccess, org.deleteOrg);
+// authenticated.delete(
+//     "/org/:orgId",
+//     verifyOrgAccess,
+//     verifyUserIsOrgOwner,
+//     org.deleteOrg
+// );
 
 authenticated.put(
     "/org/:orgId/site",
