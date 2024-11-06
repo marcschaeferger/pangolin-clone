@@ -1,49 +1,85 @@
-import { Request, Response, NextFunction } from 'express';
-import { db } from '@server/db';
-import { resources, userOrgs, userResources, roleResources } from '@server/db/schema';
-import { and, eq } from 'drizzle-orm';
-import createHttpError from 'http-errors';
-import HttpCode from '@server/types/HttpCode';
+import { Request, Response, NextFunction } from "express";
+import { db } from "@server/db";
+import {
+    resources,
+    userOrgs,
+    userResources,
+    roleResources,
+} from "@server/db/schema";
+import { and, eq } from "drizzle-orm";
+import createHttpError from "http-errors";
+import HttpCode from "@server/types/HttpCode";
 
-export async function verifyResourceAccess(req: Request, res: Response, next: NextFunction) {
-    const userId = req.user!.userId; // Assuming you have user information in the request
-    const resourceId = req.params.resourceId || req.body.resourceId || req.query.resourceId;
+export async function verifyResourceAccess(
+    req: Request,
+    res: Response,
+    next: NextFunction
+) {
+    const userId = req.user!.userId;
+    const resourceId =
+        req.params.resourceId || req.body.resourceId || req.query.resourceId;
+    let userOrg = req.userOrg;
 
     if (!userId) {
-        return next(createHttpError(HttpCode.UNAUTHORIZED, 'User not authenticated'));
+        return next(
+            createHttpError(HttpCode.UNAUTHORIZED, "User not authenticated")
+        );
     }
 
     try {
-        // Get the resource
-        const resource = await db.select()
+        const resource = await db
+            .select()
             .from(resources)
             .where(eq(resources.resourceId, resourceId))
             .limit(1);
 
         if (resource.length === 0) {
-            return next(createHttpError(HttpCode.NOT_FOUND, `Resource with ID ${resourceId} not found`));
+            return next(
+                createHttpError(
+                    HttpCode.NOT_FOUND,
+                    `Resource with ID ${resourceId} not found`
+                )
+            );
         }
 
         if (!resource[0].orgId) {
-            return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, `Resource with ID ${resourceId} does not have an organization ID`));
+            return next(
+                createHttpError(
+                    HttpCode.INTERNAL_SERVER_ERROR,
+                    `Resource with ID ${resourceId} does not have an organization ID`
+                )
+            );
         }
 
-        // Get user's role ID in the organization
-        const userOrgRole = await db.select()
-            .from(userOrgs)
-            .where(and(eq(userOrgs.userId, userId), eq(userOrgs.orgId, resource[0].orgId)))
-            .limit(1);
-
-        if (userOrgRole.length === 0) {
-            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have access to this organization'));
+        if (!userOrg) {
+            const userOrgRole = await db
+                .select()
+                .from(userOrgs)
+                .where(
+                    and(
+                        eq(userOrgs.userId, userId),
+                        eq(userOrgs.orgId, resource[0].orgId)
+                    )
+                )
+                .limit(1);
+            userOrg = userOrgRole[0];
         }
 
-        const userOrgRoleId = userOrgRole[0].roleId;
+        if (!userOrg) {
+            return next(
+                createHttpError(
+                    HttpCode.FORBIDDEN,
+                    "User does not have access to this organization"
+                )
+            );
+        }
+
+        const userOrgRoleId = userOrg.roleId;
         req.userOrgRoleId = userOrgRoleId;
         req.userOrgId = resource[0].orgId;
 
-        // Check role-based resource access first
-        const roleResourceAccess = await db.select()
+        const roleResourceAccess = await db
+            .select()
             .from(roleResources)
             .where(
                 and(
@@ -54,25 +90,36 @@ export async function verifyResourceAccess(req: Request, res: Response, next: Ne
             .limit(1);
 
         if (roleResourceAccess.length > 0) {
-            // User's role has access to the resource
             return next();
         }
 
-        // If role doesn't have access, check user-specific resource access
-        const userResourceAccess = await db.select()
+        const userResourceAccess = await db
+            .select()
             .from(userResources)
-            .where(and(eq(userResources.userId, userId), eq(userResources.resourceId, resourceId)))
+            .where(
+                and(
+                    eq(userResources.userId, userId),
+                    eq(userResources.resourceId, resourceId)
+                )
+            )
             .limit(1);
 
         if (userResourceAccess.length > 0) {
-            // User has direct access to the resource
             return next();
         }
 
-        // If we reach here, the user doesn't have access to the resource
-        return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have access to this resource'));
-
+        return next(
+            createHttpError(
+                HttpCode.FORBIDDEN,
+                "User does not have access to this resource"
+            )
+        );
     } catch (error) {
-        return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, 'Error verifying resource access'));
+        return next(
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "Error verifying resource access"
+            )
+        );
     }
 }

@@ -1,20 +1,24 @@
-import { Request, Response, NextFunction } from 'express';
-import { z } from 'zod';
-import { db } from '@server/db';
-import { orgs } from '@server/db/schema';
-import { eq } from 'drizzle-orm';
+import { Request, Response, NextFunction } from "express";
+import { z } from "zod";
+import { db } from "@server/db";
+import { orgs, userActions } from "@server/db/schema";
+import { eq } from "drizzle-orm";
 import response from "@server/utils/response";
-import HttpCode from '@server/types/HttpCode';
-import createHttpError from 'http-errors';
-import { ActionsEnum, checkUserActionPermission } from '@server/auth/actions';
-import logger from '@server/logger';
-import { fromError } from 'zod-validation-error';
+import HttpCode from "@server/types/HttpCode";
+import createHttpError from "http-errors";
+import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
+import logger from "@server/logger";
+import { fromError } from "zod-validation-error";
 
 const deleteOrgSchema = z.object({
-    orgId: z.string()
+    orgId: z.string(),
 });
 
-export async function deleteOrg(req: Request, res: Response, next: NextFunction): Promise<any> {
+export async function deleteOrg(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<any> {
     try {
         const parsedParams = deleteOrgSchema.safeParse(req.params);
         if (!parsedParams.success) {
@@ -28,13 +32,22 @@ export async function deleteOrg(req: Request, res: Response, next: NextFunction)
 
         const { orgId } = parsedParams.data;
 
-        // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(ActionsEnum.deleteOrg, req);
-        if (!hasPermission) {
-            return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
-        }
+        // // Check if the user has permission to list sites
+        // const hasPermission = await checkUserActionPermission(
+        //     ActionsEnum.deleteOrg,
+        //     req
+        // );
+        // if (!hasPermission) {
+        //     return next(
+        //         createHttpError(
+        //             HttpCode.FORBIDDEN,
+        //             "User does not have permission to perform this action"
+        //         )
+        //     );
+        // }
 
-        const deletedOrg = await db.delete(orgs)
+        const deletedOrg = await db
+            .delete(orgs)
             .where(eq(orgs.orgId, orgId))
             .returning();
 
@@ -56,6 +69,11 @@ export async function deleteOrg(req: Request, res: Response, next: NextFunction)
         });
     } catch (error) {
         logger.error(error);
-        return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred..."));
+        return next(
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "An error occurred..."
+            )
+        );
     }
 }

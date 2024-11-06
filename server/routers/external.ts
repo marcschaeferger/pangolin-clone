@@ -19,7 +19,7 @@ import {
     verifyResourceAccess,
     verifyTargetAccess,
     verifyRoleAccess,
-    verifySuperUser,
+    verifyAdmin,
     verifyUserInRole,
     verifyUserAccess,
 } from "./auth";
@@ -121,7 +121,7 @@ authenticated.delete(
 // authenticated.put(
 //     "/org/:orgId/role",
 //     verifyOrgAccess,
-//     verifySuperUser,
+//     verifyAdmin,
 //     role.createRole
 // );
 // authenticated.get("/org/:orgId/roles", verifyOrgAccess, role.listRoles);
@@ -134,13 +134,13 @@ authenticated.delete(
 // authenticated.post(
 //     "/role/:roleId",
 //     verifyRoleAccess,
-//     verifySuperUser,
+//     verifyAdmin,
 //     role.updateRole
 // );
 // authenticated.delete(
 //     "/role/:roleId",
 //     verifyRoleAccess,
-//     verifySuperUser,
+//     verifyAdmin,
 //     role.deleteRole
 // );
 
@@ -190,14 +190,14 @@ authenticated.delete(
 //     "/role/:roleId/action",
 //     verifyRoleAccess,
 //     verifyUserInRole,
-//     verifySuperUser,
+//     verifyAdmin,
 //     role.removeRoleAction
 // );
 // authenticated.get(
 //     "/role/:roleId/actions",
 //     verifyRoleAccess,
 //     verifyUserInRole,
-//     verifySuperUser,
+//     verifyAdmin,
 //     role.listRoleActions
 // );
 
@@ -239,14 +239,14 @@ authenticated.delete(
 //     "/org/:orgId/user/:userId/action",
 //     verifyOrgAccess,
 //     verifyUserAccess,
-//     verifySuperUser,
+//     verifyAdmin,
 //     role.addRoleAction
 // );
 // authenticated.delete(
 //     "/org/:orgId/user/:userId/action",
 //     verifyOrgAccess,
 //     verifyUserAccess,
-//     verifySuperUser,
+//     verifyAdmin,
 //     role.removeRoleAction
 // );
 

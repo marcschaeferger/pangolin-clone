@@ -57,13 +57,7 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
     const [loading, setLoading] = useState(false);
     const [expiresInDays, setExpiresInDays] = useState(1);
 
-    const roles = [
-        { roleId: 1, name: "Super User" },
-        { roleId: 2, name: "Admin" },
-        { roleId: 3, name: "Power User" },
-        { roleId: 4, name: "User" },
-        { roleId: 5, name: "Guest" },
-    ];
+    const roles = [{ roleId: 1, name: "Admin" }];
 
     const validFor = [
         { hours: 24, name: "1 day" },
@@ -122,13 +116,16 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
 
     return (
         <>
-            <Credenza open={open} onOpenChange={(val) => {
-                setOpen(val);
-                setInviteLink(null);
-                setLoading(false);
-                setExpiresInDays(1);
-                form.reset();
-            }}>
+            <Credenza
+                open={open}
+                onOpenChange={(val) => {
+                    setOpen(val);
+                    setInviteLink(null);
+                    setLoading(false);
+                    setExpiresInDays(1);
+                    form.reset();
+                }}
+            >
                 <CredenzaContent>
                     <CredenzaHeader>
                         <CredenzaTitle>Invite User</CredenzaTitle>

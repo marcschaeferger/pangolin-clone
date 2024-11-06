@@ -1,12 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { db } from "@server/db";
-import {
-    sites,
-    userOrgs,
-    userSites,
-    roleSites,
-    roles,
-} from "@server/db/schema";
+import { userOrgs } from "@server/db/schema";
 import { and, eq, or } from "drizzle-orm";
 import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
@@ -16,8 +10,10 @@ export async function verifyUserAccess(
     res: Response,
     next: NextFunction
 ) {
-    const userId = req.user!.userId; // Assuming you have user information in the request
+    const userId = req.user!.userId;
     const reqUserId = req.params.userId || req.body.userId || req.query.userId;
+
+    let userOrg = req.userOrg;
 
     if (!userId) {
         return next(
@@ -30,18 +26,21 @@ export async function verifyUserAccess(
     }
 
     try {
-        const userOrg = await db
-            .select()
-            .from(userOrgs)
-            .where(
-                and(
-                    eq(userOrgs.userId, reqUserId),
-                    eq(userOrgs.orgId, req.userOrgId!)
+        if (!userOrg) {
+            const res = await db
+                .select()
+                .from(userOrgs)
+                .where(
+                    and(
+                        eq(userOrgs.userId, reqUserId),
+                        eq(userOrgs.orgId, req.userOrgId!)
+                    )
                 )
-            )
-            .limit(1);
+                .limit(1);
+            userOrg = res[0];
+        }
 
-        if (userOrg.length === 0) {
+        if (userOrg) {
             return next(
                 createHttpError(
                     HttpCode.FORBIDDEN,

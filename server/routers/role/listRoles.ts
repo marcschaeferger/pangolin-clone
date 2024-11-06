@@ -80,7 +80,7 @@ export async function listRoles(
             .select({
                 roleId: roles.roleId,
                 orgId: roles.orgId,
-                isSuperUserRole: roles.isSuperUserRole,
+                isAdmin: roles.isAdmin,
                 name: roles.name,
                 description: roles.description,
                 orgName: orgs.name,

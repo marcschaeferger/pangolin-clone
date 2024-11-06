@@ -99,6 +99,7 @@ export const userOrgs = sqliteTable("userOrgs", {
     roleId: integer("roleId")
         .notNull()
         .references(() => roles.roleId),
+    isOwner: integer("isOwner", { mode: "boolean" }).notNull().default(false),
 });
 
 export const emailVerificationCodes = sqliteTable("emailVerificationCodes", {
@@ -131,7 +132,7 @@ export const roles = sqliteTable("roles", {
     orgId: text("orgId").references(() => orgs.orgId, {
         onDelete: "cascade",
     }),
-    isSuperUserRole: integer("isSuperUserRole", { mode: "boolean" }),
+    isAdmin: integer("isAdmin", { mode: "boolean" }),
     name: text("name").notNull(),
     description: text("description"),
 });
@@ -241,3 +242,4 @@ export type RoleResource = InferSelectModel<typeof roleResources>;
 export type UserResource = InferSelectModel<typeof userResources>;
 export type Limit = InferSelectModel<typeof limitsTable>;
 export type UserInvite = InferSelectModel<typeof userInvites>;
+export type UserOrg = InferSelectModel<typeof userOrgs>;

@@ -11,7 +11,7 @@ export * from "./verifyResourceAccess";
 export * from "./verifyTargetAccess";
 export * from "./verifyRoleAccess";
 export * from "./verifyUserAccess";
-export * from "./verifySuperUser";
+export * from "./verifyAdmin";
 export * from "./verifyEmail";
 export * from "./requestEmailVerificationCode";
 export * from "./changePassword";

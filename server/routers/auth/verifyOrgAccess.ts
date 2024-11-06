@@ -4,15 +4,15 @@ import { userOrgs } from "@server/db/schema";
 import { and, eq } from "drizzle-orm";
 import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
-import { AuthenticatedRequest } from "@server/types/Auth";
 
-export function verifyOrgAccess(
+export async function verifyOrgAccess(
     req: Request,
     res: Response,
     next: NextFunction
 ) {
-    const userId = req.user!.userId; // Assuming you have user information in the request
+    const userId = req.user!.userId;
     const orgId = req.params.orgId;
+    let userOrg = req.userOrg;
 
     if (!userId) {
         return next(
@@ -26,30 +26,36 @@ export function verifyOrgAccess(
         );
     }
 
-    db.select()
-        .from(userOrgs)
-        .where(and(eq(userOrgs.userId, userId), eq(userOrgs.orgId, orgId)))
-        .then((result) => {
-            if (result.length === 0) {
-                next(
-                    createHttpError(
-                        HttpCode.FORBIDDEN,
-                        "User does not have access to this organization"
-                    )
+    try {
+        if (!userOrg) {
+            const userOrgRes = await db
+                .select()
+                .from(userOrgs)
+                .where(
+                    and(eq(userOrgs.userId, userId), eq(userOrgs.orgId, orgId))
                 );
-            } else {
-                // User has access, attach the user's role to the request for potential future use
-                req.userOrgRoleId = result[0].roleId;
-                req.userOrgId = orgId;
-                next();
-            }
-        })
-        .catch((error) => {
+            userOrg = userOrgRes[0];
+        }
+
+        if (!userOrg) {
             next(
                 createHttpError(
-                    HttpCode.INTERNAL_SERVER_ERROR,
-                    "Error verifying organization access"
+                    HttpCode.FORBIDDEN,
+                    "User does not have access to this organization"
                 )
             );
-        });
+        } else {
+            // User has access, attach the user's role to the request for potential future use
+            req.userOrgRoleId = userOrg.roleId;
+            req.userOrgId = orgId;
+            return next();
+        }
+    } catch (e) {
+        return next(
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "Error verifying organization access"
+            )
+        );
+    }
 }

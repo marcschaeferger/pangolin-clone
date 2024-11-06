@@ -25,7 +25,7 @@ export type VerifyTotpResponse = {
 export async function verifyTotp(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
 ): Promise<any> {
     const parsedBody = verifyTotpBody.safeParse(req.body);
 
@@ -33,8 +33,8 @@ export async function verifyTotp(
         return next(
             createHttpError(
                 HttpCode.BAD_REQUEST,
-                fromError(parsedBody.error).toString(),
-            ),
+                fromError(parsedBody.error).toString()
+            )
         );
     }
 
@@ -46,8 +46,8 @@ export async function verifyTotp(
         return next(
             createHttpError(
                 HttpCode.BAD_REQUEST,
-                "Two-factor authentication is already enabled",
-            ),
+                "Two-factor authentication is already enabled"
+            )
         );
     }
 
@@ -55,13 +55,17 @@ export async function verifyTotp(
         return next(
             createHttpError(
                 HttpCode.BAD_REQUEST,
-                "User has not requested two-factor authentication",
-            ),
+                "User has not requested two-factor authentication"
+            )
         );
     }
 
     try {
-        const valid = await verifyTotpCode(code, user.twoFactorSecret, user.userId);
+        const valid = await verifyTotpCode(
+            code,
+            user.twoFactorSecret,
+            user.userId
+        );
 
         let codes;
         if (valid) {
@@ -101,8 +105,8 @@ export async function verifyTotp(
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,
-                "Failed to verify two-factor authentication code",
-            ),
+                "Failed to verify two-factor authentication code"
+            )
         );
     }
 }

@@ -107,25 +107,24 @@ export async function createSite(
                 subnet,
             })
             .returning();
-        // find the Super User roleId and also add the resource to the Super User role
-        const superUserRole = await db
+        const adminRole = await db
             .select()
             .from(roles)
-            .where(and(eq(roles.isSuperUserRole, true), eq(roles.orgId, orgId)))
+            .where(and(eq(roles.isAdmin, true), eq(roles.orgId, orgId)))
             .limit(1);
 
-        if (superUserRole.length === 0) {
+        if (adminRole.length === 0) {
             return next(
-                createHttpError(HttpCode.NOT_FOUND, `Super User role not found`)
+                createHttpError(HttpCode.NOT_FOUND, `Admin role not found`)
             );
         }
 
         await db.insert(roleSites).values({
-            roleId: superUserRole[0].roleId,
+            roleId: adminRole[0].roleId,
             siteId: newSite.siteId,
         });
 
-        if (req.userOrgRoleId != superUserRole[0].roleId) {
+        if (req.userOrgRoleId != adminRole[0].roleId) {
             // make sure the user can access the site
             db.insert(userSites).values({
                 userId: req.user?.userId!,

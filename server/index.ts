@@ -12,9 +12,9 @@ import {
 } from "@server/middlewares";
 import internal from "@server/routers/internal";
 import { authenticated, unauthenticated } from "@server/routers/external";
-import { router as wsRouter, handleWSUpgrade } from '@server/routers/ws';
+import { router as wsRouter, handleWSUpgrade } from "@server/routers/ws";
 import cookieParser from "cookie-parser";
-import { User } from "@server/db/schema";
+import { User, UserOrg } from "@server/db/schema";
 import { ensureActions } from "./db/ensureActions";
 import { logIncomingMiddleware } from "./middlewares/logIncoming";
 
@@ -52,15 +52,15 @@ app.prepare().then(() => {
     externalServer.use(prefix, unauthenticated);
     externalServer.use(prefix, authenticated);
     externalServer.use(`${prefix}/ws`, wsRouter);
-    
+
     externalServer.use(notFoundMiddleware);
-    
+
     // We are using NEXT from here on
     externalServer.all("*", (req: Request, res: Response) => {
         const parsedUrl = parse(req.url!, true);
         handle(req, res, parsedUrl);
     });
-    
+
     const httpServer = externalServer.listen(externalPort, (err?: any) => {
         if (err) throw err;
         logger.info(
@@ -98,6 +98,7 @@ declare global {
     namespace Express {
         interface Request {
             user?: User;
+            userOrg?: UserOrg;
             userOrgRoleId?: number;
             userOrgId?: string;
             userOrgIds?: string[];

@@ -7,15 +7,19 @@ import logger from "@server/logger";
 export async function ensureActions() {
     const actionIds = Object.values(ActionsEnum);
     const existingActions = await db.select().from(actions).execute();
-    const existingActionIds = existingActions.map(action => action.actionId);
+    const existingActionIds = existingActions.map((action) => action.actionId);
 
-    const actionsToAdd = actionIds.filter(id => !existingActionIds.includes(id));
-    const actionsToRemove = existingActionIds.filter(id => !actionIds.includes(id as ActionsEnum));
+    const actionsToAdd = actionIds.filter(
+        (id) => !existingActionIds.includes(id)
+    );
+    const actionsToRemove = existingActionIds.filter(
+        (id) => !actionIds.includes(id as ActionsEnum)
+    );
 
     const defaultRoles = await db
         .select()
         .from(roles)
-        .where(eq(roles.isSuperUserRole, true))
+        .where(eq(roles.isAdmin, true))
         .execute();
 
     // Add new actions
@@ -24,29 +28,42 @@ export async function ensureActions() {
         await db.insert(actions).values({ actionId }).execute();
         // Add new actions to the Default role
         if (defaultRoles.length != 0) {
-            await db.insert(roleActions)
-                .values(defaultRoles.map(role => ({ roleId: role.roleId!, actionId, orgId: role.orgId! })))
+            await db
+                .insert(roleActions)
+                .values(
+                    defaultRoles.map((role) => ({
+                        roleId: role.roleId!,
+                        actionId,
+                        orgId: role.orgId!,
+                    }))
+                )
                 .execute();
         }
     }
 
     // Remove deprecated actions
     if (actionsToRemove.length > 0) {
-        logger.debug(`Removing actions: ${actionsToRemove.join(', ')}`);
-        await db.delete(actions).where(inArray(actions.actionId, actionsToRemove)).execute();
-        await db.delete(roleActions).where(inArray(roleActions.actionId, actionsToRemove)).execute();
+        logger.debug(`Removing actions: ${actionsToRemove.join(", ")}`);
+        await db
+            .delete(actions)
+            .where(inArray(actions.actionId, actionsToRemove))
+            .execute();
+        await db
+            .delete(roleActions)
+            .where(inArray(roleActions.actionId, actionsToRemove))
+            .execute();
     }
 }
 
-export async function createSuperUserRole(orgId: string) {
+export async function createAdminRole(orgId: string) {
     // Create the Default role if it doesn't exist
     const [insertedRole] = await db
         .insert(roles)
         .values({
             orgId,
-            isSuperUserRole: true,
-            name: 'Super User',
-            description: 'Super User role with all actions'
+            isAdmin: true,
+            name: "Admin",
+            description: "Admin role most permissions",
         })
         .returning({ roleId: roles.roleId })
         .execute();
@@ -56,12 +73,19 @@ export async function createSuperUserRole(orgId: string) {
     const actionIds = await db.select().from(actions).execute();
 
     if (actionIds.length === 0) {
-        logger.info('No actions to assign to the Super User role');
+        logger.info("No actions to assign to the Admin role");
         return;
     }
 
-    await db.insert(roleActions)
-        .values(actionIds.map(action => ({ roleId, actionId: action.actionId, orgId })))
+    await db
+        .insert(roleActions)
+        .values(
+            actionIds.map((action) => ({
+                roleId,
+                actionId: action.actionId,
+                orgId,
+            }))
+        )
         .execute();
 
     return roleId;
