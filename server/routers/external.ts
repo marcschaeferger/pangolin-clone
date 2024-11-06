@@ -23,6 +23,8 @@ import {
     verifyUserInRole,
     verifyUserAccess,
 } from "./auth";
+import { verifyUserHasAction } from "./auth/verifyUserHasAction";
+import { ActionsEnum } from "@server/auth/actions";
 
 // Root routes
 export const unauthenticated = Router();
@@ -38,39 +40,92 @@ authenticated.use(verifySessionUserMiddleware);
 authenticated.get("/org/checkId", org.checkId);
 authenticated.put("/org", getUserOrgs, org.createOrg);
 authenticated.get("/orgs", getUserOrgs, org.listOrgs); // TODO we need to check the orgs here
-authenticated.get("/org/:orgId", verifyOrgAccess, org.getOrg);
-authenticated.post("/org/:orgId", verifyOrgAccess, org.updateOrg);
+authenticated.get(
+    "/org/:orgId",
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.getOrg),
+    org.getOrg
+);
+authenticated.post(
+    "/org/:orgId",
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.updateOrg),
+    org.updateOrg
+);
 // authenticated.delete("/org/:orgId", verifyOrgAccess, org.deleteOrg);
 
-authenticated.put("/org/:orgId/site", verifyOrgAccess, site.createSite);
-authenticated.get("/org/:orgId/sites", verifyOrgAccess, site.listSites);
-authenticated.get("/org/:orgId/site/:niceId", verifyOrgAccess, site.getSite);
+authenticated.put(
+    "/org/:orgId/site",
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.createSite),
+    site.createSite
+);
+authenticated.get(
+    "/org/:orgId/sites",
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.listSites),
+    site.listSites
+);
+authenticated.get(
+    "/org/:orgId/site/:niceId",
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.getSite),
+    site.getSite
+);
 
 authenticated.get(
     "/org/:orgId/pick-site-defaults",
     verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.createSite),
     site.pickSiteDefaults
 );
-authenticated.get("/site/:siteId", verifySiteAccess, site.getSite);
-// authenticated.get("/site/:siteId/roles", verifySiteAccess, site.listSiteRoles);
-authenticated.post("/site/:siteId", verifySiteAccess, site.updateSite);
-authenticated.delete("/site/:siteId", verifySiteAccess, site.deleteSite);
+authenticated.get(
+    "/site/:siteId",
+    verifySiteAccess,
+    verifyUserHasAction(ActionsEnum.getSite),
+    site.getSite
+);
+// authenticated.get(
+//     "/site/:siteId/roles",
+//     verifySiteAccess,
+//     verifyUserHasAction(ActionsEnum.listSiteRoles),
+//     site.listSiteRoles
+// );
+authenticated.post(
+    "/site/:siteId",
+    verifySiteAccess,
+    verifyUserHasAction(ActionsEnum.updateSite),
+    site.updateSite
+);
+authenticated.delete(
+    "/site/:siteId",
+    verifySiteAccess,
+    verifyUserHasAction(ActionsEnum.deleteSite),
+    site.deleteSite
+);
 
 authenticated.put(
     "/org/:orgId/site/:siteId/resource",
     verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.createResource),
     resource.createResource
 );
-authenticated.get("/site/:siteId/resources", resource.listResources);
+authenticated.get(
+    "/site/:siteId/resources",
+    verifyUserHasAction(ActionsEnum.listResources),
+    resource.listResources
+);
 authenticated.get(
     "/org/:orgId/resources",
     verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.listResources),
     resource.listResources
 );
 
 authenticated.post(
     "/org/:orgId/create-invite",
     verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.inviteUser),
     user.inviteUser
 ); // maybe make this /invite/create instead
 authenticated.post("/invite/accept", user.acceptInvite);
@@ -78,43 +133,56 @@ authenticated.post("/invite/accept", user.acceptInvite);
 // authenticated.get(
 //     "/resource/:resourceId/roles",
 //     verifyResourceAccess,
+//     verifyUserHasAction(ActionsEnum.listResourceRoles),
 //     resource.listResourceRoles
 // );
 authenticated.get(
     "/resource/:resourceId",
     verifyResourceAccess,
+    verifyUserHasAction(ActionsEnum.getResource),
     resource.getResource
 );
 authenticated.post(
     "/resource/:resourceId",
     verifyResourceAccess,
+    verifyUserHasAction(ActionsEnum.updateResource),
     resource.updateResource
 );
 authenticated.delete(
     "/resource/:resourceId",
     verifyResourceAccess,
+    verifyUserHasAction(ActionsEnum.deleteResource),
     resource.deleteResource
 );
 
 authenticated.put(
     "/resource/:resourceId/target",
     verifyResourceAccess,
+    verifyUserHasAction(ActionsEnum.createTarget),
     target.createTarget
 );
 authenticated.get(
     "/resource/:resourceId/targets",
     verifyResourceAccess,
+    verifyUserHasAction(ActionsEnum.listTargets),
     target.listTargets
 );
-authenticated.get("/target/:targetId", verifyTargetAccess, target.getTarget);
+authenticated.get(
+    "/target/:targetId",
+    verifyTargetAccess,
+    verifyUserHasAction(ActionsEnum.getTarget),
+    target.getTarget
+);
 authenticated.post(
     "/target/:targetId",
     verifyTargetAccess,
+    verifyUserHasAction(ActionsEnum.updateTarget),
     target.updateTarget
 );
 authenticated.delete(
     "/target/:targetId",
     verifyTargetAccess,
+    verifyUserHasAction(ActionsEnum.deleteTarget),
     target.deleteTarget
 );
 
@@ -122,25 +190,34 @@ authenticated.delete(
 //     "/org/:orgId/role",
 //     verifyOrgAccess,
 //     verifyAdmin,
+//     verifyUserHasAction(ActionsEnum.createRole),
 //     role.createRole
 // );
-// authenticated.get("/org/:orgId/roles", verifyOrgAccess, role.listRoles);
+// authenticated.get(
+//     "/org/:orgId/roles",
+//     verifyOrgAccess,
+//     verifyUserHasAction(ActionsEnum.listRoles),
+//     role.listRoles
+// );
 // authenticated.get(
 //     "/role/:roleId",
 //     verifyRoleAccess,
 //     verifyUserInRole,
+//     verifyUserHasAction(ActionsEnum.getRole),
 //     role.getRole
 // );
 // authenticated.post(
 //     "/role/:roleId",
 //     verifyRoleAccess,
 //     verifyAdmin,
+//     verifyUserHasAction(ActionsEnum.updateRole),
 //     role.updateRole
 // );
 // authenticated.delete(
 //     "/role/:roleId",
 //     verifyRoleAccess,
 //     verifyAdmin,
+//     verifyUserHasAction(ActionsEnum.deleteRole),
 //     role.deleteRole
 // );
 
@@ -148,42 +225,49 @@ authenticated.delete(
 //     "/role/:roleId/site",
 //     verifyRoleAccess,
 //     verifyUserInRole,
+//     verifyUserHasAction(ActionsEnum.addRoleSite),
 //     role.addRoleSite
 // );
 // authenticated.delete(
 //     "/role/:roleId/site",
 //     verifyRoleAccess,
 //     verifyUserInRole,
+//     verifyUserHasAction(ActionsEnum.removeRoleSite),
 //     role.removeRoleSite
 // );
 // authenticated.get(
 //     "/role/:roleId/sites",
 //     verifyRoleAccess,
 //     verifyUserInRole,
+//     verifyUserHasAction(ActionsEnum.listRoleSites),
 //     role.listRoleSites
 // );
 // authenticated.put(
 //     "/role/:roleId/resource",
 //     verifyRoleAccess,
 //     verifyUserInRole,
+//     verifyUserHasAction(ActionsEnum.addRoleResource),
 //     role.addRoleResource
 // );
 // authenticated.delete(
 //     "/role/:roleId/resource",
 //     verifyRoleAccess,
 //     verifyUserInRole,
+//     verifyUserHasAction(ActionsEnum.removeRoleResource),
 //     role.removeRoleResource
 // );
 // authenticated.get(
 //     "/role/:roleId/resources",
 //     verifyRoleAccess,
 //     verifyUserInRole,
+//     verifyUserHasAction(ActionsEnum.listRoleResources),
 //     role.listRoleResources
 // );
 // authenticated.put(
 //     "/role/:roleId/action",
 //     verifyRoleAccess,
 //     verifyUserInRole,
+//     verifyUserHasAction(ActionsEnum.addRoleAction),
 //     role.addRoleAction
 // );
 // authenticated.delete(
@@ -191,6 +275,7 @@ authenticated.delete(
 //     verifyRoleAccess,
 //     verifyUserInRole,
 //     verifyAdmin,
+//     verifyUserHasAction(ActionsEnum.removeRoleAction),
 //     role.removeRoleAction
 // );
 // authenticated.get(
@@ -198,16 +283,23 @@ authenticated.delete(
 //     verifyRoleAccess,
 //     verifyUserInRole,
 //     verifyAdmin,
+//     verifyUserHasAction(ActionsEnum.listRoleActions),
 //     role.listRoleActions
 // );
 
 unauthenticated.get("/user", verifySessionMiddleware, user.getUser);
 
-authenticated.get("/org/:orgId/users", verifyOrgAccess, user.listUsers);
+authenticated.get(
+    "/org/:orgId/users",
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.listUsers),
+    user.listUsers
+);
 authenticated.delete(
     "/org/:orgId/user/:userId",
     verifyOrgAccess,
     verifyUserAccess,
+    verifyUserHasAction(ActionsEnum.removeUser),
     user.removeUserOrg
 );
 
@@ -215,24 +307,28 @@ authenticated.delete(
 //     "/user/:userId/site",
 //     verifySiteAccess,
 //     verifyUserAccess,
+//     verifyUserHasAction(ActionsEnum.addRoleSite),
 //     role.addRoleSite
 // );
 // authenticated.delete(
 //     "/user/:userId/site",
 //     verifySiteAccess,
 //     verifyUserAccess,
+//     verifyUserHasAction(ActionsEnum.removeRoleSite),
 //     role.removeRoleSite
 // );
 // authenticated.put(
 //     "/user/:userId/resource",
 //     verifyResourceAccess,
 //     verifyUserAccess,
+//     verifyUserHasAction(ActionsEnum.addRoleResource),
 //     role.addRoleResource
 // );
 // authenticated.delete(
 //     "/user/:userId/resource",
 //     verifyResourceAccess,
 //     verifyUserAccess,
+//     verifyUserHasAction(ActionsEnum.removeRoleResource),
 //     role.removeRoleResource
 // );
 // authenticated.put(
@@ -240,6 +336,7 @@ authenticated.delete(
 //     verifyOrgAccess,
 //     verifyUserAccess,
 //     verifyAdmin,
+//     verifyUserHasAction(ActionsEnum.addRoleAction),
 //     role.addRoleAction
 // );
 // authenticated.delete(
@@ -247,6 +344,7 @@ authenticated.delete(
 //     verifyOrgAccess,
 //     verifyUserAccess,
 //     verifyAdmin,
+//     verifyUserHasAction(ActionsEnum.removeRoleAction),
 //     role.removeRoleAction
 // );
 

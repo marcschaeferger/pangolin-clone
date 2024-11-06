@@ -6,10 +6,9 @@ import { orgs, userOrgs } from "@server/db/schema";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
-import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
 import logger from "@server/logger";
 import { createAdminRole } from "@server/db/ensureActions";
-import config, { APP_PATH } from "@server/config";
+import config from "@server/config";
 import { fromError } from "zod-validation-error";
 
 const createOrgSchema = z.object({

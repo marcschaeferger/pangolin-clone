@@ -5,7 +5,6 @@ import { resources, userResources, userSites } from "@server/db/schema";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
-import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
 import logger from "@server/logger";
 import { eq } from "drizzle-orm";
 import { fromError } from "zod-validation-error";
@@ -33,20 +32,6 @@ export async function addUserSite(
 
         const { userId, siteId } = parsedBody.data;
 
-        // Check if the user has permission to add user sites
-        const hasPermission = await checkUserActionPermission(
-            ActionsEnum.addUserSite,
-            req
-        );
-        if (!hasPermission) {
-            return next(
-                createHttpError(
-                    HttpCode.FORBIDDEN,
-                    "User does not have permission to perform this action"
-                )
-            );
-        }
-
         const newUserSite = await db
             .insert(userSites)
             .values({
@@ -55,7 +40,6 @@ export async function addUserSite(
             })
             .returning();
 
-        // Add all resources associated with the site to the user
         const siteResources = await db
             .select()
             .from(resources)
@@ -78,10 +62,7 @@ export async function addUserSite(
     } catch (error) {
         logger.error(error);
         return next(
-            createHttpError(
-                HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred..."
-            )
+            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
 }

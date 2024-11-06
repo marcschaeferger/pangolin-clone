@@ -1,12 +1,10 @@
 import { Request, Response, NextFunction } from "express";
-import { z } from "zod";
 import { db } from "@server/db";
-import { exitNodes, Org, orgs, sites } from "@server/db/schema";
+import { exitNodes, sites } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
-import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
 import logger from "@server/logger";
 import { findNextAvailableCidr } from "@server/utils/ip";
 
@@ -26,20 +24,6 @@ export async function pickSiteDefaults(
     next: NextFunction
 ): Promise<any> {
     try {
-        // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(
-            ActionsEnum.createSite,
-            req
-        );
-        if (!hasPermission) {
-            return next(
-                createHttpError(
-                    HttpCode.FORBIDDEN,
-                    "User does not have permission to perform this action"
-                )
-            );
-        }
-
         // TODO: more intelligent way to pick the exit node
 
         // make sure there is an exit node by counting the exit nodes table

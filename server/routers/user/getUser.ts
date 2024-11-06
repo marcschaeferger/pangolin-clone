@@ -6,7 +6,6 @@ import { eq } from "drizzle-orm";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
-import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
 import logger from "@server/logger";
 
 export type GetUserResponse = {
@@ -18,14 +17,14 @@ export type GetUserResponse = {
 export async function getUser(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
 ): Promise<any> {
     try {
         const userId = req.user?.userId;
 
         if (!userId) {
             return next(
-                createHttpError(HttpCode.UNAUTHORIZED, "User not found"),
+                createHttpError(HttpCode.UNAUTHORIZED, "User not found")
             );
         }
 
@@ -39,8 +38,8 @@ export async function getUser(
             return next(
                 createHttpError(
                     HttpCode.NOT_FOUND,
-                    `User with ID ${userId} not found`,
-                ),
+                    `User with ID ${userId} not found`
+                )
             );
         }
 
@@ -60,8 +59,8 @@ export async function getUser(
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred...",
-            ),
+                "An error occurred..."
+            )
         );
     }
 }

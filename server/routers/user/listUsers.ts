@@ -6,7 +6,6 @@ import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import { sql } from "drizzle-orm";
-import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
 import logger from "@server/logger";
 
 const listUsersParamsSchema = z.object({
@@ -81,27 +80,12 @@ export async function listUsers(
 
         const { orgId } = parsedParams.data;
 
-        // Check if the user has permission to list users
-        const hasPermission = await checkUserActionPermission(
-            ActionsEnum.listUsers,
-            req
-        );
-        if (!hasPermission) {
-            return next(
-                createHttpError(
-                    HttpCode.FORBIDDEN,
-                    "User does not have permission to perform this action"
-                )
-            );
-        }
-
         const usersWithRoles = await queryUsers(
             orgId.toString(),
             limit,
             offset
         );
 
-        // Count total users
         const [{ count }] = await db
             .select({ count: sql<number>`count(*)` })
             .from(users);

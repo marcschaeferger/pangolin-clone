@@ -6,7 +6,6 @@ import { eq } from "drizzle-orm";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
-import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
 import logger from "@server/logger";
 
 const getOrgSchema = z.object({
@@ -15,12 +14,12 @@ const getOrgSchema = z.object({
 
 export type GetOrgResponse = {
     org: Org;
-}
+};
 
 export async function getOrg(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
 ): Promise<any> {
     try {
         const parsedParams = getOrgSchema.safeParse(req.params);
@@ -28,26 +27,12 @@ export async function getOrg(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedParams.error.errors.map((e) => e.message).join(", "),
-                ),
+                    parsedParams.error.errors.map((e) => e.message).join(", ")
+                )
             );
         }
 
         const { orgId } = parsedParams.data;
-
-        // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(
-            ActionsEnum.getOrg,
-            req,
-        );
-        if (!hasPermission) {
-            return next(
-                createHttpError(
-                    HttpCode.FORBIDDEN,
-                    "User does not have permission to perform this action",
-                ),
-            );
-        }
 
         const org = await db
             .select()
@@ -59,8 +44,8 @@ export async function getOrg(
             return next(
                 createHttpError(
                     HttpCode.NOT_FOUND,
-                    `Organization with ID ${orgId} not found`,
-                ),
+                    `Organization with ID ${orgId} not found`
+                )
             );
         }
 
@@ -76,10 +61,7 @@ export async function getOrg(
     } catch (error) {
         logger.error(error);
         return next(
-            createHttpError(
-                HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred...",
-            ),
+            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
 }

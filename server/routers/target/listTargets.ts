@@ -1,6 +1,5 @@
-import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
 import { db } from "@server/db";
-import { targets, resources } from "@server/db/schema";
+import { targets } from "@server/db/schema";
 import HttpCode from "@server/types/HttpCode";
 import response from "@server/utils/response";
 import { eq, sql } from "drizzle-orm";
@@ -81,20 +80,6 @@ export async function listTargets(
         }
         const { resourceId } = parsedParams.data;
 
-        // Check if the user has permission to list targets
-        const hasPermission = await checkUserActionPermission(
-            ActionsEnum.listTargets,
-            req
-        );
-        if (!hasPermission) {
-            return next(
-                createHttpError(
-                    HttpCode.FORBIDDEN,
-                    "User does not have permission to perform this action"
-                )
-            );
-        }
-
         const baseQuery = queryTargets(resourceId);
 
         let countQuery = db
@@ -123,10 +108,7 @@ export async function listTargets(
     } catch (error) {
         logger.error(error);
         return next(
-            createHttpError(
-                HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred..."
-            )
+            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
 }

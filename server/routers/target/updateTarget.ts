@@ -6,7 +6,6 @@ import { eq } from "drizzle-orm";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
-import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
@@ -55,20 +54,6 @@ export async function updateTarget(
         const { targetId } = parsedParams.data;
         const updateData = parsedBody.data;
 
-        // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(
-            ActionsEnum.updateTarget,
-            req
-        );
-        if (!hasPermission) {
-            return next(
-                createHttpError(
-                    HttpCode.FORBIDDEN,
-                    "User does not have permission to perform this action"
-                )
-            );
-        }
-
         const updatedTarget = await db
             .update(targets)
             .set(updateData)
@@ -94,10 +79,7 @@ export async function updateTarget(
     } catch (error) {
         logger.error(error);
         return next(
-            createHttpError(
-                HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred..."
-            )
+            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
 }

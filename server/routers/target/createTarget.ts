@@ -5,7 +5,6 @@ import { resources, sites, targets } from "@server/db/schema";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
-import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
 import logger from "@server/logger";
 import { addPeer } from "../gerbil/peers";
 import { eq, and } from "drizzle-orm";
@@ -53,20 +52,6 @@ export async function createTarget(
         }
 
         const { resourceId } = parsedParams.data;
-
-        // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(
-            ActionsEnum.createTarget,
-            req
-        );
-        if (!hasPermission) {
-            return next(
-                createHttpError(
-                    HttpCode.FORBIDDEN,
-                    "User does not have permission to perform this action"
-                )
-            );
-        }
 
         // get the resource
         const [resource] = await db
@@ -151,10 +136,7 @@ export async function createTarget(
     } catch (error) {
         logger.error(error);
         return next(
-            createHttpError(
-                HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred..."
-            )
+            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
 }

@@ -64,19 +64,6 @@ export async function inviteUser(
         const { orgId } = parsedParams.data;
         const { email, validHours, roleId } = parsedBody.data;
 
-        const hasPermission = await checkUserActionPermission(
-            ActionsEnum.inviteUser,
-            req
-        );
-        if (!hasPermission) {
-            return next(
-                createHttpError(
-                    HttpCode.FORBIDDEN,
-                    "User does not have permission to perform this action"
-                )
-            );
-        }
-
         const currentTime = Date.now();
         const oneHourAgo = currentTime - 3600000;
 
@@ -86,7 +73,7 @@ export async function inviteUser(
 
         inviteTracker[email].timestamps = inviteTracker[
             email
-        ].timestamps.filter((timestamp) => timestamp > oneHourAgo);
+        ].timestamps.filter((timestamp) => timestamp > oneHourAgo); // TODO: this could cause memory increase over time if the object is never deleted
 
         if (inviteTracker[email].timestamps.length >= 3) {
             return next(

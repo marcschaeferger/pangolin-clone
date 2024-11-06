@@ -6,14 +6,12 @@ import { eq } from "drizzle-orm";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
-import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
 import logger from "@server/logger";
 import { deletePeer } from "../gerbil/peers";
 import { fromError } from "zod-validation-error";
 
 const API_BASE_URL = "http://localhost:3000";
 
-// Define Zod schema for request parameters validation
 const deleteSiteSchema = z.object({
     siteId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
@@ -24,7 +22,6 @@ export async function deleteSite(
     next: NextFunction
 ): Promise<any> {
     try {
-        // Validate request parameters
         const parsedParams = deleteSiteSchema.safeParse(req.params);
         if (!parsedParams.success) {
             return next(
@@ -37,21 +34,6 @@ export async function deleteSite(
 
         const { siteId } = parsedParams.data;
 
-        // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(
-            ActionsEnum.deleteSite,
-            req
-        );
-        if (!hasPermission) {
-            return next(
-                createHttpError(
-                    HttpCode.FORBIDDEN,
-                    "User does not have permission to perform this action"
-                )
-            );
-        }
-
-        // Delete the site from the database
         const [deletedSite] = await db
             .delete(sites)
             .where(eq(sites.siteId, siteId))
@@ -78,10 +60,7 @@ export async function deleteSite(
     } catch (error) {
         logger.error(error);
         return next(
-            createHttpError(
-                HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred..."
-            )
+            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
 }

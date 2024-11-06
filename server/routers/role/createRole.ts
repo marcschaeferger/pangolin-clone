@@ -5,7 +5,6 @@ import { roles } from "@server/db/schema";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
-import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
@@ -48,20 +47,6 @@ export async function createRole(
 
         const { orgId } = parsedParams.data;
 
-        // Check if the user has permission to create roles
-        const hasPermission = await checkUserActionPermission(
-            ActionsEnum.createRole,
-            req
-        );
-        if (!hasPermission) {
-            return next(
-                createHttpError(
-                    HttpCode.FORBIDDEN,
-                    "User does not have permission to perform this action"
-                )
-            );
-        }
-
         const newRole = await db
             .insert(roles)
             .values({
@@ -80,10 +65,7 @@ export async function createRole(
     } catch (error) {
         logger.error(error);
         return next(
-            createHttpError(
-                HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred..."
-            )
+            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
 }

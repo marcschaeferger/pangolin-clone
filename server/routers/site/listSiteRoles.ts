@@ -6,7 +6,6 @@ import { eq } from "drizzle-orm";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
-import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
@@ -32,20 +31,6 @@ export async function listSiteRoles(
 
         const { siteId } = parsedParams.data;
 
-        // Check if the user has permission to list site roles
-        const hasPermission = await checkUserActionPermission(
-            ActionsEnum.listSiteRoles,
-            req
-        );
-        if (!hasPermission) {
-            return next(
-                createHttpError(
-                    HttpCode.FORBIDDEN,
-                    "User does not have permission to perform this action"
-                )
-            );
-        }
-
         const siteRolesList = await db
             .select({
                 roleId: roles.roleId,
@@ -67,10 +52,7 @@ export async function listSiteRoles(
     } catch (error) {
         logger.error(error);
         return next(
-            createHttpError(
-                HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred..."
-            )
+            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
 }

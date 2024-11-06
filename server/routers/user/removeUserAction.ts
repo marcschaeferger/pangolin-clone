@@ -6,7 +6,6 @@ import { and, eq } from "drizzle-orm";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
-import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
@@ -49,20 +48,6 @@ export async function removeUserAction(
 
         const { actionId, orgId } = parsedBody.data;
 
-        // Check if the user has permission to remove user actions
-        const hasPermission = await checkUserActionPermission(
-            ActionsEnum.removeUserAction,
-            req
-        );
-        if (!hasPermission) {
-            return next(
-                createHttpError(
-                    HttpCode.FORBIDDEN,
-                    "User does not have permission to perform this action"
-                )
-            );
-        }
-
         const deletedUserAction = await db
             .delete(userActions)
             .where(
@@ -93,10 +78,7 @@ export async function removeUserAction(
     } catch (error) {
         logger.error(error);
         return next(
-            createHttpError(
-                HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred..."
-            )
+            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
 }

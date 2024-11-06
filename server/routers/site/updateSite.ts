@@ -6,16 +6,13 @@ import { eq } from "drizzle-orm";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
-import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
-// Define Zod schema for request parameters validation
 const updateSiteParamsSchema = z.object({
     siteId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
 
-// Define Zod schema for request body validation
 const updateSiteBodySchema = z
     .object({
         name: z.string().min(1).max(255).optional(),
@@ -36,7 +33,6 @@ export async function updateSite(
     next: NextFunction
 ): Promise<any> {
     try {
-        // Validate request parameters
         const parsedParams = updateSiteParamsSchema.safeParse(req.params);
         if (!parsedParams.success) {
             return next(
@@ -47,7 +43,6 @@ export async function updateSite(
             );
         }
 
-        // Validate request body
         const parsedBody = updateSiteBodySchema.safeParse(req.body);
         if (!parsedBody.success) {
             return next(
@@ -61,21 +56,6 @@ export async function updateSite(
         const { siteId } = parsedParams.data;
         const updateData = parsedBody.data;
 
-        // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(
-            ActionsEnum.updateSite,
-            req
-        );
-        if (!hasPermission) {
-            return next(
-                createHttpError(
-                    HttpCode.FORBIDDEN,
-                    "User does not have permission to perform this action"
-                )
-            );
-        }
-
-        // Update the site in the database
         const updatedSite = await db
             .update(sites)
             .set(updateData)
@@ -101,10 +81,7 @@ export async function updateSite(
     } catch (error) {
         logger.error(error);
         return next(
-            createHttpError(
-                HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred..."
-            )
+            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
 }

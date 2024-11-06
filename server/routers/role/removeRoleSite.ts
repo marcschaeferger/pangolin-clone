@@ -6,7 +6,6 @@ import { and, eq } from "drizzle-orm";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
-import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
@@ -47,20 +46,6 @@ export async function removeRoleSite(
         }
 
         const { roleId } = parsedBody.data;
-
-        // Check if the user has permission to remove role sites
-        const hasPermission = await checkUserActionPermission(
-            ActionsEnum.removeRoleSite,
-            req
-        );
-        if (!hasPermission) {
-            return next(
-                createHttpError(
-                    HttpCode.FORBIDDEN,
-                    "User does not have permission to perform this action"
-                )
-            );
-        }
 
         const deletedRoleSite = await db
             .delete(roleSites)
@@ -105,10 +90,7 @@ export async function removeRoleSite(
     } catch (error) {
         logger.error(error);
         return next(
-            createHttpError(
-                HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred..."
-            )
+            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
 }

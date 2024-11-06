@@ -1,17 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import {
-    roles,
-    userSites,
-    sites,
-    roleSites,
-    exitNodes,
-} from "@server/db/schema";
+import { roles, userSites, sites, roleSites } from "@server/db/schema";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
-import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
 import logger from "@server/logger";
 import { eq, and } from "drizzle-orm";
 import { getUniqueSiteName } from "@server/db/names";
@@ -22,7 +15,6 @@ const createSiteParamsSchema = z.object({
     orgId: z.string(),
 });
 
-// Define Zod schema for request body validation
 const createSiteSchema = z.object({
     name: z.string().min(1).max(255),
     exitNodeId: z.number().int().positive(),
@@ -36,9 +28,6 @@ export type CreateSiteResponse = {
     siteId: number;
     orgId: string;
     niceId: string;
-    // niceId: string;
-    // subdomain: string;
-    // subnet: string;
 };
 
 export async function createSite(
@@ -47,7 +36,6 @@ export async function createSite(
     next: NextFunction
 ): Promise<any> {
     try {
-        // Validate request body
         const parsedBody = createSiteSchema.safeParse(req.body);
         if (!parsedBody.success) {
             return next(
@@ -60,7 +48,6 @@ export async function createSite(
 
         const { name, subdomain, exitNodeId, pubKey, subnet } = parsedBody.data;
 
-        // Validate request params
         const parsedParams = createSiteParamsSchema.safeParse(req.params);
         if (!parsedParams.success) {
             return next(
@@ -73,20 +60,6 @@ export async function createSite(
 
         const { orgId } = parsedParams.data;
 
-        // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(
-            ActionsEnum.createSite,
-            req
-        );
-        if (!hasPermission) {
-            return next(
-                createHttpError(
-                    HttpCode.FORBIDDEN,
-                    "User does not have permission perform this action"
-                )
-            );
-        }
-
         if (!req.userOrgRoleId) {
             return next(
                 createHttpError(HttpCode.FORBIDDEN, "User does not have a role")
@@ -95,7 +68,6 @@ export async function createSite(
 
         const niceId = await getUniqueSiteName(orgId);
 
-        // Create new site in the database
         const [newSite] = await db
             .insert(sites)
             .values({
@@ -144,8 +116,6 @@ export async function createSite(
                 niceId: newSite.niceId,
                 siteId: newSite.siteId,
                 orgId: newSite.orgId,
-                // subdomain: newSite.subdomain,
-                // subnet: newSite.subnet,
             },
             success: true,
             error: false,
@@ -155,10 +125,7 @@ export async function createSite(
     } catch (error) {
         logger.error(error);
         return next(
-            createHttpError(
-                HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred..."
-            )
+            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
 }

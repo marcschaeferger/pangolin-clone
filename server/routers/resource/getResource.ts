@@ -6,11 +6,8 @@ import { eq } from "drizzle-orm";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
-import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
-import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
-// Define Zod schema for request parameters validation
 const getResourceSchema = z.object({
     resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
@@ -28,7 +25,6 @@ export async function getResource(
     next: NextFunction
 ): Promise<any> {
     try {
-        // Validate request parameters
         const parsedParams = getResourceSchema.safeParse(req.params);
         if (!parsedParams.success) {
             return next(
@@ -41,21 +37,6 @@ export async function getResource(
 
         const { resourceId } = parsedParams.data;
 
-        // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(
-            ActionsEnum.getResource,
-            req
-        );
-        if (!hasPermission) {
-            return next(
-                createHttpError(
-                    HttpCode.FORBIDDEN,
-                    "User does not have permission to perform this action"
-                )
-            );
-        }
-
-        // Fetch the resource from the database
         const resource = await db
             .select()
             .from(resources)
@@ -84,12 +65,8 @@ export async function getResource(
             status: HttpCode.OK,
         });
     } catch (error) {
-        throw error;
         return next(
-            createHttpError(
-                HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred..."
-            )
+            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
 }

@@ -11,8 +11,6 @@ import {
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
-import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
-import logger from "@server/logger";
 import { eq, and } from "drizzle-orm";
 import stoi from "@server/utils/stoi";
 import { fromError } from "zod-validation-error";
@@ -26,7 +24,6 @@ const createResourceParamsSchema = z.object({
     orgId: z.string(),
 });
 
-// Define Zod schema for request body validation
 const createResourceSchema = z.object({
     name: z.string().min(1).max(255),
     subdomain: z.string().min(1).max(255).optional(),
@@ -38,7 +35,6 @@ export async function createResource(
     next: NextFunction
 ): Promise<any> {
     try {
-        // Validate request body
         const parsedBody = createResourceSchema.safeParse(req.body);
         if (!parsedBody.success) {
             return next(
@@ -63,20 +59,6 @@ export async function createResource(
         }
 
         const { siteId, orgId } = parsedParams.data;
-
-        // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(
-            ActionsEnum.createResource,
-            req
-        );
-        if (!hasPermission) {
-            return next(
-                createHttpError(
-                    HttpCode.FORBIDDEN,
-                    "User does not have permission to perform this action"
-                )
-            );
-        }
 
         if (!req.userOrgRoleId) {
             return next(

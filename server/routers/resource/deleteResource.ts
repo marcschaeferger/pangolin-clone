@@ -6,7 +6,6 @@ import { eq } from "drizzle-orm";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
-import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
@@ -21,7 +20,6 @@ export async function deleteResource(
     next: NextFunction
 ): Promise<any> {
     try {
-        // Validate request parameters
         const parsedParams = deleteResourceSchema.safeParse(req.params);
         if (!parsedParams.success) {
             return next(
@@ -34,21 +32,6 @@ export async function deleteResource(
 
         const { resourceId } = parsedParams.data;
 
-        // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(
-            ActionsEnum.deleteResource,
-            req
-        );
-        if (!hasPermission) {
-            return next(
-                createHttpError(
-                    HttpCode.FORBIDDEN,
-                    "User does not have permission to perform this action"
-                )
-            );
-        }
-
-        // Delete the resource from the database
         const deletedResource = await db
             .delete(resources)
             .where(eq(resources.resourceId, resourceId))
@@ -73,10 +56,7 @@ export async function deleteResource(
     } catch (error) {
         logger.error(error);
         return next(
-            createHttpError(
-                HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred..."
-            )
+            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
 }

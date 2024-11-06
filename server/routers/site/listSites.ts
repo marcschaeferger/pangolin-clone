@@ -1,4 +1,3 @@
-import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
 import { db } from "@server/db";
 import { orgs, roleSites, sites, userSites } from "@server/db/schema";
 import HttpCode from "@server/types/HttpCode";
@@ -45,8 +44,8 @@ function querySites(orgId: string, accessibleSiteIds: number[]) {
         .where(
             and(
                 inArray(sites.siteId, accessibleSiteIds),
-                eq(sites.orgId, orgId),
-            ),
+                eq(sites.orgId, orgId)
+            )
         );
 }
 
@@ -58,7 +57,7 @@ export type ListSitesResponse = {
 export async function listSites(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
 ): Promise<any> {
     try {
         const parsedQuery = listSitesSchema.safeParse(req.query);
@@ -66,8 +65,8 @@ export async function listSites(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    fromError(parsedQuery.error),
-                ),
+                    fromError(parsedQuery.error)
+                )
             );
         }
         const { limit, offset } = parsedQuery.data;
@@ -77,32 +76,18 @@ export async function listSites(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedParams.error.errors.map((e) => e.message).join(", "),
-                ),
+                    parsedParams.error.errors.map((e) => e.message).join(", ")
+                )
             );
         }
         const { orgId } = parsedParams.data;
-
-        // Check if the user has permission to list sites
-        const hasPermission = await checkUserActionPermission(
-            ActionsEnum.listSites,
-            req,
-        );
-        if (!hasPermission) {
-            return next(
-                createHttpError(
-                    HttpCode.FORBIDDEN,
-                    "User does not have permission to perform this action",
-                ),
-            );
-        }
 
         if (orgId && orgId !== req.userOrgId) {
             return next(
                 createHttpError(
                     HttpCode.FORBIDDEN,
-                    "User does not have access to this organization",
-                ),
+                    "User does not have access to this organization"
+                )
             );
         }
 
@@ -115,8 +100,8 @@ export async function listSites(
             .where(
                 or(
                     eq(userSites.userId, req.user!.userId),
-                    eq(roleSites.roleId, req.userOrgRoleId!),
-                ),
+                    eq(roleSites.roleId, req.userOrgRoleId!)
+                )
             );
 
         const accessibleSiteIds = accessibleSites.map((site) => site.siteId);
@@ -128,8 +113,8 @@ export async function listSites(
             .where(
                 and(
                     inArray(sites.siteId, accessibleSiteIds),
-                    eq(sites.orgId, orgId),
-                ),
+                    eq(sites.orgId, orgId)
+                )
             );
 
         const sitesList = await baseQuery.limit(limit).offset(offset);
@@ -152,10 +137,7 @@ export async function listSites(
         });
     } catch (error) {
         return next(
-            createHttpError(
-                HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred...",
-            ),
+            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
 }
