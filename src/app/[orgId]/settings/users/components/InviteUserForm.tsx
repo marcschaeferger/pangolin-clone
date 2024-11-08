@@ -22,7 +22,7 @@ import { useToast } from "@app/hooks/useToast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { InviteUserBody, InviteUserResponse } from "@server/routers/user";
 import { AxiosResponse } from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import CopyTextBox from "@app/components/CopyTextBox";
@@ -37,6 +37,7 @@ import {
     CredenzaTitle,
 } from "@app/components/Credenza";
 import { useOrgContext } from "@app/hooks/useOrgContext";
+import { ListRolesResponse } from "@server/routers/role";
 
 type InviteUserFormProps = {
     open: boolean;
@@ -45,8 +46,8 @@ type InviteUserFormProps = {
 
 const formSchema = z.object({
     email: z.string().email({ message: "Invalid email address" }),
-    validForHours: z.string(),
-    roleId: z.string(),
+    validForHours: z.string().min(1, { message: "Please select a duration" }),
+    roleId: z.string().min(1, { message: "Please select a role" }),
 });
 
 export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
@@ -57,7 +58,7 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
     const [loading, setLoading] = useState(false);
     const [expiresInDays, setExpiresInDays] = useState(1);
 
-    const roles = [{ roleId: 1, name: "Admin" }];
+    const [roles, setRoles] = useState<{ roleId: number; name: string }[]>([]);
 
     const validFor = [
         { hours: 24, name: "1 day" },
@@ -73,10 +74,43 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
         resolver: zodResolver(formSchema),
         defaultValues: {
             email: "",
-            validForHours: "168",
-            roleId: "4",
+            validForHours: "72",
+            roleId: "",
         },
     });
+
+    useEffect(() => {
+        if (!open) {
+            return;
+        }
+
+        async function fetchRoles() {
+            const res = await api
+                .get<AxiosResponse<ListRolesResponse>>(
+                    `/org/${org?.org.orgId}/roles`
+                )
+                .catch((e) => {
+                    console.error(e);
+                    toast({
+                        variant: "destructive",
+                        title: "Failed to fetch roles",
+                        description:
+                            e.message ||
+                            "An error occurred while fetching the roles",
+                    });
+                });
+
+            if (res?.status === 200) {
+                setRoles(res.data.data.roles);
+                // form.setValue(
+                //     "roleId",
+                //     res.data.data.roles[0].roleId.toString()
+                // );
+            }
+        }
+
+        fetchRoles();
+    }, [open]);
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setLoading(true);
@@ -167,7 +201,6 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
                                                     onValueChange={
                                                         field.onChange
                                                     }
-                                                    defaultValue={field.value.toString()}
                                                 >
                                                     <FormControl>
                                                         <SelectTrigger>

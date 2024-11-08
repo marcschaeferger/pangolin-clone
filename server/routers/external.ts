@@ -199,12 +199,12 @@ authenticated.delete(
 //     verifyUserHasAction(ActionsEnum.createRole),
 //     role.createRole
 // );
-// authenticated.get(
-//     "/org/:orgId/roles",
-//     verifyOrgAccess,
-//     verifyUserHasAction(ActionsEnum.listRoles),
-//     role.listRoles
-// );
+authenticated.get(
+    "/org/:orgId/roles",
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.listRoles),
+    role.listRoles
+);
 // authenticated.get(
 //     "/role/:roleId",
 //     verifyRoleAccess,

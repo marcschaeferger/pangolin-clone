@@ -1,6 +1,6 @@
 // import { orgs, sites, resources, exitNodes, targets } from "@server/db/schema";
 // import db from "@server/db";
-// import { crateAdminRole } from "@server/db/ensureActions";
+// import { createAdminRole } from "@server/db/ensureActions";
 
 // async function insertDummyData() {
 //     const org1 = db
@@ -13,7 +13,7 @@
 //         .returning()
 //         .get();
 
-//     await crateAdminRole(org1.orgId!);
+//     await createAdminRole(org1.orgId!);
 
 //     // Insert dummy exit nodes
 //     const exitNode1 = db

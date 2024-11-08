@@ -37,6 +37,7 @@ async function queryUsers(orgId: string, limit: number, offset: number) {
             orgId: userOrgs.orgId,
             roleId: userOrgs.roleId,
             roleName: roles.name,
+            isOwner: userOrgs.isOwner,
         })
         .from(users)
         .leftJoin(userOrgs, sql`${users.userId} = ${userOrgs.userId}`)

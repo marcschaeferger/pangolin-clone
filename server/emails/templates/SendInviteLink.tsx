@@ -37,7 +37,7 @@ export const SendInviteLink = ({
                 <Body className="font-sans">
                     <Container className="bg-white border border-solid border-gray-200 p-6 max-w-lg mx-auto my-8">
                         <Heading className="text-2xl font-semibold text-gray-800 text-center">
-                            You're invite to join a Fossorial organization
+                            You're invited to join a Fossorial organization
                         </Heading>
                         <Text className="text-base text-gray-700 mt-4">
                             Hi {email || "there"},
@@ -45,12 +45,15 @@ export const SendInviteLink = ({
                         <Text className="text-base text-gray-700 mt-2">
                             You’ve been invited to join the organization{" "}
                             {orgName}
-                            {inviterName ? ` by ${inviterName}.` : ""}. Please
+                            {inviterName ? ` by ${inviterName}.` : "."} Please
                             access the link below to accept the invite.
                         </Text>
                         <Text className="text-base text-gray-700 mt-2">
                             This invite will expire in{" "}
-                            <b>{expiresInDays} days.</b>
+                            <b>
+                                {expiresInDays}{" "}
+                                {expiresInDays === "1" ? "day" : "days"}.
+                            </b>
                         </Text>
                         <Section className="text-center my-6">
                             <Button

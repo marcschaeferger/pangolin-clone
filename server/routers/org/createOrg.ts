@@ -99,6 +99,7 @@ export async function createOrg(
                 userId: req.user!.userId,
                 orgId: newOrg[0].orgId,
                 roleId: roleId,
+                isOwner: true,
             })
             .execute();
 

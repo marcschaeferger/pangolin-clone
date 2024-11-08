@@ -24,6 +24,7 @@ import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { Checkbox } from "@app/components/ui/checkbox";
 import { PickSiteDefaultsResponse } from "@server/routers/site";
+import CopyTextBox from "@app/components/CopyTextBox";
 
 const method = [
     { label: "Wireguard", value: "wg" },
@@ -188,19 +189,11 @@ sh get-docker.sh`;
                         )}
                     />
                     {form.watch("method") === "wg" && !isLoading ? (
-                        <pre className="mt-2 w-full rounded-md bg-muted p-4 overflow-x-auto">
-                            <code className="whitespace-pre-wrap font-mono">
-                                {wgConfig}
-                            </code>
-                        </pre>
+                        <CopyTextBox text={wgConfig} />
                     ) : form.watch("method") === "wg" && isLoading ? (
                         <p>Loading WireGuard configuration...</p>
                     ) : (
-                        <pre className="mt-2 w-full rounded-md bg-muted p-4 overflow-x-auto">
-                            <code className="whitespace-pre-wrap">
-                                {newtConfig}
-                            </code>
-                        </pre>
+                        <CopyTextBox text={newtConfig} wrapText={false} />
                     )}
                     <div className="flex items-center space-x-2">
                         <Checkbox

@@ -145,7 +145,7 @@ export async function inviteUser(
                 email,
                 inviteLink,
                 expiresInDays: (validHours / 24).toString(),
-                orgName: orgId,
+                orgName: org[0].name || orgId,
                 inviterName: req.user?.email,
             }),
             {

@@ -29,7 +29,7 @@ export function TopbarNav({
             className={cn(
                 "flex overflow-x-auto space-x-4 lg:space-x-6",
                 disabled && "opacity-50 pointer-events-none",
-                className,
+                className
             )}
             {...props}
         >
@@ -38,22 +38,23 @@ export function TopbarNav({
                     key={item.href}
                     href={item.href.replace("{orgId}", orgId)}
                     className={cn(
-                        "px-2 py-3 text-md",
+                        "relative px-3 py-3 text-md",
                         pathname.startsWith(item.href.replace("{orgId}", orgId))
                             ? "border-b-2 border-primary text-primary font-medium"
                             : "hover:text-primary text-muted-foreground font-medium",
                         "whitespace-nowrap",
-                        disabled && "cursor-not-allowed",
+                        disabled && "cursor-not-allowed"
                     )}
                     onClick={disabled ? (e) => e.preventDefault() : undefined}
                     tabIndex={disabled ? -1 : undefined}
                     aria-disabled={disabled}
                 >
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 relative px-2 py-0.5 rounded-md">
                         {item.icon && (
                             <div className="hidden md:block">{item.icon}</div>
                         )}
-                        {item.title}
+                        <span className="relative z-10">{item.title}</span>
+                        <span className="absolute inset-x-0 bottom-0 border-b-2 border-transparent group-hover:border-primary"></span>
                     </div>
                 </Link>
             ))}

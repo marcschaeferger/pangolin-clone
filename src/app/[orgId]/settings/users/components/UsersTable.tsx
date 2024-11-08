@@ -8,11 +8,10 @@ import {
     DropdownMenuTrigger,
 } from "@app/components/ui/dropdown-menu";
 import { Button } from "@app/components/ui/button";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, Crown, MoreHorizontal } from "lucide-react";
 import { UsersDataTable } from "./UsersDataTable";
 import { useState } from "react";
 import InviteUserForm from "./InviteUserForm";
-import { Badge } from "@app/components/ui/badge";
 import ConfirmDeleteDialog from "@app/components/ConfirmDeleteDialog";
 import { useUserContext } from "@app/hooks/useUserContext";
 import api from "@app/api";
@@ -24,6 +23,7 @@ export type UserRow = {
     email: string;
     status: string;
     role: string;
+    isOwner: boolean;
 };
 
 type UsersTableProps = {
@@ -87,6 +87,16 @@ export default function UsersTable({ users }: UsersTableProps) {
                     </Button>
                 );
             },
+            cell: ({ row }) => {
+                const userRow = row.original;
+
+                return (
+                    <div className="flex flex-row items-center gap-1">
+                        {userRow.isOwner && <Crown className="w-4 h-4" />}
+                        <span>{userRow.role}</span>
+                    </div>
+                );
+            },
         },
         {
             id: "actions",
@@ -95,30 +105,39 @@ export default function UsersTable({ users }: UsersTableProps) {
 
                 return (
                     <>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                    <span className="sr-only">Open menu</span>
-                                    <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuItem>Manage user</DropdownMenuItem>
-                                {userRow.email !== user?.email && (
+                        {!userRow.isOwner && (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        variant="ghost"
+                                        className="h-8 w-8 p-0"
+                                    >
+                                        <span className="sr-only">
+                                            Open menu
+                                        </span>
+                                        <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
                                     <DropdownMenuItem>
-                                        <button
-                                            className="text-red-600 hover:text-red-800"
-                                            onClick={() => {
-                                                setIsDeleteModalOpen(true);
-                                                setUserToRemove(userRow);
-                                            }}
-                                        >
-                                            Remove User
-                                        </button>
+                                        Manage user
                                     </DropdownMenuItem>
-                                )}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                                    {userRow.email !== user?.email && (
+                                        <DropdownMenuItem>
+                                            <button
+                                                className="text-red-600 hover:text-red-800"
+                                                onClick={() => {
+                                                    setIsDeleteModalOpen(true);
+                                                    setUserToRemove(userRow);
+                                                }}
+                                            >
+                                                Remove User
+                                            </button>
+                                        </DropdownMenuItem>
+                                    )}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        )}
                     </>
                 );
             },

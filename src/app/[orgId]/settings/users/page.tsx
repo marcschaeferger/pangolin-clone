@@ -8,6 +8,7 @@ import { cache } from "react";
 import OrgProvider from "@app/providers/OrgProvider";
 import UserProvider from "@app/providers/UserProvider";
 import { verifySession } from "@app/lib/auth/verifySession";
+import CopyTextBox from "@app/components/CopyTextBox";
 
 type UsersPageProps = {
     params: Promise<{ orgId: string }>;
@@ -55,7 +56,8 @@ export default async function UsersPage(props: UsersPageProps) {
             id: user.id,
             email: user.email,
             status: "Confirmed",
-            role: user.roleName || "",
+            role: user.isOwner ? "Owner" : user.roleName || "Member",
+            isOwner: user.isOwner || false,
         };
     });
 
