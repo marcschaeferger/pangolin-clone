@@ -8,7 +8,6 @@ import { cache } from "react";
 import OrgProvider from "@app/providers/OrgProvider";
 import UserProvider from "@app/providers/UserProvider";
 import { verifySession } from "@app/lib/auth/verifySession";
-import CopyTextBox from "@app/components/CopyTextBox";
 
 type UsersPageProps = {
     params: Promise<{ orgId: string }>;
@@ -63,16 +62,6 @@ export default async function UsersPage(props: UsersPageProps) {
 
     return (
         <>
-            <div className="space-y-0.5 select-none mb-6">
-                <h2 className="text-2xl font-bold tracking-tight">
-                    Manage Users
-                </h2>
-                <p className="text-muted-foreground">
-                    Manage existing your users or invite new ones to your
-                    organization.
-                </p>
-            </div>
-
             <UserProvider user={user!}>
                 <OrgProvider org={org}>
                     <UsersTable users={userRows} />

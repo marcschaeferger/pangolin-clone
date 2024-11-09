@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@server/db";
 import {
     orgs,
+    Resource,
     resources,
     roleResources,
     roles,
@@ -28,6 +29,8 @@ const createResourceSchema = z.object({
     name: z.string().min(1).max(255),
     subdomain: z.string().min(1).max(255).optional(),
 });
+
+export type CreateResourceResponse = Resource;
 
 export async function createResource(
     req: Request,
@@ -82,10 +85,8 @@ export async function createResource(
             );
         }
 
-        // Generate a unique resourceId
         const fullDomain = `${subdomain}.${org[0].domain}`;
 
-        // Create new resource in the database
         const newResource = await db
             .insert(resources)
             .values({
@@ -122,7 +123,7 @@ export async function createResource(
             });
         }
 
-        response(res, {
+        response<CreateResourceResponse>(res, {
             data: newResource[0],
             success: true,
             error: false,
@@ -130,12 +131,8 @@ export async function createResource(
             status: HttpCode.CREATED,
         });
     } catch (error) {
-        throw error;
         return next(
-            createHttpError(
-                HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred..."
-            )
+            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
 }

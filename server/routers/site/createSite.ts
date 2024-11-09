@@ -79,6 +79,7 @@ export async function createSite(
                 subnet,
             })
             .returning();
+
         const adminRole = await db
             .select()
             .from(roles)
@@ -104,7 +105,7 @@ export async function createSite(
             });
         }
 
-        // Add the peer to the exit node
+        // add the peer to the exit node
         await addPeer(exitNodeId, {
             publicKey: pubKey,
             allowedIps: [],

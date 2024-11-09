@@ -29,8 +29,8 @@ const topNavItems = [
         icon: <Waypoints className="h-5 w-5" />,
     },
     {
-        title: "Users",
-        href: "/{orgId}/settings/users",
+        title: "Access",
+        href: "/{orgId}/settings/access",
         icon: <Users className="h-5 w-5" />,
     },
     {

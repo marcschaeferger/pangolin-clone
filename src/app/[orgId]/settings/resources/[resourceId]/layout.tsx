@@ -1,12 +1,10 @@
-import Image from "next/image";
 import ResourceProvider from "@app/providers/ResourceProvider";
 import { internal } from "@app/api";
 import { GetResourceResponse } from "@server/routers/resource";
 import { AxiosResponse } from "axios";
 import { redirect } from "next/navigation";
 import { authCookieHeader } from "@app/api/cookies";
-import Link from "next/link";
-import { ClientLayout } from "./components/ClientLayout";
+import { SidebarSettings } from "@app/components/SidebarSettings";
 
 interface ResourceLayoutProps {
     children: React.ReactNode;
@@ -32,19 +30,42 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
         }
     }
 
+    const sidebarNavItems = [
+        {
+            title: "General",
+            href: `/{orgId}/settings/resources/resourceId`,
+        },
+        {
+            title: "Targets",
+            href: `/{orgId}/settings/resources/{resourceId}/targets`,
+        },
+    ];
+
+    const isCreate = params.resourceId === "create";
+
     return (
         <>
-            <div className="mb-4">
-                <Link
-                    href={`/${params.orgId}/settings/resources`}
-                    className="text-primary font-medium"
-                ></Link>
+            <div className="space-y-0.5 select-none mb-6">
+                <h2 className="text-2xl font-bold tracking-tight">
+                    {isCreate ? "New Resource" : resource?.name + " Settings"}
+                </h2>
+                <p className="text-muted-foreground">
+                    {isCreate
+                        ? "Create a new resource"
+                        : "Configure the settings on your resource: " +
+                              resource?.name || ""}
+                    .
+                </p>
             </div>
 
             <ResourceProvider resource={resource}>
-                <ClientLayout isCreate={params.resourceId === "create"}>
+                <SidebarSettings
+                    sidebarNavItems={sidebarNavItems}
+                    disabled={isCreate}
+                    limitWidth={true}
+                >
                     {children}
-                </ClientLayout>
+                </SidebarSettings>
             </ResourceProvider>
         </>
     );

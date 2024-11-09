@@ -53,12 +53,12 @@ authenticated.post(
     verifyUserHasAction(ActionsEnum.updateOrg),
     org.updateOrg
 );
-// authenticated.delete(
-//     "/org/:orgId",
-//     verifyOrgAccess,
-//     verifyUserIsOrgOwner,
-//     org.deleteOrg
-// );
+authenticated.delete(
+    "/org/:orgId",
+    verifyOrgAccess,
+    verifyUserIsOrgOwner,
+    org.deleteOrg
+);
 
 authenticated.put(
     "/org/:orgId/site",
@@ -192,13 +192,13 @@ authenticated.delete(
     target.deleteTarget
 );
 
-// authenticated.put(
-//     "/org/:orgId/role",
-//     verifyOrgAccess,
-//     verifyAdmin,
-//     verifyUserHasAction(ActionsEnum.createRole),
-//     role.createRole
-// );
+authenticated.put(
+    "/org/:orgId/role",
+    verifyOrgAccess,
+    verifyAdmin,
+    verifyUserHasAction(ActionsEnum.createRole),
+    role.createRole
+);
 authenticated.get(
     "/org/:orgId/roles",
     verifyOrgAccess,

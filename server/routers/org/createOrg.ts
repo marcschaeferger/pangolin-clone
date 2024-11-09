@@ -45,13 +45,6 @@ export async function createOrg(
             );
         }
 
-        // TODO: we cant do this when they create an org because they are not in an org yet... maybe we need to make the org id optional on the userActions table
-        // Check if the user has permission
-        // const hasPermission = await checkUserActionPermission(ActionsEnum.createOrg, req);
-        // if (!hasPermission) {
-        //     return next(createHttpError(HttpCode.FORBIDDEN, 'User does not have permission to perform this action'));
-        // }
-
         const { orgId, name } = parsedBody.data;
 
         // make sure the orgId is unique
@@ -113,10 +106,7 @@ export async function createOrg(
     } catch (error) {
         logger.error(error);
         return next(
-            createHttpError(
-                HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred..."
-            )
+            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
 }

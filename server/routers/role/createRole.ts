@@ -1,12 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { roles } from "@server/db/schema";
+import { orgs, Role, roleActions, roles } from "@server/db/schema";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
+import { ActionsEnum } from "@server/auth/actions";
+import { eq, and } from "drizzle-orm";
 
 const createRoleParamsSchema = z.object({
     orgId: z.string(),
@@ -16,6 +18,8 @@ const createRoleSchema = z.object({
     name: z.string().min(1).max(255),
     description: z.string().optional(),
 });
+
+export type CreateRoleResponse = Role;
 
 export async function createRole(
     req: Request,
@@ -47,6 +51,25 @@ export async function createRole(
 
         const { orgId } = parsedParams.data;
 
+        const allRoles = await db
+            .select({
+                roleId: roles.roleId,
+                name: roles.name,
+            })
+            .from(roles)
+            .leftJoin(orgs, eq(roles.orgId, orgs.orgId))
+            .where(and(eq(roles.name, roleData.name), eq(roles.orgId, orgId)));
+
+        // make sure name is unique
+        if (allRoles.length > 0) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    "Role with that name already exists"
+                )
+            );
+        }
+
         const newRole = await db
             .insert(roles)
             .values({
@@ -55,7 +78,25 @@ export async function createRole(
             })
             .returning();
 
-        return response(res, {
+        // default allowed actions for a non admin role
+        const allowedActions: ActionsEnum[] = [
+            ActionsEnum.getOrg,
+            ActionsEnum.getResource,
+            ActionsEnum.listResources,
+        ];
+
+        await db
+            .insert(roleActions)
+            .values(
+                allowedActions.map((action) => ({
+                    roleId: newRole[0].roleId,
+                    actionId: action,
+                    orgId,
+                }))
+            )
+            .execute();
+
+        return response<Role>(res, {
             data: newRole[0],
             success: true,
             error: false,

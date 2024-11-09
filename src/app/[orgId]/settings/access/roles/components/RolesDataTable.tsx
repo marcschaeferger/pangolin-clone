@@ -22,17 +22,17 @@ import {
 import { Button } from "@app/components/ui/button";
 import { useState } from "react";
 import { Input } from "@app/components/ui/input";
-import { DataTablePagination } from "../../../../../components/DataTablePagination";
 import { Plus } from "lucide-react";
+import { DataTablePagination } from "@app/components/DataTablePagination";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
-    inviteUser?: () => void;
+    addRole?: () => void;
 }
 
-export function UsersDataTable<TData, TValue>({
-    inviteUser,
+export function RolesDataTable<TData, TValue>({
+    addRole,
     columns,
     data,
 }: DataTableProps<TData, TValue>) {
@@ -58,27 +58,26 @@ export function UsersDataTable<TData, TValue>({
         <div>
             <div className="flex items-center justify-between pb-4">
                 <Input
-                    placeholder="Search users"
+                    placeholder="Search roles"
                     value={
-                        (table
-                            .getColumn("email")
-                            ?.getFilterValue() as string) ?? ""
+                        (table.getColumn("name")?.getFilterValue() as string) ??
+                        ""
                     }
                     onChange={(event) =>
                         table
-                            .getColumn("email")
+                            .getColumn("name")
                             ?.setFilterValue(event.target.value)
                     }
                     className="max-w-sm mr-2"
                 />
                 <Button
                     onClick={() => {
-                        if (inviteUser) {
-                            inviteUser();
+                        if (addRole) {
+                            addRole();
                         }
                     }}
                 >
-                    <Plus className="mr-2 h-4 w-4" /> Invite User
+                    <Plus className="mr-2 h-4 w-4" /> Add Role
                 </Button>
             </div>
             <div>
@@ -127,8 +126,8 @@ export function UsersDataTable<TData, TValue>({
                                     colSpan={columns.length}
                                     className="h-24 text-center"
                                 >
-                                    No Users. Invite one to share access to
-                                    resources.
+                                    No roles. Create a role, then add users to
+                                    the it.
                                 </TableCell>
                             </TableRow>
                         )}

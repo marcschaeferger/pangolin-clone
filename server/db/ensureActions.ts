@@ -56,14 +56,13 @@ export async function ensureActions() {
 }
 
 export async function createAdminRole(orgId: string) {
-    // Create the Default role if it doesn't exist
     const [insertedRole] = await db
         .insert(roles)
         .values({
             orgId,
             isAdmin: true,
             name: "Admin",
-            description: "Admin role most permissions",
+            description: "Admin role with the most permissions",
         })
         .returning({ roleId: roles.roleId })
         .execute();
