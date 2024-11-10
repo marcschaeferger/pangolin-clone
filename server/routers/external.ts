@@ -19,7 +19,6 @@ import {
     verifyResourceAccess,
     verifyTargetAccess,
     verifyRoleAccess,
-    verifyUserInRole,
     verifyUserAccess,
 } from "./auth";
 import { verifyUserHasAction } from "./auth/verifyUserHasAction";

@@ -73,6 +73,12 @@ export const users = sqliteTable("user", {
     dateCreated: text("dateCreated").notNull(),
 });
 
+export const newts = sqliteTable("newt", {
+    newtId: text("id").primaryKey(),
+    secretHash: text("secretHash").notNull(),
+    dateCreated: text("dateCreated").notNull(),
+});
+
 export const twoFactorBackupCodes = sqliteTable("twoFactorBackupCodes", {
     codeId: integer("id").primaryKey({ autoIncrement: true }),
     userId: text("userId")
@@ -86,6 +92,14 @@ export const sessions = sqliteTable("session", {
     userId: text("userId")
         .notNull()
         .references(() => users.userId, { onDelete: "cascade" }),
+    expiresAt: integer("expiresAt").notNull(),
+});
+
+export const newtSessions = sqliteTable("newtSession", {
+    sessionId: text("id").primaryKey(),
+    newtId: text("newtId")
+        .notNull()
+        .references(() => newts.newtId, { onDelete: "cascade" }),
     expiresAt: integer("expiresAt").notNull(),
 });
 
@@ -227,6 +241,8 @@ export type Resource = InferSelectModel<typeof resources>;
 export type ExitNode = InferSelectModel<typeof exitNodes>;
 export type Target = InferSelectModel<typeof targets>;
 export type Session = InferSelectModel<typeof sessions>;
+export type Newt = InferSelectModel<typeof newts>;
+export type NewtSession = InferSelectModel<typeof newtSessions>;
 export type EmailVerificationCode = InferSelectModel<
     typeof emailVerificationCodes
 >;

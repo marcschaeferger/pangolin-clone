@@ -12,6 +12,7 @@ export * from "./verifyTargetAccess";
 export * from "./verifyRoleAccess";
 export * from "./verifyUserAccess";
 export * from "./verifyAdmin";
+// export * from "./verifySuperUser";
 export * from "./verifyEmail";
 export * from "./requestEmailVerificationCode";
 export * from "./changePassword";

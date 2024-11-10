@@ -4,8 +4,8 @@ import db from "@server/db";
 import { users, emailVerificationCodes } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import { sendEmail } from "@server/emails";
-import VerifyEmail from "@server/emails/templates/VerifyEmailCode";
 import config from "@server/config";
+import VerifyEmail from "@server/emails/templates/verifyEmailCode";
 
 export async function sendEmailVerificationCode(
     email: string,
