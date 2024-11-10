@@ -12,7 +12,6 @@ export async function verifyUserIsOrgOwner(
 ) {
     const userId = req.user!.userId;
     const orgId = req.params.orgId;
-    let userOrg = req.userOrg;
 
     if (!userId) {
         return next(
@@ -30,17 +29,17 @@ export async function verifyUserIsOrgOwner(
     }
 
     try {
-        if (!userOrg) {
+        if (!req.userOrg) {
             const res = await db
                 .select()
                 .from(userOrgs)
                 .where(
                     and(eq(userOrgs.userId, userId), eq(userOrgs.orgId, orgId))
                 );
-            userOrg = res[0];
+            req.userOrg = res[0];
         }
 
-        if (!userOrg) {
+        if (!req.userOrg) {
             return next(
                 createHttpError(
                     HttpCode.FORBIDDEN,
@@ -49,7 +48,7 @@ export async function verifyUserIsOrgOwner(
             );
         }
 
-        if (!userOrg.isOwner) {
+        if (!req.userOrg.isOwner) {
             return next(
                 createHttpError(
                     HttpCode.FORBIDDEN,

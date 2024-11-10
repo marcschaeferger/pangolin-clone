@@ -12,7 +12,6 @@ export async function verifyAdmin(
 ) {
     const userId = req.user?.userId;
     const orgId = req.userOrgId;
-    let userOrg = req.userOrg;
 
     if (!userId) {
         return next(
@@ -26,16 +25,16 @@ export async function verifyAdmin(
         );
     }
 
-    if (!userOrg) {
+    if (!req.userOrg) {
         const userOrgRes = await db
             .select()
             .from(userOrgs)
             .where(and(eq(userOrgs.userId, userId), eq(userOrgs.orgId, orgId!)))
             .limit(1);
-        userOrg = userOrgRes[0];
+        req.userOrg = userOrgRes[0];
     }
 
-    if (!userOrg) {
+    if (!req.userOrg) {
         return next(
             createHttpError(
                 HttpCode.FORBIDDEN,
@@ -47,7 +46,7 @@ export async function verifyAdmin(
     const userRole = await db
         .select()
         .from(roles)
-        .where(eq(roles.roleId, userOrg.roleId))
+        .where(eq(roles.roleId, req.userOrg.roleId))
         .limit(1);
 
     if (userRole.length === 0 || !userRole[0].isAdmin) {

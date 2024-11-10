@@ -9,11 +9,12 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
-const addUserRoleSchema = z.object({
+const addUserRoleParamsSchema = z.object({
     userId: z.string(),
     roleId: z.number().int().positive(),
-    orgId: z.string(),
 });
+
+export type AddUserRoleResponse = z.infer<typeof addUserRoleParamsSchema>;
 
 export async function addUserRole(
     req: Request,
@@ -21,7 +22,7 @@ export async function addUserRole(
     next: NextFunction
 ): Promise<any> {
     try {
-        const parsedBody = addUserRoleSchema.safeParse(req.body);
+        const parsedBody = addUserRoleParamsSchema.safeParse(req.body);
         if (!parsedBody.success) {
             return next(
                 createHttpError(
@@ -31,7 +32,42 @@ export async function addUserRole(
             );
         }
 
-        const { userId, roleId, orgId } = parsedBody.data;
+        const { userId, roleId } = parsedBody.data;
+
+        if (!req.userOrg) {
+            return next(
+                createHttpError(
+                    HttpCode.FORBIDDEN,
+                    "You do not have access to this organization"
+                )
+            );
+        }
+
+        const orgId = req.userOrg.orgId;
+
+        const existingUser = await db
+            .select()
+            .from(userOrgs)
+            .where(and(eq(userOrgs.userId, userId), eq(userOrgs.orgId, orgId)))
+            .limit(1);
+
+        if (existingUser.length === 0) {
+            return next(
+                createHttpError(
+                    HttpCode.NOT_FOUND,
+                    "User not found or does not belong to the specified organization"
+                )
+            );
+        }
+
+        if (existingUser[0].isOwner) {
+            return next(
+                createHttpError(
+                    HttpCode.FORBIDDEN,
+                    "Cannot change the role of the owner of the organization"
+                )
+            );
+        }
 
         const roleExists = await db
             .select()
@@ -59,7 +95,7 @@ export async function addUserRole(
             success: true,
             error: false,
             message: "Role added to user successfully",
-            status: HttpCode.CREATED,
+            status: HttpCode.OK,
         });
     } catch (error) {
         logger.error(error);

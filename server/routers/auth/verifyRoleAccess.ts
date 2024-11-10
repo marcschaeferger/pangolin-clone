@@ -15,7 +15,6 @@ export async function verifyRoleAccess(
     const roleId = parseInt(
         req.params.roleId || req.body.roleId || req.query.roleId
     );
-    let userOrg = req.userOrg;
 
     if (!userId) {
         return next(
@@ -43,7 +42,7 @@ export async function verifyRoleAccess(
             );
         }
 
-        if (!userOrg) {
+        if (!req.userOrg) {
             const userOrgRole = await db
                 .select()
                 .from(userOrgs)
@@ -54,10 +53,10 @@ export async function verifyRoleAccess(
                     )
                 )
                 .limit(1);
-            userOrg = userOrgRole[0];
+            req.userOrg = userOrgRole[0];
         }
 
-        if (!userOrg) {
+        if (!req.userOrg) {
             return next(
                 createHttpError(
                     HttpCode.FORBIDDEN,
@@ -66,8 +65,17 @@ export async function verifyRoleAccess(
             );
         }
 
-        req.userOrgRoleId = userOrg.roleId;
-        req.userOrgId = userOrg.orgId;
+        if (req.userOrg.orgId !== role[0].orgId) {
+            return next(
+                createHttpError(
+                    HttpCode.FORBIDDEN,
+                    "Role does not belong to the organization"
+                )
+            );
+        }
+
+        req.userOrgRoleId = req.userOrg.roleId;
+        req.userOrgId = req.userOrg.orgId;
 
         return next();
     } catch (error) {

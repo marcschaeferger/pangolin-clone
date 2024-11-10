@@ -27,13 +27,12 @@ export default async function ResourceLayout(props: AccessLayoutProps) {
                     Users & Roles
                 </h2>
                 <p className="text-muted-foreground">
-                    Manage users and roles for your organization.
+                    Invite users and add them to roles to manage access to your
+                    organization.
                 </p>
             </div>
 
-            <SidebarSettings
-                sidebarNavItems={sidebarNavItems}
-            >
+            <SidebarSettings sidebarNavItems={sidebarNavItems}>
                 {children}
             </SidebarSettings>
         </>

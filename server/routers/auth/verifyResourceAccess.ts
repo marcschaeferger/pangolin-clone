@@ -18,7 +18,6 @@ export async function verifyResourceAccess(
     const userId = req.user!.userId;
     const resourceId =
         req.params.resourceId || req.body.resourceId || req.query.resourceId;
-    let userOrg = req.userOrg;
 
     if (!userId) {
         return next(
@@ -51,7 +50,7 @@ export async function verifyResourceAccess(
             );
         }
 
-        if (!userOrg) {
+        if (!req.userOrg) {
             const userOrgRole = await db
                 .select()
                 .from(userOrgs)
@@ -62,10 +61,10 @@ export async function verifyResourceAccess(
                     )
                 )
                 .limit(1);
-            userOrg = userOrgRole[0];
+            req.userOrg = userOrgRole[0];
         }
 
-        if (!userOrg) {
+        if (!req.userOrg) {
             return next(
                 createHttpError(
                     HttpCode.FORBIDDEN,
@@ -74,7 +73,7 @@ export async function verifyResourceAccess(
             );
         }
 
-        const userOrgRoleId = userOrg.roleId;
+        const userOrgRoleId = req.userOrg.roleId;
         req.userOrgRoleId = userOrgRoleId;
         req.userOrgId = resource[0].orgId;
 

@@ -9,6 +9,7 @@ import { AxiosResponse } from "axios";
 import { GetOrgResponse, ListOrgsResponse } from "@server/routers/org";
 import { authCookieHeader } from "@app/api/cookies";
 import { cache } from "react";
+import { GetOrgUserResponse } from "@server/routers/user";
 
 export const dynamic = "force-dynamic";
 
@@ -60,15 +61,19 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
     const cookie = await authCookieHeader();
 
     try {
-        const getOrg = cache(() =>
-            internal.get<AxiosResponse<GetOrgResponse>>(
-                `/org/${params.orgId}`,
+        const getOrgUser = cache(() =>
+            internal.get<AxiosResponse<GetOrgUserResponse>>(
+                `/org/${params.orgId}/user/${user.userId}`,
                 cookie
             )
         );
-        const org = await getOrg();
+        const orgUser = await getOrgUser();
+
+        if (!orgUser.data.data.isAdmin || !orgUser.data.data.isOwner) {
+            throw new Error("User is not an admin or owner");
+        }
     } catch {
-        redirect(`/`);
+        redirect(`/${params.orgId}`);
     }
 
     let orgs: ListOrgsResponse["orgs"] = [];

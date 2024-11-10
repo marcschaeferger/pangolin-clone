@@ -19,6 +19,14 @@ const createRoleSchema = z.object({
     description: z.string().optional(),
 });
 
+export const defaultRoleAllowedActions: ActionsEnum[] = [
+    ActionsEnum.getOrg,
+    ActionsEnum.getResource,
+    ActionsEnum.listResources,
+];
+
+export type CreateRoleBody = z.infer<typeof createRoleSchema>;
+
 export type CreateRoleResponse = Role;
 
 export async function createRole(
@@ -78,17 +86,10 @@ export async function createRole(
             })
             .returning();
 
-        // default allowed actions for a non admin role
-        const allowedActions: ActionsEnum[] = [
-            ActionsEnum.getOrg,
-            ActionsEnum.getResource,
-            ActionsEnum.listResources,
-        ];
-
         await db
             .insert(roleActions)
             .values(
-                allowedActions.map((action) => ({
+                defaultRoleAllowedActions.map((action) => ({
                     roleId: newRole[0].roleId,
                     actionId: action,
                     orgId,

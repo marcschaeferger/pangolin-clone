@@ -12,7 +12,6 @@ export async function verifyOrgAccess(
 ) {
     const userId = req.user!.userId;
     const orgId = req.params.orgId;
-    let userOrg = req.userOrg;
 
     if (!userId) {
         return next(
@@ -27,17 +26,17 @@ export async function verifyOrgAccess(
     }
 
     try {
-        if (!userOrg) {
+        if (!req.userOrg) {
             const userOrgRes = await db
                 .select()
                 .from(userOrgs)
                 .where(
                     and(eq(userOrgs.userId, userId), eq(userOrgs.orgId, orgId))
                 );
-            userOrg = userOrgRes[0];
+            req.userOrg = userOrgRes[0];
         }
 
-        if (!userOrg) {
+        if (!req.userOrg) {
             next(
                 createHttpError(
                     HttpCode.FORBIDDEN,
@@ -46,7 +45,7 @@ export async function verifyOrgAccess(
             );
         } else {
             // User has access, attach the user's role to the request for potential future use
-            req.userOrgRoleId = userOrg.roleId;
+            req.userOrgRoleId = req.userOrg.roleId;
             req.userOrgId = orgId;
             return next();
         }

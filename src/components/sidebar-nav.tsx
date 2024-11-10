@@ -32,6 +32,7 @@ export function SidebarNav({
     const orgId = params.orgId as string;
     const niceId = params.niceId as string;
     const resourceId = params.resourceId as string;
+    const userId = params.userId as string;
 
     const router = useRouter();
 
@@ -50,7 +51,8 @@ export function SidebarNav({
         return val
             .replace("{orgId}", orgId)
             .replace("{niceId}", niceId)
-            .replace("{resourceId}", resourceId);
+            .replace("{resourceId}", resourceId)
+            .replace("{userId}", userId);
     }
 
     return (
@@ -86,21 +88,11 @@ export function SidebarNav({
             >
                 {items.map((item) => (
                     <Link
-                        key={item.href
-                            .replace("{orgId}", orgId)
-                            .replace("{niceId}", niceId)
-                            .replace("{resourceId}", resourceId)}
-                        href={item.href
-                            .replace("{orgId}", orgId)
-                            .replace("{niceId}", niceId)
-                            .replace("{resourceId}", resourceId)}
+                        key={hydrateHref(item.href)}
+                        href={hydrateHref(item.href)}
                         className={cn(
                             buttonVariants({ variant: "ghost" }),
-                            pathname ===
-                                item.href
-                                    .replace("{orgId}", orgId)
-                                    .replace("{niceId}", niceId)
-                                    .replace("{resourceId}", resourceId) &&
+                            pathname === hydrateHref(item.href) &&
                                 !pathname.includes("create")
                                 ? "bg-muted hover:bg-muted dark:bg-border dark:hover:bg-border"
                                 : "hover:bg-transparent hover:underline",

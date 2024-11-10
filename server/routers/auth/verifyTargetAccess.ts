@@ -12,7 +12,6 @@ export async function verifyTargetAccess(
 ) {
     const userId = req.user!.userId;
     const targetId = parseInt(req.params.targetId);
-    let userOrg = req.userOrg;
 
     if (!userId) {
         return next(
@@ -36,7 +35,7 @@ export async function verifyTargetAccess(
         return next(
             createHttpError(
                 HttpCode.NOT_FOUND,
-                `target with ID ${targetId} not found`
+                `Target with ID ${targetId} not found`
             )
         );
     }
@@ -47,7 +46,7 @@ export async function verifyTargetAccess(
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,
-                `target with ID ${targetId} does not have a resource ID`
+                `Target with ID ${targetId} does not have a resource ID`
             )
         );
     }
@@ -77,7 +76,7 @@ export async function verifyTargetAccess(
             );
         }
 
-        if (!userOrg) {
+        if (!req.userOrg) {
             const res = await db
                 .select()
                 .from(userOrgs)
@@ -87,10 +86,10 @@ export async function verifyTargetAccess(
                         eq(userOrgs.orgId, resource[0].orgId)
                     )
                 );
-            userOrg = res[0];
+            req.userOrg = res[0];
         }
 
-        if (!userOrg) {
+        if (!req.userOrg) {
             next(
                 createHttpError(
                     HttpCode.FORBIDDEN,
@@ -98,7 +97,7 @@ export async function verifyTargetAccess(
                 )
             );
         } else {
-            req.userOrgRoleId = userOrg.roleId;
+            req.userOrgRoleId = req.userOrg.roleId;
             req.userOrgId = resource[0].orgId!;
             next();
         }

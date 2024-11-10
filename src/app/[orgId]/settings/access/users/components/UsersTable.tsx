@@ -17,6 +17,8 @@ import { useUserContext } from "@app/hooks/useUserContext";
 import api from "@app/api";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { useToast } from "@app/hooks/useToast";
+import ManageUserForm from "./ManageUserForm";
+import Link from "next/link";
 
 export type UserRow = {
     id: string;
@@ -30,10 +32,12 @@ type UsersTableProps = {
     users: UserRow[];
 };
 
-export default function UsersTable({ users }: UsersTableProps) {
+export default function UsersTable({ users: u }: UsersTableProps) {
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [userToRemove, setUserToRemove] = useState<UserRow | null>(null);
+    const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
+
+    const [users, setUsers] = useState<UserRow[]>(u);
 
     const user = useUserContext();
     const { org } = useOrgContext();
@@ -120,7 +124,11 @@ export default function UsersTable({ users }: UsersTableProps) {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuItem>
-                                        Manage user
+                                        <Link
+                                            href={`/${org?.org.orgId}/settings/access/users/${userRow.id}`}
+                                        >
+                                            Manage User
+                                        </Link>
                                     </DropdownMenuItem>
                                     {userRow.email !== user?.email && (
                                         <DropdownMenuItem>
@@ -128,7 +136,7 @@ export default function UsersTable({ users }: UsersTableProps) {
                                                 className="text-red-600 hover:text-red-800"
                                                 onClick={() => {
                                                     setIsDeleteModalOpen(true);
-                                                    setUserToRemove(userRow);
+                                                    setSelectedUser(userRow);
                                                 }}
                                             >
                                                 Remove User
@@ -145,9 +153,9 @@ export default function UsersTable({ users }: UsersTableProps) {
     ];
 
     async function removeUser() {
-        if (userToRemove) {
+        if (selectedUser) {
             const res = await api
-                .delete(`/org/${org!.org.orgId}/user/${userToRemove.id}`)
+                .delete(`/org/${org!.org.orgId}/user/${selectedUser.id}`)
                 .catch((e) => {
                     toast({
                         variant: "destructive",
@@ -162,8 +170,12 @@ export default function UsersTable({ users }: UsersTableProps) {
                 toast({
                     variant: "default",
                     title: "User removed",
-                    description: `The user ${userToRemove.email} has been removed from the organization.`,
+                    description: `The user ${selectedUser.email} has been removed from the organization.`,
                 });
+
+                setUsers((prev) =>
+                    prev.filter((u) => u.id !== selectedUser?.id)
+                );
             }
         }
         setIsDeleteModalOpen(false);
@@ -175,13 +187,13 @@ export default function UsersTable({ users }: UsersTableProps) {
                 open={isDeleteModalOpen}
                 setOpen={(val) => {
                     setIsDeleteModalOpen(val);
-                    setUserToRemove(null);
+                    setSelectedUser(null);
                 }}
                 dialog={
                     <div>
                         <p className="mb-2">
                             Are you sure you want to remove{" "}
-                            <b>{userToRemove?.email}</b> from the organization?
+                            <b>{selectedUser?.email}</b> from the organization?
                         </p>
 
                         <p className="mb-2">
@@ -199,7 +211,7 @@ export default function UsersTable({ users }: UsersTableProps) {
                 }
                 buttonText="Confirm remove user"
                 onConfirm={removeUser}
-                string={userToRemove?.email ?? ""}
+                string={selectedUser?.email ?? ""}
                 title="Remove user from organization"
             />
 

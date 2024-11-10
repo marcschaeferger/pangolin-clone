@@ -51,6 +51,7 @@ export enum ActionsEnum {
     // removeUserAction = "removeUserAction",
     removeUserResource = "removeUserResource",
     removeUserSite = "removeUserSite",
+    getOrgUser = "getOrgUser",
 }
 
 export async function checkUserActionPermission(

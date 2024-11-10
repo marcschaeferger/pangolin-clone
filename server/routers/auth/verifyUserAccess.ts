@@ -13,8 +13,6 @@ export async function verifyUserAccess(
     const userId = req.user!.userId;
     const reqUserId = req.params.userId || req.body.userId || req.query.userId;
 
-    let userOrg = req.userOrg;
-
     if (!userId) {
         return next(
             createHttpError(HttpCode.UNAUTHORIZED, "User not authenticated")
@@ -26,7 +24,7 @@ export async function verifyUserAccess(
     }
 
     try {
-        if (!userOrg) {
+        if (!req.userOrg) {
             const res = await db
                 .select()
                 .from(userOrgs)
@@ -37,10 +35,10 @@ export async function verifyUserAccess(
                     )
                 )
                 .limit(1);
-            userOrg = res[0];
+            req.userOrg = res[0];
         }
 
-        if (userOrg) {
+        if (req.userOrg) {
             return next(
                 createHttpError(
                     HttpCode.FORBIDDEN,

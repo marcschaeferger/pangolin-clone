@@ -19,7 +19,6 @@ import {
     verifyResourceAccess,
     verifyTargetAccess,
     verifyRoleAccess,
-    verifyAdmin,
     verifyUserInRole,
     verifyUserAccess,
 } from "./auth";
@@ -195,7 +194,6 @@ authenticated.delete(
 authenticated.put(
     "/org/:orgId/role",
     verifyOrgAccess,
-    verifyAdmin,
     verifyUserHasAction(ActionsEnum.createRole),
     role.createRole
 );
@@ -215,17 +213,22 @@ authenticated.get(
 // authenticated.post(
 //     "/role/:roleId",
 //     verifyRoleAccess,
-//     verifyAdmin,
 //     verifyUserHasAction(ActionsEnum.updateRole),
 //     role.updateRole
 // );
-// authenticated.delete(
-//     "/role/:roleId",
-//     verifyRoleAccess,
-//     verifyAdmin,
-//     verifyUserHasAction(ActionsEnum.deleteRole),
-//     role.deleteRole
-// );
+authenticated.delete(
+    "/role/:roleId",
+    verifyRoleAccess,
+    verifyUserHasAction(ActionsEnum.deleteRole),
+    role.deleteRole
+);
+authenticated.post(
+    "/role/:roleId/add/:userId",
+    verifyRoleAccess,
+    verifyUserAccess,
+    verifyUserHasAction(ActionsEnum.addUserRole),
+    user.addUserRole
+);
 
 // authenticated.put(
 //     "/role/:roleId/site",
@@ -280,7 +283,6 @@ authenticated.get(
 //     "/role/:roleId/action",
 //     verifyRoleAccess,
 //     verifyUserInRole,
-//     verifyAdmin,
 //     verifyUserHasAction(ActionsEnum.removeRoleAction),
 //     role.removeRoleAction
 // );
@@ -288,13 +290,13 @@ authenticated.get(
 //     "/role/:roleId/actions",
 //     verifyRoleAccess,
 //     verifyUserInRole,
-//     verifyAdmin,
 //     verifyUserHasAction(ActionsEnum.listRoleActions),
 //     role.listRoleActions
 // );
 
 unauthenticated.get("/user", verifySessionMiddleware, user.getUser);
 
+authenticated.get("/org/:orgId/user/:userId", verifyOrgAccess, user.getOrgUser);
 authenticated.get(
     "/org/:orgId/users",
     verifyOrgAccess,
@@ -341,7 +343,6 @@ authenticated.delete(
 //     "/org/:orgId/user/:userId/action",
 //     verifyOrgAccess,
 //     verifyUserAccess,
-//     verifyAdmin,
 //     verifyUserHasAction(ActionsEnum.addRoleAction),
 //     role.addRoleAction
 // );
@@ -349,7 +350,6 @@ authenticated.delete(
 //     "/org/:orgId/user/:userId/action",
 //     verifyOrgAccess,
 //     verifyUserAccess,
-//     verifyAdmin,
 //     verifyUserHasAction(ActionsEnum.removeRoleAction),
 //     role.removeRoleAction
 // );

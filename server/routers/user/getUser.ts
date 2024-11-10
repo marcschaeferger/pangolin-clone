@@ -8,11 +8,23 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 
-export type GetUserResponse = {
-    email: string;
-    twoFactorEnabled: boolean;
-    emailVerified: boolean;
-};
+async function queryUser(userId: string) {
+    const [user] = await db
+        .select({
+            userId: users.userId,
+            email: users.email,
+            twoFactorEnabled: users.twoFactorEnabled,
+            emailVerified: users.emailVerified,
+        })
+        .from(users)
+        .where(eq(users.userId, userId))
+        .limit(1);
+    return user;
+}
+
+export type GetUserResponse = NonNullable<
+    Awaited<ReturnType<typeof queryUser>>
+>;
 
 export async function getUser(
     req: Request,
@@ -28,13 +40,9 @@ export async function getUser(
             );
         }
 
-        const user = await db
-            .select()
-            .from(users)
-            .where(eq(users.userId, userId))
-            .limit(1);
+        const user = await queryUser(userId);
 
-        if (user.length === 0) {
+        if (!user) {
             return next(
                 createHttpError(
                     HttpCode.NOT_FOUND,
@@ -44,11 +52,7 @@ export async function getUser(
         }
 
         return response<GetUserResponse>(res, {
-            data: {
-                email: user[0].email,
-                twoFactorEnabled: user[0].twoFactorEnabled,
-                emailVerified: user[0].emailVerified,
-            },
+            data: user,
             success: true,
             error: false,
             message: "User retrieved successfully",
@@ -57,10 +61,7 @@ export async function getUser(
     } catch (error) {
         logger.error(error);
         return next(
-            createHttpError(
-                HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred..."
-            )
+            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
 }

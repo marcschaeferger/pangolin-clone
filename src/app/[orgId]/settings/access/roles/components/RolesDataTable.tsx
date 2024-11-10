@@ -51,6 +51,10 @@ export function RolesDataTable<TData, TValue>({
         state: {
             sorting,
             columnFilters,
+            pagination: {
+                pageSize: 100,
+                pageIndex: 0,
+            },
         },
     });
 

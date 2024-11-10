@@ -16,6 +16,7 @@ import { useOrgContext } from "@app/hooks/useOrgContext";
 import { useToast } from "@app/hooks/useToast";
 import { RolesDataTable } from "./RolesDataTable";
 import { Role } from "@server/db/schema";
+import CreateRoleForm from "./CreateRoleForm";
 
 export type RoleRow = Role;
 
@@ -23,8 +24,12 @@ type RolesTableProps = {
     roles: RoleRow[];
 };
 
-export default function UsersTable({ roles }: RolesTableProps) {
+export default function UsersTable({ roles: r }: RolesTableProps) {
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+    const [roles, setRoles] = useState<RoleRow[]>(r);
+
     const [roleToRemove, setUserToRemove] = useState<RoleRow | null>(null);
 
     const { org } = useOrgContext();
@@ -80,7 +85,7 @@ export default function UsersTable({ roles }: RolesTableProps) {
                                                 setUserToRemove(roleRow);
                                             }}
                                         >
-                                            Remove User
+                                            Delete Role
                                         </button>
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
@@ -95,7 +100,7 @@ export default function UsersTable({ roles }: RolesTableProps) {
     async function removeRole() {
         if (roleToRemove) {
             const res = await api
-                .delete(`/org/${org!.org.orgId}/role/${roleToRemove.roleId}`)
+                .delete(`/role/${roleToRemove.roleId}`)
                 .catch((e) => {
                     toast({
                         variant: "destructive",
@@ -112,6 +117,10 @@ export default function UsersTable({ roles }: RolesTableProps) {
                     title: "Role removed",
                     description: `The role ${roleToRemove.name} has been removed from the organization.`,
                 });
+
+                setRoles((prev) =>
+                    prev.filter((role) => role.roleId !== roleToRemove.roleId)
+                );
             }
         }
         setIsDeleteModalOpen(false);
@@ -119,6 +128,14 @@ export default function UsersTable({ roles }: RolesTableProps) {
 
     return (
         <>
+            <CreateRoleForm
+                open={isCreateModalOpen}
+                setOpen={setIsCreateModalOpen}
+                afterCreate={async (role) => {
+                    setRoles((prev) => [...prev, role]);
+                }}
+            />
+
             <ConfirmDeleteDialog
                 open={isDeleteModalOpen}
                 setOpen={(val) => {
@@ -148,7 +165,13 @@ export default function UsersTable({ roles }: RolesTableProps) {
                 title="Remove role from organization"
             />
 
-            <RolesDataTable columns={columns} data={roles} />
+            <RolesDataTable
+                columns={columns}
+                data={roles}
+                addRole={() => {
+                    setIsCreateModalOpen(true);
+                }}
+            />
         </>
     );
 }

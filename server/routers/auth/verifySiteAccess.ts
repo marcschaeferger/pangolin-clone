@@ -57,19 +57,22 @@ export async function verifySiteAccess(
             );
         }
 
-        // Get user's role ID in the organization
-        const userOrgRole = await db
-            .select()
-            .from(userOrgs)
-            .where(
-                and(
-                    eq(userOrgs.userId, userId),
-                    eq(userOrgs.orgId, site[0].orgId)
+        if (!req.userOrg) {
+            // Get user's role ID in the organization
+            const userOrgRole = await db
+                .select()
+                .from(userOrgs)
+                .where(
+                    and(
+                        eq(userOrgs.userId, userId),
+                        eq(userOrgs.orgId, site[0].orgId)
+                    )
                 )
-            )
-            .limit(1);
+                .limit(1);
+            req.userOrg = userOrgRole[0];
+        }
 
-        if (userOrgRole.length === 0) {
+        if (!req.userOrg) {
             return next(
                 createHttpError(
                     HttpCode.FORBIDDEN,
@@ -78,7 +81,7 @@ export async function verifySiteAccess(
             );
         }
 
-        const userOrgRoleId = userOrgRole[0].roleId;
+        const userOrgRoleId = req.userOrg.roleId;
         req.userOrgRoleId = userOrgRoleId;
         req.userOrgId = site[0].orgId;
 
