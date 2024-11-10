@@ -6,7 +6,6 @@ import { Socket } from 'net';
 import { Newt, newts, NewtSession } from '@server/db/schema';
 import { eq } from 'drizzle-orm';
 import db from '@server/db';
-import { newtGetToken } from './auth';
 import { validateNewtSessionToken } from '@server/auth/newt';
 
 // Custom interfaces
@@ -60,8 +59,6 @@ router.get('/ws', (req: Request, res: Response) => {
     // WebSocket upgrade will be handled by the server
     res.status(200).send('WebSocket endpoint');
 });
-
-router.get('/ws/auth/newtGetToken', newtGetToken);
 
 // Set up WebSocket server handling
 const handleWSUpgrade = (server: HttpServer): void => {

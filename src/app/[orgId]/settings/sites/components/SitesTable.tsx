@@ -13,6 +13,8 @@ import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import api from "@app/api";
+import { authCookieHeader } from "@app/api/cookies";
+import { AxiosResponse } from "axios";
 
 export type SiteRow = {
     id: number;
@@ -120,7 +122,17 @@ type SitesTableProps = {
 export default function SitesTable({ sites, orgId }: SitesTableProps) {
     const router = useRouter();
 
+    const callApi = async () => {
+
+        const res = await api.put<AxiosResponse<any>>(
+            `/newt`
+        );
+        console.log(res);
+        
+    };
+
     return (
+        <>
         <SitesDataTable
             columns={columns}
             data={sites}
@@ -128,5 +140,8 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                 router.push(`/${orgId}/settings/sites/create`);
             }}
         />
+        <button onClick={callApi}>Create Newt</button>
+        </>
+
     );
 }

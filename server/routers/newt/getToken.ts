@@ -13,18 +13,17 @@ import { NextFunction, Request, Response } from "express";
 import createHttpError from "http-errors";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
-import config from "@server/config";
-import { validateNewtSessionToken } from "@server/auth/newt";
+import { createNewtSession, validateNewtSessionToken } from "@server/auth/newt";
 
 export const newtGetTokenBodySchema = z.object({
-    newtId: z.string().email(),
+    newtId: z.string(),
     secret: z.string(),
     token: z.string().optional(),
 });
 
 export type NewtGetTokenBody = z.infer<typeof newtGetTokenBodySchema>;
 
-export async function newtGetToken(
+export async function getToken(
     req: Request,
     res: Response,
     next: NextFunction
@@ -93,7 +92,7 @@ export async function newtGetToken(
         }
 
         const resToken = generateSessionToken();
-        await createSession(resToken, existingNewt.newtId);
+        await createNewtSession(resToken, existingNewt.newtId);
 
         return response<{ token: string }>(res, {
             data: {
@@ -105,6 +104,7 @@ export async function newtGetToken(
             status: HttpCode.OK,
         });
     } catch (e) {
+        console.error(e);
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,

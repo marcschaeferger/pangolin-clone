@@ -24,6 +24,7 @@ import {
 import { verifyUserHasAction } from "./auth/verifyUserHasAction";
 import { ActionsEnum } from "@server/auth/actions";
 import { verifyUserIsOrgOwner } from "./auth/verifyUserIsOrgOwner";
+import { createNewt, getToken } from "./newt";
 
 // Root routes
 export const unauthenticated = Router();
@@ -353,6 +354,8 @@ authenticated.delete(
 //     role.removeRoleAction
 // );
 
+authenticated.put("/newt", createNewt);
+
 // Auth routes
 export const authRouter = Router();
 unauthenticated.use("/auth", authRouter);
@@ -367,6 +370,8 @@ authRouter.use(
 authRouter.put("/signup", auth.signup);
 authRouter.post("/login", auth.login);
 authRouter.post("/logout", auth.logout);
+authRouter.post('/newt/get-token', getToken);
+
 authRouter.post("/2fa/enable", verifySessionUserMiddleware, auth.verifyTotp);
 authRouter.post(
     "/2fa/request",
