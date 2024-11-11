@@ -29,7 +29,7 @@ export default function CustomDomainInput(
     };
 
     return (
-        <div className="relative w-full max-w-sm">
+        <div className="w-full">
             <div className="flex">
                 <Input
                     type="text"

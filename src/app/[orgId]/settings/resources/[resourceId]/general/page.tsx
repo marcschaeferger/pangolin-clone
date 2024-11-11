@@ -46,7 +46,7 @@ const GeneralFormSchema = z.object({
 
 type GeneralFormValues = z.infer<typeof GeneralFormSchema>;
 
-export function GeneralForm() {
+export default function GeneralForm() {
     const params = useParams();
     const orgId = params.orgId;
     const { resource, updateResource } = useResourceContext();
