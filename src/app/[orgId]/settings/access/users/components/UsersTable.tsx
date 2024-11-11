@@ -17,8 +17,8 @@ import { useUserContext } from "@app/hooks/useUserContext";
 import api from "@app/api";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { useToast } from "@app/hooks/useToast";
-import ManageUserForm from "./ManageUserForm";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export type UserRow = {
     id: string;
@@ -38,6 +38,8 @@ export default function UsersTable({ users: u }: UsersTableProps) {
     const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
 
     const [users, setUsers] = useState<UserRow[]>(u);
+
+    const router = useRouter();
 
     const user = useUserContext();
     const { org } = useOrgContext();

@@ -8,6 +8,8 @@ import { cache } from "react";
 import OrgProvider from "@app/providers/OrgProvider";
 import UserProvider from "@app/providers/UserProvider";
 import { verifySession } from "@app/lib/auth/verifySession";
+import { SidebarSettings } from "@app/components/SidebarSettings";
+import AccessPageHeaderAndNav from "../components/AccessPageHeaderAndNav";
 
 type UsersPageProps = {
     params: Promise<{ orgId: string }>;
@@ -62,11 +64,13 @@ export default async function UsersPage(props: UsersPageProps) {
 
     return (
         <>
-            <UserProvider user={user!}>
-                <OrgProvider org={org}>
-                    <UsersTable users={userRows} />
-                </OrgProvider>
-            </UserProvider>
+            <AccessPageHeaderAndNav>
+                <UserProvider user={user!}>
+                    <OrgProvider org={org}>
+                        <UsersTable users={userRows} />
+                    </OrgProvider>
+                </UserProvider>
+            </AccessPageHeaderAndNav>
         </>
     );
 }

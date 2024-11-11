@@ -8,10 +8,11 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
+import stoi from "@server/utils/stoi";
 
 const addUserRoleParamsSchema = z.object({
     userId: z.string(),
-    roleId: z.number().int().positive(),
+    roleId: z.string().transform(stoi).pipe(z.number()),
 });
 
 export type AddUserRoleResponse = z.infer<typeof addUserRoleParamsSchema>;
@@ -22,17 +23,17 @@ export async function addUserRole(
     next: NextFunction
 ): Promise<any> {
     try {
-        const parsedBody = addUserRoleParamsSchema.safeParse(req.body);
-        if (!parsedBody.success) {
+        const parsedParams = addUserRoleParamsSchema.safeParse(req.params);
+        if (!parsedParams.success) {
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    fromError(parsedBody.error).toString()
+                    fromError(parsedParams.error).toString()
                 )
             );
         }
 
-        const { userId, roleId } = parsedBody.data;
+        const { userId, roleId } = parsedParams.data;
 
         if (!req.userOrg) {
             return next(

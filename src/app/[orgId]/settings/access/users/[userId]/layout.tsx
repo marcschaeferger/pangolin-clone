@@ -1,11 +1,10 @@
-import SiteProvider from "@app/providers/SiteProvider";
 import { internal } from "@app/api";
-import { GetSiteResponse } from "@server/routers/site";
 import { AxiosResponse } from "axios";
 import { redirect } from "next/navigation";
 import { authCookieHeader } from "@app/api/cookies";
 import { SidebarSettings } from "@app/components/SidebarSettings";
 import { GetOrgUserResponse } from "@server/routers/user";
+import OrgUserProvider from "@app/providers/OrgUserProvider";
 
 interface UserLayoutProps {
     children: React.ReactNode;
@@ -30,28 +29,28 @@ export default async function UserLayoutProps(props: UserLayoutProps) {
 
     const sidebarNavItems = [
         {
-            title: "General",
-            href: "/{orgId}/settings/access/users/{userId}",
+            title: "Access Controls",
+            href: "/{orgId}/settings/access/users/{userId}/access-controls",
         },
     ];
 
     return (
         <>
-            <div className="space-y-0.5 select-none mb-6">
-                <h2 className="text-2xl font-bold tracking-tight">
-                    User {user?.email}
-                </h2>
-                <p className="text-muted-foreground">
-                    Manage user access and permissions
-                </p>
-            </div>
+            <OrgUserProvider orgUser={user}>
+                <div className="space-y-0.5 select-none mb-6">
+                    <h2 className="text-2xl font-bold tracking-tight">
+                        User {user?.email}
+                    </h2>
+                    <p className="text-muted-foreground">Manage user</p>
+                </div>
 
-            <SidebarSettings
-                sidebarNavItems={sidebarNavItems}
-                limitWidth={true}
-            >
-                {children}
-            </SidebarSettings>
+                <SidebarSettings
+                    sidebarNavItems={sidebarNavItems}
+                    limitWidth={true}
+                >
+                    {children}
+                </SidebarSettings>
+            </OrgUserProvider>
         </>
     );
 }
