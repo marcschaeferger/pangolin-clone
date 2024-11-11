@@ -17,6 +17,7 @@ import { useToast } from "@app/hooks/useToast";
 import { RolesDataTable } from "./RolesDataTable";
 import { Role } from "@server/db/schema";
 import CreateRoleForm from "./CreateRoleForm";
+import DeleteRoleForm from "./DeleteRoleForm";
 
 export type RoleRow = Role;
 
@@ -97,35 +98,6 @@ export default function UsersTable({ roles: r }: RolesTableProps) {
         },
     ];
 
-    async function removeRole() {
-        if (roleToRemove) {
-            const res = await api
-                .delete(`/role/${roleToRemove.roleId}`)
-                .catch((e) => {
-                    toast({
-                        variant: "destructive",
-                        title: "Failed to remove role",
-                        description:
-                            e.message ??
-                            "An error occurred while removing the role.",
-                    });
-                });
-
-            if (res && res.status === 200) {
-                toast({
-                    variant: "default",
-                    title: "Role removed",
-                    description: `The role ${roleToRemove.name} has been removed from the organization.`,
-                });
-
-                setRoles((prev) =>
-                    prev.filter((role) => role.roleId !== roleToRemove.roleId)
-                );
-            }
-        }
-        setIsDeleteModalOpen(false);
-    }
-
     return (
         <>
             <CreateRoleForm
@@ -136,34 +108,19 @@ export default function UsersTable({ roles: r }: RolesTableProps) {
                 }}
             />
 
-            <ConfirmDeleteDialog
-                open={isDeleteModalOpen}
-                setOpen={(val) => {
-                    setIsDeleteModalOpen(val);
-                    setUserToRemove(null);
-                }}
-                dialog={
-                    <div>
-                        <p className="mb-2">
-                            Are you sure you want to remove the role{" "}
-                            <b>{roleToRemove?.name}</b> from the organization?
-                        </p>
-
-                        <p className="mb-2">
-                            You cannot undo this action. Please select a new
-                            role to move existing users to after deletion.
-                        </p>
-
-                        <p>
-                            To confirm, please type the name of the role below.
-                        </p>
-                    </div>
-                }
-                buttonText="Confirm remove role"
-                onConfirm={removeRole}
-                string={roleToRemove?.name ?? ""}
-                title="Remove role from organization"
-            />
+            {roleToRemove && (
+                <DeleteRoleForm
+                    open={isDeleteModalOpen}
+                    setOpen={setIsDeleteModalOpen}
+                    roleToDelete={roleToRemove}
+                    afterDelete={() => {
+                        setRoles((prev) =>
+                            prev.filter((r) => r.roleId !== roleToRemove.roleId)
+                        );
+                        setUserToRemove(null);
+                    }}
+                />
+            )}
 
             <RolesDataTable
                 columns={columns}

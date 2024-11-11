@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { roles } from "@server/db/schema";
+import { roles, userOrgs } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
@@ -10,6 +10,10 @@ import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
 const deleteRoleSchema = z.object({
+    roleId: z.string().transform(Number).pipe(z.number().int().positive()),
+});
+
+const deelteRoleBodySchema = z.object({
     roleId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
 
@@ -29,7 +33,27 @@ export async function deleteRole(
             );
         }
 
+        const parsedBody = deelteRoleBodySchema.safeParse(req.body);
+        if (!parsedBody.success) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    fromError(parsedBody.error).toString()
+                )
+            );
+        }
+
         const { roleId } = parsedParams.data;
+        const { roleId: newRoleId } = parsedBody.data;
+
+        if (roleId === newRoleId) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    `Cannot delete a role and assign the same role`
+                )
+            );
+        }
 
         const role = await db
             .select()
@@ -55,19 +79,29 @@ export async function deleteRole(
             );
         }
 
-        const deletedRole = await db
-            .delete(roles)
-            .where(eq(roles.roleId, roleId))
-            .returning();
+        const newRole = await db
+            .select()
+            .from(roles)
+            .where(eq(roles.roleId, newRoleId))
+            .limit(1);
 
-        if (deletedRole.length === 0) {
+        if (newRole.length === 0) {
             return next(
                 createHttpError(
                     HttpCode.NOT_FOUND,
-                    `Role with ID ${roleId} not found`
+                    `Role with ID ${newRoleId} not found`
                 )
             );
         }
+
+        // move all users from the userOrgs table with roleId to newRoleId
+        await db
+            .update(userOrgs)
+            .set({ roleId: newRoleId })
+            .where(eq(userOrgs.roleId, roleId));
+
+        // delete the old role
+        await db.delete(roles).where(eq(roles.roleId, roleId));
 
         return response(res, {
             data: null,
