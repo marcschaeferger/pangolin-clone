@@ -7,7 +7,7 @@ import { Newt, newts, NewtSession } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import db from "@server/db";
 import { validateNewtSessionToken } from "@server/auth/newt";
-import { handleNewtMessage } from "./newt";
+import { messageHandlers } from "./messageHandlers";
 
 // Custom interfaces
 interface WebSocketRequest extends IncomingMessage {
@@ -46,10 +46,6 @@ interface HandlerContext {
 }
 
 export type MessageHandler = (context: HandlerContext) => Promise<HandlerResponse | void>;
-
-const messageHandlers: Record<string, MessageHandler> = {
-    "newt": handleNewtMessage,
-};
 
 const router: Router = Router();
 const wss: WebSocketServer = new WebSocketServer({ noServer: true });
@@ -202,7 +198,7 @@ wss.on("connection", (ws: AuthenticatedWebSocket, request: WebSocketRequest) => 
     ws.on("message", async (data) => {
         try {
             const message: WSMessage = JSON.parse(data.toString());
-            console.log(`Message received from Newt ID ${newtId}:`, message);
+            // console.log(`Message received from Newt ID ${newtId}:`, message);
     
             // Validate message format
             if (!message.type || typeof message.type !== "string") {
