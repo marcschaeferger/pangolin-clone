@@ -133,6 +133,9 @@ export default function CreateSiteForm({ open, setOpen }: CreateSiteFormProps) {
             const niceId = res.data.data.niceId;
             // navigate to the site page
             router.push(`/${orgId}/settings/sites/${niceId}`);
+
+            // close the modal
+            setOpen(false);
         }
 
         setLoading(false);
@@ -257,6 +260,11 @@ sh get-docker.sh`;
                                         />
                                     )}
                                 </div>
+
+                                <span className="text-sm text-muted-foreground mt-2">
+                                    You will only be able to see the
+                                    configuration once.
+                                </span>
 
                                 <div className="flex items-center space-x-2">
                                     <Checkbox

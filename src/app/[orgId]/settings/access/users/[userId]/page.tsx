@@ -5,5 +5,4 @@ export default async function UserPage(props: {
 }) {
     const { orgId, userId } = await props.params;
     redirect(`/${orgId}/settings/access/users/${userId}/access-controls`);
-    return <></>;
 }
