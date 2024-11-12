@@ -16,6 +16,7 @@ import api from "@app/api";
 import { AxiosResponse } from "axios";
 import { useState } from "react";
 import CreateSiteForm from "./CreateSiteForm";
+import ConfirmDeleteDialog from "@app/components/ConfirmDeleteDialog";
 
 export type SiteRow = {
     id: number;
@@ -35,10 +36,23 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
     const router = useRouter();
 
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [selectedSite, setSelectedSite] = useState<SiteRow | null>(null);
 
     const callApi = async () => {
         const res = await api.put<AxiosResponse<any>>(`/newt`);
         console.log(res);
+    };
+
+    const deleteSite = (siteId: number) => {
+        api.delete(`/site/${siteId}`)
+            .catch((e) => {
+                console.error("Error deleting site", e);
+            })
+            .then(() => {
+                router.refresh();
+                setIsDeleteModalOpen(false);
+            });
     };
 
     const columns: ColumnDef<SiteRow>[] = [
@@ -89,16 +103,6 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
 
                 const siteRow = row.original;
 
-                const deleteSite = (siteId: number) => {
-                    api.delete(`/site/${siteId}`)
-                        .catch((e) => {
-                            console.error("Error deleting site", e);
-                        })
-                        .then(() => {
-                            router.refresh();
-                        });
-                };
-
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -117,7 +121,10 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                             </DropdownMenuItem>
                             <DropdownMenuItem>
                                 <button
-                                    onClick={() => deleteSite(siteRow.id)}
+                                    onClick={() => {
+                                        setSelectedSite(siteRow);
+                                        setIsDeleteModalOpen(true);
+                                    }}
                                     className="text-red-600 hover:text-red-800"
                                 >
                                     Delete
@@ -136,6 +143,43 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                 open={isCreateModalOpen}
                 setOpen={setIsCreateModalOpen}
             />
+
+            {selectedSite && (
+                <ConfirmDeleteDialog
+                    open={isDeleteModalOpen}
+                    setOpen={(val) => {
+                        setIsDeleteModalOpen(val);
+                        setSelectedSite(null);
+                    }}
+                    dialog={
+                        <div>
+                            <p className="mb-2">
+                                Are you sure you want to remove the site{" "}
+                                <b>{selectedSite?.name || selectedSite?.id}</b>{" "}
+                                from the organization?
+                            </p>
+
+                            <p className="mb-2">
+                                Once removed, the site will no longer be
+                                accessible.{" "}
+                                <b>
+                                    All resources and targets associated with
+                                    the site will also be removed.
+                                </b>
+                            </p>
+
+                            <p>
+                                To confirm, please type the name of the site
+                                below.
+                            </p>
+                        </div>
+                    }
+                    buttonText="Confirm delete site"
+                    onConfirm={async () => deleteSite(selectedSite!.id)}
+                    string={selectedSite.name}
+                    title="Delete site"
+                />
+            )}
 
             <SitesDataTable
                 columns={columns}

@@ -25,11 +25,9 @@ const isValidIPAddress = (ip: string) => {
     return ipv4Regex.test(ip);
 };
 
-export default function ReverseProxyTargets(
-    props: {
-        params: Promise<{ resourceId: number }>;
-    }
-) {
+export default function ReverseProxyTargets(props: {
+    params: Promise<{ resourceId: number }>;
+}) {
     const params = use(props.params);
     const [targets, setTargets] = useState<ListTargetsResponse["targets"]>([]);
     const [nextId, setNextId] = useState(1);
@@ -39,7 +37,7 @@ export default function ReverseProxyTargets(
         if (typeof window !== "undefined") {
             const fetchSites = async () => {
                 const res = await api.get<AxiosResponse<ListTargetsResponse>>(
-                    `/resource/${params.resourceId}/targets`,
+                    `/resource/${params.resourceId}/targets`
                 );
                 setTargets(res.data.data.targets);
             };
@@ -93,7 +91,7 @@ export default function ReverseProxyTargets(
             })
             .then((res) => {
                 setTargets(
-                    targets.filter((target) => target.targetId !== targetId),
+                    targets.filter((target) => target.targetId !== targetId)
                 );
             });
     };
@@ -103,8 +101,8 @@ export default function ReverseProxyTargets(
             targets.map((target) =>
                 target.targetId === targetId
                     ? { ...target, enabled: !target.enabled }
-                    : target,
-            ),
+                    : target
+            )
         );
         api.post(`/target/${targetId}`, {
             enabled: !targets.find((target) => target.targetId === targetId)
@@ -115,7 +113,14 @@ export default function ReverseProxyTargets(
     };
 
     return (
-        <div className="space-y-6">
+        <div>
+            <div className="space-y-0.5 select-none mb-6">
+                <h2 className="text-2xl font-bold tracking-tight">Targets</h2>
+                <p className="text-muted-foreground">
+                    Setup the targets for the reverse proxy
+                </p>
+            </div>
+
             <form
                 onSubmit={(e) => {
                     e.preventDefault();
@@ -192,9 +197,7 @@ export default function ReverseProxyTargets(
                         </Select>
                     </div>
                 </div>
-                <Button type="submit">
-                    <PlusCircle className="mr-2 h-4 w-4" /> Add Target
-                </Button>
+                <Button type="submit">Add Target</Button>
             </form>
 
             <div className="space-y-4">

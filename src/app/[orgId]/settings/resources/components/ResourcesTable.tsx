@@ -15,6 +15,8 @@ import { useRouter } from "next/navigation";
 import api from "@app/api";
 import CreateResourceForm from "./CreateResourceForm";
 import { useState } from "react";
+import ConfirmDeleteDialog from "@app/components/ConfirmDeleteDialog";
+import { set } from "zod";
 
 export type ResourceRow = {
     id: number;
@@ -33,6 +35,20 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
     const router = useRouter();
 
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [selectedResource, setSelectedResource] =
+        useState<ResourceRow | null>();
+
+    const deleteResource = (resourceId: number) => {
+        api.delete(`/resource/${resourceId}`)
+            .catch((e) => {
+                console.error("Error deleting resource", e);
+            })
+            .then(() => {
+                router.refresh();
+                setIsDeleteModalOpen(false);
+            });
+    };
 
     const columns: ColumnDef<ResourceRow>[] = [
         {
@@ -78,16 +94,6 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
 
                 const resourceRow = row.original;
 
-                const deleteResource = (resourceId: number) => {
-                    api.delete(`/resource/${resourceId}`)
-                        .catch((e) => {
-                            console.error("Error deleting resource", e);
-                        })
-                        .then(() => {
-                            router.refresh();
-                        });
-                };
-
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -106,9 +112,10 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                             </DropdownMenuItem>
                             <DropdownMenuItem>
                                 <button
-                                    onClick={() =>
-                                        deleteResource(resourceRow.id)
-                                    }
+                                    onClick={() => {
+                                        setSelectedResource(resourceRow);
+                                        setIsDeleteModalOpen(true);
+                                    }}
                                     className="text-red-600 hover:text-red-800 hover:underline cursor-pointer"
                                 >
                                     Delete
@@ -127,6 +134,43 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                 open={isCreateModalOpen}
                 setOpen={setIsCreateModalOpen}
             />
+
+            {selectedResource && (
+                <ConfirmDeleteDialog
+                    open={isDeleteModalOpen}
+                    setOpen={(val) => {
+                        setIsDeleteModalOpen(val);
+                        setSelectedResource(null);
+                    }}
+                    dialog={
+                        <div>
+                            <p className="mb-2">
+                                Are you sure you want to remove the resource{" "}
+                                <b>
+                                    {selectedResource?.name ||
+                                        selectedResource?.id}
+                                </b>{" "}
+                                from the organization?
+                            </p>
+
+                            <p className="mb-2">
+                                Once removed, the resource will no longer be
+                                accessible. All targets attached to the resource
+                                will be removed.
+                            </p>
+
+                            <p>
+                                To confirm, please type the name of the resource
+                                below.
+                            </p>
+                        </div>
+                    }
+                    buttonText="Confirm delete resource"
+                    onConfirm={async () => deleteResource(selectedResource!.id)}
+                    string={selectedResource.name}
+                    title="Delete resource"
+                />
+            )}
 
             <ResourcesDataTable
                 columns={columns}
