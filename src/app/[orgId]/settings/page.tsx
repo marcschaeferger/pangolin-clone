@@ -6,7 +6,7 @@ type OrgPageProps = {
 
 export default async function SettingsPage(props: OrgPageProps) {
     const params = await props.params;
-    redirect(`/${params.orgId}/settings/sites`);
+    redirect(`/${params.orgId}/settings/resources`);
 
     return <></>;
 }

@@ -16,7 +16,7 @@ import { useToast } from "@app/hooks/useToast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { set, z } from "zod";
+import { z } from "zod";
 import {
     Credenza,
     CredenzaBody,
@@ -31,10 +31,15 @@ import { useOrgContext } from "@app/hooks/useOrgContext";
 import { useParams, useRouter } from "next/navigation";
 import { PickSiteDefaultsResponse } from "@server/routers/site";
 import { generateKeypair } from "../[niceId]/components/wireguardConfig";
-import { cn } from "@app/lib/utils";
-import { ChevronDownIcon } from "lucide-react";
 import CopyTextBox from "@app/components/CopyTextBox";
 import { Checkbox } from "@app/components/ui/checkbox";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@app/components/ui/select";
 
 const method = [
     { label: "Wireguard", value: "wg" },
@@ -213,28 +218,26 @@ sh get-docker.sh`;
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Method</FormLabel>
-                                            <div className="relative w-max">
-                                                <FormControl>
-                                                    <select
-                                                        className={cn(
-                                                            buttonVariants({
-                                                                variant:
-                                                                    "outline",
-                                                            }),
-                                                            "w-[200px] appearance-none font-normal"
-                                                        )}
-                                                        {...field}
-                                                    >
-                                                        <option value="wg">
+                                            <FormControl>
+                                                <Select
+                                                    value={field.value}
+                                                    onValueChange={
+                                                        field.onChange
+                                                    }
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select method" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="wg">
                                                             WireGuard
-                                                        </option>
-                                                        <option value="newt">
+                                                        </SelectItem>
+                                                        <SelectItem value="newt">
                                                             Newt
-                                                        </option>
-                                                    </select>
-                                                </FormControl>
-                                                <ChevronDownIcon className="absolute right-3 top-2.5 h-4 w-4 opacity-50" />
-                                            </div>
+                                                        </SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </FormControl>
                                             <FormDescription>
                                                 This is how you will connect
                                                 your site to Fossorial.

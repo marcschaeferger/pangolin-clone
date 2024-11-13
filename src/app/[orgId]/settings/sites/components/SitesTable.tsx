@@ -9,7 +9,7 @@ import {
     DropdownMenuTrigger,
 } from "@app/components/ui/dropdown-menu";
 import { Button } from "@app/components/ui/button";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { ArrowRight, ArrowUpDown, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import api from "@app/api";
@@ -104,34 +104,47 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                 const siteRow = row.original;
 
                 return (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                                <Link
-                                    href={`/${siteRow.orgId}/settings/sites/${siteRow.nice}`}
-                                >
-                                    View settings
-                                </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                                <button
-                                    onClick={() => {
-                                        setSelectedSite(siteRow);
-                                        setIsDeleteModalOpen(true);
-                                    }}
-                                    className="text-red-600 hover:text-red-800"
-                                >
-                                    Delete
-                                </button>
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="flex items-center justify-end">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                    <span className="sr-only">Open menu</span>
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem>
+                                    <Link
+                                        href={`/${siteRow.orgId}/settings/sites/${siteRow.nice}`}
+                                    >
+                                        View settings
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                    <button
+                                        onClick={() => {
+                                            setSelectedSite(siteRow);
+                                            setIsDeleteModalOpen(true);
+                                        }}
+                                        className="text-red-600 hover:text-red-800"
+                                    >
+                                        Delete
+                                    </button>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                        <Button
+                            variant={"gray"}
+                            className="ml-2"
+                            onClick={() =>
+                                router.push(
+                                    `/${siteRow.orgId}/settings/sites/${siteRow.nice}`
+                                )
+                            }
+                        >
+                            Edit <ArrowRight className="ml-2 w-4 h-4" />
+                        </Button>
+                    </div>
                 );
             },
         },
@@ -188,7 +201,7 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                     setIsCreateModalOpen(true);
                 }}
             />
-            <button onClick={callApi}>Create Newt</button>
+            {/* <button onClick={callApi}>Create Newt</button> */}
         </>
     );
 }

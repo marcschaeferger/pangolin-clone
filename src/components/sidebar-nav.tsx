@@ -59,9 +59,9 @@ export function SidebarNav({
         <div>
             <div className="block lg:hidden px-4">
                 <Select
+                    defaultValue={getSelectedValue()}
                     onValueChange={handleSelectChange}
                     disabled={disabled}
-                    defaultValue={getSelectedValue()}
                 >
                     <SelectTrigger>
                         <SelectValue placeholder="Select an option" />

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { resources, sites, targets } from "@server/db/schema";
+import { resources, sites, Target, targets } from "@server/db/schema";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
@@ -22,6 +22,8 @@ const createTargetSchema = z.object({
     protocol: z.string().optional(),
     enabled: z.boolean().default(true),
 });
+
+export type CreateTargetResponse = Target;
 
 export async function createTarget(
     req: Request,
@@ -126,7 +128,7 @@ export async function createTarget(
             allowedIps: targetIps.flat(),
         });
 
-        return response(res, {
+        return response<CreateTargetResponse>(res, {
             data: newTarget[0],
             success: true,
             error: false,

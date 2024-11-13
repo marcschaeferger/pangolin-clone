@@ -36,8 +36,12 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
             href: `/{orgId}/settings/resources/{resourceId}/general`,
         },
         {
-            title: "Targets",
-            href: `/{orgId}/settings/resources/{resourceId}/targets`,
+            title: "Connectivity",
+            href: `/{orgId}/settings/resources/{resourceId}/connectivity`,
+        },
+        {
+            title: "Authentication",
+            href: `/{orgId}/settings/resources/{resourceId}/authentication`,
         },
     ];
 
@@ -66,7 +70,7 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
             <ResourceProvider resource={resource}>
                 <SidebarSettings
                     sidebarNavItems={sidebarNavItems}
-                    limitWidth={true}
+                    limitWidth={false}
                 >
                     {children}
                 </SidebarSettings>
