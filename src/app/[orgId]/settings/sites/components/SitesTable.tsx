@@ -17,6 +17,8 @@ import { AxiosResponse } from "axios";
 import { useState } from "react";
 import CreateSiteForm from "./CreateSiteForm";
 import ConfirmDeleteDialog from "@app/components/ConfirmDeleteDialog";
+import { useToast } from "@app/hooks/useToast";
+import { formatAxiosError } from "@app/lib/utils";
 
 export type SiteRow = {
     id: number;
@@ -35,6 +37,8 @@ type SitesTableProps = {
 export default function SitesTable({ sites, orgId }: SitesTableProps) {
     const router = useRouter();
 
+    const { toast } = useToast();
+
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedSite, setSelectedSite] = useState<SiteRow | null>(null);
@@ -48,6 +52,11 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
         api.delete(`/site/${siteId}`)
             .catch((e) => {
                 console.error("Error deleting site", e);
+                toast({
+                    variant: "destructive",
+                    title: "Error deleting site",
+                    description: formatAxiosError(e, "Error deleting site"),
+                });
             })
             .then(() => {
                 router.refresh();

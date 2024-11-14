@@ -29,6 +29,7 @@ import {
 } from "@app/components/Credenza";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { CreateRoleBody, CreateRoleResponse } from "@server/routers/role";
+import { formatAxiosError } from "@app/lib/utils";
 
 type CreateRoleFormProps = {
     open: boolean;
@@ -74,9 +75,10 @@ export default function CreateRoleForm({
                 toast({
                     variant: "destructive",
                     title: "Failed to create role",
-                    description:
-                        e.response?.data?.message ||
-                        "An error occurred while creating the role.",
+                    description: formatAxiosError(
+                        e,
+                        "An error occurred while creating the role."
+                    ),
                 });
             });
 

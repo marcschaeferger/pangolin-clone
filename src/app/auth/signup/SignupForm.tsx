@@ -27,6 +27,7 @@ import { api } from "@app/api";
 import { useRouter } from "next/navigation";
 import { passwordSchema } from "@server/auth/passwordSchema";
 import { AxiosResponse } from "axios";
+import { formatAxiosError } from "@app/lib/utils";
 
 type SignupFormProps = {
     redirect?: string;
@@ -70,8 +71,7 @@ export default function SignupForm({ redirect }: SignupFormProps) {
             .catch((e) => {
                 console.error(e);
                 setError(
-                    e.response?.data?.message ||
-                        "An error occurred while signing up",
+                    formatAxiosError(e, "An error occurred while signing up")
                 );
             });
 

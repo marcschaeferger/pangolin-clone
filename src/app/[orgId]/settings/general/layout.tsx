@@ -1,5 +1,6 @@
 import { internal } from "@app/api";
 import { authCookieHeader } from "@app/api/cookies";
+import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { SidebarSettings } from "@app/components/SidebarSettings";
 import { verifySession } from "@app/lib/auth/verifySession";
 import OrgProvider from "@app/providers/OrgProvider";
@@ -67,14 +68,12 @@ export default async function GeneralSettingsPage({
         <>
             <OrgProvider org={org}>
                 <OrgUserProvider orgUser={orgUser}>
-                    <div className="space-y-0.5 select-none mb-6">
-                        <h2 className="text-2xl font-bold tracking-tight">
-                            General
-                        </h2>
-                        <p className="text-muted-foreground">
-                            Configure your organization's general settings
-                        </p>
-                    </div>
+                    <SettingsSectionTitle
+                        title="General"
+                        description="Configure your organization's general settings"
+                        size="1xl"
+                    />
+
                     <SidebarSettings sidebarNavItems={sidebarNavItems}>
                         {children}
                     </SidebarSettings>

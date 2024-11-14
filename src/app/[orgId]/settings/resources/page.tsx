@@ -3,6 +3,7 @@ import { authCookieHeader } from "@app/api/cookies";
 import ResourcesTable, { ResourceRow } from "./components/ResourcesTable";
 import { AxiosResponse } from "axios";
 import { ListResourcesResponse } from "@server/routers/resource";
+import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 
 type ResourcesPageProps = {
     params: Promise<{ orgId: string }>;
@@ -33,14 +34,10 @@ export default async function ResourcesPage(props: ResourcesPageProps) {
 
     return (
         <>
-            <div className="space-y-0.5 select-none mb-6">
-                <h2 className="text-2xl font-bold tracking-tight">
-                    Manage Resources
-                </h2>
-                <p className="text-muted-foreground">
-                    Create secure proxies to your private applications.
-                </p>
-            </div>
+            <SettingsSectionTitle
+                title="Manage Resources"
+                description="Create secure proxies to your private applications"
+            />
 
             <ResourcesTable resources={resourceRows} orgId={params.orgId} />
         </>

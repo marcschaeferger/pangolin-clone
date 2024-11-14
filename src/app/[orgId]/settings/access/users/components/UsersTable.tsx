@@ -19,6 +19,7 @@ import { useOrgContext } from "@app/hooks/useOrgContext";
 import { useToast } from "@app/hooks/useToast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { formatAxiosError } from "@app/lib/utils";
 
 export type UserRow = {
     id: string;
@@ -162,9 +163,10 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                     toast({
                         variant: "destructive",
                         title: "Failed to remove user",
-                        description:
-                            e.message ??
-                            "An error occurred while removing the user.",
+                        description: formatAxiosError(
+                            e,
+                            "An error occurred while removing the user."
+                        ),
                     });
                 });
 

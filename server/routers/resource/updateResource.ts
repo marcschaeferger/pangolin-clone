@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { resources } from "@server/db/schema";
+import { resources, sites } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
@@ -17,6 +17,8 @@ const updateResourceBodySchema = z
     .object({
         name: z.string().min(1).max(255).optional(),
         subdomain: z.string().min(1).max(255).optional(),
+        ssl: z.boolean().optional(),
+        siteId: z.number(),
     })
     .refine((data) => Object.keys(data).length > 0, {
         message: "At least one field must be provided for update",

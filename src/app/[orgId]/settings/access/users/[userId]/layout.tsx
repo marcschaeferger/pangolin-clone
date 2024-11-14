@@ -53,7 +53,8 @@ export default async function UserLayoutProps(props: UserLayoutProps) {
                         className="text-muted-foreground hover:underline"
                     >
                         <div className="flex flex-row items-center gap-1">
-                            <ArrowLeft /> <span>All Users</span>
+                            <ArrowLeft className="w-4 h-4" />{" "}
+                            <span>All Users</span>
                         </div>
                     </Link>
                 </div>

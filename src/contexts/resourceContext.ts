@@ -2,7 +2,7 @@ import { GetResourceResponse } from "@server/routers/resource/getResource";
 import { createContext } from "react";
 
 interface ResourceContextType {
-    resource: GetResourceResponse | null;
+    resource: GetResourceResponse;
     updateResource: (updatedResource: Partial<GetResourceResponse>) => void;
 }
 

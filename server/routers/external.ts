@@ -150,6 +150,7 @@ authenticated.get(
 authenticated.post(
     "/resource/:resourceId",
     verifyResourceAccess,
+    verifySiteAccess,
     verifyUserHasAction(ActionsEnum.updateResource),
     resource.updateResource
 );
@@ -370,7 +371,7 @@ authRouter.use(
 authRouter.put("/signup", auth.signup);
 authRouter.post("/login", auth.login);
 authRouter.post("/logout", auth.logout);
-authRouter.post('/newt/get-token', getToken);
+authRouter.post("/newt/get-token", getToken);
 
 authRouter.post("/2fa/enable", verifySessionUserMiddleware, auth.verifyTotp);
 authRouter.post(

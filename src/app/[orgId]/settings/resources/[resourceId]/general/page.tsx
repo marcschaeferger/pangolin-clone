@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { cn } from "@/lib/utils";
+import { cn, formatAxiosError } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
     Form,
@@ -38,6 +38,7 @@ import { useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { GetResourceResponse } from "@server/routers/resource";
 import { useToast } from "@app/hooks/useToast";
+import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 
 const GeneralFormSchema = z.object({
     name: z.string(),
@@ -48,64 +49,71 @@ type GeneralFormValues = z.infer<typeof GeneralFormSchema>;
 
 export default function GeneralForm() {
     const params = useParams();
-    const orgId = params.orgId;
-    const { resource, updateResource } = useResourceContext();
-    const [sites, setSites] = useState<ListSitesResponse["sites"]>([]);
     const { toast } = useToast();
+    const { resource, updateResource } = useResourceContext();
+
+    const orgId = params.orgId;
+
+    const [sites, setSites] = useState<ListSitesResponse["sites"]>([]);
+    const [saveLoading, setSaveLoading] = useState(false);
 
     const form = useForm<GeneralFormValues>({
         resolver: zodResolver(GeneralFormSchema),
         defaultValues: {
-            name: resource?.name,
-            siteId: resource?.siteId,
+            name: resource.name,
+            siteId: resource.siteId!,
         },
         mode: "onChange",
     });
 
     useEffect(() => {
-        if (typeof window !== "undefined") {
-            const fetchSites = async () => {
-                const res = await api.get<AxiosResponse<ListSitesResponse>>(
-                    `/org/${orgId}/sites/`
-                );
-                setSites(res.data.data.sites);
-            };
-            fetchSites();
-        }
+        const fetchSites = async () => {
+            const res = await api.get<AxiosResponse<ListSitesResponse>>(
+                `/org/${orgId}/sites/`
+            );
+            setSites(res.data.data.sites);
+        };
+        fetchSites();
     }, []);
 
     async function onSubmit(data: GeneralFormValues) {
+        setSaveLoading(true);
         updateResource({ name: data.name, siteId: data.siteId });
-        await api
-            .post<AxiosResponse<GetResourceResponse>>(
-                `resource/${resource?.resourceId}`,
-                {
-                    name: data.name,
-                    siteId: data.siteId,
-                }
-            )
+
+        api.post<AxiosResponse<GetResourceResponse>>(
+            `resource/${resource?.resourceId}`,
+            {
+                name: data.name,
+                siteId: data.siteId,
+            }
+        )
             .catch((e) => {
                 toast({
                     variant: "destructive",
                     title: "Failed to update resource",
-                    description:
-                        e.response?.data?.message ||
-                        "An error occurred while updating the resource",
+                    description: formatAxiosError(
+                        e,
+                        "An error occurred while updating the resource"
+                    ),
                 });
-            });
+            })
+            .then(() => {
+                toast({
+                    title: "Resource updated",
+                    description: "The resource has been updated successfully",
+                });
+            })
+            .finally(() => setSaveLoading(false));
     }
 
     return (
         <>
             <div className="lg:max-w-2xl">
-                <div className="space-y-0.5 select-none mb-6">
-                    <h2 className="text-2xl font-bold tracking-tight">
-                        General Settings
-                    </h2>
-                    <p className="text-muted-foreground">
-                        Configure the general settings for this resource
-                    </p>
-                </div>
+                <SettingsSectionTitle
+                    title="General Settings"
+                    description="Configure the general settings for this resource"
+                    size="1xl"
+                />
 
                 <Form {...form}>
                     <form
@@ -160,10 +168,10 @@ export default function GeneralForm() {
                                         </PopoverTrigger>
                                         <PopoverContent className="w-[350px] p-0">
                                             <Command>
-                                                <CommandInput placeholder="Search site..." />
+                                                <CommandInput placeholder="Search sites" />
                                                 <CommandList>
                                                     <CommandEmpty>
-                                                        No site found.
+                                                        No sites found.
                                                     </CommandEmpty>
                                                     <CommandGroup>
                                                         {sites.map((site) => (
@@ -206,7 +214,13 @@ export default function GeneralForm() {
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit">Update Resource</Button>
+                        <Button
+                            type="submit"
+                            loading={saveLoading}
+                            disabled={saveLoading}
+                        >
+                            Save Changes
+                        </Button>
                     </form>
                 </Form>
             </div>

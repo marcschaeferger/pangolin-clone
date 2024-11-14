@@ -34,6 +34,7 @@ import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "../../../components/ui/alert";
 import { useToast } from "@app/hooks/useToast";
 import { useRouter } from "next/navigation";
+import { formatAxiosError } from "@app/lib/utils";
 
 const FormSchema = z.object({
     email: z.string().email({ message: "Invalid email address" }),
@@ -76,14 +77,14 @@ export default function VerifyEmailForm({
                 code: data.pin,
             })
             .catch((e) => {
-                setError(e.response?.data?.message || "An error occurred");
+                setError(formatAxiosError(e, "An error occurred"));
                 console.error("Failed to verify email:", e);
             });
 
         if (res && res.data?.data?.valid) {
             setError(null);
             setSuccessMessage(
-                "Email successfully verified! Redirecting you...",
+                "Email successfully verified! Redirecting you..."
             );
             setTimeout(() => {
                 if (redirect && redirect.includes("http")) {
@@ -103,7 +104,7 @@ export default function VerifyEmailForm({
         setIsResending(true);
 
         const res = await api.post("/auth/verify-email/request").catch((e) => {
-            setError(e.response?.data?.message || "An error occurred");
+            setError(formatAxiosError(e, "An error occurred"));
             console.error("Failed to resend verification code:", e);
         });
 

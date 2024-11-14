@@ -36,6 +36,7 @@ import {
     SelectValue,
 } from "@app/components/ui/select";
 import { RoleRow } from "./RolesTable";
+import { formatAxiosError } from "@app/lib/utils";
 
 type CreateRoleFormProps = {
     open: boolean;
@@ -71,9 +72,10 @@ export default function DeleteRoleForm({
                     toast({
                         variant: "destructive",
                         title: "Failed to fetch roles",
-                        description:
-                            e.message ||
-                            "An error occurred while fetching the roles",
+                        description: formatAxiosError(
+                            e,
+                            "An error occurred while fetching the roles"
+                        ),
                     });
                 });
 
@@ -109,9 +111,10 @@ export default function DeleteRoleForm({
                 toast({
                     variant: "destructive",
                     title: "Failed to remove role",
-                    description:
-                        e.response?.data?.message ||
-                        "An error occurred while removing the role.",
+                    description: formatAxiosError(
+                        e,
+                        "An error occurred while removing the role."
+                    ),
                 });
             });
 

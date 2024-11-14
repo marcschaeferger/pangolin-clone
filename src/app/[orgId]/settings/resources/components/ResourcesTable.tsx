@@ -17,6 +17,8 @@ import CreateResourceForm from "./CreateResourceForm";
 import { useState } from "react";
 import ConfirmDeleteDialog from "@app/components/ConfirmDeleteDialog";
 import { set } from "zod";
+import { formatAxiosError } from "@app/lib/utils";
+import { useToast } from "@app/hooks/useToast";
 
 export type ResourceRow = {
     id: number;
@@ -34,6 +36,8 @@ type ResourcesTableProps = {
 export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
     const router = useRouter();
 
+    const { toast } = useToast();
+
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedResource, setSelectedResource] =
@@ -43,6 +47,11 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
         api.delete(`/resource/${resourceId}`)
             .catch((e) => {
                 console.error("Error deleting resource", e);
+                toast({
+                    variant: "destructive",
+                    title: "Error deleting resource",
+                    description: formatAxiosError(e, "Error deleting resource"),
+                });
             })
             .then(() => {
                 router.refresh();

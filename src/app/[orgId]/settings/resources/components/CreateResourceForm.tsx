@@ -29,7 +29,7 @@ import {
 } from "@app/components/Credenza";
 import { useParams, useRouter } from "next/navigation";
 import { ListSitesResponse } from "@server/routers/site";
-import { cn } from "@app/lib/utils";
+import { cn, formatAxiosError } from "@app/lib/utils";
 import { CheckIcon } from "lucide-react";
 import {
     Popover,
@@ -123,7 +123,12 @@ export default function CreateResourceForm({
             )
             .catch((e) => {
                 toast({
+                    variant: "destructive",
                     title: "Error creating resource",
+                    description: formatAxiosError(
+                        e,
+                        "An error occurred when creating the resource"
+                    ),
                 });
             });
 

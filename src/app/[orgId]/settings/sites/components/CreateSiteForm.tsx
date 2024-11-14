@@ -40,6 +40,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@app/components/ui/select";
+import { formatAxiosError } from "@app/lib/utils";
 
 const method = [
     { label: "Wireguard", value: "wg" },
@@ -108,7 +109,9 @@ export default function CreateSiteForm({ open, setOpen }: CreateSiteFormProps) {
             api.get(`/org/${orgId}/pick-site-defaults`)
                 .catch((e) => {
                     toast({
+                        variant: "destructive",
                         title: "Error picking site defaults",
+                        description: formatAxiosError(e),
                     });
                 })
                 .then((res) => {
@@ -130,7 +133,9 @@ export default function CreateSiteForm({ open, setOpen }: CreateSiteFormProps) {
             })
             .catch((e) => {
                 toast({
+                    variant: "destructive",
                     title: "Error creating site",
+                    description: formatAxiosError(e),
                 });
             });
 

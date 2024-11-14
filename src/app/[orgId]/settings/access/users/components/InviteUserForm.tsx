@@ -38,6 +38,7 @@ import {
 } from "@app/components/Credenza";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { ListRolesResponse } from "@server/routers/role";
+import { formatAxiosError } from "@app/lib/utils";
 
 type InviteUserFormProps = {
     open: boolean;
@@ -94,9 +95,10 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
                     toast({
                         variant: "destructive",
                         title: "Failed to fetch roles",
-                        description:
-                            e.message ||
-                            "An error occurred while fetching the roles",
+                        description: formatAxiosError(
+                            e,
+                            "An error occurred while fetching the roles"
+                        ),
                     });
                 });
 
@@ -128,9 +130,10 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
                 toast({
                     variant: "destructive",
                     title: "Failed to invite user",
-                    description:
-                        e.response?.data?.message ||
-                        "An error occurred while inviting the user.",
+                    description: formatAxiosError(
+                        e,
+                        "An error occurred while inviting the user"
+                    ),
                 });
             });
 

@@ -28,6 +28,8 @@ import { ListRolesResponse } from "@server/routers/role";
 import { userOrgUserContext } from "@app/hooks/useOrgUserContext";
 import { useParams } from "next/navigation";
 import { Button } from "@app/components/ui/button";
+import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
+import { formatAxiosError } from "@app/lib/utils";
 
 const formSchema = z.object({
     email: z.string().email({ message: "Please enter a valid email" }),
@@ -60,9 +62,10 @@ export default function AccessControlsPage() {
                     toast({
                         variant: "destructive",
                         title: "Failed to fetch roles",
-                        description:
-                            e.message ||
-                            "An error occurred while fetching the roles",
+                        description: formatAxiosError(
+                            e,
+                            "An error occurred while fetching the roles"
+                        ),
                     });
                 });
 
@@ -87,9 +90,10 @@ export default function AccessControlsPage() {
                 toast({
                     variant: "destructive",
                     title: "Failed to add user to role",
-                    description:
-                        e.response?.data?.message ||
-                        "An error occurred while adding user to the role.",
+                    description: formatAxiosError(
+                        e,
+                        "An error occurred while adding user to the role."
+                    ),
                 });
             });
 
@@ -106,14 +110,11 @@ export default function AccessControlsPage() {
 
     return (
         <>
-            <div className="space-y-0.5 select-none mb-6">
-                <h2 className="text-2xl font-bold tracking-tight">
-                    Access Controls
-                </h2>
-                <p className="text-muted-foreground">
-                    Manage what this user can access and do in the organization
-                </p>
-            </div>
+            <SettingsSectionTitle
+                title="Access Controls"
+                description="Manage what this user can access and do in the organization"
+                size="1xl"
+            />
 
             <Form {...form}>
                 <form

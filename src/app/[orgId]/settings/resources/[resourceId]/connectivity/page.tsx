@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
-import { Trash2, Server, Globe, Cpu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -14,13 +12,12 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
 import api from "@app/api";
 import { AxiosResponse } from "axios";
 import { ListTargetsResponse } from "@server/routers/target/listTargets";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { set, z } from "zod";
 import {
     Form,
     FormControl,
@@ -50,16 +47,14 @@ import {
 } from "@app/components/ui/table";
 import { useToast } from "@app/hooks/useToast";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
-import { Target } from "@server/db/schema";
 import { useResourceContext } from "@app/hooks/useResourceContext";
+import { ArrayElement } from "@server/types/ArrayElement";
+import { Dot } from "lucide-react";
+import { formatAxiosError } from "@app/lib/utils";
+import { escape } from "querystring";
 
 const addTargetSchema = z.object({
-    ip: z
-        .string()
-        .regex(
-            /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
-            "Invalid IP address format"
-        ),
+    ip: z.string().ip(),
     method: z.string(),
     port: z
         .string()
@@ -72,6 +67,11 @@ const addTargetSchema = z.object({
 
 type AddTargetFormValues = z.infer<typeof addTargetSchema>;
 
+type LocalTarget = ArrayElement<ListTargetsResponse["targets"]> & {
+    new?: boolean;
+    updated?: boolean;
+};
+
 export default function ReverseProxyTargets(props: {
     params: Promise<{ resourceId: number }>;
 }) {
@@ -80,7 +80,9 @@ export default function ReverseProxyTargets(props: {
     const { toast } = useToast();
     const { resource, updateResource } = useResourceContext();
 
-    const [targets, setTargets] = useState<ListTargetsResponse["targets"]>([]);
+    const [targets, setTargets] = useState<LocalTarget[]>([]);
+    const [targetsToRemove, setTargetsToRemove] = useState<number[]>([]);
+    const [sslEnabled, setSslEnabled] = useState(resource.ssl);
 
     const addTargetForm = useForm({
         resolver: zodResolver(addTargetSchema),
@@ -103,9 +105,10 @@ export default function ReverseProxyTargets(props: {
                     toast({
                         variant: "destructive",
                         title: "Failed to fetch targets",
-                        description:
-                            err.message ||
-                            "An error occurred while fetching targets",
+                        description: formatAxiosError(
+                            err,
+                            "An error occurred while fetching targets"
+                        ),
                     });
                 });
 
@@ -117,68 +120,145 @@ export default function ReverseProxyTargets(props: {
     }, []);
 
     async function addTarget(data: AddTargetFormValues) {
-        const res = await api
-            .put<AxiosResponse<CreateTargetResponse>>(
-                `/resource/${params.resourceId}/target`,
-                {
-                    ...data,
-                    resourceId: undefined,
-                }
+        const newTarget: LocalTarget = {
+            ...data,
+            enabled: true,
+            targetId: new Date().getTime(),
+            new: true,
+            resourceId: resource.resourceId,
+        };
+
+        setTargets([...targets, newTarget]);
+        addTargetForm.reset();
+    }
+
+    const removeTarget = (targetId: number) => {
+        setTargets([
+            ...targets.filter((target) => target.targetId !== targetId),
+        ]);
+
+        if (!targets.find((target) => target.targetId === targetId)?.new) {
+            setTargetsToRemove([...targetsToRemove, targetId]);
+        }
+    };
+
+    async function updateTarget(targetId: number, data: Partial<LocalTarget>) {
+        setTargets(
+            targets.map((target) =>
+                target.targetId === targetId
+                    ? { ...target, ...data, updated: true }
+                    : target
             )
+        );
+    }
+
+    async function saveAll() {
+        const res = await api
+            .post(`/resource/${params.resourceId}`, { ssl: sslEnabled })
             .catch((err) => {
                 console.error(err);
                 toast({
                     variant: "destructive",
-                    title: "Failed to add target",
-                    description:
-                        err.message || "An error occurred while adding target",
+                    title: "Failed to update resource",
+                    description: formatAxiosError(
+                        err,
+                        "Failed to update resource"
+                    ),
                 });
-            });
-
-        if (res && res.status === 201) {
-            setTargets([...targets, res.data.data]);
-            addTargetForm.reset();
-        }
-    }
-
-    const removeTarget = (targetId: number) => {
-        api.delete(`/target/${targetId}`)
-            .catch((err) => {
-                console.error(err);
             })
-            .then((res) => {
-                setTargets(
-                    targets.filter((target) => target.targetId !== targetId)
-                );
+            .then(() => {
+                updateResource({ ssl: sslEnabled });
             });
-    };
 
-    async function updateTarget(targetId: number, data: Partial<Target>) {
-        setTargets(
-            targets.map((target) =>
-                target.targetId === targetId ? { ...target, ...data } : target
-            )
-        );
+        for (const target of targets) {
+            const data = {
+                ip: target.ip,
+                port: target.port,
+                method: target.method,
+                protocol: target.protocol,
+                enabled: target.enabled,
+            };
 
-        const res = await api.post(`/target/${targetId}`, data).catch((err) => {
-            console.error(err);
-            toast({
-                variant: "destructive",
-                title: "Failed to update target",
-                description:
-                    err.message || "An error occurred while updating target",
-            });
+            if (target.new) {
+                await api
+                    .put<AxiosResponse<CreateTargetResponse>>(
+                        `/resource/${params.resourceId}/target`,
+                        data
+                    )
+                    .then((res) => {
+                        setTargets(
+                            targets.map((t) => {
+                                if (
+                                    t.new &&
+                                    t.targetId === res.data.data.targetId
+                                ) {
+                                    return {
+                                        ...t,
+                                        new: false,
+                                    };
+                                }
+                                return t;
+                            })
+                        );
+                    })
+                    .catch((err) => {
+                        console.error(err);
+                        toast({
+                            variant: "destructive",
+                            title: "Failed to add target",
+                            description: formatAxiosError(
+                                err,
+                                "Failed to add target"
+                            ),
+                        });
+                    });
+            } else if (target.updated) {
+                const res = await api
+                    .post(`/target/${target.targetId}`, data)
+                    .catch((err) => {
+                        console.error(err);
+                        toast({
+                            variant: "destructive",
+                            title: "Failed to update target",
+                            description: formatAxiosError(
+                                err,
+                                "Failed to update target"
+                            ),
+                        });
+                    });
+            }
+        }
+
+        for (const targetId of targetsToRemove) {
+            await api
+                .delete(`/target/${targetId}`)
+                .catch((err) => {
+                    console.error(err);
+                    toast({
+                        variant: "destructive",
+                        title: "Failed to remove target",
+                        description: formatAxiosError(
+                            err,
+                            "Failed to remove target"
+                        ),
+                    });
+                })
+                .then((res) => {
+                    setTargets(
+                        targets.filter((target) => target.targetId !== targetId)
+                    );
+                });
+        }
+
+        toast({
+            title: "Resource updated",
+            description: "Resource and targets updated successfully",
         });
 
-        if (res && res.status === 200) {
-            toast({
-                title: "Target updated",
-                description: "The target has been updated successfully",
-            });
-        }
+        setTargetsToRemove([]);
     }
 
-    const columns: ColumnDef<ListTargetsResponse["targets"][0]>[] = [
+    const columns: ColumnDef<LocalTarget>[] = [
         {
             accessorKey: "ip",
             header: "IP Address",
@@ -259,12 +339,17 @@ export default function ReverseProxyTargets(props: {
         {
             id: "actions",
             cell: ({ row }) => (
-                <Button
-                    variant="outline"
-                    onClick={() => removeTarget(row.original.targetId)}
-                >
-                    Delete
-                </Button>
+                <>
+                    <div className="flex items-center justify-end space-x-2">
+                        {row.original.new && <Dot />}
+                        <Button
+                            variant="outline"
+                            onClick={() => removeTarget(row.original.targetId)}
+                        >
+                            Delete
+                        </Button>
+                    </div>
+                </>
             ),
         },
     ];
@@ -286,10 +371,15 @@ export default function ReverseProxyTargets(props: {
                     <SettingsSectionTitle
                         title="SSL"
                         description="Setup SSL to secure your connections with LetsEncrypt certificates"
+                        size="1xl"
                     />
 
                     <div className="flex items-center space-x-2">
-                        <Switch id="ssl-toggle" />
+                        <Switch
+                            id="ssl-toggle"
+                            defaultChecked={resource.ssl}
+                            onCheckedChange={(val) => setSslEnabled(val)}
+                        />
                         <Label htmlFor="ssl-toggle">Enable SSL (https)</Label>
                     </div>
                 </div>
@@ -298,6 +388,7 @@ export default function ReverseProxyTargets(props: {
                     <SettingsSectionTitle
                         title="Targets"
                         description="Setup targets to route traffic to your services"
+                        size="1xl"
                     />
 
                     <Form {...addTargetForm}>
@@ -355,8 +446,8 @@ export default function ReverseProxyTargets(props: {
                                                 </Select>
                                             </FormControl>
                                             <FormDescription>
-                                                Choose the method for the target
-                                                connection
+                                                Choose the method for how the
+                                                target is accessed
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>
@@ -422,7 +513,9 @@ export default function ReverseProxyTargets(props: {
                                     )}
                                 />
                             </div>
-                            <Button type="submit">Add Target</Button>
+                            <Button type="submit" variant="gray">
+                                Add Target
+                            </Button>
                         </form>
                     </Form>
                 </div>
@@ -466,13 +559,17 @@ export default function ReverseProxyTargets(props: {
                                         colSpan={columns.length}
                                         className="h-24 text-center"
                                     >
-                                        No results.
+                                        No targets. Add a target using the form.
                                     </TableCell>
                                 </TableRow>
                             )}
                         </TableBody>
                     </Table>
                 </div>
+            </div>
+
+            <div className="mt-8">
+                <Button onClick={saveAll}>Save Changes</Button>
             </div>
         </div>
     );

@@ -7,6 +7,7 @@ import { authCookieHeader } from "@app/api/cookies";
 import { SidebarSettings } from "@app/components/SidebarSettings";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 
 interface SettingsLayoutProps {
     children: React.ReactNode;
@@ -44,19 +45,15 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
                     className="text-muted-foreground hover:underline"
                 >
                     <div className="flex flex-row items-center gap-1">
-                        <ArrowLeft /> <span>All Sites</span>
+                        <ArrowLeft className="w-4 h-4" /> <span>All Sites</span>
                     </div>
                 </Link>
             </div>
 
-            <div className="space-y-0.5 select-none mb-6">
-                <h2 className="text-2xl font-bold tracking-tight">
-                    {site?.name + " Settings"}
-                </h2>
-                <p className="text-muted-foreground">
-                    Configure the settings on your site
-                </p>
-            </div>
+            <SettingsSectionTitle
+                title={`${site?.name} Settings`}
+                description="Configure the settings on your site"
+            />
 
             <SiteProvider site={site}>
                 <SidebarSettings

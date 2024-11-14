@@ -18,6 +18,8 @@ import { useForm } from "react-hook-form";
 import api from "@app/api";
 import { useToast } from "@app/hooks/useToast";
 import { useRouter } from "next/navigation";
+import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
+import { formatAxiosError } from "@app/lib/utils";
 
 const GeneralFormSchema = z.object({
     name: z.string(),
@@ -41,18 +43,19 @@ export default function GeneralPage() {
 
     async function onSubmit(data: GeneralFormValues) {
         await api
-        .post(`/site/${site?.siteId}`, {
-            name: data.name,
-        })
-        .catch((e) => {
-            toast({
-                variant: "destructive",
-                title: "Failed to update site",
-                description:
-                e.message ||
-                "An error occurred while updating the site.",
+            .post(`/site/${site?.siteId}`, {
+                name: data.name,
+            })
+            .catch((e) => {
+                toast({
+                    variant: "destructive",
+                    title: "Failed to update site",
+                    description: formatAxiosError(
+                        e,
+                        "An error occurred while updating the site."
+                    ),
+                });
             });
-        });
 
         updateSite({ name: data.name });
 
@@ -61,14 +64,11 @@ export default function GeneralPage() {
 
     return (
         <>
-            <div className="space-y-0.5 select-none mb-6">
-                <h2 className="text-2xl font-bold tracking-tight">
-                    General Settings
-                </h2>
-                <p className="text-muted-foreground">
-                    Configure the general settings for this site
-                </p>
-            </div>
+            <SettingsSectionTitle
+                title="General Settings"
+                description="Configure the general settings for this site"
+                size="1xl"
+            />
 
             <Form {...form}>
                 <form
