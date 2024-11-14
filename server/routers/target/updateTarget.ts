@@ -15,12 +15,12 @@ const updateTargetParamsSchema = z.object({
 
 const updateTargetBodySchema = z
     .object({
-        // ip: z.string().ip().optional(), // for now we cant update the ip; you will have to delete
+        ip: z.string().ip().optional(), // for now we cant update the ip; you will have to delete
         method: z.string().min(1).max(10).optional(),
         port: z.number().int().min(1).max(65535).optional(),
-        protocol: z.string().optional(),
         enabled: z.boolean().optional(),
     })
+    .strict()
     .refine((data) => Object.keys(data).length > 0, {
         message: "At least one field must be provided for update",
     });

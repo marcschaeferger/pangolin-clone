@@ -61,7 +61,7 @@ export default function GeneralForm() {
         resolver: zodResolver(GeneralFormSchema),
         defaultValues: {
             name: resource.name,
-            siteId: resource.siteId!,
+            // siteId: resource.siteId!,
         },
         mode: "onChange",
     });
@@ -84,7 +84,7 @@ export default function GeneralForm() {
             `resource/${resource?.resourceId}`,
             {
                 name: data.name,
-                siteId: data.siteId,
+                // siteId: data.siteId,
             }
         )
             .catch((e) => {
@@ -137,7 +137,7 @@ export default function GeneralForm() {
                                 </FormItem>
                             )}
                         />
-                        <FormField
+                        {/* <FormField
                             control={form.control}
                             name="siteId"
                             render={({ field }) => (
@@ -213,7 +213,7 @@ export default function GeneralForm() {
                                     <FormMessage />
                                 </FormItem>
                             )}
-                        />
+                        /> */}
                         <Button
                             type="submit"
                             loading={saveLoading}

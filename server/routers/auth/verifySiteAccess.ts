@@ -10,6 +10,7 @@ import {
 import { and, eq, or } from "drizzle-orm";
 import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
+import logger from "@server/logger";
 
 export async function verifySiteAccess(
     req: Request,
@@ -28,6 +29,7 @@ export async function verifySiteAccess(
     }
 
     if (isNaN(siteId)) {
+        logger.debug(JSON.stringify(req.body));
         return next(createHttpError(HttpCode.BAD_REQUEST, "Invalid site ID"));
     }
 

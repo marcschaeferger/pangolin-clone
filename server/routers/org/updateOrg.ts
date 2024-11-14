@@ -18,6 +18,7 @@ const updateOrgBodySchema = z
         name: z.string().min(1).max(255).optional(),
         domain: z.string().min(1).max(255).optional(),
     })
+    .strict()
     .refine((data) => Object.keys(data).length > 0, {
         message: "At least one field must be provided for update",
     });

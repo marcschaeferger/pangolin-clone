@@ -18,8 +18,9 @@ const updateResourceBodySchema = z
         name: z.string().min(1).max(255).optional(),
         subdomain: z.string().min(1).max(255).optional(),
         ssl: z.boolean().optional(),
-        siteId: z.number(),
+        // siteId: z.number(),
     })
+    .strict()
     .refine((data) => Object.keys(data).length > 0, {
         message: "At least one field must be provided for update",
     });

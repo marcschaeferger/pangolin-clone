@@ -25,10 +25,12 @@ const createResourceParamsSchema = z.object({
     orgId: z.string(),
 });
 
-const createResourceSchema = z.object({
-    name: z.string().min(1).max(255),
-    subdomain: z.string().min(1).max(255).optional(),
-});
+const createResourceSchema = z
+    .object({
+        name: z.string().min(1).max(255),
+        subdomain: z.string().min(1).max(255).optional(),
+    })
+    .strict();
 
 export type CreateResourceResponse = Resource;
 

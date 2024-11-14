@@ -15,13 +15,15 @@ const createSiteParamsSchema = z.object({
     orgId: z.string(),
 });
 
-const createSiteSchema = z.object({
-    name: z.string().min(1).max(255),
-    exitNodeId: z.number().int().positive(),
-    subdomain: z.string().min(1).max(255).optional(),
-    pubKey: z.string(),
-    subnet: z.string(),
-});
+const createSiteSchema = z
+    .object({
+        name: z.string().min(1).max(255),
+        exitNodeId: z.number().int().positive(),
+        subdomain: z.string().min(1).max(255).optional(),
+        pubKey: z.string(),
+        subnet: z.string(),
+    })
+    .strict();
 
 export type CreateSiteResponse = {
     name: string;

@@ -15,13 +15,15 @@ const createTargetParamsSchema = z.object({
     resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
 
-const createTargetSchema = z.object({
-    ip: z.string().ip(),
-    method: z.string().min(1).max(10),
-    port: z.number().int().min(1).max(65535),
-    protocol: z.string().optional(),
-    enabled: z.boolean().default(true),
-});
+const createTargetSchema = z
+    .object({
+        ip: z.string().ip(),
+        method: z.string().min(1).max(10),
+        port: z.number().int().min(1).max(65535),
+        protocol: z.string().optional(),
+        enabled: z.boolean().default(true),
+    })
+    .strict();
 
 export type CreateTargetResponse = Target;
 
@@ -104,6 +106,7 @@ export async function createTarget(
             .insert(targets)
             .values({
                 resourceId,
+                protocol: "tcp", // hard code for now
                 ...targetData,
             })
             .returning();

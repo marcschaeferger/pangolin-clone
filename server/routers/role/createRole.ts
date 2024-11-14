@@ -14,10 +14,12 @@ const createRoleParamsSchema = z.object({
     orgId: z.string(),
 });
 
-const createRoleSchema = z.object({
-    name: z.string().min(1).max(255),
-    description: z.string().optional(),
-});
+const createRoleSchema = z
+    .object({
+        name: z.string().min(1).max(255),
+        description: z.string().optional(),
+    })
+    .strict();
 
 export const defaultRoleAllowedActions: ActionsEnum[] = [
     ActionsEnum.getOrg,

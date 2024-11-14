@@ -150,7 +150,6 @@ authenticated.get(
 authenticated.post(
     "/resource/:resourceId",
     verifyResourceAccess,
-    verifySiteAccess,
     verifyUserHasAction(ActionsEnum.updateResource),
     resource.updateResource
 );
