@@ -89,7 +89,7 @@ export async function acceptInvite(
             );
         }
 
-        if (existingUser[0].email !== existingInvite[0].email) {
+        if (req.user && req.user.email !== existingInvite[0].email) {
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,

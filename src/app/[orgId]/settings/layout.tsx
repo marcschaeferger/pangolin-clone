@@ -69,7 +69,7 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
         );
         const orgUser = await getOrgUser();
 
-        if (!orgUser.data.data.isAdmin || !orgUser.data.data.isOwner) {
+        if (!orgUser.data.data.isAdmin && !orgUser.data.data.isOwner) {
             throw new Error("User is not an admin or owner");
         }
     } catch {

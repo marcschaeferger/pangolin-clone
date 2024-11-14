@@ -49,6 +49,7 @@ export default async function InvitePage(props: {
         )
         .catch((e) => {
             console.error(e);
+            error = formatAxiosError(e);
         });
 
     if (res && res.status === 200) {

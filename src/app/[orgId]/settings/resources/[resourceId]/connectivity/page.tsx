@@ -308,13 +308,13 @@ export default function ReverseProxyTargets(props: {
             cell: ({ row }) => (
                 <>
                     <div className="flex items-center justify-end space-x-2">
-                        <Dot
+                        {/* <Dot
                             className={
                                 row.original.new || row.original.updated
                                     ? "opacity-100"
                                     : "opacity-0"
                             }
-                        />
+                        /> */}
 
                         <Button
                             variant="outline"
@@ -494,7 +494,7 @@ export default function ReverseProxyTargets(props: {
                     </Form>
                 </div>
 
-                <div className="rounded-md border mt-4">
+                <div className="rounded-md mt-4">
                     <Table>
                         <TableHeader>
                             {table.getHeaderGroups().map((headerGroup) => (
