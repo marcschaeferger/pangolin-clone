@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { InfoIcon, LinkIcon, CheckIcon, CopyIcon } from "lucide-react";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { useResourceContext } from "@app/hooks/useResourceContext";
+import Link from "next/link";
 
 type ResourceInfoBoxType = {};
 
@@ -68,20 +69,17 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
                             </span>
                         </Button>
                     </div>
-                    {/* <ul className="mt-3 space-y-1 text-sm list-disc list-inside">
-                        <li>
-                            Protocol:{" "}
-                            <span className="font-semibold">{protocol}</span>
-                        </li>
-                        <li>
-                            Subdomain:{" "}
-                            <span className="font-semibold">{subdomain}</span>
-                        </li>
-                        <li>
-                            Domain:{" "}
-                            <span className="font-semibold">{domain}</span>
-                        </li>
-                    </ul> */}
+
+                    <p className="mt-3">
+                        To create a proxy to your private services,{" "}
+                        <Link
+                            href={`/${org.org.orgId}/settings/resources/${resource.resourceId}/connectivity`}
+                            className="text-primary hover:underline"
+                        >
+                            add targets
+                        </Link>{" "}
+                        to this resource
+                    </p>
                 </AlertDescription>
             </Alert>
         </Card>
