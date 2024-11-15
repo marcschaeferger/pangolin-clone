@@ -39,10 +39,15 @@ import { useForm } from "react-hook-form";
 import { GetResourceResponse } from "@server/routers/resource";
 import { useToast } from "@app/hooks/useToast";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
+import { useOrgContext } from "@app/hooks/useOrgContext";
+import CustomDomainInput from "../components/CustomDomainInput";
+import ResourceInfoBox from "../components/ResourceInfoBox";
+import { subdomainSchema } from "@server/schemas/subdomainSchema";
 
 const GeneralFormSchema = z.object({
     name: z.string(),
-    siteId: z.number(),
+    subdomain: subdomainSchema,
+    // siteId: z.number(),
 });
 
 type GeneralFormValues = z.infer<typeof GeneralFormSchema>;
@@ -51,16 +56,19 @@ export default function GeneralForm() {
     const params = useParams();
     const { toast } = useToast();
     const { resource, updateResource } = useResourceContext();
+    const { org } = useOrgContext();
 
     const orgId = params.orgId;
 
     const [sites, setSites] = useState<ListSitesResponse["sites"]>([]);
     const [saveLoading, setSaveLoading] = useState(false);
+    const [domainSuffix, setDomainSuffix] = useState(org.org.domain);
 
     const form = useForm<GeneralFormValues>({
         resolver: zodResolver(GeneralFormSchema),
         defaultValues: {
             name: resource.name,
+            subdomain: resource.subdomain,
             // siteId: resource.siteId!,
         },
         mode: "onChange",
@@ -78,12 +86,12 @@ export default function GeneralForm() {
 
     async function onSubmit(data: GeneralFormValues) {
         setSaveLoading(true);
-        updateResource({ name: data.name, siteId: data.siteId });
 
         api.post<AxiosResponse<GetResourceResponse>>(
             `resource/${resource?.resourceId}`,
             {
                 name: data.name,
+                subdomain: data.subdomain,
                 // siteId: data.siteId,
             }
         )
@@ -102,13 +110,15 @@ export default function GeneralForm() {
                     title: "Resource updated",
                     description: "The resource has been updated successfully",
                 });
+
+                updateResource({ name: data.name, subdomain: data.subdomain });
             })
             .finally(() => setSaveLoading(false));
     }
 
     return (
         <>
-            <div className="lg:max-w-2xl">
+            <div className="lg:max-w-2xl space-y-6">
                 <SettingsSectionTitle
                     title="General Settings"
                     description="Configure the general settings for this resource"
@@ -118,7 +128,7 @@ export default function GeneralForm() {
                 <Form {...form}>
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
-                        className="space-y-4"
+                        className="space-y-6"
                     >
                         <FormField
                             control={form.control}
@@ -130,9 +140,42 @@ export default function GeneralForm() {
                                         <Input {...field} />
                                     </FormControl>
                                     <FormDescription>
-                                        This is the display name of the
-                                        resource.
+                                        This is the display name of the resource
                                     </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <SettingsSectionTitle
+                            title="Domain"
+                            description="Define the domain that users will use to access this resource"
+                            size="1xl"
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="subdomain"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Subdomain</FormLabel>
+                                    <FormControl>
+                                        <CustomDomainInput
+                                            value={field.value}
+                                            domainSuffix={domainSuffix}
+                                            placeholder="Enter subdomain"
+                                            onChange={(value) =>
+                                                form.setValue(
+                                                    "subdomain",
+                                                    value
+                                                )
+                                            }
+                                        />
+                                    </FormControl>
+                                    {/* <FormDescription>
+                                        This is the subdomain that will be used
+                                        to access the resource
+                                    </FormDescription> */}
                                     <FormMessage />
                                 </FormItem>
                             )}

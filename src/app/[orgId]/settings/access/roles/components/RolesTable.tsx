@@ -64,34 +64,36 @@ export default function UsersTable({ roles: r }: RolesTableProps) {
 
                 return (
                     <>
-                        {!roleRow.isAdmin && (
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button
-                                        variant="ghost"
-                                        className="h-8 w-8 p-0"
-                                    >
-                                        <span className="sr-only">
-                                            Open menu
-                                        </span>
-                                        <MoreHorizontal className="h-4 w-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuItem>
-                                        <button
-                                            className="text-red-600 hover:text-red-800"
-                                            onClick={() => {
-                                                setIsDeleteModalOpen(true);
-                                                setUserToRemove(roleRow);
-                                            }}
+                        <div className="flex items-center justify-end">
+                            {!roleRow.isAdmin && (
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            className="h-8 w-8 p-0"
                                         >
-                                            Delete Role
-                                        </button>
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        )}
+                                            <span className="sr-only">
+                                                Open menu
+                                            </span>
+                                            <MoreHorizontal className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem>
+                                            <button
+                                                className="text-red-600 hover:text-red-800"
+                                                onClick={() => {
+                                                    setIsDeleteModalOpen(true);
+                                                    setUserToRemove(roleRow);
+                                                }}
+                                            >
+                                                Delete Role
+                                            </button>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            )}
+                        </div>
                     </>
                 );
             },

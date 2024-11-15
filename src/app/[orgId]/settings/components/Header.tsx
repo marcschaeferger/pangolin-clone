@@ -97,7 +97,7 @@ export default function Header({ email, orgName, name, orgs }: HeaderProps) {
                             <DropdownMenuSeparator />
                             <DropdownMenuGroup>
                                 <DropdownMenuItem onClick={logout}>
-                                    Log out
+                                    Logout
                                 </DropdownMenuItem>
                             </DropdownMenuGroup>
                         </DropdownMenuContent>

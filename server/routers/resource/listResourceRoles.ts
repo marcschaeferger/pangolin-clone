@@ -13,6 +13,23 @@ const listResourceRolesSchema = z.object({
     resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
 
+async function query(resourceId: number) {
+    return await db
+        .select({
+            roleId: roles.roleId,
+            name: roles.name,
+            description: roles.description,
+            isAdmin: roles.isAdmin,
+        })
+        .from(roleResources)
+        .innerJoin(roles, eq(roleResources.roleId, roles.roleId))
+        .where(eq(roleResources.resourceId, resourceId));
+}
+
+export type ListResourceRolesResponse = {
+    roles: NonNullable<Awaited<ReturnType<typeof query>>>;
+};
+
 export async function listResourceRoles(
     req: Request,
     res: Response,
@@ -31,19 +48,12 @@ export async function listResourceRoles(
 
         const { resourceId } = parsedParams.data;
 
-        const resourceRolesList = await db
-            .select({
-                roleId: roles.roleId,
-                name: roles.name,
-                description: roles.description,
-                isAdmin: roles.isAdmin,
-            })
-            .from(roleResources)
-            .innerJoin(roles, eq(roleResources.roleId, roles.roleId))
-            .where(eq(roleResources.resourceId, resourceId));
+        const resourceRolesList = await query(resourceId);
 
-        return response(res, {
-            data: resourceRolesList,
+        return response<ListResourceRolesResponse>(res, {
+            data: {
+                roles: resourceRolesList,
+            },
             success: true,
             error: false,
             message: "Resource roles retrieved successfully",

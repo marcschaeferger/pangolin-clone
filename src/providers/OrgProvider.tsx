@@ -12,6 +12,10 @@ interface OrgProviderProps {
 export function OrgProvider({ children, org: serverOrg }: OrgProviderProps) {
     const [org, setOrg] = useState<GetOrgResponse | null>(serverOrg);
 
+    if (!org) {
+        throw new Error("No org provided");
+    }
+
     const updateOrg = (updatedOrg: Partial<GetOrgResponse>) => {
         if (!org) {
             throw new Error("No org to update");

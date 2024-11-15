@@ -71,7 +71,6 @@ export default async function GeneralSettingsPage({
                     <SettingsSectionTitle
                         title="General"
                         description="Configure your organization's general settings"
-                        size="1xl"
                     />
 
                     <SidebarSettings sidebarNavItems={sidebarNavItems}>

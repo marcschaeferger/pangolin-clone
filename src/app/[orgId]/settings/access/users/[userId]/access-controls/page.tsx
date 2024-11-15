@@ -110,52 +110,58 @@ export default function AccessControlsPage() {
 
     return (
         <>
-            <SettingsSectionTitle
-                title="Access Controls"
-                description="Manage what this user can access and do in the organization"
-                size="1xl"
-            />
+            <div className="space-y-6">
+                <SettingsSectionTitle
+                    title="Access Controls"
+                    description="Manage what this user can access and do in the organization"
+                    size="1xl"
+                />
 
-            <Form {...form}>
-                <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-4"
-                >
-                    <FormField
-                        control={form.control}
-                        name="roleId"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Role</FormLabel>
-                                <Select
-                                    onValueChange={field.onChange}
-                                    value={field.value}
-                                >
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select role" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {roles.map((role) => (
-                                            <SelectItem
-                                                key={role.roleId}
-                                                value={role.roleId.toString()}
-                                            >
-                                                {role.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <Button type="submit" loading={loading} disabled={loading}>
-                        Save Changes
-                    </Button>
-                </form>
-            </Form>
+                <Form {...form}>
+                    <form
+                        onSubmit={form.handleSubmit(onSubmit)}
+                        className="space-y-6"
+                    >
+                        <FormField
+                            control={form.control}
+                            name="roleId"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Role</FormLabel>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        value={field.value}
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select role" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {roles.map((role) => (
+                                                <SelectItem
+                                                    key={role.roleId}
+                                                    value={role.roleId.toString()}
+                                                >
+                                                    {role.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <Button
+                            type="submit"
+                            loading={loading}
+                            disabled={loading}
+                        >
+                            Save Changes
+                        </Button>
+                    </form>
+                </Form>
+            </div>
         </>
     );
 }

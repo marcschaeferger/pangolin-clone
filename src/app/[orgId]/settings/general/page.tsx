@@ -46,13 +46,15 @@ export default function GeneralPage() {
                 title="Delete organization"
             />
 
-            {orgUser.isOwner ? (
-                <Button onClick={() => setIsDeleteModalOpen(true)}>
-                    Delete Organization
-                </Button>
-            ) : (
-                <p>Nothing to see here</p>
-            )}
+            <div className="space-y-6">
+                {orgUser.isOwner ? (
+                    <Button onClick={() => setIsDeleteModalOpen(true)}>
+                        Delete Organization
+                    </Button>
+                ) : (
+                    <p>Nothing to see here</p>
+                )}
+            </div>
         </>
     );
 }

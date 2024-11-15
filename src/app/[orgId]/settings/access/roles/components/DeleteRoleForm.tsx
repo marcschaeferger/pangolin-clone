@@ -155,53 +155,61 @@ export default function DeleteRoleForm({
                         </CredenzaDescription>
                     </CredenzaHeader>
                     <CredenzaBody>
-                        <p className="mb-1">
-                            You're about to delete the{" "}
-                            <b>{roleToDelete.name}</b> role. You cannot undo
-                            this action.
-                        </p>
-                        <p className="mb-4">
-                            Before deleting this role, please select a new role
-                            to transfer existing members to.
-                        </p>
-                        <Form {...form}>
-                            <form
-                                onSubmit={form.handleSubmit(onSubmit)}
-                                className="space-y-4"
-                                id="remove-role-form"
-                            >
-                                <FormField
-                                    control={form.control}
-                                    name="newRoleId"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Role</FormLabel>
-                                            <Select
-                                                onValueChange={field.onChange}
-                                                value={field.value}
-                                            >
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select role" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    {roles.map((role) => (
-                                                        <SelectItem
-                                                            key={role.roleId}
-                                                            value={role.roleId.toString()}
-                                                        >
-                                                            {role.name}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </form>
-                        </Form>
+                        <div className="space-y-6">
+                            <div className="space-y-4">
+                                <p>
+                                    You're about to delete the{" "}
+                                    <b>{roleToDelete.name}</b> role. You cannot
+                                    undo this action.
+                                </p>
+                                <p>
+                                    Before deleting this role, please select a
+                                    new role to transfer existing members to.
+                                </p>
+                            </div>
+                            <Form {...form}>
+                                <form
+                                    onSubmit={form.handleSubmit(onSubmit)}
+                                    className="space-y-6"
+                                    id="remove-role-form"
+                                >
+                                    <FormField
+                                        control={form.control}
+                                        name="newRoleId"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Role</FormLabel>
+                                                <Select
+                                                    onValueChange={
+                                                        field.onChange
+                                                    }
+                                                    value={field.value}
+                                                >
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select role" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        {roles.map((role) => (
+                                                            <SelectItem
+                                                                key={
+                                                                    role.roleId
+                                                                }
+                                                                value={role.roleId.toString()}
+                                                            >
+                                                                {role.name}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </form>
+                            </Form>
+                        </div>
                     </CredenzaBody>
                     <CredenzaFooter>
                         <Button

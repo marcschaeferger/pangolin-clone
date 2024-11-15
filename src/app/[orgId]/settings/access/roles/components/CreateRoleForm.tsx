@@ -123,7 +123,7 @@ export default function CreateRoleForm({
                         <Form {...form}>
                             <form
                                 onSubmit={form.handleSubmit(onSubmit)}
-                                className="space-y-4"
+                                className="space-y-6"
                                 id="create-role-form"
                             >
                                 <FormField

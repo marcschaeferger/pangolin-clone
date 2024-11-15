@@ -339,117 +339,109 @@ export default function ReverseProxyTargets(props: {
 
     return (
         <div>
-            {/* <div className="lg:max-w-2xl"> */}
-            <div>
-                <div className="mb-8">
-                    <SettingsSectionTitle
-                        title="SSL"
-                        description="Setup SSL to secure your connections with LetsEncrypt certificates"
-                        size="1xl"
-                    />
+            <div className="space-y-6">
+                <SettingsSectionTitle
+                    title="SSL"
+                    description="Setup SSL to secure your connections with LetsEncrypt certificates"
+                    size="1xl"
+                />
 
-                    <div className="flex items-center space-x-2">
-                        <Switch
-                            id="ssl-toggle"
-                            defaultChecked={resource.ssl}
-                            onCheckedChange={(val) => setSslEnabled(val)}
-                        />
-                        <Label htmlFor="ssl-toggle">Enable SSL (https)</Label>
-                    </div>
+                <div className="flex items-center space-x-2">
+                    <Switch
+                        id="ssl-toggle"
+                        defaultChecked={resource.ssl}
+                        onCheckedChange={(val) => setSslEnabled(val)}
+                    />
+                    <Label htmlFor="ssl-toggle">Enable SSL (https)</Label>
                 </div>
 
-                <div className="mb-8">
-                    <SettingsSectionTitle
-                        title="Targets"
-                        description="Setup targets to route traffic to your services"
-                        size="1xl"
-                    />
+                <SettingsSectionTitle
+                    title="Targets"
+                    description="Setup targets to route traffic to your services"
+                    size="1xl"
+                />
 
-                    <Form {...addTargetForm}>
-                        <form
-                            onSubmit={addTargetForm.handleSubmit(
-                                addTarget as any
-                            )}
-                            className="space-y-4"
-                        >
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <FormField
-                                    control={addTargetForm.control}
-                                    name="ip"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>IP Address</FormLabel>
-                                            <FormControl>
-                                                <Input id="ip" {...field} />
-                                            </FormControl>
-                                            <FormDescription>
-                                                Enter the IP address of the
-                                                target
-                                            </FormDescription>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={addTargetForm.control}
-                                    name="method"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Method</FormLabel>
-                                            <FormControl>
-                                                <Select
-                                                    {...field}
-                                                    onValueChange={(value) => {
-                                                        addTargetForm.setValue(
-                                                            "method",
-                                                            value
-                                                        );
-                                                    }}
-                                                >
-                                                    <SelectTrigger id="method">
-                                                        <SelectValue placeholder="Select method" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="http">
-                                                            HTTP
-                                                        </SelectItem>
-                                                        <SelectItem value="https">
-                                                            HTTPS
-                                                        </SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </FormControl>
-                                            <FormDescription>
-                                                Choose the method for how the
-                                                target is accessed
-                                            </FormDescription>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={addTargetForm.control}
-                                    name="port"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Port</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    id="port"
-                                                    type="number"
-                                                    {...field}
-                                                    required
-                                                />
-                                            </FormControl>
-                                            <FormDescription>
-                                                Specify the port number for the
-                                                target
-                                            </FormDescription>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                {/* <FormField
+                <Form {...addTargetForm}>
+                    <form
+                        onSubmit={addTargetForm.handleSubmit(addTarget as any)}
+                    >
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <FormField
+                                control={addTargetForm.control}
+                                name="ip"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>IP Address</FormLabel>
+                                        <FormControl>
+                                            <Input id="ip" {...field} />
+                                        </FormControl>
+                                        <FormDescription>
+                                            Enter the IP address of the target
+                                        </FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={addTargetForm.control}
+                                name="method"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Method</FormLabel>
+                                        <FormControl>
+                                            <Select
+                                                {...field}
+                                                onValueChange={(value) => {
+                                                    addTargetForm.setValue(
+                                                        "method",
+                                                        value
+                                                    );
+                                                }}
+                                            >
+                                                <SelectTrigger id="method">
+                                                    <SelectValue placeholder="Select method" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="http">
+                                                        HTTP
+                                                    </SelectItem>
+                                                    <SelectItem value="https">
+                                                        HTTPS
+                                                    </SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </FormControl>
+                                        <FormDescription>
+                                            Choose the method for how the target
+                                            is accessed
+                                        </FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={addTargetForm.control}
+                                name="port"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Port</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                id="port"
+                                                type="number"
+                                                {...field}
+                                                required
+                                            />
+                                        </FormControl>
+                                        <FormDescription>
+                                            Specify the port number for the
+                                            target
+                                        </FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            {/* <FormField
                                     control={addTargetForm.control}
                                     name="protocol"
                                     render={({ field }) => (
@@ -486,15 +478,14 @@ export default function ReverseProxyTargets(props: {
                                         </FormItem>
                                     )}
                                 /> */}
-                            </div>
-                            <Button type="submit" variant="gray">
-                                Add Target
-                            </Button>
-                        </form>
-                    </Form>
-                </div>
+                        </div>
+                        <Button type="submit" variant="gray">
+                            Add Target
+                        </Button>
+                    </form>
+                </Form>
 
-                <div className="rounded-md mt-4">
+                <div className="rounded-md border">
                     <Table>
                         <TableHeader>
                             {table.getHeaderGroups().map((headerGroup) => (
@@ -540,9 +531,7 @@ export default function ReverseProxyTargets(props: {
                         </TableBody>
                     </Table>
                 </div>
-            </div>
 
-            <div className="mt-8">
                 <Button onClick={saveAll} loading={loading} disabled={loading}>
                     Save Changes
                 </Button>

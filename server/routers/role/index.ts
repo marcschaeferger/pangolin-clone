@@ -1,5 +1,5 @@
 export * from "./addRoleAction";
-export * from "./addRoleResource";
+export * from "../resource/setResourceRoles";
 export * from "./addRoleSite";
 export * from "./createRole";
 export * from "./deleteRole";

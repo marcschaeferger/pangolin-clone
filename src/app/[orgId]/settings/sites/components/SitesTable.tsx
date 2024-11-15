@@ -174,14 +174,14 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                         setSelectedSite(null);
                     }}
                     dialog={
-                        <div>
-                            <p className="mb-2">
+                        <div className="space-y-4">
+                            <p>
                                 Are you sure you want to remove the site{" "}
                                 <b>{selectedSite?.name || selectedSite?.id}</b>{" "}
                                 from the organization?
                             </p>
 
-                            <p className="mb-2">
+                            <p>
                                 Once removed, the site will no longer be
                                 accessible.{" "}
                                 <b>
@@ -196,10 +196,10 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                             </p>
                         </div>
                     }
-                    buttonText="Confirm delete site"
+                    buttonText="Confirm Delete Site"
                     onConfirm={async () => deleteSite(selectedSite!.id)}
                     string={selectedSite.name}
-                    title="Delete site"
+                    title="Delete Site"
                 />
             )}
 

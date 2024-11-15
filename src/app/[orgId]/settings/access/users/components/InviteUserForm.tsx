@@ -171,125 +171,135 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
                         </CredenzaDescription>
                     </CredenzaHeader>
                     <CredenzaBody>
-                        {!inviteLink && (
-                            <Form {...form}>
-                                <form
-                                    onSubmit={form.handleSubmit(onSubmit)}
-                                    className="space-y-4"
-                                    id="invite-user-form"
-                                >
-                                    <FormField
-                                        control={form.control}
-                                        name="email"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Email</FormLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        placeholder="Enter an email"
-                                                        {...field}
-                                                    />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="roleId"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Role</FormLabel>
-                                                <Select
-                                                    onValueChange={
-                                                        field.onChange
-                                                    }
-                                                >
+                        <div className="space-y-6">
+                            {!inviteLink && (
+                                <Form {...form}>
+                                    <form
+                                        onSubmit={form.handleSubmit(onSubmit)}
+                                        className="space-y-4"
+                                        id="invite-user-form"
+                                    >
+                                        <FormField
+                                            control={form.control}
+                                            name="email"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Email</FormLabel>
                                                     <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select role" />
-                                                        </SelectTrigger>
+                                                        <Input
+                                                            placeholder="Enter an email"
+                                                            {...field}
+                                                        />
                                                     </FormControl>
-                                                    <SelectContent>
-                                                        {roles.map((role) => (
-                                                            <SelectItem
-                                                                key={
-                                                                    role.roleId
-                                                                }
-                                                                value={role.roleId.toString()}
-                                                            >
-                                                                {role.name}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="validForHours"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Valid For</FormLabel>
-                                                <Select
-                                                    onValueChange={
-                                                        field.onChange
-                                                    }
-                                                    defaultValue={field.value.toString()}
-                                                >
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select duration" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        {validFor.map(
-                                                            (option) => (
-                                                                <SelectItem
-                                                                    key={
-                                                                        option.hours
-                                                                    }
-                                                                    value={option.hours.toString()}
-                                                                >
-                                                                    {
-                                                                        option.name
-                                                                    }
-                                                                </SelectItem>
-                                                            )
-                                                        )}
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </form>
-                            </Form>
-                        )}
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="roleId"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Role</FormLabel>
+                                                    <Select
+                                                        onValueChange={
+                                                            field.onChange
+                                                        }
+                                                    >
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select role" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            {roles.map(
+                                                                (role) => (
+                                                                    <SelectItem
+                                                                        key={
+                                                                            role.roleId
+                                                                        }
+                                                                        value={role.roleId.toString()}
+                                                                    >
+                                                                        {
+                                                                            role.name
+                                                                        }
+                                                                    </SelectItem>
+                                                                )
+                                                            )}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="validForHours"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        Valid For
+                                                    </FormLabel>
+                                                    <Select
+                                                        onValueChange={
+                                                            field.onChange
+                                                        }
+                                                        defaultValue={field.value.toString()}
+                                                    >
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select duration" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            {validFor.map(
+                                                                (option) => (
+                                                                    <SelectItem
+                                                                        key={
+                                                                            option.hours
+                                                                        }
+                                                                        value={option.hours.toString()}
+                                                                    >
+                                                                        {
+                                                                            option.name
+                                                                        }
+                                                                    </SelectItem>
+                                                                )
+                                                            )}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </form>
+                                </Form>
+                            )}
 
-                        {inviteLink && (
-                            <div className="max-w-md">
-                                <p className="mb-4">
-                                    The user has been successfully invited. They
-                                    must access the link below to accept the
-                                    invitation.
-                                </p>
-                                <p className="mb-4">
-                                    The invite will expire in{" "}
-                                    <b>
-                                        {expiresInDays}{" "}
-                                        {expiresInDays === 1 ? "day" : "days"}
-                                    </b>
-                                    .
-                                </p>
-                                <CopyTextBox
-                                    text={inviteLink}
-                                    wrapText={false}
-                                />
-                            </div>
-                        )}
+                            {inviteLink && (
+                                <div className="max-w-md space-y-4">
+                                    <p>
+                                        The user has been successfully invited.
+                                        They must access the link below to
+                                        accept the invitation.
+                                    </p>
+                                    <p>
+                                        The invite will expire in{" "}
+                                        <b>
+                                            {expiresInDays}{" "}
+                                            {expiresInDays === 1
+                                                ? "day"
+                                                : "days"}
+                                        </b>
+                                        .
+                                    </p>
+                                    <CopyTextBox
+                                        text={inviteLink}
+                                        wrapText={false}
+                                    />
+                                </div>
+                            )}
+                        </div>
                     </CredenzaBody>
                     <CredenzaFooter>
                         <Button

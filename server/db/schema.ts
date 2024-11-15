@@ -25,7 +25,6 @@ export const sites = sqliteTable("sites", {
 
 export const resources = sqliteTable("resources", {
     resourceId: integer("resourceId").primaryKey({ autoIncrement: true }),
-    fullDomain: text("fullDomain", { length: 2048 }),
     siteId: integer("siteId").references(() => sites.siteId, {
         onDelete: "cascade",
     }),
@@ -33,7 +32,7 @@ export const resources = sqliteTable("resources", {
         onDelete: "cascade",
     }),
     name: text("name").notNull(),
-    subdomain: text("subdomain"),
+    subdomain: text("subdomain").notNull(),
     ssl: integer("ssl", { mode: "boolean" }).notNull().default(false),
 });
 

@@ -191,104 +191,109 @@ sh get-docker.sh`;
                         </CredenzaDescription>
                     </CredenzaHeader>
                     <CredenzaBody>
-                        <Form {...form}>
-                            <form
-                                onSubmit={form.handleSubmit(onSubmit)}
-                                className="space-y-4"
-                                id="create-site-form"
-                            >
-                                <FormField
-                                    control={form.control}
-                                    name="name"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Name</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="Your name"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormDescription>
-                                                This is the name that will be
-                                                displayed for this site.
-                                            </FormDescription>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="method"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Method</FormLabel>
-                                            <FormControl>
-                                                <Select
-                                                    value={field.value}
-                                                    onValueChange={
-                                                        field.onChange
-                                                    }
-                                                >
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select method" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="wg">
-                                                            WireGuard
-                                                        </SelectItem>
-                                                        <SelectItem value="newt">
-                                                            Newt
-                                                        </SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </FormControl>
-                                            <FormDescription>
-                                                This is how you will connect
-                                                your site to Fossorial.
-                                            </FormDescription>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <div className="max-w-md">
-                                    {form.watch("method") === "wg" &&
-                                    !isLoading ? (
-                                        <CopyTextBox text={wgConfig} />
-                                    ) : form.watch("method") === "wg" &&
-                                      isLoading ? (
-                                        <p>
-                                            Loading WireGuard configuration...
-                                        </p>
-                                    ) : (
-                                        <CopyTextBox
-                                            text={newtConfig}
-                                            wrapText={false}
-                                        />
-                                    )}
-                                </div>
-
-                                <span className="text-sm text-muted-foreground mt-2">
-                                    You will only be able to see the
-                                    configuration once.
-                                </span>
-
-                                <div className="flex items-center space-x-2">
-                                    <Checkbox
-                                        id="terms"
-                                        checked={isChecked}
-                                        onCheckedChange={handleCheckboxChange}
+                        <div className="space-y-6">
+                            <Form {...form}>
+                                <form
+                                    onSubmit={form.handleSubmit(onSubmit)}
+                                    className="space-y-6"
+                                    id="create-site-form"
+                                >
+                                    <FormField
+                                        control={form.control}
+                                        name="name"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Name</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        placeholder="Site name"
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormDescription>
+                                                    This is the name that will
+                                                    be displayed for this site.
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
                                     />
-                                    <label
-                                        htmlFor="terms"
-                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                    >
-                                        I have copied the config
-                                    </label>
-                                </div>
-                            </form>
-                        </Form>
+                                    <FormField
+                                        control={form.control}
+                                        name="method"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Method</FormLabel>
+                                                <FormControl>
+                                                    <Select
+                                                        value={field.value}
+                                                        onValueChange={
+                                                            field.onChange
+                                                        }
+                                                    >
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select method" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="wg">
+                                                                WireGuard
+                                                            </SelectItem>
+                                                            <SelectItem value="newt">
+                                                                Newt
+                                                            </SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </FormControl>
+                                                <FormDescription>
+                                                    This is how you will connect
+                                                    your site to Fossorial.
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <div className="max-w-md">
+                                        {form.watch("method") === "wg" &&
+                                        !isLoading ? (
+                                            <CopyTextBox text={wgConfig} />
+                                        ) : form.watch("method") === "wg" &&
+                                          isLoading ? (
+                                            <p>
+                                                Loading WireGuard
+                                                configuration...
+                                            </p>
+                                        ) : (
+                                            <CopyTextBox
+                                                text={newtConfig}
+                                                wrapText={false}
+                                            />
+                                        )}
+                                    </div>
+
+                                    <span className="text-sm text-muted-foreground">
+                                        You will only be able to see the
+                                        configuration once.
+                                    </span>
+
+                                    <div className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id="terms"
+                                            checked={isChecked}
+                                            onCheckedChange={
+                                                handleCheckboxChange
+                                            }
+                                        />
+                                        <label
+                                            htmlFor="terms"
+                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                        >
+                                            I have copied the config
+                                        </label>
+                                    </div>
+                                </form>
+                            </Form>
+                        </div>
                     </CredenzaBody>
                     <CredenzaFooter>
                         <Button

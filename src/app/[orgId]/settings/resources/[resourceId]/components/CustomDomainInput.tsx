@@ -6,19 +6,17 @@ import { Input } from "@/components/ui/input";
 interface CustomDomainInputProps {
     domainSuffix: string;
     placeholder?: string;
+    value: string;
     onChange?: (value: string) => void;
 }
 
-export default function CustomDomainInput(
-    {
-        domainSuffix,
-        placeholder = "Enter subdomain",
-        onChange,
-    }: CustomDomainInputProps = {
-        domainSuffix: ".example.com",
-    }
-) {
-    const [value, setValue] = React.useState("");
+export default function CustomDomainInput({
+    domainSuffix,
+    placeholder = "Enter subdomain",
+    value: defaultValue,
+    onChange,
+}: CustomDomainInputProps) {
+    const [value, setValue] = React.useState(defaultValue);
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = event.target.value;

@@ -64,36 +64,38 @@ export default function GeneralPage() {
 
     return (
         <>
-            <SettingsSectionTitle
-                title="General Settings"
-                description="Configure the general settings for this site"
-                size="1xl"
-            />
+            <div className="space-y-6">
+                <SettingsSectionTitle
+                    title="General Settings"
+                    description="Configure the general settings for this site"
+                    size="1xl"
+                />
 
-            <Form {...form}>
-                <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-4"
-                >
-                    <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Name</FormLabel>
-                                <FormControl>
-                                    <Input {...field} />
-                                </FormControl>
-                                <FormDescription>
-                                    This is the display name of the site
-                                </FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <Button type="submit">Update Site</Button>
-                </form>
-            </Form>
+                <Form {...form}>
+                    <form
+                        onSubmit={form.handleSubmit(onSubmit)}
+                        className="space-y-6"
+                    >
+                        <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Name</FormLabel>
+                                    <FormControl>
+                                        <Input {...field} />
+                                    </FormControl>
+                                    <FormDescription>
+                                        This is the display name of the site
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <Button type="submit">Save Changes</Button>
+                    </form>
+                </Form>
+            </div>
         </>
     );
 }

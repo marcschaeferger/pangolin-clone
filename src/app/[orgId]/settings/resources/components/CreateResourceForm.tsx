@@ -48,16 +48,11 @@ import { CaretSortIcon } from "@radix-ui/react-icons";
 import CustomDomainInput from "../[resourceId]/components/CustomDomainInput";
 import { Axios, AxiosResponse } from "axios";
 import { Resource } from "@server/db/schema";
+import { useOrgContext } from "@app/hooks/useOrgContext";
+import { subdomainSchema } from "@server/schemas/subdomainSchema";
 
 const accountFormSchema = z.object({
-    subdomain: z
-        .string()
-        .min(2, {
-            message: "Name must be at least 2 characters.",
-        })
-        .max(30, {
-            message: "Name must not be longer than 30 characters.",
-        }),
+    subdomain: subdomainSchema,
     name: z.string(),
     siteId: z.number(),
 });
@@ -65,7 +60,7 @@ const accountFormSchema = z.object({
 type AccountFormValues = z.infer<typeof accountFormSchema>;
 
 const defaultValues: Partial<AccountFormValues> = {
-    subdomain: "someanimalherefromapi",
+    subdomain: "",
     name: "My Resource",
 };
 
@@ -86,8 +81,10 @@ export default function CreateResourceForm({
     const orgId = params.orgId;
     const router = useRouter();
 
+    const { org } = useOrgContext();
+
     const [sites, setSites] = useState<ListSitesResponse["sites"]>([]);
-    const [domainSuffix, setDomainSuffix] = useState<string>(".example.com");
+    const [domainSuffix, setDomainSuffix] = useState<string>(org.org.domain);
 
     const form = useForm<AccountFormValues>({
         resolver: zodResolver(accountFormSchema),
@@ -193,9 +190,15 @@ export default function CreateResourceForm({
                                             <FormLabel>Subdomain</FormLabel>
                                             <FormControl>
                                                 <CustomDomainInput
-                                                    {...field}
+                                                    value={field.value}
                                                     domainSuffix={domainSuffix}
                                                     placeholder="Enter subdomain"
+                                                    onChange={(value) =>
+                                                        form.setValue(
+                                                            "subdomain",
+                                                            value
+                                                        )
+                                                    }
                                                 />
                                             </FormControl>
                                             <FormDescription>

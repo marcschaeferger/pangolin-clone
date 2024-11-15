@@ -8,6 +8,10 @@ import { SidebarSettings } from "@app/components/SidebarSettings";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
+import { GetOrgResponse } from "@server/routers/org";
+import OrgProvider from "@app/providers/OrgProvider";
+import { cache } from "react";
+import ResourceInfoBox from "./components/ResourceInfoBox";
 
 interface ResourceLayoutProps {
     children: React.ReactNode;
@@ -20,7 +24,6 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
     const { children } = props;
 
     let resource = null;
-
     try {
         const res = await internal.get<AxiosResponse<GetResourceResponse>>(
             `/resource/${params.resourceId}`,
@@ -28,6 +31,28 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
         );
         resource = res.data.data;
     } catch {
+        redirect(`/${params.orgId}/settings/resources`);
+    }
+
+    if (!resource) {
+        redirect(`/${params.orgId}/settings/resources`);
+    }
+
+    let org = null;
+    try {
+        const getOrg = cache(async () =>
+            internal.get<AxiosResponse<GetOrgResponse>>(
+                `/org/${params.orgId}`,
+                await authCookieHeader()
+            )
+        );
+        const res = await getOrg();
+        org = res.data.data;
+    } catch {
+        redirect(`/${params.orgId}/settings/resources`);
+    }
+
+    if (!org) {
         redirect(`/${params.orgId}/settings/resources`);
     }
 
@@ -65,14 +90,19 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
                 description="Configure the settings on your resource"
             />
 
-            <ResourceProvider resource={resource}>
-                <SidebarSettings
-                    sidebarNavItems={sidebarNavItems}
-                    limitWidth={false}
-                >
-                    {children}
-                </SidebarSettings>
-            </ResourceProvider>
+            <OrgProvider org={org}>
+                <ResourceProvider resource={resource}>
+                    <SidebarSettings
+                        sidebarNavItems={sidebarNavItems}
+                        limitWidth={false}
+                    >
+                        <div className="mb-8">
+                            <ResourceInfoBox />
+                        </div>
+                        {children}
+                    </SidebarSettings>
+                </ResourceProvider>
+            </OrgProvider>
         </>
     );
 }
