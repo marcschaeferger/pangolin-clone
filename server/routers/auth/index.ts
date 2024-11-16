@@ -19,3 +19,4 @@ export * from "./changePassword";
 export * from "./requestPasswordReset";
 export * from "./resetPassword";
 export * from "./verifyUserInRole";
+export * from "./verifySetResourceUsers";

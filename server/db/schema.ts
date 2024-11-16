@@ -11,7 +11,7 @@ export const sites = sqliteTable("sites", {
     siteId: integer("siteId").primaryKey({ autoIncrement: true }),
     orgId: text("orgId").references(() => orgs.orgId, {
         onDelete: "cascade",
-    }),
+    }).notNull(),
     niceId: text("niceId").notNull(),
     exitNodeId: integer("exitNode").references(() => exitNodes.exitNodeId, {
         onDelete: "set null",
@@ -27,10 +27,10 @@ export const resources = sqliteTable("resources", {
     resourceId: integer("resourceId").primaryKey({ autoIncrement: true }),
     siteId: integer("siteId").references(() => sites.siteId, {
         onDelete: "cascade",
-    }),
+    }).notNull(),
     orgId: text("orgId").references(() => orgs.orgId, {
         onDelete: "cascade",
-    }),
+    }).notNull(),
     name: text("name").notNull(),
     subdomain: text("subdomain").notNull(),
     ssl: integer("ssl", { mode: "boolean" }).notNull().default(false),
@@ -40,7 +40,7 @@ export const targets = sqliteTable("targets", {
     targetId: integer("targetId").primaryKey({ autoIncrement: true }),
     resourceId: integer("resourceId").references(() => resources.resourceId, {
         onDelete: "cascade",
-    }),
+    }).notNull(),
     ip: text("ip").notNull(),
     method: text("method").notNull(),
     port: integer("port").notNull(),
@@ -144,7 +144,7 @@ export const roles = sqliteTable("roles", {
     roleId: integer("roleId").primaryKey({ autoIncrement: true }),
     orgId: text("orgId").references(() => orgs.orgId, {
         onDelete: "cascade",
-    }),
+    }).notNull(),
     isAdmin: integer("isAdmin", { mode: "boolean" }),
     name: text("name").notNull(),
     description: text("description"),
@@ -214,7 +214,7 @@ export const limitsTable = sqliteTable("limits", {
     limitId: integer("limitId").primaryKey({ autoIncrement: true }),
     orgId: text("orgId").references(() => orgs.orgId, {
         onDelete: "cascade",
-    }),
+    }).notNull(),
     name: text("name").notNull(),
     value: integer("value").notNull(),
     description: text("description"),

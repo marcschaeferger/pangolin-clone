@@ -100,7 +100,7 @@ export default function AccessControlsPage() {
         if (res && res.status === 200) {
             toast({
                 variant: "default",
-                title: "User invited",
+                title: "User saved",
                 description: "The user has been updated.",
             });
         }

@@ -73,6 +73,8 @@ export default function LoginForm({ redirect }: LoginFormProps) {
         if (res && res.status === 200) {
             setError(null);
 
+            console.log(res)
+
             if (res.data?.data?.emailVerificationRequired) {
                 if (redirect) {
                     router.push(`/auth/verify-email?redirect=${redirect}`);
@@ -106,7 +108,7 @@ export default function LoginForm({ redirect }: LoginFormProps) {
                 <Form {...form}>
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
-                        className="space-y-4"
+                        className="space-y-6"
                     >
                         <FormField
                             control={form.control}

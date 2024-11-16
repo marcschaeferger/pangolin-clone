@@ -4,3 +4,6 @@ export * from "./deleteResource";
 export * from "./updateResource";
 export * from "./listResources";
 export * from "./listResourceRoles";
+export * from "./setResourceUsers";
+export * from "./setResourceRoles";
+export * from "./listResourceUsers"

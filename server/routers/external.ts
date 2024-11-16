@@ -21,6 +21,7 @@ import {
     verifyRoleAccess,
     verifyUserAccess,
     verifyUserInRole,
+    verifySetResourceUsers
 } from "./auth";
 import { verifyUserHasAction } from "./auth/verifyUserHasAction";
 import { ActionsEnum } from "@server/auth/actions";
@@ -144,6 +145,13 @@ authenticated.get(
 );
 
 authenticated.get(
+    "/resource/:resourceId/users",
+    verifyResourceAccess,
+    verifyUserHasAction(ActionsEnum.listResourceUsers),
+    resource.listResourceUsers
+);
+
+authenticated.get(
     "/resource/:resourceId",
     verifyResourceAccess,
     verifyUserHasAction(ActionsEnum.getResource),
@@ -259,7 +267,15 @@ authenticated.post(
     verifyResourceAccess,
     verifyRoleAccess,
     verifyUserHasAction(ActionsEnum.setResourceRoles),
-    role.addRoleResource
+    resource.setResourceRoles
+);
+
+authenticated.post(
+    "/resource/:resourceId/users",
+    verifyResourceAccess,
+    verifySetResourceUsers,
+    verifyUserHasAction(ActionsEnum.setResourceUsers),
+    resource.setResourceUsers
 );
 
 // authenticated.get(
@@ -321,20 +337,6 @@ authenticated.delete(
 //     verifyUserAccess,
 //     verifyUserHasAction(ActionsEnum.removeRoleSite),
 //     role.removeRoleSite
-// );
-// authenticated.put(
-//     "/user/:userId/resource",
-//     verifyResourceAccess,
-//     verifyUserAccess,
-//     verifyUserHasAction(ActionsEnum.addRoleResource),
-//     role.addRoleResource
-// );
-// authenticated.delete(
-//     "/user/:userId/resource",
-//     verifyResourceAccess,
-//     verifyUserAccess,
-//     verifyUserHasAction(ActionsEnum.removeRoleResource),
-//     role.removeRoleResource
 // );
 // authenticated.put(
 //     "/org/:orgId/user/:userId/action",

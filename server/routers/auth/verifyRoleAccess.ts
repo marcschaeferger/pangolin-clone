@@ -5,12 +5,6 @@ import { and, eq, inArray } from "drizzle-orm";
 import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
 import logger from "@server/logger";
-import { z } from "zod";
-import { fromError } from "zod-validation-error";
-
-const verifyRoleAccessSchema = z.object({
-    roleIds: z.array(z.number().int().positive()).optional(),
-});
 
 export async function verifyRoleAccess(
     req: Request,
@@ -28,17 +22,7 @@ export async function verifyRoleAccess(
         );
     }
 
-    const parsedBody = verifyRoleAccessSchema.safeParse(req.body);
-    if (!parsedBody.success) {
-        return next(
-            createHttpError(
-                HttpCode.BAD_REQUEST,
-                fromError(parsedBody.error).toString()
-            )
-        );
-    }
-
-    const { roleIds } = parsedBody.data;
+    const { roleIds } = req.body;
     const allRoleIds = roleIds || (isNaN(singleRoleId) ? [] : [singleRoleId]);
 
     if (allRoleIds.length === 0) {
@@ -81,6 +65,33 @@ export async function verifyRoleAccess(
                     )
                 );
             }
+
+            req.userOrgId = role.orgId;
+        }
+
+        const orgId = req.userOrgId;
+
+        if (!orgId) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    "Organization ID not found"
+                )
+            );
+        }
+
+        if (!req.userOrg) {
+            // get the userORg
+            const userOrg = await db
+                .select()
+                .from(userOrgs)
+                .where(
+                    and(eq(userOrgs.userId, userId), eq(userOrgs.orgId, orgId!))
+                )
+                .limit(1);
+
+            req.userOrg = userOrg[0];
+            req.userOrgRoleId = userOrg[0].roleId;
         }
 
         return next();

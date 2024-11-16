@@ -17,7 +17,7 @@ const setResourceRolesParamsSchema = z.object({
     resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
 
-export async function addRoleResource(
+export async function setResourceRoles(
     req: Request,
     res: Response,
     next: NextFunction
