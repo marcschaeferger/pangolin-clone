@@ -19,7 +19,7 @@ const createSiteSchema = z.object({
     name: z.string().min(1).max(255),
     exitNodeId: z.number().int().positive(),
     subdomain: z.string().min(1).max(255).optional(),
-    pubKey: z.string(),
+    pubKey: z.string().optional(),
     subnet: z.string(),
 });
 
@@ -68,16 +68,24 @@ export async function createSite(
 
         const niceId = await getUniqueSiteName(orgId);
 
+        let payload: any = {
+            orgId,
+            exitNodeId,
+            name,
+            niceId,
+            subnet,
+        };
+
+        if (pubKey) {
+            payload = {
+                ...payload,
+                pubKey,
+            };
+        }
+
         const [newSite] = await db
             .insert(sites)
-            .values({
-                orgId,
-                exitNodeId,
-                name,
-                niceId,
-                pubKey,
-                subnet,
-            })
+            .values(payload)
             .returning();
 
         const adminRole = await db
@@ -105,11 +113,13 @@ export async function createSite(
             });
         }
 
-        // add the peer to the exit node
-        await addPeer(exitNodeId, {
-            publicKey: pubKey,
-            allowedIps: [],
-        });
+        if (pubKey) {
+            // add the peer to the exit node
+            await addPeer(exitNodeId, {
+                publicKey: pubKey,
+                allowedIps: [],
+            });
+        }
 
         return response(res, {
             data: {

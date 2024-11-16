@@ -48,7 +48,9 @@ export async function deleteSite(
             );
         }
 
-        await deletePeer(deletedSite.exitNodeId!, deletedSite.pubKey);
+        if (deletedSite.pubKey) {
+            await deletePeer(deletedSite.exitNodeId!, deletedSite.pubKey);
+        }
 
         return response(res, {
             data: null,
@@ -79,7 +81,7 @@ async function removePeer(publicKey: string) {
         }
 
         const data = await response.json();
-        console.log("Peer removed successfully:", data.status);
+        logger.info("Peer removed successfully:", data.status);
         return data;
     } catch (error: any) {
         console.error("Error removing peer:", error.message);

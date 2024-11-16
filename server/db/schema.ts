@@ -17,7 +17,7 @@ export const sites = sqliteTable("sites", {
         onDelete: "set null",
     }),
     name: text("name").notNull(),
-    pubKey: text("pubKey").notNull(),
+    pubKey: text("pubKey"),
     subnet: text("subnet").notNull(),
     megabytesIn: integer("bytesIn"),
     megabytesOut: integer("bytesOut"),
@@ -77,6 +77,9 @@ export const newts = sqliteTable("newt", {
     newtId: text("id").primaryKey(),
     secretHash: text("secretHash").notNull(),
     dateCreated: text("dateCreated").notNull(),
+    siteId: integer("siteId").references(() => sites.siteId, {
+        onDelete: "cascade",
+    }),
 });
 
 export const twoFactorBackupCodes = sqliteTable("twoFactorBackupCodes", {
