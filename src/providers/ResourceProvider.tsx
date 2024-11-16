@@ -6,16 +6,15 @@ import { useState } from "react";
 
 interface ResourceProviderProps {
     children: React.ReactNode;
-    resource: GetResourceResponse | null;
+    resource: GetResourceResponse;
 }
 
 export function ResourceProvider({
     children,
     resource: serverResource,
 }: ResourceProviderProps) {
-    const [resource, setResource] = useState<GetResourceResponse | null>(
-        serverResource
-    );
+    const [resource, setResource] =
+        useState<GetResourceResponse>(serverResource);
 
     const updateResource = (updatedResource: Partial<GetResourceResponse>) => {
         if (!resource) {

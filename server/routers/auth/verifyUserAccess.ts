@@ -38,7 +38,7 @@ export async function verifyUserAccess(
             req.userOrg = res[0];
         }
 
-        if (req.userOrg) {
+        if (!req.userOrg) {
             return next(
                 createHttpError(
                     HttpCode.FORBIDDEN,

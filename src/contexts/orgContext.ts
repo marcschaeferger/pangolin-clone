@@ -2,7 +2,7 @@ import { GetOrgResponse } from "@server/routers/org";
 import { createContext } from "react";
 
 interface OrgContextType {
-    org: GetOrgResponse | null;
+    org: GetOrgResponse;
     updateOrg: (updateOrg: Partial<GetOrgResponse>) => void;
 }
 

@@ -76,7 +76,7 @@ export async function listSites(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedParams.error.errors.map((e) => e.message).join(", ")
+                    fromError(parsedParams.error)
                 )
             );
         }

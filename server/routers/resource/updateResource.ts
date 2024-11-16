@@ -1,13 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { resources } from "@server/db/schema";
+import { resources, sites } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
+import { subdomainSchema } from "@server/schemas/subdomainSchema";
 
 const updateResourceParamsSchema = z.object({
     resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
@@ -16,8 +17,11 @@ const updateResourceParamsSchema = z.object({
 const updateResourceBodySchema = z
     .object({
         name: z.string().min(1).max(255).optional(),
-        subdomain: z.string().min(1).max(255).optional(),
+        subdomain: subdomainSchema.optional(),
+        ssl: z.boolean().optional(),
+        // siteId: z.number(),
     })
+    .strict()
     .refine((data) => Object.keys(data).length > 0, {
         message: "At least one field must be provided for update",
     });

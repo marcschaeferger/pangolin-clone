@@ -12,11 +12,13 @@ import config from "@server/config";
 import { fromError } from "zod-validation-error";
 import { defaultRoleAllowedActions } from "../role";
 
-const createOrgSchema = z.object({
-    orgId: z.string(),
-    name: z.string().min(1).max(255),
-    // domain: z.string().min(1).max(255).optional(),
-});
+const createOrgSchema = z
+    .object({
+        orgId: z.string(),
+        name: z.string().min(1).max(255),
+        // domain: z.string().min(1).max(255).optional(),
+    })
+    .strict();
 
 const MAX_ORGS = 5;
 

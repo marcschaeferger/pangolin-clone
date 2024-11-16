@@ -3,6 +3,7 @@ import { authCookieHeader } from "@app/api/cookies";
 import { ListSitesResponse } from "@server/routers/site";
 import { AxiosResponse } from "axios";
 import SitesTable, { SiteRow } from "./components/SitesTable";
+import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 
 type SitesPageProps = {
     params: Promise<{ orgId: string }>;
@@ -34,14 +35,10 @@ export default async function SitesPage(props: SitesPageProps) {
 
     return (
         <>
-            <div className="space-y-0.5 select-none mb-6">
-                <h2 className="text-2xl font-bold tracking-tight">
-                    Manage Sites
-                </h2>
-                <p className="text-muted-foreground">
-                    Manage your existing sites here or create a new one.
-                </p>
-            </div>
+            <SettingsSectionTitle
+                title="Manage Sites"
+                description="Manage your existing sites here or create a new one."
+            />
 
             <SitesTable sites={siteRows} orgId={params.orgId} />
         </>

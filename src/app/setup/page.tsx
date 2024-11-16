@@ -15,6 +15,7 @@ import {
     CardTitle,
 } from "@app/components/ui/card";
 import CopyTextBox from "@app/components/CopyTextBox";
+import { formatAxiosError } from "@app/lib/utils";
 
 type Step = "org" | "site" | "resources";
 
@@ -43,7 +44,7 @@ export default function StepperForm() {
 
     const debouncedCheckOrgIdAvailability = useCallback(
         debounce(checkOrgIdAvailability, 300),
-        [checkOrgIdAvailability],
+        [checkOrgIdAvailability]
     );
 
     useEffect(() => {
@@ -76,7 +77,9 @@ export default function StepperForm() {
                 })
                 .catch((e) => {
                     toast({
-                        title: "Error creating org...",
+                        variant: "destructive",
+                        title: "Error creating org",
+                        description: formatAxiosError(e),
                     });
                 });
 
@@ -106,36 +109,60 @@ export default function StepperForm() {
                         <div className="flex justify-between mb-2">
                             <div className="flex flex-col items-center">
                                 <div
-                                    className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 ${currentStep === "org" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+                                    className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 ${
+                                        currentStep === "org"
+                                            ? "bg-primary text-primary-foreground"
+                                            : "bg-muted text-muted-foreground"
+                                    }`}
                                 >
                                     1
                                 </div>
                                 <span
-                                    className={`text-sm font-medium ${currentStep === "org" ? "text-primary" : "text-muted-foreground"}`}
+                                    className={`text-sm font-medium ${
+                                        currentStep === "org"
+                                            ? "text-primary"
+                                            : "text-muted-foreground"
+                                    }`}
                                 >
                                     Create Org
                                 </span>
                             </div>
                             <div className="flex flex-col items-center">
                                 <div
-                                    className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 ${currentStep === "site" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+                                    className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 ${
+                                        currentStep === "site"
+                                            ? "bg-primary text-primary-foreground"
+                                            : "bg-muted text-muted-foreground"
+                                    }`}
                                 >
                                     2
                                 </div>
                                 <span
-                                    className={`text-sm font-medium ${currentStep === "site" ? "text-primary" : "text-muted-foreground"}`}
+                                    className={`text-sm font-medium ${
+                                        currentStep === "site"
+                                            ? "text-primary"
+                                            : "text-muted-foreground"
+                                    }`}
                                 >
                                     Create Site
                                 </span>
                             </div>
                             <div className="flex flex-col items-center">
                                 <div
-                                    className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 ${currentStep === "resources" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+                                    className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 ${
+                                        currentStep === "resources"
+                                            ? "bg-primary text-primary-foreground"
+                                            : "bg-muted text-muted-foreground"
+                                    }`}
                                 >
                                     3
                                 </div>
                                 <span
-                                    className={`text-sm font-medium ${currentStep === "resources" ? "text-primary" : "text-muted-foreground"}`}
+                                    className={`text-sm font-medium ${
+                                        currentStep === "resources"
+                                            ? "text-primary"
+                                            : "text-muted-foreground"
+                                    }`}
                                 >
                                     Create Resources
                                 </span>
@@ -251,7 +278,7 @@ export default function StepperForm() {
 
 function debounce<T extends (...args: any[]) => any>(
     func: T,
-    wait: number,
+    wait: number
 ): (...args: Parameters<T>) => void {
     let timeout: NodeJS.Timeout | null = null;
 

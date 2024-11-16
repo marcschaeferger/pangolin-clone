@@ -15,6 +15,7 @@ import createHttpError from "http-errors";
 import { eq, and } from "drizzle-orm";
 import stoi from "@server/utils/stoi";
 import { fromError } from "zod-validation-error";
+import { subdomainSchema } from "@server/schemas/subdomainSchema";
 
 const createResourceParamsSchema = z.object({
     siteId: z
@@ -25,10 +26,12 @@ const createResourceParamsSchema = z.object({
     orgId: z.string(),
 });
 
-const createResourceSchema = z.object({
-    name: z.string().min(1).max(255),
-    subdomain: z.string().min(1).max(255).optional(),
-});
+const createResourceSchema = z
+    .object({
+        name: z.string().min(1).max(255),
+        subdomain: subdomainSchema,
+    })
+    .strict();
 
 export type CreateResourceResponse = Resource;
 
@@ -85,12 +88,9 @@ export async function createResource(
             );
         }
 
-        const fullDomain = `${subdomain}.${org[0].domain}`;
-
         const newResource = await db
             .insert(resources)
             .values({
-                fullDomain,
                 siteId,
                 orgId,
                 name,

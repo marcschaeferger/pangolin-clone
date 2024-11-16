@@ -6,6 +6,8 @@ import { cache } from "react";
 import OrgProvider from "@app/providers/OrgProvider";
 import { ListRolesResponse } from "@server/routers/role";
 import RolesTable, { RoleRow } from "./components/RolesTable";
+import { SidebarSettings } from "@app/components/SidebarSettings";
+import AccessPageHeaderAndNav from "../components/AccessPageHeaderAndNav";
 
 type RolesPageProps = {
     params: Promise<{ orgId: string }>;
@@ -49,9 +51,11 @@ export default async function RolesPage(props: RolesPageProps) {
 
     return (
         <>
-            <OrgProvider org={org}>
-                <RolesTable roles={roleRows} />
-            </OrgProvider>
+            <AccessPageHeaderAndNav>
+                <OrgProvider org={org}>
+                    <RolesTable roles={roleRows} />
+                </OrgProvider>
+            </AccessPageHeaderAndNav>
         </>
     );
 }

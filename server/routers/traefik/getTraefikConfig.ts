@@ -18,10 +18,15 @@ export async function traefikConfigProvider(
                 schema.resources,
                 eq(schema.targets.resourceId, schema.resources.resourceId)
             )
+            .innerJoin(
+                schema.orgs,
+                eq(schema.resources.orgId, schema.orgs.orgId)
+            )
             .where(
                 and(
                     eq(schema.targets.enabled, true),
-                    isNotNull(schema.resources.fullDomain)
+                    isNotNull(schema.resources.subdomain),
+                    isNotNull(schema.orgs.domain)
                 )
             );
 
@@ -60,15 +65,22 @@ export async function traefikConfigProvider(
         for (const item of all) {
             const target = item.targets;
             const resource = item.resources;
+            const org = item.orgs;
 
             const routerName = `${target.targetId}-router`;
             const serviceName = `${target.targetId}-service`;
 
-            if (!resource.fullDomain) {
+            if (!resource || !resource.subdomain) {
                 continue;
             }
 
-            const domainParts = resource.fullDomain.split(".");
+            if (!org || !org.domain) {
+                continue;
+            }
+
+            const fullDomain = `${resource.subdomain}.${org.domain}`;
+
+            const domainParts = fullDomain.split(".");
             let wildCard;
             if (domainParts.length <= 2) {
                 wildCard = `*.${domainParts.join(".")}`;
@@ -97,7 +109,7 @@ export async function traefikConfigProvider(
                 ],
                 middlewares: resource.ssl ? [badgerMiddlewareName] : [],
                 service: serviceName,
-                rule: `Host(\`${resource.fullDomain}\`)`,
+                rule: `Host(\`${fullDomain}\`)`,
                 ...(resource.ssl ? { tls } : {}),
             };
 
@@ -107,7 +119,7 @@ export async function traefikConfigProvider(
                     entryPoints: [config.traefik.http_entrypoint],
                     middlewares: [redirectMiddlewareName],
                     service: serviceName,
-                    rule: `Host(\`${resource.fullDomain}\`)`,
+                    rule: `Host(\`${fullDomain}\`)`,
                 };
             }
 

@@ -5,6 +5,7 @@ import { AcceptInviteResponse } from "@server/routers/user";
 import { AxiosResponse } from "axios";
 import { redirect } from "next/navigation";
 import InviteStatusCard from "./InviteStatusCard";
+import { formatAxiosError } from "@app/lib/utils";
 
 export default async function InvitePage(props: {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -47,8 +48,8 @@ export default async function InvitePage(props: {
             await authCookieHeader()
         )
         .catch((e) => {
-            error = e.response?.data?.message;
-            console.log(error);
+            console.error(e);
+            error = formatAxiosError(e);
         });
 
     if (res && res.status === 200) {

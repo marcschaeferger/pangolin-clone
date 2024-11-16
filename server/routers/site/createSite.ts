@@ -15,13 +15,15 @@ const createSiteParamsSchema = z.object({
     orgId: z.string(),
 });
 
-const createSiteSchema = z.object({
-    name: z.string().min(1).max(255),
-    exitNodeId: z.number().int().positive(),
-    subdomain: z.string().min(1).max(255).optional(),
-    pubKey: z.string().optional(),
-    subnet: z.string(),
-});
+const createSiteSchema = z
+    .object({
+        name: z.string().min(1).max(255),
+        exitNodeId: z.number().int().positive(),
+        subdomain: z.string().min(1).max(255).optional(),
+        pubKey: z.string().optional(),
+        subnet: z.string(),
+    })
+    .strict();
 
 export type CreateSiteResponse = {
     name: string;
@@ -83,10 +85,7 @@ export async function createSite(
             };
         }
 
-        const [newSite] = await db
-            .insert(sites)
-            .values(payload)
-            .returning();
+        const [newSite] = await db.insert(sites).values(payload).returning();
 
         const adminRole = await db
             .select()

@@ -21,6 +21,7 @@ import {
     SelectValue,
 } from "@app/components/ui/select";
 import { useToast } from "@app/hooks/useToast";
+import { formatAxiosError } from "@app/lib/utils";
 import { ListOrgsResponse } from "@server/routers/org";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -51,6 +52,7 @@ export default function Header({ email, orgName, name, orgs }: HeaderProps) {
                 console.error("Error logging out", e);
                 toast({
                     title: "Error logging out",
+                    description: formatAxiosError(e, "Error logging out"),
                 });
             })
             .then(() => {
@@ -95,7 +97,7 @@ export default function Header({ email, orgName, name, orgs }: HeaderProps) {
                             <DropdownMenuSeparator />
                             <DropdownMenuGroup>
                                 <DropdownMenuItem onClick={logout}>
-                                    Log out
+                                    Logout
                                 </DropdownMenuItem>
                             </DropdownMenuGroup>
                         </DropdownMenuContent>

@@ -20,6 +20,7 @@ import {
     verifyTargetAccess,
     verifyRoleAccess,
     verifyUserAccess,
+    verifyUserInRole,
 } from "./auth";
 import { verifyUserHasAction } from "./auth/verifyUserHasAction";
 import { ActionsEnum } from "@server/auth/actions";
@@ -135,12 +136,13 @@ authenticated.post(
 ); // maybe make this /invite/create instead
 authenticated.post("/invite/accept", user.acceptInvite);
 
-// authenticated.get(
-//     "/resource/:resourceId/roles",
-//     verifyResourceAccess,
-//     verifyUserHasAction(ActionsEnum.listResourceRoles),
-//     resource.listResourceRoles
-// );
+authenticated.get(
+    "/resource/:resourceId/roles",
+    verifyResourceAccess,
+    verifyUserHasAction(ActionsEnum.listResourceRoles),
+    resource.listResourceRoles
+);
+
 authenticated.get(
     "/resource/:resourceId",
     verifyResourceAccess,
@@ -251,20 +253,15 @@ authenticated.post(
 //     verifyUserHasAction(ActionsEnum.listRoleSites),
 //     role.listRoleSites
 // );
-// authenticated.put(
-//     "/role/:roleId/resource",
-//     verifyRoleAccess,
-//     verifyUserInRole,
-//     verifyUserHasAction(ActionsEnum.addRoleResource),
-//     role.addRoleResource
-// );
-// authenticated.delete(
-//     "/role/:roleId/resource",
-//     verifyRoleAccess,
-//     verifyUserInRole,
-//     verifyUserHasAction(ActionsEnum.removeRoleResource),
-//     role.removeRoleResource
-// );
+
+authenticated.post(
+    "/resource/:resourceId/roles",
+    verifyResourceAccess,
+    verifyRoleAccess,
+    verifyUserHasAction(ActionsEnum.setResourceRoles),
+    role.addRoleResource
+);
+
 // authenticated.get(
 //     "/role/:roleId/resources",
 //     verifyRoleAccess,
@@ -370,7 +367,7 @@ authRouter.use(
 authRouter.put("/signup", auth.signup);
 authRouter.post("/login", auth.login);
 authRouter.post("/logout", auth.logout);
-authRouter.post('/newt/get-token', getToken);
+authRouter.post("/newt/get-token", getToken);
 
 authRouter.post("/2fa/enable", verifySessionUserMiddleware, auth.verifyTotp);
 authRouter.post(

@@ -5,6 +5,13 @@ import { AxiosResponse } from "axios";
 import { redirect } from "next/navigation";
 import { authCookieHeader } from "@app/api/cookies";
 import { SidebarSettings } from "@app/components/SidebarSettings";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
+import { GetOrgResponse } from "@server/routers/org";
+import OrgProvider from "@app/providers/OrgProvider";
+import { cache } from "react";
+import ResourceInfoBox from "./components/ResourceInfoBox";
 
 interface ResourceLayoutProps {
     children: React.ReactNode;
@@ -17,56 +24,85 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
     const { children } = props;
 
     let resource = null;
+    try {
+        const res = await internal.get<AxiosResponse<GetResourceResponse>>(
+            `/resource/${params.resourceId}`,
+            await authCookieHeader()
+        );
+        resource = res.data.data;
+    } catch {
+        redirect(`/${params.orgId}/settings/resources`);
+    }
 
-    if (params.resourceId !== "create") {
-        try {
-            const res = await internal.get<AxiosResponse<GetResourceResponse>>(
-                `/resource/${params.resourceId}`,
+    if (!resource) {
+        redirect(`/${params.orgId}/settings/resources`);
+    }
+
+    let org = null;
+    try {
+        const getOrg = cache(async () =>
+            internal.get<AxiosResponse<GetOrgResponse>>(
+                `/org/${params.orgId}`,
                 await authCookieHeader()
-            );
-            resource = res.data.data;
-        } catch {
-            redirect(`/${params.orgId}/settings/resources`);
-        }
+            )
+        );
+        const res = await getOrg();
+        org = res.data.data;
+    } catch {
+        redirect(`/${params.orgId}/settings/resources`);
+    }
+
+    if (!org) {
+        redirect(`/${params.orgId}/settings/resources`);
     }
 
     const sidebarNavItems = [
         {
             title: "General",
-            href: `/{orgId}/settings/resources/resourceId`,
+            href: `/{orgId}/settings/resources/{resourceId}/general`,
         },
         {
-            title: "Targets",
-            href: `/{orgId}/settings/resources/{resourceId}/targets`,
+            title: "Connectivity",
+            href: `/{orgId}/settings/resources/{resourceId}/connectivity`,
+        },
+        {
+            title: "Authentication",
+            href: `/{orgId}/settings/resources/{resourceId}/authentication`,
         },
     ];
 
-    const isCreate = params.resourceId === "create";
-
     return (
         <>
-            <div className="space-y-0.5 select-none mb-6">
-                <h2 className="text-2xl font-bold tracking-tight">
-                    {isCreate ? "New Resource" : resource?.name + " Settings"}
-                </h2>
-                <p className="text-muted-foreground">
-                    {isCreate
-                        ? "Create a new resource"
-                        : "Configure the settings on your resource: " +
-                              resource?.name || ""}
-                    .
-                </p>
+            <div className="mb-4">
+                <Link
+                    href="../../"
+                    className="text-muted-foreground hover:underline"
+                >
+                    <div className="flex flex-row items-center gap-1">
+                        <ArrowLeft className="w-4 h-4" />{" "}
+                        <span>All Resources</span>
+                    </div>
+                </Link>
             </div>
 
-            <ResourceProvider resource={resource}>
-                <SidebarSettings
-                    sidebarNavItems={sidebarNavItems}
-                    disabled={isCreate}
-                    limitWidth={true}
-                >
-                    {children}
-                </SidebarSettings>
-            </ResourceProvider>
+            <SettingsSectionTitle
+                title={`${resource?.name} Settings`}
+                description="Configure the settings on your resource"
+            />
+
+            <OrgProvider org={org}>
+                <ResourceProvider resource={resource}>
+                    <SidebarSettings
+                        sidebarNavItems={sidebarNavItems}
+                        limitWidth={false}
+                    >
+                        <div className="mb-8">
+                            <ResourceInfoBox />
+                        </div>
+                        {children}
+                    </SidebarSettings>
+                </ResourceProvider>
+            </OrgProvider>
         </>
     );
 }

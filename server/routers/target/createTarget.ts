@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { resources, sites, targets } from "@server/db/schema";
+import { resources, sites, Target, targets } from "@server/db/schema";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
@@ -15,13 +15,17 @@ const createTargetParamsSchema = z.object({
     resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
 
-const createTargetSchema = z.object({
-    ip: z.string().ip(),
-    method: z.string().min(1).max(10),
-    port: z.number().int().min(1).max(65535),
-    protocol: z.string().optional(),
-    enabled: z.boolean().default(true),
-});
+const createTargetSchema = z
+    .object({
+        ip: z.string().ip(),
+        method: z.string().min(1).max(10),
+        port: z.number().int().min(1).max(65535),
+        protocol: z.string().optional(),
+        enabled: z.boolean().default(true),
+    })
+    .strict();
+
+export type CreateTargetResponse = Target;
 
 export async function createTarget(
     req: Request,
@@ -102,6 +106,7 @@ export async function createTarget(
             .insert(targets)
             .values({
                 resourceId,
+                protocol: "tcp", // hard code for now
                 ...targetData,
             })
             .returning();
@@ -126,7 +131,7 @@ export async function createTarget(
             allowedIps: targetIps.flat(),
         });
 
-        return response(res, {
+        return response<CreateTargetResponse>(res, {
             data: newTarget[0],
             success: true,
             error: false,

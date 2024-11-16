@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { resources } from "@server/db/schema";
+import { Resource, resources } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
@@ -12,12 +12,7 @@ const getResourceSchema = z.object({
     resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
 });
 
-export type GetResourceResponse = {
-    resourceId: number;
-    siteId: number;
-    orgId: string;
-    name: string;
-};
+export type GetResourceResponse = Resource;
 
 export async function getResource(
     req: Request,
@@ -53,12 +48,7 @@ export async function getResource(
         }
 
         return response(res, {
-            data: {
-                resourceId: resource[0].resourceId,
-                siteId: resource[0].siteId,
-                orgId: resource[0].orgId,
-                name: resource[0].name,
-            },
+            data: resource[0],
             success: true,
             error: false,
             message: "Resource retrieved successfully",

@@ -26,6 +26,7 @@ import { LoginResponse } from "@server/routers/auth";
 import { api } from "@app/api";
 import { useRouter } from "next/navigation";
 import { AxiosResponse } from "axios";
+import { formatAxiosError } from "@app/lib/utils";
 
 type LoginFormProps = {
     redirect?: string;
@@ -65,8 +66,7 @@ export default function LoginForm({ redirect }: LoginFormProps) {
             .catch((e) => {
                 console.error(e);
                 setError(
-                    e.response?.data?.message ||
-                        "An error occurred while logging in",
+                    formatAxiosError(e, "An error occurred while logging in")
                 );
             });
 
@@ -146,7 +146,11 @@ export default function LoginForm({ redirect }: LoginFormProps) {
                                 <AlertDescription>{error}</AlertDescription>
                             </Alert>
                         )}
-                        <Button type="submit" className="w-full" loading={loading}>
+                        <Button
+                            type="submit"
+                            className="w-full"
+                            loading={loading}
+                        >
                             Login
                         </Button>
                     </form>

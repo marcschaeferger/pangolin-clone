@@ -37,6 +37,7 @@ export default function CopyTextBox({ text = "", wrapText = false }) {
             <Button
                 variant="outline"
                 size="icon"
+                type="button"
                 className="absolute top-1 right-1 z-10"
                 onClick={copyToClipboard}
                 aria-label="Copy to clipboard"

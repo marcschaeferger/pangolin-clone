@@ -5,6 +5,9 @@ import { AxiosResponse } from "axios";
 import { redirect } from "next/navigation";
 import { authCookieHeader } from "@app/api/cookies";
 import { SidebarSettings } from "@app/components/SidebarSettings";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 
 interface SettingsLayoutProps {
     children: React.ReactNode;
@@ -17,50 +20,49 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
     const { children } = props;
 
     let site = null;
-
-    if (params.niceId !== "create") {
-        try {
-            const res = await internal.get<AxiosResponse<GetSiteResponse>>(
-                `/org/${params.orgId}/site/${params.niceId}`,
-                await authCookieHeader()
-            );
-            site = res.data.data;
-        } catch {
-            redirect(`/${params.orgId}/settings/sites`);
-        }
+    try {
+        const res = await internal.get<AxiosResponse<GetSiteResponse>>(
+            `/org/${params.orgId}/site/${params.niceId}`,
+            await authCookieHeader()
+        );
+        site = res.data.data;
+    } catch {
+        redirect(`/${params.orgId}/settings/sites`);
     }
 
     const sidebarNavItems = [
         {
             title: "General",
-            href: "/{orgId}/settings/sites/{niceId}",
+            href: "/{orgId}/settings/sites/{niceId}/general",
         },
     ];
 
-    const isCreate = params.niceId === "create";
-
     return (
         <>
-            <div className="space-y-0.5 select-none mb-6">
-                <h2 className="text-2xl font-bold tracking-tight">
-                    {isCreate ? "New Site" : site?.name + " Settings"}
-                </h2>
-                <p className="text-muted-foreground">
-                    {isCreate
-                        ? "Create a new site"
-                        : "Configure the settings on your site: " +
-                              site?.name || ""}
-                    .
-                </p>
+            <div className="mb-4">
+                <Link
+                    href="../../"
+                    className="text-muted-foreground hover:underline"
+                >
+                    <div className="flex flex-row items-center gap-1">
+                        <ArrowLeft className="w-4 h-4" /> <span>All Sites</span>
+                    </div>
+                </Link>
             </div>
 
-            <SidebarSettings
-                sidebarNavItems={sidebarNavItems}
-                disabled={isCreate}
-                limitWidth={true}
-            >
-                {children}
-            </SidebarSettings>
+            <SettingsSectionTitle
+                title={`${site?.name} Settings`}
+                description="Configure the settings on your site"
+            />
+
+            <SiteProvider site={site}>
+                <SidebarSettings
+                    sidebarNavItems={sidebarNavItems}
+                    limitWidth={true}
+                >
+                    {children}
+                </SidebarSettings>
+            </SiteProvider>
         </>
     );
 }

@@ -8,7 +8,7 @@ import {
     DropdownMenuTrigger,
 } from "@app/components/ui/dropdown-menu";
 import { Button } from "@app/components/ui/button";
-import { ArrowUpDown, Crown, MoreHorizontal } from "lucide-react";
+import { ArrowRight, ArrowUpDown, Crown, MoreHorizontal } from "lucide-react";
 import { UsersDataTable } from "./UsersDataTable";
 import { useState } from "react";
 import InviteUserForm from "./InviteUserForm";
@@ -17,8 +17,9 @@ import { useUserContext } from "@app/hooks/useUserContext";
 import api from "@app/api";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { useToast } from "@app/hooks/useToast";
-import ManageUserForm from "./ManageUserForm";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { formatAxiosError } from "@app/lib/utils";
 
 export type UserRow = {
     id: string;
@@ -38,6 +39,8 @@ export default function UsersTable({ users: u }: UsersTableProps) {
     const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
 
     const [users, setUsers] = useState<UserRow[]>(u);
+
+    const router = useRouter();
 
     const user = useUserContext();
     const { org } = useOrgContext();
@@ -109,43 +112,63 @@ export default function UsersTable({ users: u }: UsersTableProps) {
 
                 return (
                     <>
-                        {!userRow.isOwner && (
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button
-                                        variant="ghost"
-                                        className="h-8 w-8 p-0"
-                                    >
-                                        <span className="sr-only">
-                                            Open menu
-                                        </span>
-                                        <MoreHorizontal className="h-4 w-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuItem>
-                                        <Link
-                                            href={`/${org?.org.orgId}/settings/access/users/${userRow.id}`}
-                                        >
-                                            Manage User
-                                        </Link>
-                                    </DropdownMenuItem>
-                                    {userRow.email !== user?.email && (
-                                        <DropdownMenuItem>
-                                            <button
-                                                className="text-red-600 hover:text-red-800"
-                                                onClick={() => {
-                                                    setIsDeleteModalOpen(true);
-                                                    setSelectedUser(userRow);
-                                                }}
+                        <div className="flex items-center justify-end">
+                            {!userRow.isOwner && (
+                                <>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button
+                                                variant="ghost"
+                                                className="h-8 w-8 p-0"
                                             >
-                                                Remove User
-                                            </button>
-                                        </DropdownMenuItem>
-                                    )}
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        )}
+                                                <span className="sr-only">
+                                                    Open menu
+                                                </span>
+                                                <MoreHorizontal className="h-4 w-4" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                            <DropdownMenuItem>
+                                                <Link
+                                                    href={`/${org?.org.orgId}/settings/access/users/${userRow.id}`}
+                                                >
+                                                    Manage User
+                                                </Link>
+                                            </DropdownMenuItem>
+                                            {userRow.email !== user?.email && (
+                                                <DropdownMenuItem>
+                                                    <button
+                                                        className="text-red-600 hover:text-red-800"
+                                                        onClick={() => {
+                                                            setIsDeleteModalOpen(
+                                                                true
+                                                            );
+                                                            setSelectedUser(
+                                                                userRow
+                                                            );
+                                                        }}
+                                                    >
+                                                        Remove User
+                                                    </button>
+                                                </DropdownMenuItem>
+                                            )}
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                    <Button
+                                        variant={"gray"}
+                                        className="ml-2"
+                                        onClick={() =>
+                                            router.push(
+                                                `/${org?.org.orgId}/settings/access/users/${userRow.id}`
+                                            )
+                                        }
+                                    >
+                                        Manage{" "}
+                                        <ArrowRight className="ml-2 w-4 h-4" />
+                                    </Button>
+                                </>
+                            )}
+                        </div>
                     </>
                 );
             },
@@ -160,9 +183,10 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                     toast({
                         variant: "destructive",
                         title: "Failed to remove user",
-                        description:
-                            e.message ??
-                            "An error occurred while removing the user.",
+                        description: formatAxiosError(
+                            e,
+                            "An error occurred while removing the user."
+                        ),
                     });
                 });
 
@@ -190,13 +214,13 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                     setSelectedUser(null);
                 }}
                 dialog={
-                    <div>
-                        <p className="mb-2">
+                    <div className="space-y-4">
+                        <p>
                             Are you sure you want to remove{" "}
                             <b>{selectedUser?.email}</b> from the organization?
                         </p>
 
-                        <p className="mb-2">
+                        <p>
                             Once removed, this user will no longer have access
                             to the organization. You can always re-invite them
                             later, but they will need to accept the invitation
@@ -209,10 +233,10 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                         </p>
                     </div>
                 }
-                buttonText="Confirm remove user"
+                buttonText="Confirm Remove User"
                 onConfirm={removeUser}
                 string={selectedUser?.email ?? ""}
-                title="Remove user from organization"
+                title="Remove User from Organization"
             />
 
             <InviteUserForm
