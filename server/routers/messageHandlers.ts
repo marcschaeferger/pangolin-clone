@@ -1,6 +1,6 @@
-import { handleNewtMessage } from "./newt";
+import { handleRegisterMessage } from "./newt";
 import { MessageHandler } from "./ws";
 
 export const messageHandlers: Record<string, MessageHandler> = {
-    "newt": handleNewtMessage,
+    "newt/wg/register": handleRegisterMessage,
 };

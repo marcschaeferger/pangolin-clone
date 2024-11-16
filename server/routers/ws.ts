@@ -8,6 +8,7 @@ import { eq } from "drizzle-orm";
 import db from "@server/db";
 import { validateNewtSessionToken } from "@server/auth/newt";
 import { messageHandlers } from "./messageHandlers";
+import logger from "@server/logger";
 
 // Custom interfaces
 interface WebSocketRequest extends IncomingMessage {
@@ -39,7 +40,7 @@ interface HandlerResponse {
 interface HandlerContext {
     message: WSMessage;
     senderWs: WebSocket;
-    senderNewtId: string;
+    newt: Newt | undefined;
     sendToClient: (newtId: string, message: WSMessage) => boolean;
     broadcastToAllExcept: (message: WSMessage, excludeNewtId?: string) => void;
     connectedClients: Map<string, WebSocket[]>;
@@ -58,7 +59,7 @@ const addClient = (newtId: string, ws: AuthenticatedWebSocket): void => {
     const existingClients = connectedClients.get(newtId) || [];
     existingClients.push(ws);
     connectedClients.set(newtId, existingClients);
-    console.log(`Client added to tracking - Newt ID: ${newtId}, Total connections: ${existingClients.length}`);
+    logger.info(`Client added to tracking - Newt ID: ${newtId}, Total connections: ${existingClients.length}`);
 };
 
 const removeClient = (newtId: string, ws: AuthenticatedWebSocket): void => {
@@ -67,10 +68,10 @@ const removeClient = (newtId: string, ws: AuthenticatedWebSocket): void => {
     
     if (updatedClients.length === 0) {
         connectedClients.delete(newtId);
-        console.log(`All connections removed for Newt ID: ${newtId}`);
+        logger.info(`All connections removed for Newt ID: ${newtId}`);
     } else {
         connectedClients.set(newtId, updatedClients);
-        console.log(`Connection removed - Newt ID: ${newtId}, Remaining connections: ${updatedClients.length}`);
+        logger.info(`Connection removed - Newt ID: ${newtId}, Remaining connections: ${updatedClients.length}`);
     }
 };
 
@@ -78,7 +79,7 @@ const removeClient = (newtId: string, ws: AuthenticatedWebSocket): void => {
 const sendToClient = (newtId: string, message: WSMessage): boolean => {
     const clients = connectedClients.get(newtId);
     if (!clients || clients.length === 0) {
-        console.log(`No active connections found for Newt ID: ${newtId}`);
+        logger.info(`No active connections found for Newt ID: ${newtId}`);
         return false;
     }
 
@@ -198,7 +199,7 @@ wss.on("connection", (ws: AuthenticatedWebSocket, request: WebSocketRequest) => 
     ws.on("message", async (data) => {
         try {
             const message: WSMessage = JSON.parse(data.toString());
-            // console.log(`Message received from Newt ID ${newtId}:`, message);
+            // logger.info(`Message received from Newt ID ${newtId}:`, message);
     
             // Validate message format
             if (!message.type || typeof message.type !== "string") {
@@ -215,7 +216,7 @@ wss.on("connection", (ws: AuthenticatedWebSocket, request: WebSocketRequest) => 
             const response = await handler({
                 message,
                 senderWs: ws,
-                senderNewtId: newtId,
+                newt: ws.newt,
                 sendToClient,
                 broadcastToAllExcept,
                 connectedClients
@@ -250,7 +251,7 @@ wss.on("connection", (ws: AuthenticatedWebSocket, request: WebSocketRequest) => 
     ws.on("close", () => {
         clearInterval(pingInterval);
         removeClient(newtId, ws);
-        console.log(`Client disconnected - Newt ID: ${newtId}`);
+        logger.info(`Client disconnected - Newt ID: ${newtId}`);
     });
 
     ws.on("error", (error: Error) => {
