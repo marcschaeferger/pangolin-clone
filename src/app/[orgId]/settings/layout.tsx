@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { TopbarNav } from "./components/TopbarNav";
-import { Cog, Combine, Users, Waypoints } from "lucide-react";
+import { Cog, Combine, Settings, Users, Waypoints } from "lucide-react";
 import Header from "./components/Header";
 import { verifySession } from "@app/lib/auth/verifySession";
 import { redirect } from "next/navigation";
@@ -37,7 +37,7 @@ const topNavItems = [
     {
         title: "General",
         href: "/{orgId}/settings/general",
-        icon: <Cog className="h-5 w-5" />,
+        icon: <Settings className="h-5 w-5" />,
     },
 ];
 

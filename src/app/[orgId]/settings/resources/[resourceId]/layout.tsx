@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { authCookieHeader } from "@app/api/cookies";
 import { SidebarSettings } from "@app/components/SidebarSettings";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Cloud, Settings, Shield } from "lucide-react";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { GetOrgResponse } from "@server/routers/org";
 import OrgProvider from "@app/providers/OrgProvider";
@@ -60,14 +60,17 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
         {
             title: "General",
             href: `/{orgId}/settings/resources/{resourceId}/general`,
+            icon: <Settings className="w-4 h-4" />,
         },
         {
             title: "Connectivity",
             href: `/{orgId}/settings/resources/{resourceId}/connectivity`,
+            icon: <Cloud className="w-4 h-4" />,
         },
         {
             title: "Authentication",
             href: `/{orgId}/settings/resources/{resourceId}/authentication`,
+            icon: <Shield className="w-4 h-4" />,
         },
     ];
 

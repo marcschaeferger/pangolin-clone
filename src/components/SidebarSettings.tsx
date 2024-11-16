@@ -1,10 +1,15 @@
 "use client";
 
 import { SidebarNav } from "@app/components/sidebar-nav";
+import React from "react";
 
 interface SideBarSettingsProps {
     children: React.ReactNode;
-    sidebarNavItems: Array<{ title: string; href: string }>;
+    sidebarNavItems: Array<{
+        title: string;
+        href: string;
+        icon?: React.ReactNode;
+    }>;
     disabled?: boolean;
     limitWidth?: boolean;
 }

@@ -48,7 +48,7 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
                             href={fullUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm font-mono flex-grow hover:underline"
+                            className="text-sm font-mono flex-grow hover:underline truncate"
                         >
                             {fullUrl}
                         </a>

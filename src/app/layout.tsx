@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Fira_Sans, Inter } from "next/font/google";
+import { Fira_Sans, Inter, Noto_Sans_Mono, Roboto_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@app/providers/ThemeProvider";
 
@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 };
 
 const font = Inter({ subsets: ["latin"] });
+// const font = Noto_Sans_Mono({ subsets: ["latin"] });
 
 export default async function RootLayout({
     children,

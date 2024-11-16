@@ -17,6 +17,7 @@ interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
     items: {
         href: string;
         title: string;
+        icon?: React.ReactNode;
     }[];
     disabled?: boolean;
 }
@@ -105,7 +106,14 @@ export function SidebarNav({
                         tabIndex={disabled ? -1 : undefined}
                         aria-disabled={disabled}
                     >
-                        {item.title}
+                        {item.icon ? (
+                            <div className="flex items-center space-x-2">
+                                {item.icon}
+                                <span>{item.title}</span>
+                            </div>
+                        ) : (
+                            item.title
+                        )}
                     </Link>
                 ))}
             </nav>
