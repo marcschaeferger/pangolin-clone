@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { userOrgs, users } from "@server/db/schema";
+import { userOrgs, userResources, users, userSites } from "@server/db/schema";
 import { and, eq } from "drizzle-orm";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
@@ -51,10 +51,19 @@ export async function removeUserOrg(
             );
         }
 
-        // remove the user from the userOrgs table
-        await db
-            .delete(userOrgs)
-            .where(and(eq(userOrgs.userId, userId), eq(userOrgs.orgId, orgId)));
+        await db.transaction(async (trx) => {
+            await trx
+                .delete(userOrgs)
+                .where(
+                    and(eq(userOrgs.userId, userId), eq(userOrgs.orgId, orgId))
+                );
+
+            await trx
+                .delete(userResources)
+                .where(eq(userResources.userId, userId));
+
+            await trx.delete(userSites).where(eq(userSites.userId, userId));
+        });
 
         return response(res, {
             data: null,
