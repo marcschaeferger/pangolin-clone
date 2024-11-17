@@ -18,11 +18,7 @@ import { fromError } from "zod-validation-error";
 import { subdomainSchema } from "@server/schemas/subdomainSchema";
 
 const createResourceParamsSchema = z.object({
-    siteId: z
-        .string()
-        .optional()
-        .transform(stoi)
-        .pipe(z.number().int().positive().optional()),
+    siteId: z.string().transform(stoi).pipe(z.number().int().positive()),
     orgId: z.string(),
 });
 
@@ -88,10 +84,13 @@ export async function createResource(
             );
         }
 
+        const fullDomain = `${subdomain}.${org[0].domain}`;
+
         const newResource = await db
             .insert(resources)
             .values({
                 siteId,
+                fullDomain,
                 orgId,
                 name,
                 subdomain,

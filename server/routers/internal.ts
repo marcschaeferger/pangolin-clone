@@ -24,6 +24,6 @@ gerbilRouter.post("/receive-bandwidth", gerbil.receiveBandwidth);
 const badgerRouter = Router();
 internalRouter.use("/badger", badgerRouter);
 
-badgerRouter.get("/verify-user", badger.verifyUser)
+badgerRouter.get("/verify-session", badger.verifyResourceSession);
 
 export default internalRouter;

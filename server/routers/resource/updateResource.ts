@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { resources, sites } from "@server/db/schema";
-import { eq } from "drizzle-orm";
+import { orgs, resources, sites } from "@server/db/schema";
+import { eq, or } from "drizzle-orm";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
@@ -55,9 +55,35 @@ export async function updateResource(
         const { resourceId } = parsedParams.data;
         const updateData = parsedBody.data;
 
+        const resource = await db
+            .select()
+            .from(resources)
+            .where(eq(resources.resourceId, resourceId))
+            .leftJoin(orgs, eq(resources.orgId, orgs.orgId));
+
+        if (resource.length === 0) {
+            return next(
+                createHttpError(
+                    HttpCode.NOT_FOUND,
+                    `Resource with ID ${resourceId} not found`
+                )
+            );
+        }
+
+        if (!resource[0].orgs?.domain) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    "Resource does not have a domain"
+                )
+            );
+        }
+
+        const fullDomain = `${updateData.subdomain}.${resource[0].orgs.domain}`;
+
         const updatedResource = await db
             .update(resources)
-            .set(updateData)
+            .set({ ...updateData, fullDomain })
             .where(eq(resources.resourceId, resourceId))
             .returning();
 

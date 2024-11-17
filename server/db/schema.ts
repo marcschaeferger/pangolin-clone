@@ -9,9 +9,11 @@ export const orgs = sqliteTable("orgs", {
 
 export const sites = sqliteTable("sites", {
     siteId: integer("siteId").primaryKey({ autoIncrement: true }),
-    orgId: text("orgId").references(() => orgs.orgId, {
-        onDelete: "cascade",
-    }).notNull(),
+    orgId: text("orgId")
+        .references(() => orgs.orgId, {
+            onDelete: "cascade",
+        })
+        .notNull(),
     niceId: text("niceId").notNull(),
     exitNodeId: integer("exitNode").references(() => exitNodes.exitNodeId, {
         onDelete: "set null",
@@ -25,22 +27,32 @@ export const sites = sqliteTable("sites", {
 
 export const resources = sqliteTable("resources", {
     resourceId: integer("resourceId").primaryKey({ autoIncrement: true }),
-    siteId: integer("siteId").references(() => sites.siteId, {
-        onDelete: "cascade",
-    }).notNull(),
-    orgId: text("orgId").references(() => orgs.orgId, {
-        onDelete: "cascade",
-    }).notNull(),
+    siteId: integer("siteId")
+        .references(() => sites.siteId, {
+            onDelete: "cascade",
+        })
+        .notNull(),
+    orgId: text("orgId")
+        .references(() => orgs.orgId, {
+            onDelete: "cascade",
+        })
+        .notNull(),
     name: text("name").notNull(),
     subdomain: text("subdomain").notNull(),
+    fullDomain: text("fullDomain").notNull().unique(),
     ssl: integer("ssl", { mode: "boolean" }).notNull().default(false),
+    appSSOEnabled: integer("appSSOEnabled", { mode: "boolean" })
+        .notNull()
+        .default(false),
 });
 
 export const targets = sqliteTable("targets", {
     targetId: integer("targetId").primaryKey({ autoIncrement: true }),
-    resourceId: integer("resourceId").references(() => resources.resourceId, {
-        onDelete: "cascade",
-    }).notNull(),
+    resourceId: integer("resourceId")
+        .references(() => resources.resourceId, {
+            onDelete: "cascade",
+        })
+        .notNull(),
     ip: text("ip").notNull(),
     method: text("method").notNull(),
     port: integer("port").notNull(),
@@ -145,9 +157,11 @@ export const actions = sqliteTable("actions", {
 
 export const roles = sqliteTable("roles", {
     roleId: integer("roleId").primaryKey({ autoIncrement: true }),
-    orgId: text("orgId").references(() => orgs.orgId, {
-        onDelete: "cascade",
-    }).notNull(),
+    orgId: text("orgId")
+        .references(() => orgs.orgId, {
+            onDelete: "cascade",
+        })
+        .notNull(),
     isAdmin: integer("isAdmin", { mode: "boolean" }),
     name: text("name").notNull(),
     description: text("description"),
@@ -215,9 +229,11 @@ export const userResources = sqliteTable("userResources", {
 
 export const limitsTable = sqliteTable("limits", {
     limitId: integer("limitId").primaryKey({ autoIncrement: true }),
-    orgId: text("orgId").references(() => orgs.orgId, {
-        onDelete: "cascade",
-    }).notNull(),
+    orgId: text("orgId")
+        .references(() => orgs.orgId, {
+            onDelete: "cascade",
+        })
+        .notNull(),
     name: text("name").notNull(),
     value: integer("value").notNull(),
     description: text("description"),
@@ -234,6 +250,39 @@ export const userInvites = sqliteTable("userInvites", {
     roleId: integer("roleId")
         .notNull()
         .references(() => roles.roleId, { onDelete: "cascade" }),
+});
+
+export const resourcePincode = sqliteTable("resourcePincode", {
+    resourcePincodeId: integer("resourcePincodeId").primaryKey({
+        autoIncrement: true,
+    }),
+    resourceId: integer("resourceId")
+        .notNull()
+        .references(() => resources.resourceId, { onDelete: "cascade" }),
+    pincodeHash: text("pincodeHash").notNull(),
+    digitLength: integer("digitLength").notNull(),
+});
+
+export const resourcePassword = sqliteTable("resourcePassword", {
+    resourcePasswordId: integer("resourcePasswordId").primaryKey({
+        autoIncrement: true,
+    }),
+    resourceId: integer("resourceId")
+        .notNull()
+        .references(() => resources.resourceId, { onDelete: "cascade" }),
+    passwordHash: text("passwordHash").notNull(),
+});
+
+export const resourceSessions = sqliteTable("resourceSessions", {
+    sessionId: text("id").primaryKey(),
+    resourceId: integer("resourceId")
+        .notNull()
+        .references(() => resources.resourceId, { onDelete: "cascade" }),
+    userId: text("userId")
+        .notNull()
+        .references(() => users.userId, { onDelete: "cascade" }),
+    expiresAt: integer("expiresAt").notNull(),
+    method: text("method").notNull(),
 });
 
 export type Org = InferSelectModel<typeof orgs>;
@@ -261,3 +310,4 @@ export type UserResource = InferSelectModel<typeof userResources>;
 export type Limit = InferSelectModel<typeof limitsTable>;
 export type UserInvite = InferSelectModel<typeof userInvites>;
 export type UserOrg = InferSelectModel<typeof userOrgs>;
+export type ResourceSession = InferSelectModel<typeof resourceSessions>;

@@ -1,1 +1,1 @@
-export * from "./verifyUser";
+export * from "./verifySession";
