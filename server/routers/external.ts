@@ -11,21 +11,18 @@ import {
     rateLimitMiddleware,
     verifySessionMiddleware,
     verifySessionUserMiddleware,
-} from "@server/middlewares";
-import {
     verifyOrgAccess,
-    getUserOrgs,
     verifySiteAccess,
     verifyResourceAccess,
     verifyTargetAccess,
     verifyRoleAccess,
+    verifySetResourceUsers,
     verifyUserAccess,
-    verifyUserInRole,
-    verifySetResourceUsers
-} from "./auth";
-import { verifyUserHasAction } from "./auth/verifyUserHasAction";
+    getUserOrgs,
+} from "@server/middlewares";
+import { verifyUserHasAction } from "../middlewares/verifyUserHasAction";
 import { ActionsEnum } from "@server/auth/actions";
-import { verifyUserIsOrgOwner } from "./auth/verifyUserIsOrgOwner";
+import { verifyUserIsOrgOwner } from "../middlewares/verifyUserIsOrgOwner";
 import { createNewt, getToken } from "./newt";
 
 // Root routes
