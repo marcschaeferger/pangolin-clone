@@ -29,8 +29,10 @@ import {
 import { TagInput } from "emblor";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { ListUsersResponse } from "@server/routers/user";
+import { Switch } from "@app/components/ui/switch";
+import { Label } from "@app/components/ui/label";
 
-const FormSchema = z.object({
+const UsersRolesFormSchema = z.object({
     roles: z.array(
         z.object({
             id: z.string(),
@@ -48,7 +50,7 @@ const FormSchema = z.object({
 export default function ResourceAuthenticationPage() {
     const { toast } = useToast();
     const { org } = useOrgContext();
-    const { resource } = useResourceContext();
+    const { resource, updateResource } = useResourceContext();
 
     const [allRoles, setAllRoles] = useState<{ id: string; text: string }[]>(
         []
@@ -56,7 +58,6 @@ export default function ResourceAuthenticationPage() {
     const [allUsers, setAllUsers] = useState<{ id: string; text: string }[]>(
         []
     );
-
     const [activeRolesTagIndex, setActiveRolesTagIndex] = useState<
         number | null
     >(null);
@@ -64,10 +65,14 @@ export default function ResourceAuthenticationPage() {
         number | null
     >(null);
 
-    const [loading, setLoading] = useState(false);
+    const [ssoEnabled, setSsoEnabled] = useState(resource.sso);
+    const [blockAccess, setBlockAccess] = useState(resource.blockAccess);
 
-    const form = useForm<z.infer<typeof FormSchema>>({
-        resolver: zodResolver(FormSchema),
+    const [loadingSaveUsersRoles, setLoadingSaveUsersRoles] = useState(false);
+    const [loadingSaveAuth, setLoadingSaveAuth] = useState(false);
+
+    const usersRolesForm = useForm<z.infer<typeof UsersRolesFormSchema>>({
+        resolver: zodResolver(UsersRolesFormSchema),
         defaultValues: { roles: [], users: [] },
     });
 
@@ -101,7 +106,7 @@ export default function ResourceAuthenticationPage() {
             `/resource/${resource.resourceId}/roles`
         )
             .then((res) => {
-                form.setValue(
+                usersRolesForm.setValue(
                     "roles",
                     res.data.data.roles
                         .map((i) => ({
@@ -150,7 +155,7 @@ export default function ResourceAuthenticationPage() {
             `/resource/${resource.resourceId}/users`
         )
             .then((res) => {
-                form.setValue(
+                usersRolesForm.setValue(
                     "users",
                     res.data.data.users.map((i) => ({
                         id: i.userId.toString(),
@@ -171,9 +176,11 @@ export default function ResourceAuthenticationPage() {
             });
     }, []);
 
-    async function onSubmit(data: z.infer<typeof FormSchema>) {
+    async function onSubmitUsersRoles(
+        data: z.infer<typeof UsersRolesFormSchema>
+    ) {
         try {
-            setLoading(true);
+            setLoadingSaveUsersRoles(true);
             await api.post(`/resource/${resource.resourceId}/roles`, {
                 roleIds: data.roles.map((i) => parseInt(i.id)),
             });
@@ -197,7 +204,40 @@ export default function ResourceAuthenticationPage() {
                 ),
             });
         } finally {
-            setLoading(false);
+            setLoadingSaveUsersRoles(false);
+        }
+    }
+
+    async function onSubmitAuth() {
+        try {
+            setLoadingSaveAuth(true);
+
+            await api.post(`/resource/${resource.resourceId}`, {
+                sso: ssoEnabled,
+                blockAccess,
+            });
+
+            updateResource({
+                blockAccess,
+                sso: ssoEnabled,
+            });
+
+            toast({
+                title: "Saved successfully",
+                description: "Authentication settings have been saved",
+            });
+        } catch (e) {
+            console.error(e);
+            toast({
+                variant: "destructive",
+                title: "Failed to save authentication",
+                description: formatAxiosError(
+                    e,
+                    "An error occurred while saving the authentication"
+                ),
+            });
+        } finally {
+            setLoadingSaveAuth(false);
         }
     }
 
@@ -206,17 +246,19 @@ export default function ResourceAuthenticationPage() {
             <div className="space-y-6 lg:max-w-2xl">
                 <SettingsSectionTitle
                     title="Users & Roles"
-                    description="Configure who can visit this resource"
+                    description="Configure who can visit this resource (only applicable if SSO is used)"
                     size="1xl"
                 />
 
-                <Form {...form}>
+                <Form {...usersRolesForm}>
                     <form
-                        onSubmit={form.handleSubmit(onSubmit)}
+                        onSubmit={usersRolesForm.handleSubmit(
+                            onSubmitUsersRoles
+                        )}
                         className="space-y-6"
                     >
                         <FormField
-                            control={form.control}
+                            control={usersRolesForm.control}
                             name="roles"
                             render={({ field }) => (
                                 <FormItem className="flex flex-col items-start">
@@ -229,9 +271,11 @@ export default function ResourceAuthenticationPage() {
                                                 setActiveRolesTagIndex
                                             }
                                             placeholder="Enter a role"
-                                            tags={form.getValues().roles}
+                                            tags={
+                                                usersRolesForm.getValues().roles
+                                            }
                                             setTags={(newRoles) => {
-                                                form.setValue(
+                                                usersRolesForm.setValue(
                                                     "roles",
                                                     newRoles as [Tag, ...Tag[]]
                                                 );
@@ -248,7 +292,8 @@ export default function ResourceAuthenticationPage() {
                                                     body: "bg-muted hover:bg-accent text-foreground  p-2",
                                                 },
                                                 input: "border-none bg-transparent text-inherit placeholder:text-inherit shadow-none",
-                                                inlineTagsContainer: "bg-transparent",
+                                                inlineTagsContainer:
+                                                    "bg-transparent",
                                             }}
                                         />
                                     </FormControl>
@@ -262,7 +307,7 @@ export default function ResourceAuthenticationPage() {
                             )}
                         />
                         <FormField
-                            control={form.control}
+                            control={usersRolesForm.control}
                             name="users"
                             render={({ field }) => (
                                 <FormItem className="flex flex-col items-start">
@@ -275,9 +320,11 @@ export default function ResourceAuthenticationPage() {
                                                 setActiveUsersTagIndex
                                             }
                                             placeholder="Enter a user"
-                                            tags={form.getValues().users}
+                                            tags={
+                                                usersRolesForm.getValues().users
+                                            }
                                             setTags={(newUsers) => {
-                                                form.setValue(
+                                                usersRolesForm.setValue(
                                                     "users",
                                                     newUsers as [Tag, ...Tag[]]
                                                 );
@@ -294,7 +341,8 @@ export default function ResourceAuthenticationPage() {
                                                     body: "bg-muted hover:bg-accent text-foreground  p-2",
                                                 },
                                                 input: "border-none bg-transparent text-inherit placeholder:text-inherit shadow-none",
-                                                inlineTagsContainer: "bg-transparent",
+                                                inlineTagsContainer:
+                                                    "bg-transparent",
                                             }}
                                         />
                                     </FormControl>
@@ -310,13 +358,61 @@ export default function ResourceAuthenticationPage() {
                         />
                         <Button
                             type="submit"
-                            loading={loading}
-                            disabled={loading}
+                            loading={loadingSaveUsersRoles}
+                            disabled={loadingSaveUsersRoles}
                         >
-                            Save Changes
+                            Save Users & Roles
                         </Button>
                     </form>
                 </Form>
+
+                <SettingsSectionTitle
+                    title="Authentication Methods"
+                    description="Configure how users can authenticate to this resource"
+                    size="1xl"
+                />
+
+                <div>
+                    <div className="flex items-center space-x-2 mb-2">
+                        <Switch
+                            id="block-toggle"
+                            defaultChecked={resource.blockAccess}
+                            onCheckedChange={(val) => setBlockAccess(val)}
+                        />
+                        <Label htmlFor="block-toggle">Block Access</Label>
+                    </div>
+                    <span className="text-muted-foreground text-sm">
+                        When enabled, all auth methods will be disabled and
+                        users will not able to access the resource. This is an
+                        override.
+                    </span>
+                </div>
+
+                <div>
+                    <div className="flex items-center space-x-2 mb-2">
+                        <Switch
+                            id="sso-toggle"
+                            defaultChecked={resource.sso}
+                            onCheckedChange={(val) => setSsoEnabled(val)}
+                        />
+                        <Label htmlFor="sso-toggle">Allow SSO</Label>
+                    </div>
+                    <span className="text-muted-foreground text-sm">
+                        Users will be able to access the resource if they're
+                        logged into the dashboard and have access to the
+                        resource. Users will only have to login once for all
+                        resources that have SSO enabled.
+                    </span>
+                </div>
+
+                <Button
+                    type="button"
+                    onClick={onSubmitAuth}
+                    loading={loadingSaveAuth}
+                    disabled={loadingSaveAuth}
+                >
+                    Save Authentication
+                </Button>
             </div>
         </>
     );
