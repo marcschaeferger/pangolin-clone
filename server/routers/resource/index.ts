@@ -6,4 +6,6 @@ export * from "./listResources";
 export * from "./listResourceRoles";
 export * from "./setResourceUsers";
 export * from "./setResourceRoles";
-export * from "./listResourceUsers"
+export * from "./listResourceUsers";
+export * from "./setResourcePassword";
+export * from "./authWithPassword";

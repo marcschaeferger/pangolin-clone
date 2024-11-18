@@ -1,60 +1,64 @@
 import { encodeHexLowerCase } from "@oslojs/encoding";
 import { sha256 } from "@oslojs/crypto/sha2";
-import {
-    resourceSessions,
-    ResourceSession,
-    User,
-    users,
-} from "@server/db/schema";
+import { resourceSessions, ResourceSession } from "@server/db/schema";
 import db from "@server/db";
 import { eq, and } from "drizzle-orm";
 
 export const SESSION_COOKIE_NAME = "resource_session";
 export const SESSION_COOKIE_EXPIRES = 1000 * 60 * 60 * 24 * 30;
 
-export type ResourceAuthMethod = "password" | "pincode";
+export async function createResourceSession(opts: {
+    token: string;
+    resourceId: number;
+    passwordId?: number;
+    pincodeId?: number;
+}): Promise<ResourceSession> {
+    if (!opts.passwordId && !opts.pincodeId) {
+        throw new Error(
+            "At least one of passwordId or pincodeId must be provided"
+        );
+    }
 
-export async function createResourceSession(
-    token: string,
-    userId: string,
-    resourceId: number,
-    method: ResourceAuthMethod
-): Promise<ResourceSession> {
     const sessionId = encodeHexLowerCase(
-        sha256(new TextEncoder().encode(token))
+        sha256(new TextEncoder().encode(opts.token))
     );
+
     const session: ResourceSession = {
         sessionId: sessionId,
-        userId,
         expiresAt: new Date(Date.now() + SESSION_COOKIE_EXPIRES).getTime(),
-        resourceId,
-        method,
+        resourceId: opts.resourceId,
+        passwordId: opts.passwordId || null,
+        pincodeId: opts.pincodeId || null,
     };
+
     await db.insert(resourceSessions).values(session);
+
     return session;
 }
 
 export async function validateResourceSessionToken(
-    token: string
+    token: string,
+    resourceId: number
 ): Promise<ResourceSessionValidationResult> {
     const sessionId = encodeHexLowerCase(
         sha256(new TextEncoder().encode(token))
     );
     const result = await db
-        .select({ user: users, resourceSession: resourceSessions })
+        .select()
         .from(resourceSessions)
-        .innerJoin(users, eq(resourceSessions.userId, users.userId))
-        .where(eq(resourceSessions.sessionId, sessionId));
+        .where(
+            and(
+                eq(resourceSessions.sessionId, sessionId),
+                eq(resourceSessions.resourceId, resourceId)
+            )
+        );
+
     if (result.length < 1) {
-        return { session: null, user: null };
+        return { resourceSession: null };
     }
-    const { user, resourceSession } = result[0];
-    if (Date.now() >= resourceSession.expiresAt) {
-        await db
-            .delete(resourceSessions)
-            .where(eq(resourceSessions.sessionId, resourceSession.sessionId));
-        return { session: null, user: null };
-    }
+
+    const resourceSession = result[0];
+
     if (Date.now() >= resourceSession.expiresAt - SESSION_COOKIE_EXPIRES / 2) {
         resourceSession.expiresAt = new Date(
             Date.now() + SESSION_COOKIE_EXPIRES
@@ -66,7 +70,8 @@ export async function validateResourceSessionToken(
             })
             .where(eq(resourceSessions.sessionId, resourceSession.sessionId));
     }
-    return { session: resourceSession, user };
+
+    return { resourceSession };
 }
 
 export async function invalidateResourceSession(
@@ -78,26 +83,38 @@ export async function invalidateResourceSession(
 }
 
 export async function invalidateAllSessions(
-    userId: string,
-    method?: ResourceAuthMethod
+    resourceId: number,
+    method?: {
+        passwordId?: number;
+        pincodeId?: number;
+    }
 ): Promise<void> {
-    if (!method) {
-        await db
-            .delete(resourceSessions)
-            .where(eq(resourceSessions.userId, userId));
-    } else {
+    if (method?.passwordId) {
         await db
             .delete(resourceSessions)
             .where(
                 and(
-                    eq(resourceSessions.userId, userId),
-                    eq(resourceSessions.method, method)
+                    eq(resourceSessions.resourceId, resourceId),
+                    eq(resourceSessions.passwordId, method.passwordId)
                 )
             );
+    } else if (method?.pincodeId) {
+        await db
+            .delete(resourceSessions)
+            .where(
+                and(
+                    eq(resourceSessions.resourceId, resourceId),
+                    eq(resourceSessions.pincodeId, method.pincodeId)
+                )
+            );
+    } else {
+        await db
+            .delete(resourceSessions)
+            .where(eq(resourceSessions.resourceId, resourceId));
     }
 }
 
-export function serializeSessionCookie(
+export function serializeResourceSessionCookie(
     token: string,
     fqdn: string,
     secure: boolean
@@ -109,7 +126,7 @@ export function serializeSessionCookie(
     }
 }
 
-export function createBlankSessionTokenCookie(
+export function createBlankResourceSessionTokenCookie(
     fqdn: string,
     secure: boolean
 ): string {
@@ -120,6 +137,6 @@ export function createBlankSessionTokenCookie(
     }
 }
 
-export type ResourceSessionValidationResult =
-    | { session: ResourceSession; user: User }
-    | { session: null; user: null };
+export type ResourceSessionValidationResult = {
+    resourceSession: ResourceSession | null;
+};

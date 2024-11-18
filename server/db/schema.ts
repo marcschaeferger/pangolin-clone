@@ -41,7 +41,11 @@ export const resources = sqliteTable("resources", {
     subdomain: text("subdomain").notNull(),
     fullDomain: text("fullDomain").notNull().unique(),
     ssl: integer("ssl", { mode: "boolean" }).notNull().default(false),
-    appSSOEnabled: integer("appSSOEnabled", { mode: "boolean" })
+    blockAccess: integer("blockAccess", { mode: "boolean" })
+        .notNull()
+        .default(false),
+    sso: integer("sso", { mode: "boolean" }).notNull().default(false),
+    twoFactorEnabled: integer("twoFactorEnabled", { mode: "boolean" })
         .notNull()
         .default(false),
 });
@@ -253,7 +257,7 @@ export const userInvites = sqliteTable("userInvites", {
 });
 
 export const resourcePincode = sqliteTable("resourcePincode", {
-    resourcePincodeId: integer("resourcePincodeId").primaryKey({
+    pincodeId: integer("pincodeId").primaryKey({
         autoIncrement: true,
     }),
     resourceId: integer("resourceId")
@@ -264,7 +268,7 @@ export const resourcePincode = sqliteTable("resourcePincode", {
 });
 
 export const resourcePassword = sqliteTable("resourcePassword", {
-    resourcePasswordId: integer("resourcePasswordId").primaryKey({
+    passwordId: integer("passwordId").primaryKey({
         autoIncrement: true,
     }),
     resourceId: integer("resourceId")
@@ -278,11 +282,19 @@ export const resourceSessions = sqliteTable("resourceSessions", {
     resourceId: integer("resourceId")
         .notNull()
         .references(() => resources.resourceId, { onDelete: "cascade" }),
-    userId: text("userId")
-        .notNull()
-        .references(() => users.userId, { onDelete: "cascade" }),
     expiresAt: integer("expiresAt").notNull(),
-    method: text("method").notNull(),
+    passwordId: integer("passwordId").references(
+        () => resourcePassword.passwordId,
+        {
+            onDelete: "cascade",
+        }
+    ),
+    pincodeId: integer("pincodeId").references(
+        () => resourcePincode.pincodeId,
+        {
+            onDelete: "cascade",
+        }
+    ),
 });
 
 export type Org = InferSelectModel<typeof orgs>;
@@ -311,3 +323,5 @@ export type Limit = InferSelectModel<typeof limitsTable>;
 export type UserInvite = InferSelectModel<typeof userInvites>;
 export type UserOrg = InferSelectModel<typeof userOrgs>;
 export type ResourceSession = InferSelectModel<typeof resourceSessions>;
+export type ResourcePincode = InferSelectModel<typeof resourcePincode>;
+export type ResourcePassword = InferSelectModel<typeof resourcePassword>;

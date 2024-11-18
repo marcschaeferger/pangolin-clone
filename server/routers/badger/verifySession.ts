@@ -10,13 +10,15 @@ import {
     resourcePassword,
     resourcePincode,
     resources,
+    userOrgs,
 } from "@server/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import config from "@server/config";
 import { validateResourceSessionToken } from "@server/auth/resource";
+import { Resource, roleResources, userResources } from "@server/db/schema";
 
 const verifyResourceSessionSchema = z.object({
-    cookies: z.object({
+    sessions: z.object({
         session: z.string().nullable(),
         resource_session: z.string().nullable(),
     }),
@@ -42,7 +44,7 @@ export async function verifyResourceSession(
     res: Response,
     next: NextFunction
 ): Promise<any> {
-    const parsedBody = verifyResourceSessionSchema.safeParse(req.query);
+    const parsedBody = verifyResourceSessionSchema.safeParse(req.body);
 
     if (!parsedBody.success) {
         return next(
@@ -54,7 +56,7 @@ export async function verifyResourceSession(
     }
 
     try {
-        const { cookies, host, originalRequestURL } = parsedBody.data;
+        const { sessions, host, originalRequestURL } = parsedBody.data;
 
         const [result] = await db
             .select()
@@ -74,53 +76,60 @@ export async function verifyResourceSession(
         const pincode = result?.resourcePincode;
         const password = result?.resourcePassword;
 
-        // resource doesn't exist for some reason
         if (!resource) {
-            return notAllowed(res); // no resource to redirect to
+            return notAllowed(res);
         }
 
-        // no auth is configured; auth check is disabled
-        if (!resource.appSSOEnabled && !pincode && !password) {
+        const { sso, blockAccess } = resource;
+
+        if (blockAccess) {
+            return notAllowed(res);
+        }
+
+        if (!resource.sso && !pincode && !password) {
             return allowed(res);
         }
 
         const redirectUrl = `${config.app.base_url}/auth/resource/${resource.resourceId}/login?redirect=${originalRequestURL}`;
 
-        // we need to check all session to find at least one valid session
-        // if we find one, we allow access
-        // if we don't find any, we deny access and redirect to the login page
-
-        // we found a session token, and app sso is enabled, so we need to check if it's a valid session
-        if (cookies.session && resource.appSSOEnabled) {
-            const { user, session } = await validateSessionToken(
-                cookies.session
+        if (sso && sessions.session) {
+            const { session, user } = await validateSessionToken(
+                sessions.session
             );
-            if (user && session) {
-                return allowed(res);
-            }
-        }
-
-        // we found a resource session token, and either pincode or password is enabled for the resource
-        // so we need to check if it's a valid session
-        if (cookies.resource_session && (pincode || password)) {
-            const { session, user } = await validateResourceSessionToken(
-                cookies.resource_session
-            );
-
             if (session && user) {
-                if (pincode && session.method === "pincode") {
-                    return allowed(res);
-                }
+                const isAllowed = await isUserAllowedToAccessResource(
+                    user.userId,
+                    resource
+                );
 
-                if (password && session.method === "password") {
+                if (isAllowed) {
                     return allowed(res);
                 }
             }
         }
 
-        // a valid session was not found for an enabled auth method so we deny access
-        // the user is redirected to the login page
-        // the login page with render which auth methods are enabled and show the user the correct login form
+        if (password && sessions.resource_session) {
+            const { resourceSession } = await validateResourceSessionToken(
+                sessions.resource_session,
+                resource.resourceId
+            );
+            if (resourceSession) {
+                if (
+                    pincode &&
+                    resourceSession.pincodeId === pincode.pincodeId
+                ) {
+                    return allowed(res);
+                }
+
+                if (
+                    password &&
+                    resourceSession.passwordId === password.passwordId
+                ) {
+                    return allowed(res);
+                }
+            }
+        }
+
         return notAllowed(res, redirectUrl);
     } catch (e) {
         return next(
@@ -150,4 +159,53 @@ function allowed(res: Response) {
         message: "Access allowed",
         status: HttpCode.OK,
     });
+}
+
+async function isUserAllowedToAccessResource(
+    userId: string,
+    resource: Resource
+) {
+    const userOrgRole = await db
+        .select()
+        .from(userOrgs)
+        .where(
+            and(eq(userOrgs.userId, userId), eq(userOrgs.orgId, resource.orgId))
+        )
+        .limit(1);
+
+    if (userOrgRole.length === 0) {
+        return false;
+    }
+
+    const roleResourceAccess = await db
+        .select()
+        .from(roleResources)
+        .where(
+            and(
+                eq(roleResources.resourceId, resource.resourceId),
+                eq(roleResources.roleId, userOrgRole[0].roleId)
+            )
+        )
+        .limit(1);
+
+    if (roleResourceAccess.length > 0) {
+        return true;
+    }
+
+    const userResourceAccess = await db
+        .select()
+        .from(userResources)
+        .where(
+            and(
+                eq(userResources.userId, userId),
+                eq(userResources.resourceId, resource.resourceId)
+            )
+        )
+        .limit(1);
+
+    if (userResourceAccess.length > 0) {
+        return true;
+    }
+
+    return false;
 }

@@ -275,6 +275,18 @@ authenticated.post(
     resource.setResourceUsers
 );
 
+authenticated.post(
+    `/resource/:resourceId/password`,
+    verifyResourceAccess,
+    verifyUserHasAction(ActionsEnum.setResourceAuthMethods),
+    resource.setResourcePassword
+);
+
+unauthenticated.post(
+    "/resource/:resourceId/auth/password",
+    resource.authWithPassword
+);
+
 // authenticated.get(
 //     "/role/:roleId/resources",
 //     verifyRoleAccess,

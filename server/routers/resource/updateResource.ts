@@ -19,6 +19,8 @@ const updateResourceBodySchema = z
         name: z.string().min(1).max(255).optional(),
         subdomain: subdomainSchema.optional(),
         ssl: z.boolean().optional(),
+        sso: z.boolean().optional(),
+        blockAccess: z.boolean().optional(),
         // siteId: z.number(),
     })
     .strict()
