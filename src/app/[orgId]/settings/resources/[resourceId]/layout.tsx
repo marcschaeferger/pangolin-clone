@@ -1,6 +1,6 @@
 import ResourceProvider from "@app/providers/ResourceProvider";
 import { internal } from "@app/api";
-import { GetResourceResponse } from "@server/routers/resource";
+import { GetResourceAuthInfoResponse } from "@server/routers/resource";
 import { AxiosResponse } from "axios";
 import { redirect } from "next/navigation";
 import { authCookieHeader } from "@app/api/cookies";
@@ -25,7 +25,7 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
 
     let resource = null;
     try {
-        const res = await internal.get<AxiosResponse<GetResourceResponse>>(
+        const res = await internal.get<AxiosResponse<GetResourceAuthInfoResponse>>(
             `/resource/${params.resourceId}`,
             await authCookieHeader()
         );

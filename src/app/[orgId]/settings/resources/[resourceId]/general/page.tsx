@@ -36,7 +36,7 @@ import { AxiosResponse } from "axios";
 import api from "@app/api";
 import { useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { GetResourceResponse } from "@server/routers/resource";
+import { GetResourceAuthInfoResponse } from "@server/routers/resource";
 import { useToast } from "@app/hooks/useToast";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { useOrgContext } from "@app/hooks/useOrgContext";
@@ -87,7 +87,7 @@ export default function GeneralForm() {
     async function onSubmit(data: GeneralFormValues) {
         setSaveLoading(true);
 
-        api.post<AxiosResponse<GetResourceResponse>>(
+        api.post<AxiosResponse<GetResourceAuthInfoResponse>>(
             `resource/${resource?.resourceId}`,
             {
                 name: data.name,

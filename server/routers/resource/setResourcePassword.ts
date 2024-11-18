@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { resourcePassword, resources } from "@server/db/schema";
+import { resourcePassword } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
@@ -15,7 +15,7 @@ const setResourceAuthMethodsParamsSchema = z.object({
 
 const setResourceAuthMethodsBodySchema = z
     .object({
-        password: z.string().nullable(),
+        password: z.string().min(4).max(255).nullable(),
     })
     .strict();
 

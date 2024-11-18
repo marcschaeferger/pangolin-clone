@@ -287,6 +287,8 @@ unauthenticated.post(
     resource.authWithPassword
 );
 
+unauthenticated.get("/resource/:resourceId/auth", resource.getResourceAuthInfo);
+
 // authenticated.get(
 //     "/role/:roleId/resources",
 //     verifyRoleAccess,
