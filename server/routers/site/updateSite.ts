@@ -17,11 +17,11 @@ const updateSiteBodySchema = z
     .object({
         name: z.string().min(1).max(255).optional(),
         subdomain: z.string().min(1).max(255).optional(),
-        pubKey: z.string().optional(),
-        subnet: z.string().optional(),
-        exitNode: z.number().int().positive().optional(),
-        megabytesIn: z.number().int().nonnegative().optional(),
-        megabytesOut: z.number().int().nonnegative().optional(),
+        // pubKey: z.string().optional(),
+        // subnet: z.string().optional(),
+        // exitNode: z.number().int().positive().optional(),
+        // megabytesIn: z.number().int().nonnegative().optional(),
+        // megabytesOut: z.number().int().nonnegative().optional(),
     })
     .strict()
     .refine((data) => Object.keys(data).length > 0, {
