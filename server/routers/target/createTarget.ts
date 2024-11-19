@@ -10,6 +10,7 @@ import { addPeer } from "../gerbil/peers";
 import { eq, and } from "drizzle-orm";
 import { isIpInCidr } from "@server/utils/ip";
 import { fromError } from "zod-validation-error";
+import { addTargets } from "../newt/targets";
 
 const createTargetParamsSchema = z.object({
     resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
@@ -111,25 +112,31 @@ export async function createTarget(
             })
             .returning();
 
-        // Fetch resources for this site
-        const resourcesRes = await db.query.resources.findMany({
-            where: eq(resources.siteId, site.siteId),
-        });
+        if (site.pubKey) {
+            if ( site.type == "wireguard") {
+            // Fetch resources for this site
+            const resourcesRes = await db.query.resources.findMany({
+                where: eq(resources.siteId, site.siteId),
+            });
 
-        // Fetch targets for all resources of this site
-        const targetIps = await Promise.all(
-            resourcesRes.map(async (resource) => {
-                const targetsRes = await db.query.targets.findMany({
-                    where: eq(targets.resourceId, resource.resourceId),
-                });
-                return targetsRes.map((target) => `${target.ip}/32`);
-            })
-        );
+            // Fetch targets for all resources of this site
+            const targetIps = await Promise.all(
+                resourcesRes.map(async (resource) => {
+                    const targetsRes = await db.query.targets.findMany({
+                        where: eq(targets.resourceId, resource.resourceId),
+                    });
+                    return targetsRes.map((target) => `${target.ip}/32`);
+                })
+            );
 
-        await addPeer(site.exitNodeId!, {
-            publicKey: site.pubKey,
-            allowedIps: targetIps.flat(),
-        });
+            await addPeer(site.exitNodeId!, {
+                publicKey: site.pubKey,
+                allowedIps: targetIps.flat(),
+            });
+        } else if (site.type == "newt") {
+            addTargets("",newTarget); // TODO: we need to generate and save the internal port somewhere and also come up with the newtId
+        }
+    }
 
         return response<CreateTargetResponse>(res, {
             data: newTarget[0],

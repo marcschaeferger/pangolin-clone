@@ -9,6 +9,7 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { addPeer } from "../gerbil/peers";
 import { fromError } from "zod-validation-error";
+import { removeTargets } from "../newt/targets";
 
 const deleteTargetSchema = z.object({
     targetId: z.string().transform(Number).pipe(z.number().int().positive()),
@@ -80,25 +81,31 @@ export async function deleteTarget(
             );
         }
 
-        // Fetch resources for this site
-        const resourcesRes = await db.query.resources.findMany({
-            where: eq(resources.siteId, site.siteId),
-        });
-
-        // Fetch targets for all resources of this site
-        const targetIps = await Promise.all(
-            resourcesRes.map(async (resource) => {
-                const targetsRes = await db.query.targets.findMany({
-                    where: eq(targets.resourceId, resource.resourceId),
+        if (site.pubKey) {
+            if (site.type == "wireguard") {
+                // Fetch resources for this site
+                const resourcesRes = await db.query.resources.findMany({
+                    where: eq(resources.siteId, site.siteId),
                 });
-                return targetsRes.map((target) => `${target.ip}/32`);
-            })
-        );
 
-        await addPeer(site.exitNodeId!, {
-            publicKey: site.pubKey,
-            allowedIps: targetIps.flat(),
-        });
+                // Fetch targets for all resources of this site
+                const targetIps = await Promise.all(
+                    resourcesRes.map(async (resource) => {
+                        const targetsRes = await db.query.targets.findMany({
+                            where: eq(targets.resourceId, resource.resourceId),
+                        });
+                        return targetsRes.map((target) => `${target.ip}/32`);
+                    })
+                );
+
+                await addPeer(site.exitNodeId!, {
+                    publicKey: site.pubKey,
+                    allowedIps: targetIps.flat(),
+                });
+            } else if (site.type == "newt") {
+                removeTargets("", [deletedTarget]); // TODO: we need to generate and save the internal port somewhere and also come up with the newtId
+            }
+        }
 
         return response(res, {
             data: null,

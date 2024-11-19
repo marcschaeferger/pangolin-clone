@@ -23,6 +23,7 @@ export const sites = sqliteTable("sites", {
     subnet: text("subnet").notNull(),
     megabytesIn: integer("bytesIn"),
     megabytesOut: integer("bytesOut"),
+    type: text("type").notNull(), // "newt" or "wireguard"
 });
 
 export const resources = sqliteTable("resources", {
@@ -60,6 +61,7 @@ export const targets = sqliteTable("targets", {
     ip: text("ip").notNull(),
     method: text("method").notNull(),
     port: integer("port").notNull(),
+    internalPort: integer("internalPort"),
     protocol: text("protocol"),
     enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
 });
@@ -92,9 +94,7 @@ export const newts = sqliteTable("newt", {
     newtId: text("id").primaryKey(),
     secretHash: text("secretHash").notNull(),
     dateCreated: text("dateCreated").notNull(),
-    siteId: integer("siteId").references(() => sites.siteId, {
-        onDelete: "cascade",
-    }),
+    siteId: integer("siteId").references(() => sites.siteId),
 });
 
 export const twoFactorBackupCodes = sqliteTable("twoFactorBackupCodes", {

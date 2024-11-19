@@ -1,13 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { targets } from "@server/db/schema";
+import { resources, sites, targets } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
+import { addPeer } from "../gerbil/peers";
 
 const updateTargetParamsSchema = z.object({
     targetId: z.string().transform(Number).pipe(z.number().int().positive()),
@@ -53,14 +54,14 @@ export async function updateTarget(
 
         const { targetId } = parsedParams.data;
         const updateData = parsedBody.data;
-
-        const updatedTarget = await db
+    
+        const [updatedTarget] = await db
             .update(targets)
             .set(updateData)
             .where(eq(targets.targetId, targetId))
             .returning();
 
-        if (updatedTarget.length === 0) {
+        if (!updatedTarget) {
             return next(
                 createHttpError(
                     HttpCode.NOT_FOUND,
@@ -69,8 +70,65 @@ export async function updateTarget(
             );
         }
 
+                // get the resource
+                const [resource] = await db
+                .select({
+                    siteId: resources.siteId,
+                })
+                .from(resources)
+                .where(eq(resources.resourceId, updatedTarget.resourceId!));
+    
+            if (!resource) {
+                return next(
+                    createHttpError(
+                        HttpCode.NOT_FOUND,
+                        `Resource with ID ${updatedTarget.resourceId} not found`
+                    )
+                );
+            }
+    
+            // TODO: is this all inefficient?
+    
+            // get the site
+            const [site] = await db
+                .select()
+                .from(sites)
+                .where(eq(sites.siteId, resource.siteId!))
+                .limit(1);
+    
+            if (!site) {
+                return next(
+                    createHttpError(
+                        HttpCode.NOT_FOUND,
+                        `Site with ID ${resource.siteId} not found`
+                    )
+                );
+            }
+
+        if (site.pubKey && site.type == "wireguard") {
+            // Fetch resources for this site
+            const resourcesRes = await db.query.resources.findMany({
+                where: eq(resources.siteId, site.siteId),
+            });
+
+            // Fetch targets for all resources of this site
+            const targetIps = await Promise.all(
+                resourcesRes.map(async (resource) => {
+                    const targetsRes = await db.query.targets.findMany({
+                        where: eq(targets.resourceId, resource.resourceId),
+                    });
+                    return targetsRes.map((target) => `${target.ip}/32`);
+                })
+            );
+
+            await addPeer(site.exitNodeId!, {
+                publicKey: site.pubKey,
+                allowedIps: targetIps.flat(),
+            });
+        }
+
         return response(res, {
-            data: updatedTarget[0],
+            data: updatedTarget,
             success: true,
             error: false,
             message: "Target updated successfully",

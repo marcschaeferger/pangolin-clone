@@ -22,6 +22,7 @@ const createSiteSchema = z
         subdomain: z.string().min(1).max(255).optional(),
         pubKey: z.string().optional(),
         subnet: z.string(),
+        type: z.string(),
     })
     .strict();
 
@@ -48,7 +49,7 @@ export async function createSite(
             );
         }
 
-        const { name, subdomain, exitNodeId, pubKey, subnet } = parsedBody.data;
+        const { name, type, exitNodeId, pubKey, subnet } = parsedBody.data;
 
         const parsedParams = createSiteParamsSchema.safeParse(req.params);
         if (!parsedParams.success) {
@@ -76,6 +77,7 @@ export async function createSite(
             name,
             niceId,
             subnet,
+            type,
         };
 
         if (pubKey) {
@@ -114,10 +116,17 @@ export async function createSite(
 
         if (pubKey) {
             // add the peer to the exit node
-            await addPeer(exitNodeId, {
-                publicKey: pubKey,
-                allowedIps: [],
-            });
+            if (type == "newt") {
+                await addPeer(exitNodeId, {
+                    publicKey: pubKey,
+                    allowedIps: [subnet],
+                });
+            } else if (type == "wireguard") {
+                await addPeer(exitNodeId, {
+                    publicKey: pubKey,
+                    allowedIps: [],
+                });
+            }
         }
 
         return response(res, {
