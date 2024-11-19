@@ -1,6 +1,9 @@
 import ResourceProvider from "@app/providers/ResourceProvider";
 import { internal } from "@app/api";
-import { GetResourceAuthInfoResponse } from "@server/routers/resource";
+import {
+    GetResourceAuthInfoResponse,
+    GetResourceResponse,
+} from "@server/routers/resource";
 import { AxiosResponse } from "axios";
 import { redirect } from "next/navigation";
 import { authCookieHeader } from "@app/api/cookies";
@@ -23,9 +26,10 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
 
     const { children } = props;
 
+    let authInfo = null;
     let resource = null;
     try {
-        const res = await internal.get<AxiosResponse<GetResourceAuthInfoResponse>>(
+        const res = await internal.get<AxiosResponse<GetResourceResponse>>(
             `/resource/${params.resourceId}`,
             await authCookieHeader()
         );
@@ -35,6 +39,19 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
     }
 
     if (!resource) {
+        redirect(`/${params.orgId}/settings/resources`);
+    }
+
+    try {
+        const res = await internal.get<
+            AxiosResponse<GetResourceAuthInfoResponse>
+        >(`/resource/${resource.resourceId}/auth`, await authCookieHeader());
+        authInfo = res.data.data;
+    } catch {
+        redirect(`/${params.orgId}/settings/resources`);
+    }
+
+    if (!authInfo) {
         redirect(`/${params.orgId}/settings/resources`);
     }
 
@@ -94,7 +111,7 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
             />
 
             <OrgProvider org={org}>
-                <ResourceProvider resource={resource}>
+                <ResourceProvider resource={resource} authInfo={authInfo}>
                     <SidebarSettings
                         sidebarNavItems={sidebarNavItems}
                         limitWidth={false}

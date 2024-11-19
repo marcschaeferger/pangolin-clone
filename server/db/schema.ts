@@ -44,7 +44,7 @@ export const resources = sqliteTable("resources", {
     blockAccess: integer("blockAccess", { mode: "boolean" })
         .notNull()
         .default(false),
-    sso: integer("sso", { mode: "boolean" }).notNull().default(false),
+    sso: integer("sso", { mode: "boolean" }).notNull().default(true),
     twoFactorEnabled: integer("twoFactorEnabled", { mode: "boolean" })
         .notNull()
         .default(false),

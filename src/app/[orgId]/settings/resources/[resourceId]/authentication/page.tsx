@@ -9,11 +9,12 @@ import { useResourceContext } from "@app/hooks/useResourceContext";
 import { AxiosResponse } from "axios";
 import { formatAxiosError } from "@app/lib/utils";
 import {
+    GetResourceAuthInfoResponse,
     ListResourceRolesResponse,
     ListResourceUsersResponse,
 } from "@server/routers/resource";
 import { Button } from "@app/components/ui/button";
-import { z } from "zod";
+import { set, z } from "zod";
 import { Tag } from "emblor";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -31,6 +32,9 @@ import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { ListUsersResponse } from "@server/routers/user";
 import { Switch } from "@app/components/ui/switch";
 import { Label } from "@app/components/ui/label";
+import { Input } from "@app/components/ui/input";
+import { ShieldCheck } from "lucide-react";
+import SetResourcePasswordForm from "./components/SetResourcePasswordForm";
 
 const UsersRolesFormSchema = z.object({
     roles: z.array(
@@ -50,7 +54,10 @@ const UsersRolesFormSchema = z.object({
 export default function ResourceAuthenticationPage() {
     const { toast } = useToast();
     const { org } = useOrgContext();
-    const { resource, updateResource } = useResourceContext();
+    const { resource, updateResource, authInfo, updateAuthInfo } =
+        useResourceContext();
+
+    const [pageLoading, setPageLoading] = useState(true);
 
     const [allRoles, setAllRoles] = useState<{ id: string; text: string }[]>(
         []
@@ -69,7 +76,10 @@ export default function ResourceAuthenticationPage() {
     const [blockAccess, setBlockAccess] = useState(resource.blockAccess);
 
     const [loadingSaveUsersRoles, setLoadingSaveUsersRoles] = useState(false);
-    const [loadingSaveAuth, setLoadingSaveAuth] = useState(false);
+    const [loadingRemoveResourcePassword, setLoadingRemoveResourcePassword] =
+        useState(false);
+
+    const [isSetPasswordOpen, setIsSetPasswordOpen] = useState(false);
 
     const usersRolesForm = useForm<z.infer<typeof UsersRolesFormSchema>>({
         resolver: zodResolver(UsersRolesFormSchema),
@@ -77,103 +87,77 @@ export default function ResourceAuthenticationPage() {
     });
 
     useEffect(() => {
-        api.get<AxiosResponse<ListRolesResponse>>(
-            `/org/${org?.org.orgId}/roles`
-        )
-            .then((res) => {
+        const fetchData = async () => {
+            try {
+                const [
+                    rolesResponse,
+                    resourceRolesResponse,
+                    usersResponse,
+                    resourceUsersResponse,
+                ] = await Promise.all([
+                    api.get<AxiosResponse<ListRolesResponse>>(
+                        `/org/${org?.org.orgId}/roles`
+                    ),
+                    api.get<AxiosResponse<ListResourceRolesResponse>>(
+                        `/resource/${resource.resourceId}/roles`
+                    ),
+                    api.get<AxiosResponse<ListUsersResponse>>(
+                        `/org/${org?.org.orgId}/users`
+                    ),
+                    api.get<AxiosResponse<ListResourceUsersResponse>>(
+                        `/resource/${resource.resourceId}/users`
+                    ),
+                ]);
+
                 setAllRoles(
-                    res.data.data.roles
+                    rolesResponse.data.data.roles
                         .map((role) => ({
                             id: role.roleId.toString(),
                             text: role.name,
                         }))
                         .filter((role) => role.text !== "Admin")
                 );
-            })
-            .catch((e) => {
-                console.error(e);
-                toast({
-                    variant: "destructive",
-                    title: "Failed to fetch roles",
-                    description: formatAxiosError(
-                        e,
-                        "An error occurred while fetching the roles"
-                    ),
-                });
-            });
 
-        api.get<AxiosResponse<ListResourceRolesResponse>>(
-            `/resource/${resource.resourceId}/roles`
-        )
-            .then((res) => {
                 usersRolesForm.setValue(
                     "roles",
-                    res.data.data.roles
+                    resourceRolesResponse.data.data.roles
                         .map((i) => ({
                             id: i.roleId.toString(),
                             text: i.name,
                         }))
                         .filter((role) => role.text !== "Admin")
                 );
-            })
-            .catch((e) => {
-                console.error(e);
-                toast({
-                    variant: "destructive",
-                    title: "Failed to fetch roles",
-                    description: formatAxiosError(
-                        e,
-                        "An error occurred while fetching the roles"
-                    ),
-                });
-            });
 
-        api.get<AxiosResponse<ListUsersResponse>>(
-            `/org/${org?.org.orgId}/users`
-        )
-            .then((res) => {
                 setAllUsers(
-                    res.data.data.users.map((user) => ({
+                    usersResponse.data.data.users.map((user) => ({
                         id: user.id.toString(),
                         text: user.email,
                     }))
                 );
-            })
-            .catch((e) => {
-                console.error(e);
-                toast({
-                    variant: "destructive",
-                    title: "Failed to fetch users",
-                    description: formatAxiosError(
-                        e,
-                        "An error occurred while fetching the users"
-                    ),
-                });
-            });
 
-        api.get<AxiosResponse<ListResourceUsersResponse>>(
-            `/resource/${resource.resourceId}/users`
-        )
-            .then((res) => {
                 usersRolesForm.setValue(
                     "users",
-                    res.data.data.users.map((i) => ({
+                    resourceUsersResponse.data.data.users.map((i) => ({
                         id: i.userId.toString(),
                         text: i.email,
                     }))
                 );
-            })
-            .catch((e) => {
+
+                setPageLoading(false);
+            } catch (e) {
                 console.error(e);
                 toast({
                     variant: "destructive",
-                    title: "Failed to fetch users",
+                    title: "Failed to fetch data",
                     description: formatAxiosError(
                         e,
-                        "An error occurred while fetching the users"
+                        "An error occurred while fetching the data"
                     ),
                 });
-            });
+            }
+        };
+
+        fetchData();
     }, []);
 
     async function onSubmitUsersRoles(
@@ -181,12 +165,28 @@ export default function ResourceAuthenticationPage() {
     ) {
         try {
             setLoadingSaveUsersRoles(true);
-            await api.post(`/resource/${resource.resourceId}/roles`, {
-                roleIds: data.roles.map((i) => parseInt(i.id)),
+
+            const jobs = [
+                api.post(`/resource/${resource.resourceId}/roles`, {
+                    roleIds: data.roles.map((i) => parseInt(i.id)),
+                }),
+                api.post(`/resource/${resource.resourceId}/users`, {
+                    userIds: data.users.map((i) => i.id),
+                }),
+                api.post(`/resource/${resource.resourceId}`, {
+                    sso: ssoEnabled,
+                    blockAccess,
+                }),
+            ];
+
+            await Promise.all(jobs);
+
+            updateResource({
+                sso: ssoEnabled,
             });
 
-            await api.post(`/resource/${resource.resourceId}/users`, {
-                userIds: data.users.map((i) => i.id),
+            updateAuthInfo({
+                sso: ssoEnabled,
             });
 
             toast({
@@ -208,47 +208,94 @@ export default function ResourceAuthenticationPage() {
         }
     }
 
-    async function onSubmitAuth() {
-        try {
-            setLoadingSaveAuth(true);
+    function removeResourcePassword() {
+        setLoadingRemoveResourcePassword(true);
 
-            await api.post(`/resource/${resource.resourceId}`, {
-                sso: ssoEnabled,
-                blockAccess,
-            });
+        api.post(`/resource/${resource.resourceId}/password`, {
+            password: null,
+        })
+            .then(() => {
+                toast({
+                    title: "Resource password removed",
+                    description:
+                        "The resource password has been removed successfully",
+                });
 
-            updateResource({
-                blockAccess,
-                sso: ssoEnabled,
-            });
+                updateAuthInfo({
+                    password: false,
+                });
+            })
+            .catch((e) => {
+                toast({
+                    variant: "destructive",
+                    title: "Error removing resource password",
+                    description: formatAxiosError(
+                        e,
+                        "An error occurred while removing the resource password"
+                    ),
+                });
+            })
+            .finally(() => setLoadingRemoveResourcePassword(false));
+    }
 
-            toast({
-                title: "Saved successfully",
-                description: "Authentication settings have been saved",
-            });
-        } catch (e) {
-            console.error(e);
-            toast({
-                variant: "destructive",
-                title: "Failed to save authentication",
-                description: formatAxiosError(
-                    e,
-                    "An error occurred while saving the authentication"
-                ),
-            });
-        } finally {
-            setLoadingSaveAuth(false);
-        }
+    if (pageLoading) {
+        return <></>;
     }
 
     return (
         <>
+            {isSetPasswordOpen && (
+                <SetResourcePasswordForm
+                    open={isSetPasswordOpen}
+                    setOpen={setIsSetPasswordOpen}
+                    resourceId={resource.resourceId}
+                    onSetPassword={() => {
+                        setIsSetPasswordOpen(false);
+                        updateAuthInfo({
+                            password: true,
+                        });
+                    }}
+                />
+            )}
+
             <div className="space-y-6 lg:max-w-2xl">
+                {/* <div>
+                    <div className="flex items-center space-x-2 mb-2">
+                        <Switch
+                            id="block-toggle"
+                            defaultChecked={resource.blockAccess}
+                            onCheckedChange={(val) => setBlockAccess(val)}
+                        />
+                        <Label htmlFor="block-toggle">Block Access</Label>
+                    </div>
+                    <span className="text-muted-foreground text-sm">
+                        When enabled, this will prevent anyone from accessing
+                        the resource including SSO users.
+                    </span>
+                </div> */}
+
                 <SettingsSectionTitle
                     title="Users & Roles"
                     description="Configure who can visit this resource (only applicable if SSO is used)"
                     size="1xl"
                 />
+
+                <div>
+                    <div className="flex items-center space-x-2 mb-2">
+                        <Switch
+                            id="sso-toggle"
+                            defaultChecked={resource.sso}
+                            onCheckedChange={(val) => setSsoEnabled(val)}
+                        />
+                        <Label htmlFor="sso-toggle">Allow SSO</Label>
+                    </div>
+                    <span className="text-muted-foreground text-sm">
+                        Users will be able to access the resource if they're
+                        logged into the dashboard and have access to the
+                        resource. Users will only have to login once for all
+                        resources that have SSO enabled.
+                    </span>
+                </div>
 
                 <Form {...usersRolesForm}>
                     <form
@@ -368,51 +415,39 @@ export default function ResourceAuthenticationPage() {
 
                 <SettingsSectionTitle
                     title="Authentication Methods"
-                    description="Configure how users can authenticate to this resource"
+                    description="You can also allow users to access the resource via the below methods"
                     size="1xl"
                 />
 
                 <div>
-                    <div className="flex items-center space-x-2 mb-2">
-                        <Switch
-                            id="block-toggle"
-                            defaultChecked={resource.blockAccess}
-                            onCheckedChange={(val) => setBlockAccess(val)}
-                        />
-                        <Label htmlFor="block-toggle">Block Access</Label>
-                    </div>
-                    <span className="text-muted-foreground text-sm">
-                        When enabled, all auth methods will be disabled and
-                        users will not able to access the resource. This is an
-                        override.
-                    </span>
+                    {authInfo?.password ? (
+                        <div className="flex items-center space-x-4">
+                            <div className="flex items-center text-green-500 space-x-2">
+                                <ShieldCheck />
+                                <span>Password Protection Enabled</span>
+                            </div>
+                            <Button
+                                variant="gray"
+                                type="button"
+                                loading={loadingRemoveResourcePassword}
+                                disabled={loadingRemoveResourcePassword}
+                                onClick={removeResourcePassword}
+                            >
+                                Remove Password
+                            </Button>
+                        </div>
+                    ) : (
+                        <div>
+                            <Button
+                                variant="gray"
+                                type="button"
+                                onClick={() => setIsSetPasswordOpen(true)}
+                            >
+                                Add Password
+                            </Button>
+                        </div>
+                    )}
                 </div>
-
-                <div>
-                    <div className="flex items-center space-x-2 mb-2">
-                        <Switch
-                            id="sso-toggle"
-                            defaultChecked={resource.sso}
-                            onCheckedChange={(val) => setSsoEnabled(val)}
-                        />
-                        <Label htmlFor="sso-toggle">Allow SSO</Label>
-                    </div>
-                    <span className="text-muted-foreground text-sm">
-                        Users will be able to access the resource if they're
-                        logged into the dashboard and have access to the
-                        resource. Users will only have to login once for all
-                        resources that have SSO enabled.
-                    </span>
-                </div>
-
-                <Button
-                    type="button"
-                    onClick={onSubmitAuth}
-                    loading={loadingSaveAuth}
-                    disabled={loadingSaveAuth}
-                >
-                    Save Authentication
-                </Button>
             </div>
         </>
     );

@@ -1,10 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { InfoIcon, LinkIcon, CheckIcon, CopyIcon } from "lucide-react";
+import {
+    InfoIcon,
+    LinkIcon,
+    CheckIcon,
+    CopyIcon,
+    ShieldCheck,
+    ShieldOff,
+} from "lucide-react";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { useResourceContext } from "@app/hooks/useResourceContext";
 import Link from "next/link";
@@ -15,7 +22,7 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
     const [copied, setCopied] = useState(false);
 
     const { org } = useOrgContext();
-    const { resource } = useResourceContext();
+    const { resource, authInfo } = useResourceContext();
 
     const fullUrl = `${resource.ssl ? "https" : "http"}://${
         resource.subdomain
@@ -70,7 +77,7 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
                         </Button>
                     </div>
 
-                    <p className="mt-3">
+                    {/* <p className="mt-3">
                         To create a proxy to your private services,{" "}
                         <Link
                             href={`/${org.org.orgId}/settings/resources/${resource.resourceId}/connectivity`}
@@ -79,7 +86,29 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
                             add targets
                         </Link>{" "}
                         to this resource
-                    </p>
+                    </p> */}
+
+                    <div className="mt-3">
+                        {authInfo.password ||
+                        authInfo.pincode ||
+                        authInfo.sso ? (
+                            <div className="flex items-center space-x-2 text-green-500">
+                                <ShieldCheck />
+                                <span>
+                                    This resource is protected with at least one
+                                    auth method
+                                </span>
+                            </div>
+                        ) : (
+                            <div className="flex items-center space-x-2 text-yellow-500">
+                                <ShieldOff />
+                                <span>
+                                    This resource is not protected with any auth
+                                    method. Anyone can access this resource.
+                                </span>
+                            </div>
+                        )}
+                    </div>
                 </AlertDescription>
             </Alert>
         </Card>

@@ -15,7 +15,7 @@ const setResourceAuthMethodsParamsSchema = z.object({
 
 const setResourceAuthMethodsBodySchema = z
     .object({
-        password: z.string().min(4).max(255).nullable(),
+        password: z.string().nullish(),
     })
     .strict();
 

@@ -88,6 +88,8 @@ export default function ReverseProxyTargets(props: {
 
     const [loading, setLoading] = useState(false);
 
+    const [pageLoading, setPageLoading] = useState(true);
+
     const addTargetForm = useForm({
         resolver: zodResolver(addTargetSchema),
         defaultValues: {
@@ -100,24 +102,26 @@ export default function ReverseProxyTargets(props: {
 
     useEffect(() => {
         const fetchSites = async () => {
-            const res = await api
-                .get<AxiosResponse<ListTargetsResponse>>(
+            try {
+                const res = await api.get<AxiosResponse<ListTargetsResponse>>(
                     `/resource/${params.resourceId}/targets`
-                )
-                .catch((err) => {
-                    console.error(err);
-                    toast({
-                        variant: "destructive",
-                        title: "Failed to fetch targets",
-                        description: formatAxiosError(
-                            err,
-                            "An error occurred while fetching targets"
-                        ),
-                    });
-                });
+                );
 
-            if (res && res.status === 200) {
-                setTargets(res.data.data.targets);
+                if (res.status === 200) {
+                    setTargets(res.data.data.targets);
+                }
+            } catch (err) {
+                console.error(err);
+                toast({
+                    variant: "destructive",
+                    title: "Failed to fetch targets",
+                    description: formatAxiosError(
+                        err,
+                        "An error occurred while fetching targets"
+                    ),
+                });
+            } finally {
+                setPageLoading(false);
             }
         };
         fetchSites();
@@ -336,6 +340,10 @@ export default function ReverseProxyTargets(props: {
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
     });
+
+    if (pageLoading) {
+        return <></>;
+    }
 
     return (
         <div>
