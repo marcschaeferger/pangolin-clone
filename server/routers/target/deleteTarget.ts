@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { resources, sites, targets } from "@server/db/schema";
+import { newts, resources, sites, targets } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
@@ -63,9 +63,6 @@ export async function deleteTarget(
             );
         }
 
-        // TODO: is this all inefficient?
-
-        // get the site
         const [site] = await db
             .select()
             .from(sites)
@@ -83,6 +80,7 @@ export async function deleteTarget(
 
         if (site.pubKey) {
             if (site.type == "wireguard") {
+                // TODO: is this all inefficient?
                 // Fetch resources for this site
                 const resourcesRes = await db.query.resources.findMany({
                     where: eq(resources.siteId, site.siteId),
@@ -103,7 +101,14 @@ export async function deleteTarget(
                     allowedIps: targetIps.flat(),
                 });
             } else if (site.type == "newt") {
-                removeTargets("", [deletedTarget]); // TODO: we need to generate and save the internal port somewhere and also come up with the newtId
+                // get the newt on the site by querying the newt table for siteId
+                const [newt] = await db
+                    .select()
+                    .from(newts)
+                    .where(eq(newts.siteId, site.siteId))
+                    .limit(1);
+
+                removeTargets(newt.newtId, [deletedTarget]);
             }
         }
 

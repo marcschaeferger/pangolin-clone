@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { resources, sites, Target, targets } from "@server/db/schema";
+import { newts, resources, sites, Target, targets } from "@server/db/schema";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
@@ -75,9 +75,6 @@ export async function createTarget(
             );
         }
 
-        // TODO: is this all inefficient?
-
-        // get the site
         const [site] = await db
             .select()
             .from(sites)
@@ -103,40 +100,74 @@ export async function createTarget(
             );
         }
 
+        // Fetch resources for this site
+        const resourcesRes = await db.query.resources.findMany({
+            where: eq(resources.siteId, site.siteId),
+        });
+
+        // TODO: is this all inefficient?
+        // Fetch targets for all resources of this site
+        let targetIps: string[] = [];
+        let targetInternalPorts: number[] = [];
+        await Promise.all(
+            resourcesRes.map(async (resource) => {
+                const targetsRes = await db.query.targets.findMany({
+                    where: eq(targets.resourceId, resource.resourceId),
+                });
+                targetsRes.forEach((target) => {
+                    targetIps.push(`${target.ip}/32`);
+                    if (target.internalPort) {
+                        targetInternalPorts.push(target.internalPort);
+                    }
+                });
+            })
+        );
+
+        let internalPort!: number;
+        // pick a port
+        for (let i = 40000; i < 65535; i++) {
+            if (!targetInternalPorts.includes(i)) {
+                internalPort = i;
+                break;
+            }
+        }
+
+        if (!internalPort) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    `No available internal port`
+                )
+            );
+        }
+
         const newTarget = await db
             .insert(targets)
             .values({
                 resourceId,
                 protocol: "tcp", // hard code for now
+                internalPort,
                 ...targetData,
             })
             .returning();
 
         if (site.pubKey) {
-            if ( site.type == "wireguard") {
-            // Fetch resources for this site
-            const resourcesRes = await db.query.resources.findMany({
-                where: eq(resources.siteId, site.siteId),
-            });
+            if (site.type == "wireguard") {
+                await addPeer(site.exitNodeId!, {
+                    publicKey: site.pubKey,
+                    allowedIps: targetIps.flat(),
+                });
+            } else if (site.type == "newt") {
+                // get the newt on the site by querying the newt table for siteId
+                const [newt] = await db
+                    .select()
+                    .from(newts)
+                    .where(eq(newts.siteId, site.siteId))
+                    .limit(1);
 
-            // Fetch targets for all resources of this site
-            const targetIps = await Promise.all(
-                resourcesRes.map(async (resource) => {
-                    const targetsRes = await db.query.targets.findMany({
-                        where: eq(targets.resourceId, resource.resourceId),
-                    });
-                    return targetsRes.map((target) => `${target.ip}/32`);
-                })
-            );
-
-            await addPeer(site.exitNodeId!, {
-                publicKey: site.pubKey,
-                allowedIps: targetIps.flat(),
-            });
-        } else if (site.type == "newt") {
-            addTargets("",newTarget); // TODO: we need to generate and save the internal port somewhere and also come up with the newtId
+                addTargets(newt.newtId, newTarget);
+            }
         }
-    }
 
         return response<CreateTargetResponse>(res, {
             data: newTarget[0],
