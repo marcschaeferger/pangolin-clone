@@ -43,9 +43,7 @@ export async function deletePeer(exitNodeId: number, publicKey: string) {
         throw new Error(`Exit node with ID ${exitNodeId} is not reachable`);
     }
     try {
-        const response = await axios.delete(`${exitNode.reachableAt}/peer`, {
-            data: { publicKey }  // Send public key in request body
-        });
+        const response = await axios.delete(`${exitNode.reachableAt}/peer?public_key=${encodeURIComponent(publicKey)}`);
         logger.info('Peer deleted successfully:', response.data.status);
         return response.data;
     } catch (error) {
