@@ -23,12 +23,13 @@ export type GetResourceAuthInfoResponse = {
     pincode: boolean;
     sso: boolean;
     blockAccess: boolean;
+    url: string;
 };
 
 export async function getResourceAuthInfo(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ): Promise<any> {
     try {
         const parsedParams = getResourceAuthInfoSchema.safeParse(req.params);
@@ -36,8 +37,8 @@ export async function getResourceAuthInfo(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    fromError(parsedParams.error).toString()
-                )
+                    fromError(parsedParams.error).toString(),
+                ),
             );
         }
 
@@ -48,11 +49,11 @@ export async function getResourceAuthInfo(
             .from(resources)
             .leftJoin(
                 resourcePincode,
-                eq(resourcePincode.resourceId, resources.resourceId)
+                eq(resourcePincode.resourceId, resources.resourceId),
             )
             .leftJoin(
                 resourcePassword,
-                eq(resourcePassword.resourceId, resources.resourceId)
+                eq(resourcePassword.resourceId, resources.resourceId),
             )
             .where(eq(resources.resourceId, resourceId))
             .limit(1);
@@ -61,9 +62,11 @@ export async function getResourceAuthInfo(
         const pincode = result?.resourcePincode;
         const password = result?.resourcePassword;
 
+        const url = `${resource.ssl ? "https" : "http"}://${resource.fullDomain}`;
+
         if (!resource) {
             return next(
-                createHttpError(HttpCode.NOT_FOUND, "Resource not found")
+                createHttpError(HttpCode.NOT_FOUND, "Resource not found"),
             );
         }
 
@@ -75,6 +78,7 @@ export async function getResourceAuthInfo(
                 pincode: pincode !== null,
                 sso: resource.sso,
                 blockAccess: resource.blockAccess,
+                url,
             },
             success: true,
             error: false,
@@ -83,7 +87,10 @@ export async function getResourceAuthInfo(
         });
     } catch (error) {
         return next(
-            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "An error occurred",
+            ),
         );
     }
 }

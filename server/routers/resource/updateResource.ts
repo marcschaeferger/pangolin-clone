@@ -31,7 +31,7 @@ const updateResourceBodySchema = z
 export async function updateResource(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ): Promise<any> {
     try {
         const parsedParams = updateResourceParamsSchema.safeParse(req.params);
@@ -39,8 +39,8 @@ export async function updateResource(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    fromError(parsedParams.error).toString()
-                )
+                    fromError(parsedParams.error).toString(),
+                ),
             );
         }
 
@@ -49,8 +49,8 @@ export async function updateResource(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    fromError(parsedBody.error).toString()
-                )
+                    fromError(parsedBody.error).toString(),
+                ),
             );
         }
 
@@ -67,8 +67,8 @@ export async function updateResource(
             return next(
                 createHttpError(
                     HttpCode.NOT_FOUND,
-                    `Resource with ID ${resourceId} not found`
-                )
+                    `Resource with ID ${resourceId} not found`,
+                ),
             );
         }
 
@@ -76,16 +76,23 @@ export async function updateResource(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    "Resource does not have a domain"
-                )
+                    "Resource does not have a domain",
+                ),
             );
         }
 
-        const fullDomain = `${updateData.subdomain}.${resource[0].orgs.domain}`;
+        const fullDomain = updateData.subdomain
+            ? `${updateData.subdomain}.${resource[0].orgs.domain}`
+            : undefined;
+
+        const updatePayload = {
+            ...updateData,
+            ...(fullDomain && { fullDomain }),
+        };
 
         const updatedResource = await db
             .update(resources)
-            .set({ ...updateData, fullDomain })
+            .set(updatePayload)
             .where(eq(resources.resourceId, resourceId))
             .returning();
 
@@ -93,8 +100,8 @@ export async function updateResource(
             return next(
                 createHttpError(
                     HttpCode.NOT_FOUND,
-                    `Resource with ID ${resourceId} not found`
-                )
+                    `Resource with ID ${resourceId} not found`,
+                ),
             );
         }
 
@@ -108,7 +115,10 @@ export async function updateResource(
     } catch (error) {
         logger.error(error);
         return next(
-            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "An error occurred",
+            ),
         );
     }
 }

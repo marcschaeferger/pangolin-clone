@@ -99,12 +99,12 @@ export default function InviteStatusCard({
         <div className="p-3 md:mt-32 flex items-center justify-center">
             <Card className="w-full max-w-md">
                 <CardHeader>
-                    <div className="flex items-center justify-center w-20 h-20 rounded-full bg-red-100 mx-auto mb-4">
+                    {/* <div className="flex items-center justify-center w-20 h-20 rounded-full bg-red-100 mx-auto mb-4">
                         <XCircle
                             className="w-10 h-10 text-red-600"
                             aria-hidden="true"
                         />
-                    </div>
+                    </div> */}
                     <CardTitle className="text-center text-2xl font-bold">
                         Invite Not Accepted
                     </CardTitle>

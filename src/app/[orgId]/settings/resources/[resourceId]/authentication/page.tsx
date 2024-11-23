@@ -415,7 +415,7 @@ export default function ResourceAuthenticationPage() {
                 <section className="space-y-8">
                     <SettingsSectionTitle
                         title="Authentication Methods"
-                        description="You can also anyone to access the resource via the below methods"
+                        description="Allow anyone to access the resource via the below methods"
                         size="1xl"
                     />
 
