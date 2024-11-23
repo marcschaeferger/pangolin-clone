@@ -13,6 +13,7 @@ import {
     createResourceSession,
     serializeResourceSessionCookie,
 } from "@server/auth/resource";
+import logger from "@server/logger";
 
 export const authWithPasswordBodySchema = z.object({
     password: z.string(),
@@ -132,8 +133,9 @@ export async function authWithPassword(
             resource.fullDomain,
             secureCookie
         );
-
         res.appendHeader("Set-Cookie", cookie);
+
+        logger.debug(cookie); // remove after testing
 
         return response<null>(res, {
             data: null,

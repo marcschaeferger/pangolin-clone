@@ -6,16 +6,17 @@ import {
     CardTitle,
 } from "@app/components/ui/card";
 
-export default async function ResourceNotFound() {
+export default async function ResourceAccessDenied() {
     return (
         <Card className="w-full max-w-md">
             <CardHeader>
                 <CardTitle className="text-center text-2xl font-bold">
-                    Resource Not Found
+                    Access Denied
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                The resource you're trying to access does not exist
+                You're not alowed to access this resource. If this is a mistake,
+                please contact the administrator.
             </CardContent>
         </Card>
     );

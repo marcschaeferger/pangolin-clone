@@ -44,11 +44,11 @@ import { useState } from "react";
 type HeaderProps = {
     name?: string;
     email: string;
-    orgName: string;
+    orgId: string;
     orgs: ListOrgsResponse["orgs"];
 };
 
-export default function Header({ email, orgName, name, orgs }: HeaderProps) {
+export default function Header({ email, orgId, name, orgs }: HeaderProps) {
     const { toast } = useToast();
 
     const [open, setOpen] = useState(false);
@@ -149,7 +149,7 @@ export default function Header({ email, orgName, name, orgs }: HeaderProps) {
                                 size="lg"
                                 role="combobox"
                                 aria-expanded={open}
-                                className="w-full md:w-[200px] h-12 px-3 py-4"
+                                className="w-full md:w-[200px] h-12 px-3 py-4 bg-neutral"
                             >
                                 <div className="flex items-center justify-between w-full">
                                     <div className="flex flex-col items-start">
@@ -157,10 +157,10 @@ export default function Header({ email, orgName, name, orgs }: HeaderProps) {
                                             Organization
                                         </span>
                                         <span className="text-sm text-muted-foreground">
-                                            {orgName
+                                            {orgId
                                                 ? orgs.find(
                                                       (org) =>
-                                                          org.name === orgName,
+                                                          org.orgId === orgId,
                                                   )?.name
                                                 : "Select organization..."}
                                         </span>
@@ -189,7 +189,7 @@ export default function Header({ email, orgName, name, orgs }: HeaderProps) {
                                                 <Check
                                                     className={cn(
                                                         "mr-2 h-4 w-4",
-                                                        orgName === org.name
+                                                        orgId === org.orgId
                                                             ? "opacity-100"
                                                             : "opacity-0",
                                                     )}
@@ -204,7 +204,7 @@ export default function Header({ email, orgName, name, orgs }: HeaderProps) {
                     </Popover>
 
                     {/* <Select
-                        defaultValue={orgName}
+                        defaultValue={orgId}
                         onValueChange={(val) => {
                             router.push(`/${val}/settings`);
                         }}

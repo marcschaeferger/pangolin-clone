@@ -9,6 +9,8 @@ import { authCookieHeader } from "@app/api/cookies";
 import { cache } from "react";
 import { verifySession } from "@app/lib/auth/verifySession";
 import { redirect } from "next/navigation";
+import ResourceNotFound from "./components/ResourceNotFound";
+import ResourceAccessDenied from "./components/ResourceAccessDenied";
 
 export default async function ResourceAuthPage(props: {
     params: Promise<{ resourceId: number; orgId: string }>;
@@ -35,10 +37,23 @@ export default async function ResourceAuthPage(props: {
     const user = await getUser();
 
     if (!authInfo) {
-        return <>Resource not found</>;
+        return (
+            <div className="w-full max-w-md mx-auto p-3 md:mt-32">
+                <ResourceNotFound />
+            </div>
+        );
     }
 
+    const hasAuth = authInfo.password || authInfo.pincode || authInfo.sso;
     const isSSOOnly = authInfo.sso && !authInfo.password && !authInfo.pincode;
+
+    if (!hasAuth) {
+        return (
+            <div className="w-full max-w-md mx-auto p-3 md:mt-32">
+                <ResourceAccessDenied />
+            </div>
+        );
+    }
 
     let userIsUnauthorized = false;
     if (user && authInfo.sso) {
@@ -62,7 +77,11 @@ export default async function ResourceAuthPage(props: {
     }
 
     if (userIsUnauthorized && isSSOOnly) {
-        return <>You do not have access to this resource</>;
+        return (
+            <div className="w-full max-w-md mx-auto p-3 md:mt-32">
+                <ResourceAccessDenied />
+            </div>
+        );
     }
 
     return (

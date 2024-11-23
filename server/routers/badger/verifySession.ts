@@ -16,6 +16,7 @@ import { and, eq } from "drizzle-orm";
 import config from "@server/config";
 import { validateResourceSessionToken } from "@server/auth/resource";
 import { Resource, roleResources, userResources } from "@server/db/schema";
+import logger from "@server/logger";
 
 const verifyResourceSessionSchema = z.object({
     sessions: z.object({
@@ -44,6 +45,8 @@ export async function verifyResourceSession(
     res: Response,
     next: NextFunction
 ): Promise<any> {
+    logger.debug("Badger sent", req.body); // remove when done testing
+
     const parsedBody = verifyResourceSessionSchema.safeParse(req.body);
 
     if (!parsedBody.success) {

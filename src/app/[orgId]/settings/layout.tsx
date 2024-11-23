@@ -95,7 +95,7 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
                 <div className="container mx-auto flex flex-col content-between gap-4 ">
                     <Header
                         email={user.email}
-                        orgName={params.orgId}
+                        orgId={params.orgId}
                         orgs={orgs}
                     />
                     <TopbarNav items={topNavItems} orgId={params.orgId} />

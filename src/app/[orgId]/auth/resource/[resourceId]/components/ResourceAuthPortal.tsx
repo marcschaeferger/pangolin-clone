@@ -35,6 +35,8 @@ import { Alert, AlertDescription } from "@app/components/ui/alert";
 import { formatAxiosError } from "@app/lib/utils";
 import { AxiosResponse } from "axios";
 import { LoginResponse } from "@server/routers/auth";
+import ResourceAccessDenied from "./ResourceAccessDenied";
+import LoginForm from "@app/components/LoginForm";
 
 const pinSchema = z.object({
     pin: z
@@ -44,13 +46,6 @@ const pinSchema = z.object({
 });
 
 const passwordSchema = z.object({
-    password: z
-        .string()
-        .min(1, { message: "Password must be at least 1 character long" }),
-});
-
-const userSchema = z.object({
-    email: z.string().email({ message: "Please enter a valid email address" }),
     password: z
         .string()
         .min(1, { message: "Password must be at least 1 character long" }),
@@ -73,7 +68,7 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
     const router = useRouter();
 
     const [passwordError, setPasswordError] = useState<string | null>(null);
-    const [userError, setUserError] = useState<string | null>(null);
+    const [accessDenied, setAccessDenied] = useState<boolean>(false);
 
     function getDefaultSelectedMethod() {
         if (props.methods.sso) {
@@ -115,14 +110,6 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
         },
     });
 
-    const userForm = useForm<z.infer<typeof userSchema>>({
-        resolver: zodResolver(userSchema),
-        defaultValues: {
-            email: "",
-            password: "",
-        },
-    });
-
     const onPinSubmit = (values: z.infer<typeof pinSchema>) => {
         console.log("PIN authentication", values);
         // Implement PIN authentication logic here
@@ -143,254 +130,218 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
             });
     };
 
-    const handleSSOAuth = (values: z.infer<typeof userSchema>) => {
+    async function handleSSOAuth() {
         console.log("SSO authentication");
 
-        api.post<AxiosResponse<LoginResponse>>("/auth/login", {
-            email: values.email,
-            password: values.password,
-        })
-            .then((res) => {
-                // console.log(res)
-                window.location.href = props.redirect;
-            })
-            .catch((e) => {
-                console.error(e);
-                setUserError(
-                    formatAxiosError(e, "An error occurred while logging in"),
-                );
-            });
-    };
+        await api.get(`/resource/${props.resource.id}`).catch((e) => {
+            setAccessDenied(true);
+        });
+
+        if (!accessDenied) {
+            window.location.href = props.redirect;
+        }
+    }
 
     return (
         <div>
-            <Card>
-                <CardHeader>
-                    <CardTitle>Authentication Required</CardTitle>
-                    <CardDescription>
-                        {numMethods > 1
-                            ? `Choose your preferred method to access ${props.resource.name}`
-                            : `You must authenticate to access ${props.resource.name}`}
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Tabs value={activeTab} onValueChange={setActiveTab}>
-                        {numMethods > 1 && (
-                            <TabsList
-                                className={`grid w-full grid-cols-${numMethods}`}
+            {!accessDenied ? (
+                <div>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Authentication Required</CardTitle>
+                            <CardDescription>
+                                {numMethods > 1
+                                    ? `Choose your preferred method to access ${props.resource.name}`
+                                    : `You must authenticate to access ${props.resource.name}`}
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Tabs
+                                value={activeTab}
+                                onValueChange={setActiveTab}
                             >
+                                {numMethods > 1 && (
+                                    <TabsList
+                                        className={`grid w-full grid-cols-${numMethods}`}
+                                    >
+                                        {props.methods.pincode && (
+                                            <TabsTrigger value="pin">
+                                                <Binary className="w-4 h-4 mr-1" />{" "}
+                                                PIN
+                                            </TabsTrigger>
+                                        )}
+                                        {props.methods.password && (
+                                            <TabsTrigger value="password">
+                                                <Key className="w-4 h-4 mr-1" />{" "}
+                                                Password
+                                            </TabsTrigger>
+                                        )}
+                                        {props.methods.sso && (
+                                            <TabsTrigger value="sso">
+                                                <User className="w-4 h-4 mr-1" />{" "}
+                                                User
+                                            </TabsTrigger>
+                                        )}
+                                    </TabsList>
+                                )}
                                 {props.methods.pincode && (
-                                    <TabsTrigger value="pin">
-                                        <Binary className="w-4 h-4 mr-1" /> PIN
-                                    </TabsTrigger>
+                                    <TabsContent
+                                        value="pin"
+                                        className={`${numMethods <= 1 ? "mt-0" : ""}`}
+                                    >
+                                        <Form {...pinForm}>
+                                            <form
+                                                onSubmit={pinForm.handleSubmit(
+                                                    onPinSubmit,
+                                                )}
+                                                className="space-y-4"
+                                            >
+                                                <FormField
+                                                    control={pinForm.control}
+                                                    name="pin"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>
+                                                                Enter 6-digit
+                                                                PIN
+                                                            </FormLabel>
+                                                            <FormControl>
+                                                                <div className="flex justify-center">
+                                                                    <InputOTP
+                                                                        maxLength={
+                                                                            6
+                                                                        }
+                                                                        {...field}
+                                                                    >
+                                                                        <InputOTPGroup className="flex">
+                                                                            <InputOTPSlot
+                                                                                index={
+                                                                                    0
+                                                                                }
+                                                                            />
+                                                                            <InputOTPSlot
+                                                                                index={
+                                                                                    1
+                                                                                }
+                                                                            />
+                                                                            <InputOTPSlot
+                                                                                index={
+                                                                                    2
+                                                                                }
+                                                                            />
+                                                                            <InputOTPSlot
+                                                                                index={
+                                                                                    3
+                                                                                }
+                                                                            />
+                                                                            <InputOTPSlot
+                                                                                index={
+                                                                                    4
+                                                                                }
+                                                                            />
+                                                                            <InputOTPSlot
+                                                                                index={
+                                                                                    5
+                                                                                }
+                                                                            />
+                                                                        </InputOTPGroup>
+                                                                    </InputOTP>
+                                                                </div>
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <Button
+                                                    type="submit"
+                                                    className="w-full"
+                                                >
+                                                    <LockIcon className="w-4 h-4 mr-2" />
+                                                    Login with PIN
+                                                </Button>
+                                            </form>
+                                        </Form>
+                                    </TabsContent>
                                 )}
                                 {props.methods.password && (
-                                    <TabsTrigger value="password">
-                                        <Key className="w-4 h-4 mr-1" />{" "}
-                                        Password
-                                    </TabsTrigger>
+                                    <TabsContent
+                                        value="password"
+                                        className={`${numMethods <= 1 ? "mt-0" : ""}`}
+                                    >
+                                        <Form {...passwordForm}>
+                                            <form
+                                                onSubmit={passwordForm.handleSubmit(
+                                                    onPasswordSubmit,
+                                                )}
+                                                className="space-y-4"
+                                            >
+                                                <FormField
+                                                    control={
+                                                        passwordForm.control
+                                                    }
+                                                    name="password"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>
+                                                                Password
+                                                            </FormLabel>
+                                                            <FormControl>
+                                                                <Input
+                                                                    placeholder="Enter password"
+                                                                    type="password"
+                                                                    {...field}
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                {passwordError && (
+                                                    <Alert variant="destructive">
+                                                        <AlertDescription>
+                                                            {passwordError}
+                                                        </AlertDescription>
+                                                    </Alert>
+                                                )}
+                                                <Button
+                                                    type="submit"
+                                                    className="w-full"
+                                                >
+                                                    <LockIcon className="w-4 h-4 mr-2" />
+                                                    Login with Password
+                                                </Button>
+                                            </form>
+                                        </Form>
+                                    </TabsContent>
                                 )}
                                 {props.methods.sso && (
-                                    <TabsTrigger value="sso">
-                                        <User className="w-4 h-4 mr-1" /> User
-                                    </TabsTrigger>
+                                    <TabsContent
+                                        value="sso"
+                                        className={`${numMethods <= 1 ? "mt-0" : ""}`}
+                                    >
+                                        <LoginForm
+                                            onLogin={async () =>
+                                                await handleSSOAuth()
+                                            }
+                                        />
+                                    </TabsContent>
                                 )}
-                            </TabsList>
-                        )}
-                        {props.methods.pincode && (
-                            <TabsContent value="pin">
-                                <Form {...pinForm}>
-                                    <form
-                                        onSubmit={pinForm.handleSubmit(
-                                            onPinSubmit,
-                                        )}
-                                        className="space-y-4"
-                                    >
-                                        <FormField
-                                            control={pinForm.control}
-                                            name="pin"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>
-                                                        Enter 6-digit PIN
-                                                    </FormLabel>
-                                                    <FormControl>
-                                                        <div className="flex justify-center">
-                                                            <InputOTP
-                                                                maxLength={6}
-                                                                {...field}
-                                                            >
-                                                                <InputOTPGroup className="flex">
-                                                                    <InputOTPSlot
-                                                                        index={
-                                                                            0
-                                                                        }
-                                                                    />
-                                                                    <InputOTPSlot
-                                                                        index={
-                                                                            1
-                                                                        }
-                                                                    />
-                                                                    <InputOTPSlot
-                                                                        index={
-                                                                            2
-                                                                        }
-                                                                    />
-                                                                    <InputOTPSlot
-                                                                        index={
-                                                                            3
-                                                                        }
-                                                                    />
-                                                                    <InputOTPSlot
-                                                                        index={
-                                                                            4
-                                                                        }
-                                                                    />
-                                                                    <InputOTPSlot
-                                                                        index={
-                                                                            5
-                                                                        }
-                                                                    />
-                                                                </InputOTPGroup>
-                                                            </InputOTP>
-                                                        </div>
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <Button
-                                            type="submit"
-                                            className="w-full"
-                                        >
-                                            <LockIcon className="w-4 h-4 mr-2" />
-                                            Login with PIN
-                                        </Button>
-                                    </form>
-                                </Form>
-                            </TabsContent>
-                        )}
-                        {props.methods.password && (
-                            <TabsContent value="password">
-                                <Form {...passwordForm}>
-                                    <form
-                                        onSubmit={passwordForm.handleSubmit(
-                                            onPasswordSubmit,
-                                        )}
-                                        className="space-y-4"
-                                    >
-                                        <FormField
-                                            control={passwordForm.control}
-                                            name="password"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>
-                                                        Password
-                                                    </FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            placeholder="Enter password"
-                                                            type="password"
-                                                            {...field}
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        {passwordError && (
-                                            <Alert variant="destructive">
-                                                <AlertDescription>
-                                                    {passwordError}
-                                                </AlertDescription>
-                                            </Alert>
-                                        )}
-                                        <Button
-                                            type="submit"
-                                            className="w-full"
-                                        >
-                                            <LockIcon className="w-4 h-4 mr-2" />
-                                            Login with Password
-                                        </Button>
-                                    </form>
-                                </Form>
-                            </TabsContent>
-                        )}
-                        {props.methods.sso && (
-                            <TabsContent value="sso">
-                                <Form {...userForm}>
-                                    <form
-                                        onSubmit={userForm.handleSubmit(
-                                            handleSSOAuth,
-                                        )}
-                                        className="space-y-4"
-                                    >
-                                        <FormField
-                                            control={userForm.control}
-                                            name="email"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Email</FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            placeholder="Enter email"
-                                                            type="email"
-                                                            {...field}
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <FormField
-                                            control={userForm.control}
-                                            name="password"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>
-                                                        Password
-                                                    </FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            placeholder="Enter password"
-                                                            type="password"
-                                                            {...field}
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        {userError && (
-                                            <Alert variant="destructive">
-                                                <AlertDescription>
-                                                    {userError}
-                                                </AlertDescription>
-                                            </Alert>
-                                        )}
-                                        <Button
-                                            type="submit"
-                                            className="w-full"
-                                        >
-                                            <LockIcon className="w-4 h-4 mr-2" />
-                                            Login as User
-                                        </Button>
-                                    </form>
-                                </Form>
-                            </TabsContent>
-                        )}
-                    </Tabs>
-                </CardContent>
-            </Card>
-            {activeTab === "sso" && (
-                <div className="flex justify-center mt-4">
-                    <p className="text-sm text-muted-foreground">
-                        Don't have an account?{" "}
-                        <a href="#" className="underline">
-                            Sign up
-                        </a>
-                    </p>
+                            </Tabs>
+                        </CardContent>
+                    </Card>
+                    {/* {activeTab === "sso" && (
+                        <div className="flex justify-center mt-4">
+                            <p className="text-sm text-muted-foreground">
+                                Don't have an account?{" "}
+                                <a href="#" className="underline">
+                                    Sign up
+                                </a>
+                            </p>
+                        </div>
+                    )} */}
                 </div>
+            ) : (
+                <ResourceAccessDenied />
             )}
         </div>
     );
