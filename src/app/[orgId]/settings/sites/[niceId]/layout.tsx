@@ -8,6 +8,13 @@ import { SidebarSettings } from "@app/components/SidebarSettings";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
+import {
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
+} from "@app/components/ui/breadcrumb";
 
 interface SettingsLayoutProps {
     children: React.ReactNode;
@@ -23,7 +30,7 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
     try {
         const res = await internal.get<AxiosResponse<GetSiteResponse>>(
             `/org/${params.orgId}/site/${params.niceId}`,
-            await authCookieHeader()
+            await authCookieHeader(),
         );
         site = res.data.data;
     } catch {
@@ -39,15 +46,18 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
 
     return (
         <>
-            <div className="mb-4">
-                <Link
-                    href="../../"
-                    className="text-muted-foreground hover:underline"
-                >
-                    <div className="flex flex-row items-center gap-1">
-                        <ArrowLeft className="w-4 h-4" /> <span>All Sites</span>
-                    </div>
-                </Link>
+            <div className="mb-4 flex-row">
+                <Breadcrumb>
+                    <BreadcrumbList>
+                        <BreadcrumbItem>
+                            <Link href="../../">Sites</Link>
+                        </BreadcrumbItem>
+                        <BreadcrumbSeparator />
+                        <BreadcrumbItem>
+                            <BreadcrumbPage>{site.name}</BreadcrumbPage>
+                        </BreadcrumbItem>
+                    </BreadcrumbList>
+                </Breadcrumb>
             </div>
 
             <SettingsSectionTitle

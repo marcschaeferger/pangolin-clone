@@ -134,7 +134,7 @@ export default function VerifyEmailForm({
                     <Form {...form}>
                         <form
                             onSubmit={form.handleSubmit(onSubmit)}
-                            className="space-y-6"
+                            className="space-y-8"
                         >
                             <FormField
                                 control={form.control}

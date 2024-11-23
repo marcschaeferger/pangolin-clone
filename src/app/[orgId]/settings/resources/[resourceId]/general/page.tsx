@@ -118,8 +118,8 @@ export default function GeneralForm() {
 
     return (
         <>
-            <div className="lg:max-w-2xl space-y-12">
-                <section className="space-y-6">
+            <div className="space-y-12 lg:max-w-2xl">
+                <section className="space-y-8">
                     <SettingsSectionTitle
                         title="General Settings"
                         description="Configure the general settings for this resource"
@@ -129,7 +129,7 @@ export default function GeneralForm() {
                     <Form {...form}>
                         <form
                             onSubmit={form.handleSubmit(onSubmit)}
-                            className="space-y-6"
+                            className="space-y-8"
                         >
                             <FormField
                                 control={form.control}

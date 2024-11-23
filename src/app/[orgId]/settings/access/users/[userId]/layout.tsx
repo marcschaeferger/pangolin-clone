@@ -14,7 +14,6 @@ import {
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 
 interface UserLayoutProps {
     children: React.ReactNode;
@@ -30,7 +29,7 @@ export default async function UserLayoutProps(props: UserLayoutProps) {
     try {
         const res = await internal.get<AxiosResponse<GetOrgUserResponse>>(
             `/org/${params.orgId}/user/${params.userId}`,
-            await authCookieHeader()
+            await authCookieHeader(),
         );
         user = res.data.data;
     } catch {
@@ -48,15 +47,17 @@ export default async function UserLayoutProps(props: UserLayoutProps) {
         <>
             <OrgUserProvider orgUser={user}>
                 <div className="mb-4">
-                    <Link
-                        href="../../"
-                        className="text-muted-foreground hover:underline"
-                    >
-                        <div className="flex flex-row items-center gap-1">
-                            <ArrowLeft className="w-4 h-4" />{" "}
-                            <span>All Users</span>
-                        </div>
-                    </Link>
+                    <Breadcrumb>
+                        <BreadcrumbList>
+                            <BreadcrumbItem>
+                                <Link href="../../">Users</Link>
+                            </BreadcrumbItem>
+                            <BreadcrumbSeparator />
+                            <BreadcrumbItem>
+                                <BreadcrumbPage>{user.email}</BreadcrumbPage>
+                            </BreadcrumbItem>
+                        </BreadcrumbList>
+                    </Breadcrumb>
                 </div>
 
                 <div className="space-y-0.5 select-none mb-6">

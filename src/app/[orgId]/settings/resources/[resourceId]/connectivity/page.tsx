@@ -349,7 +349,7 @@ export default function ReverseProxyTargets(props: {
     return (
         <>
             <div className="space-y-12">
-                <section className="space-y-6 lg:max-w-2xl">
+                <section className="space-y-8">
                     <SettingsSectionTitle
                         title="SSL"
                         description="Setup SSL to secure your connections with LetsEncrypt certificates"
@@ -366,23 +366,24 @@ export default function ReverseProxyTargets(props: {
                     </div>
                 </section>
 
-                <hr className="lg:max-w-2xl" />
+                <hr />
 
-                <section className="space-y-6">
+                <section className="space-y-8">
                     <SettingsSectionTitle
                         title="Targets"
                         description="Setup targets to route traffic to your services"
                         size="1xl"
                     />
 
-                    <div className="space-y-6">
+                    <div className="space-y-8">
                         <Form {...addTargetForm}>
                             <form
                                 onSubmit={addTargetForm.handleSubmit(
                                     addTarget as any,
                                 )}
+                                className="space-y-8"
                             >
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                     <FormField
                                         control={addTargetForm.control}
                                         name="ip"

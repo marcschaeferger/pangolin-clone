@@ -4,6 +4,14 @@ import api from "@app/api";
 import { Avatar, AvatarFallback } from "@app/components/ui/avatar";
 import { Button } from "@app/components/ui/button";
 import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "@app/components/ui/command";
+import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuGroup,
@@ -13,6 +21,11 @@ import {
     DropdownMenuTrigger,
 } from "@app/components/ui/dropdown-menu";
 import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@app/components/ui/popover";
+import {
     Select,
     SelectContent,
     SelectGroup,
@@ -21,10 +34,12 @@ import {
     SelectValue,
 } from "@app/components/ui/select";
 import { useToast } from "@app/hooks/useToast";
-import { formatAxiosError } from "@app/lib/utils";
+import { cn, formatAxiosError } from "@app/lib/utils";
 import { ListOrgsResponse } from "@server/routers/org";
+import { Check, ChevronsUpDown } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 type HeaderProps = {
     name?: string;
@@ -35,6 +50,8 @@ type HeaderProps = {
 
 export default function Header({ email, orgName, name, orgs }: HeaderProps) {
     const { toast } = useToast();
+
+    const [open, setOpen] = useState(false);
 
     const router = useRouter();
 
@@ -125,7 +142,68 @@ export default function Header({ email, orgName, name, orgs }: HeaderProps) {
                         </div>
                     </div>
 
-                    <Select
+                    <Popover open={open} onOpenChange={setOpen}>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="outline"
+                                size="lg"
+                                role="combobox"
+                                aria-expanded={open}
+                                className="w-full md:w-[200px] h-12 px-3 py-4"
+                            >
+                                <div className="flex items-center justify-between w-full">
+                                    <div className="flex flex-col items-start">
+                                        <span className="font-bold text-sm">
+                                            Organization
+                                        </span>
+                                        <span className="text-sm text-muted-foreground">
+                                            {orgName
+                                                ? orgs.find(
+                                                      (org) =>
+                                                          org.name === orgName,
+                                                  )?.name
+                                                : "Select organization..."}
+                                        </span>
+                                    </div>
+                                    <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+                                </div>
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="[100px] md:w-[180px] p-0">
+                            <Command>
+                                <CommandInput placeholder="Search..." />
+                                <CommandEmpty>
+                                    No organization found.
+                                </CommandEmpty>
+                                <CommandGroup>
+                                    <CommandList>
+                                        {orgs.map((org) => (
+                                            <CommandItem
+                                                key={org.orgId}
+                                                onSelect={(currentValue) => {
+                                                    router.push(
+                                                        `/${org.orgId}/settings`,
+                                                    );
+                                                }}
+                                            >
+                                                <Check
+                                                    className={cn(
+                                                        "mr-2 h-4 w-4",
+                                                        orgName === org.name
+                                                            ? "opacity-100"
+                                                            : "opacity-0",
+                                                    )}
+                                                />
+                                                {org.name}
+                                            </CommandItem>
+                                        ))}
+                                    </CommandList>
+                                </CommandGroup>
+                            </Command>
+                        </PopoverContent>
+                    </Popover>
+
+                    {/* <Select
                         defaultValue={orgName}
                         onValueChange={(val) => {
                             router.push(`/${val}/settings`);
@@ -146,7 +224,7 @@ export default function Header({ email, orgName, name, orgs }: HeaderProps) {
                                 ))}
                             </SelectGroup>
                         </SelectContent>
-                    </Select>
+                    </Select> */}
                 </div>
             </div>
         </>

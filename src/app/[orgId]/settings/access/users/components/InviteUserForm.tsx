@@ -171,7 +171,7 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
                         </CredenzaDescription>
                     </CredenzaHeader>
                     <CredenzaBody>
-                        <div className="space-y-6">
+                        <div className="space-y-8">
                             {!inviteLink && (
                                 <Form {...form}>
                                     <form

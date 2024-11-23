@@ -27,6 +27,7 @@ import { api } from "@app/api";
 import { useRouter } from "next/navigation";
 import { AxiosResponse } from "axios";
 import { formatAxiosError } from "@app/lib/utils";
+import { LockIcon } from "lucide-react";
 
 type LoginFormProps = {
     redirect?: string;
@@ -108,7 +109,7 @@ export default function LoginForm({ redirect }: LoginFormProps) {
                 <Form {...form}>
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
-                        className="space-y-6"
+                        className="space-y-8"
                     >
                         <FormField
                             control={form.control}
@@ -153,6 +154,7 @@ export default function LoginForm({ redirect }: LoginFormProps) {
                             className="w-full"
                             loading={loading}
                         >
+                            <LockIcon className="w-4 h-4 mr-2" />
                             Login
                         </Button>
                     </form>

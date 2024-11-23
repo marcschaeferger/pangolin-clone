@@ -22,22 +22,22 @@ const topNavItems = [
     {
         title: "Sites",
         href: "/{orgId}/settings/sites",
-        icon: <Combine className="h-5 w-5" />,
+        icon: <Combine className="h-4 w-4" />,
     },
     {
         title: "Resources",
         href: "/{orgId}/settings/resources",
-        icon: <Waypoints className="h-5 w-5" />,
+        icon: <Waypoints className="h-4 w-4" />,
     },
     {
         title: "Access",
         href: "/{orgId}/settings/access",
-        icon: <Users className="h-5 w-5" />,
+        icon: <Users className="h-4 w-4" />,
     },
     {
         title: "General",
         href: "/{orgId}/settings/general",
-        icon: <Settings className="h-5 w-5" />,
+        icon: <Settings className="h-4 w-4" />,
     },
 ];
 

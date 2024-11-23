@@ -110,7 +110,7 @@ export default function AccessControlsPage() {
 
     return (
         <>
-            <div className="space-y-6">
+            <div className="space-y-8">
                 <SettingsSectionTitle
                     title="Access Controls"
                     description="Manage what this user can access and do in the organization"
@@ -120,7 +120,7 @@ export default function AccessControlsPage() {
                 <Form {...form}>
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
-                        className="space-y-6"
+                        className="space-y-8"
                     >
                         <FormField
                             control={form.control}

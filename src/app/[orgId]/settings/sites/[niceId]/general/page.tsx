@@ -64,7 +64,7 @@ export default function GeneralPage() {
 
     return (
         <>
-            <div className="space-y-6">
+            <div className="space-y-8">
                 <SettingsSectionTitle
                     title="General Settings"
                     description="Configure the general settings for this site"
@@ -74,7 +74,7 @@ export default function GeneralPage() {
                 <Form {...form}>
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
-                        className="space-y-6"
+                        className="space-y-8"
                     >
                         <FormField
                             control={form.control}

@@ -155,7 +155,7 @@ export default function DeleteRoleForm({
                         </CredenzaDescription>
                     </CredenzaHeader>
                     <CredenzaBody>
-                        <div className="space-y-6">
+                        <div className="space-y-8">
                             <div className="space-y-4">
                                 <p>
                                     You're about to delete the{" "}
@@ -170,7 +170,7 @@ export default function DeleteRoleForm({
                             <Form {...form}>
                                 <form
                                     onSubmit={form.handleSubmit(onSubmit)}
-                                    className="space-y-6"
+                                    className="space-y-8"
                                     id="remove-role-form"
                                 >
                                     <FormField

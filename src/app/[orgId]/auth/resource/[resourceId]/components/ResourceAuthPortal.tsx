@@ -15,7 +15,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
     Form,
     FormControl,
@@ -24,7 +23,12 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { LockIcon, KeyIcon, UserIcon, Binary, Key, User } from "lucide-react";
+import { LockIcon, UserIcon, Binary, Key, User } from "lucide-react";
+import {
+    InputOTP,
+    InputOTPGroup,
+    InputOTPSlot,
+} from "@app/components/ui/input-otp";
 
 const pinSchema = z.object({
     pin: z
@@ -34,10 +38,14 @@ const pinSchema = z.object({
 });
 
 const passwordSchema = z.object({
-    email: z.string().email({ message: "Please enter a valid email address" }),
     password: z
         .string()
         .min(8, { message: "Password must be at least 8 characters long" }),
+});
+
+const userSchema = z.object({
+    email: z.string().email(),
+    password: z.string().min(1),
 });
 
 export default function ResourceAuthPortal() {
@@ -52,6 +60,13 @@ export default function ResourceAuthPortal() {
 
     const passwordForm = useForm<z.infer<typeof passwordSchema>>({
         resolver: zodResolver(passwordSchema),
+        defaultValues: {
+            password: "",
+        },
+    });
+
+    const userForm = useForm<z.infer<typeof userSchema>>({
+        resolver: zodResolver(userSchema),
         defaultValues: {
             email: "",
             password: "",
@@ -77,9 +92,9 @@ export default function ResourceAuthPortal() {
         <div className="w-full max-w-md mx-auto">
             <Card>
                 <CardHeader>
-                    <CardTitle>Welcome Back</CardTitle>
+                    <CardTitle>Authentication Required</CardTitle>
                     <CardDescription>
-                        Choose your preferred login method
+                        Choose your preferred method
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -92,7 +107,7 @@ export default function ResourceAuthPortal() {
                                 <Key className="w-4 h-4 mr-1" /> Password
                             </TabsTrigger>
                             <TabsTrigger value="sso">
-                                <User className="w-4 h-4 mr-1" /> SSO
+                                <User className="w-4 h-4 mr-1" /> User
                             </TabsTrigger>
                         </TabsList>
                         <TabsContent value="pin">
@@ -106,20 +121,44 @@ export default function ResourceAuthPortal() {
                                         name="pin"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Enter PIN</FormLabel>
+                                                <FormLabel>
+                                                    Enter 6-digit PIN
+                                                </FormLabel>
                                                 <FormControl>
-                                                    <Input
-                                                        placeholder="Enter your 6-digit PIN"
-                                                        type="password"
-                                                        {...field}
-                                                    />
+                                                    <div className="flex justify-center">
+                                                        <InputOTP
+                                                            maxLength={6}
+                                                            {...field}
+                                                        >
+                                                            <InputOTPGroup className="flex">
+                                                                <InputOTPSlot
+                                                                    index={0}
+                                                                />
+                                                                <InputOTPSlot
+                                                                    index={1}
+                                                                />
+                                                                <InputOTPSlot
+                                                                    index={2}
+                                                                />
+                                                                <InputOTPSlot
+                                                                    index={3}
+                                                                />
+                                                                <InputOTPSlot
+                                                                    index={4}
+                                                                />
+                                                                <InputOTPSlot
+                                                                    index={5}
+                                                                />
+                                                            </InputOTPGroup>
+                                                        </InputOTP>
+                                                    </div>
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
                                     />
                                     <Button type="submit" className="w-full">
-                                        <KeyIcon className="w-4 h-4 mr-2" />
+                                        <LockIcon className="w-4 h-4 mr-2" />
                                         Login with PIN
                                     </Button>
                                 </form>
@@ -129,27 +168,10 @@ export default function ResourceAuthPortal() {
                             <Form {...passwordForm}>
                                 <form
                                     onSubmit={passwordForm.handleSubmit(
-                                        onPasswordSubmit
+                                        onPasswordSubmit,
                                     )}
                                     className="space-y-4"
                                 >
-                                    <FormField
-                                        control={passwordForm.control}
-                                        name="email"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Email</FormLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        placeholder="Enter your email"
-                                                        type="email"
-                                                        {...field}
-                                                    />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
                                     <FormField
                                         control={passwordForm.control}
                                         name="password"
@@ -158,7 +180,7 @@ export default function ResourceAuthPortal() {
                                                 <FormLabel>Password</FormLabel>
                                                 <FormControl>
                                                     <Input
-                                                        placeholder="Enter your password"
+                                                        placeholder="Enter password"
                                                         type="password"
                                                         {...field}
                                                     />
@@ -175,31 +197,73 @@ export default function ResourceAuthPortal() {
                             </Form>
                         </TabsContent>
                         <TabsContent value="sso">
-                            <div className="space-y-4">
-                                <p className="text-sm text-muted-foreground">
-                                    Click the button below to login with your
-                                    organization's SSO provider.
-                                </p>
-                                <Button
-                                    onClick={handleSSOAuth}
-                                    className="w-full"
+                            <Form {...userForm}>
+                                <form
+                                    onSubmit={userForm.handleSubmit(
+                                        (values) => {
+                                            console.log(
+                                                "User authentication",
+                                                values,
+                                            );
+                                            // Implement user authentication logic here
+                                        },
+                                    )}
+                                    className="space-y-4"
                                 >
-                                    <UserIcon className="w-4 h-4 mr-2" />
-                                    Login with SSO
-                                </Button>
-                            </div>
+                                    <FormField
+                                        control={userForm.control}
+                                        name="email"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Email</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        placeholder="Enter email"
+                                                        type="email"
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={userForm.control}
+                                        name="password"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Password</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        placeholder="Enter password"
+                                                        type="password"
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <Button type="submit" className="w-full">
+                                        <LockIcon className="w-4 h-4 mr-2" />
+                                        Login as User
+                                    </Button>
+                                </form>
+                            </Form>
                         </TabsContent>
                     </Tabs>
                 </CardContent>
-                <CardFooter className="flex justify-center">
+            </Card>
+            {activeTab === "sso" && (
+                <div className="flex justify-center mt-4">
                     <p className="text-sm text-muted-foreground">
                         Don't have an account?{" "}
                         <a href="#" className="underline">
                             Sign up
                         </a>
                     </p>
-                </CardFooter>
-            </Card>
+                </div>
+            )}
         </div>
     );
 }

@@ -191,11 +191,11 @@ sh get-docker.sh`;
                         </CredenzaDescription>
                     </CredenzaHeader>
                     <CredenzaBody>
-                        <div className="space-y-6">
+                        <div className="space-y-8">
                             <Form {...form}>
                                 <form
                                     onSubmit={form.handleSubmit(onSubmit)}
-                                    className="space-y-6"
+                                    className="space-y-8"
                                     id="create-site-form"
                                 >
                                     <FormField

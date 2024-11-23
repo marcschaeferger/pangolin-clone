@@ -257,11 +257,11 @@ export default function ResourceAuthenticationPage() {
                 />
             )}
 
-            <div className="space-y-12 lg:max-w-2xl">
-                <section className="space-y-6">
+            <div className="space-y-12">
+                <section className="space-y-8">
                     <SettingsSectionTitle
                         title="Users & Roles"
-                        description="Configure who can visit this resource (only applicable if SSO is used)"
+                        description="Configure which users can access this resource (only applicable if SSO enabled)"
                         size="1xl"
                     />
 
@@ -275,9 +275,7 @@ export default function ResourceAuthenticationPage() {
                             <Label htmlFor="sso-toggle">Allow SSO</Label>
                         </div>
                         <span className="text-muted-foreground text-sm">
-                            Users will be able to access the resource if they're
-                            logged into the dashboard and have access to the
-                            resource. Users will only have to login once for all
+                            Existing users will only have to login once for all
                             resources that have SSO enabled.
                         </span>
                     </div>
@@ -287,7 +285,7 @@ export default function ResourceAuthenticationPage() {
                             onSubmit={usersRolesForm.handleSubmit(
                                 onSubmitUsersRoles,
                             )}
-                            className="space-y-6"
+                            className="space-y-8"
                         >
                             <FormField
                                 control={usersRolesForm.control}
@@ -336,9 +334,9 @@ export default function ResourceAuthenticationPage() {
                                             />
                                         </FormControl>
                                         <FormDescription>
-                                            Users with these roles will be able
-                                            to access this resource. Admins can
-                                            always access this resource.
+                                            These roles will be able to access
+                                            this resource. Admins can always
+                                            access this resource.
                                         </FormDescription>
                                         <FormMessage />
                                     </FormItem>
@@ -414,10 +412,10 @@ export default function ResourceAuthenticationPage() {
 
                 <Separator />
 
-                <section className="space-y-6">
+                <section className="space-y-8">
                     <SettingsSectionTitle
                         title="Authentication Methods"
-                        description="You can also allow users to access the resource via the below methods"
+                        description="You can also anyone to access the resource via the below methods"
                         size="1xl"
                     />
 

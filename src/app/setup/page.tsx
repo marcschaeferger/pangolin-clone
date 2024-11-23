@@ -206,7 +206,7 @@ export default function StepperForm() {
                         </div>
                     )}
                     {currentStep === "site" && (
-                        <div className="space-y-6">
+                        <div className="space-y-8">
                             <div className="space-y-2">
                                 <Label htmlFor="siteName">Site Name</Label>
                                 <Input
@@ -222,7 +222,7 @@ export default function StepperForm() {
                         </div>
                     )}
                     {currentStep === "resources" && (
-                        <div className="space-y-6">
+                        <div className="space-y-8">
                             <div className="space-y-2">
                                 <Label htmlFor="resourceName">
                                     Resource Name
