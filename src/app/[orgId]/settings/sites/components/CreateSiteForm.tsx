@@ -29,7 +29,7 @@ import {
 } from "@app/components/Credenza";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { useParams, useRouter } from "next/navigation";
-import { PickSiteDefaultsResponse } from "@server/routers/site";
+import { CreateSiteBody, PickSiteDefaultsResponse } from "@server/routers/site";
 import { generateKeypair } from "../[niceId]/components/wireguardConfig";
 import CopyTextBox from "@app/components/CopyTextBox";
 import { Checkbox } from "@app/components/ui/checkbox";
@@ -43,8 +43,8 @@ import {
 import { formatAxiosError } from "@app/lib/utils";
 
 const method = [
-    { label: "Wireguard", value: "wg" },
     { label: "Newt", value: "newt" },
+    { label: "Wireguard", value: "wireguard" },
 ] as const;
 
 const accountFormSchema = z.object({
@@ -56,14 +56,14 @@ const accountFormSchema = z.object({
         .max(30, {
             message: "Name must not be longer than 30 characters.",
         }),
-    method: z.enum(["wg", "newt"]),
+    method: z.enum(["wireguard", "newt"]),
 });
 
 type AccountFormValues = z.infer<typeof accountFormSchema>;
 
 const defaultValues: Partial<AccountFormValues> = {
     name: "",
-    method: "wg",
+    method: "newt",
 };
 
 type CreateSiteFormProps = {
@@ -124,13 +124,22 @@ export default function CreateSiteForm({ open, setOpen }: CreateSiteFormProps) {
 
     async function onSubmit(data: AccountFormValues) {
         setLoading(true);
+        if (!siteDefaults || !keypair) {
+            return;
+        }
+        let payload: CreateSiteBody = {
+            name: data.name,
+            subnet: siteDefaults.subnet,
+            exitNodeId: siteDefaults.exitNodeId,
+            pubKey: keypair.publicKey,
+            type: data.method,
+        };
+        if (data.method === "newt") {
+            payload.secret = siteDefaults.newtSecret;
+            payload.newtId = siteDefaults.newtId;
+        }
         const res = await api
-            .put(`/org/${orgId}/site/`, {
-                name: data.name,
-                subnet: siteDefaults?.subnet,
-                exitNodeId: siteDefaults?.exitNodeId,
-                pubKey: keypair?.publicKey,
-            })
+            .put(`/org/${orgId}/site/`, payload)
             .catch((e) => {
                 toast({
                     variant: "destructive",
@@ -165,8 +174,7 @@ Endpoint = ${siteDefaults.endpoint}:${siteDefaults.listenPort}
 PersistentKeepalive = 5`
             : "";
 
-    const newtConfig = `curl -fsSL https://get.docker.com -o get-docker.sh
-sh get-docker.sh`;
+    const newtConfig = `newt --id ${siteDefaults?.newtId} --secret ${siteDefaults?.newtSecret}`;
 
     return (
         <>
@@ -236,7 +244,7 @@ sh get-docker.sh`;
                                                             <SelectValue placeholder="Select method" />
                                                         </SelectTrigger>
                                                         <SelectContent>
-                                                            <SelectItem value="wg">
+                                                            <SelectItem value="wireguard">
                                                                 WireGuard
                                                             </SelectItem>
                                                             <SelectItem value="newt">
@@ -255,10 +263,10 @@ sh get-docker.sh`;
                                     />
 
                                     <div className="max-w-md">
-                                        {form.watch("method") === "wg" &&
+                                        {form.watch("method") === "wireguard" &&
                                         !isLoading ? (
                                             <CopyTextBox text={wgConfig} />
-                                        ) : form.watch("method") === "wg" &&
+                                        ) : form.watch("method") === "wireguard" &&
                                           isLoading ? (
                                             <p>
                                                 Loading WireGuard

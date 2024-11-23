@@ -13,6 +13,7 @@ import {
     generateSessionToken,
 } from "@server/auth";
 import { createNewtSession } from "@server/auth/newt";
+import { fromError } from "zod-validation-error";
 
 export const createNewtBodySchema = z.object({});
 
@@ -24,6 +25,13 @@ export type CreateNewtResponse = {
     secret: string;
 };
 
+const createNewtSchema = z
+    .object({
+        newtId: z.string(),
+        secret: z.string()
+    })
+    .strict();
+
 export async function createNewt(
     req: Request,
     res: Response,
@@ -31,16 +39,31 @@ export async function createNewt(
 ): Promise<any> {
     try {
 
+        const parsedBody = createNewtSchema.safeParse(req.body);
+        if (!parsedBody.success) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    fromError(parsedBody.error).toString()
+                )
+            );
+        }
+
+        const { newtId, secret } = parsedBody.data;
+
+        if (!req.userOrgRoleId) {
+            return next(
+                createHttpError(HttpCode.FORBIDDEN, "User does not have a role")
+            );
+        }
+
         // generate a newtId and secret
-        const secret = generateId(48);
         const secretHash = await hash(secret, {
             memoryCost: 19456,
             timeCost: 2,
             outputLen: 32,
             parallelism: 1,
         });
-
-        const newtId = generateId(15);
 
         await db.insert(newts).values({
             newtId: newtId,

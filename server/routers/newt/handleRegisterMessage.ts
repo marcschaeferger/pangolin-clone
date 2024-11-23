@@ -4,8 +4,6 @@ import { exitNodes, resources, sites, targets } from "@server/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import { addPeer, deletePeer } from "../gerbil/peers";
 import logger from "@server/logger";
-import { findNextAvailableCidr } from "@server/utils/ip";
-import { exit } from "process";
 
 export const handleRegisterMessage: MessageHandler = async (context) => {
     const { message, newt, sendToClient } = context;
@@ -28,13 +26,18 @@ export const handleRegisterMessage: MessageHandler = async (context) => {
         return;
     }
 
-    // const [site] = await db
-    //     .select()
-    //     .from(sites)
-    //     .where(eq(sites.siteId, siteId))
-    //     .limit(1);
-
     const [site] = await db
+        .select()
+        .from(sites)
+        .where(eq(sites.siteId, siteId))
+        .limit(1);
+
+    if (!site || !site.exitNodeId) {
+        logger.warn("Site not found or does not have exit node");
+        return;
+    }
+
+    const [updatedSite] = await db
     .update(sites)
         .set({
             pubKey: publicKey
@@ -42,11 +45,6 @@ export const handleRegisterMessage: MessageHandler = async (context) => {
         .where(eq(sites.siteId, siteId))
         .returning();
 
-
-    if (!site || !site.exitNodeId) {
-        logger.warn("Site not found or does not have exit node");
-        return;
-    }
 
     const [exitNode] = await db
         .select()
@@ -100,10 +98,10 @@ export const handleRegisterMessage: MessageHandler = async (context) => {
         message: {
             type: "newt/wg/connect",
             data: {
-                endpoint: exitNode.endpoint,
+                endpoint: `${exitNode.endpoint}:${exitNode.listenPort}`,
                 publicKey: exitNode.publicKey,
-                serverIP: exitNode.address,
-                tunnelIP: site.subnet,
+                serverIP: exitNode.address.split("/")[0],
+                tunnelIP: site.subnet.split("/")[0],
                 targets: {
                     udp: udpTargets,
                     tcp: tcpTargets,

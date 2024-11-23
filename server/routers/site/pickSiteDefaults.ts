@@ -7,6 +7,7 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { findNextAvailableCidr } from "@server/utils/ip";
+import { generateId } from "@server/auth";
 
 export type PickSiteDefaultsResponse = {
     exitNodeId: number;
@@ -16,6 +17,8 @@ export type PickSiteDefaultsResponse = {
     listenPort: number;
     endpoint: string;
     subnet: string;
+    newtId: string;
+    newtSecret: string;
 };
 
 export async function pickSiteDefaults(
@@ -60,6 +63,9 @@ export async function pickSiteDefaults(
             );
         }
 
+        const newtId = generateId(15);
+        const secret = generateId(48);
+
         return response<PickSiteDefaultsResponse>(res, {
             data: {
                 exitNodeId: exitNode.exitNodeId,
@@ -69,6 +75,8 @@ export async function pickSiteDefaults(
                 listenPort: exitNode.listenPort,
                 endpoint: exitNode.endpoint,
                 subnet: newSubnet,
+                newtId,
+                newtSecret: secret,
             },
             success: true,
             error: false,

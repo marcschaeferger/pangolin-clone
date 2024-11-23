@@ -10,6 +10,9 @@ import { eq, and } from "drizzle-orm";
 import { getUniqueSiteName } from "@server/db/names";
 import { addPeer } from "../gerbil/peers";
 import { fromError } from "zod-validation-error";
+import { hash } from "@node-rs/argon2";
+import { newts } from "@server/db/schema";
+import moment from "moment";
 
 const createSiteParamsSchema = z.object({
     orgId: z.string(),
@@ -22,9 +25,13 @@ const createSiteSchema = z
         subdomain: z.string().min(1).max(255).optional(),
         pubKey: z.string().optional(),
         subnet: z.string(),
+        newtId: z.string().optional(),
+        secret: z.string().optional(),
         type: z.string(),
     })
     .strict();
+
+export type CreateSiteBody = z.infer<typeof createSiteSchema>;
 
 export type CreateSiteResponse = {
     name: string;
@@ -49,7 +56,8 @@ export async function createSite(
             );
         }
 
-        const { name, type, exitNodeId, pubKey, subnet } = parsedBody.data;
+        const { name, type, exitNodeId, pubKey, subnet, newtId, secret } =
+            parsedBody.data;
 
         const parsedParams = createSiteParamsSchema.safeParse(req.params);
         if (!parsedParams.success) {
@@ -80,7 +88,8 @@ export async function createSite(
             type,
         };
 
-        if (pubKey) {
+        if (pubKey && type == "wireguard") {
+            // we dont add the pubKey for newts because the newt will generate it
             payload = {
                 ...payload,
                 pubKey,
@@ -114,19 +123,34 @@ export async function createSite(
             });
         }
 
-        if (pubKey) {
-            // add the peer to the exit node
-            if (type == "newt") {
-                await addPeer(exitNodeId, {
-                    publicKey: pubKey,
-                    allowedIps: [subnet],
-                });
-            } else if (type == "wireguard") {
-                await addPeer(exitNodeId, {
-                    publicKey: pubKey,
-                    allowedIps: [],
-                });
+        // add the peer to the exit node
+        if (type == "newt") {
+            const secretHash = await hash(secret!, {
+                memoryCost: 19456,
+                timeCost: 2,
+                outputLen: 32,
+                parallelism: 1,
+            });
+
+            await db.insert(newts).values({
+                newtId: newtId!,
+                secretHash,
+                siteId: newSite.siteId,
+                dateCreated: moment().toISOString(),
+            });
+        } else if (type == "wireguard") {
+            if (!pubKey) {
+                return next(
+                    createHttpError(
+                        HttpCode.BAD_REQUEST,
+                        "Public key is required for wireguard sites"
+                    )
+                );
             }
+            await addPeer(exitNodeId, {
+                publicKey: pubKey,
+                allowedIps: [],
+            });
         }
 
         return response(res, {
@@ -142,7 +166,7 @@ export async function createSite(
             status: HttpCode.CREATED,
         });
     } catch (error) {
-        logger.error(error);
+        throw error;
         return next(
             createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
