@@ -85,17 +85,17 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
         {
             title: "General",
             href: `/{orgId}/settings/resources/{resourceId}/general`,
-            icon: <Settings className="w-4 h-4" />,
+            // icon: <Settings className="w-4 h-4" />,
         },
         {
             title: "Connectivity",
             href: `/{orgId}/settings/resources/{resourceId}/connectivity`,
-            icon: <Cloud className="w-4 h-4" />,
+            // icon: <Cloud className="w-4 h-4" />,
         },
         {
             title: "Authentication",
             href: `/{orgId}/settings/resources/{resourceId}/authentication`,
-            icon: <Shield className="w-4 h-4" />,
+            // icon: <Shield className="w-4 h-4" />,
         },
     ];
 

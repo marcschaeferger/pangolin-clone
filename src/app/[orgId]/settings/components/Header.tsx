@@ -175,7 +175,7 @@ export default function Header({ email, orgName, name, orgs }: HeaderProps) {
                                 <CommandEmpty>
                                     No organization found.
                                 </CommandEmpty>
-                                <CommandGroup>
+                                <CommandGroup className="[50px]">
                                     <CommandList>
                                         {orgs.map((org) => (
                                             <CommandItem

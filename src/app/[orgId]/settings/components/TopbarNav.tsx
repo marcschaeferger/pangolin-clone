@@ -54,7 +54,6 @@ export function TopbarNav({
                             <div className="hidden md:block">{item.icon}</div>
                         )}
                         <span className="relative z-10">{item.title}</span>
-                        <span className="absolute inset-x-0 bottom-0 border-b-2 border-transparent group-hover:border-primary"></span>
                     </div>
                 </Link>
             ))}
