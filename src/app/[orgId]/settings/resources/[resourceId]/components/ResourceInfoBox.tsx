@@ -39,45 +39,66 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
     };
 
     return (
-        <Card>
+        <Card className="shadow-none">
             <Alert>
                 <InfoIcon className="h-4 w-4" />
                 <AlertTitle className="font-semibold">
                     Resource Information
                 </AlertTitle>
                 <AlertDescription className="mt-3">
-                    <p className="mb-2">
-                        The current full URL for this resource is:
-                    </p>
-                    <div className="flex items-center space-x-2 bg-muted p-2 rounded-md">
-                        <LinkIcon className="h-4 w-4" />
-                        <a
-                            href={fullUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm font-mono flex-grow hover:underline truncate"
-                        >
-                            {fullUrl}
-                        </a>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={copyToClipboard}
-                            className="ml-2"
-                            type="button"
-                        >
-                            {copied ? (
-                                <CheckIcon className="h-4 w-4 text-green-500" />
+                    <div className="space-y-3">
+                        <div>
+                            {authInfo.password ||
+                            authInfo.pincode ||
+                            authInfo.sso ? (
+                                <div className="flex items-center space-x-2 text-green-500">
+                                    <ShieldCheck />
+                                    <span>
+                                        This resource is protected with at least
+                                        one auth method.
+                                    </span>
+                                </div>
                             ) : (
-                                <CopyIcon className="h-4 w-4" />
+                                <div className="flex items-center space-x-2 text-yellow-500">
+                                    <ShieldOff />
+                                    <span>
+                                        This resource is not protected with any
+                                        auth method. Anyone can access this
+                                        resource.
+                                    </span>
+                                </div>
                             )}
-                            <span className="ml-2">
-                                {copied ? "Copied!" : "Copy"}
-                            </span>
-                        </Button>
-                    </div>
+                        </div>
 
-                    {/* <p className="mt-3">
+                        <div className="flex items-center space-x-2 bg-muted p-1 pl-3 rounded-md">
+                            <LinkIcon className="h-4 w-4" />
+                            <a
+                                href={fullUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm font-mono flex-grow hover:underline truncate"
+                            >
+                                {fullUrl}
+                            </a>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={copyToClipboard}
+                                className="ml-2"
+                                type="button"
+                            >
+                                {copied ? (
+                                    <CheckIcon className="h-4 w-4 text-green-500" />
+                                ) : (
+                                    <CopyIcon className="h-4 w-4" />
+                                )}
+                                <span className="ml-2">
+                                    {copied ? "Copied!" : "Copy"}
+                                </span>
+                            </Button>
+                        </div>
+
+                        {/* <p className="mt-3">
                         To create a proxy to your private services,{" "}
                         <Link
                             href={`/${org.org.orgId}/settings/resources/${resource.resourceId}/connectivity`}
@@ -87,27 +108,6 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
                         </Link>{" "}
                         to this resource
                     </p> */}
-
-                    <div className="mt-3">
-                        {authInfo.password ||
-                        authInfo.pincode ||
-                        authInfo.sso ? (
-                            <div className="flex items-center space-x-2 text-green-500">
-                                <ShieldCheck />
-                                <span>
-                                    This resource is protected with at least one
-                                    auth method
-                                </span>
-                            </div>
-                        ) : (
-                            <div className="flex items-center space-x-2 text-yellow-500">
-                                <ShieldOff />
-                                <span>
-                                    This resource is not protected with any auth
-                                    method. Anyone can access this resource.
-                                </span>
-                            </div>
-                        )}
                     </div>
                 </AlertDescription>
             </Alert>

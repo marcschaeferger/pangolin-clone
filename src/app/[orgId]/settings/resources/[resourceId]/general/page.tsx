@@ -118,69 +118,65 @@ export default function GeneralForm() {
 
     return (
         <>
-            <div className="lg:max-w-2xl space-y-6">
-                <SettingsSectionTitle
-                    title="General Settings"
-                    description="Configure the general settings for this resource"
-                    size="1xl"
-                />
+            <div className="lg:max-w-2xl space-y-12">
+                <section className="space-y-6">
+                    <SettingsSectionTitle
+                        title="General Settings"
+                        description="Configure the general settings for this resource"
+                        size="1xl"
+                    />
 
-                <Form {...form}>
-                    <form
-                        onSubmit={form.handleSubmit(onSubmit)}
-                        className="space-y-6"
-                    >
-                        <FormField
-                            control={form.control}
-                            name="name"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Name</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} />
-                                    </FormControl>
-                                    <FormDescription>
-                                        This is the display name of the resource
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                    <Form {...form}>
+                        <form
+                            onSubmit={form.handleSubmit(onSubmit)}
+                            className="space-y-6"
+                        >
+                            <FormField
+                                control={form.control}
+                                name="name"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Name</FormLabel>
+                                        <FormControl>
+                                            <Input {...field} />
+                                        </FormControl>
+                                        <FormDescription>
+                                            This is the display name of the
+                                            resource.
+                                        </FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
 
-                        <SettingsSectionTitle
-                            title="Domain"
-                            description="Define the domain that users will use to access this resource"
-                            size="1xl"
-                        />
-
-                        <FormField
-                            control={form.control}
-                            name="subdomain"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Subdomain</FormLabel>
-                                    <FormControl>
-                                        <CustomDomainInput
-                                            value={field.value}
-                                            domainSuffix={domainSuffix}
-                                            placeholder="Enter subdomain"
-                                            onChange={(value) =>
-                                                form.setValue(
-                                                    "subdomain",
-                                                    value
-                                                )
-                                            }
-                                        />
-                                    </FormControl>
-                                    {/* <FormDescription>
-                                        This is the subdomain that will be used
-                                        to access the resource
-                                    </FormDescription> */}
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        {/* <FormField
+                            <FormField
+                                control={form.control}
+                                name="subdomain"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Subdomain</FormLabel>
+                                        <FormControl>
+                                            <CustomDomainInput
+                                                value={field.value}
+                                                domainSuffix={domainSuffix}
+                                                placeholder="Enter subdomain"
+                                                onChange={(value) =>
+                                                    form.setValue(
+                                                        "subdomain",
+                                                        value
+                                                    )
+                                                }
+                                            />
+                                        </FormControl>
+                                        <FormDescription>
+                                            This is the subdomain that will be
+                                            used to access the resource.
+                                        </FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            {/* <FormField
                             control={form.control}
                             name="siteId"
                             render={({ field }) => (
@@ -257,15 +253,16 @@ export default function GeneralForm() {
                                 </FormItem>
                             )}
                         /> */}
-                        <Button
-                            type="submit"
-                            loading={saveLoading}
-                            disabled={saveLoading}
-                        >
-                            Save Changes
-                        </Button>
-                    </form>
-                </Form>
+                            <Button
+                                type="submit"
+                                loading={saveLoading}
+                                disabled={saveLoading}
+                            >
+                                Save Changes
+                            </Button>
+                        </form>
+                    </Form>
+                </section>
             </div>
         </>
     );

@@ -81,7 +81,7 @@ export function SidebarNav({
             </div>
             <nav
                 className={cn(
-                    "hidden lg:flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-1",
+                    "hidden lg:flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-3",
                     disabled && "opacity-50 pointer-events-none",
                     className
                 )}

@@ -206,6 +206,7 @@ sh get-docker.sh`;
                                                 <FormLabel>Name</FormLabel>
                                                 <FormControl>
                                                     <Input
+                                                        autoComplete="off"
                                                         placeholder="Site name"
                                                         {...field}
                                                     />

@@ -10,7 +10,9 @@ export default function SettingsSectionTitle({
     size,
 }: SettingsSectionTitleProps) {
     return (
-        <div className="space-y-0.5 select-none mb-6">
+        <div
+            className={`space-y-0.5 select-none ${!size || size === "2xl" ? "mb-12" : ""}`}
+        >
             <h2
                 className={`text-${
                     size ? size : "2xl"

@@ -116,7 +116,7 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
                         sidebarNavItems={sidebarNavItems}
                         limitWidth={false}
                     >
-                        <div className="mb-8">
+                        <div className="mb-8 lg:max-w-2xl">
                             <ResourceInfoBox />
                         </div>
                         {children}
