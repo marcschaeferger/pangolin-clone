@@ -100,7 +100,7 @@ export default function SignupForm({ redirect }: SignupFormProps) {
     }
 
     return (
-        <Card className="w-full max-w-md mx-auto">
+        <Card className="w-full max-w-md">
             <CardHeader>
                 <CardTitle>Create Account</CardTitle>
                 <CardDescription>

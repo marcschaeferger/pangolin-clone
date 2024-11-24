@@ -10,3 +10,5 @@ export * from "./listResourceUsers";
 export * from "./setResourcePassword";
 export * from "./authWithPassword";
 export * from "./getResourceAuthInfo";
+export * from "./setResourcePincode";
+export * from "./authWithPincode";

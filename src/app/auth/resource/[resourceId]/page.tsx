@@ -13,7 +13,7 @@ import ResourceNotFound from "./components/ResourceNotFound";
 import ResourceAccessDenied from "./components/ResourceAccessDenied";
 
 export default async function ResourceAuthPage(props: {
-    params: Promise<{ resourceId: number; orgId: string }>;
+    params: Promise<{ resourceId: number }>;
     searchParams: Promise<{ r: string }>;
 }) {
     const params = await props.params;
@@ -28,17 +28,14 @@ export default async function ResourceAuthPage(props: {
         if (res && res.status === 200) {
             authInfo = res.data.data;
         }
-    } catch (e) {
-        console.error(e);
-        console.log("resource not found");
-    }
+    } catch (e) {}
 
     const getUser = cache(verifySession);
     const user = await getUser();
 
     if (!authInfo) {
         return (
-            <div className="w-full max-w-md mx-auto p-3 md:mt-32">
+            <div className="w-full max-w-md">
                 <ResourceNotFound />
             </div>
         );
@@ -47,12 +44,10 @@ export default async function ResourceAuthPage(props: {
     const hasAuth = authInfo.password || authInfo.pincode || authInfo.sso;
     const isSSOOnly = authInfo.sso && !authInfo.password && !authInfo.pincode;
 
+    const redirectUrl = searchParams.r || authInfo.url;
+
     if (!hasAuth) {
-        return (
-            <div className="w-full max-w-md mx-auto p-3 md:mt-32">
-                <ResourceAccessDenied />
-            </div>
-        );
+        redirect(redirectUrl);
     }
 
     let userIsUnauthorized = false;
@@ -72,13 +67,13 @@ export default async function ResourceAuthPage(props: {
         }
 
         if (doRedirect) {
-            redirect(searchParams.r || authInfo.url);
+            redirect(redirectUrl);
         }
     }
 
     if (userIsUnauthorized && isSSOOnly) {
         return (
-            <div className="w-full max-w-md mx-auto p-3 md:mt-32">
+            <div className="w-full max-w-md">
                 <ResourceAccessDenied />
             </div>
         );
@@ -86,7 +81,7 @@ export default async function ResourceAuthPage(props: {
 
     return (
         <>
-            <div className="w-full max-w-md mx-auto p-3 md:mt-32">
+            <div className="w-full max-w-md">
                 <ResourceAuthPortal
                     methods={{
                         password: authInfo.password,
@@ -97,7 +92,7 @@ export default async function ResourceAuthPage(props: {
                         name: authInfo.resourceName,
                         id: authInfo.resourceId,
                     }}
-                    redirect={searchParams.r || authInfo.url}
+                    redirect={redirectUrl}
                 />
             </div>
         </>

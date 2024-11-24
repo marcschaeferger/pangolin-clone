@@ -32,9 +32,10 @@ import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { ListUsersResponse } from "@server/routers/user";
 import { Switch } from "@app/components/ui/switch";
 import { Label } from "@app/components/ui/label";
-import { ShieldCheck } from "lucide-react";
+import { Binary, Key, ShieldCheck } from "lucide-react";
 import SetResourcePasswordForm from "./components/SetResourcePasswordForm";
 import { Separator } from "@app/components/ui/separator";
+import SetResourcePincodeForm from "./components/SetResourcePincodeForm";
 
 const UsersRolesFormSchema = z.object({
     roles: z.array(
@@ -78,8 +79,11 @@ export default function ResourceAuthenticationPage() {
     const [loadingSaveUsersRoles, setLoadingSaveUsersRoles] = useState(false);
     const [loadingRemoveResourcePassword, setLoadingRemoveResourcePassword] =
         useState(false);
+    const [loadingRemoveResourcePincode, setLoadingRemoveResourcePincode] =
+        useState(false);
 
     const [isSetPasswordOpen, setIsSetPasswordOpen] = useState(false);
+    const [isSetPincodeOpen, setIsSetPincodeOpen] = useState(false);
 
     const usersRolesForm = useForm<z.infer<typeof UsersRolesFormSchema>>({
         resolver: zodResolver(UsersRolesFormSchema),
@@ -237,6 +241,36 @@ export default function ResourceAuthenticationPage() {
             .finally(() => setLoadingRemoveResourcePassword(false));
     }
 
+    function removeResourcePincode() {
+        setLoadingRemoveResourcePincode(true);
+
+        api.post(`/resource/${resource.resourceId}/pincode`, {
+            pincode: null,
+        })
+            .then(() => {
+                toast({
+                    title: "Resource pincode removed",
+                    description:
+                        "The resource password has been removed successfully",
+                });
+
+                updateAuthInfo({
+                    pincode: false,
+                });
+            })
+            .catch((e) => {
+                toast({
+                    variant: "destructive",
+                    title: "Error removing resource pincode",
+                    description: formatAxiosError(
+                        e,
+                        "An error occurred while removing the resource pincode",
+                    ),
+                });
+            })
+            .finally(() => setLoadingRemoveResourcePincode(false));
+    }
+
     if (pageLoading) {
         return <></>;
     }
@@ -252,6 +286,20 @@ export default function ResourceAuthenticationPage() {
                         setIsSetPasswordOpen(false);
                         updateAuthInfo({
                             password: true,
+                        });
+                    }}
+                />
+            )}
+
+            {isSetPincodeOpen && (
+                <SetResourcePincodeForm
+                    open={isSetPincodeOpen}
+                    setOpen={setIsSetPincodeOpen}
+                    resourceId={resource.resourceId}
+                    onSetPincode={() => {
+                        setIsSetPincodeOpen(false);
+                        updateAuthInfo({
+                            pincode: true,
                         });
                     }}
                 />
@@ -412,40 +460,78 @@ export default function ResourceAuthenticationPage() {
 
                 <Separator />
 
-                <section className="space-y-8">
+                <section className="space-y-8 lg:max-w-2xl">
                     <SettingsSectionTitle
                         title="Authentication Methods"
                         description="Allow anyone to access the resource via the below methods"
                         size="1xl"
                     />
 
-                    {authInfo?.password ? (
-                        <div className="flex items-center space-x-4">
-                            <div className="flex items-center text-green-500 space-x-2">
-                                <ShieldCheck />
-                                <span>Password Protection Enabled</span>
+                    <div className="flex flex-col space-y-4">
+                        <div className="flex items-center justify-between space-x-4">
+                            <div
+                                className={`flex items-center text-${!authInfo.password ? "red" : "green"}-500 space-x-2`}
+                            >
+                                <Key />
+                                <span>
+                                    Password Protection{" "}
+                                    {authInfo?.password
+                                        ? "Enabled"
+                                        : "Disabled"}
+                                </span>
                             </div>
-                            <Button
-                                variant="gray"
-                                type="button"
-                                loading={loadingRemoveResourcePassword}
-                                disabled={loadingRemoveResourcePassword}
-                                onClick={removeResourcePassword}
-                            >
-                                Remove Password
-                            </Button>
+                            {authInfo?.password ? (
+                                <Button
+                                    variant="gray"
+                                    type="button"
+                                    loading={loadingRemoveResourcePassword}
+                                    disabled={loadingRemoveResourcePassword}
+                                    onClick={removeResourcePassword}
+                                >
+                                    Remove Password
+                                </Button>
+                            ) : (
+                                <Button
+                                    variant="gray"
+                                    type="button"
+                                    onClick={() => setIsSetPasswordOpen(true)}
+                                >
+                                    Add Password
+                                </Button>
+                            )}
                         </div>
-                    ) : (
-                        <div>
-                            <Button
-                                variant="gray"
-                                type="button"
-                                onClick={() => setIsSetPasswordOpen(true)}
+
+                        <div className="flex items-center justify-between space-x-4">
+                            <div
+                                className={`flex items-center text-${!authInfo.pincode ? "red" : "green"}-500 space-x-2`}
                             >
-                                Add Password
-                            </Button>
+                                <Binary />
+                                <span>
+                                    PIN Code Protection{" "}
+                                    {authInfo?.pincode ? "Enabled" : "Disabled"}
+                                </span>
+                            </div>
+                            {authInfo?.pincode ? (
+                                <Button
+                                    variant="gray"
+                                    type="button"
+                                    loading={loadingRemoveResourcePincode}
+                                    disabled={loadingRemoveResourcePincode}
+                                    onClick={removeResourcePincode}
+                                >
+                                    Remove PIN Code
+                                </Button>
+                            ) : (
+                                <Button
+                                    variant="gray"
+                                    type="button"
+                                    onClick={() => setIsSetPincodeOpen(true)}
+                                >
+                                    Add PIN Code
+                                </Button>
+                            )}
                         </div>
-                    )}
+                    </div>
                 </section>
             </div>
         </>

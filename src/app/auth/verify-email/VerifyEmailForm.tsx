@@ -123,7 +123,7 @@ export default function VerifyEmailForm({
 
     return (
         <div>
-            <Card className="w-full max-w-md mx-auto">
+            <Card className="w-full max-w-md">
                 <CardHeader>
                     <CardTitle>Verify Your Email</CardTitle>
                     <CardDescription>

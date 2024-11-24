@@ -20,7 +20,7 @@ export default function DashboardLoginForm({
     const router = useRouter();
 
     return (
-        <Card className="w-full max-w-md mx-auto">
+        <Card className="w-full max-w-md">
             <CardHeader>
                 <CardTitle>Login</CardTitle>
                 <CardDescription>

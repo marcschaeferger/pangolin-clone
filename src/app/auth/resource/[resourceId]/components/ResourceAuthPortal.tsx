@@ -68,7 +68,9 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
     const router = useRouter();
 
     const [passwordError, setPasswordError] = useState<string | null>(null);
+    const [pincodeError, setPincodeError] = useState<string | null>(null);
     const [accessDenied, setAccessDenied] = useState<boolean>(false);
+    const [loadingLogin, setLoadingLogin] = useState(false);
 
     function getDefaultSelectedMethod() {
         if (props.methods.sso) {
@@ -111,11 +113,24 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
     });
 
     const onPinSubmit = (values: z.infer<typeof pinSchema>) => {
-        console.log("PIN authentication", values);
-        // Implement PIN authentication logic here
+        setLoadingLogin(true);
+        api.post(`/resource/${props.resource.id}/auth/pincode`, {
+            pincode: values.pin,
+        })
+            .then((res) => {
+                window.location.href = props.redirect;
+            })
+            .catch((e) => {
+                console.error(e);
+                setPincodeError(
+                    formatAxiosError(e, "Failed to authenticate with pincode"),
+                );
+            })
+            .then(() => setLoadingLogin(false));
     };
 
     const onPasswordSubmit = (values: z.infer<typeof passwordSchema>) => {
+        setLoadingLogin(true);
         api.post(`/resource/${props.resource.id}/auth/password`, {
             password: values.password,
         })
@@ -127,7 +142,8 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
                 setPasswordError(
                     formatAxiosError(e, "Failed to authenticate with password"),
                 );
-            });
+            })
+            .finally(() => setLoadingLogin(false));
     };
 
     async function handleSSOAuth() {
@@ -202,8 +218,7 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
                                                     render={({ field }) => (
                                                         <FormItem>
                                                             <FormLabel>
-                                                                Enter 6-digit
-                                                                PIN
+                                                                6-digit PIN Code
                                                             </FormLabel>
                                                             <FormControl>
                                                                 <div className="flex justify-center">
@@ -252,9 +267,18 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
                                                         </FormItem>
                                                     )}
                                                 />
+                                                {pincodeError && (
+                                                    <Alert variant="destructive">
+                                                        <AlertDescription>
+                                                            {pincodeError}
+                                                        </AlertDescription>
+                                                    </Alert>
+                                                )}
                                                 <Button
                                                     type="submit"
                                                     className="w-full"
+                                                    loading={loadingLogin}
+                                                    disabled={loadingLogin}
                                                 >
                                                     <LockIcon className="w-4 h-4 mr-2" />
                                                     Login with PIN
@@ -306,6 +330,8 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
                                                 <Button
                                                     type="submit"
                                                     className="w-full"
+                                                    loading={loadingLogin}
+                                                    disabled={loadingLogin}
                                                 >
                                                     <LockIcon className="w-4 h-4 mr-2" />
                                                     Login with Password
