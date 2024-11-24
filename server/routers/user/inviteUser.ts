@@ -146,20 +146,20 @@ export async function inviteUser(
         const inviteLink = `${config.app.base_url}/invite?token=${inviteId}-${token}`;
 
         logger.debug("here5")
-        await sendEmail(
-            SendInviteLink({
-                email,
-                inviteLink,
-                expiresInDays: (validHours / 24).toString(),
-                orgName: org[0].name || orgId,
-                inviterName: req.user?.email,
-            }),
-            {
-                to: email,
-                from: config.email?.no_reply,
-                subject: "You're invited to join a Fossorial organization",
-            },
-        );
+        // await sendEmail(
+        //     SendInviteLink({
+        //         email,
+        //         inviteLink,
+        //         expiresInDays: (validHours / 24).toString(),
+        //         orgName: org[0].name || orgId,
+        //         inviterName: req.user?.email,
+        //     }),
+        //     {
+        //         to: email,
+        //         from: config.email?.no_reply,
+        //         subject: "You're invited to join a Fossorial organization",
+        //     },
+        // );
 
         logger.debug("here6")
         return response<InviteUserResponse>(res, {
