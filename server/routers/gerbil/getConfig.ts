@@ -51,12 +51,15 @@ export async function getConfig(req: Request, res: Response, next: NextFunction)
         if (exitNodeQuery.length === 0) {
             const address = await getNextAvailableSubnet();
             const listenPort = await getNextAvailablePort();
-            const subEndpoint = await getUniqueExitNodeEndpointName();
+            let subEndpoint = "";
+            if (config.gerbil.use_subdomain) {
+                subEndpoint = await getUniqueExitNodeEndpointName();
+            }
 
             // create a new exit node
             exitNode = await db.insert(exitNodes).values({
                 publicKey,
-                endpoint: `${subEndpoint}.${config.gerbil.base_endpoint}`,
+                endpoint: `${subEndpoint}${subEndpoint != "" ? "." : ""}${config.gerbil.base_endpoint}`,
                 address,
                 listenPort,
                 reachableAt,

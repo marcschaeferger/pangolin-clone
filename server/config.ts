@@ -39,6 +39,7 @@ const environmentSchema = z.object({
     gerbil: z.object({
         start_port: portSchema,
         base_endpoint: z.string(),
+        use_subdomain: z.boolean(),
         subnet_group: z.string(),
         block_size: z.number().positive().gt(0),
     }),
