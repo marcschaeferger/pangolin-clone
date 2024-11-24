@@ -6,16 +6,14 @@ import { useState } from "react";
 
 interface OrgUserProviderProps {
     children: React.ReactNode;
-    orgUser: GetOrgUserResponse | null;
+    orgUser: GetOrgUserResponse;
 }
 
 export function OrgUserProvider({
     children,
     orgUser: serverOrgUser,
 }: OrgUserProviderProps) {
-    const [orgUser, setOrgUser] = useState<GetOrgUserResponse | null>(
-        serverOrgUser
-    );
+    const [orgUser, setOrgUser] = useState<GetOrgUserResponse>(serverOrgUser);
 
     const updateOrgUser = (updateOrgUser: Partial<GetOrgUserResponse>) => {
         if (!orgUser) {
