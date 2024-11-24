@@ -43,7 +43,7 @@ export type VerifyUserResponse = {
 export async function verifyResourceSession(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ): Promise<any> {
     logger.debug("Badger sent", req.body); // remove when done testing
 
@@ -53,8 +53,8 @@ export async function verifyResourceSession(
         return next(
             createHttpError(
                 HttpCode.BAD_REQUEST,
-                fromError(parsedBody.error).toString()
-            )
+                fromError(parsedBody.error).toString(),
+            ),
         );
     }
 
@@ -66,11 +66,11 @@ export async function verifyResourceSession(
             .from(resources)
             .leftJoin(
                 resourcePincode,
-                eq(resourcePincode.resourceId, resources.resourceId)
+                eq(resourcePincode.resourceId, resources.resourceId),
             )
             .leftJoin(
                 resourcePassword,
-                eq(resourcePassword.resourceId, resources.resourceId)
+                eq(resourcePassword.resourceId, resources.resourceId),
             )
             .where(eq(resources.fullDomain, host))
             .limit(1);
@@ -80,32 +80,38 @@ export async function verifyResourceSession(
         const password = result?.resourcePassword;
 
         if (!resource) {
+            logger.debug("Resource not found", host);
             return notAllowed(res);
         }
 
         const { sso, blockAccess } = resource;
 
         if (blockAccess) {
+            logger.debug("Resource blocked", host);
             return notAllowed(res);
         }
 
         if (!resource.sso && !pincode && !password) {
+            logger.debug("Resource allowed because no auth");
             return allowed(res);
         }
 
-        const redirectUrl = `${config.app.base_url}/auth/resource/${resource.resourceId}?redirect=${originalRequestURL}`;
+        const redirectUrl = `${config.app.base_url}/auth/resource/${encodeURIComponent(resource.resourceId)}?redirect=${encodeURIComponent(originalRequestURL)}`;
 
         if (sso && sessions.session) {
             const { session, user } = await validateSessionToken(
-                sessions.session
+                sessions.session,
             );
             if (session && user) {
                 const isAllowed = await isUserAllowedToAccessResource(
                     user.userId,
-                    resource
+                    resource,
                 );
 
                 if (isAllowed) {
+                    logger.debug(
+                        "Resource allowed because user session is valid",
+                    );
                     return allowed(res);
                 }
             }
@@ -114,13 +120,16 @@ export async function verifyResourceSession(
         if (password && sessions.resource_session) {
             const { resourceSession } = await validateResourceSessionToken(
                 sessions.resource_session,
-                resource.resourceId
+                resource.resourceId,
             );
             if (resourceSession) {
                 if (
                     pincode &&
                     resourceSession.pincodeId === pincode.pincodeId
                 ) {
+                    logger.debug(
+                        "Resource allowed because pincode session is valid",
+                    );
                     return allowed(res);
                 }
 
@@ -128,51 +137,63 @@ export async function verifyResourceSession(
                     password &&
                     resourceSession.passwordId === password.passwordId
                 ) {
+                    logger.debug(
+                        "Resource allowed because password session is valid",
+                    );
                     return allowed(res);
                 }
             }
         }
 
+        logger.debug("No more auth to check, resource not allowed");
         return notAllowed(res, redirectUrl);
     } catch (e) {
+        console.error(e);
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,
-                "Failed to verify session"
-            )
+                "Failed to verify session",
+            ),
         );
     }
 }
 
 function notAllowed(res: Response, redirectUrl?: string) {
-    return response<VerifyUserResponse>(res, {
+    const data = {
         data: { valid: false, redirectUrl },
         success: true,
         error: false,
         message: "Access denied",
         status: HttpCode.OK,
-    });
+    }
+    logger.debug(JSON.stringify(data));
+    return response<VerifyUserResponse>(res, data);
 }
 
 function allowed(res: Response) {
-    return response<VerifyUserResponse>(res, {
+    const data = {
         data: { valid: true },
         success: true,
         error: false,
         message: "Access allowed",
         status: HttpCode.OK,
-    });
+    }
+    logger.debug(JSON.stringify(data));
+    return response<VerifyUserResponse>(res, data);
 }
 
 async function isUserAllowedToAccessResource(
     userId: string,
-    resource: Resource
+    resource: Resource,
 ) {
     const userOrgRole = await db
         .select()
         .from(userOrgs)
         .where(
-            and(eq(userOrgs.userId, userId), eq(userOrgs.orgId, resource.orgId))
+            and(
+                eq(userOrgs.userId, userId),
+                eq(userOrgs.orgId, resource.orgId),
+            ),
         )
         .limit(1);
 
@@ -186,8 +207,8 @@ async function isUserAllowedToAccessResource(
         .where(
             and(
                 eq(roleResources.resourceId, resource.resourceId),
-                eq(roleResources.roleId, userOrgRole[0].roleId)
-            )
+                eq(roleResources.roleId, userOrgRole[0].roleId),
+            ),
         )
         .limit(1);
 
@@ -201,8 +222,8 @@ async function isUserAllowedToAccessResource(
         .where(
             and(
                 eq(userResources.userId, userId),
-                eq(userResources.resourceId, resource.resourceId)
-            )
+                eq(userResources.resourceId, resource.resourceId),
+            ),
         )
         .limit(1);
 
