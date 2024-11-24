@@ -38,7 +38,7 @@ const inviteTracker: Record<string, { timestamps: number[] }> = {};
 export async function inviteUser(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ): Promise<any> {
     try {
         const parsedParams = inviteUserParamsSchema.safeParse(req.params);
@@ -46,8 +46,8 @@ export async function inviteUser(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    fromError(parsedParams.error).toString()
-                )
+                    fromError(parsedParams.error).toString(),
+                ),
             );
         }
 
@@ -56,8 +56,8 @@ export async function inviteUser(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    fromError(parsedBody.error).toString()
-                )
+                    fromError(parsedBody.error).toString(),
+                ),
             );
         }
 
@@ -79,13 +79,14 @@ export async function inviteUser(
             return next(
                 createHttpError(
                     HttpCode.TOO_MANY_REQUESTS,
-                    "User has already been invited 3 times in the last hour"
-                )
+                    "User has already been invited 3 times in the last hour",
+                ),
             );
         }
 
         inviteTracker[email].timestamps.push(currentTime);
 
+        logger.debug("here0")
         const org = await db
             .select()
             .from(orgs)
@@ -93,10 +94,11 @@ export async function inviteUser(
             .limit(1);
         if (!org.length) {
             return next(
-                createHttpError(HttpCode.NOT_FOUND, "Organization not found")
+                createHttpError(HttpCode.NOT_FOUND, "Organization not found"),
             );
         }
 
+        logger.debug("here1")
         const existingUser = await db
             .select()
             .from(users)
@@ -107,28 +109,31 @@ export async function inviteUser(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    "User is already a member of this organization"
-                )
+                    "User is already a member of this organization",
+                ),
             );
         }
 
+        logger.debug("here2")
         const inviteId = generateRandomString(
             10,
-            alphabet("a-z", "A-Z", "0-9")
+            alphabet("a-z", "A-Z", "0-9"),
         );
         const token = generateRandomString(32, alphabet("a-z", "A-Z", "0-9"));
         const expiresAt = createDate(new TimeSpan(validHours, "h")).getTime();
 
         const tokenHash = await hashPassword(token);
 
+        logger.debug("here3")
         // delete any existing invites for this email
         await db
             .delete(userInvites)
             .where(
-                and(eq(userInvites.email, email), eq(userInvites.orgId, orgId))
+                and(eq(userInvites.email, email), eq(userInvites.orgId, orgId)),
             )
             .execute();
 
+        logger.debug("here4")
         await db.insert(userInvites).values({
             inviteId,
             orgId,
@@ -140,6 +145,7 @@ export async function inviteUser(
 
         const inviteLink = `${config.app.base_url}/invite?token=${inviteId}-${token}`;
 
+        logger.debug("here5")
         await sendEmail(
             SendInviteLink({
                 email,
@@ -152,9 +158,10 @@ export async function inviteUser(
                 to: email,
                 from: config.email?.no_reply,
                 subject: "You're invited to join a Fossorial organization",
-            }
+            },
         );
 
+        logger.debug("here6")
         return response<InviteUserResponse>(res, {
             data: {
                 inviteLink,
@@ -166,9 +173,12 @@ export async function inviteUser(
             status: HttpCode.OK,
         });
     } catch (error) {
-        throw error;
+        console.error(error);
         return next(
-            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "An error occurred",
+            ),
         );
     }
 }
