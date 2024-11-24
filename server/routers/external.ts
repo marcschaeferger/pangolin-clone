@@ -281,20 +281,12 @@ authenticated.post(
     verifyUserHasAction(ActionsEnum.setResourceAuthMethods),
     resource.setResourcePassword,
 );
-unauthenticated.post(
-    "/resource/:resourceId/auth/password",
-    resource.authWithPassword,
-);
 
 authenticated.post(
     `/resource/:resourceId/pincode`,
     verifyResourceAccess,
     verifyUserHasAction(ActionsEnum.setResourceAuthMethods),
     resource.setResourcePincode,
-);
-unauthenticated.post(
-    "/resource/:resourceId/auth/pincode",
-    resource.authWithPincode,
 );
 
 unauthenticated.get("/resource/:resourceId/auth", resource.getResourceAuthInfo);
@@ -382,7 +374,7 @@ unauthenticated.use("/auth", authRouter);
 authRouter.use(
     rateLimitMiddleware({
         windowMin: 10,
-        max: 15,
+        max: 75,
         type: "IP_AND_PATH",
     }),
 );
@@ -412,3 +404,6 @@ authRouter.post(
 );
 authRouter.post("/reset-password/request", auth.requestPasswordReset);
 authRouter.post("/reset-password/", auth.resetPassword);
+
+authRouter.post("/resource/:resourceId/password", resource.authWithPassword);
+authRouter.post("/resource/:resourceId/pincode", resource.authWithPincode);

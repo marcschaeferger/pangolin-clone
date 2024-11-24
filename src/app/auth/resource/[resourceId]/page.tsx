@@ -80,14 +80,6 @@ export default async function ResourceAuthPage(props: {
         );
     }
 
-    const getNumMethods = () => {
-        let colLength = 0;
-        if (authInfo.pincode) colLength++;
-        if (authInfo.password) colLength++;
-        if (authInfo.sso) colLength++;
-        return colLength;
-    };
-
     return (
         <>
             <div className="w-full max-w-md">
@@ -105,7 +97,6 @@ export default async function ResourceAuthPage(props: {
                     queryParamName={
                         process.env.RESOURCE_SESSION_QUERY_PARAM_NAME!
                     }
-                    numMethods={getNumMethods()}
                 />
             </div>
         </>

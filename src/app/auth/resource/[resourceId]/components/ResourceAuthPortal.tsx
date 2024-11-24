@@ -64,13 +64,20 @@ type ResourceAuthPortalProps = {
     };
     redirect: string;
     queryParamName: string;
-    numMethods: number;
 };
 
 export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
     const router = useRouter();
 
-    const numMethods = props.numMethods;
+    const getNumMethods = () => {
+        let colLength = 0;
+        if (props.methods.pincode) colLength++;
+        if (props.methods.password) colLength++;
+        if (props.methods.sso) colLength++;
+        return colLength;
+    };
+
+    const [numMethods, setNumMethods] = useState(getNumMethods());
 
     const [passwordError, setPasswordError] = useState<string | null>(null);
     const [pincodeError, setPincodeError] = useState<string | null>(null);
@@ -117,7 +124,7 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
     const onPinSubmit = (values: z.infer<typeof pinSchema>) => {
         setLoadingLogin(true);
         api.post<AxiosResponse<AuthWithPasswordResponse>>(
-            `/resource/${props.resource.id}/auth/pincode`,
+            `/auth/resource/${props.resource.id}/pincode`,
             { pincode: values.pin },
         )
             .then((res) => {
@@ -141,7 +148,7 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
     const onPasswordSubmit = (values: z.infer<typeof passwordSchema>) => {
         setLoadingLogin(true);
         api.post<AxiosResponse<AuthWithPasswordResponse>>(
-            `/resource/${props.resource.id}/auth/password`,
+            `/auth/resource/${props.resource.id}/password`,
             {
                 password: values.password,
             },
