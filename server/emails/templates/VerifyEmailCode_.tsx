@@ -59,5 +59,3 @@ export const VerifyEmail = ({
         </Html>
     );
 };
-
-export default VerifyEmail;
