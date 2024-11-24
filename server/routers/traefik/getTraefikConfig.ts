@@ -22,6 +22,10 @@ export async function traefikConfigProvider(
                 schema.orgs,
                 eq(schema.resources.orgId, schema.orgs.orgId),
             )
+            .innerJoin(
+                schema.sites,
+                eq(schema.sites.siteId, schema.resources.siteId),
+            )
             .where(
                 and(
                     eq(schema.targets.enabled, true),
@@ -70,6 +74,7 @@ export async function traefikConfigProvider(
         for (const item of all) {
             const target = item.targets;
             const resource = item.resources;
+            const site = item.sites;
             const org = item.orgs;
 
             const routerName = `${target.targetId}-router`;
@@ -128,15 +133,28 @@ export async function traefikConfigProvider(
                 };
             }
 
-            http.services![serviceName] = {
-                loadBalancer: {
-                    servers: [
-                        {
-                            url: `${target.method}://${target.ip}:${target.port}`,
-                        },
-                    ],
-                },
-            };
+            if (site.type === "newt") {
+                const ip = site.subnet.split("/")[0];
+                http.services![serviceName] = {
+                    loadBalancer: {
+                        servers: [
+                            {
+                                url: `${target.method}://${ip}:${target.internalPort}`,
+                            },
+                        ],
+                    },
+                };
+            } else if (site.type === "wireguard") {
+                http.services![serviceName] = {
+                    loadBalancer: {
+                        servers: [
+                            {
+                                url: `${target.method}://${target.ip}:${target.port}`,
+                            },
+                        ],
+                    },
+                };
+            }
         }
 
         return res.status(HttpCode.OK).json({ http });
