@@ -171,7 +171,7 @@ export default function ReverseProxyTargets(props: {
 
             updateResource({ ssl: sslEnabled });
 
-            for (const target of targets) {
+            for (let target of targets) {
                 const data = {
                     ip: target.ip,
                     port: target.port,
@@ -184,6 +184,7 @@ export default function ReverseProxyTargets(props: {
                     const res = await api.put<
                         AxiosResponse<CreateTargetResponse>
                     >(`/resource/${params.resourceId}/target`, data);
+                    target.targetId = res.data.data.targetId;
                 } else if (target.updated) {
                     const res = await api.post(
                         `/target/${target.targetId}`,
@@ -193,11 +194,12 @@ export default function ReverseProxyTargets(props: {
 
                 setTargets([
                     ...targets.map((t) => {
-                        return {
+                        let res = {
                             ...t,
                             new: false,
                             updated: false,
                         };
+                        return res;
                     }),
                 ]);
             }
