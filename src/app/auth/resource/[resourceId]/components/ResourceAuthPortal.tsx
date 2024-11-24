@@ -64,10 +64,13 @@ type ResourceAuthPortalProps = {
     };
     redirect: string;
     queryParamName: string;
+    numMethods: number;
 };
 
 export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
     const router = useRouter();
+
+    const numMethods = props.numMethods;
 
     const [passwordError, setPasswordError] = useState<string | null>(null);
     const [pincodeError, setPincodeError] = useState<string | null>(null);
@@ -89,16 +92,6 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
     }
 
     const [activeTab, setActiveTab] = useState(getDefaultSelectedMethod());
-
-    const getColLength = () => {
-        let colLength = 0;
-        if (props.methods.pincode) colLength++;
-        if (props.methods.password) colLength++;
-        if (props.methods.sso) colLength++;
-        return colLength;
-    };
-
-    const [numMethods, setNumMethods] = useState(getColLength());
 
     const pinForm = useForm<z.infer<typeof pinSchema>>({
         resolver: zodResolver(pinSchema),
@@ -125,9 +118,7 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
         setLoadingLogin(true);
         api.post<AxiosResponse<AuthWithPasswordResponse>>(
             `/resource/${props.resource.id}/auth/pincode`,
-            {
-                pincode: values.pin,
-            },
+            { pincode: values.pin },
         )
             .then((res) => {
                 const session = res.data.data.session;
@@ -202,10 +193,17 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
                             <Tabs
                                 value={activeTab}
                                 onValueChange={setActiveTab}
+                                orientation="horizontal"
                             >
                                 {numMethods > 1 && (
                                     <TabsList
-                                        className={`grid w-full grid-cols-${numMethods}`}
+                                        className={`grid w-full ${
+                                            numMethods === 1
+                                                ? "grid-cols-1"
+                                                : numMethods === 2
+                                                  ? "grid-cols-2"
+                                                  : "grid-cols-3"
+                                        }`}
                                     >
                                         {props.methods.pincode && (
                                             <TabsTrigger value="pin">
