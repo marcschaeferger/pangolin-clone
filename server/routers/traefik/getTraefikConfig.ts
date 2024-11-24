@@ -8,7 +8,7 @@ import config from "@server/config";
 
 export async function traefikConfigProvider(
     _: Request,
-    res: Response
+    res: Response,
 ): Promise<any> {
     try {
         const all = await db
@@ -16,18 +16,18 @@ export async function traefikConfigProvider(
             .from(schema.targets)
             .innerJoin(
                 schema.resources,
-                eq(schema.targets.resourceId, schema.resources.resourceId)
+                eq(schema.targets.resourceId, schema.resources.resourceId),
             )
             .innerJoin(
                 schema.orgs,
-                eq(schema.resources.orgId, schema.orgs.orgId)
+                eq(schema.resources.orgId, schema.orgs.orgId),
             )
             .where(
                 and(
                     eq(schema.targets.enabled, true),
                     isNotNull(schema.resources.subdomain),
-                    isNotNull(schema.orgs.domain)
-                )
+                    isNotNull(schema.orgs.domain),
+                ),
             );
 
         if (!all.length) {
@@ -48,9 +48,14 @@ export async function traefikConfigProvider(
                         [badgerMiddlewareName]: {
                             apiBaseUrl: new URL(
                                 "/api/v1",
-                                `http://${config.server.internal_hostname}:${config.server.internal_port}`
+                                `http://${config.server.internal_hostname}:${config.server.internal_port}`,
                             ).href,
-                            appBaseUrl: config.app.base_url,
+                            resourceSessionCookieName:
+                                config.badger.resource_session_cookie_name,
+                            userSessionCookieName:
+                                config.server.session_cookie_name,
+                            sessionQueryParameter:
+                                config.badger.session_query_parameter,
                         },
                     },
                 },

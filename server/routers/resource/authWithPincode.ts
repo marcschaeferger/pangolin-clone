@@ -27,6 +27,7 @@ export const authWithPincodeParamsSchema = z.object({
 
 export type AuthWithPincodeResponse = {
     codeRequested?: boolean;
+    session?: string;
 };
 
 export async function authWithPincode(
@@ -126,18 +127,20 @@ export async function authWithPincode(
             token,
             pincodeId: definedPincode.pincodeId,
         });
-        const secureCookie = resource.ssl;
-        const cookie = serializeResourceSessionCookie(
-            token,
-            resource.fullDomain,
-            secureCookie,
-        );
-        res.appendHeader("Set-Cookie", cookie);
+        // const secureCookie = resource.ssl;
+        // const cookie = serializeResourceSessionCookie(
+        //     token,
+        //     resource.fullDomain,
+        //     secureCookie,
+        // );
+        // res.appendHeader("Set-Cookie", cookie);
 
-        logger.debug(cookie); // remove after testing
+        // logger.debug(cookie); // remove after testing
 
-        return response<null>(res, {
-            data: null,
+        return response<AuthWithPincodeResponse>(res, {
+            data: {
+                session: token,
+            },
             success: true,
             error: false,
             message: "Authenticated with resource successfully",

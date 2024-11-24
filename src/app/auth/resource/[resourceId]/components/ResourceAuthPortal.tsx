@@ -37,6 +37,7 @@ import { AxiosResponse } from "axios";
 import { LoginResponse } from "@server/routers/auth";
 import ResourceAccessDenied from "./ResourceAccessDenied";
 import LoginForm from "@app/components/LoginForm";
+import { AuthWithPasswordResponse } from "@server/routers/resource";
 
 const pinSchema = z.object({
     pin: z
@@ -62,6 +63,7 @@ type ResourceAuthPortalProps = {
         id: number;
     };
     redirect: string;
+    queryParamName: string;
 };
 
 export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
@@ -112,13 +114,29 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
         },
     });
 
+    function constructRedirect(redirect: string, token: string): string {
+        const redirectUrl = new URL(redirect);
+        redirectUrl.searchParams.delete(props.queryParamName);
+        redirectUrl.searchParams.append(props.queryParamName, token);
+        return redirectUrl.toString();
+    }
+
     const onPinSubmit = (values: z.infer<typeof pinSchema>) => {
         setLoadingLogin(true);
-        api.post(`/resource/${props.resource.id}/auth/pincode`, {
-            pincode: values.pin,
-        })
+        api.post<AxiosResponse<AuthWithPasswordResponse>>(
+            `/resource/${props.resource.id}/auth/pincode`,
+            {
+                pincode: values.pin,
+            },
+        )
             .then((res) => {
-                window.location.href = props.redirect;
+                const session = res.data.data.session;
+                if (session) {
+                    window.location.href = constructRedirect(
+                        props.redirect,
+                        session,
+                    );
+                }
             })
             .catch((e) => {
                 console.error(e);
@@ -131,11 +149,20 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
 
     const onPasswordSubmit = (values: z.infer<typeof passwordSchema>) => {
         setLoadingLogin(true);
-        api.post(`/resource/${props.resource.id}/auth/password`, {
-            password: values.password,
-        })
+        api.post<AxiosResponse<AuthWithPasswordResponse>>(
+            `/resource/${props.resource.id}/auth/password`,
+            {
+                password: values.password,
+            },
+        )
             .then((res) => {
-                window.location.href = props.redirect;
+                const session = res.data.data.session;
+                if (session) {
+                    window.location.href = constructRedirect(
+                        props.redirect,
+                        session,
+                    );
+                }
             })
             .catch((e) => {
                 console.error(e);

@@ -14,7 +14,7 @@ import ResourceAccessDenied from "./components/ResourceAccessDenied";
 
 export default async function ResourceAuthPage(props: {
     params: Promise<{ resourceId: number }>;
-    searchParams: Promise<{ r: string }>;
+    searchParams: Promise<{ redirect: string }>;
 }) {
     const params = await props.params;
     const searchParams = await props.searchParams;
@@ -44,9 +44,10 @@ export default async function ResourceAuthPage(props: {
     const hasAuth = authInfo.password || authInfo.pincode || authInfo.sso;
     const isSSOOnly = authInfo.sso && !authInfo.password && !authInfo.pincode;
 
-    const redirectUrl = searchParams.r || authInfo.url;
+    const redirectUrl = searchParams.redirect || authInfo.url;
 
     if (!hasAuth) {
+        // no authentication so always go straight to the resource
         redirect(redirectUrl);
     }
 
@@ -93,6 +94,9 @@ export default async function ResourceAuthPage(props: {
                         id: authInfo.resourceId,
                     }}
                     redirect={redirectUrl}
+                    queryParamName={
+                        process.env.RESOURCE_SESSION_QUERY_PARAM_NAME!
+                    }
                 />
             </div>
         </>

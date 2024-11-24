@@ -2,6 +2,7 @@ app:
     base_url: http://localhost:3000
     log_level: warning
     save_logs: false
+    sessionCookieName: session
 
 server:
     external_port: 3000
@@ -14,11 +15,15 @@ traefik:
     http_entrypoint: web
     https_entrypoint: websecure
 
+badger:
+    session_query_parameter: __pang_sess
+    resource_session_cookie_name: resource_session
+
 gerbil:
     start_port: 51820
     base_endpoint: localhost
     block_size: 16
-    subnet_group: 10.0.0.0/8 
+    subnet_group: 10.0.0.0/8
 
 rate_limit:
     window_minutes: 1

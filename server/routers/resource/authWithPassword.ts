@@ -27,12 +27,13 @@ export const authWithPasswordParamsSchema = z.object({
 
 export type AuthWithPasswordResponse = {
     codeRequested?: boolean;
+    session?: string;
 };
 
 export async function authWithPassword(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ): Promise<any> {
     const parsedBody = authWithPasswordBodySchema.safeParse(req.body);
 
@@ -40,8 +41,8 @@ export async function authWithPassword(
         return next(
             createHttpError(
                 HttpCode.BAD_REQUEST,
-                fromError(parsedBody.error).toString()
-            )
+                fromError(parsedBody.error).toString(),
+            ),
         );
     }
 
@@ -51,8 +52,8 @@ export async function authWithPassword(
         return next(
             createHttpError(
                 HttpCode.BAD_REQUEST,
-                fromError(parsedParams.error).toString()
-            )
+                fromError(parsedParams.error).toString(),
+            ),
         );
     }
 
@@ -65,7 +66,7 @@ export async function authWithPassword(
             .from(resources)
             .leftJoin(
                 resourcePassword,
-                eq(resourcePassword.resourceId, resources.resourceId)
+                eq(resourcePassword.resourceId, resources.resourceId),
             )
             .where(eq(resources.resourceId, resourceId))
             .limit(1);
@@ -75,7 +76,10 @@ export async function authWithPassword(
 
         if (!resource) {
             return next(
-                createHttpError(HttpCode.BAD_REQUEST, "Resource does not exist")
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    "Resource does not exist",
+                ),
             );
         }
 
@@ -85,9 +89,9 @@ export async function authWithPassword(
                     HttpCode.UNAUTHORIZED,
                     createHttpError(
                         HttpCode.BAD_REQUEST,
-                        "Resource has no password protection"
-                    )
-                )
+                        "Resource has no password protection",
+                    ),
+                ),
             );
         }
 
@@ -99,11 +103,11 @@ export async function authWithPassword(
                 timeCost: 2,
                 outputLen: 32,
                 parallelism: 1,
-            }
+            },
         );
         if (!validPassword) {
             return next(
-                createHttpError(HttpCode.UNAUTHORIZED, "Incorrect password")
+                createHttpError(HttpCode.UNAUTHORIZED, "Incorrect password"),
             );
         }
 
@@ -127,18 +131,20 @@ export async function authWithPassword(
             token,
             passwordId: definedPassword.passwordId,
         });
-        const secureCookie = resource.ssl;
-        const cookie = serializeResourceSessionCookie(
-            token,
-            resource.fullDomain,
-            secureCookie
-        );
-        res.appendHeader("Set-Cookie", cookie);
+        // const secureCookie = resource.ssl;
+        // const cookie = serializeResourceSessionCookie(
+        //     token,
+        //     resource.fullDomain,
+        //     secureCookie,
+        // );
+        // res.appendHeader("Set-Cookie", cookie);
 
-        logger.debug(cookie); // remove after testing
+        // logger.debug(cookie); // remove after testing
 
-        return response<null>(res, {
-            data: null,
+        return response<AuthWithPasswordResponse>(res, {
+            data: {
+                session: token,
+            },
             success: true,
             error: false,
             message: "Authenticated with resource successfully",
@@ -148,8 +154,8 @@ export async function authWithPassword(
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,
-                "Failed to authenticate with resource"
-            )
+                "Failed to authenticate with resource",
+            ),
         );
     }
 }

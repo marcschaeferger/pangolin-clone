@@ -16,6 +16,7 @@ import { z } from "zod";
 import { fromError } from "zod-validation-error";
 import { verifyTotpCode } from "@server/auth/2fa";
 import config from "@server/config";
+import logger from "@server/logger";
 
 export const loginBodySchema = z.object({
     email: z.string().email(),
@@ -124,6 +125,8 @@ export async function login(
         const token = generateSessionToken();
         await createSession(token, existingUser.userId);
         const cookie = serializeSessionCookie(token);
+
+        logger.debug(cookie);
 
         res.appendHeader("Set-Cookie", cookie);
 

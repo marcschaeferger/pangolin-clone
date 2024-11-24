@@ -93,7 +93,7 @@ export async function verifyResourceSession(
             return allowed(res);
         }
 
-        const redirectUrl = `${config.app.base_url}/${resource.orgId}/auth/resource/${resource.resourceId}?r=${originalRequestURL}`;
+        const redirectUrl = `${config.app.base_url}/auth/resource/${resource.resourceId}?redirect=${originalRequestURL}`;
 
         if (sso && sessions.session) {
             const { session, user } = await validateSessionToken(

@@ -13,7 +13,7 @@ import config from "@server/config";
 import type { RandomReader } from "@oslojs/crypto/random";
 import { generateRandomString } from "@oslojs/crypto/random";
 
-export const SESSION_COOKIE_NAME = "session";
+export const SESSION_COOKIE_NAME = config.server.session_cookie_name;
 export const SESSION_COOKIE_EXPIRES = 1000 * 60 * 60 * 24 * 30;
 export const SECURE_COOKIES = config.server.secure_cookies;
 export const COOKIE_DOMAIN =
@@ -63,7 +63,7 @@ export async function validateSessionToken(
             .where(eq(sessions.sessionId, session.sessionId));
         return { session: null, user: null };
     }
-    if (Date.now() >= session.expiresAt - (SESSION_COOKIE_EXPIRES / 2)) {
+    if (Date.now() >= session.expiresAt - SESSION_COOKIE_EXPIRES / 2) {
         session.expiresAt = new Date(
             Date.now() + SESSION_COOKIE_EXPIRES,
         ).getTime();

@@ -24,6 +24,11 @@ const environmentSchema = z.object({
         internal_hostname: z.string(),
         secure_cookies: z.boolean(),
         signup_secret: z.string().optional(),
+        session_cookie_name: z.string(),
+    }),
+    badger: z.object({
+        session_query_parameter: z.string(),
+        resource_session_cookie_name: z.string(),
     }),
     traefik: z.object({
         http_entrypoint: z.string(),
@@ -68,7 +73,7 @@ const loadConfig = (configPath: string) => {
     } catch (error) {
         if (error instanceof Error) {
             throw new Error(
-                `Error loading configuration file: ${error.message}`
+                `Error loading configuration file: ${error.message}`,
             );
         }
         throw error;
@@ -90,21 +95,21 @@ if (!environment) {
         try {
             const exampleConfigContent = fs.readFileSync(
                 exampleConfigPath,
-                "utf8"
+                "utf8",
             );
             fs.writeFileSync(configFilePath1, exampleConfigContent, "utf8");
             environment = loadConfig(configFilePath1);
         } catch (error) {
             if (error instanceof Error) {
                 throw new Error(
-                    `Error creating configuration file from example: ${error.message}`
+                    `Error creating configuration file from example: ${error.message}`,
                 );
             }
             throw error;
         }
     } else {
         throw new Error(
-            "No configuration file found and no example configuration available"
+            "No configuration file found and no example configuration available",
         );
     }
 }
@@ -126,5 +131,8 @@ process.env.FLAGS_EMAIL_VERIFICATION_REQUIRED = parsedConfig.data.flags
     ?.require_email_verification
     ? "true"
     : "false";
+process.env.SESSION_COOKIE_NAME = parsedConfig.data.server.session_cookie_name;
+process.env.RESOURCE_SESSION_QUERY_PARAM_NAME =
+    parsedConfig.data.badger.session_query_parameter;
 
 export default parsedConfig.data;

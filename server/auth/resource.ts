@@ -15,12 +15,12 @@ export async function createResourceSession(opts: {
 }): Promise<ResourceSession> {
     if (!opts.passwordId && !opts.pincodeId) {
         throw new Error(
-            "At least one of passwordId or pincodeId must be provided"
+            "At least one of passwordId or pincodeId must be provided",
         );
     }
 
     const sessionId = encodeHexLowerCase(
-        sha256(new TextEncoder().encode(opts.token))
+        sha256(new TextEncoder().encode(opts.token)),
     );
 
     const session: ResourceSession = {
@@ -38,10 +38,10 @@ export async function createResourceSession(opts: {
 
 export async function validateResourceSessionToken(
     token: string,
-    resourceId: number
+    resourceId: number,
 ): Promise<ResourceSessionValidationResult> {
     const sessionId = encodeHexLowerCase(
-        sha256(new TextEncoder().encode(token))
+        sha256(new TextEncoder().encode(token)),
     );
     const result = await db
         .select()
@@ -49,8 +49,8 @@ export async function validateResourceSessionToken(
         .where(
             and(
                 eq(resourceSessions.sessionId, sessionId),
-                eq(resourceSessions.resourceId, resourceId)
-            )
+                eq(resourceSessions.resourceId, resourceId),
+            ),
         );
 
     if (result.length < 1) {
@@ -61,7 +61,7 @@ export async function validateResourceSessionToken(
 
     if (Date.now() >= resourceSession.expiresAt - SESSION_COOKIE_EXPIRES / 2) {
         resourceSession.expiresAt = new Date(
-            Date.now() + SESSION_COOKIE_EXPIRES
+            Date.now() + SESSION_COOKIE_EXPIRES,
         ).getTime();
         await db
             .update(resourceSessions)
@@ -75,7 +75,7 @@ export async function validateResourceSessionToken(
 }
 
 export async function invalidateResourceSession(
-    sessionId: string
+    sessionId: string,
 ): Promise<void> {
     await db
         .delete(resourceSessions)
@@ -87,7 +87,7 @@ export async function invalidateAllSessions(
     method?: {
         passwordId?: number;
         pincodeId?: number;
-    }
+    },
 ): Promise<void> {
     if (method?.passwordId) {
         await db
@@ -95,8 +95,8 @@ export async function invalidateAllSessions(
             .where(
                 and(
                     eq(resourceSessions.resourceId, resourceId),
-                    eq(resourceSessions.passwordId, method.passwordId)
-                )
+                    eq(resourceSessions.passwordId, method.passwordId),
+                ),
             );
     } else if (method?.pincodeId) {
         await db
@@ -104,8 +104,8 @@ export async function invalidateAllSessions(
             .where(
                 and(
                     eq(resourceSessions.resourceId, resourceId),
-                    eq(resourceSessions.pincodeId, method.pincodeId)
-                )
+                    eq(resourceSessions.pincodeId, method.pincodeId),
+                ),
             );
     } else {
         await db
@@ -117,18 +117,18 @@ export async function invalidateAllSessions(
 export function serializeResourceSessionCookie(
     token: string,
     fqdn: string,
-    secure: boolean
+    secure: boolean,
 ): string {
     if (secure) {
-        return `${SESSION_COOKIE_NAME}=${token}; HttpOnly; SameSite=Lax; Max-Age=${SESSION_COOKIE_EXPIRES}; Path=/; Secure; Domain=${fqdn}`;
+        return `${SESSION_COOKIE_NAME}=${token}; HttpOnly; SameSite=Lax; Max-Age=${SESSION_COOKIE_EXPIRES}; Path=/; Secure; Domain=.localhost`;
     } else {
-        return `${SESSION_COOKIE_NAME}=${token}; HttpOnly; SameSite=Lax; Max-Age=${SESSION_COOKIE_EXPIRES}; Path=/; Domain=${fqdn}`;
+        return `${SESSION_COOKIE_NAME}=${token}; HttpOnly; SameSite=Lax; Max-Age=${SESSION_COOKIE_EXPIRES}; Path=/; Domain=.localhost`;
     }
 }
 
 export function createBlankResourceSessionTokenCookie(
     fqdn: string,
-    secure: boolean
+    secure: boolean,
 ): string {
     if (secure) {
         return `${SESSION_COOKIE_NAME}=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/; Secure; Domain=${fqdn}`;
