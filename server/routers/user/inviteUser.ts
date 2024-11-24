@@ -166,7 +166,7 @@ export async function inviteUser(
             status: HttpCode.OK,
         });
     } catch (error) {
-        logger.error(error);
+        throw error;
         return next(
             createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
