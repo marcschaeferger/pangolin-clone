@@ -91,7 +91,7 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
 
     return (
         <>
-            <div className="w-full border-b bg-neutral-100 dark:bg-neutral-900 mb-6 select-none sm:px-0 px-3 pt-3">
+            <div className="w-full border-b bg-neutral-100 dark:bg-neutral-800 mb-6 select-none sm:px-0 px-3 pt-3">
                 <div className="container mx-auto flex flex-col content-between gap-4 ">
                     <Header
                         email={user.email}

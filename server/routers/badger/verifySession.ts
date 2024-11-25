@@ -165,7 +165,7 @@ function notAllowed(res: Response, redirectUrl?: string) {
         error: false,
         message: "Access denied",
         status: HttpCode.OK,
-    }
+    };
     logger.debug(JSON.stringify(data));
     return response<VerifyUserResponse>(res, data);
 }
@@ -177,7 +177,7 @@ function allowed(res: Response) {
         error: false,
         message: "Access allowed",
         status: HttpCode.OK,
-    }
+    };
     logger.debug(JSON.stringify(data));
     return response<VerifyUserResponse>(res, data);
 }

@@ -15,11 +15,21 @@ export default async function SitesPage(props: SitesPageProps) {
     try {
         const res = await internal.get<AxiosResponse<ListSitesResponse>>(
             `/org/${params.orgId}/sites`,
-            await authCookieHeader()
+            await authCookieHeader(),
         );
         sites = res.data.data.sites;
     } catch (e) {
         console.error("Error fetching sites", e);
+    }
+
+    function formatSize(mb: number): string {
+        if (mb >= 1024 * 1024) {
+            return `${(mb / (1024 * 1024)).toFixed(2)} TB`;
+        } else if (mb >= 1024) {
+            return `${(mb / 1024).toFixed(2)} GB`;
+        } else {
+            return `${mb.toFixed(2)} MB`;
+        }
     }
 
     const siteRows: SiteRow[] = sites.map((site) => {
@@ -27,8 +37,8 @@ export default async function SitesPage(props: SitesPageProps) {
             name: site.name,
             id: site.siteId,
             nice: site.niceId.toString(),
-            mbIn: site.megabytesIn || 0,
-            mbOut: site.megabytesOut || 0,
+            mbIn: formatSize(site.megabytesIn || 0),
+            mbOut: formatSize(site.megabytesOut || 0),
             orgId: params.orgId,
         };
     });

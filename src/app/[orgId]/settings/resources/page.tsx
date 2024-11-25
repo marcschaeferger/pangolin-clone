@@ -19,7 +19,7 @@ export default async function ResourcesPage(props: ResourcesPageProps) {
     try {
         const res = await internal.get<AxiosResponse<ListResourcesResponse>>(
             `/org/${params.orgId}/resources`,
-            await authCookieHeader()
+            await authCookieHeader(),
         );
         resources = res.data.data.resources;
     } catch (e) {
@@ -31,8 +31,8 @@ export default async function ResourcesPage(props: ResourcesPageProps) {
         const getOrg = cache(async () =>
             internal.get<AxiosResponse<GetOrgResponse>>(
                 `/org/${params.orgId}`,
-                await authCookieHeader()
-            )
+                await authCookieHeader(),
+            ),
         );
         const res = await getOrg();
         org = res.data.data;
@@ -49,8 +49,12 @@ export default async function ResourcesPage(props: ResourcesPageProps) {
             id: resource.resourceId,
             name: resource.name,
             orgId: params.orgId,
-            domain: resource.subdomain || "",
+            domain: `${resource.ssl ? "https://" : "http://"}${resource.fullDomain}`,
             site: resource.siteName || "None",
+            hasAuth:
+                resource.sso ||
+                resource.pincodeId !== null ||
+                resource.pincodeId !== null,
         };
     });
 

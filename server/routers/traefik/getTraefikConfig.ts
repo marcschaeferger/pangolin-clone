@@ -117,7 +117,7 @@ export async function traefikConfigProvider(
                         ? config.traefik.https_entrypoint
                         : config.traefik.http_entrypoint,
                 ],
-                middlewares: resource.ssl ? [badgerMiddlewareName] : [],
+                middlewares: [badgerMiddlewareName],
                 service: serviceName,
                 rule: `Host(\`${fullDomain}\`)`,
                 ...(resource.ssl ? { tls } : {}),

@@ -24,8 +24,8 @@ export type SiteRow = {
     id: number;
     nice: string;
     name: string;
-    mbIn: number;
-    mbOut: number;
+    mbIn: string;
+    mbOut: string;
     orgId: string;
 };
 

@@ -6,6 +6,8 @@ import {
     sites,
     userResources,
     roleResources,
+    resourcePassword,
+    resourcePincode,
 } from "@server/db/schema";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
@@ -46,39 +48,63 @@ const listResourcesSchema = z.object({
 function queryResources(
     accessibleResourceIds: number[],
     siteId?: number,
-    orgId?: string
+    orgId?: string,
 ) {
     if (siteId) {
         return db
             .select({
                 resourceId: resources.resourceId,
                 name: resources.name,
-                subdomain: resources.subdomain,
+                fullDomain: resources.fullDomain,
+                ssl: resources.ssl,
                 siteName: sites.name,
+                passwordId: resourcePassword.passwordId,
+                pincodeId: resourcePincode.pincodeId,
+                sso: resources.sso,
             })
             .from(resources)
             .leftJoin(sites, eq(resources.siteId, sites.siteId))
+            .leftJoin(
+                resourcePassword,
+                eq(resourcePassword.resourceId, resources.resourceId),
+            )
+            .leftJoin(
+                resourcePincode,
+                eq(resourcePincode.resourceId, resources.resourceId),
+            )
             .where(
                 and(
                     inArray(resources.resourceId, accessibleResourceIds),
-                    eq(resources.siteId, siteId)
-                )
+                    eq(resources.siteId, siteId),
+                ),
             );
     } else if (orgId) {
         return db
             .select({
                 resourceId: resources.resourceId,
                 name: resources.name,
-                subdomain: resources.subdomain,
+                ssl: resources.ssl,
+                fullDomain: resources.fullDomain,
                 siteName: sites.name,
+                passwordId: resourcePassword.passwordId,
+                sso: resources.sso,
+                pincodeId: resourcePincode.pincodeId,
             })
             .from(resources)
             .leftJoin(sites, eq(resources.siteId, sites.siteId))
+            .leftJoin(
+                resourcePassword,
+                eq(resourcePassword.resourceId, resources.resourceId),
+            )
+            .leftJoin(
+                resourcePincode,
+                eq(resourcePincode.resourceId, resources.resourceId),
+            )
             .where(
                 and(
                     inArray(resources.resourceId, accessibleResourceIds),
-                    eq(resources.orgId, orgId)
-                )
+                    eq(resources.orgId, orgId),
+                ),
             );
     }
 }
@@ -91,7 +117,7 @@ export type ListResourcesResponse = {
 export async function listResources(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ): Promise<any> {
     try {
         const parsedQuery = listResourcesSchema.safeParse(req.query);
@@ -99,8 +125,8 @@ export async function listResources(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedQuery.error.errors.map((e) => e.message).join(", ")
-                )
+                    parsedQuery.error.errors.map((e) => e.message).join(", "),
+                ),
             );
         }
         const { limit, offset } = parsedQuery.data;
@@ -110,8 +136,8 @@ export async function listResources(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedParams.error.errors.map((e) => e.message).join(", ")
-                )
+                    parsedParams.error.errors.map((e) => e.message).join(", "),
+                ),
             );
         }
         const { siteId, orgId } = parsedParams.data;
@@ -120,8 +146,8 @@ export async function listResources(
             return next(
                 createHttpError(
                     HttpCode.FORBIDDEN,
-                    "User does not have access to this organization"
-                )
+                    "User does not have access to this organization",
+                ),
             );
         }
 
@@ -132,17 +158,17 @@ export async function listResources(
             .from(userResources)
             .fullJoin(
                 roleResources,
-                eq(userResources.resourceId, roleResources.resourceId)
+                eq(userResources.resourceId, roleResources.resourceId),
             )
             .where(
                 or(
                     eq(userResources.userId, req.user!.userId),
-                    eq(roleResources.roleId, req.userOrgRoleId!)
-                )
+                    eq(roleResources.roleId, req.userOrgRoleId!),
+                ),
             );
 
         const accessibleResourceIds = accessibleResources.map(
-            (resource) => resource.resourceId
+            (resource) => resource.resourceId,
         );
 
         let countQuery: any = db
@@ -173,7 +199,10 @@ export async function listResources(
     } catch (error) {
         logger.error(error);
         return next(
-            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "An error occurred",
+            ),
         );
     }
 }
