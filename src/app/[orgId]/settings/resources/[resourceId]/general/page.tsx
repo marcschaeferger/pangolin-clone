@@ -34,7 +34,7 @@ import { ListSitesResponse } from "@server/routers/site";
 import { useEffect, useState } from "react";
 import { AxiosResponse } from "axios";
 import api from "@app/api";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { GetResourceAuthInfoResponse } from "@server/routers/resource";
 import { useToast } from "@app/hooks/useToast";
@@ -57,6 +57,7 @@ export default function GeneralForm() {
     const { toast } = useToast();
     const { resource, updateResource } = useResourceContext();
     const { org } = useOrgContext();
+    const router = useRouter();
 
     const orgId = params.orgId;
 
@@ -112,6 +113,8 @@ export default function GeneralForm() {
                 });
 
                 updateResource({ name: data.name, subdomain: data.subdomain });
+
+                router.refresh();
             })
             .finally(() => setSaveLoading(false));
     }
