@@ -81,7 +81,7 @@ export default function UsersTable({ roles: r }: RolesTableProps) {
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuItem>
                                             <button
-                                                className="text-red-600 hover:text-red-800"
+                                                className="text-red-500"
                                                 onClick={() => {
                                                     setIsDeleteModalOpen(true);
                                                     setUserToRemove(roleRow);

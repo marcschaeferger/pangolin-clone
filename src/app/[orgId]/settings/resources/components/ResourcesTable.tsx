@@ -117,7 +117,7 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
         },
         {
             accessorKey: "domain",
-            header: "Domain",
+            header: "Full URL",
             cell: ({ row }) => {
                 const resourceRow = row.original;
                 return (

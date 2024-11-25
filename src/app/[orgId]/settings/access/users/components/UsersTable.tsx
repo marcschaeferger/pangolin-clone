@@ -99,7 +99,7 @@ export default function UsersTable({ users: u }: UsersTableProps) {
 
                 return (
                     <div className="flex flex-row items-center gap-1">
-                        {userRow.isOwner && <Crown className="w-4 h-4" />}
+                        {userRow.isOwner && <Crown className="w-4 h-4 text-yellow-600" />}
                         <span>{userRow.role}</span>
                     </div>
                 );
@@ -138,13 +138,13 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                                             {userRow.email !== user?.email && (
                                                 <DropdownMenuItem>
                                                     <button
-                                                        className="text-red-600 hover:text-red-800"
+                                                        className="text-red-500"
                                                         onClick={() => {
                                                             setIsDeleteModalOpen(
-                                                                true
+                                                                true,
                                                             );
                                                             setSelectedUser(
-                                                                userRow
+                                                                userRow,
                                                             );
                                                         }}
                                                     >
@@ -159,7 +159,7 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                                         className="ml-2"
                                         onClick={() =>
                                             router.push(
-                                                `/${org?.org.orgId}/settings/access/users/${userRow.id}`
+                                                `/${org?.org.orgId}/settings/access/users/${userRow.id}`,
                                             )
                                         }
                                     >
@@ -185,7 +185,7 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                         title: "Failed to remove user",
                         description: formatAxiosError(
                             e,
-                            "An error occurred while removing the user."
+                            "An error occurred while removing the user.",
                         ),
                     });
                 });
@@ -198,7 +198,7 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                 });
 
                 setUsers((prev) =>
-                    prev.filter((u) => u.id !== selectedUser?.id)
+                    prev.filter((u) => u.id !== selectedUser?.id),
                 );
             }
         }

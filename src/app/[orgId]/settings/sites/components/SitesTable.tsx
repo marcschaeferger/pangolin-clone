@@ -27,6 +27,7 @@ export type SiteRow = {
     mbIn: string;
     mbOut: string;
     orgId: string;
+    type: "newt" | "wireguard";
 };
 
 type SitesTableProps = {
@@ -106,6 +107,29 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
             header: "MB Out",
         },
         {
+            accessorKey: "type",
+            header: "Connection Type",
+            cell: ({ row }) => {
+                const originalRow = row.original;
+
+                if (originalRow.type === "newt") {
+                    return (
+                        <div className="flex items-center space-x-2">
+                            <span>Newt</span>
+                        </div>
+                    );
+                }
+
+                if (originalRow.type === "wireguard") {
+                    return (
+                        <div className="flex items-center space-x-2">
+                            <span>WireGuard</span>
+                        </div>
+                    );
+                }
+            },
+        },
+        {
             id: "actions",
             cell: ({ row }) => {
                 const router = useRouter();
@@ -135,7 +159,7 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                                             setSelectedSite(siteRow);
                                             setIsDeleteModalOpen(true);
                                         }}
-                                        className="text-red-600 hover:text-red-800"
+                                        className="text-red-500"
                                     >
                                         Delete
                                     </button>
@@ -147,7 +171,7 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                             className="ml-2"
                             onClick={() =>
                                 router.push(
-                                    `/${siteRow.orgId}/settings/sites/${siteRow.nice}`
+                                    `/${siteRow.orgId}/settings/sites/${siteRow.nice}`,
                                 )
                             }
                         >

@@ -38,14 +38,15 @@ function querySites(orgId: string, accessibleSiteIds: number[]) {
             megabytesIn: sites.megabytesIn,
             megabytesOut: sites.megabytesOut,
             orgName: orgs.name,
+            type: sites.type,
         })
         .from(sites)
         .leftJoin(orgs, eq(sites.orgId, orgs.orgId))
         .where(
             and(
                 inArray(sites.siteId, accessibleSiteIds),
-                eq(sites.orgId, orgId)
-            )
+                eq(sites.orgId, orgId),
+            ),
         );
 }
 
@@ -57,7 +58,7 @@ export type ListSitesResponse = {
 export async function listSites(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ): Promise<any> {
     try {
         const parsedQuery = listSitesSchema.safeParse(req.query);
@@ -65,8 +66,8 @@ export async function listSites(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    fromError(parsedQuery.error)
-                )
+                    fromError(parsedQuery.error),
+                ),
             );
         }
         const { limit, offset } = parsedQuery.data;
@@ -76,8 +77,8 @@ export async function listSites(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    fromError(parsedParams.error)
-                )
+                    fromError(parsedParams.error),
+                ),
             );
         }
         const { orgId } = parsedParams.data;
@@ -86,8 +87,8 @@ export async function listSites(
             return next(
                 createHttpError(
                     HttpCode.FORBIDDEN,
-                    "User does not have access to this organization"
-                )
+                    "User does not have access to this organization",
+                ),
             );
         }
 
@@ -100,8 +101,8 @@ export async function listSites(
             .where(
                 or(
                     eq(userSites.userId, req.user!.userId),
-                    eq(roleSites.roleId, req.userOrgRoleId!)
-                )
+                    eq(roleSites.roleId, req.userOrgRoleId!),
+                ),
             );
 
         const accessibleSiteIds = accessibleSites.map((site) => site.siteId);
@@ -113,8 +114,8 @@ export async function listSites(
             .where(
                 and(
                     inArray(sites.siteId, accessibleSiteIds),
-                    eq(sites.orgId, orgId)
-                )
+                    eq(sites.orgId, orgId),
+                ),
             );
 
         const sitesList = await baseQuery.limit(limit).offset(offset);
@@ -137,7 +138,10 @@ export async function listSites(
         });
     } catch (error) {
         return next(
-            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "An error occurred",
+            ),
         );
     }
 }
