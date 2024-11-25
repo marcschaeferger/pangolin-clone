@@ -99,7 +99,9 @@ export default function UsersTable({ users: u }: UsersTableProps) {
 
                 return (
                     <div className="flex flex-row items-center gap-1">
-                        {userRow.isOwner && <Crown className="w-4 h-4 text-yellow-600" />}
+                        {userRow.isOwner && (
+                            <Crown className="w-4 h-4 text-yellow-600" />
+                        )}
                         <span>{userRow.role}</span>
                     </div>
                 );
@@ -113,6 +115,11 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                 return (
                     <>
                         <div className="flex items-center justify-end">
+                            {userRow.isOwner && (
+                                <Button variant="ghost" className="opacity-0 cursor-default">
+                                    Placeholder
+                                </Button>
+                            )}
                             {!userRow.isOwner && (
                                 <>
                                     <DropdownMenu>

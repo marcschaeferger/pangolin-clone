@@ -65,6 +65,14 @@ export default function UsersTable({ roles: r }: RolesTableProps) {
                 return (
                     <>
                         <div className="flex items-center justify-end">
+                            {roleRow.isAdmin && (
+                                <Button
+                                    variant="ghost"
+                                    className="h-8 w-8 p-0 opacity-0 cursor-default"
+                                >
+                                    Placeholder
+                                </Button>
+                            )}
                             {!roleRow.isAdmin && (
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
@@ -117,7 +125,9 @@ export default function UsersTable({ roles: r }: RolesTableProps) {
                     roleToDelete={roleToRemove}
                     afterDelete={() => {
                         setRoles((prev) =>
-                            prev.filter((r) => r.roleId !== roleToRemove.roleId)
+                            prev.filter(
+                                (r) => r.roleId !== roleToRemove.roleId,
+                            ),
                         );
                         setUserToRemove(null);
                     }}
