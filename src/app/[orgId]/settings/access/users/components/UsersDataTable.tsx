@@ -85,7 +85,7 @@ export function UsersDataTable<TData, TValue>({
                     <Plus className="mr-2 h-4 w-4" /> Invite User
                 </Button>
             </div>
-            <div>
+            <div className="border rounded-md">
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (

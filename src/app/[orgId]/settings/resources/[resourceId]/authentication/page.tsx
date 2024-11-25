@@ -305,7 +305,7 @@ export default function ResourceAuthenticationPage() {
                 />
             )}
 
-            <div className="space-y-12">
+            <div className="space-y-12 lg:max-w-2xl">
                 <section className="space-y-8">
                     <SettingsSectionTitle
                         title="Users & Roles"
@@ -460,7 +460,7 @@ export default function ResourceAuthenticationPage() {
 
                 <Separator />
 
-                <section className="space-y-8 lg:max-w-2xl">
+                <section className="space-y-8">
                     <SettingsSectionTitle
                         title="Authentication Methods"
                         description="Allow anyone to access the resource via the below methods"

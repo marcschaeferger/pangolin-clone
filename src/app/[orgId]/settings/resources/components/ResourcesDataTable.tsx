@@ -85,7 +85,7 @@ export function ResourcesDataTable<TData, TValue>({
                     <Plus className="mr-2 h-4 w-4" /> Add Resource
                 </Button>
             </div>
-            <div>
+            <div className="border rounded-md">
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
@@ -98,7 +98,7 @@ export function ResourcesDataTable<TData, TValue>({
                                                 : flexRender(
                                                       header.column.columnDef
                                                           .header,
-                                                      header.getContext()
+                                                      header.getContext(),
                                                   )}
                                         </TableHead>
                                     );
@@ -119,7 +119,7 @@ export function ResourcesDataTable<TData, TValue>({
                                         <TableCell key={cell.id}>
                                             {flexRender(
                                                 cell.column.columnDef.cell,
-                                                cell.getContext()
+                                                cell.getContext(),
                                             )}
                                         </TableCell>
                                     ))}

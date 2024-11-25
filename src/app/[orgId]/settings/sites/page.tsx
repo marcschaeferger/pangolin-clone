@@ -48,7 +48,7 @@ export default async function SitesPage(props: SitesPageProps) {
         <>
             <SettingsSectionTitle
                 title="Manage Sites"
-                description="Manage your existing sites here or create a new one."
+                description="Allow connectivity to your network through secure tunnels"
             />
 
             <SitesTable sites={siteRows} orgId={params.orgId} />
