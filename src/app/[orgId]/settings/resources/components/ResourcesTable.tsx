@@ -35,6 +35,7 @@ export type ResourceRow = {
     orgId: string;
     domain: string;
     site: string;
+    siteId: string;
     hasAuth: boolean;
 };
 
@@ -106,7 +107,7 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                 return (
                     <Button variant="outline">
                         <Link
-                            href={`/${resourceRow.orgId}/settings/sites/${resourceRow.site}`}
+                            href={`/${resourceRow.orgId}/settings/sites/${resourceRow.siteId}`}
                         >
                             {resourceRow.site}
                         </Link>
@@ -175,7 +176,19 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
         },
         {
             accessorKey: "hasAuth",
-            header: "Authentication",
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() =>
+                            column.toggleSorting(column.getIsSorted() === "asc")
+                        }
+                    >
+                        Authentication
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                );
+            },
             cell: ({ row }) => {
                 const resourceRow = row.original;
                 return (

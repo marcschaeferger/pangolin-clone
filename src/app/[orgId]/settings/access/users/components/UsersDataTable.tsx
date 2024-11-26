@@ -23,7 +23,7 @@ import { Button } from "@app/components/ui/button";
 import { useState } from "react";
 import { Input } from "@app/components/ui/input";
 import { DataTablePagination } from "../../../../../../components/DataTablePagination";
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
@@ -61,20 +61,23 @@ export function UsersDataTable<TData, TValue>({
     return (
         <div>
             <div className="flex items-center justify-between pb-4">
-                <Input
-                    placeholder="Search users"
-                    value={
-                        (table
-                            .getColumn("email")
-                            ?.getFilterValue() as string) ?? ""
-                    }
-                    onChange={(event) =>
-                        table
-                            .getColumn("email")
-                            ?.setFilterValue(event.target.value)
-                    }
-                    className="max-w-sm mr-2"
-                />
+                <div className="flex items-center max-w-sm mr-2 w-full relative">
+                    <Input
+                        placeholder="Search users"
+                        value={
+                            (table
+                                .getColumn("email")
+                                ?.getFilterValue() as string) ?? ""
+                        }
+                        onChange={(event) =>
+                            table
+                                .getColumn("email")
+                                ?.setFilterValue(event.target.value)
+                        }
+                        className="w-full pl-8"
+                    />
+                    <Search className="h-5 w-5 absolute left-2 top-1/2 transform -translate-y-1/2" />
+                </div>
                 <Button
                     onClick={() => {
                         if (inviteUser) {
@@ -98,7 +101,7 @@ export function UsersDataTable<TData, TValue>({
                                                 : flexRender(
                                                       header.column.columnDef
                                                           .header,
-                                                      header.getContext()
+                                                      header.getContext(),
                                                   )}
                                         </TableHead>
                                     );
@@ -119,7 +122,7 @@ export function UsersDataTable<TData, TValue>({
                                         <TableCell key={cell.id}>
                                             {flexRender(
                                                 cell.column.columnDef.cell,
-                                                cell.getContext()
+                                                cell.getContext(),
                                             )}
                                         </TableCell>
                                     ))}

@@ -86,7 +86,6 @@ export async function inviteUser(
 
         inviteTracker[email].timestamps.push(currentTime);
 
-        logger.debug("here0")
         const org = await db
             .select()
             .from(orgs)
@@ -98,7 +97,6 @@ export async function inviteUser(
             );
         }
 
-        logger.debug("here1")
         const existingUser = await db
             .select()
             .from(users)
@@ -114,7 +112,6 @@ export async function inviteUser(
             );
         }
 
-        logger.debug("here2")
         const inviteId = generateRandomString(
             10,
             alphabet("a-z", "A-Z", "0-9"),
@@ -124,7 +121,6 @@ export async function inviteUser(
 
         const tokenHash = await hashPassword(token);
 
-        logger.debug("here3")
         // delete any existing invites for this email
         await db
             .delete(userInvites)
@@ -133,7 +129,6 @@ export async function inviteUser(
             )
             .execute();
 
-        logger.debug("here4")
         await db.insert(userInvites).values({
             inviteId,
             orgId,
@@ -145,23 +140,21 @@ export async function inviteUser(
 
         const inviteLink = `${config.app.base_url}/invite?token=${inviteId}-${token}`;
 
-        logger.debug("here5")
-        // await sendEmail(
-        //     SendInviteLink({
-        //         email,
-        //         inviteLink,
-        //         expiresInDays: (validHours / 24).toString(),
-        //         orgName: org[0].name || orgId,
-        //         inviterName: req.user?.email,
-        //     }),
-        //     {
-        //         to: email,
-        //         from: config.email?.no_reply,
-        //         subject: "You're invited to join a Fossorial organization",
-        //     },
-        // );
+        await sendEmail(
+            SendInviteLink({
+                email,
+                inviteLink,
+                expiresInDays: (validHours / 24).toString(),
+                orgName: org[0].name || orgId,
+                inviterName: req.user?.email,
+            }),
+            {
+                to: email,
+                from: config.email?.no_reply,
+                subject: "You're invited to join a Fossorial organization",
+            },
+        );
 
-        logger.debug("here6")
         return response<InviteUserResponse>(res, {
             data: {
                 inviteLink,

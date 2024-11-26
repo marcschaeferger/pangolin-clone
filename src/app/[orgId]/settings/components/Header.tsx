@@ -149,7 +149,7 @@ export default function Header({ email, orgId, name, orgs }: HeaderProps) {
                                 size="lg"
                                 role="combobox"
                                 aria-expanded={open}
-                                className="w-full md:w-[200px] h-12 px-3 py-4 bg-neutral"
+                                className="w-full md:w-[200px] h-12 px-3 py-4 bg-neutral hover:bg-muted"
                             >
                                 <div className="flex items-center justify-between w-full">
                                     <div className="flex flex-col items-start">

@@ -309,7 +309,7 @@ export default function ResourceAuthenticationPage() {
                 <section className="space-y-8">
                     <SettingsSectionTitle
                         title="Users & Roles"
-                        description="Configure which users can access this resource (only applicable if SSO enabled)"
+                        description="Configure which users and roles can visit this resource"
                         size="1xl"
                     />
 
@@ -320,11 +320,13 @@ export default function ResourceAuthenticationPage() {
                                 defaultChecked={resource.sso}
                                 onCheckedChange={(val) => setSsoEnabled(val)}
                             />
-                            <Label htmlFor="sso-toggle">Allow SSO</Label>
+                            <Label htmlFor="sso-toggle">
+                                Allow Unified Login
+                            </Label>
                         </div>
                         <span className="text-muted-foreground text-sm">
                             Existing users will only have to login once for all
-                            resources that have SSO enabled.
+                            resources that have this enabled.
                         </span>
                     </div>
 

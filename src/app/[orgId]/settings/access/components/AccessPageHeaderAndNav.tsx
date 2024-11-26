@@ -24,7 +24,7 @@ export default function AccessPageHeaderAndNav({
     return (
         <>
             <SettingsSectionTitle
-                title="Users & Roles"
+                title="Manage Users & Roles"
                 description="Invite users and add them to roles to manage access to your
             organization"
             />
