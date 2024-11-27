@@ -253,17 +253,14 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
-                            <Button
-                                variant={"gray"}
-                                className="ml-2"
-                                onClick={() =>
-                                    router.push(
-                                        `/${resourceRow.orgId}/settings/resources/${resourceRow.id}`,
-                                    )
-                                }
+                            <Link
+                                href={`/${resourceRow.orgId}/settings/resources/${resourceRow.id}`}
                             >
-                                Edit <ArrowRight className="ml-2 w-4 h-4" />
-                            </Button>
+                                <Button variant={"gray"} className="ml-2">
+                                    Edit
+                                    <ArrowRight className="ml-2 w-4 h-4" />
+                                </Button>
+                            </Link>
                         </div>
                     </>
                 );

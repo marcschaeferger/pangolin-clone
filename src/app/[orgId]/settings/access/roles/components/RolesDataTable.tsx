@@ -76,7 +76,7 @@ export function RolesDataTable<TData, TValue>({
                         }
                         className="w-full pl-8"
                     />
-                    <Search className="h-5 w-5 absolute left-2 top-1/2 transform -translate-y-1/2" />
+                    <Search className="h-4 w-4 absolute left-2 top-1/2 transform -translate-y-1/2" />
                 </div>
                 <Button
                     onClick={() => {

@@ -149,7 +149,7 @@ export default function Header({ email, orgId, name, orgs }: HeaderProps) {
                                 size="lg"
                                 role="combobox"
                                 aria-expanded={open}
-                                className="w-full md:w-[200px] h-12 px-3 py-4 bg-neutral hover:bg-muted"
+                                className="w-full md:w-[200px] h-12 px-3 py-4 bg-neutral hover:bg-neutral"
                             >
                                 <div className="flex items-center justify-between w-full">
                                     <div className="flex flex-col items-start">
@@ -202,29 +202,6 @@ export default function Header({ email, orgId, name, orgs }: HeaderProps) {
                             </Command>
                         </PopoverContent>
                     </Popover>
-
-                    {/* <Select
-                        defaultValue={orgId}
-                        onValueChange={(val) => {
-                            router.push(`/${val}/settings`);
-                        }}
-                    >
-                        <SelectTrigger className="w-[100px] md:w-[180px]">
-                            <SelectValue placeholder="Select an org" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                {orgs.map((org) => (
-                                    <SelectItem
-                                        value={org.name}
-                                        key={org.orgId}
-                                    >
-                                        {org.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select> */}
                 </div>
             </div>
         </>

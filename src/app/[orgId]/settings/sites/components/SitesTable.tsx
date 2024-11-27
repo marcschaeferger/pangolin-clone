@@ -202,17 +202,14 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
-                        <Button
-                            variant={"gray"}
-                            className="ml-2"
-                            onClick={() =>
-                                router.push(
-                                    `/${siteRow.orgId}/settings/sites/${siteRow.nice}`,
-                                )
-                            }
+                        <Link
+                            href={`/${siteRow.orgId}/settings/sites/${siteRow.nice}`}
                         >
-                            Edit <ArrowRight className="ml-2 w-4 h-4" />
-                        </Button>
+                            <Button variant={"gray"} className="ml-2">
+                                Edit
+                                <ArrowRight className="ml-2 w-4 h-4" />
+                            </Button>
+                        </Link>
                     </div>
                 );
             },

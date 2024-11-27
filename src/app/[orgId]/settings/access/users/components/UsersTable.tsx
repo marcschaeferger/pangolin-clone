@@ -116,7 +116,10 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                     <>
                         <div className="flex items-center justify-end">
                             {userRow.isOwner && (
-                                <Button variant="ghost" className="opacity-0 cursor-default">
+                                <Button
+                                    variant="ghost"
+                                    className="opacity-0 cursor-default"
+                                >
                                     Placeholder
                                 </Button>
                             )}
@@ -161,18 +164,17 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                                             )}
                                         </DropdownMenuContent>
                                     </DropdownMenu>
-                                    <Button
-                                        variant={"gray"}
-                                        className="ml-2"
-                                        onClick={() =>
-                                            router.push(
-                                                `/${org?.org.orgId}/settings/access/users/${userRow.id}`,
-                                            )
-                                        }
+                                    <Link
+                                        href={`/${org?.org.orgId}/settings/access/users/${userRow.id}`}
                                     >
-                                        Manage{" "}
-                                        <ArrowRight className="ml-2 w-4 h-4" />
-                                    </Button>
+                                        <Button
+                                            variant={"gray"}
+                                            className="ml-2"
+                                        >
+                                            Manage
+                                            <ArrowRight className="ml-2 w-4 h-4" />
+                                        </Button>
+                                    </Link>
                                 </>
                             )}
                         </div>

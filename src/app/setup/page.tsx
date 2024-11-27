@@ -44,7 +44,7 @@ export default function StepperForm() {
 
     const debouncedCheckOrgIdAvailability = useCallback(
         debounce(checkOrgIdAvailability, 300),
-        [checkOrgIdAvailability]
+        [checkOrgIdAvailability],
     );
 
     useEffect(() => {
@@ -278,7 +278,7 @@ export default function StepperForm() {
 
 function debounce<T extends (...args: any[]) => any>(
     func: T,
-    wait: number
+    wait: number,
 ): (...args: Parameters<T>) => void {
     let timeout: NodeJS.Timeout | null = null;
 
