@@ -65,9 +65,7 @@ export default async function ResourceAuthPage(props: {
             if (res && res.data.data.valid) {
                 doRedirect = true;
             }
-        } catch (e) {
-            console.error(e);
-        }
+        } catch (e) {}
 
         if (doRedirect) {
             redirect(redirectUrl);
@@ -91,7 +89,6 @@ export default async function ResourceAuthPage(props: {
             console.log(res.data);
             doRedirect = true;
         } catch (e) {
-            console.error(e);
             userIsUnauthorized = true;
         }
 
@@ -100,30 +97,28 @@ export default async function ResourceAuthPage(props: {
         }
     }
 
-    if (userIsUnauthorized && isSSOOnly) {
-        return (
-            <div className="w-full max-w-md">
-                <ResourceAccessDenied />
-            </div>
-        );
-    }
-
     return (
         <>
-            <div className="w-full max-w-md">
-                <ResourceAuthPortal
-                    methods={{
-                        password: authInfo.password,
-                        pincode: authInfo.pincode,
-                        sso: authInfo.sso && !userIsUnauthorized,
-                    }}
-                    resource={{
-                        name: authInfo.resourceName,
-                        id: authInfo.resourceId,
-                    }}
-                    redirect={redirectUrl}
-                />
-            </div>
+            {userIsUnauthorized && isSSOOnly ? (
+                <div className="w-full max-w-md">
+                    <ResourceAccessDenied />
+                </div>
+            ) : (
+                <div className="w-full max-w-md">
+                    <ResourceAuthPortal
+                        methods={{
+                            password: authInfo.password,
+                            pincode: authInfo.pincode,
+                            sso: authInfo.sso && !userIsUnauthorized,
+                        }}
+                        resource={{
+                            name: authInfo.resourceName,
+                            id: authInfo.resourceId,
+                        }}
+                        redirect={redirectUrl}
+                    />
+                </div>
+            )}
         </>
     );
 }

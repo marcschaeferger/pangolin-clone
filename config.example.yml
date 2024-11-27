@@ -1,14 +1,15 @@
 app:
-    base_url: http://localhost:3000
+    base_url: https://fossorial.io
     log_level: debug
     save_logs: false
 
 server:
     external_port: 3000
     internal_port: 3001
-    internal_hostname: localhost
+    internal_hostname: pangolin
     secure_cookies: false
     session_cookie_name: session
+    resource_session_cookie_name: resource_session
 
 traefik:
     cert_resolver: letsencrypt
@@ -16,16 +17,12 @@ traefik:
     https_entrypoint: websecure
     prefer_wildcard_cert: true
 
-badger:
-    session_query_parameter: __pang_sess
-    resource_session_cookie_name: resource_session
-
 gerbil:
     start_port: 51820
-    base_endpoint: localhost
+    base_endpoint: fossorial.io
+    use_subdomain: false
     block_size: 16
     subnet_group: 10.0.0.0/8
-    use_subdomain: true
 
 rate_limit:
     window_minutes: 1

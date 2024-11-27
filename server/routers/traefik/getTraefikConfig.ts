@@ -55,11 +55,9 @@ export async function traefikConfigProvider(
                                 `http://${config.server.internal_hostname}:${config.server.internal_port}`,
                             ).href,
                             resourceSessionCookieName:
-                                config.badger.resource_session_cookie_name,
+                                config.server.resource_session_cookie_name,
                             userSessionCookieName:
                                 config.server.session_cookie_name,
-                            sessionQueryParameter:
-                                config.badger.session_query_parameter,
                         },
                     },
                 },

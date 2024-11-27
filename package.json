@@ -10,7 +10,7 @@
         "db:hydrate": "npx tsx scripts/hydrate.ts",
         "db:studio": "drizzle-kit studio",
         "build": "mkdir -p dist && next build && node scripts/esbuild.mjs -e server/index.ts -o dist/server.mjs",
-        "start": "ENVIRONMENT=prod node dist/server.mjs",
+        "start": "NODE_ENV=development ENVIRONMENT=prod node dist/server.mjs",
         "email": "email dev --dir server/emails/templates --port 3002"
     },
     "dependencies": {

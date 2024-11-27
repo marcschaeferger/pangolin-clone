@@ -121,7 +121,7 @@ export async function verifyResourceSession(
 
         const resourceSessionToken =
             sessions[
-                `${config.badger.resource_session_cookie_name}_${resource.resourceId}`
+                `${config.server.resource_session_cookie_name}_${resource.resourceId}`
             ];
 
         if ((pincode || password) && resourceSessionToken) {

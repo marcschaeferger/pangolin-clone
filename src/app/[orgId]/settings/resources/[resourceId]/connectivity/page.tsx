@@ -234,6 +234,24 @@ export default function ReverseProxyTargets(props: {
 
     const columns: ColumnDef<LocalTarget>[] = [
         {
+            accessorKey: "method",
+            header: "Method",
+            cell: ({ row }) => (
+                <Select
+                    defaultValue={row.original.method}
+                    onValueChange={(value) =>
+                        updateTarget(row.original.targetId, { method: value })
+                    }
+                >
+                    <SelectTrigger>{row.original.method}</SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="http">http</SelectItem>
+                        <SelectItem value="https">https</SelectItem>
+                    </SelectContent>
+                </Select>
+            ),
+        },
+        {
             accessorKey: "ip",
             header: "IP Address",
             cell: ({ row }) => (
@@ -260,24 +278,6 @@ export default function ReverseProxyTargets(props: {
                         })
                     }
                 />
-            ),
-        },
-        {
-            accessorKey: "method",
-            header: "Method",
-            cell: ({ row }) => (
-                <Select
-                    defaultValue={row.original.method}
-                    onValueChange={(value) =>
-                        updateTarget(row.original.targetId, { method: value })
-                    }
-                >
-                    <SelectTrigger>{row.original.method}</SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="http">http</SelectItem>
-                        <SelectItem value="https">https</SelectItem>
-                    </SelectContent>
-                </Select>
             ),
         },
         // {
@@ -368,7 +368,7 @@ export default function ReverseProxyTargets(props: {
                     </div>
                 </section>
 
-                <hr className="lg:max-w-2xl"/>
+                <hr className="lg:max-w-2xl" />
 
                 <section className="space-y-8">
                     <SettingsSectionTitle
@@ -386,25 +386,6 @@ export default function ReverseProxyTargets(props: {
                                 className="space-y-8"
                             >
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                    <FormField
-                                        control={addTargetForm.control}
-                                        name="ip"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>
-                                                    IP Address
-                                                </FormLabel>
-                                                <FormControl>
-                                                    <Input id="ip" {...field} />
-                                                </FormControl>
-                                                <FormDescription>
-                                                    Enter the IP address of the
-                                                    target.
-                                                </FormDescription>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
                                     <FormField
                                         control={addTargetForm.control}
                                         name="method"
@@ -439,6 +420,25 @@ export default function ReverseProxyTargets(props: {
                                                 <FormDescription>
                                                     Choose the method for how
                                                     the target is accessed.
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={addTargetForm.control}
+                                        name="ip"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>
+                                                    IP Address
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input id="ip" {...field} />
+                                                </FormControl>
+                                                <FormDescription>
+                                                    Enter the IP address of the
+                                                    target.
                                                 </FormDescription>
                                                 <FormMessage />
                                             </FormItem>

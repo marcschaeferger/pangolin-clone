@@ -165,14 +165,14 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
     };
 
     async function handleSSOAuth() {
-        console.log("SSO authentication");
-
-        await api.get(`/resource/${props.resource.id}`).catch((e) => {
+        try {
+            await api.get(`/resource/${props.resource.id}`);
+        } catch (e) {
             setAccessDenied(true);
-        });
+        }
 
         if (!accessDenied) {
-            window.location.href = props.redirect;
+            window.location.href = constructRedirect(props.redirect);
         }
     }
 

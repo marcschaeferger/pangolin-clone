@@ -25,9 +25,6 @@ const environmentSchema = z.object({
         secure_cookies: z.boolean(),
         signup_secret: z.string().optional(),
         session_cookie_name: z.string(),
-    }),
-    badger: z.object({
-        session_query_parameter: z.string(),
         resource_session_cookie_name: z.string(),
     }),
     traefik: z.object({
@@ -136,8 +133,6 @@ process.env.FLAGS_EMAIL_VERIFICATION_REQUIRED = parsedConfig.data.flags
     : "false";
 process.env.SESSION_COOKIE_NAME = parsedConfig.data.server.session_cookie_name;
 process.env.RESOURCE_SESSION_COOKIE_NAME =
-    parsedConfig.data.badger.resource_session_cookie_name;
-process.env.RESOURCE_SESSION_QUERY_PARAM_NAME =
-    parsedConfig.data.badger.session_query_parameter;
+    parsedConfig.data.server.resource_session_cookie_name;
 
 export default parsedConfig.data;
