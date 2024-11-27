@@ -63,7 +63,6 @@ type ResourceAuthPortalProps = {
         id: number;
     };
     redirect: string;
-    queryParamName: string;
 };
 
 export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
@@ -114,10 +113,8 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
         },
     });
 
-    function constructRedirect(redirect: string, token: string): string {
+    function constructRedirect(redirect: string): string {
         const redirectUrl = new URL(redirect);
-        redirectUrl.searchParams.delete(props.queryParamName);
-        redirectUrl.searchParams.append(props.queryParamName, token);
         return redirectUrl.toString();
     }
 
@@ -130,10 +127,9 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
             .then((res) => {
                 const session = res.data.data.session;
                 if (session) {
-                    window.location.href = constructRedirect(
-                        props.redirect,
-                        session,
-                    );
+                    const url = constructRedirect(props.redirect);
+                    console.log(url);
+                    window.location.href = url;
                 }
             })
             .catch((e) => {
@@ -156,10 +152,7 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
             .then((res) => {
                 const session = res.data.data.session;
                 if (session) {
-                    window.location.href = constructRedirect(
-                        props.redirect,
-                        session,
-                    );
+                    window.location.href = constructRedirect(props.redirect);
                 }
             })
             .catch((e) => {

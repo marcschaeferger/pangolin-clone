@@ -2,6 +2,7 @@ import { Router } from "express";
 import * as gerbil from "@server/routers/gerbil";
 import * as badger from "@server/routers/badger";
 import * as traefik from "@server/routers/traefik";
+import * as auth from "@server/routers/auth";
 import HttpCode from "@server/types/HttpCode";
 
 // Root routes
@@ -12,6 +13,10 @@ internalRouter.get("/", (_, res) => {
 });
 
 internalRouter.get("/traefik-config", traefik.traefikConfigProvider);
+internalRouter.get(
+    "/resource-session/:resourceId/:token",
+    auth.checkResourceSession,
+);
 
 // Gerbil routes
 const gerbilRouter = Router();

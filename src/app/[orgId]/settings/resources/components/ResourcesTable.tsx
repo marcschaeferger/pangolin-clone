@@ -124,7 +124,7 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                 return (
                     <div className="flex items-center">
                         <Link
-                            href={`https://${resourceRow.domain}`}
+                            href={resourceRow.domain}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="hover:underline mr-2"

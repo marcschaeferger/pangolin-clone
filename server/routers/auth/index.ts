@@ -9,3 +9,4 @@ export * from "./requestEmailVerificationCode";
 export * from "./changePassword";
 export * from "./requestPasswordReset";
 export * from "./resetPassword";
+export * from "./checkResourceSession";

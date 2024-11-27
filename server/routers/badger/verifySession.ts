@@ -19,10 +19,7 @@ import { Resource, roleResources, userResources } from "@server/db/schema";
 import logger from "@server/logger";
 
 const verifyResourceSessionSchema = z.object({
-    sessions: z.object({
-        session: z.string().nullable(),
-        resource_session: z.string().nullable(),
-    }),
+    sessions: z.record(z.string()).optional(),
     originalRequestURL: z.string().url(),
     scheme: z.string(),
     host: z.string(),
@@ -98,10 +95,15 @@ export async function verifyResourceSession(
 
         const redirectUrl = `${config.app.base_url}/auth/resource/${encodeURIComponent(resource.resourceId)}?redirect=${encodeURIComponent(originalRequestURL)}`;
 
-        if (sso && sessions.session) {
-            const { session, user } = await validateSessionToken(
-                sessions.session,
-            );
+        if (!sessions) {
+            return notAllowed(res);
+        }
+
+        const sessionToken = sessions[config.server.session_cookie_name];
+
+        // check for unified login
+        if (sso && sessionToken) {
+            const { session, user } = await validateSessionToken(sessionToken);
             if (session && user) {
                 const isAllowed = await isUserAllowedToAccessResource(
                     user.userId,
@@ -117,11 +119,17 @@ export async function verifyResourceSession(
             }
         }
 
-        if (password && sessions.resource_session) {
+        const resourceSessionToken =
+            sessions[
+                `${config.badger.resource_session_cookie_name}_${resource.resourceId}`
+            ];
+
+        if ((pincode || password) && resourceSessionToken) {
             const { resourceSession } = await validateResourceSessionToken(
-                sessions.resource_session,
+                resourceSessionToken,
                 resource.resourceId,
             );
+
             if (resourceSession) {
                 if (
                     pincode &&

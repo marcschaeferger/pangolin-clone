@@ -3,9 +3,13 @@ import { sha256 } from "@oslojs/crypto/sha2";
 import { resourceSessions, ResourceSession } from "@server/db/schema";
 import db from "@server/db";
 import { eq, and } from "drizzle-orm";
+import config from "@server/config";
 
 export const SESSION_COOKIE_NAME = "resource_session";
 export const SESSION_COOKIE_EXPIRES = 1000 * 60 * 60 * 24 * 30;
+export const SECURE_COOKIES = config.server.secure_cookies;
+export const COOKIE_DOMAIN =
+    "." + new URL(config.app.base_url).hostname.split(".").slice(-2).join(".");
 
 export async function createResourceSession(opts: {
     token: string;
@@ -115,25 +119,25 @@ export async function invalidateAllSessions(
 }
 
 export function serializeResourceSessionCookie(
+    cookieName: string,
     token: string,
     fqdn: string,
-    secure: boolean,
 ): string {
-    if (secure) {
-        return `${SESSION_COOKIE_NAME}=${token}; HttpOnly; SameSite=Lax; Max-Age=${SESSION_COOKIE_EXPIRES}; Path=/; Secure; Domain=.localhost`;
+    if (SECURE_COOKIES) {
+        return `${cookieName}=${token}; HttpOnly; SameSite=Lax; Max-Age=${SESSION_COOKIE_EXPIRES}; Path=/; Secure; Domain=${COOKIE_DOMAIN}`;
     } else {
-        return `${SESSION_COOKIE_NAME}=${token}; HttpOnly; SameSite=Lax; Max-Age=${SESSION_COOKIE_EXPIRES}; Path=/; Domain=.localhost`;
+        return `${cookieName}=${token}; HttpOnly; SameSite=Lax; Max-Age=${SESSION_COOKIE_EXPIRES}; Path=/; Domain=${COOKIE_DOMAIN}`;
     }
 }
 
 export function createBlankResourceSessionTokenCookie(
+    cookieName: string,
     fqdn: string,
-    secure: boolean,
 ): string {
-    if (secure) {
-        return `${SESSION_COOKIE_NAME}=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/; Secure; Domain=${fqdn}`;
+    if (SECURE_COOKIES) {
+        return `${cookieName}=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/; Secure; Domain=${COOKIE_DOMAIN}`;
     } else {
-        return `${SESSION_COOKIE_NAME}=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/; Domain=${fqdn}`;
+        return `${cookieName}=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/; Domain=${COOKIE_DOMAIN}`;
     }
 }
 
