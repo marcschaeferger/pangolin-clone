@@ -72,13 +72,14 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
                 );
             });
 
+        console.log(res);
+
         if (res && res.status === 200) {
             setError(null);
 
-            console.log(res);
-
             if (res.data?.data?.emailVerificationRequired) {
                 if (redirect) {
+                    console.log("here", redirect)
                     router.push(`/auth/verify-email?redirect=${redirect}`);
                 } else {
                     router.push("/auth/verify-email");
@@ -86,14 +87,8 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
                 return;
             }
 
-            if (redirect && redirect.includes("http")) {
-                window.location.href = redirect;
-            } else if (redirect) {
-                router.push(redirect);
-            } else {
-                if (onLogin) {
-                    await onLogin();
-                }
+            if (onLogin) {
+                await onLogin();
             }
         }
 

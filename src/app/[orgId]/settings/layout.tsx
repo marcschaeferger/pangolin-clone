@@ -55,7 +55,7 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
     const user = await getUser();
 
     if (!user) {
-        redirect("/auth/login");
+        redirect(`/?redirect=/${params.orgId}/`);
     }
 
     const cookie = await authCookieHeader();
@@ -64,8 +64,8 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
         const getOrgUser = cache(() =>
             internal.get<AxiosResponse<GetOrgUserResponse>>(
                 `/org/${params.orgId}/user/${user.userId}`,
-                cookie
-            )
+                cookie,
+            ),
         );
         const orgUser = await getOrgUser();
 
@@ -79,7 +79,7 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
     let orgs: ListOrgsResponse["orgs"] = [];
     try {
         const getOrgs = cache(() =>
-            internal.get<AxiosResponse<ListOrgsResponse>>(`/orgs`, cookie)
+            internal.get<AxiosResponse<ListOrgsResponse>>(`/orgs`, cookie),
         );
         const res = await getOrgs();
         if (res && res.data.data.orgs) {

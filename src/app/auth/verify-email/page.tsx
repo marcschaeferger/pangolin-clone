@@ -8,13 +8,13 @@ export const dynamic = "force-dynamic";
 export default async function Page(props: {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-    if (process.env.PUBLIC_FLAGS_EMAIL_VERIFICATION_REQUIRED !== "true") {
+    if (process.env.FLAGS_EMAIL_VERIFICATION_REQUIRED !== "true") {
         redirect("/");
     }
 
     const searchParams = await props.searchParams;
     const getUser = cache(verifySession);
-    const user = await getUser();
+    const user = await getUser({ skipCheckVerifyEmail: true });
 
     if (!user) {
         redirect("/");

@@ -13,11 +13,18 @@ export async function sendEmailVerificationCode(
 ): Promise<void> {
     const code = await generateEmailVerificationCode(userId, email);
 
-    await sendEmail(VerifyEmail({ username: email, verificationCode: code }), {
-        to: email,
-        from: config.email?.no_reply,
-        subject: "Verify your email address",
-    });
+    await sendEmail(
+        VerifyEmail({
+            username: email,
+            verificationCode: code,
+            verifyLink: `${config.app.base_url}/auth/verify-email`,
+        }),
+        {
+            to: email,
+            from: config.email?.no_reply,
+            subject: "Verify your email address",
+        },
+    );
 }
 
 async function generateEmailVerificationCode(

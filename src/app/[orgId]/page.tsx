@@ -14,27 +14,6 @@ export default async function OrgPage(props: OrgPageProps) {
     const params = await props.params;
     const orgId = params.orgId;
 
-    const getUser = cache(verifySession);
-    const user = await getUser();
-
-    if (!user) {
-        redirect("/auth/login");
-    }
-
-    const cookie = await authCookieHeader();
-
-    try {
-        const getOrgUser = cache(() =>
-            internal.get<AxiosResponse<GetOrgUserResponse>>(
-                `/org/${orgId}/user/${user.userId}`,
-                cookie
-            )
-        );
-        const orgUser = await getOrgUser();
-    } catch {
-        redirect(`/`);
-    }
-
     return (
         <>
             <p>Welcome to {orgId} dashboard</p>

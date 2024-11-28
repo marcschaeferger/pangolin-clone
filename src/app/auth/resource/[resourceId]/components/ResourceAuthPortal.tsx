@@ -38,6 +38,7 @@ import { LoginResponse } from "@server/routers/auth";
 import ResourceAccessDenied from "./ResourceAccessDenied";
 import LoginForm from "@app/components/LoginForm";
 import { AuthWithPasswordResponse } from "@server/routers/resource";
+import { redirect } from "next/dist/server/api-utils";
 
 const pinSchema = z.object({
     pin: z
@@ -113,11 +114,6 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
         },
     });
 
-    function constructRedirect(redirect: string): string {
-        const redirectUrl = new URL(redirect);
-        return redirectUrl.toString();
-    }
-
     const onPinSubmit = (values: z.infer<typeof pinSchema>) => {
         setLoadingLogin(true);
         api.post<AxiosResponse<AuthWithPasswordResponse>>(
@@ -127,9 +123,7 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
             .then((res) => {
                 const session = res.data.data.session;
                 if (session) {
-                    const url = constructRedirect(props.redirect);
-                    console.log(url);
-                    window.location.href = url;
+                    window.location.href = props.redirect;
                 }
             })
             .catch((e) => {
@@ -152,7 +146,7 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
             .then((res) => {
                 const session = res.data.data.session;
                 if (session) {
-                    window.location.href = constructRedirect(props.redirect);
+                    window.location.href = props.redirect;
                 }
             })
             .catch((e) => {
@@ -172,7 +166,7 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
         }
 
         if (!accessDenied) {
-            window.location.href = constructRedirect(props.redirect);
+            window.location.href = props.redirect;
         }
     }
 
@@ -371,6 +365,7 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
                                         className={`${numMethods <= 1 ? "mt-0" : ""}`}
                                     >
                                         <LoginForm
+                                            redirect={window.location.href}
                                             onLogin={async () =>
                                                 await handleSSOAuth()
                                             }

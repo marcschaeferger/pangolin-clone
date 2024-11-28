@@ -19,7 +19,7 @@ export default async function SetupLayout({
     const user = await getUser();
 
     if (!user) {
-        redirect("/");
+        redirect("/?redirect=/setup");
     }
 
     return <div className="mt-32">{children}</div>;

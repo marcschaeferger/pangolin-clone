@@ -21,9 +21,7 @@ export async function sendEmail(
         return;
     }
 
-    logger.debug("Rendering email templatee...")
     const emailHtml = await render(template);
-    logger.debug("Done rendering email templatee")
 
     const options = {
         from: opts.from,
