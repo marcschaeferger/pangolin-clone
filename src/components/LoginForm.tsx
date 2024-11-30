@@ -72,14 +72,11 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
                 );
             });
 
-        console.log(res);
-
         if (res && res.status === 200) {
             setError(null);
 
             if (res.data?.data?.emailVerificationRequired) {
                 if (redirect) {
-                    console.log("here", redirect)
                     router.push(`/auth/verify-email?redirect=${redirect}`);
                 } else {
                     router.push("/auth/verify-email");

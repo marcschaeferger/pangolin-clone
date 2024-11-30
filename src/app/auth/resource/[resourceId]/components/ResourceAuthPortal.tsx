@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -23,7 +23,7 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { LockIcon, UserIcon, Binary, Key, User } from "lucide-react";
+import { LockIcon, Binary, Key, User } from "lucide-react";
 import {
     InputOTP,
     InputOTPGroup,
@@ -34,11 +34,10 @@ import { useRouter } from "next/navigation";
 import { Alert, AlertDescription } from "@app/components/ui/alert";
 import { formatAxiosError } from "@app/lib/utils";
 import { AxiosResponse } from "axios";
-import { LoginResponse } from "@server/routers/auth";
-import ResourceAccessDenied from "./ResourceAccessDenied";
 import LoginForm from "@app/components/LoginForm";
 import { AuthWithPasswordResponse } from "@server/routers/resource";
 import { redirect } from "next/dist/server/api-utils";
+import ResourceAccessDenied from "./ResourceAccessDenied";
 
 const pinSchema = z.object({
     pin: z
@@ -159,13 +158,15 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
     };
 
     async function handleSSOAuth() {
+        let isAllowed = false;
         try {
             await api.get(`/resource/${props.resource.id}`);
+            isAllowed = true;
         } catch (e) {
             setAccessDenied(true);
         }
 
-        if (!accessDenied) {
+        if (isAllowed) {
             window.location.href = props.redirect;
         }
     }
@@ -174,6 +175,11 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
         <div>
             {!accessDenied ? (
                 <div>
+                    <div className="text-center mb-2">
+                        <span className="text-sm text-muted-foreground">
+                            Powered by Fossorial
+                        </span>
+                    </div>
                     <Card>
                         <CardHeader>
                             <CardTitle>Authentication Required</CardTitle>
@@ -365,7 +371,11 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
                                         className={`${numMethods <= 1 ? "mt-0" : ""}`}
                                     >
                                         <LoginForm
-                                            redirect={window.location.href}
+                                            redirect={
+                                                typeof window !== "undefined"
+                                                    ? window.location.href
+                                                    : ""
+                                            }
                                             onLogin={async () =>
                                                 await handleSSOAuth()
                                             }

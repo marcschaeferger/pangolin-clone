@@ -10,6 +10,7 @@ import {
     resourcePassword,
     resourcePincode,
     resources,
+    User,
     userOrgs,
 } from "@server/db/schema";
 import { and, eq } from "drizzle-orm";
@@ -106,7 +107,7 @@ export async function verifyResourceSession(
             const { session, user } = await validateSessionToken(sessionToken);
             if (session && user) {
                 const isAllowed = await isUserAllowedToAccessResource(
-                    user.userId,
+                    user,
                     resource,
                 );
 
@@ -191,15 +192,19 @@ function allowed(res: Response) {
 }
 
 async function isUserAllowedToAccessResource(
-    userId: string,
+    user: User,
     resource: Resource,
-) {
+): Promise<boolean> {
+    if (config.flags?.require_email_verification && !user.emailVerified) {
+        return false;
+    }
+
     const userOrgRole = await db
         .select()
         .from(userOrgs)
         .where(
             and(
-                eq(userOrgs.userId, userId),
+                eq(userOrgs.userId, user.userId),
                 eq(userOrgs.orgId, resource.orgId),
             ),
         )
@@ -229,7 +234,7 @@ async function isUserAllowedToAccessResource(
         .from(userResources)
         .where(
             and(
-                eq(userResources.userId, userId),
+                eq(userResources.userId, user.userId),
                 eq(userResources.resourceId, resource.resourceId),
             ),
         )

@@ -33,7 +33,7 @@ export default async function ResourceAuthPage(props: {
     } catch (e) {}
 
     const getUser = cache(verifySession);
-    const user = await getUser();
+    const user = await getUser({ skipCheckVerifyEmail: true });
 
     if (!authInfo) {
         return (
@@ -47,6 +47,16 @@ export default async function ResourceAuthPage(props: {
     const isSSOOnly = authInfo.sso && !authInfo.password && !authInfo.pincode;
 
     const redirectUrl = searchParams.redirect || authInfo.url;
+
+    if (
+        user &&
+        !user.emailVerified &&
+        process.env.FLAGS_EMAIL_VERIFICATION_REQUIRED === "true"
+    ) {
+        redirect(
+            `/auth/verify-email?redirect=/auth/resource/${authInfo.resourceId}`,
+        );
+    }
 
     const allCookies = await cookies();
     const cookieName =
