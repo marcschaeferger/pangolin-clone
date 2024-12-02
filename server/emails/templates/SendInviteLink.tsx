@@ -33,9 +33,17 @@ export const SendInviteLink = ({
         <Html>
             <Head />
             <Preview>{previewText}</Preview>
-            <Tailwind>
+            <Tailwind config={{
+                theme: {
+                    extend: {
+                        colors: {
+                            primary: "#F97317"
+                        }
+                    }
+                }
+            }}>
                 <Body className="font-sans">
-                    <Container className="bg-white border border-solid border-gray-200 p-6 max-w-lg mx-auto my-8">
+                    <Container className="bg-white border border-solid border-gray-200 p-6 max-w-lg mx-auto my-8 rounded-lg">
                         <Heading className="text-2xl font-semibold text-gray-800 text-center">
                             You're invited to join a Fossorial organization
                         </Heading>
@@ -58,7 +66,7 @@ export const SendInviteLink = ({
                         <Section className="text-center my-6">
                             <Button
                                 href={inviteLink}
-                                className="rounded-md bg-gray-600 px-[12px] py-[12px] text-center font-semibold text-white cursor-pointer"
+                                className="rounded-lg bg-primary px-[12px] py-[9px] text-center font-semibold text-white cursor-pointer"
                             >
                                 Accept invitation to {orgName}
                             </Button>

@@ -14,6 +14,7 @@ import {
     serializeResourceSessionCookie,
 } from "@server/auth/resource";
 import logger from "@server/logger";
+import config from "@server/config";
 
 export const authWithPincodeBodySchema = z.object({
     pincode: z.string(),
@@ -127,15 +128,15 @@ export async function authWithPincode(
             token,
             pincodeId: definedPincode.pincodeId,
         });
-        // const secureCookie = resource.ssl;
-        // const cookie = serializeResourceSessionCookie(
-        //     token,
-        //     resource.fullDomain,
-        //     secureCookie,
-        // );
-        // res.appendHeader("Set-Cookie", cookie);
+        const cookieName = `${config.server.resource_session_cookie_name}_${resource.resourceId}`;
+        const cookie = serializeResourceSessionCookie(
+            cookieName,
+            token,
+            resource.fullDomain,
+        );
+        res.appendHeader("Set-Cookie", cookie);
 
-        // logger.debug(cookie); // remove after testing
+        logger.debug(cookie); // remove after testing
 
         return response<AuthWithPincodeResponse>(res, {
             data: {

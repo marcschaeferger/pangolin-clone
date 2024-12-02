@@ -26,7 +26,7 @@ export default async function GeneralSettingsPage({
     const user = await getUser();
 
     if (!user) {
-        redirect("/auth/login");
+        redirect(`/?redirect=/${orgId}/settings/general`);
     }
 
     let orgUser = null;
@@ -34,8 +34,8 @@ export default async function GeneralSettingsPage({
         const getOrgUser = cache(async () =>
             internal.get<AxiosResponse<GetOrgUserResponse>>(
                 `/org/${orgId}/user/${user.userId}`,
-                await authCookieHeader()
-            )
+                await authCookieHeader(),
+            ),
         );
         const res = await getOrgUser();
         orgUser = res.data.data;
@@ -48,8 +48,8 @@ export default async function GeneralSettingsPage({
         const getOrg = cache(async () =>
             internal.get<AxiosResponse<GetOrgResponse>>(
                 `/org/${orgId}`,
-                await authCookieHeader()
-            )
+                await authCookieHeader(),
+            ),
         );
         const res = await getOrg();
         org = res.data.data;

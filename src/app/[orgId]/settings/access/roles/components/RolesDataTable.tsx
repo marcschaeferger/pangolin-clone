@@ -22,7 +22,7 @@ import {
 import { Button } from "@app/components/ui/button";
 import { useState } from "react";
 import { Input } from "@app/components/ui/input";
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { DataTablePagination } from "@app/components/DataTablePagination";
 
 interface DataTableProps<TData, TValue> {
@@ -61,19 +61,23 @@ export function RolesDataTable<TData, TValue>({
     return (
         <div>
             <div className="flex items-center justify-between pb-4">
-                <Input
-                    placeholder="Search roles"
-                    value={
-                        (table.getColumn("name")?.getFilterValue() as string) ??
-                        ""
-                    }
-                    onChange={(event) =>
-                        table
-                            .getColumn("name")
-                            ?.setFilterValue(event.target.value)
-                    }
-                    className="max-w-sm mr-2"
-                />
+                <div className="flex items-center max-w-sm mr-2 w-full relative">
+                    <Input
+                        placeholder="Search roles"
+                        value={
+                            (table
+                                .getColumn("name")
+                                ?.getFilterValue() as string) ?? ""
+                        }
+                        onChange={(event) =>
+                            table
+                                .getColumn("name")
+                                ?.setFilterValue(event.target.value)
+                        }
+                        className="w-full pl-8"
+                    />
+                    <Search className="h-4 w-4 absolute left-2 top-1/2 transform -translate-y-1/2" />
+                </div>
                 <Button
                     onClick={() => {
                         if (addRole) {
@@ -84,7 +88,7 @@ export function RolesDataTable<TData, TValue>({
                     <Plus className="mr-2 h-4 w-4" /> Add Role
                 </Button>
             </div>
-            <div>
+            <div className="border rounded-md">
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
@@ -97,7 +101,7 @@ export function RolesDataTable<TData, TValue>({
                                                 : flexRender(
                                                       header.column.columnDef
                                                           .header,
-                                                      header.getContext()
+                                                      header.getContext(),
                                                   )}
                                         </TableHead>
                                     );
@@ -118,7 +122,7 @@ export function RolesDataTable<TData, TValue>({
                                         <TableCell key={cell.id}>
                                             {flexRender(
                                                 cell.column.columnDef.cell,
-                                                cell.getContext()
+                                                cell.getContext(),
                                             )}
                                         </TableCell>
                                     ))}

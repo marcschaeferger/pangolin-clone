@@ -287,14 +287,26 @@ export const resourceSessions = sqliteTable("resourceSessions", {
         () => resourcePassword.passwordId,
         {
             onDelete: "cascade",
-        }
+        },
     ),
     pincodeId: integer("pincodeId").references(
         () => resourcePincode.pincodeId,
         {
             onDelete: "cascade",
-        }
+        },
     ),
+});
+
+export const resourceOtp = sqliteTable("resourceOtp", {
+    otpId: integer("otpId").primaryKey({
+        autoIncrement: true,
+    }),
+    resourceId: integer("resourceId")
+        .notNull()
+        .references(() => resources.resourceId, { onDelete: "cascade" }),
+    email: text("email").notNull(),
+    otpHash: text("otpHash").notNull(),
+    expiresAt: integer("expiresAt").notNull(),
 });
 
 export type Org = InferSelectModel<typeof orgs>;
@@ -325,3 +337,4 @@ export type UserOrg = InferSelectModel<typeof userOrgs>;
 export type ResourceSession = InferSelectModel<typeof resourceSessions>;
 export type ResourcePincode = InferSelectModel<typeof resourcePincode>;
 export type ResourcePassword = InferSelectModel<typeof resourcePassword>;
+export type ResourceOtp = InferSelectModel<typeof resourceOtp>;

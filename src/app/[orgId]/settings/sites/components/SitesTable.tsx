@@ -24,9 +24,10 @@ export type SiteRow = {
     id: number;
     nice: string;
     name: string;
-    mbIn: number;
-    mbOut: number;
+    mbIn: string;
+    mbOut: string;
     orgId: string;
+    type: "newt" | "wireguard";
 };
 
 type SitesTableProps = {
@@ -99,11 +100,70 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
         },
         {
             accessorKey: "mbIn",
-            header: "MB In",
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() =>
+                            column.toggleSorting(column.getIsSorted() === "asc")
+                        }
+                    >
+                        Data In
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                );
+            },
         },
         {
             accessorKey: "mbOut",
-            header: "MB Out",
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() =>
+                            column.toggleSorting(column.getIsSorted() === "asc")
+                        }
+                    >
+                        Data Out
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                );
+            },
+        },
+        {
+            accessorKey: "type",
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() =>
+                            column.toggleSorting(column.getIsSorted() === "asc")
+                        }
+                    >
+                        Connection Type
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                );
+            },
+            cell: ({ row }) => {
+                const originalRow = row.original;
+
+                if (originalRow.type === "newt") {
+                    return (
+                        <div className="flex items-center space-x-2">
+                            <span>Newt</span>
+                        </div>
+                    );
+                }
+
+                if (originalRow.type === "wireguard") {
+                    return (
+                        <div className="flex items-center space-x-2">
+                            <span>WireGuard</span>
+                        </div>
+                    );
+                }
+            },
         },
         {
             id: "actions",
@@ -135,24 +195,21 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                                             setSelectedSite(siteRow);
                                             setIsDeleteModalOpen(true);
                                         }}
-                                        className="text-red-600 hover:text-red-800"
+                                        className="text-red-500"
                                     >
                                         Delete
                                     </button>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
-                        <Button
-                            variant={"gray"}
-                            className="ml-2"
-                            onClick={() =>
-                                router.push(
-                                    `/${siteRow.orgId}/settings/sites/${siteRow.nice}`
-                                )
-                            }
+                        <Link
+                            href={`/${siteRow.orgId}/settings/sites/${siteRow.nice}`}
                         >
-                            Edit <ArrowRight className="ml-2 w-4 h-4" />
-                        </Button>
+                            <Button variant={"gray"} className="ml-2">
+                                Edit
+                                <ArrowRight className="ml-2 w-4 h-4" />
+                            </Button>
+                        </Link>
                     </div>
                 );
             },

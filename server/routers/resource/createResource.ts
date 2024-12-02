@@ -94,6 +94,7 @@ export async function createResource(
                 orgId,
                 name,
                 subdomain,
+                ssl: true,
             })
             .returning();
 

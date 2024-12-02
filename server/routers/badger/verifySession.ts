@@ -10,6 +10,7 @@ import {
     resourcePassword,
     resourcePincode,
     resources,
+    User,
     userOrgs,
 } from "@server/db/schema";
 import { and, eq } from "drizzle-orm";
@@ -19,10 +20,7 @@ import { Resource, roleResources, userResources } from "@server/db/schema";
 import logger from "@server/logger";
 
 const verifyResourceSessionSchema = z.object({
-    sessions: z.object({
-        session: z.string().nullable(),
-        resource_session: z.string().nullable(),
-    }),
+    sessions: z.record(z.string()).optional(),
     originalRequestURL: z.string().url(),
     scheme: z.string(),
     host: z.string(),
@@ -98,13 +96,18 @@ export async function verifyResourceSession(
 
         const redirectUrl = `${config.app.base_url}/auth/resource/${encodeURIComponent(resource.resourceId)}?redirect=${encodeURIComponent(originalRequestURL)}`;
 
-        if (sso && sessions.session) {
-            const { session, user } = await validateSessionToken(
-                sessions.session,
-            );
+        if (!sessions) {
+            return notAllowed(res);
+        }
+
+        const sessionToken = sessions[config.server.session_cookie_name];
+
+        // check for unified login
+        if (sso && sessionToken) {
+            const { session, user } = await validateSessionToken(sessionToken);
             if (session && user) {
                 const isAllowed = await isUserAllowedToAccessResource(
-                    user.userId,
+                    user,
                     resource,
                 );
 
@@ -117,11 +120,17 @@ export async function verifyResourceSession(
             }
         }
 
-        if (password && sessions.resource_session) {
+        const resourceSessionToken =
+            sessions[
+                `${config.server.resource_session_cookie_name}_${resource.resourceId}`
+            ];
+
+        if ((pincode || password) && resourceSessionToken) {
             const { resourceSession } = await validateResourceSessionToken(
-                sessions.resource_session,
+                resourceSessionToken,
                 resource.resourceId,
             );
+
             if (resourceSession) {
                 if (
                     pincode &&
@@ -165,7 +174,7 @@ function notAllowed(res: Response, redirectUrl?: string) {
         error: false,
         message: "Access denied",
         status: HttpCode.OK,
-    }
+    };
     logger.debug(JSON.stringify(data));
     return response<VerifyUserResponse>(res, data);
 }
@@ -177,21 +186,25 @@ function allowed(res: Response) {
         error: false,
         message: "Access allowed",
         status: HttpCode.OK,
-    }
+    };
     logger.debug(JSON.stringify(data));
     return response<VerifyUserResponse>(res, data);
 }
 
 async function isUserAllowedToAccessResource(
-    userId: string,
+    user: User,
     resource: Resource,
-) {
+): Promise<boolean> {
+    if (config.flags?.require_email_verification && !user.emailVerified) {
+        return false;
+    }
+
     const userOrgRole = await db
         .select()
         .from(userOrgs)
         .where(
             and(
-                eq(userOrgs.userId, userId),
+                eq(userOrgs.userId, user.userId),
                 eq(userOrgs.orgId, resource.orgId),
             ),
         )
@@ -221,7 +234,7 @@ async function isUserAllowedToAccessResource(
         .from(userResources)
         .where(
             and(
-                eq(userResources.userId, userId),
+                eq(userResources.userId, user.userId),
                 eq(userResources.resourceId, resource.resourceId),
             ),
         )

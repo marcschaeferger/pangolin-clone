@@ -1,4 +1,4 @@
-import { render } from "@react-email/components";
+import { render } from "@react-email/render";
 import { ReactElement } from "react";
 import emailClient from "@server/emails";
 import logger from "@server/logger";

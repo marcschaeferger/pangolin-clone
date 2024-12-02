@@ -79,6 +79,7 @@ export default function VerifyEmailForm({
             .catch((e) => {
                 setError(formatAxiosError(e, "An error occurred"));
                 console.error("Failed to verify email:", e);
+                setIsSubmitting(false);
             });
 
         if (res && res.data?.data?.valid) {
@@ -125,7 +126,7 @@ export default function VerifyEmailForm({
         <div>
             <Card className="w-full max-w-md">
                 <CardHeader>
-                    <CardTitle>Verify Your Email</CardTitle>
+                    <CardTitle>Verify Email</CardTitle>
                     <CardDescription>
                         Enter the verification code sent to your email address.
                     </CardDescription>
@@ -234,7 +235,7 @@ export default function VerifyEmailForm({
                 </CardContent>
             </Card>
 
-            <div className="text-center text-muted-foreground mt-4">
+            <div className="text-center text-muted-foreground mt-2">
                 <Button
                     type="button"
                     variant="link"

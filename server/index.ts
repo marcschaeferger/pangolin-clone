@@ -51,7 +51,7 @@ app.prepare().then(() => {
     externalServer.use(logIncomingMiddleware);
     externalServer.use(prefix, unauthenticated);
     externalServer.use(prefix, authenticated);
-    externalServer.use(`${prefix}/ws`, wsRouter);
+    // externalServer.use(`${prefix}/ws`, wsRouter);
 
     externalServer.use(notFoundMiddleware);
 
@@ -68,7 +68,7 @@ app.prepare().then(() => {
         );
     });
 
-    handleWSUpgrade(httpServer);
+    // handleWSUpgrade(httpServer);
 
     externalServer.use(errorHandlerMiddleware);
 

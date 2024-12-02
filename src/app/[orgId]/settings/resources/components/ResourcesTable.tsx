@@ -9,7 +9,16 @@ import {
     DropdownMenuTrigger,
 } from "@app/components/ui/dropdown-menu";
 import { Button } from "@app/components/ui/button";
-import { ArrowRight, ArrowUpDown, MoreHorizontal } from "lucide-react";
+import {
+    Copy,
+    ArrowRight,
+    ArrowUpDown,
+    MoreHorizontal,
+    Check,
+    ArrowUpRight,
+    ShieldOff,
+    ShieldCheck,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import api from "@app/api";
@@ -26,6 +35,8 @@ export type ResourceRow = {
     orgId: string;
     domain: string;
     site: string;
+    siteId: string;
+    hasAuth: boolean;
 };
 
 type ResourcesTableProps = {
@@ -91,10 +102,111 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                     </Button>
                 );
             },
+            cell: ({ row }) => {
+                const resourceRow = row.original;
+                return (
+                    <Button variant="outline">
+                        <Link
+                            href={`/${resourceRow.orgId}/settings/sites/${resourceRow.siteId}`}
+                        >
+                            {resourceRow.site}
+                        </Link>
+                        <ArrowUpRight className="ml-2 h-4 w-4" />
+                    </Button>
+                );
+            },
         },
         {
             accessorKey: "domain",
-            header: "Domain",
+            header: "Full URL",
+            cell: ({ row }) => {
+                const resourceRow = row.original;
+                return (
+                    <div className="flex items-center">
+                        <Link
+                            href={resourceRow.domain}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:underline mr-2"
+                        >
+                            {resourceRow.domain}
+                        </Link>
+                        <Button
+                            variant="ghost"
+                            className="h-6 w-6 p-0"
+                            onClick={() => {
+                                navigator.clipboard.writeText(
+                                    resourceRow.domain,
+                                );
+                                const originalIcon = document.querySelector(
+                                    `#icon-${resourceRow.id}`,
+                                );
+                                if (originalIcon) {
+                                    originalIcon.classList.add("hidden");
+                                }
+                                const checkIcon = document.querySelector(
+                                    `#check-icon-${resourceRow.id}`,
+                                );
+                                if (checkIcon) {
+                                    checkIcon.classList.remove("hidden");
+                                    setTimeout(() => {
+                                        checkIcon.classList.add("hidden");
+                                        if (originalIcon) {
+                                            originalIcon.classList.remove(
+                                                "hidden",
+                                            );
+                                        }
+                                    }, 2000);
+                                }
+                            }}
+                        >
+                            <Copy
+                                id={`icon-${resourceRow.id}`}
+                                className="h-4 w-4"
+                            />
+                            <Check
+                                id={`check-icon-${resourceRow.id}`}
+                                className="hidden text-green-500 h-4 w-4"
+                            />
+                            <span className="sr-only">Copy domain</span>
+                        </Button>
+                    </div>
+                );
+            },
+        },
+        {
+            accessorKey: "hasAuth",
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() =>
+                            column.toggleSorting(column.getIsSorted() === "asc")
+                        }
+                    >
+                        Authentication
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                );
+            },
+            cell: ({ row }) => {
+                const resourceRow = row.original;
+                return (
+                    <div>
+                        {resourceRow.hasAuth ? (
+                            <span className="text-green-500 flex items-center space-x-2">
+                                <ShieldCheck className="w-4 h-4" />
+                                <span>Protected</span>
+                            </span>
+                        ) : (
+                            <span className="text-yellow-500 flex items-center space-x-2">
+                                <ShieldOff className="w-4 h-4" />
+                                <span>Not Protected</span>
+                            </span>
+                        )}
+                    </div>
+                );
+            },
         },
         {
             id: "actions",
@@ -130,28 +242,25 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                                         <button
                                             onClick={() => {
                                                 setSelectedResource(
-                                                    resourceRow
+                                                    resourceRow,
                                                 );
                                                 setIsDeleteModalOpen(true);
                                             }}
-                                            className="text-red-600 hover:text-red-800 hover:underline cursor-pointer"
+                                            className="text-red-500"
                                         >
                                             Delete
                                         </button>
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
-                            <Button
-                                variant={"gray"}
-                                className="ml-2"
-                                onClick={() =>
-                                    router.push(
-                                        `/${resourceRow.orgId}/settings/resources/${resourceRow.id}`
-                                    )
-                                }
+                            <Link
+                                href={`/${resourceRow.orgId}/settings/resources/${resourceRow.id}`}
                             >
-                                Edit <ArrowRight className="ml-2 w-4 h-4" />
-                            </Button>
+                                <Button variant={"gray"} className="ml-2">
+                                    Edit
+                                    <ArrowRight className="ml-2 w-4 h-4" />
+                                </Button>
+                            </Link>
                         </div>
                     </>
                 );

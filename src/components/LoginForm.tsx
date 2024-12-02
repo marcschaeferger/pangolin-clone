@@ -75,8 +75,6 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
         if (res && res.status === 200) {
             setError(null);
 
-            console.log(res);
-
             if (res.data?.data?.emailVerificationRequired) {
                 if (redirect) {
                     router.push(`/auth/verify-email?redirect=${redirect}`);
@@ -86,14 +84,8 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
                 return;
             }
 
-            if (redirect && redirect.includes("http")) {
-                window.location.href = redirect;
-            } else if (redirect) {
-                router.push(redirect);
-            } else {
-                if (onLogin) {
-                    await onLogin();
-                }
+            if (onLogin) {
+                await onLogin();
             }
         }
 

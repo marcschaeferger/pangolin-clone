@@ -55,7 +55,7 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
     const user = await getUser();
 
     if (!user) {
-        redirect("/auth/login");
+        redirect(`/?redirect=/${params.orgId}/`);
     }
 
     const cookie = await authCookieHeader();
@@ -64,8 +64,8 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
         const getOrgUser = cache(() =>
             internal.get<AxiosResponse<GetOrgUserResponse>>(
                 `/org/${params.orgId}/user/${user.userId}`,
-                cookie
-            )
+                cookie,
+            ),
         );
         const orgUser = await getOrgUser();
 
@@ -79,7 +79,7 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
     let orgs: ListOrgsResponse["orgs"] = [];
     try {
         const getOrgs = cache(() =>
-            internal.get<AxiosResponse<ListOrgsResponse>>(`/orgs`, cookie)
+            internal.get<AxiosResponse<ListOrgsResponse>>(`/orgs`, cookie),
         );
         const res = await getOrgs();
         if (res && res.data.data.orgs) {
@@ -91,7 +91,7 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
 
     return (
         <>
-            <div className="w-full border-b bg-neutral-100 dark:bg-neutral-900 mb-6 select-none sm:px-0 px-3 pt-3">
+            <div className="w-full border-b bg-neutral-100 dark:bg-neutral-800 mb-6 select-none sm:px-0 px-3 pt-3">
                 <div className="container mx-auto flex flex-col content-between gap-4 ">
                     <Header
                         email={user.email}

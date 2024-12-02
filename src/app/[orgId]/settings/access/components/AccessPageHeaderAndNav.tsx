@@ -1,5 +1,6 @@
 "use client";
 
+import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { SidebarSettings } from "@app/components/SidebarSettings";
 
 type AccessPageHeaderAndNavProps = {
@@ -22,16 +23,12 @@ export default function AccessPageHeaderAndNav({
 
     return (
         <>
-            {" "}
-            <div className="space-y-0.5 select-none mb-6">
-                <h2 className="text-2xl font-bold tracking-tight">
-                    Users & Roles
-                </h2>
-                <p className="text-muted-foreground">
-                    Invite users and add them to roles to manage access to your
-                    organization
-                </p>
-            </div>
+            <SettingsSectionTitle
+                title="Manage Users & Roles"
+                description="Invite users and add them to roles to manage access to your
+            organization"
+            />
+
             <SidebarSettings sidebarNavItems={sidebarNavItems}>
                 {children}
             </SidebarSettings>

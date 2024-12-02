@@ -30,7 +30,15 @@ export default function DashboardLoginForm({
             <CardContent>
                 <LoginForm
                     redirect={redirect}
-                    onLogin={() => router.push("/")}
+                    onLogin={() => {
+                        if (redirect && redirect.includes("http")) {
+                            window.location.href = redirect;
+                        } else if (redirect) {
+                            router.push(redirect);
+                        } else {
+                            router.push("/");
+                        }
+                    }}
                 />
             </CardContent>
         </Card>

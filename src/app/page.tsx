@@ -12,21 +12,36 @@ import { cache } from "react";
 export const dynamic = "force-dynamic";
 
 export default async function Page(props: {
-    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+    searchParams: Promise<{ redirect: string | undefined }>;
 }) {
     const params = await props.searchParams; // this is needed to prevent static optimization
     const getUser = cache(verifySession);
-    const user = await getUser();
+    const user = await getUser({ skipCheckVerifyEmail: true });
 
     if (!user) {
-        redirect("/auth/login");
+        if (params.redirect) {
+            redirect(`/auth/login?redirect=${params.redirect}`);
+        } else {
+            redirect(`/auth/login`);
+        }
+    }
+
+    if (
+        !user.emailVerified &&
+        process.env.FLAGS_EMAIL_VERIFICATION_REQUIRED === "true"
+    ) {
+        if (params.redirect) {
+            redirect(`/auth/verify-email?redirect=${params.redirect}`);
+        } else {
+            redirect(`/auth/verify-email`);
+        }
     }
 
     let orgs: ListOrgsResponse["orgs"] = [];
     try {
         const res = await internal.get<AxiosResponse<ListOrgsResponse>>(
             `/orgs`,
-            await authCookieHeader()
+            await authCookieHeader(),
         );
 
         if (res && res.data.data.orgs) {

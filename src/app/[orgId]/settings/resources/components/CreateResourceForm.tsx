@@ -59,11 +59,6 @@ const accountFormSchema = z.object({
 
 type AccountFormValues = z.infer<typeof accountFormSchema>;
 
-const defaultValues: Partial<AccountFormValues> = {
-    subdomain: "",
-    name: "My Resource",
-};
-
 type CreateResourceFormProps = {
     open: boolean;
     setOpen: (open: boolean) => void;
@@ -88,7 +83,10 @@ export default function CreateResourceForm({
 
     const form = useForm<AccountFormValues>({
         resolver: zodResolver(accountFormSchema),
-        defaultValues,
+        defaultValues: {
+            subdomain: "",
+            name: "My Resource",
+        },
     });
 
     useEffect(() => {
@@ -98,9 +96,13 @@ export default function CreateResourceForm({
 
         const fetchSites = async () => {
             const res = await api.get<AxiosResponse<ListSitesResponse>>(
-                `/org/${orgId}/sites/`
+                `/org/${orgId}/sites/`,
             );
             setSites(res.data.data.sites);
+
+            if (res.data.data.sites.length > 0) {
+                form.setValue("siteId", res.data.data.sites[0].siteId);
+            }
         };
 
         fetchSites();
@@ -116,7 +118,7 @@ export default function CreateResourceForm({
                     name: data.name,
                     subdomain: data.subdomain,
                     // subdomain: data.subdomain,
-                }
+                },
             )
             .catch((e) => {
                 toast({
@@ -124,7 +126,7 @@ export default function CreateResourceForm({
                     title: "Error creating resource",
                     description: formatAxiosError(
                         e,
-                        "An error occurred when creating the resource"
+                        "An error occurred when creating the resource",
                     ),
                 });
             });
@@ -196,7 +198,7 @@ export default function CreateResourceForm({
                                                     onChange={(value) =>
                                                         form.setValue(
                                                             "subdomain",
-                                                            value
+                                                            value,
                                                         )
                                                     }
                                                 />
@@ -225,14 +227,14 @@ export default function CreateResourceForm({
                                                             className={cn(
                                                                 "w-[350px] justify-between",
                                                                 !field.value &&
-                                                                    "text-muted-foreground"
+                                                                    "text-muted-foreground",
                                                             )}
                                                         >
                                                             {field.value
                                                                 ? sites.find(
                                                                       (site) =>
                                                                           site.siteId ===
-                                                                          field.value
+                                                                          field.value,
                                                                   )?.name
                                                                 : "Select site"}
                                                             <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -259,7 +261,7 @@ export default function CreateResourceForm({
                                                                             onSelect={() => {
                                                                                 form.setValue(
                                                                                     "siteId",
-                                                                                    site.siteId
+                                                                                    site.siteId,
                                                                                 );
                                                                             }}
                                                                         >
@@ -269,14 +271,14 @@ export default function CreateResourceForm({
                                                                                     site.siteId ===
                                                                                         field.value
                                                                                         ? "opacity-100"
-                                                                                        : "opacity-0"
+                                                                                        : "opacity-0",
                                                                                 )}
                                                                             />
                                                                             {
                                                                                 site.name
                                                                             }
                                                                         </CommandItem>
-                                                                    )
+                                                                    ),
                                                                 )}
                                                             </CommandGroup>
                                                         </CommandList>

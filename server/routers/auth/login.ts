@@ -139,7 +139,7 @@ export async function login(
                 success: true,
                 error: false,
                 message: "Email verification code sent",
-                status: HttpCode.ACCEPTED,
+                status: HttpCode.OK,
             });
         }
 

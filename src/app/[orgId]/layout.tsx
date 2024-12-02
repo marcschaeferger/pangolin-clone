@@ -1,6 +1,8 @@
 import { internal } from "@app/api";
 import { authCookieHeader } from "@app/api/cookies";
+import { verifySession } from "@app/lib/auth/verifySession";
 import { GetOrgResponse } from "@server/routers/org";
+import { GetOrgUserResponse } from "@server/routers/user";
 import { AxiosResponse } from "axios";
 import { redirect } from "next/navigation";
 import { cache } from "react";
@@ -14,6 +16,25 @@ export default async function OrgLayout(props: {
     const orgId = params.orgId;
 
     if (!orgId) {
+        redirect(`/`);
+    }
+
+    const getUser = cache(verifySession);
+    const user = await getUser();
+
+    if (!user) {
+        redirect(`/?redirect=/${orgId}`);
+    }
+
+    try {
+        const getOrgUser = cache(() =>
+            internal.get<AxiosResponse<GetOrgUserResponse>>(
+                `/org/${orgId}/user/${user.userId}`,
+                cookie,
+            ),
+        );
+        const orgUser = await getOrgUser();
+    } catch {
         redirect(`/`);
     }
 
