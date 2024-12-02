@@ -5,7 +5,10 @@ build-arm:
 	docker buildx build --platform linux/arm64 -t fossorial/pangolin:latest .
 
 build-x86:
-	docker buildx build --platform linux/amd64 -t fossorial/pangolin:latest .
+	docker buildx build --platform linux/amd64 -t fossorial/pangolin:latest . 
+
+build:
+	docker build -t fossorial/pangolin:latest .
 
 push:
 	docker push fossorial/pangolin:latest

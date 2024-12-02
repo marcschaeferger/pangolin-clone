@@ -21,10 +21,10 @@ badger:
 
 gerbil:
     start_port: 51820
-    base_endpoint: localhost
+    base_endpoint: 127.0.0.1
+    use_subdomain: false
     block_size: 16
     subnet_group: 10.0.0.0/8
-    use_subdomain: true
 
 rate_limit:
     window_minutes: 1
@@ -36,3 +36,6 @@ email:
     smtp_user: no-reply@example.io
     smtp_pass: aaaaaaaaaaaaaaaaaa
     no_reply: no-reply@example.io
+
+flags:
+    require_email_verification: true

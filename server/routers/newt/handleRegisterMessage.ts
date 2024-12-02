@@ -8,6 +8,8 @@ import logger from "@server/logger";
 export const handleRegisterMessage: MessageHandler = async (context) => {
     const { message, newt, sendToClient } = context;
 
+    logger.info("Handling register message!");
+
     if (!newt) {
         logger.warn("Newt not found");
         return;

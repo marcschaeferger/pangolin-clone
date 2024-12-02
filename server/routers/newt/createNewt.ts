@@ -8,10 +8,7 @@ import createHttpError from "http-errors";
 import response from "@server/utils/response";
 import { SqliteError } from "better-sqlite3";
 import moment from "moment";
-import {
-    generateId,
-    generateSessionToken,
-} from "@server/auth";
+import { generateSessionToken } from "@server/auth";
 import { createNewtSession } from "@server/auth/newt";
 import { fromError } from "zod-validation-error";
 
