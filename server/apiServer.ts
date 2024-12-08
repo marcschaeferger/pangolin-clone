@@ -37,7 +37,7 @@ export function createApiServer() {
   apiServer.use(prefix, authenticated);
   
   // WebSocket routes
-  apiServer.use(`/ws`, wsRouter);
+  apiServer.use(prefix, wsRouter);
   
   // Error handling
   apiServer.use(notFoundMiddleware);
