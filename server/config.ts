@@ -21,6 +21,7 @@ const environmentSchema = z.object({
     server: z.object({
         external_port: portSchema,
         internal_port: portSchema,
+        next_port: portSchema,
         internal_hostname: z.string(),
         secure_cookies: z.boolean(),
         signup_secret: z.string().optional(),

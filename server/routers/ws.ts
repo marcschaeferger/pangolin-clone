@@ -17,7 +17,6 @@ interface WebSocketRequest extends IncomingMessage {
 
 interface AuthenticatedWebSocket extends WebSocket {
     newt?: Newt;
-    isAlive?: boolean;
 }
 
 interface TokenPayload {
@@ -124,77 +123,23 @@ const verifyToken = async (token: string): Promise<TokenPayload | null> => {
 
         return { newt: existingNewt[0], session };
     } catch (error) {
-        console.error("Token verification failed:", error);
+        logger.error("Token verification failed:", error);
         return null;
     }
 };
 
-// Router endpoint (unchanged)
-router.get("/ws", (req: Request, res: Response) => {
-    res.status(200).send("WebSocket endpoint");
-});
+const setupConnection = (ws: AuthenticatedWebSocket, newt: Newt): void => {
+    logger.info("Establishing websocket connection");
 
-// WebSocket upgrade handler
-const handleWSUpgrade = (server: HttpServer): void => {
-    server.on("upgrade", async (request: WebSocketRequest, socket: Socket, head: Buffer) => {
-        try {
-            const token = request.url?.includes("?")
-                ? new URLSearchParams(request.url.split("?")[1]).get("token") || ""
-                : request.headers["sec-websocket-protocol"];
-
-            if (!token) {
-                socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
-                socket.destroy();
-                return;
-            }
-
-            const tokenPayload = await verifyToken(token);
-            if (!tokenPayload) {
-                socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
-                socket.destroy();
-                return;
-            }
-
-            request.token = token;
-
-            wss.handleUpgrade(request, socket, head, (ws: AuthenticatedWebSocket) => {
-                ws.newt = tokenPayload.newt;
-                ws.isAlive = true;
-                wss.emit("connection", ws, request);
-            });
-        } catch (error) {
-            console.error("Upgrade error:", error);
-            socket.write("HTTP/1.1 500 Internal Server Error\r\n\r\n");
-            socket.destroy();
-        }
-    });
-};
-
-// WebSocket connection handler
-wss.on("connection", (ws: AuthenticatedWebSocket, request: WebSocketRequest) => {
-    const newtId = ws.newt?.newtId;
-    if (!newtId) {
-        console.error("Connection attempt without newt ID");
+    if (!newt) {
+        logger.error("Connection attempt without newt");
         return ws.terminate();
     }
 
+    ws.newt = newt;
+
     // Add client to tracking
-    addClient(newtId, ws);
-
-    // Set up ping-pong for connection health check
-    const pingInterval = setInterval(() => {
-        if (ws.isAlive === false) {
-            clearInterval(pingInterval);
-            removeClient(newtId, ws);
-            return ws.terminate();
-        }
-        ws.isAlive = false;
-        ws.ping();
-    }, 30000);
-
-    ws.on("pong", () => {
-        ws.isAlive = true;
-    });
+    addClient(newt.newtId, ws);
 
     ws.on("message", async (data) => {
         try {
@@ -226,7 +171,7 @@ wss.on("connection", (ws: AuthenticatedWebSocket, request: WebSocketRequest) => 
             if (response) {
                 if (response.broadcast) {
                     // Broadcast to all clients except sender if specified
-                    broadcastToAllExcept(response.message, response.excludeSender ? newtId : undefined);
+                    broadcastToAllExcept(response.message, response.excludeSender ? newt.newtId : undefined);
                 } else if (response.targetNewtId) {
                     // Send to specific client if targetNewtId is provided
                     sendToClient(response.targetNewtId, response.message);
@@ -235,9 +180,9 @@ wss.on("connection", (ws: AuthenticatedWebSocket, request: WebSocketRequest) => 
                     ws.send(JSON.stringify(response.message));
                 }
             }
-    
+
         } catch (error) {
-            console.error("Message handling error:", error);
+            logger.error("Message handling error:", error);
             ws.send(JSON.stringify({
                 type: "error",
                 data: {
@@ -247,17 +192,57 @@ wss.on("connection", (ws: AuthenticatedWebSocket, request: WebSocketRequest) => 
             }));
         }
     });    
-
+    
     ws.on("close", () => {
-        clearInterval(pingInterval);
-        removeClient(newtId, ws);
-        logger.info(`Client disconnected - Newt ID: ${newtId}`);
+        removeClient(newt.newtId, ws);
+        logger.info(`Client disconnected - Newt ID: ${newt.newtId}`);
+    });
+    
+    ws.on("error", (error: Error) => {
+        logger.error(`WebSocket error for Newt ID ${newt.newtId}:`, error);
     });
 
-    ws.on("error", (error: Error) => {
-        console.error(`WebSocket error for Newt ID ${newtId}:`, error);
-    });
+    logger.info(`WebSocket connection established - Newt ID: ${newt.newtId}`);
+};
+
+// Router endpoint (unchanged)
+router.get("/ws", (req: Request, res: Response) => {
+    res.status(200).send("WebSocket endpoint");
 });
+
+// WebSocket upgrade handler
+const handleWSUpgrade = (server: HttpServer): void => {
+    server.on("upgrade", async (request: WebSocketRequest, socket: Socket, head: Buffer) => {
+        try {
+            const token = request.url?.includes("?")
+                ? new URLSearchParams(request.url.split("?")[1]).get("token") || ""
+                : request.headers["sec-websocket-protocol"];
+
+            if (!token) {
+                logger.warn("Unauthorized connection attempt: no token...");
+                socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
+                socket.destroy();
+                return;
+            }
+
+            const tokenPayload = await verifyToken(token);
+            if (!tokenPayload) {
+                logger.warn("Unauthorized connection attempt: invalid token...");
+                socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
+                socket.destroy();
+                return;
+            }
+
+            wss.handleUpgrade(request, socket, head, (ws: AuthenticatedWebSocket) => {
+                setupConnection(ws, tokenPayload.newt);
+            });
+        } catch (error) {
+            logger.error("WebSocket upgrade error:", error);
+            socket.write("HTTP/1.1 500 Internal Server Error\r\n\r\n");
+            socket.destroy();
+        }
+    });
+};
 
 export {
     router,

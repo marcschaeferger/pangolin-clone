@@ -174,7 +174,13 @@ Endpoint = ${siteDefaults.endpoint}:${siteDefaults.listenPort}
 PersistentKeepalive = 5`
             : "";
 
-    const newtConfig = `newt --id ${siteDefaults?.newtId} --secret ${siteDefaults?.newtSecret}`;
+    // am I at http or https?
+    let proto = "http:";
+    if (typeof window !== "undefined") {
+        proto = window.location.protocol;
+    }
+
+    const newtConfig = `newt --id ${siteDefaults?.newtId} --secret ${siteDefaults?.newtSecret} --endpoint ${proto}//${siteDefaults?.endpoint}`;
 
     return (
         <>
