@@ -166,7 +166,6 @@ export async function createSite(
             status: HttpCode.CREATED,
         });
     } catch (error) {
-        throw error;
         return next(
             createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );

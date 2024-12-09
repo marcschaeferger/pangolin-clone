@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { sites } from "@server/db/schema";
+import { newts, newtSessions, sites } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
@@ -9,8 +9,7 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { deletePeer } from "../gerbil/peers";
 import { fromError } from "zod-validation-error";
-
-const API_BASE_URL = "http://localhost:3000";
+import { sendToClient } from "../ws";
 
 const deleteSiteSchema = z.object({
     siteId: z.string().transform(Number).pipe(z.number().int().positive()),
@@ -34,12 +33,13 @@ export async function deleteSite(
 
         const { siteId } = parsedParams.data;
 
-        const [deletedSite] = await db
-            .delete(sites)
+        const [site] = await db
+            .select()
+            .from(sites)
             .where(eq(sites.siteId, siteId))
-            .returning();
+            .limit(1);
 
-        if (!deletedSite) {
+        if (!site) {
             return next(
                 createHttpError(
                     HttpCode.NOT_FOUND,
@@ -48,9 +48,31 @@ export async function deleteSite(
             );
         }
 
-        if (deletedSite.pubKey) {
-            await deletePeer(deletedSite.exitNodeId!, deletedSite.pubKey);
+        if (site.pubKey) {
+            if (site.type == "wireguard") {
+                await deletePeer(site.exitNodeId!, site.pubKey);
+            } else if (site.type == "newt") {
+                // get the newt on the site by querying the newt table for siteId
+                const [deletedNewt] = await db
+                    .delete(newts)
+                    .where(eq(newts.siteId, siteId))
+                    .returning();
+                if (deletedNewt) {
+                    const payload = {
+                        type: `newt/terminate`,
+                        data: {},
+                    };
+                    sendToClient(deletedNewt.newtId, payload);
+
+                    // delete all of the sessions for the newt
+                    db.delete(newtSessions)
+                        .where(eq(newtSessions.newtId, deletedNewt.newtId))
+                        .run();
+                }
+            }
         }
+
+        db.delete(sites).where(eq(sites.siteId, siteId)).run();
 
         return response(res, {
             data: null,
@@ -64,27 +86,5 @@ export async function deleteSite(
         return next(
             createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
-    }
-}
-
-async function removePeer(publicKey: string) {
-    try {
-        const response = await fetch(
-            `${API_BASE_URL}/peer?public_key=${encodeURIComponent(publicKey)}`,
-            {
-                method: "DELETE",
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        logger.info("Peer removed successfully:", data.status);
-        return data;
-    } catch (error: any) {
-        console.error("Error removing peer:", error.message);
-        throw error;
     }
 }
