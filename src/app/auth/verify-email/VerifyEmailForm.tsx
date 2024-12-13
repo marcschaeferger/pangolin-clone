@@ -27,7 +27,6 @@ import {
     InputOTPGroup,
     InputOTPSlot,
 } from "@/components/ui/input-otp";
-import api from "@app/api";
 import { AxiosResponse } from "axios";
 import { VerifyEmailResponse } from "@server/routers/auth";
 import { Loader2 } from "lucide-react";
@@ -35,6 +34,8 @@ import { Alert, AlertDescription } from "../../../components/ui/alert";
 import { useToast } from "@app/hooks/useToast";
 import { useRouter } from "next/navigation";
 import { formatAxiosError } from "@app/lib/utils";
+import { createApiClient } from "@app/api";
+import { useEnvContext } from "@app/hooks/useEnvContext";
 
 const FormSchema = z.object({
     email: z.string().email({ message: "Invalid email address" }),
@@ -60,6 +61,8 @@ export default function VerifyEmailForm({
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { toast } = useToast();
+
+    const api = createApiClient(useEnvContext());
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),

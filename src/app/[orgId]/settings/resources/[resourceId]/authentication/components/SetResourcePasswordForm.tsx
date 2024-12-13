@@ -1,6 +1,5 @@
 "use client";
 
-import api from "@app/api";
 import { Button } from "@app/components/ui/button";
 import {
     Form,
@@ -30,6 +29,8 @@ import {
 import { formatAxiosError } from "@app/lib/utils";
 import { AxiosResponse } from "axios";
 import { Resource } from "@server/db/schema";
+import { createApiClient } from "@app/api";
+import { useEnvContext } from "@app/hooks/useEnvContext";
 
 const setPasswordFormSchema = z.object({
     password: z.string().min(4).max(100),
@@ -55,6 +56,8 @@ export default function SetResourcePasswordForm({
     onSetPassword,
 }: SetPasswordFormProps) {
     const { toast } = useToast();
+
+    const api = createApiClient(useEnvContext());
 
     const [loading, setLoading] = useState(false);
 

@@ -15,11 +15,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { useSiteContext } from "@app/hooks/useSiteContext";
 import { useForm } from "react-hook-form";
-import api from "@app/api";
 import { useToast } from "@app/hooks/useToast";
 import { useRouter } from "next/navigation";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { formatAxiosError } from "@app/lib/utils";
+import { createApiClient } from "@app/api";
+import { useEnvContext } from "@app/hooks/useEnvContext";
 
 const GeneralFormSchema = z.object({
     name: z.string(),
@@ -30,6 +31,8 @@ type GeneralFormValues = z.infer<typeof GeneralFormSchema>;
 export default function GeneralPage() {
     const { site, updateSite } = useSiteContext();
     const { toast } = useToast();
+
+    const api = createApiClient(useEnvContext());
 
     const router = useRouter();
 

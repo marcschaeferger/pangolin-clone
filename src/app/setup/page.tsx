@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import api from "@app/api";
 import { toast } from "@app/hooks/useToast";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -16,6 +15,8 @@ import {
 } from "@app/components/ui/card";
 import CopyTextBox from "@app/components/CopyTextBox";
 import { formatAxiosError } from "@app/lib/utils";
+import { createApiClient } from "@app/api";
+import { useEnvContext } from "@app/hooks/useEnvContext";
 
 type Step = "org" | "site" | "resources";
 
@@ -27,6 +28,8 @@ export default function StepperForm() {
     const [resourceName, setResourceName] = useState("");
     const [orgCreated, setOrgCreated] = useState(false);
     const [orgIdTaken, setOrgIdTaken] = useState(false);
+
+    const api = createApiClient(useEnvContext());
 
     const checkOrgIdAvailability = useCallback(async (value: string) => {
         try {

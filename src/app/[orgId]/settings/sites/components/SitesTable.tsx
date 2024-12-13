@@ -12,13 +12,14 @@ import { Button } from "@app/components/ui/button";
 import { ArrowRight, ArrowUpDown, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import api from "@app/api";
 import { AxiosResponse } from "axios";
 import { useState } from "react";
 import CreateSiteForm from "./CreateSiteForm";
 import ConfirmDeleteDialog from "@app/components/ConfirmDeleteDialog";
 import { useToast } from "@app/hooks/useToast";
 import { formatAxiosError } from "@app/lib/utils";
+import { createApiClient } from "@app/api";
+import { useEnvContext } from "@app/hooks/useEnvContext";
 
 export type SiteRow = {
     id: number;
@@ -43,6 +44,8 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedSite, setSelectedSite] = useState<SiteRow | null>(null);
+
+    const api = createApiClient(useEnvContext());
 
     const callApi = async () => {
         const res = await api.put<AxiosResponse<any>>(`/newt`);

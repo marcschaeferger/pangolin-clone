@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -29,7 +29,6 @@ import {
     InputOTPGroup,
     InputOTPSlot,
 } from "@app/components/ui/input-otp";
-import api from "@app/api";
 import { useRouter } from "next/navigation";
 import { Alert, AlertDescription } from "@app/components/ui/alert";
 import { formatAxiosError } from "@app/lib/utils";
@@ -38,6 +37,8 @@ import LoginForm from "@app/components/LoginForm";
 import { AuthWithPasswordResponse } from "@server/routers/resource";
 import { redirect } from "next/dist/server/api-utils";
 import ResourceAccessDenied from "./ResourceAccessDenied";
+import { createApiClient } from "@app/api";
+import { useEnvContext } from "@app/hooks/useEnvContext";
 
 const pinSchema = z.object({
     pin: z
@@ -82,6 +83,8 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
     const [pincodeError, setPincodeError] = useState<string | null>(null);
     const [accessDenied, setAccessDenied] = useState<boolean>(false);
     const [loadingLogin, setLoadingLogin] = useState(false);
+
+    const api = createApiClient(useEnvContext());
 
     function getDefaultSelectedMethod() {
         if (props.methods.sso) {

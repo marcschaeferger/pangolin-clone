@@ -1,6 +1,5 @@
 "use client";
 
-import api from "@app/api";
 import { Button } from "@app/components/ui/button";
 import {
     Form,
@@ -39,6 +38,8 @@ import {
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { ListRolesResponse } from "@server/routers/role";
 import { formatAxiosError } from "@app/lib/utils";
+import { createApiClient } from "@app/api";
+import { useEnvContext } from "@app/hooks/useEnvContext";
 
 type InviteUserFormProps = {
     open: boolean;
@@ -54,6 +55,8 @@ const formSchema = z.object({
 export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
     const { toast } = useToast();
     const { org } = useOrgContext();
+
+    const api = createApiClient(useEnvContext());
 
     const [inviteLink, setInviteLink] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);

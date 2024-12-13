@@ -1,6 +1,5 @@
 "use client";
 
-import api from "@app/api";
 import { Button, buttonVariants } from "@app/components/ui/button";
 import {
     Form,
@@ -41,6 +40,8 @@ import {
     SelectValue,
 } from "@app/components/ui/select";
 import { formatAxiosError } from "@app/lib/utils";
+import { createApiClient } from "@app/api";
+import { useEnvContext } from "@app/hooks/useEnvContext";
 
 const method = [
     { label: "Newt", value: "newt" },
@@ -73,6 +74,8 @@ type CreateSiteFormProps = {
 
 export default function CreateSiteForm({ open, setOpen }: CreateSiteFormProps) {
     const { toast } = useToast();
+
+    const api = createApiClient(useEnvContext());
 
     const [loading, setLoading] = useState(false);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import api from "@app/api";
+import { createApiClient } from "@app/api";
 import { Avatar, AvatarFallback } from "@app/components/ui/avatar";
 import { Button } from "@app/components/ui/button";
 import {
@@ -33,6 +33,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@app/components/ui/select";
+import { useEnvContext } from "@app/hooks/useEnvContext";
 import { useToast } from "@app/hooks/useToast";
 import { cn, formatAxiosError } from "@app/lib/utils";
 import { ListOrgsResponse } from "@server/routers/org";
@@ -54,6 +55,8 @@ export default function Header({ email, orgId, name, orgs }: HeaderProps) {
     const [open, setOpen] = useState(false);
 
     const router = useRouter();
+
+    const api = createApiClient(useEnvContext());
 
     function getInitials() {
         if (name) {

@@ -1,6 +1,5 @@
 "use client";
 
-import api from "@app/api";
 import { Button } from "@app/components/ui/button";
 import {
     Form,
@@ -42,6 +41,8 @@ import {
 } from "@app/components/Credenza";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { Description } from "@radix-ui/react-toast";
+import { createApiClient } from "@app/api";
+import { useEnvContext } from "@app/hooks/useEnvContext";
 
 type InviteUserFormProps = {
     open: boolean;
@@ -63,6 +64,8 @@ export default function InviteUserForm({
     dialog,
 }: InviteUserFormProps) {
     const [loading, setLoading] = useState(false);
+
+    const api = createApiClient(useEnvContext());
 
     const formSchema = z.object({
         string: z.string().refine((val) => val === string, {

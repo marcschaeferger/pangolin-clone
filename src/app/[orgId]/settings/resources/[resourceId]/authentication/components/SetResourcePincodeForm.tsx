@@ -1,6 +1,5 @@
 "use client";
 
-import api from "@app/api";
 import { Button } from "@app/components/ui/button";
 import {
     Form,
@@ -35,6 +34,8 @@ import {
     InputOTPGroup,
     InputOTPSlot,
 } from "@app/components/ui/input-otp";
+import { createApiClient } from "@app/api";
+import { useEnvContext } from "@app/hooks/useEnvContext";
 
 const setPincodeFormSchema = z.object({
     pincode: z.string().length(6),
@@ -62,6 +63,8 @@ export default function SetResourcePincodeForm({
     const { toast } = useToast();
 
     const [loading, setLoading] = useState(false);
+
+    const api = createApiClient(useEnvContext());
 
     const form = useForm<SetPincodeFormValues>({
         resolver: zodResolver(setPincodeFormSchema),

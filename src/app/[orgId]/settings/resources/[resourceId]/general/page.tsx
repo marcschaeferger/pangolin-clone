@@ -33,7 +33,6 @@ import { useResourceContext } from "@app/hooks/useResourceContext";
 import { ListSitesResponse } from "@server/routers/site";
 import { useEffect, useState } from "react";
 import { AxiosResponse } from "axios";
-import api from "@app/api";
 import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { GetResourceAuthInfoResponse } from "@server/routers/resource";
@@ -43,6 +42,8 @@ import { useOrgContext } from "@app/hooks/useOrgContext";
 import CustomDomainInput from "../components/CustomDomainInput";
 import ResourceInfoBox from "../components/ResourceInfoBox";
 import { subdomainSchema } from "@server/schemas/subdomainSchema";
+import { createApiClient } from "@app/api";
+import { useEnvContext } from "@app/hooks/useEnvContext";
 
 const GeneralFormSchema = z.object({
     name: z.string(),
@@ -60,6 +61,8 @@ export default function GeneralForm() {
     const router = useRouter();
 
     const orgId = params.orgId;
+
+    const api = createApiClient(useEnvContext());
 
     const [sites, setSites] = useState<ListSitesResponse["sites"]>([]);
     const [saveLoading, setSaveLoading] = useState(false);

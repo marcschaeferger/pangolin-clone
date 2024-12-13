@@ -14,12 +14,13 @@ import { useState } from "react";
 import InviteUserForm from "./InviteUserForm";
 import ConfirmDeleteDialog from "@app/components/ConfirmDeleteDialog";
 import { useUserContext } from "@app/hooks/useUserContext";
-import api from "@app/api";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { useToast } from "@app/hooks/useToast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatAxiosError } from "@app/lib/utils";
+import { createApiClient } from "@app/api";
+import { useEnvContext } from "@app/hooks/useEnvContext";
 
 export type UserRow = {
     id: string;
@@ -41,6 +42,8 @@ export default function UsersTable({ users: u }: UsersTableProps) {
     const [users, setUsers] = useState<UserRow[]>(u);
 
     const router = useRouter();
+
+    const api  = createApiClient(useEnvContext());
 
     const user = useUserContext();
     const { org } = useOrgContext();

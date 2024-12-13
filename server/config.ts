@@ -124,6 +124,7 @@ if (!parsedConfig.success) {
     throw new Error(`Invalid configuration file: ${errors}`);
 }
 
+process.env.NEXT_PORT = parsedConfig.data.server.next_port.toString();
 process.env.SERVER_EXTERNAL_PORT =
     parsedConfig.data.server.external_port.toString();
 process.env.SERVER_INTERNAL_PORT =

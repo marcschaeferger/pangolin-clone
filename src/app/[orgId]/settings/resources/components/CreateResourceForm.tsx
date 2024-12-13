@@ -1,6 +1,5 @@
 "use client";
 
-import api from "@app/api";
 import { Button, buttonVariants } from "@app/components/ui/button";
 import {
     Form,
@@ -9,7 +8,7 @@ import {
     FormField,
     FormItem,
     FormLabel,
-    FormMessage,
+    FormMessage
 } from "@app/components/ui/form";
 import { Input } from "@app/components/ui/input";
 import { useToast } from "@app/hooks/useToast";
@@ -25,7 +24,7 @@ import {
     CredenzaDescription,
     CredenzaFooter,
     CredenzaHeader,
-    CredenzaTitle,
+    CredenzaTitle
 } from "@app/components/Credenza";
 import { useParams, useRouter } from "next/navigation";
 import { ListSitesResponse } from "@server/routers/site";
@@ -34,7 +33,7 @@ import { CheckIcon } from "lucide-react";
 import {
     Popover,
     PopoverContent,
-    PopoverTrigger,
+    PopoverTrigger
 } from "@app/components/ui/popover";
 import {
     Command,
@@ -42,7 +41,7 @@ import {
     CommandGroup,
     CommandInput,
     CommandItem,
-    CommandList,
+    CommandList
 } from "@app/components/ui/command";
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import CustomDomainInput from "../[resourceId]/components/CustomDomainInput";
@@ -50,11 +49,13 @@ import { Axios, AxiosResponse } from "axios";
 import { Resource } from "@server/db/schema";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { subdomainSchema } from "@server/schemas/subdomainSchema";
+import { createApiClient } from "@app/api";
+import { useEnvContext } from "@app/hooks/useEnvContext";
 
 const accountFormSchema = z.object({
     subdomain: subdomainSchema,
     name: z.string(),
-    siteId: z.number(),
+    siteId: z.number()
 });
 
 type AccountFormValues = z.infer<typeof accountFormSchema>;
@@ -66,9 +67,11 @@ type CreateResourceFormProps = {
 
 export default function CreateResourceForm({
     open,
-    setOpen,
+    setOpen
 }: CreateResourceFormProps) {
     const { toast } = useToast();
+
+    const api = createApiClient(useEnvContext());
 
     const [loading, setLoading] = useState(false);
     const params = useParams();
@@ -85,8 +88,8 @@ export default function CreateResourceForm({
         resolver: zodResolver(accountFormSchema),
         defaultValues: {
             subdomain: "",
-            name: "My Resource",
-        },
+            name: "My Resource"
+        }
     });
 
     useEffect(() => {
@@ -96,7 +99,7 @@ export default function CreateResourceForm({
 
         const fetchSites = async () => {
             const res = await api.get<AxiosResponse<ListSitesResponse>>(
-                `/org/${orgId}/sites/`,
+                `/org/${orgId}/sites/`
             );
             setSites(res.data.data.sites);
 
@@ -116,9 +119,9 @@ export default function CreateResourceForm({
                 `/org/${orgId}/site/${data.siteId}/resource/`,
                 {
                     name: data.name,
-                    subdomain: data.subdomain,
+                    subdomain: data.subdomain
                     // subdomain: data.subdomain,
-                },
+                }
             )
             .catch((e) => {
                 toast({
@@ -126,8 +129,8 @@ export default function CreateResourceForm({
                     title: "Error creating resource",
                     description: formatAxiosError(
                         e,
-                        "An error occurred when creating the resource",
-                    ),
+                        "An error occurred when creating the resource"
+                    )
                 });
             });
 
@@ -198,7 +201,7 @@ export default function CreateResourceForm({
                                                     onChange={(value) =>
                                                         form.setValue(
                                                             "subdomain",
-                                                            value,
+                                                            value
                                                         )
                                                     }
                                                 />
@@ -227,14 +230,14 @@ export default function CreateResourceForm({
                                                             className={cn(
                                                                 "w-[350px] justify-between",
                                                                 !field.value &&
-                                                                    "text-muted-foreground",
+                                                                    "text-muted-foreground"
                                                             )}
                                                         >
                                                             {field.value
                                                                 ? sites.find(
                                                                       (site) =>
                                                                           site.siteId ===
-                                                                          field.value,
+                                                                          field.value
                                                                   )?.name
                                                                 : "Select site"}
                                                             <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -261,7 +264,7 @@ export default function CreateResourceForm({
                                                                             onSelect={() => {
                                                                                 form.setValue(
                                                                                     "siteId",
-                                                                                    site.siteId,
+                                                                                    site.siteId
                                                                                 );
                                                                             }}
                                                                         >
@@ -271,14 +274,14 @@ export default function CreateResourceForm({
                                                                                     site.siteId ===
                                                                                         field.value
                                                                                         ? "opacity-100"
-                                                                                        : "opacity-0",
+                                                                                        : "opacity-0"
                                                                                 )}
                                                                             />
                                                                             {
                                                                                 site.name
                                                                             }
                                                                         </CommandItem>
-                                                                    ),
+                                                                    )
                                                                 )}
                                                             </CommandGroup>
                                                         </CommandList>

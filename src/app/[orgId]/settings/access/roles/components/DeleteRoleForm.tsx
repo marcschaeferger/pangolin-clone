@@ -1,6 +1,5 @@
 "use client";
 
-import api from "@app/api";
 import { Button } from "@app/components/ui/button";
 import {
     Form,
@@ -37,6 +36,8 @@ import {
 } from "@app/components/ui/select";
 import { RoleRow } from "./RolesTable";
 import { formatAxiosError } from "@app/lib/utils";
+import { createApiClient } from "@app/api";
+import { useEnvContext } from "@app/hooks/useEnvContext";
 
 type CreateRoleFormProps = {
     open: boolean;
@@ -60,6 +61,8 @@ export default function DeleteRoleForm({
 
     const [loading, setLoading] = useState(false);
     const [roles, setRoles] = useState<ListRolesResponse["roles"]>([]);
+
+    const api = createApiClient(useEnvContext());
 
     useEffect(() => {
         async function fetchRoles() {

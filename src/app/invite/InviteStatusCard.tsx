@@ -1,14 +1,15 @@
 "use client";
 
-import api from "@app/api";
+import { createApiClient } from "@app/api";
 import { Button } from "@app/components/ui/button";
 import {
     Card,
     CardContent,
     CardFooter,
     CardHeader,
-    CardTitle,
+    CardTitle
 } from "@app/components/ui/card";
+import { useEnvContext } from "@app/hooks/useEnvContext";
 import { XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -19,9 +20,11 @@ type InviteStatusCardProps = {
 
 export default function InviteStatusCard({
     type,
-    token,
+    token
 }: InviteStatusCardProps) {
     const router = useRouter();
+
+    const api = createApiClient(useEnvContext());
 
     async function goToLogin() {
         await api.post("/auth/logout", {});

@@ -1,23 +1,19 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Figtree, IBM_Plex_Sans, Inter, Work_Sans } from "next/font/google";
+import { Figtree } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@app/providers/ThemeProvider";
+import EnvProvider from "@app/providers/EnvProvider";
 
 export const metadata: Metadata = {
     title: `Dashboard - Pangolin`,
-    description: "",
+    description: ""
 };
 
-// const font = Inter({ subsets: ["latin"] });
-// const font = Noto_Sans_Mono({ subsets: ["latin"] });
-// const font = Work_Sans({ subsets: ["latin"] });
-// const font = Space_Grotesk({subsets: ["latin"]})
-// const font = IBM_Plex_Sans({subsets: ["latin"], weight: "400"})
 const font = Figtree({ subsets: ["latin"] });
 
 export default async function RootLayout({
-    children,
+    children
 }: Readonly<{
     children: React.ReactNode;
 }>) {
@@ -30,7 +26,18 @@ export default async function RootLayout({
                     enableSystem
                     disableTransitionOnChange
                 >
-                    {children}
+                    <EnvProvider
+                        // it's import not to pass all of process.env here in case of secrets
+                        // select only the necessary ones
+                        env={{
+                            NEXT_PORT: process.env.NEXT_PORT as string,
+                            SERVER_EXTERNAL_PORT: process.env
+                                .SERVER_EXTERNAL_PORT as string,
+                            ENVIRONMENT: process.env.ENVIRONMENT as string
+                        }}
+                    >
+                        {children}
+                    </EnvProvider>
                     <Toaster />
                 </ThemeProvider>
             </body>

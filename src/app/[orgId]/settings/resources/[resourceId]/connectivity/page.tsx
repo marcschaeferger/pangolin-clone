@@ -12,7 +12,6 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import api from "@app/api";
 import { AxiosResponse } from "axios";
 import { ListTargetsResponse } from "@server/routers/target/listTargets";
 import { useForm } from "react-hook-form";
@@ -49,9 +48,9 @@ import { useToast } from "@app/hooks/useToast";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { useResourceContext } from "@app/hooks/useResourceContext";
 import { ArrayElement } from "@server/types/ArrayElement";
-import { Dot } from "lucide-react";
 import { formatAxiosError } from "@app/lib/utils";
-import { Separator } from "@radix-ui/react-separator";
+import { useEnvContext } from "@app/hooks/useEnvContext";
+import { createApiClient } from "@app/api";
 
 const addTargetSchema = z.object({
     ip: z.string().ip(),
@@ -82,6 +81,8 @@ export default function ReverseProxyTargets(props: {
 
     const { toast } = useToast();
     const { resource, updateResource } = useResourceContext();
+
+    const api = createApiClient(useEnvContext());
 
     const [targets, setTargets] = useState<LocalTarget[]>([]);
     const [targetsToRemove, setTargetsToRemove] = useState<number[]>([]);

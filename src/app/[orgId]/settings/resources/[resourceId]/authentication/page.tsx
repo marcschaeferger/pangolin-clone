@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import api from "@app/api";
 import { ListRolesResponse } from "@server/routers/role";
 import { useToast } from "@app/hooks/useToast";
 import { useOrgContext } from "@app/hooks/useOrgContext";
@@ -36,6 +35,8 @@ import { Binary, Key, ShieldCheck } from "lucide-react";
 import SetResourcePasswordForm from "./components/SetResourcePasswordForm";
 import { Separator } from "@app/components/ui/separator";
 import SetResourcePincodeForm from "./components/SetResourcePincodeForm";
+import { createApiClient } from "@app/api";
+import { useEnvContext } from "@app/hooks/useEnvContext";
 
 const UsersRolesFormSchema = z.object({
     roles: z.array(
@@ -57,6 +58,8 @@ export default function ResourceAuthenticationPage() {
     const { org } = useOrgContext();
     const { resource, updateResource, authInfo, updateAuthInfo } =
         useResourceContext();
+
+    const api = createApiClient(useEnvContext());
 
     const [pageLoading, setPageLoading] = useState(true);
 

@@ -1,6 +1,5 @@
 "use client";
 
-import api from "@app/api";
 import {
     Form,
     FormControl,
@@ -30,6 +29,8 @@ import { useParams } from "next/navigation";
 import { Button } from "@app/components/ui/button";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { formatAxiosError } from "@app/lib/utils";
+import { createApiClient } from "@app/api";
+import { useEnvContext } from "@app/hooks/useEnvContext";
 
 const formSchema = z.object({
     email: z.string().email({ message: "Please enter a valid email" }),
@@ -39,6 +40,8 @@ const formSchema = z.object({
 export default function AccessControlsPage() {
     const { toast } = useToast();
     const { orgUser: user } = userOrgUserContext();
+
+    const api = createApiClient(useEnvContext());
 
     const { orgId } = useParams();
 

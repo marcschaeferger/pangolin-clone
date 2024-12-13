@@ -5,31 +5,31 @@ import { createInternalServer } from "./internalServer";
 import { User, UserOrg } from "./db/schema";
 
 async function startServers() {
-  await ensureActions();
-  
-  // Start all servers
-  const apiServer = createApiServer();
-  const nextServer = await createNextServer();
-  const internalServer = createInternalServer();
+    await ensureActions();
 
-  return {
-    apiServer,
-    nextServer,
-    internalServer
-  };
+    // Start all servers
+    const apiServer = createApiServer();
+    const nextServer = await createNextServer();
+    const internalServer = createInternalServer();
+
+    return {
+        apiServer,
+        nextServer,
+        internalServer,
+    };
 }
 
 // Types
 declare global {
-  namespace Express {
-    interface Request {
-      user?: User;
-      userOrg?: UserOrg;
-      userOrgRoleId?: number;
-      userOrgId?: string;
-      userOrgIds?: string[];
+    namespace Express {
+        interface Request {
+            user?: User;
+            userOrg?: UserOrg;
+            userOrgRoleId?: number;
+            userOrgId?: string;
+            userOrgIds?: string[];
+        }
     }
-  }
 }
 
 startServers().catch(console.error);

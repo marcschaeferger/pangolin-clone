@@ -21,13 +21,14 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import api from "@app/api";
 import CreateResourceForm from "./CreateResourceForm";
 import { useState } from "react";
 import ConfirmDeleteDialog from "@app/components/ConfirmDeleteDialog";
 import { set } from "zod";
 import { formatAxiosError } from "@app/lib/utils";
 import { useToast } from "@app/hooks/useToast";
+import { createApiClient } from "@app/api";
+import { useEnvContext } from "@app/hooks/useEnvContext";
 
 export type ResourceRow = {
     id: number;
@@ -48,6 +49,8 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
     const router = useRouter();
 
     const { toast } = useToast();
+
+    const api = createApiClient(useEnvContext());
 
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
