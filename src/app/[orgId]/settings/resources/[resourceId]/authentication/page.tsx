@@ -10,7 +10,7 @@ import { formatAxiosError } from "@app/lib/utils";
 import {
     GetResourceAuthInfoResponse,
     ListResourceRolesResponse,
-    ListResourceUsersResponse,
+    ListResourceUsersResponse
 } from "@server/routers/resource";
 import { Button } from "@app/components/ui/button";
 import { set, z } from "zod";
@@ -24,7 +24,7 @@ import {
     FormField,
     FormItem,
     FormLabel,
-    FormMessage,
+    FormMessage
 } from "@app/components/ui/form";
 import { TagInput } from "emblor";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
@@ -42,15 +42,15 @@ const UsersRolesFormSchema = z.object({
     roles: z.array(
         z.object({
             id: z.string(),
-            text: z.string(),
-        }),
+            text: z.string()
+        })
     ),
     users: z.array(
         z.object({
             id: z.string(),
-            text: z.string(),
-        }),
-    ),
+            text: z.string()
+        })
+    )
 });
 
 export default function ResourceAuthenticationPage() {
@@ -64,10 +64,10 @@ export default function ResourceAuthenticationPage() {
     const [pageLoading, setPageLoading] = useState(true);
 
     const [allRoles, setAllRoles] = useState<{ id: string; text: string }[]>(
-        [],
+        []
     );
     const [allUsers, setAllUsers] = useState<{ id: string; text: string }[]>(
-        [],
+        []
     );
     const [activeRolesTagIndex, setActiveRolesTagIndex] = useState<
         number | null
@@ -90,7 +90,7 @@ export default function ResourceAuthenticationPage() {
 
     const usersRolesForm = useForm<z.infer<typeof UsersRolesFormSchema>>({
         resolver: zodResolver(UsersRolesFormSchema),
-        defaultValues: { roles: [], users: [] },
+        defaultValues: { roles: [], users: [] }
     });
 
     useEffect(() => {
@@ -100,29 +100,29 @@ export default function ResourceAuthenticationPage() {
                     rolesResponse,
                     resourceRolesResponse,
                     usersResponse,
-                    resourceUsersResponse,
+                    resourceUsersResponse
                 ] = await Promise.all([
                     api.get<AxiosResponse<ListRolesResponse>>(
-                        `/org/${org?.org.orgId}/roles`,
+                        `/org/${org?.org.orgId}/roles`
                     ),
                     api.get<AxiosResponse<ListResourceRolesResponse>>(
-                        `/resource/${resource.resourceId}/roles`,
+                        `/resource/${resource.resourceId}/roles`
                     ),
                     api.get<AxiosResponse<ListUsersResponse>>(
-                        `/org/${org?.org.orgId}/users`,
+                        `/org/${org?.org.orgId}/users`
                     ),
                     api.get<AxiosResponse<ListResourceUsersResponse>>(
-                        `/resource/${resource.resourceId}/users`,
-                    ),
+                        `/resource/${resource.resourceId}/users`
+                    )
                 ]);
 
                 setAllRoles(
                     rolesResponse.data.data.roles
                         .map((role) => ({
                             id: role.roleId.toString(),
-                            text: role.name,
+                            text: role.name
                         }))
-                        .filter((role) => role.text !== "Admin"),
+                        .filter((role) => role.text !== "Admin")
                 );
 
                 usersRolesForm.setValue(
@@ -130,24 +130,24 @@ export default function ResourceAuthenticationPage() {
                     resourceRolesResponse.data.data.roles
                         .map((i) => ({
                             id: i.roleId.toString(),
-                            text: i.name,
+                            text: i.name
                         }))
-                        .filter((role) => role.text !== "Admin"),
+                        .filter((role) => role.text !== "Admin")
                 );
 
                 setAllUsers(
                     usersResponse.data.data.users.map((user) => ({
                         id: user.id.toString(),
-                        text: user.email,
-                    })),
+                        text: user.email
+                    }))
                 );
 
                 usersRolesForm.setValue(
                     "users",
                     resourceUsersResponse.data.data.users.map((i) => ({
                         id: i.userId.toString(),
-                        text: i.email,
-                    })),
+                        text: i.email
+                    }))
                 );
 
                 setPageLoading(false);
@@ -158,8 +158,8 @@ export default function ResourceAuthenticationPage() {
                     title: "Failed to fetch data",
                     description: formatAxiosError(
                         e,
-                        "An error occurred while fetching the data",
-                    ),
+                        "An error occurred while fetching the data"
+                    )
                 });
             }
         };
@@ -168,36 +168,36 @@ export default function ResourceAuthenticationPage() {
     }, []);
 
     async function onSubmitUsersRoles(
-        data: z.infer<typeof UsersRolesFormSchema>,
+        data: z.infer<typeof UsersRolesFormSchema>
     ) {
         try {
             setLoadingSaveUsersRoles(true);
 
             const jobs = [
                 api.post(`/resource/${resource.resourceId}/roles`, {
-                    roleIds: data.roles.map((i) => parseInt(i.id)),
+                    roleIds: data.roles.map((i) => parseInt(i.id))
                 }),
                 api.post(`/resource/${resource.resourceId}/users`, {
-                    userIds: data.users.map((i) => i.id),
+                    userIds: data.users.map((i) => i.id)
                 }),
                 api.post(`/resource/${resource.resourceId}`, {
-                    sso: ssoEnabled,
-                }),
+                    sso: ssoEnabled
+                })
             ];
 
             await Promise.all(jobs);
 
             updateResource({
-                sso: ssoEnabled,
+                sso: ssoEnabled
             });
 
             updateAuthInfo({
-                sso: ssoEnabled,
+                sso: ssoEnabled
             });
 
             toast({
                 title: "Saved successfully",
-                description: "Authentication settings have been saved",
+                description: "Authentication settings have been saved"
             });
         } catch (e) {
             console.error(e);
@@ -206,8 +206,8 @@ export default function ResourceAuthenticationPage() {
                 title: "Failed to set roles",
                 description: formatAxiosError(
                     e,
-                    "An error occurred while setting the roles",
-                ),
+                    "An error occurred while setting the roles"
+                )
             });
         } finally {
             setLoadingSaveUsersRoles(false);
@@ -218,17 +218,17 @@ export default function ResourceAuthenticationPage() {
         setLoadingRemoveResourcePassword(true);
 
         api.post(`/resource/${resource.resourceId}/password`, {
-            password: null,
+            password: null
         })
             .then(() => {
                 toast({
                     title: "Resource password removed",
                     description:
-                        "The resource password has been removed successfully",
+                        "The resource password has been removed successfully"
                 });
 
                 updateAuthInfo({
-                    password: false,
+                    password: false
                 });
             })
             .catch((e) => {
@@ -237,8 +237,8 @@ export default function ResourceAuthenticationPage() {
                     title: "Error removing resource password",
                     description: formatAxiosError(
                         e,
-                        "An error occurred while removing the resource password",
-                    ),
+                        "An error occurred while removing the resource password"
+                    )
                 });
             })
             .finally(() => setLoadingRemoveResourcePassword(false));
@@ -248,17 +248,17 @@ export default function ResourceAuthenticationPage() {
         setLoadingRemoveResourcePincode(true);
 
         api.post(`/resource/${resource.resourceId}/pincode`, {
-            pincode: null,
+            pincode: null
         })
             .then(() => {
                 toast({
                     title: "Resource pincode removed",
                     description:
-                        "The resource password has been removed successfully",
+                        "The resource password has been removed successfully"
                 });
 
                 updateAuthInfo({
-                    pincode: false,
+                    pincode: false
                 });
             })
             .catch((e) => {
@@ -267,8 +267,8 @@ export default function ResourceAuthenticationPage() {
                     title: "Error removing resource pincode",
                     description: formatAxiosError(
                         e,
-                        "An error occurred while removing the resource pincode",
-                    ),
+                        "An error occurred while removing the resource pincode"
+                    )
                 });
             })
             .finally(() => setLoadingRemoveResourcePincode(false));
@@ -288,7 +288,7 @@ export default function ResourceAuthenticationPage() {
                     onSetPassword={() => {
                         setIsSetPasswordOpen(false);
                         updateAuthInfo({
-                            password: true,
+                            password: true
                         });
                     }}
                 />
@@ -302,7 +302,7 @@ export default function ResourceAuthenticationPage() {
                     onSetPincode={() => {
                         setIsSetPincodeOpen(false);
                         updateAuthInfo({
-                            pincode: true,
+                            pincode: true
                         });
                     }}
                 />
@@ -336,7 +336,7 @@ export default function ResourceAuthenticationPage() {
                     <Form {...usersRolesForm}>
                         <form
                             onSubmit={usersRolesForm.handleSubmit(
-                                onSubmitUsersRoles,
+                                onSubmitUsersRoles
                             )}
                             className="space-y-8"
                         >
@@ -365,8 +365,8 @@ export default function ResourceAuthenticationPage() {
                                                         "roles",
                                                         newRoles as [
                                                             Tag,
-                                                            ...Tag[],
-                                                        ],
+                                                            ...Tag[]
+                                                        ]
                                                     );
                                                 }}
                                                 enableAutocomplete={true}
@@ -378,11 +378,11 @@ export default function ResourceAuthenticationPage() {
                                                 sortTags={true}
                                                 styleClasses={{
                                                     tag: {
-                                                        body: "bg-muted hover:bg-accent text-foreground py-2 px-3 rounded-full",
+                                                        body: "bg-muted hover:bg-accent text-foreground py-2 px-3 rounded-full"
                                                     },
                                                     input: "border-none bg-transparent text-inherit placeholder:text-inherit shadow-none",
                                                     inlineTagsContainer:
-                                                        "bg-transparent",
+                                                        "bg-transparent"
                                                 }}
                                             />
                                         </FormControl>
@@ -420,8 +420,8 @@ export default function ResourceAuthenticationPage() {
                                                         "users",
                                                         newUsers as [
                                                             Tag,
-                                                            ...Tag[],
-                                                        ],
+                                                            ...Tag[]
+                                                        ]
                                                     );
                                                 }}
                                                 enableAutocomplete={true}
@@ -433,11 +433,11 @@ export default function ResourceAuthenticationPage() {
                                                 sortTags={true}
                                                 styleClasses={{
                                                     tag: {
-                                                        body: "bg-muted hover:bg-accent text-foreground py-2 px-3 rounded-full",
+                                                        body: "bg-muted hover:bg-accent text-foreground py-2 px-3 rounded-full"
                                                     },
                                                     input: "border-none bg-transparent text-inherit placeholder:text-inherit shadow-none",
                                                     inlineTagsContainer:
-                                                        "bg-transparent",
+                                                        "bg-transparent"
                                                 }}
                                             />
                                         </FormControl>
@@ -468,7 +468,7 @@ export default function ResourceAuthenticationPage() {
                 <section className="space-y-8">
                     <SettingsSectionTitle
                         title="Authentication Methods"
-                        description="Allow anyone to access the resource via the below methods"
+                        description="Allow access to the resource via additional auth methods"
                         size="1xl"
                     />
 

@@ -1,40 +1,42 @@
 import { verify } from "@node-rs/argon2";
 import { generateSessionToken } from "@server/auth";
 import db from "@server/db";
-import { resourcePassword, resources } from "@server/db/schema";
+import { orgs, resourceOtp, resourcePassword, resources } from "@server/db/schema";
 import HttpCode from "@server/types/HttpCode";
 import response from "@server/utils/response";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { NextFunction, Request, Response } from "express";
 import createHttpError from "http-errors";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
 import {
     createResourceSession,
-    serializeResourceSessionCookie,
+    serializeResourceSessionCookie
 } from "@server/auth/resource";
 import logger from "@server/logger";
 import config from "@server/config";
+import { isValidOtp, sendResourceOtpEmail } from "@server/auth/resourceOtp";
 
 export const authWithPasswordBodySchema = z.object({
     password: z.string(),
     email: z.string().email().optional(),
-    code: z.string().optional(),
+    otp: z.string().optional()
 });
 
 export const authWithPasswordParamsSchema = z.object({
-    resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
+    resourceId: z.string().transform(Number).pipe(z.number().int().positive())
 });
 
 export type AuthWithPasswordResponse = {
-    codeRequested?: boolean;
+    otpRequested?: boolean;
+    otpSent?: boolean;
     session?: string;
 };
 
 export async function authWithPassword(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
 ): Promise<any> {
     const parsedBody = authWithPasswordBodySchema.safeParse(req.body);
 
@@ -42,8 +44,8 @@ export async function authWithPassword(
         return next(
             createHttpError(
                 HttpCode.BAD_REQUEST,
-                fromError(parsedBody.error).toString(),
-            ),
+                fromError(parsedBody.error).toString()
+            )
         );
     }
 
@@ -53,13 +55,13 @@ export async function authWithPassword(
         return next(
             createHttpError(
                 HttpCode.BAD_REQUEST,
-                fromError(parsedParams.error).toString(),
-            ),
+                fromError(parsedParams.error).toString()
+            )
         );
     }
 
     const { resourceId } = parsedParams.data;
-    const { email, password, code } = parsedBody.data;
+    const { email, password, otp } = parsedBody.data;
 
     try {
         const [result] = await db
@@ -67,20 +69,25 @@ export async function authWithPassword(
             .from(resources)
             .leftJoin(
                 resourcePassword,
-                eq(resourcePassword.resourceId, resources.resourceId),
+                eq(resourcePassword.resourceId, resources.resourceId)
             )
+            .leftJoin(orgs, eq(orgs.orgId, resources.orgId))
             .where(eq(resources.resourceId, resourceId))
             .limit(1);
 
         const resource = result?.resources;
+        const org = result?.orgs;
         const definedPassword = result?.resourcePassword;
+
+        if (!org) {
+            return next(
+                createHttpError(HttpCode.BAD_REQUEST, "Resource does not exist")
+            );
+        }
 
         if (!resource) {
             return next(
-                createHttpError(
-                    HttpCode.BAD_REQUEST,
-                    "Resource does not exist",
-                ),
+                createHttpError(HttpCode.BAD_REQUEST, "Resource does not exist")
             );
         }
 
@@ -90,9 +97,9 @@ export async function authWithPassword(
                     HttpCode.UNAUTHORIZED,
                     createHttpError(
                         HttpCode.BAD_REQUEST,
-                        "Resource has no password protection",
-                    ),
-                ),
+                        "Resource has no password protection"
+                    )
+                )
             );
         }
 
@@ -103,27 +110,69 @@ export async function authWithPassword(
                 memoryCost: 19456,
                 timeCost: 2,
                 outputLen: 32,
-                parallelism: 1,
-            },
+                parallelism: 1
+            }
         );
         if (!validPassword) {
             return next(
-                createHttpError(HttpCode.UNAUTHORIZED, "Incorrect password"),
+                createHttpError(HttpCode.UNAUTHORIZED, "Incorrect password")
             );
         }
 
-        if (resource.twoFactorEnabled) {
-            if (!code) {
+        if (resource.otpEnabled) {
+            if (otp && email) {
+                const isValidCode = await isValidOtp(
+                    email,
+                    resource.resourceId,
+                    otp
+                );
+                if (!isValidCode) {
+                    return next(
+                        createHttpError(HttpCode.UNAUTHORIZED, "Incorrect OTP")
+                    );
+                }
+
+                await db
+                    .delete(resourceOtp)
+                    .where(
+                        and(
+                            eq(resourceOtp.email, email),
+                            eq(resourceOtp.resourceId, resource.resourceId)
+                        )
+                    );
+            } else if (email) {
+                try {
+                    await sendResourceOtpEmail(
+                        email,
+                        resource.resourceId,
+                        resource.name,
+                        org.name
+                    );
+                    return response<AuthWithPasswordResponse>(res, {
+                        data: { otpSent: true },
+                        success: true,
+                        error: false,
+                        message: "Sent one-time otp to email address",
+                        status: HttpCode.ACCEPTED
+                    });
+                } catch (e) {
+                    logger.error(e);
+                    return next(
+                        createHttpError(
+                            HttpCode.INTERNAL_SERVER_ERROR,
+                            "Failed to send one-time otp. Make sure the email address is correct and try again."
+                        )
+                    );
+                }
+            } else {
                 return response<AuthWithPasswordResponse>(res, {
-                    data: { codeRequested: true },
+                    data: { otpRequested: true },
                     success: true,
                     error: false,
-                    message: "Two-factor authentication required",
-                    status: HttpCode.ACCEPTED,
+                    message: "One-time otp required to complete authentication",
+                    status: HttpCode.ACCEPTED
                 });
             }
-
-            // TODO: Implement email OTP for resource 2fa
         }
 
         const token = generateSessionToken();
@@ -131,32 +180,32 @@ export async function authWithPassword(
             resourceId,
             token,
             passwordId: definedPassword.passwordId,
+            usedOtp: otp !== undefined,
+            email
         });
         const cookieName = `${config.server.resource_session_cookie_name}_${resource.resourceId}`;
         const cookie = serializeResourceSessionCookie(
             cookieName,
             token,
-            resource.fullDomain,
+            resource.fullDomain
         );
         res.appendHeader("Set-Cookie", cookie);
 
-        logger.debug(cookie); // remove after testing
-
         return response<AuthWithPasswordResponse>(res, {
             data: {
-                session: token,
+                session: token
             },
             success: true,
             error: false,
             message: "Authenticated with resource successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (e) {
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,
-                "Failed to authenticate with resource",
-            ),
+                "Failed to authenticate with resource"
+            )
         );
     }
 }

@@ -16,15 +16,17 @@ export async function createResourceSession(opts: {
     resourceId: number;
     passwordId?: number;
     pincodeId?: number;
+    whitelistId: number;
+    usedOtp?: boolean;
 }): Promise<ResourceSession> {
     if (!opts.passwordId && !opts.pincodeId) {
         throw new Error(
-            "At least one of passwordId or pincodeId must be provided",
+            "At least one of passwordId or pincodeId must be provided"
         );
     }
 
     const sessionId = encodeHexLowerCase(
-        sha256(new TextEncoder().encode(opts.token)),
+        sha256(new TextEncoder().encode(opts.token))
     );
 
     const session: ResourceSession = {
@@ -33,6 +35,8 @@ export async function createResourceSession(opts: {
         resourceId: opts.resourceId,
         passwordId: opts.passwordId || null,
         pincodeId: opts.pincodeId || null,
+        whitelistId: opts.whitelistId,
+        usedOtp: opts.usedOtp || false
     };
 
     await db.insert(resourceSessions).values(session);
@@ -42,10 +46,10 @@ export async function createResourceSession(opts: {
 
 export async function validateResourceSessionToken(
     token: string,
-    resourceId: number,
+    resourceId: number
 ): Promise<ResourceSessionValidationResult> {
     const sessionId = encodeHexLowerCase(
-        sha256(new TextEncoder().encode(token)),
+        sha256(new TextEncoder().encode(token))
     );
     const result = await db
         .select()
@@ -53,8 +57,8 @@ export async function validateResourceSessionToken(
         .where(
             and(
                 eq(resourceSessions.sessionId, sessionId),
-                eq(resourceSessions.resourceId, resourceId),
-            ),
+                eq(resourceSessions.resourceId, resourceId)
+            )
         );
 
     if (result.length < 1) {
@@ -65,12 +69,12 @@ export async function validateResourceSessionToken(
 
     if (Date.now() >= resourceSession.expiresAt - SESSION_COOKIE_EXPIRES / 2) {
         resourceSession.expiresAt = new Date(
-            Date.now() + SESSION_COOKIE_EXPIRES,
+            Date.now() + SESSION_COOKIE_EXPIRES
         ).getTime();
         await db
             .update(resourceSessions)
             .set({
-                expiresAt: resourceSession.expiresAt,
+                expiresAt: resourceSession.expiresAt
             })
             .where(eq(resourceSessions.sessionId, resourceSession.sessionId));
     }
@@ -79,7 +83,7 @@ export async function validateResourceSessionToken(
 }
 
 export async function invalidateResourceSession(
-    sessionId: string,
+    sessionId: string
 ): Promise<void> {
     await db
         .delete(resourceSessions)
@@ -91,7 +95,8 @@ export async function invalidateAllSessions(
     method?: {
         passwordId?: number;
         pincodeId?: number;
-    },
+        whitelistId?: number;
+    }
 ): Promise<void> {
     if (method?.passwordId) {
         await db
@@ -99,19 +104,34 @@ export async function invalidateAllSessions(
             .where(
                 and(
                     eq(resourceSessions.resourceId, resourceId),
-                    eq(resourceSessions.passwordId, method.passwordId),
-                ),
+                    eq(resourceSessions.passwordId, method.passwordId)
+                )
             );
-    } else if (method?.pincodeId) {
+    }
+
+    if (method?.pincodeId) {
         await db
             .delete(resourceSessions)
             .where(
                 and(
                     eq(resourceSessions.resourceId, resourceId),
-                    eq(resourceSessions.pincodeId, method.pincodeId),
-                ),
+                    eq(resourceSessions.pincodeId, method.pincodeId)
+                )
             );
-    } else {
+    }
+
+    if (method?.whitelistId) {
+        await db
+            .delete(resourceSessions)
+            .where(
+                and(
+                    eq(resourceSessions.resourceId, resourceId),
+                    eq(resourceSessions.whitelistId, method.whitelistId)
+                )
+            );
+
+    }
+    if (!method?.passwordId && !method?.pincodeId && !method?.whitelistId) {
         await db
             .delete(resourceSessions)
             .where(eq(resourceSessions.resourceId, resourceId));
@@ -121,7 +141,7 @@ export async function invalidateAllSessions(
 export function serializeResourceSessionCookie(
     cookieName: string,
     token: string,
-    fqdn: string,
+    fqdn: string
 ): string {
     if (SECURE_COOKIES) {
         return `${cookieName}=${token}; HttpOnly; SameSite=Lax; Max-Age=${SESSION_COOKIE_EXPIRES}; Path=/; Secure; Domain=${COOKIE_DOMAIN}`;
@@ -132,7 +152,7 @@ export function serializeResourceSessionCookie(
 
 export function createBlankResourceSessionTokenCookie(
     cookieName: string,
-    fqdn: string,
+    fqdn: string
 ): string {
     if (SECURE_COOKIES) {
         return `${cookieName}=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/; Secure; Domain=${COOKIE_DOMAIN}`;

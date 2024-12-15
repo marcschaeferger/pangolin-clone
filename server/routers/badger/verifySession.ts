@@ -11,7 +11,7 @@ import {
     resourcePincode,
     resources,
     User,
-    userOrgs,
+    userOrgs
 } from "@server/db/schema";
 import { and, eq } from "drizzle-orm";
 import config from "@server/config";
@@ -26,7 +26,7 @@ const verifyResourceSessionSchema = z.object({
     host: z.string(),
     path: z.string(),
     method: z.string(),
-    tls: z.boolean(),
+    tls: z.boolean()
 });
 
 export type VerifyResourceSessionSchema = z.infer<
@@ -41,7 +41,7 @@ export type VerifyUserResponse = {
 export async function verifyResourceSession(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
 ): Promise<any> {
     logger.debug("Badger sent", req.body); // remove when done testing
 
@@ -51,8 +51,8 @@ export async function verifyResourceSession(
         return next(
             createHttpError(
                 HttpCode.BAD_REQUEST,
-                fromError(parsedBody.error).toString(),
-            ),
+                fromError(parsedBody.error).toString()
+            )
         );
     }
 
@@ -64,11 +64,11 @@ export async function verifyResourceSession(
             .from(resources)
             .leftJoin(
                 resourcePincode,
-                eq(resourcePincode.resourceId, resources.resourceId),
+                eq(resourcePincode.resourceId, resources.resourceId)
             )
             .leftJoin(
                 resourcePassword,
-                eq(resourcePassword.resourceId, resources.resourceId),
+                eq(resourcePassword.resourceId, resources.resourceId)
             )
             .where(eq(resources.fullDomain, host))
             .limit(1);
@@ -103,17 +103,17 @@ export async function verifyResourceSession(
         const sessionToken = sessions[config.server.session_cookie_name];
 
         // check for unified login
-        if (sso && sessionToken) {
+        if (sso && sessionToken && !resource.otpEnabled) {
             const { session, user } = await validateSessionToken(sessionToken);
             if (session && user) {
                 const isAllowed = await isUserAllowedToAccessResource(
                     user,
-                    resource,
+                    resource
                 );
 
                 if (isAllowed) {
                     logger.debug(
-                        "Resource allowed because user session is valid",
+                        "Resource allowed because user session is valid"
                     );
                     return allowed(res);
                 }
@@ -125,19 +125,56 @@ export async function verifyResourceSession(
                 `${config.server.resource_session_cookie_name}_${resource.resourceId}`
             ];
 
+        if (
+            sso &&
+            sessionToken &&
+            resourceSessionToken &&
+            resource.otpEnabled
+        ) {
+            const { session, user } = await validateSessionToken(sessionToken);
+            const { resourceSession } = await validateResourceSessionToken(
+                resourceSessionToken,
+                resource.resourceId
+            );
+
+            if (session && user && resourceSession) {
+                if (!resourceSession.usedOtp) {
+                    logger.debug("Resource not allowed because OTP not used");
+                    return notAllowed(res, redirectUrl);
+                }
+
+                const isAllowed = await isUserAllowedToAccessResource(
+                    user,
+                    resource
+                );
+
+                if (isAllowed) {
+                    logger.debug(
+                        "Resource allowed because user and resource session is valid"
+                    );
+                    return allowed(res);
+                }
+            }
+        }
+
         if ((pincode || password) && resourceSessionToken) {
             const { resourceSession } = await validateResourceSessionToken(
                 resourceSessionToken,
-                resource.resourceId,
+                resource.resourceId
             );
 
             if (resourceSession) {
+                if (resource.otpEnabled && !resourceSession.usedOtp) {
+                    logger.debug("Resource not allowed because OTP not used");
+                    return notAllowed(res, redirectUrl);
+                }
+
                 if (
                     pincode &&
                     resourceSession.pincodeId === pincode.pincodeId
                 ) {
                     logger.debug(
-                        "Resource allowed because pincode session is valid",
+                        "Resource allowed because pincode session is valid"
                     );
                     return allowed(res);
                 }
@@ -147,7 +184,7 @@ export async function verifyResourceSession(
                     resourceSession.passwordId === password.passwordId
                 ) {
                     logger.debug(
-                        "Resource allowed because password session is valid",
+                        "Resource allowed because password session is valid"
                     );
                     return allowed(res);
                 }
@@ -161,8 +198,8 @@ export async function verifyResourceSession(
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,
-                "Failed to verify session",
-            ),
+                "Failed to verify session"
+            )
         );
     }
 }
@@ -173,7 +210,7 @@ function notAllowed(res: Response, redirectUrl?: string) {
         success: true,
         error: false,
         message: "Access denied",
-        status: HttpCode.OK,
+        status: HttpCode.OK
     };
     logger.debug(JSON.stringify(data));
     return response<VerifyUserResponse>(res, data);
@@ -185,7 +222,7 @@ function allowed(res: Response) {
         success: true,
         error: false,
         message: "Access allowed",
-        status: HttpCode.OK,
+        status: HttpCode.OK
     };
     logger.debug(JSON.stringify(data));
     return response<VerifyUserResponse>(res, data);
@@ -193,7 +230,7 @@ function allowed(res: Response) {
 
 async function isUserAllowedToAccessResource(
     user: User,
-    resource: Resource,
+    resource: Resource
 ): Promise<boolean> {
     if (config.flags?.require_email_verification && !user.emailVerified) {
         return false;
@@ -205,8 +242,8 @@ async function isUserAllowedToAccessResource(
         .where(
             and(
                 eq(userOrgs.userId, user.userId),
-                eq(userOrgs.orgId, resource.orgId),
-            ),
+                eq(userOrgs.orgId, resource.orgId)
+            )
         )
         .limit(1);
 
@@ -220,8 +257,8 @@ async function isUserAllowedToAccessResource(
         .where(
             and(
                 eq(roleResources.resourceId, resource.resourceId),
-                eq(roleResources.roleId, userOrgRole[0].roleId),
-            ),
+                eq(roleResources.roleId, userOrgRole[0].roleId)
+            )
         )
         .limit(1);
 
@@ -235,8 +272,8 @@ async function isUserAllowedToAccessResource(
         .where(
             and(
                 eq(userResources.userId, user.userId),
-                eq(userResources.resourceId, resource.resourceId),
-            ),
+                eq(userResources.resourceId, resource.resourceId)
+            )
         )
         .limit(1);
 

@@ -71,11 +71,6 @@ export const SendInviteLink = ({
                                 Accept invitation to {orgName}
                             </Button>
                         </Section>
-                        <Text className="text-sm text-gray-500 mt-6">
-                            Best regards,
-                            <br />
-                            Fossorial
-                        </Text>
                     </Container>
                 </Body>
             </Tailwind>

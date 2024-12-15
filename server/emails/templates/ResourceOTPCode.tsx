@@ -7,22 +7,24 @@ import {
     Preview,
     Section,
     Text,
-    Tailwind,
+    Tailwind
 } from "@react-email/components";
 import * as React from "react";
 
-interface VerifyEmailProps {
-    username?: string;
-    verificationCode: string;
-    verifyLink: string;
+interface ResourceOTPCodeProps {
+    email?: string;
+    resourceName: string;
+    orgName: string;
+    otp: string;
 }
 
-export const VerifyEmail = ({
-    username,
-    verificationCode,
-    verifyLink,
-}: VerifyEmailProps) => {
-    const previewText = `Verify your email, ${username}`;
+export const ResourceOTPCode = ({
+    email,
+    resourceName,
+    orgName: organizationName,
+    otp
+}: ResourceOTPCodeProps) => {
+    const previewText = `Your one-time password for ${resourceName} is ready!`;
 
     return (
         <Html>
@@ -33,36 +35,32 @@ export const VerifyEmail = ({
                     theme: {
                         extend: {
                             colors: {
-                                primary: "#F97317",
-                            },
-                        },
-                    },
+                                primary: "#F97317"
+                            }
+                        }
+                    }
                 }}
             >
                 <Body className="font-sans">
                     <Container className="bg-white border border-solid border-gray-200 p-6 max-w-lg mx-auto my-8 rounded-lg">
                         <Heading className="text-2xl font-semibold text-gray-800 text-center">
-                            Please verify your email
+                            Your One-Time Password
                         </Heading>
                         <Text className="text-base text-gray-700 mt-4">
-                            Hi {username || "there"},
+                            Hi {email || "there"},
                         </Text>
                         <Text className="text-base text-gray-700 mt-2">
-                            You’ve requested to verify your email. Please{" "}
-                            <a href={verifyLink} className="text-primary">
-                                click here
-                            </a>{" "}
-                            to verify your email, then enter the following code:
+                            You’ve requested a one-time password (OTP) to
+                            authenticate with the resource{" "}
+                            <strong>{resourceName}</strong> in{" "}
+                            <strong>{organizationName}</strong>. Use the OTP
+                            below to complete your authentication:
                         </Text>
                         <Section className="text-center my-6">
                             <Text className="inline-block bg-primary text-xl font-bold text-white py-2 px-4 border border-gray-300 rounded-xl">
-                                {verificationCode}
+                                {otp}
                             </Text>
                         </Section>
-                        <Text className="text-base text-gray-700 mt-2">
-                            If you didn’t request this, you can safely ignore
-                            this email.
-                        </Text>
                     </Container>
                 </Body>
             </Tailwind>
@@ -70,4 +68,4 @@ export const VerifyEmail = ({
     );
 };
 
-export default VerifyEmail;
+export default ResourceOTPCode;

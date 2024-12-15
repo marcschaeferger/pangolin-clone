@@ -23,11 +23,12 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LoginResponse } from "@server/routers/auth";
-import { api } from "@app/api";
 import { useRouter } from "next/navigation";
 import { AxiosResponse } from "axios";
 import { formatAxiosError } from "@app/lib/utils";
 import { LockIcon } from "lucide-react";
+import { createApiClient } from "@app/api";
+import { useEnvContext } from "@app/hooks/useEnvContext";
 
 type LoginFormProps = {
     redirect?: string;
@@ -44,6 +45,8 @@ const formSchema = z.object({
 export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
     const router = useRouter();
 
+    const api = createApiClient(useEnvContext());
+
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
@@ -57,6 +60,7 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const { email, password } = values;
+
 
         setLoading(true);
 
