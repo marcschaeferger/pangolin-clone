@@ -24,6 +24,7 @@ export type GetResourceAuthInfoResponse = {
     sso: boolean;
     blockAccess: boolean;
     url: string;
+    whitelist: boolean;
 };
 
 export async function getResourceAuthInfo(
@@ -79,6 +80,7 @@ export async function getResourceAuthInfo(
                 sso: resource.sso,
                 blockAccess: resource.blockAccess,
                 url,
+                whitelist: resource.emailWhitelistEnabled
             },
             success: true,
             error: false,

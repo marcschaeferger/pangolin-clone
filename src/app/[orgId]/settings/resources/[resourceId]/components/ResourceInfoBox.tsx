@@ -10,7 +10,7 @@ import {
     CheckIcon,
     CopyIcon,
     ShieldCheck,
-    ShieldOff,
+    ShieldOff
 } from "lucide-react";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { useResourceContext } from "@app/hooks/useResourceContext";
@@ -49,7 +49,8 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
                     <div>
                         {authInfo.password ||
                         authInfo.pincode ||
-                        authInfo.sso ? (
+                        authInfo.sso ||
+                        authInfo.whitelist ? (
                             <div className="flex items-center space-x-2 text-green-500">
                                 <ShieldCheck />
                                 <span>

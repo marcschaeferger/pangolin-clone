@@ -16,10 +16,10 @@ export async function createResourceSession(opts: {
     resourceId: number;
     passwordId?: number;
     pincodeId?: number;
-    whitelistId: number;
+    whitelistId?: number;
     usedOtp?: boolean;
 }): Promise<ResourceSession> {
-    if (!opts.passwordId && !opts.pincodeId) {
+    if (!opts.passwordId && !opts.pincodeId && !opts.whitelistId) {
         throw new Error(
             "At least one of passwordId or pincodeId must be provided"
         );
@@ -35,8 +35,7 @@ export async function createResourceSession(opts: {
         resourceId: opts.resourceId,
         passwordId: opts.passwordId || null,
         pincodeId: opts.pincodeId || null,
-        whitelistId: opts.whitelistId,
-        usedOtp: opts.usedOtp || false
+        whitelistId: opts.whitelistId || null
     };
 
     await db.insert(resourceSessions).values(session);
@@ -129,7 +128,6 @@ export async function invalidateAllSessions(
                     eq(resourceSessions.whitelistId, method.whitelistId)
                 )
             );
-
     }
     if (!method?.passwordId && !method?.pincodeId && !method?.whitelistId) {
         await db

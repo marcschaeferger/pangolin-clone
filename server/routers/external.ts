@@ -18,7 +18,7 @@ import {
     verifyRoleAccess,
     verifySetResourceUsers,
     verifyUserAccess,
-    getUserOrgs,
+    getUserOrgs
 } from "@server/middlewares";
 import { verifyUserHasAction } from "../middlewares/verifyUserHasAction";
 import { ActionsEnum } from "@server/auth/actions";
@@ -43,51 +43,51 @@ authenticated.get(
     "/org/:orgId",
     verifyOrgAccess,
     verifyUserHasAction(ActionsEnum.getOrg),
-    org.getOrg,
+    org.getOrg
 );
 authenticated.post(
     "/org/:orgId",
     verifyOrgAccess,
     verifyUserHasAction(ActionsEnum.updateOrg),
-    org.updateOrg,
+    org.updateOrg
 );
 authenticated.delete(
     "/org/:orgId",
     verifyOrgAccess,
     verifyUserIsOrgOwner,
-    org.deleteOrg,
+    org.deleteOrg
 );
 
 authenticated.put(
     "/org/:orgId/site",
     verifyOrgAccess,
     verifyUserHasAction(ActionsEnum.createSite),
-    site.createSite,
+    site.createSite
 );
 authenticated.get(
     "/org/:orgId/sites",
     verifyOrgAccess,
     verifyUserHasAction(ActionsEnum.listSites),
-    site.listSites,
+    site.listSites
 );
 authenticated.get(
     "/org/:orgId/site/:niceId",
     verifyOrgAccess,
     verifyUserHasAction(ActionsEnum.getSite),
-    site.getSite,
+    site.getSite
 );
 
 authenticated.get(
     "/org/:orgId/pick-site-defaults",
     verifyOrgAccess,
     verifyUserHasAction(ActionsEnum.createSite),
-    site.pickSiteDefaults,
+    site.pickSiteDefaults
 );
 authenticated.get(
     "/site/:siteId",
     verifySiteAccess,
     verifyUserHasAction(ActionsEnum.getSite),
-    site.getSite,
+    site.getSite
 );
 // authenticated.get(
 //     "/site/:siteId/roles",
@@ -99,38 +99,38 @@ authenticated.post(
     "/site/:siteId",
     verifySiteAccess,
     verifyUserHasAction(ActionsEnum.updateSite),
-    site.updateSite,
+    site.updateSite
 );
 authenticated.delete(
     "/site/:siteId",
     verifySiteAccess,
     verifyUserHasAction(ActionsEnum.deleteSite),
-    site.deleteSite,
+    site.deleteSite
 );
 
 authenticated.put(
     "/org/:orgId/site/:siteId/resource",
     verifyOrgAccess,
     verifyUserHasAction(ActionsEnum.createResource),
-    resource.createResource,
+    resource.createResource
 );
 authenticated.get(
     "/site/:siteId/resources",
     verifyUserHasAction(ActionsEnum.listResources),
-    resource.listResources,
+    resource.listResources
 );
 authenticated.get(
     "/org/:orgId/resources",
     verifyOrgAccess,
     verifyUserHasAction(ActionsEnum.listResources),
-    resource.listResources,
+    resource.listResources
 );
 
 authenticated.post(
     "/org/:orgId/create-invite",
     verifyOrgAccess,
     verifyUserHasAction(ActionsEnum.inviteUser),
-    user.inviteUser,
+    user.inviteUser
 ); // maybe make this /invite/create instead
 authenticated.post("/invite/accept", user.acceptInvite);
 
@@ -138,77 +138,77 @@ authenticated.get(
     "/resource/:resourceId/roles",
     verifyResourceAccess,
     verifyUserHasAction(ActionsEnum.listResourceRoles),
-    resource.listResourceRoles,
+    resource.listResourceRoles
 );
 
 authenticated.get(
     "/resource/:resourceId/users",
     verifyResourceAccess,
     verifyUserHasAction(ActionsEnum.listResourceUsers),
-    resource.listResourceUsers,
+    resource.listResourceUsers
 );
 
 authenticated.get(
     "/resource/:resourceId",
     verifyResourceAccess,
     verifyUserHasAction(ActionsEnum.getResource),
-    resource.getResource,
+    resource.getResource
 );
 authenticated.post(
     "/resource/:resourceId",
     verifyResourceAccess,
     verifyUserHasAction(ActionsEnum.updateResource),
-    resource.updateResource,
+    resource.updateResource
 );
 authenticated.delete(
     "/resource/:resourceId",
     verifyResourceAccess,
     verifyUserHasAction(ActionsEnum.deleteResource),
-    resource.deleteResource,
+    resource.deleteResource
 );
 
 authenticated.put(
     "/resource/:resourceId/target",
     verifyResourceAccess,
     verifyUserHasAction(ActionsEnum.createTarget),
-    target.createTarget,
+    target.createTarget
 );
 authenticated.get(
     "/resource/:resourceId/targets",
     verifyResourceAccess,
     verifyUserHasAction(ActionsEnum.listTargets),
-    target.listTargets,
+    target.listTargets
 );
 authenticated.get(
     "/target/:targetId",
     verifyTargetAccess,
     verifyUserHasAction(ActionsEnum.getTarget),
-    target.getTarget,
+    target.getTarget
 );
 authenticated.post(
     "/target/:targetId",
     verifyTargetAccess,
     verifyUserHasAction(ActionsEnum.updateTarget),
-    target.updateTarget,
+    target.updateTarget
 );
 authenticated.delete(
     "/target/:targetId",
     verifyTargetAccess,
     verifyUserHasAction(ActionsEnum.deleteTarget),
-    target.deleteTarget,
+    target.deleteTarget
 );
 
 authenticated.put(
     "/org/:orgId/role",
     verifyOrgAccess,
     verifyUserHasAction(ActionsEnum.createRole),
-    role.createRole,
+    role.createRole
 );
 authenticated.get(
     "/org/:orgId/roles",
     verifyOrgAccess,
     verifyUserHasAction(ActionsEnum.listRoles),
-    role.listRoles,
+    role.listRoles
 );
 // authenticated.get(
 //     "/role/:roleId",
@@ -227,14 +227,14 @@ authenticated.delete(
     "/role/:roleId",
     verifyRoleAccess,
     verifyUserHasAction(ActionsEnum.deleteRole),
-    role.deleteRole,
+    role.deleteRole
 );
 authenticated.post(
     "/role/:roleId/add/:userId",
     verifyRoleAccess,
     verifyUserAccess,
     verifyUserHasAction(ActionsEnum.addUserRole),
-    user.addUserRole,
+    user.addUserRole
 );
 
 // authenticated.put(
@@ -264,7 +264,7 @@ authenticated.post(
     verifyResourceAccess,
     verifyRoleAccess,
     verifyUserHasAction(ActionsEnum.setResourceRoles),
-    resource.setResourceRoles,
+    resource.setResourceRoles
 );
 
 authenticated.post(
@@ -272,21 +272,35 @@ authenticated.post(
     verifyResourceAccess,
     verifySetResourceUsers,
     verifyUserHasAction(ActionsEnum.setResourceUsers),
-    resource.setResourceUsers,
+    resource.setResourceUsers
 );
 
 authenticated.post(
     `/resource/:resourceId/password`,
     verifyResourceAccess,
-    verifyUserHasAction(ActionsEnum.setResourceAuthMethods),
-    resource.setResourcePassword,
+    verifyUserHasAction(ActionsEnum.updateResource), // REVIEW: group all resource related updates under update resource?
+    resource.setResourcePassword
 );
 
 authenticated.post(
     `/resource/:resourceId/pincode`,
     verifyResourceAccess,
-    verifyUserHasAction(ActionsEnum.setResourceAuthMethods),
-    resource.setResourcePincode,
+    verifyUserHasAction(ActionsEnum.updateResource),
+    resource.setResourcePincode
+);
+
+authenticated.post(
+    `/resource/:resourceId/whitelist`,
+    verifyResourceAccess,
+    verifyUserHasAction(ActionsEnum.updateResource),
+    resource.setResourceWhitelist
+);
+
+authenticated.get(
+    `/resource/:resourceId/whitelist`,
+    verifyResourceAccess,
+    verifyUserHasAction(ActionsEnum.getResource),
+    resource.getResourceWhitelist
 );
 
 unauthenticated.get("/resource/:resourceId/auth", resource.getResourceAuthInfo);
@@ -327,14 +341,14 @@ authenticated.get(
     "/org/:orgId/users",
     verifyOrgAccess,
     verifyUserHasAction(ActionsEnum.listUsers),
-    user.listUsers,
+    user.listUsers
 );
 authenticated.delete(
     "/org/:orgId/user/:userId",
     verifyOrgAccess,
     verifyUserAccess,
     verifyUserHasAction(ActionsEnum.removeUser),
-    user.removeUserOrg,
+    user.removeUserOrg
 );
 
 // authenticated.put(
@@ -375,8 +389,8 @@ authRouter.use(
     rateLimitMiddleware({
         windowMin: 10,
         max: 75,
-        type: "IP_AND_PATH",
-    }),
+        type: "IP_AND_PATH"
+    })
 );
 
 authRouter.put("/signup", auth.signup);
@@ -388,22 +402,23 @@ authRouter.post("/2fa/enable", verifySessionUserMiddleware, auth.verifyTotp);
 authRouter.post(
     "/2fa/request",
     verifySessionUserMiddleware,
-    auth.requestTotpSecret,
+    auth.requestTotpSecret
 );
 authRouter.post("/2fa/disable", verifySessionUserMiddleware, auth.disable2fa);
 authRouter.post("/verify-email", verifySessionMiddleware, auth.verifyEmail);
 authRouter.post(
     "/verify-email/request",
     verifySessionMiddleware,
-    auth.requestEmailVerificationCode,
+    auth.requestEmailVerificationCode
 );
 authRouter.post(
     "/change-password",
     verifySessionUserMiddleware,
-    auth.changePassword,
+    auth.changePassword
 );
 authRouter.post("/reset-password/request", auth.requestPasswordReset);
 authRouter.post("/reset-password/", auth.resetPassword);
 
 authRouter.post("/resource/:resourceId/password", resource.authWithPassword);
 authRouter.post("/resource/:resourceId/pincode", resource.authWithPincode);
+authRouter.post("/resource/:resourceId/whitelist", resource.authWithWhitelist);

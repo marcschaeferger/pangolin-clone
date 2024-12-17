@@ -46,7 +46,7 @@ export const resources = sqliteTable("resources", {
         .notNull()
         .default(false),
     sso: integer("sso", { mode: "boolean" }).notNull().default(true),
-    otpEnabled: integer("otpEnabled", { mode: "boolean" })
+    emailWhitelistEnabled: integer("emailWhitelistEnabled", { mode: "boolean" })
         .notNull()
         .default(false)
 });
@@ -282,7 +282,6 @@ export const resourceSessions = sqliteTable("resourceSessions", {
     resourceId: integer("resourceId")
         .notNull()
         .references(() => resources.resourceId, { onDelete: "cascade" }),
-    usedOtp: integer("usedOtp", { mode: "boolean" }).notNull().default(false),
     expiresAt: integer("expiresAt").notNull(),
     passwordId: integer("passwordId").references(
         () => resourcePassword.passwordId,
@@ -297,23 +296,20 @@ export const resourceSessions = sqliteTable("resourceSessions", {
         }
     ),
     whitelistId: integer("whitelistId").references(
-        () => resourceWhitelistedEmail.whitelistId,
+        () => resourceWhitelist.whitelistId,
         {
             onDelete: "cascade"
         }
     )
 });
 
-export const resourceWhitelistedEmail = sqliteTable(
-    "resourceWhitelistedEmail",
-    {
-        whitelistId: integer("id").primaryKey({ autoIncrement: true }),
-        email: text("email").primaryKey(),
-        resourceId: integer("resourceId")
-            .notNull()
-            .references(() => resources.resourceId, { onDelete: "cascade" })
-    }
-);
+export const resourceWhitelist = sqliteTable("resourceWhitelist", {
+    whitelistId: integer("id").primaryKey({ autoIncrement: true }),
+    email: text("email").notNull(),
+    resourceId: integer("resourceId")
+        .notNull()
+        .references(() => resources.resourceId, { onDelete: "cascade" })
+});
 
 export const resourceOtp = sqliteTable("resourceOtp", {
     otpId: integer("otpId").primaryKey({

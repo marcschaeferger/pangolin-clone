@@ -21,6 +21,7 @@ const updateResourceBodySchema = z
         ssl: z.boolean().optional(),
         sso: z.boolean().optional(),
         blockAccess: z.boolean().optional(),
+        emailWhitelistEnabled: z.boolean().optional(),
         // siteId: z.number(),
     })
     .strict()

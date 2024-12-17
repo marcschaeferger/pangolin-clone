@@ -62,6 +62,7 @@ function queryResources(
                 passwordId: resourcePassword.passwordId,
                 pincodeId: resourcePincode.pincodeId,
                 sso: resources.sso,
+                whitelist: resources.emailWhitelistEnabled
             })
             .from(resources)
             .leftJoin(sites, eq(resources.siteId, sites.siteId))
@@ -91,6 +92,7 @@ function queryResources(
                 passwordId: resourcePassword.passwordId,
                 sso: resources.sso,
                 pincodeId: resourcePincode.pincodeId,
+                whitelist: resources.emailWhitelistEnabled
             })
             .from(resources)
             .leftJoin(sites, eq(resources.siteId, sites.siteId))

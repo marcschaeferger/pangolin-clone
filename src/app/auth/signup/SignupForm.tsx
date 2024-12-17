@@ -23,11 +23,12 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { SignUpResponse } from "@server/routers/auth";
-import { api } from "@app/api";
 import { useRouter } from "next/navigation";
 import { passwordSchema } from "@server/auth/passwordSchema";
 import { AxiosResponse } from "axios";
 import { formatAxiosError } from "@app/lib/utils";
+import { createApiClient } from "@app/api";
+import { useEnvContext } from "@app/hooks/useEnvContext";
 
 type SignupFormProps = {
     redirect?: string;
@@ -46,6 +47,8 @@ const formSchema = z
 
 export default function SignupForm({ redirect }: SignupFormProps) {
     const router = useRouter();
+
+    const api = createApiClient(useEnvContext());
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);

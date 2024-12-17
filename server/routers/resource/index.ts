@@ -12,3 +12,6 @@ export * from "./authWithPassword";
 export * from "./getResourceAuthInfo";
 export * from "./setResourcePincode";
 export * from "./authWithPincode";
+export * from "./setResourceWhitelist";
+export * from "./getResourceWhitelist";
+export * from "./authWithWhitelist";

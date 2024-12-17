@@ -120,6 +120,7 @@ export default async function ResourceAuthPage(props: {
                             password: authInfo.password,
                             pincode: authInfo.pincode,
                             sso: authInfo.sso && !userIsUnauthorized,
+                            whitelist: authInfo.whitelist
                         }}
                         resource={{
                             name: authInfo.resourceName,

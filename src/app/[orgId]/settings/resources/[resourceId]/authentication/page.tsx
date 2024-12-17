@@ -9,6 +9,7 @@ import { AxiosResponse } from "axios";
 import { formatAxiosError } from "@app/lib/utils";
 import {
     GetResourceAuthInfoResponse,
+    GetResourceWhitelistResponse,
     ListResourceRolesResponse,
     ListResourceUsersResponse
 } from "@server/routers/resource";
@@ -53,6 +54,15 @@ const UsersRolesFormSchema = z.object({
     )
 });
 
+const whitelistSchema = z.object({
+    emails: z.array(
+        z.object({
+            id: z.string(),
+            text: z.string()
+        })
+    )
+});
+
 export default function ResourceAuthenticationPage() {
     const { toast } = useToast();
     const { org } = useOrgContext();
@@ -76,10 +86,19 @@ export default function ResourceAuthenticationPage() {
         number | null
     >(null);
 
+    const [activeEmailTagIndex, setActiveEmailTagIndex] = useState<
+        number | null
+    >(null);
+
     const [ssoEnabled, setSsoEnabled] = useState(resource.sso);
     // const [blockAccess, setBlockAccess] = useState(resource.blockAccess);
+    const [whitelistEnabled, setWhitelistEnabled] = useState(
+        resource.emailWhitelistEnabled
+    );
 
     const [loadingSaveUsersRoles, setLoadingSaveUsersRoles] = useState(false);
+    const [loadingSaveWhitelist, setLoadingSaveWhitelist] = useState(false);
+
     const [loadingRemoveResourcePassword, setLoadingRemoveResourcePassword] =
         useState(false);
     const [loadingRemoveResourcePincode, setLoadingRemoveResourcePincode] =
@@ -93,6 +112,11 @@ export default function ResourceAuthenticationPage() {
         defaultValues: { roles: [], users: [] }
     });
 
+    const whitelistForm = useForm<z.infer<typeof whitelistSchema>>({
+        resolver: zodResolver(whitelistSchema),
+        defaultValues: { emails: [] }
+    });
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -100,7 +124,8 @@ export default function ResourceAuthenticationPage() {
                     rolesResponse,
                     resourceRolesResponse,
                     usersResponse,
-                    resourceUsersResponse
+                    resourceUsersResponse,
+                    whitelist
                 ] = await Promise.all([
                     api.get<AxiosResponse<ListRolesResponse>>(
                         `/org/${org?.org.orgId}/roles`
@@ -113,6 +138,9 @@ export default function ResourceAuthenticationPage() {
                     ),
                     api.get<AxiosResponse<ListResourceUsersResponse>>(
                         `/resource/${resource.resourceId}/users`
+                    ),
+                    api.get<AxiosResponse<GetResourceWhitelistResponse>>(
+                        `/resource/${resource.resourceId}/whitelist`
                     )
                 ]);
 
@@ -150,6 +178,14 @@ export default function ResourceAuthenticationPage() {
                     }))
                 );
 
+                whitelistForm.setValue(
+                    "emails",
+                    whitelist.data.data.whitelist.map((w) => ({
+                        id: w.email,
+                        text: w.email
+                    }))
+                );
+
                 setPageLoading(false);
             } catch (e) {
                 console.error(e);
@@ -166,6 +202,42 @@ export default function ResourceAuthenticationPage() {
 
         fetchData();
     }, []);
+
+    async function saveWhitelist() {
+        setLoadingSaveWhitelist(true);
+        try {
+            await api.post(`/resource/${resource.resourceId}`, {
+                emailWhitelistEnabled: whitelistEnabled
+            });
+
+            if (whitelistEnabled) {
+                await api.post(`/resource/${resource.resourceId}/whitelist`, {
+                    emails: whitelistForm.getValues().emails.map((i) => i.text)
+                });
+            }
+
+            updateResource({
+                emailWhitelistEnabled: whitelistEnabled
+            });
+
+            toast({
+                title: "Saved successfully",
+                description: "Whitelist settings have been saved"
+            });
+        } catch (e) {
+            console.error(e);
+            toast({
+                variant: "destructive",
+                title: "Failed to save whitelist",
+                description: formatAxiosError(
+                    e,
+                    "An error occurred while saving the whitelist"
+                )
+            });
+        } finally {
+            setLoadingSaveWhitelist(false);
+        }
+    }
 
     async function onSubmitUsersRoles(
         data: z.infer<typeof UsersRolesFormSchema>
@@ -537,6 +609,96 @@ export default function ResourceAuthenticationPage() {
                             )}
                         </div>
                     </div>
+
+                    <Separator />
+
+                    <div>
+                        <div className="flex items-center space-x-2 mb-2">
+                            <Switch
+                                id="whitelist-toggle"
+                                defaultChecked={resource.emailWhitelistEnabled}
+                                onCheckedChange={(val) =>
+                                    setWhitelistEnabled(val)
+                                }
+                            />
+                            <Label htmlFor="whitelist-toggle">
+                                Email Whitelist
+                            </Label>
+                        </div>
+                        <span className="text-muted-foreground text-sm">
+                            Enable resource whitelist to require email-based
+                            authentication (one-time passwords) for resource
+                            access.
+                        </span>
+                    </div>
+
+                    {whitelistEnabled && (
+                        <Form {...whitelistForm}>
+                            <form className="space-y-8">
+                                <FormField
+                                    control={whitelistForm.control}
+                                    name="emails"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col items-start">
+                                            <FormLabel>
+                                                Whitelisted Emails
+                                            </FormLabel>
+                                            <FormControl>
+                                                <TagInput
+                                                    {...field}
+                                                    activeTagIndex={
+                                                        activeEmailTagIndex
+                                                    }
+                                                    validateTag={(tag) => {
+                                                        return z
+                                                            .string()
+                                                            .email()
+                                                            .safeParse(tag)
+                                                            .success;
+                                                    }}
+                                                    setActiveTagIndex={
+                                                        setActiveEmailTagIndex
+                                                    }
+                                                    placeholder="Enter an email"
+                                                    tags={
+                                                        whitelistForm.getValues()
+                                                            .emails
+                                                    }
+                                                    setTags={(newRoles) => {
+                                                        whitelistForm.setValue(
+                                                            "emails",
+                                                            newRoles as [
+                                                                Tag,
+                                                                ...Tag[]
+                                                            ]
+                                                        );
+                                                    }}
+                                                    allowDuplicates={false}
+                                                    sortTags={true}
+                                                    styleClasses={{
+                                                        tag: {
+                                                            body: "bg-muted hover:bg-accent text-foreground py-2 px-3 rounded-full"
+                                                        },
+                                                        input: "border-none bg-transparent text-inherit placeholder:text-inherit shadow-none",
+                                                        inlineTagsContainer:
+                                                            "bg-transparent"
+                                                    }}
+                                                />
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
+                                />
+                            </form>
+                        </Form>
+                    )}
+
+                    <Button
+                        loading={loadingSaveWhitelist}
+                        disabled={loadingSaveWhitelist}
+                        onClick={saveWhitelist}
+                    >
+                        Save Whitelist
+                    </Button>
                 </section>
             </div>
         </>

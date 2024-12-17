@@ -5,7 +5,8 @@ import {
     orgs,
     resourceOtp,
     resourcePincode,
-    resources
+    resources,
+    resourceWhitelist
 } from "@server/db/schema";
 import HttpCode from "@server/types/HttpCode";
 import response from "@server/utils/response";
@@ -24,9 +25,7 @@ import { AuthWithPasswordResponse } from "./authWithPassword";
 import { isValidOtp, sendResourceOtpEmail } from "@server/auth/resourceOtp";
 
 export const authWithPincodeBodySchema = z.object({
-    pincode: z.string(),
-    email: z.string().email().optional(),
-    otp: z.string().optional()
+    pincode: z.string()
 });
 
 export const authWithPincodeParamsSchema = z.object({
@@ -34,8 +33,6 @@ export const authWithPincodeParamsSchema = z.object({
 });
 
 export type AuthWithPincodeResponse = {
-    otpRequested?: boolean;
-    otpSent?: boolean;
     session?: string;
 };
 
@@ -67,7 +64,7 @@ export async function authWithPincode(
     }
 
     const { resourceId } = parsedParams.data;
-    const { email, pincode, otp } = parsedBody.data;
+    const { pincode } = parsedBody.data;
 
     try {
         const [result] = await db
@@ -124,69 +121,11 @@ export async function authWithPincode(
             );
         }
 
-        if (resource.otpEnabled) {
-            if (otp && email) {
-                const isValidCode = await isValidOtp(
-                    email,
-                    resource.resourceId,
-                    otp
-                );
-                if (!isValidCode) {
-                    return next(
-                        createHttpError(HttpCode.UNAUTHORIZED, "Incorrect OTP")
-                    );
-                }
-
-                await db
-                    .delete(resourceOtp)
-                    .where(
-                        and(
-                            eq(resourceOtp.email, email),
-                            eq(resourceOtp.resourceId, resource.resourceId)
-                        )
-                    );
-            } else if (email) {
-                try {
-                    await sendResourceOtpEmail(
-                        email,
-                        resource.resourceId,
-                        resource.name,
-                        org.name
-                    );
-                    return response<AuthWithPasswordResponse>(res, {
-                        data: { otpSent: true },
-                        success: true,
-                        error: false,
-                        message: "Sent one-time otp to email address",
-                        status: HttpCode.ACCEPTED
-                    });
-                } catch (e) {
-                    logger.error(e);
-                    return next(
-                        createHttpError(
-                            HttpCode.INTERNAL_SERVER_ERROR,
-                            "Failed to send one-time otp. Make sure the email address is correct and try again."
-                        )
-                    );
-                }
-            } else {
-                return response<AuthWithPasswordResponse>(res, {
-                    data: { otpRequested: true },
-                    success: true,
-                    error: false,
-                    message: "One-time otp required to complete authentication",
-                    status: HttpCode.ACCEPTED
-                });
-            }
-        }
-
         const token = generateSessionToken();
         await createResourceSession({
             resourceId,
             token,
-            pincodeId: definedPincode.pincodeId,
-            usedOtp: otp !== undefined,
-            email
+            pincodeId: definedPincode.pincodeId
         });
         const cookieName = `${config.server.resource_session_cookie_name}_${resource.resourceId}`;
         const cookie = serializeResourceSessionCookie(

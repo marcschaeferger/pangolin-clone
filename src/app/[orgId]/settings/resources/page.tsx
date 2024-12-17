@@ -55,7 +55,8 @@ export default async function ResourcesPage(props: ResourcesPageProps) {
             hasAuth:
                 resource.sso ||
                 resource.pincodeId !== null ||
-                resource.pincodeId !== null,
+                resource.pincodeId !== null ||
+                resource.whitelist
         };
     });
 
