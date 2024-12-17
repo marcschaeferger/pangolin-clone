@@ -19,7 +19,7 @@ export default async function RootLayout({
 }>) {
     return (
         <html suppressHydrationWarning>
-            <body className={`${font.className} pb-3`}>
+            <body className={`${font.className}`}>
                 <ThemeProvider
                     attribute="class"
                     defaultTheme="system"
