@@ -4,7 +4,6 @@ import { z } from "zod";
 import { fromError } from "zod-validation-error";
 import HttpCode from "@server/types/HttpCode";
 import { response } from "@server/utils";
-import { validateSessionToken } from "@server/auth";
 import { validateResourceSessionToken } from "@server/auth/resource";
 
 export const params = z.object({

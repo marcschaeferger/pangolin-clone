@@ -277,12 +277,32 @@ export const resourcePassword = sqliteTable("resourcePassword", {
     passwordHash: text("passwordHash").notNull()
 });
 
+export const resourceAccessToken = sqliteTable("resourceAccessToken", {
+    accessTokenId: text("accessTokenId").primaryKey(),
+    orgId: text("orgId")
+        .notNull()
+        .references(() => orgs.orgId, { onDelete: "cascade" }),
+    resourceId: integer("resourceId")
+        .notNull()
+        .references(() => resources.resourceId, { onDelete: "cascade" }),
+    tokenHash: text("tokenHash").notNull(),
+    sessionLength: integer("sessionLength").notNull(),
+    expiresAt: integer("expiresAt"),
+    title: text("title").notNull(),
+    description: text("description"),
+    createdAt: integer("createdAt").notNull()
+});
+
 export const resourceSessions = sqliteTable("resourceSessions", {
     sessionId: text("id").primaryKey(),
     resourceId: integer("resourceId")
         .notNull()
         .references(() => resources.resourceId, { onDelete: "cascade" }),
     expiresAt: integer("expiresAt").notNull(),
+    sessionLength: integer("sessionLength").notNull(),
+    doNotExtend: integer("doNotExtend", { mode: "boolean" })
+        .notNull()
+        .default(false),
     passwordId: integer("passwordId").references(
         () => resourcePassword.passwordId,
         {
@@ -297,6 +317,12 @@ export const resourceSessions = sqliteTable("resourceSessions", {
     ),
     whitelistId: integer("whitelistId").references(
         () => resourceWhitelist.whitelistId,
+        {
+            onDelete: "cascade"
+        }
+    ),
+    accessTokenId: text("accessTokenId").references(
+        () => resourceAccessToken.accessTokenId,
         {
             onDelete: "cascade"
         }

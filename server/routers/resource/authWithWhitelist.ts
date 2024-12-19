@@ -174,7 +174,6 @@ export async function authWithWhitelist(
         const cookie = serializeResourceSessionCookie(
             cookieName,
             token,
-            resource.fullDomain
         );
         res.appendHeader("Set-Cookie", cookie);
 
@@ -188,7 +187,6 @@ export async function authWithWhitelist(
             status: HttpCode.OK
         });
     } catch (e) {
-        throw e;
         logger.error(e);
         return next(
             createHttpError(

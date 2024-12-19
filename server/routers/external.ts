@@ -6,8 +6,10 @@ import * as target from "./target";
 import * as user from "./user";
 import * as auth from "./auth";
 import * as role from "./role";
+import * as accessToken from "./accessToken";
 import HttpCode from "@server/types/HttpCode";
 import {
+    verifyAccessTokenAccess,
     rateLimitMiddleware,
     verifySessionMiddleware,
     verifySessionUserMiddleware,
@@ -114,11 +116,13 @@ authenticated.put(
     verifyUserHasAction(ActionsEnum.createResource),
     resource.createResource
 );
+
 authenticated.get(
     "/site/:siteId/resources",
     verifyUserHasAction(ActionsEnum.listResources),
     resource.listResources
 );
+
 authenticated.get(
     "/org/:orgId/resources",
     verifyOrgAccess,
@@ -278,29 +282,57 @@ authenticated.post(
 authenticated.post(
     `/resource/:resourceId/password`,
     verifyResourceAccess,
-    verifyUserHasAction(ActionsEnum.updateResource), // REVIEW: group all resource related updates under update resource?
+    verifyUserHasAction(ActionsEnum.setResourcePassword),
     resource.setResourcePassword
 );
 
 authenticated.post(
     `/resource/:resourceId/pincode`,
     verifyResourceAccess,
-    verifyUserHasAction(ActionsEnum.updateResource),
+    verifyUserHasAction(ActionsEnum.setResourcePincode),
     resource.setResourcePincode
 );
 
 authenticated.post(
     `/resource/:resourceId/whitelist`,
     verifyResourceAccess,
-    verifyUserHasAction(ActionsEnum.updateResource),
+    verifyUserHasAction(ActionsEnum.setResourceWhitelist),
     resource.setResourceWhitelist
 );
 
 authenticated.get(
     `/resource/:resourceId/whitelist`,
     verifyResourceAccess,
-    verifyUserHasAction(ActionsEnum.getResource),
+    verifyUserHasAction(ActionsEnum.getResourceWhitelist),
     resource.getResourceWhitelist
+);
+
+authenticated.post(
+    `/resource/:resourceId/access-token`,
+    verifyResourceAccess,
+    verifyUserHasAction(ActionsEnum.generateAccessToken),
+    accessToken.generateAccessToken
+);
+
+authenticated.delete(
+    `/access-token/:accessTokenId`,
+    verifyAccessTokenAccess,
+    verifyUserHasAction(ActionsEnum.deleteAcessToken),
+    accessToken.deleteAccessToken
+);
+
+authenticated.get(
+    `/org/:orgId/access-tokens`,
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.listAccessTokens),
+    accessToken.listAccessTokens
+);
+
+authenticated.get(
+    `/resource/:resourceId/access-tokens`,
+    verifyResourceAccess,
+    verifyUserHasAction(ActionsEnum.listAccessTokens),
+    accessToken.listAccessTokens
 );
 
 unauthenticated.get("/resource/:resourceId/auth", resource.getResourceAuthInfo);
@@ -422,3 +454,7 @@ authRouter.post("/reset-password/", auth.resetPassword);
 authRouter.post("/resource/:resourceId/password", resource.authWithPassword);
 authRouter.post("/resource/:resourceId/pincode", resource.authWithPincode);
 authRouter.post("/resource/:resourceId/whitelist", resource.authWithWhitelist);
+authRouter.post(
+    "/resource/:resourceId/access-token",
+    resource.authWithAccessToken
+);

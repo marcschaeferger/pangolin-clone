@@ -1,18 +1,18 @@
 import { Request, Response, NextFunction } from "express";
 import { db } from "@server/db";
-import { resources, targets, userOrgs } from "@server/db/schema";
+import { resourceAccessToken, resources, userOrgs } from "@server/db/schema";
 import { and, eq } from "drizzle-orm";
 import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
 import { canUserAccessResource } from "./helpers/canUserAccessResource";
 
-export async function verifyTargetAccess(
+export async function verifyAccessTokenAccess(
     req: Request,
     res: Response,
     next: NextFunction
 ) {
     const userId = req.user!.userId;
-    const targetId = parseInt(req.params.targetId);
+    const accessTokenId = req.params.accessTokenId;
 
     if (!userId) {
         return next(
@@ -20,34 +20,28 @@ export async function verifyTargetAccess(
         );
     }
 
-    if (isNaN(targetId)) {
-        return next(
-            createHttpError(HttpCode.BAD_REQUEST, "Invalid organization ID")
-        );
-    }
-
-    const target = await db
+    const [accessToken] = await db
         .select()
-        .from(targets)
-        .where(eq(targets.targetId, targetId))
+        .from(resourceAccessToken)
+        .where(eq(resourceAccessToken.accessTokenId, accessTokenId))
         .limit(1);
 
-    if (target.length === 0) {
+    if (!accessToken) {
         return next(
             createHttpError(
                 HttpCode.NOT_FOUND,
-                `Target with ID ${targetId} not found`
+                `Access token with ID ${accessTokenId} not found`
             )
         );
     }
 
-    const resourceId = target[0].resourceId;
+    const resourceId = accessToken.resourceId;
 
     if (!resourceId) {
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,
-                `Target with ID ${targetId} does not have a resource ID`
+                `Access token with ID ${accessTokenId} does not have a resource ID`
             )
         );
     }
@@ -72,7 +66,7 @@ export async function verifyTargetAccess(
             return next(
                 createHttpError(
                     HttpCode.INTERNAL_SERVER_ERROR,
-                    `resource with ID ${resourceId} does not have an organization ID`
+                    `Resource with ID ${resourceId} does not have an organization ID`
                 )
             );
         }

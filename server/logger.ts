@@ -16,6 +16,7 @@ const hformat = winston.format.printf(
 const transports: any = [
     new winston.transports.Console({
         format: winston.format.combine(
+            winston.format.errors({ stack: true }),
             winston.format.colorize(),
             winston.format.splat(),
             winston.format.timestamp(),

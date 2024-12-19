@@ -1,6 +1,10 @@
 import { encodeHexLowerCase } from "@oslojs/encoding";
 import { sha256 } from "@oslojs/crypto/sha2";
-import { resourceSessions, ResourceSession } from "@server/db/schema";
+import {
+    resourceSessions,
+    ResourceSession,
+    resources
+} from "@server/db/schema";
 import db from "@server/db";
 import { eq, and } from "drizzle-orm";
 import config from "@server/config";
@@ -17,12 +21,19 @@ export async function createResourceSession(opts: {
     passwordId?: number;
     pincodeId?: number;
     whitelistId?: number;
+    accessTokenId?: string;
     usedOtp?: boolean;
+    doNotExtend?: boolean;
+    expiresAt?: number | null;
+    sessionLength: number;
 }): Promise<ResourceSession> {
-    if (!opts.passwordId && !opts.pincodeId && !opts.whitelistId) {
-        throw new Error(
-            "At least one of passwordId or pincodeId must be provided"
-        );
+    if (
+        !opts.passwordId &&
+        !opts.pincodeId &&
+        !opts.whitelistId &&
+        !opts.accessTokenId
+    ) {
+        throw new Error("Auth method must be provided");
     }
 
     const sessionId = encodeHexLowerCase(
@@ -31,11 +42,16 @@ export async function createResourceSession(opts: {
 
     const session: ResourceSession = {
         sessionId: sessionId,
-        expiresAt: new Date(Date.now() + SESSION_COOKIE_EXPIRES).getTime(),
+        expiresAt:
+            opts.expiresAt ||
+            new Date(Date.now() + SESSION_COOKIE_EXPIRES).getTime(),
+        sessionLength: opts.sessionLength || SESSION_COOKIE_EXPIRES,
         resourceId: opts.resourceId,
         passwordId: opts.passwordId || null,
         pincodeId: opts.pincodeId || null,
-        whitelistId: opts.whitelistId || null
+        whitelistId: opts.whitelistId || null,
+        doNotExtend: opts.doNotExtend || false,
+        accessTokenId: opts.accessTokenId || null
     };
 
     await db.insert(resourceSessions).values(session);
@@ -66,9 +82,18 @@ export async function validateResourceSessionToken(
 
     const resourceSession = result[0];
 
-    if (Date.now() >= resourceSession.expiresAt - SESSION_COOKIE_EXPIRES / 2) {
+    if (Date.now() >= resourceSession.expiresAt) {
+        await db
+            .delete(resourceSessions)
+            .where(eq(resourceSessions.sessionId, resourceSessions.sessionId));
+        return { resourceSession: null };
+    } else if (
+        !resourceSession.doNotExtend &&
+        Date.now() >=
+            resourceSession.expiresAt - resourceSession.sessionLength / 2
+    ) {
         resourceSession.expiresAt = new Date(
-            Date.now() + SESSION_COOKIE_EXPIRES
+            Date.now() + resourceSession.sessionLength
         ).getTime();
         await db
             .update(resourceSessions)
@@ -138,8 +163,7 @@ export async function invalidateAllSessions(
 
 export function serializeResourceSessionCookie(
     cookieName: string,
-    token: string,
-    fqdn: string
+    token: string
 ): string {
     if (SECURE_COOKIES) {
         return `${cookieName}=${token}; HttpOnly; SameSite=Lax; Max-Age=${SESSION_COOKIE_EXPIRES}; Path=/; Secure; Domain=${COOKIE_DOMAIN}`;
@@ -149,8 +173,7 @@ export function serializeResourceSessionCookie(
 }
 
 export function createBlankResourceSessionTokenCookie(
-    cookieName: string,
-    fqdn: string
+    cookieName: string
 ): string {
     if (SECURE_COOKIES) {
         return `${cookieName}=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/; Secure; Domain=${COOKIE_DOMAIN}`;

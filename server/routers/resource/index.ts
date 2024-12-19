@@ -15,3 +15,4 @@ export * from "./authWithPincode";
 export * from "./setResourceWhitelist";
 export * from "./getResourceWhitelist";
 export * from "./authWithWhitelist";
+export * from "./authWithAccessToken";

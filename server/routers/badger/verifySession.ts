@@ -7,9 +7,11 @@ import { response } from "@server/utils/response";
 import { validateSessionToken } from "@server/auth";
 import db from "@server/db";
 import {
+    resourceAccessToken,
     resourcePassword,
     resourcePincode,
     resources,
+    resourceWhitelist,
     User,
     userOrgs
 } from "@server/db/schema";
@@ -89,7 +91,12 @@ export async function verifyResourceSession(
             return notAllowed(res);
         }
 
-        if (!resource.sso && !pincode && !password) {
+        if (
+            !resource.sso &&
+            !pincode &&
+            !password &&
+            !resource.emailWhitelistEnabled
+        ) {
             logger.debug("Resource allowed because no auth");
             return allowed(res);
         }
@@ -103,7 +110,7 @@ export async function verifyResourceSession(
         const sessionToken = sessions[config.server.session_cookie_name];
 
         // check for unified login
-        if (sso && sessionToken && !resource.otpEnabled) {
+        if (sso && sessionToken) {
             const { session, user } = await validateSessionToken(sessionToken);
             if (session && user) {
                 const isAllowed = await isUserAllowedToAccessResource(
@@ -125,69 +132,46 @@ export async function verifyResourceSession(
                 `${config.server.resource_session_cookie_name}_${resource.resourceId}`
             ];
 
-        if (
-            sso &&
-            sessionToken &&
-            resourceSessionToken &&
-            resource.otpEnabled
-        ) {
-            const { session, user } = await validateSessionToken(sessionToken);
-            const { resourceSession } = await validateResourceSessionToken(
-                resourceSessionToken,
-                resource.resourceId
-            );
-
-            if (session && user && resourceSession) {
-                if (!resourceSession.usedOtp) {
-                    logger.debug("Resource not allowed because OTP not used");
-                    return notAllowed(res, redirectUrl);
-                }
-
-                const isAllowed = await isUserAllowedToAccessResource(
-                    user,
-                    resource
-                );
-
-                if (isAllowed) {
-                    logger.debug(
-                        "Resource allowed because user and resource session is valid"
-                    );
-                    return allowed(res);
-                }
-            }
-        }
-
-        if ((pincode || password) && resourceSessionToken) {
+        if (resourceSessionToken) {
             const { resourceSession } = await validateResourceSessionToken(
                 resourceSessionToken,
                 resource.resourceId
             );
 
             if (resourceSession) {
-                if (resource.otpEnabled && !resourceSession.usedOtp) {
-                    logger.debug("Resource not allowed because OTP not used");
-                    return notAllowed(res, redirectUrl);
-                }
+                return allowed(res);
 
-                if (
-                    pincode &&
-                    resourceSession.pincodeId === pincode.pincodeId
-                ) {
-                    logger.debug(
-                        "Resource allowed because pincode session is valid"
-                    );
-                    return allowed(res);
-                }
-
-                if (
-                    password &&
-                    resourceSession.passwordId === password.passwordId
-                ) {
-                    logger.debug(
-                        "Resource allowed because password session is valid"
-                    );
-                    return allowed(res);
-                }
+                // Might not be needed
+                // if (pincode && resourceSession.pincodeId) {
+                //     logger.debug(
+                //         "Resource allowed because pincode session is valid"
+                //     );
+                //     return allowed(res);
+                // }
+                //
+                // if (password && resourceSession.passwordId) {
+                //     logger.debug(
+                //         "Resource allowed because password session is valid"
+                //     );
+                //     return allowed(res);
+                // }
+                //
+                // if (
+                //     resource.emailWhitelistEnabled &&
+                //     resourceSession.whitelistId
+                // ) {
+                //     logger.debug(
+                //         "Resource allowed because whitelist session is valid"
+                //     );
+                //     return allowed(res);
+                // }
+                //
+                // if (resourceSession.accessTokenId) {
+                //     logger.debug(
+                //         "Resource allowed because access token session is valid"
+                //     );
+                //     return allowed(res);
+                // }
             }
         }
 

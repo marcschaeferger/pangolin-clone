@@ -43,8 +43,8 @@ export default async function ResourceAuthPage(props: {
         );
     }
 
-    const hasAuth = authInfo.password || authInfo.pincode || authInfo.sso;
-    const isSSOOnly = authInfo.sso && !authInfo.password && !authInfo.pincode;
+    const hasAuth = authInfo.password || authInfo.pincode || authInfo.sso || authInfo.whitelist;
+    const isSSOOnly = authInfo.sso && !authInfo.password && !authInfo.pincode && !authInfo.whitelist;
 
     const redirectUrl = searchParams.redirect || authInfo.url;
 
@@ -70,8 +70,6 @@ export default async function ResourceAuthPage(props: {
                 AxiosResponse<CheckResourceSessionResponse>
             >(`/resource-session/${params.resourceId}/${sessionId}`);
 
-            console.log("resource session already exists and is valid");
-
             if (res && res.data.data.valid) {
                 doRedirect = true;
             }
@@ -96,7 +94,6 @@ export default async function ResourceAuthPage(props: {
                 await authCookieHeader(),
             );
 
-            console.log(res.data);
             doRedirect = true;
         } catch (e) {
             userIsUnauthorized = true;
