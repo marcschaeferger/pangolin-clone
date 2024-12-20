@@ -39,6 +39,7 @@ function querySites(orgId: string, accessibleSiteIds: number[]) {
             megabytesOut: sites.megabytesOut,
             orgName: orgs.name,
             type: sites.type,
+            online: sites.online,
         })
         .from(sites)
         .leftJoin(orgs, eq(sites.orgId, orgs.orgId))

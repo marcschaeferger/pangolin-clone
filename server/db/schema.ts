@@ -23,7 +23,9 @@ export const sites = sqliteTable("sites", {
     subnet: text("subnet").notNull(),
     megabytesIn: integer("bytesIn"),
     megabytesOut: integer("bytesOut"),
-    type: text("type").notNull() // "newt" or "wireguard"
+    lastBandwidthUpdate: text("lastBandwidthUpdate"),
+    type: text("type").notNull(), // "newt" or "wireguard"
+    online: integer("online", { mode: "boolean" }).notNull().default(false)
 });
 
 export const resources = sqliteTable("resources", {

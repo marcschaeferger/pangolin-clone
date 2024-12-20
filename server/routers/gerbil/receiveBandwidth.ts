@@ -33,16 +33,29 @@ export const receiveBandwidth = async (req: Request, res: Response, next: NextFu
                 logger.warn(`Site not found for public key: ${publicKey}`);
                 continue;
             }
+            let online = site.online;
+
+            // if the bandwidth for the site is > 0 then set it to online. if it has been less than 0 (no update) for 5 minutes then set it to offline
+            if (bytesIn > 0 || bytesOut > 0) {
+                online = true;
+            } else if (site.lastBandwidthUpdate) {
+                const lastBandwidthUpdate = new Date(site.lastBandwidthUpdate);
+                const currentTime = new Date();
+                const diff = currentTime.getTime() - lastBandwidthUpdate.getTime();
+                if (diff < 300000) {
+                    online = false;
+                }
+            }
 
             // Update the site's bandwidth usage
             await db.update(sites)
                 .set({
                     megabytesIn: (site.megabytesIn || 0) + bytesIn,
                     megabytesOut: (site.megabytesOut || 0) + bytesOut,
+                    lastBandwidthUpdate: new Date().toISOString(),
+                    online,
                 })
                 .where(eq(sites.siteId, site.siteId));
-
-            logger.debug(`Updated bandwidth for site: ${site.siteId}: megabytesIn: ${(site.megabytesIn || 0) + bytesIn}, megabytesOut: ${(site.megabytesOut || 0) + bytesOut}`);
 
         }
 
