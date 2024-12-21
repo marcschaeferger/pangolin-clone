@@ -30,6 +30,22 @@ if (config.app.save_logs) {
             symlinkName: "pangolin.log"
         })
     );
+    transports.push(
+        new winston.transports.DailyRotateFile({
+            filename: path.join(APP_PATH, "logs", ".machinelogs-%DATE%.json"),
+            datePattern: "YYYY-MM-DD",
+            zippedArchive: true,
+            maxSize: "20m",
+            maxFiles: "1d",
+            createSymlink: true,
+            symlinkName: ".machinelogs.json",
+            format: winston.format.combine(
+                winston.format.timestamp(),
+                winston.format.splat(),
+                winston.format.json()
+            )
+        })
+    );
 }
 
 const logger = winston.createLogger({
