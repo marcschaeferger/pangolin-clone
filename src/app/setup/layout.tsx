@@ -5,13 +5,13 @@ import { cache } from "react";
 
 export const metadata: Metadata = {
     title: `Setup - Pangolin`,
-    description: "",
+    description: ""
 };
 
 export const dynamic = "force-dynamic";
 
 export default async function SetupLayout({
-    children,
+    children
 }: {
     children: React.ReactNode;
 }) {
@@ -22,5 +22,5 @@ export default async function SetupLayout({
         redirect("/?redirect=/setup");
     }
 
-    return <div className="mt-32">{children}</div>;
+    return <div className="w-full max-w-2xl mx-auto p-3 md:mt-32">{children}</div>;
 }

@@ -11,104 +11,112 @@ import {
     CardContent,
     CardDescription,
     CardHeader,
-    CardTitle,
+    CardTitle
 } from "@app/components/ui/card";
 import CopyTextBox from "@app/components/CopyTextBox";
 import { formatAxiosError } from "@app/lib/utils";
 import { createApiClient } from "@app/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
+import { Separator } from "@/components/ui/separator";
+import { z } from "zod";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage
+} from "@app/components/ui/form";
+import { Alert, AlertDescription } from "@app/components/ui/alert";
 
 type Step = "org" | "site" | "resources";
 
+const orgSchema = z.object({
+    orgName: z.string().min(1, { message: "Organization name is required" }),
+    orgId: z.string().min(1, { message: "Organization ID is required" })
+});
+
 export default function StepperForm() {
     const [currentStep, setCurrentStep] = useState<Step>("org");
-    const [orgName, setOrgName] = useState("");
-    const [orgId, setOrgId] = useState("");
-    const [siteName, setSiteName] = useState("");
-    const [resourceName, setResourceName] = useState("");
-    const [orgCreated, setOrgCreated] = useState(false);
     const [orgIdTaken, setOrgIdTaken] = useState(false);
 
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const orgForm = useForm<z.infer<typeof orgSchema>>({
+        resolver: zodResolver(orgSchema),
+        defaultValues: {
+            orgName: "",
+            orgId: ""
+        }
+    });
+
     const api = createApiClient(useEnvContext());
+    const router = useRouter();
 
     const checkOrgIdAvailability = useCallback(async (value: string) => {
         try {
             const res = await api.get(`/org/checkId`, {
                 params: {
-                    orgId: value,
-                },
+                    orgId: value
+                }
             });
             setOrgIdTaken(res.status !== 404);
         } catch (error) {
-            console.error("Error checking org ID availability:", error);
             setOrgIdTaken(false);
         }
     }, []);
 
     const debouncedCheckOrgIdAvailability = useCallback(
         debounce(checkOrgIdAvailability, 300),
-        [checkOrgIdAvailability],
+        [checkOrgIdAvailability]
     );
-
-    useEffect(() => {
-        if (orgId) {
-            debouncedCheckOrgIdAvailability(orgId);
-        }
-    }, [orgId, debouncedCheckOrgIdAvailability]);
-
-    const showOrgIdError = () => {
-        if (orgIdTaken) {
-            return (
-                <p className="text-sm text-red-500">
-                    This ID is already taken. Please choose another.
-                </p>
-            );
-        }
-        return null;
-    };
 
     const generateId = (name: string) => {
         return name.toLowerCase().replace(/\s+/g, "-");
     };
 
-    const handleNext = async () => {
-        if (currentStep === "org") {
-            const res = await api
-                .put(`/org`, {
-                    orgId: orgId,
-                    name: orgName,
-                })
-                .catch((e) => {
-                    toast({
-                        variant: "destructive",
-                        title: "Error creating org",
-                        description: formatAxiosError(e),
-                    });
-                });
+    async function orgSubmit(values: z.infer<typeof orgSchema>) {
+        if (orgIdTaken) {
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const res = await api.put(`/org`, {
+                orgId: values.orgId,
+                name: values.orgName
+            });
 
             if (res && res.status === 201) {
                 setCurrentStep("site");
-                setOrgCreated(true);
             }
-        } else if (currentStep === "site") setCurrentStep("resources");
-    };
+        } catch (e) {
+            console.error(e);
+            setError(
+                formatAxiosError(e, "An error occurred while creating org")
+            );
+        }
 
-    const handlePrevious = () => {
-        if (currentStep === "site") setCurrentStep("org");
-        else if (currentStep === "resources") setCurrentStep("site");
-    };
+        setLoading(false);
+    }
 
     return (
         <>
-            <Card className="w-full max-w-2xl mx-auto">
+            <Card>
                 <CardHeader>
-                    <CardTitle>Setup Your Environment</CardTitle>
+                    <CardTitle>Setup New Organization</CardTitle>
                     <CardDescription>
-                        Create your organization, site, and resources.
+                        Create your organization, site, and resources
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="mb-8">
+                    <section className="space-y-6">
                         <div className="flex justify-between mb-2">
                             <div className="flex flex-col items-center">
                                 <div
@@ -171,108 +179,134 @@ export default function StepperForm() {
                                 </span>
                             </div>
                         </div>
-                        <div className="flex items-center">
-                            <div className="flex-1 h-px bg-border"></div>
-                            <div className="flex-1 h-px bg-border"></div>
-                        </div>
-                    </div>
-                    {currentStep === "org" && (
-                        <div className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="orgName">
-                                    Organization Name
-                                </Label>
-                                <Input
-                                    id="orgName"
-                                    value={orgName}
-                                    onChange={(e) => {
-                                        setOrgName(e.target.value);
-                                        setOrgId(generateId(e.target.value));
+
+                        <Separator />
+
+                        {currentStep === "org" && (
+                            <Form {...orgForm}>
+                                <form
+                                    onSubmit={orgForm.handleSubmit(orgSubmit)}
+                                    className="space-y-8"
+                                >
+                                    <FormField
+                                        control={orgForm.control}
+                                        name="orgName"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>
+                                                    Organization Name
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        placeholder="Name your new organization"
+                                                        type="text"
+                                                        {...field}
+                                                        onChange={(e) => {
+                                                            const orgId =
+                                                                generateId(
+                                                                    e.target
+                                                                        .value
+                                                                );
+                                                            orgForm.setValue(
+                                                                "orgId",
+                                                                orgId
+                                                            );
+                                                            orgForm.setValue(
+                                                                "orgName",
+                                                                e.target.value
+                                                            );
+                                                            debouncedCheckOrgIdAvailability(
+                                                                orgId
+                                                            );
+                                                        }}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                                <FormDescription>
+                                                    This is the display name for
+                                                    your organization.
+                                                </FormDescription>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={orgForm.control}
+                                        name="orgId"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>
+                                                    Organization ID
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        type="text"
+                                                        placeholder="Enter unique organization ID"
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                                <FormDescription>
+                                                    This is the unique
+                                                    identifier for your
+                                                    organization. This is
+                                                    separate from the display
+                                                    name.
+                                                </FormDescription>
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    {orgIdTaken && (
+                                        <Alert variant="destructive">
+                                            <AlertDescription>
+                                                Organization ID is already
+                                                taken. Please choose a different
+                                                one.
+                                            </AlertDescription>
+                                        </Alert>
+                                    )}
+
+                                    {error && (
+                                        <Alert variant="destructive">
+                                            <AlertDescription>
+                                                {error}
+                                            </AlertDescription>
+                                        </Alert>
+                                    )}
+
+                                    <div className="flex justify-end">
+                                        <Button
+                                            type="submit"
+                                            loading={loading}
+                                            disabled={
+                                                error !== null ||
+                                                loading ||
+                                                orgIdTaken
+                                            }
+                                        >
+                                            Create Organization
+                                        </Button>
+                                    </div>
+                                </form>
+                            </Form>
+                        )}
+
+                        {currentStep === "site" && (
+                            <div className="flex justify-end">
+                                <Button
+                                    type="submit"
+                                    variant="outline"
+                                    onClick={() => {
+                                        router.push(
+                                            `/${orgForm.getValues().orgId}/settings/sites`
+                                        );
                                     }}
-                                    placeholder="Enter organization name"
-                                    required
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="orgId">Organization ID</Label>
-                                <Input
-                                    id="orgId"
-                                    value={orgId}
-                                    onChange={(e) => setOrgId(e.target.value)}
-                                />
-                                {showOrgIdError()}
-                                <p className="text-sm text-muted-foreground">
-                                    This ID is automatically generated from the
-                                    organization name and must be unique.
-                                </p>
-                            </div>
-                        </div>
-                    )}
-                    {currentStep === "site" && (
-                        <div className="space-y-8">
-                            <div className="space-y-2">
-                                <Label htmlFor="siteName">Site Name</Label>
-                                <Input
-                                    id="siteName"
-                                    value={siteName}
-                                    onChange={(e) =>
-                                        setSiteName(e.target.value)
-                                    }
-                                    placeholder="Enter site name"
-                                    required
-                                />
-                            </div>
-                        </div>
-                    )}
-                    {currentStep === "resources" && (
-                        <div className="space-y-8">
-                            <div className="space-y-2">
-                                <Label htmlFor="resourceName">
-                                    Resource Name
-                                </Label>
-                                <Input
-                                    id="resourceName"
-                                    value={resourceName}
-                                    onChange={(e) =>
-                                        setResourceName(e.target.value)
-                                    }
-                                    placeholder="Enter resource name"
-                                    required
-                                />
-                            </div>
-                        </div>
-                    )}
-                    <div className="flex justify-between pt-4">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={handlePrevious}
-                            disabled={
-                                currentStep === "org" ||
-                                (currentStep === "site" && orgCreated)
-                            }
-                        >
-                            Previous
-                        </Button>
-                        <div className="flex items-center space-x-2">
-                            {currentStep !== "org" ? (
-                                <Link
-                                    href={`/${orgId}/settings/sites`}
-                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                 >
                                     Skip for now
-                                </Link>
-                            ) : null}
-
-                            <Button
-                                type="button"
-                                id="button"
-                                onClick={handleNext}
-                            >
-                                Create
-                            </Button>
-                        </div>
-                    </div>
+                                </Button>
+                            </div>
+                        )}
+                    </section>
                 </CardContent>
             </Card>
         </>
@@ -281,7 +315,7 @@ export default function StepperForm() {
 
 function debounce<T extends (...args: any[]) => any>(
     func: T,
-    wait: number,
+    wait: number
 ): (...args: Parameters<T>) => void {
     let timeout: NodeJS.Timeout | null = null;
 
