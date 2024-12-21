@@ -12,9 +12,10 @@ import { cache } from "react";
 export const dynamic = "force-dynamic";
 
 export default async function Page(props: {
-    searchParams: Promise<{ redirect: string | undefined }>;
+    searchParams: Promise<{ redirect: string | undefined, t: string | undefined }>;
 }) {
     const params = await props.searchParams; // this is needed to prevent static optimization
+
     const getUser = cache(verifySession);
     const user = await getUser({ skipCheckVerifyEmail: true });
 

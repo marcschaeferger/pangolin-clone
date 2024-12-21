@@ -5,7 +5,7 @@ import {
     SESSION_COOKIE_EXPIRES
 } from "@server/auth";
 import db from "@server/db";
-import { resourceAccessToken, resources } from "@server/db/schema";
+import { ResourceAccessToken, resourceAccessToken, resources } from "@server/db/schema";
 import HttpCode from "@server/types/HttpCode";
 import response from "@server/utils/response";
 import { eq } from "drizzle-orm";
@@ -26,9 +26,7 @@ export const generateAccssTokenParamsSchema = z.object({
     resourceId: z.string().transform(Number).pipe(z.number().int().positive())
 });
 
-export type GenerateAccessTokenResponse = {
-    token: string;
-};
+export type GenerateAccessTokenResponse = ResourceAccessToken;
 
 export async function generateAccessToken(
     req: Request,
@@ -79,30 +77,37 @@ export async function generateAccessToken(
 
         const token = generateIdFromEntropySize(25);
 
-        const tokenHash = await hash(token, {
-            memoryCost: 19456,
-            timeCost: 2,
-            outputLen: 32,
-            parallelism: 1
-        });
+        // const tokenHash = await hash(token, {
+        //     memoryCost: 19456,
+        //     timeCost: 2,
+        //     outputLen: 32,
+        //     parallelism: 1
+        // });
 
         const id = generateId(15);
-        await db.insert(resourceAccessToken).values({
+        const [result] = await db.insert(resourceAccessToken).values({
             accessTokenId: id,
             orgId: resource.orgId,
             resourceId,
-            tokenHash,
+            tokenHash: token,
             expiresAt: expiresAt || null,
             sessionLength: sessionLength,
-            title: title || `${resource.name} Token ${new Date().getTime()}`,
+            title: title || null,
             description: description || null,
             createdAt: new Date().getTime()
-        });
+        }).returning();
+
+        if (!result) {
+            return next(
+                createHttpError(
+                    HttpCode.INTERNAL_SERVER_ERROR,
+                    "Failed to generate access token"
+                )
+            );
+        }
 
         return response<GenerateAccessTokenResponse>(res, {
-            data: {
-                token: `${id}.${token}`
-            },
+            data: result,
             success: true,
             error: false,
             message: "Resource access token generated successfully",

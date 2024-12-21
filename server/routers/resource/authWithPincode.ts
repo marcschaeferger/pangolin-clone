@@ -131,7 +131,6 @@ export async function authWithPincode(
         const cookie = serializeResourceSessionCookie(
             cookieName,
             token,
-            resource.fullDomain
         );
         res.appendHeader("Set-Cookie", cookie);
 

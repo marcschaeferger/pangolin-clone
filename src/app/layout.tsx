@@ -33,7 +33,8 @@ export default async function RootLayout({
                             NEXT_PORT: process.env.NEXT_PORT as string,
                             SERVER_EXTERNAL_PORT: process.env
                                 .SERVER_EXTERNAL_PORT as string,
-                            ENVIRONMENT: process.env.ENVIRONMENT as string
+                            ENVIRONMENT: process.env.ENVIRONMENT as string,
+                            EMAIL_ENABLED: process.env.EMAIL_ENABLED as string
                         }}
                     >
                         {children}

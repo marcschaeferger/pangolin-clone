@@ -8,6 +8,10 @@ export function createApiClient({ env }: { env: env }): AxiosInstance {
         return apiInstance;
     }
 
+    if (apiInstance) {
+        return apiInstance
+    }
+
     let baseURL;
     const suffix = "api/v1";
 

@@ -84,7 +84,6 @@ export async function pickSiteDefaults(
             status: HttpCode.OK,
         });
     } catch (error) {
-        throw error;
         logger.error(error);
         return next(
             createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")

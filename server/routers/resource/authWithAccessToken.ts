@@ -98,12 +98,14 @@ export async function authWithAccessToken(
             );
         }
 
-        const validCode = await verify(tokenItem.tokenHash, accessToken, {
-            memoryCost: 19456,
-            timeCost: 2,
-            outputLen: 32,
-            parallelism: 1
-        });
+        // const validCode = await verify(tokenItem.tokenHash, accessToken, {
+        //     memoryCost: 19456,
+        //     timeCost: 2,
+        //     outputLen: 32,
+        //     parallelism: 1
+        // });
+        logger.debug(`${accessToken} ${tokenItem.tokenHash}`)
+        const validCode = accessToken === tokenItem.tokenHash;
 
         if (!validCode) {
             return next(

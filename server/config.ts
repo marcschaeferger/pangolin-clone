@@ -136,5 +136,6 @@ process.env.FLAGS_EMAIL_VERIFICATION_REQUIRED = parsedConfig.data.flags
 process.env.SESSION_COOKIE_NAME = parsedConfig.data.server.session_cookie_name;
 process.env.RESOURCE_SESSION_COOKIE_NAME =
     parsedConfig.data.server.resource_session_cookie_name;
+process.env.EMAIL_ENABLED = parsedConfig.data.email ? "true" : "false";
 
 export default parsedConfig.data;

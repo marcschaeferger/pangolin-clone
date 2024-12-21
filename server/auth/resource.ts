@@ -25,7 +25,7 @@ export async function createResourceSession(opts: {
     usedOtp?: boolean;
     doNotExtend?: boolean;
     expiresAt?: number | null;
-    sessionLength: number;
+    sessionLength?: number | null;
 }): Promise<ResourceSession> {
     if (
         !opts.passwordId &&

@@ -123,7 +123,6 @@ export async function authWithPassword(
         const cookie = serializeResourceSessionCookie(
             cookieName,
             token,
-            resource.fullDomain
         );
         res.appendHeader("Set-Cookie", cookie);
 

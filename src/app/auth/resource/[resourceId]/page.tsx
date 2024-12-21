@@ -1,6 +1,7 @@
 import {
+    AuthWithAccessTokenResponse,
     GetResourceAuthInfoResponse,
-    GetResourceResponse,
+    GetResourceResponse
 } from "@server/routers/resource";
 import ResourceAuthPortal from "./components/ResourceAuthPortal";
 import { internal, priv } from "@app/api";
@@ -13,10 +14,14 @@ import ResourceNotFound from "./components/ResourceNotFound";
 import ResourceAccessDenied from "./components/ResourceAccessDenied";
 import { cookies } from "next/headers";
 import { CheckResourceSessionResponse } from "@server/routers/auth";
+import AccessTokenInvalid from "./components/AccessTokenInvalid";
 
 export default async function ResourceAuthPage(props: {
     params: Promise<{ resourceId: number }>;
-    searchParams: Promise<{ redirect: string | undefined }>;
+    searchParams: Promise<{
+        redirect: string | undefined;
+        token: string | undefined;
+    }>;
 }) {
     const params = await props.params;
     const searchParams = await props.searchParams;
@@ -43,10 +48,47 @@ export default async function ResourceAuthPage(props: {
         );
     }
 
-    const hasAuth = authInfo.password || authInfo.pincode || authInfo.sso || authInfo.whitelist;
-    const isSSOOnly = authInfo.sso && !authInfo.password && !authInfo.pincode && !authInfo.whitelist;
-
     const redirectUrl = searchParams.redirect || authInfo.url;
+
+    if (searchParams.token) {
+        let doRedirect = false;
+        try {
+            const res = await internal.post<
+                AxiosResponse<AuthWithAccessTokenResponse>
+            >(
+                `/auth/resource/${params.resourceId}/access-token`,
+                {
+                    accessToken: searchParams.token
+                },
+                await authCookieHeader()
+            );
+
+            if (res.data.data.session) {
+                doRedirect = true;
+            }
+        } catch (e) {
+            return (
+                <div className="w-full max-w-md">
+                    <AccessTokenInvalid />
+                </div>
+            );
+        }
+
+        if (doRedirect) {
+            redirect(redirectUrl);
+        }
+    }
+
+    const hasAuth =
+        authInfo.password ||
+        authInfo.pincode ||
+        authInfo.sso ||
+        authInfo.whitelist;
+    const isSSOOnly =
+        authInfo.sso &&
+        !authInfo.password &&
+        !authInfo.pincode &&
+        !authInfo.whitelist;
 
     if (
         user &&
@@ -54,7 +96,7 @@ export default async function ResourceAuthPage(props: {
         process.env.FLAGS_EMAIL_VERIFICATION_REQUIRED === "true"
     ) {
         redirect(
-            `/auth/verify-email?redirect=/auth/resource/${authInfo.resourceId}`,
+            `/auth/verify-email?redirect=/auth/resource/${authInfo.resourceId}`
         );
     }
 
@@ -91,7 +133,7 @@ export default async function ResourceAuthPage(props: {
         try {
             const res = await internal.get<AxiosResponse<GetResourceResponse>>(
                 `/resource/${params.resourceId}`,
-                await authCookieHeader(),
+                await authCookieHeader()
             );
 
             doRedirect = true;
@@ -121,7 +163,7 @@ export default async function ResourceAuthPage(props: {
                         }}
                         resource={{
                             name: authInfo.resourceName,
-                            id: authInfo.resourceId,
+                            id: authInfo.resourceId
                         }}
                         redirect={redirectUrl}
                     />

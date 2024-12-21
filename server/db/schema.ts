@@ -288,7 +288,7 @@ export const resourceAccessToken = sqliteTable("resourceAccessToken", {
     tokenHash: text("tokenHash").notNull(),
     sessionLength: integer("sessionLength").notNull(),
     expiresAt: integer("expiresAt"),
-    title: text("title").notNull(),
+    title: text("title"),
     description: text("description"),
     createdAt: integer("createdAt").notNull()
 });
@@ -378,3 +378,4 @@ export type ResourceSession = InferSelectModel<typeof resourceSessions>;
 export type ResourcePincode = InferSelectModel<typeof resourcePincode>;
 export type ResourcePassword = InferSelectModel<typeof resourcePassword>;
 export type ResourceOtp = InferSelectModel<typeof resourceOtp>;
+export type ResourceAccessToken = InferSelectModel<typeof resourceAccessToken>;

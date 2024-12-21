@@ -45,7 +45,7 @@ import { Alert, AlertDescription } from "@app/components/ui/alert";
 import { formatAxiosError } from "@app/lib/utils";
 import { AxiosResponse } from "axios";
 import LoginForm from "@app/components/LoginForm";
-import { AuthWithPasswordResponse, AuthWithAccessTokenResponse } from "@server/routers/resource";
+import { AuthWithPasswordResponse, AuthWithAccessTokenResponse, AuthWithWhitelistResponse } from "@server/routers/resource";
 import { redirect } from "next/dist/server/api-utils";
 import ResourceAccessDenied from "./ResourceAccessDenied";
 import { createApiClient } from "@app/api";
@@ -166,7 +166,7 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
 
     const onWhitelistSubmit = (values: any) => {
         setLoadingLogin(true);
-        api.post<AxiosResponse<AuthWithAccessTokenResponse>>(
+        api.post<AxiosResponse<AuthWithWhitelistResponse>>(
             `/auth/resource/${props.resource.id}/whitelist`,
             { email: values.email, otp: values.otp }
         )

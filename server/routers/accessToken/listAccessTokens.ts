@@ -10,7 +10,7 @@ import {
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
-import { sql, eq, or, inArray, and, count } from "drizzle-orm";
+import { sql, eq, or, inArray, and, count, isNull, lt, gt } from "drizzle-orm";
 import logger from "@server/logger";
 import stoi from "@server/utils/stoi";
 
@@ -54,29 +54,47 @@ function queryAccessTokens(
         resourceId: resourceAccessToken.resourceId,
         sessionLength: resourceAccessToken.sessionLength,
         expiresAt: resourceAccessToken.expiresAt,
+        tokenHash: resourceAccessToken.tokenHash,
         title: resourceAccessToken.title,
         description: resourceAccessToken.description,
-        createdAt: resourceAccessToken.createdAt
+        createdAt: resourceAccessToken.createdAt,
+        resourceName: resources.name
     };
 
     if (orgId) {
         return db
             .select(cols)
             .from(resourceAccessToken)
+            .leftJoin(resources, eq(resourceAccessToken.resourceId, resources.resourceId))
             .where(
                 and(
-                    inArray(resourceAccessToken.resourceId, accessibleResourceIds),
-                    eq(resourceAccessToken.orgId, orgId)
+                    inArray(
+                        resourceAccessToken.resourceId,
+                        accessibleResourceIds
+                    ),
+                    eq(resourceAccessToken.orgId, orgId),
+                    or(
+                        isNull(resourceAccessToken.expiresAt),
+                        gt(resourceAccessToken.expiresAt, new Date().getTime())
+                    )
                 )
             );
     } else if (resourceId) {
         return db
             .select(cols)
             .from(resourceAccessToken)
+            .leftJoin(resources, eq(resourceAccessToken.resourceId, resources.resourceId))
             .where(
                 and(
-                    inArray(resources.resourceId, accessibleResourceIds),
-                    eq(resources.resourceId, resourceId)
+                    inArray(
+                        resourceAccessToken.resourceId,
+                        accessibleResourceIds
+                    ),
+                    eq(resourceAccessToken.resourceId, resourceId),
+                    or(
+                        isNull(resourceAccessToken.expiresAt),
+                        gt(resourceAccessToken.expiresAt, new Date().getTime())
+                    )
                 )
             );
     }
@@ -174,7 +192,6 @@ export async function listAccessTokens(
             status: HttpCode.OK
         });
     } catch (error) {
-        throw error;
         logger.error(error);
         return next(
             createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
