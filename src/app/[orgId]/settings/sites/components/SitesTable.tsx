@@ -9,7 +9,7 @@ import {
     DropdownMenuTrigger,
 } from "@app/components/ui/dropdown-menu";
 import { Button } from "@app/components/ui/button";
-import { ArrowRight, ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { ArrowRight, ArrowUpDown, Check, MoreHorizontal, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AxiosResponse } from "axios";
@@ -29,6 +29,7 @@ export type SiteRow = {
     mbOut: string;
     orgId: string;
     type: "newt" | "wireguard";
+    online: boolean;
 };
 
 type SitesTableProps = {
@@ -164,6 +165,42 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                         <div className="flex items-center space-x-2">
                             <span>WireGuard</span>
                         </div>
+                    );
+                }
+            },
+        },
+        {
+            accessorKey: "online",
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() =>
+                            column.toggleSorting(column.getIsSorted() === "asc")
+                        }
+                    >
+                        Online
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                );
+            },
+            cell: ({ row }) => {
+                const originalRow = row.original;
+                console.log(originalRow.online);
+                
+                if (originalRow.online) {
+                    return (
+                        <span className="text-green-500 flex items-center space-x-2">
+                        <Check className="w-4 h-4" />
+                        <span>Online</span>
+                        </span>
+                    );
+                } else {
+                    return (
+                        <span className="text-red-500 flex items-center space-x-2">
+                        <X className="w-4 h-4" />
+                        <span>Offline</span>
+                        </span>
                     );
                 }
             },
