@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
 import { eq } from "drizzle-orm";
-import { orgs, roleActions, roles, userOrgs } from "@server/db/schema";
+import { Org, orgs, roleActions, roles, userOrgs } from "@server/db/schema";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
@@ -15,7 +15,7 @@ import { defaultRoleAllowedActions } from "../role";
 const createOrgSchema = z
     .object({
         orgId: z.string(),
-        name: z.string().min(1).max(255),
+        name: z.string().min(1).max(255)
         // domain: z.string().min(1).max(255).optional(),
     })
     .strict();
@@ -66,65 +66,82 @@ export async function createOrg(
             );
         }
 
-        // create a url from config.app.base_url and get the hostname
-        const domain = new URL(config.app.base_url).hostname;
+        let error = "";
+        let org: Org | null = null;
 
-        const newOrg = await db
-            .insert(orgs)
-            .values({
-                orgId,
-                name,
-                domain,
-            })
-            .returning();
+        await db.transaction(async (trx) => {
+            // create a url from config.app.base_url and get the hostname
+            const domain = new URL(config.app.base_url).hostname;
 
-        const roleId = await createAdminRole(newOrg[0].orgId);
+            const newOrg = await trx
+                .insert(orgs)
+                .values({
+                    orgId,
+                    name,
+                    domain
+                })
+                .returning();
 
-        if (!roleId) {
+            if (newOrg.length === 0) {
+                error = "Failed to create organization";
+                trx.rollback();
+                return;
+            }
+
+            org = newOrg[0];
+
+            const roleId = await createAdminRole(newOrg[0].orgId);
+
+            if (!roleId) {
+                error = "Failed to create Admin role";
+                trx.rollback();
+                return;
+            }
+
+            await trx.insert(userOrgs).values({
+                userId: req.user!.userId,
+                orgId: newOrg[0].orgId,
+                roleId: roleId,
+                isOwner: true
+            });
+
+            const memberRole = await trx
+                .insert(roles)
+                .values({
+                    name: "Member",
+                    description: "Members can only view resources",
+                    orgId
+                })
+                .returning();
+
+            await trx.insert(roleActions).values(
+                defaultRoleAllowedActions.map((action) => ({
+                    roleId: memberRole[0].roleId,
+                    actionId: action,
+                    orgId
+                }))
+            );
+        });
+
+        if (!org) {
             return next(
                 createHttpError(
                     HttpCode.INTERNAL_SERVER_ERROR,
-                    `Error creating Admin role`
+                    "Failed to createo org"
                 )
             );
         }
 
-        await db
-            .insert(userOrgs)
-            .values({
-                userId: req.user!.userId,
-                orgId: newOrg[0].orgId,
-                roleId: roleId,
-                isOwner: true,
-            })
-            .execute();
-
-        const memberRole = await db
-            .insert(roles)
-            .values({
-                name: "Member",
-                description: "Members can only view resources",
-                orgId,
-            })
-            .returning();
-
-        await db
-            .insert(roleActions)
-            .values(
-                defaultRoleAllowedActions.map((action) => ({
-                    roleId: memberRole[0].roleId,
-                    actionId: action,
-                    orgId,
-                }))
-            )
-            .execute();
+        if (error) {
+            return next(createHttpError(HttpCode.INTERNAL_SERVER_ERROR, error));
+        }
 
         return response(res, {
-            data: newOrg[0],
+            data: org,
             success: true,
             error: false,
             message: "Organization created successfully",
-            status: HttpCode.CREATED,
+            status: HttpCode.CREATED
         });
     } catch (error) {
         logger.error(error);

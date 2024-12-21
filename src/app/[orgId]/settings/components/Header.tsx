@@ -37,7 +37,7 @@ import { useEnvContext } from "@app/hooks/useEnvContext";
 import { useToast } from "@app/hooks/useToast";
 import { cn, formatAxiosError } from "@app/lib/utils";
 import { ListOrgsResponse } from "@server/routers/org";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -180,6 +180,15 @@ export default function Header({ email, orgId, name, orgs }: HeaderProps) {
                                 </CommandEmpty>
                                 <CommandGroup className="[50px]">
                                     <CommandList>
+                                        <CommandItem
+                                            className="flex items-center border border-input mb-2 cursor-pointer"
+                                            onSelect={(currentValue) => {
+                                                router.push("/setup");
+                                            }}
+                                        >
+                                            <Plus className="mr-2 h-4 w-4"/>
+                                            New Organization
+                                        </CommandItem>
                                         {orgs.map((org) => (
                                             <CommandItem
                                                 key={org.orgId}
