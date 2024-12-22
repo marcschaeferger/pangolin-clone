@@ -1,13 +1,11 @@
-import { ensureActions } from "./db/ensureActions";
 import { createApiServer } from "./apiServer";
 import { createNextServer } from "./nextServer";
 import { createInternalServer } from "./internalServer";
 import { User, UserOrg } from "./db/schema";
-import { copyInConfig } from "./setup/copyInConfig";
+import { runSetupFunctions } from "./setup";
 
 async function startServers() {
-    await ensureActions();
-    await copyInConfig();
+    await runSetupFunctions();
 
     // Start all servers
     const apiServer = createApiServer();

@@ -7,7 +7,7 @@ import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
-import { createAdminRole } from "@server/db/ensureActions";
+import { createAdminRole } from "@server/setup/ensureActions";
 import config from "@server/config";
 import { fromError } from "zod-validation-error";
 import { defaultRoleAllowedActions } from "../role";
