@@ -132,8 +132,8 @@ export default function ReverseProxyTargets(props: {
     async function addTarget(data: AddTargetFormValues) {
         // Check if target with same IP, port and method already exists
         const isDuplicate = targets.some(
-            target => target.ip === data.ip && 
-                     target.port === data.port && 
+            target => target.ip === data.ip &&
+                     target.port === data.port &&
                      target.method === data.method
         );
 
@@ -157,7 +157,7 @@ export default function ReverseProxyTargets(props: {
         setTargets([...targets, newTarget]);
         addTargetForm.reset();
     }
-    
+
     const removeTarget = (targetId: number) => {
         setTargets([
             ...targets.filter((target) => target.targetId !== targetId),
@@ -400,7 +400,7 @@ export default function ReverseProxyTargets(props: {
                                 onSubmit={addTargetForm.handleSubmit(
                                     addTarget as any,
                                 )}
-                                className="space-y-8"
+                                className="space-y-4"
                             >
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                     <FormField

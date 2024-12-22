@@ -211,7 +211,7 @@ export default function ResetPasswordForm({
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="space-y-8">
+                    <div className="space-y-4">
                         {state === "request" && (
                             <Form {...requestForm}>
                                 <form

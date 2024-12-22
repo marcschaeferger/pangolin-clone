@@ -2,6 +2,7 @@ import { verifySession } from "@app/lib/auth/verifySession";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import ResetPasswordForm from "./ResetPasswordForm";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,19 @@ export default async function Page(props: {
                 tokenParam={searchParams.token}
                 emailParam={searchParams.email}
             />
+
+            <p className="text-center text-muted-foreground mt-4">
+                <Link
+                    href={
+                        !searchParams.redirect
+                            ? `/auth/signup`
+                            : `/auth/signup?redirect=${searchParams.redirect}`
+                    }
+                    className="underline"
+                >
+                    Go to login
+                </Link>
+            </p>
         </>
     );
 }

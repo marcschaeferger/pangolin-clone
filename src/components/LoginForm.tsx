@@ -134,7 +134,7 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
                 <Form {...form}>
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
-                        className="space-y-8"
+                        className="space-y-4"
                     >
                         <FormField
                             control={form.control}
@@ -203,7 +203,7 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
                 <Form {...mfaForm}>
                     <form
                         onSubmit={mfaForm.handleSubmit(onSubmit)}
-                        className="space-y-8"
+                        className="space-y-4"
                     >
                         <FormField
                             control={mfaForm.control}

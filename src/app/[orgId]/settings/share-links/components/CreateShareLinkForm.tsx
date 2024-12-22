@@ -232,7 +232,7 @@ export default function CreateShareLinkForm({
                         </CredenzaDescription>
                     </CredenzaHeader>
                     <CredenzaBody>
-                        <div className="space-y-8">
+                        <div className="space-y-4">
                             {!link && (
                                 <Form {...form}>
                                     <form
