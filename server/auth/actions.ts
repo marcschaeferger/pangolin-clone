@@ -10,6 +10,7 @@ export enum ActionsEnum {
     // deleteOrg = "deleteOrg",
     getOrg = "getOrg",
     updateOrg = "updateOrg",
+    deleteOrg = "deleteOrg",
     createSite = "createSite",
     deleteSite = "deleteSite",
     getSite = "getSite",

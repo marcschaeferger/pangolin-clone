@@ -126,8 +126,6 @@ export async function login(
         await createSession(token, existingUser.userId);
         const cookie = serializeSessionCookie(token);
 
-        logger.debug(cookie);
-
         res.appendHeader("Set-Cookie", cookie);
 
         if (

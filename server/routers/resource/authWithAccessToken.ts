@@ -104,7 +104,6 @@ export async function authWithAccessToken(
         //     outputLen: 32,
         //     parallelism: 1
         // });
-        logger.debug(`${accessToken} ${tokenItem.tokenHash}`)
         const validCode = accessToken === tokenItem.tokenHash;
 
         if (!validCode) {

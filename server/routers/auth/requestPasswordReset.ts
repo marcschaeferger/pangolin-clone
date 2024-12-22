@@ -75,8 +75,6 @@ export async function requestPasswordReset(
         // TODO: send email with link to reset password on dashboard
         // something like: https://example.com/auth/reset-password?email=${email}&?token=${token}
         // for now, just log the token
-        logger.debug(`Password reset token: ${token}`);
-
         return response<RequestPasswordResetResponse>(res, {
             data: {
                 sentEmail: true,

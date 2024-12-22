@@ -29,7 +29,6 @@ export async function verifySiteAccess(
     }
 
     if (isNaN(siteId)) {
-        logger.debug(JSON.stringify(req.body));
         return next(createHttpError(HttpCode.BAD_REQUEST, "Invalid site ID"));
     }
 
