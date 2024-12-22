@@ -130,6 +130,22 @@ export default function ReverseProxyTargets(props: {
     }, []);
 
     async function addTarget(data: AddTargetFormValues) {
+        // Check if target with same IP, port and method already exists
+        const isDuplicate = targets.some(
+            target => target.ip === data.ip && 
+                     target.port === data.port && 
+                     target.method === data.method
+        );
+
+        if (isDuplicate) {
+            toast({
+                variant: "destructive",
+                title: "Duplicate target",
+                description: "A target with these settings already exists",
+            });
+            return;
+        }
+
         const newTarget: LocalTarget = {
             ...data,
             enabled: true,
@@ -141,7 +157,7 @@ export default function ReverseProxyTargets(props: {
         setTargets([...targets, newTarget]);
         addTargetForm.reset();
     }
-
+    
     const removeTarget = (targetId: number) => {
         setTargets([
             ...targets.filter((target) => target.targetId !== targetId),
