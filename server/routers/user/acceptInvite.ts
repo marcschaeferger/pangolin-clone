@@ -11,10 +11,12 @@ import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { isWithinExpirationDate } from "oslo";
 
-const acceptInviteBodySchema = z.object({
-    token: z.string(),
-    inviteId: z.string(),
-});
+const acceptInviteBodySchema = z
+    .object({
+        token: z.string(),
+        inviteId: z.string()
+    })
+    .strict();
 
 export type AcceptInviteResponse = {
     accepted: boolean;
@@ -64,7 +66,7 @@ export async function acceptInvite(
             memoryCost: 19456,
             timeCost: 2,
             outputLen: 32,
-            parallelism: 1,
+            parallelism: 1
         });
         if (!validToken) {
             return next(
@@ -121,7 +123,7 @@ export async function acceptInvite(
         await db.insert(userOrgs).values({
             userId: existingUser[0].userId,
             orgId: existingInvite[0].orgId,
-            roleId: existingInvite[0].roleId,
+            roleId: existingInvite[0].roleId
         });
 
         // delete the invite
@@ -132,7 +134,7 @@ export async function acceptInvite(
             success: true,
             error: false,
             message: "Invite accepted",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

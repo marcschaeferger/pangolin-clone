@@ -14,14 +14,22 @@ import {
     serializeResourceSessionCookie
 } from "@server/auth/resource";
 import config from "@server/config";
+import logger from "@server/logger";
 
-export const authWithPasswordBodySchema = z.object({
-    password: z.string()
-});
+export const authWithPasswordBodySchema = z
+    .object({
+        password: z.string()
+    })
+    .strict();
 
-export const authWithPasswordParamsSchema = z.object({
-    resourceId: z.string().transform(Number).pipe(z.number().int().positive())
-});
+export const authWithPasswordParamsSchema = z
+    .object({
+        resourceId: z
+            .string()
+            .transform(Number)
+            .pipe(z.number().int().positive())
+    })
+    .strict();
 
 export type AuthWithPasswordResponse = {
     session?: string;
@@ -120,10 +128,7 @@ export async function authWithPassword(
             passwordId: definedPassword.passwordId
         });
         const cookieName = `${config.server.resource_session_cookie_name}_${resource.resourceId}`;
-        const cookie = serializeResourceSessionCookie(
-            cookieName,
-            token,
-        );
+        const cookie = serializeResourceSessionCookie(cookieName, token);
         res.appendHeader("Set-Cookie", cookie);
 
         return response<AuthWithPasswordResponse>(res, {
@@ -136,6 +141,7 @@ export async function authWithPassword(
             status: HttpCode.OK
         });
     } catch (e) {
+        logger.error(e);
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,

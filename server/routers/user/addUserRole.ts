@@ -10,10 +10,12 @@ import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import stoi from "@server/utils/stoi";
 
-const addUserRoleParamsSchema = z.object({
-    userId: z.string(),
-    roleId: z.string().transform(stoi).pipe(z.number()),
-});
+const addUserRoleParamsSchema = z
+    .object({
+        userId: z.string(),
+        roleId: z.string().transform(stoi).pipe(z.number())
+    })
+    .strict();
 
 export type AddUserRoleResponse = z.infer<typeof addUserRoleParamsSchema>;
 
@@ -96,7 +98,7 @@ export async function addUserRole(
             success: true,
             error: false,
             message: "Role added to user successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

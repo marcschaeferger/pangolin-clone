@@ -9,9 +9,11 @@ import { resourceAccessToken } from "@server/db/schema";
 import { and, eq } from "drizzle-orm";
 import db from "@server/db";
 
-const deleteAccessTokenParamsSchema = z.object({
-    accessTokenId: z.string()
-});
+const deleteAccessTokenParamsSchema = z
+    .object({
+        accessTokenId: z.string()
+    })
+    .strict();
 
 export async function deleteAccessToken(
     req: Request,

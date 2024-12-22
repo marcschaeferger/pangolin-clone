@@ -8,24 +8,28 @@ import createHttpError from "http-errors";
 import { sql } from "drizzle-orm";
 import logger from "@server/logger";
 
-const listUsersParamsSchema = z.object({
-    orgId: z.string(),
-});
+const listUsersParamsSchema = z
+    .object({
+        orgId: z.string()
+    })
+    .strict();
 
-const listUsersSchema = z.object({
-    limit: z
-        .string()
-        .optional()
-        .default("1000")
-        .transform(Number)
-        .pipe(z.number().int().nonnegative()),
-    offset: z
-        .string()
-        .optional()
-        .default("0")
-        .transform(Number)
-        .pipe(z.number().int().nonnegative()),
-});
+const listUsersSchema = z
+    .object({
+        limit: z
+            .string()
+            .optional()
+            .default("1000")
+            .transform(Number)
+            .pipe(z.number().int().nonnegative()),
+        offset: z
+            .string()
+            .optional()
+            .default("0")
+            .transform(Number)
+            .pipe(z.number().int().nonnegative())
+    })
+    .strict();
 
 async function queryUsers(orgId: string, limit: number, offset: number) {
     return await db
@@ -37,7 +41,7 @@ async function queryUsers(orgId: string, limit: number, offset: number) {
             orgId: userOrgs.orgId,
             roleId: userOrgs.roleId,
             roleName: roles.name,
-            isOwner: userOrgs.isOwner,
+            isOwner: userOrgs.isOwner
         })
         .from(users)
         .leftJoin(userOrgs, sql`${users.userId} = ${userOrgs.userId}`)
@@ -97,13 +101,13 @@ export async function listUsers(
                 pagination: {
                     total: count,
                     limit,
-                    offset,
-                },
+                    offset
+                }
             },
             success: true,
             error: false,
             message: "Users retrieved successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { roles, userSites, sites, roleSites } from "@server/db/schema";
+import { roles, userSites, sites, roleSites, Site } from "@server/db/schema";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
@@ -14,9 +14,11 @@ import { hash } from "@node-rs/argon2";
 import { newts } from "@server/db/schema";
 import moment from "moment";
 
-const createSiteParamsSchema = z.object({
-    orgId: z.string(),
-});
+const createSiteParamsSchema = z
+    .object({
+        orgId: z.string()
+    })
+    .strict();
 
 const createSiteSchema = z
     .object({
@@ -27,18 +29,13 @@ const createSiteSchema = z
         subnet: z.string(),
         newtId: z.string().optional(),
         secret: z.string().optional(),
-        type: z.string(),
+        type: z.string()
     })
     .strict();
 
 export type CreateSiteBody = z.infer<typeof createSiteSchema>;
 
-export type CreateSiteResponse = {
-    name: string;
-    siteId: number;
-    orgId: string;
-    niceId: string;
-};
+export type CreateSiteResponse = Site;
 
 export async function createSite(
     req: Request,
@@ -85,14 +82,14 @@ export async function createSite(
             name,
             niceId,
             subnet,
-            type,
+            type
         };
 
         if (pubKey && type == "wireguard") {
             // we dont add the pubKey for newts because the newt will generate it
             payload = {
                 ...payload,
-                pubKey,
+                pubKey
             };
         }
 
@@ -112,14 +109,14 @@ export async function createSite(
 
         await db.insert(roleSites).values({
             roleId: adminRole[0].roleId,
-            siteId: newSite.siteId,
+            siteId: newSite.siteId
         });
 
         if (req.userOrgRoleId != adminRole[0].roleId) {
             // make sure the user can access the site
             db.insert(userSites).values({
                 userId: req.user?.userId!,
-                siteId: newSite.siteId,
+                siteId: newSite.siteId
             });
         }
 
@@ -129,14 +126,14 @@ export async function createSite(
                 memoryCost: 19456,
                 timeCost: 2,
                 outputLen: 32,
-                parallelism: 1,
+                parallelism: 1
             });
 
             await db.insert(newts).values({
                 newtId: newtId!,
                 secretHash,
                 siteId: newSite.siteId,
-                dateCreated: moment().toISOString(),
+                dateCreated: moment().toISOString()
             });
         } else if (type == "wireguard") {
             if (!pubKey) {
@@ -149,23 +146,19 @@ export async function createSite(
             }
             await addPeer(exitNodeId, {
                 publicKey: pubKey,
-                allowedIps: [],
+                allowedIps: []
             });
         }
 
-        return response(res, {
-            data: {
-                name: newSite.name,
-                niceId: newSite.niceId,
-                siteId: newSite.siteId,
-                orgId: newSite.orgId,
-            },
+        return response<CreateSiteResponse>(res, {
+            data: newSite,
             success: true,
             error: false,
             message: "Site created successfully",
-            status: HttpCode.CREATED,
+            status: HttpCode.CREATED
         });
     } catch (error) {
+        logger.error(error);
         return next(
             createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );

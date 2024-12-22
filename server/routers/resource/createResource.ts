@@ -1,3 +1,4 @@
+import { SqliteError } from "better-sqlite3";
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
@@ -7,7 +8,7 @@ import {
     resources,
     roleResources,
     roles,
-    userResources,
+    userResources
 } from "@server/db/schema";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
@@ -16,16 +17,19 @@ import { eq, and } from "drizzle-orm";
 import stoi from "@server/utils/stoi";
 import { fromError } from "zod-validation-error";
 import { subdomainSchema } from "@server/schemas/subdomainSchema";
+import logger from "@server/logger";
 
-const createResourceParamsSchema = z.object({
-    siteId: z.string().transform(stoi).pipe(z.number().int().positive()),
-    orgId: z.string(),
-});
+const createResourceParamsSchema = z
+    .object({
+        siteId: z.string().transform(stoi).pipe(z.number().int().positive()),
+        orgId: z.string()
+    })
+    .strict();
 
 const createResourceSchema = z
     .object({
         name: z.string().min(1).max(255),
-        subdomain: subdomainSchema,
+        subdomain: subdomainSchema
     })
     .strict();
 
@@ -94,7 +98,7 @@ export async function createResource(
                 orgId,
                 name,
                 subdomain,
-                ssl: true,
+                ssl: true
             })
             .returning();
 
@@ -112,14 +116,14 @@ export async function createResource(
 
         await db.insert(roleResources).values({
             roleId: adminRole[0].roleId,
-            resourceId: newResource[0].resourceId,
+            resourceId: newResource[0].resourceId
         });
 
         if (req.userOrgRoleId != adminRole[0].roleId) {
             // make sure the user can access the resource
             await db.insert(userResources).values({
                 userId: req.user?.userId!,
-                resourceId: newResource[0].resourceId,
+                resourceId: newResource[0].resourceId
             });
         }
 
@@ -128,9 +132,22 @@ export async function createResource(
             success: true,
             error: false,
             message: "Resource created successfully",
-            status: HttpCode.CREATED,
+            status: HttpCode.CREATED
         });
     } catch (error) {
+        if (
+            error instanceof SqliteError &&
+            error.code === "SQLITE_CONSTRAINT_UNIQUE"
+        ) {
+            return next(
+                createHttpError(
+                    HttpCode.CONFLICT,
+                    "Resource with that subdomain already exists"
+                )
+            );
+        }
+
+        logger.error(error);
         return next(
             createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );

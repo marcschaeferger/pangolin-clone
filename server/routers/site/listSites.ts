@@ -1,5 +1,6 @@
 import { db } from "@server/db";
 import { orgs, roleSites, sites, userSites } from "@server/db/schema";
+import logger from "@server/logger";
 import HttpCode from "@server/types/HttpCode";
 import response from "@server/utils/response";
 import { and, count, eq, inArray, or, sql } from "drizzle-orm";
@@ -8,9 +9,11 @@ import createHttpError from "http-errors";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
 
-const listSitesParamsSchema = z.object({
-    orgId: z.string(),
-});
+const listSitesParamsSchema = z
+    .object({
+        orgId: z.string()
+    })
+    .strict();
 
 const listSitesSchema = z.object({
     limit: z
@@ -24,7 +27,7 @@ const listSitesSchema = z.object({
         .optional()
         .default("0")
         .transform(Number)
-        .pipe(z.number().int().nonnegative()),
+        .pipe(z.number().int().nonnegative())
 });
 
 function querySites(orgId: string, accessibleSiteIds: number[]) {
@@ -39,15 +42,15 @@ function querySites(orgId: string, accessibleSiteIds: number[]) {
             megabytesOut: sites.megabytesOut,
             orgName: orgs.name,
             type: sites.type,
-            online: sites.online,
+            online: sites.online
         })
         .from(sites)
         .leftJoin(orgs, eq(sites.orgId, orgs.orgId))
         .where(
             and(
                 inArray(sites.siteId, accessibleSiteIds),
-                eq(sites.orgId, orgId),
-            ),
+                eq(sites.orgId, orgId)
+            )
         );
 }
 
@@ -59,7 +62,7 @@ export type ListSitesResponse = {
 export async function listSites(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
 ): Promise<any> {
     try {
         const parsedQuery = listSitesSchema.safeParse(req.query);
@@ -67,8 +70,8 @@ export async function listSites(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    fromError(parsedQuery.error),
-                ),
+                    fromError(parsedQuery.error)
+                )
             );
         }
         const { limit, offset } = parsedQuery.data;
@@ -78,8 +81,8 @@ export async function listSites(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    fromError(parsedParams.error),
-                ),
+                    fromError(parsedParams.error)
+                )
             );
         }
         const { orgId } = parsedParams.data;
@@ -88,22 +91,22 @@ export async function listSites(
             return next(
                 createHttpError(
                     HttpCode.FORBIDDEN,
-                    "User does not have access to this organization",
-                ),
+                    "User does not have access to this organization"
+                )
             );
         }
 
         const accessibleSites = await db
             .select({
-                siteId: sql<number>`COALESCE(${userSites.siteId}, ${roleSites.siteId})`,
+                siteId: sql<number>`COALESCE(${userSites.siteId}, ${roleSites.siteId})`
             })
             .from(userSites)
             .fullJoin(roleSites, eq(userSites.siteId, roleSites.siteId))
             .where(
                 or(
                     eq(userSites.userId, req.user!.userId),
-                    eq(roleSites.roleId, req.userOrgRoleId!),
-                ),
+                    eq(roleSites.roleId, req.userOrgRoleId!)
+                )
             );
 
         const accessibleSiteIds = accessibleSites.map((site) => site.siteId);
@@ -115,8 +118,8 @@ export async function listSites(
             .where(
                 and(
                     inArray(sites.siteId, accessibleSiteIds),
-                    eq(sites.orgId, orgId),
-                ),
+                    eq(sites.orgId, orgId)
+                )
             );
 
         const sitesList = await baseQuery.limit(limit).offset(offset);
@@ -129,20 +132,18 @@ export async function listSites(
                 pagination: {
                     total: totalCount,
                     limit,
-                    offset,
-                },
+                    offset
+                }
             },
             success: true,
             error: false,
             message: "Sites retrieved successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
+        logger.error(error);
         return next(
-            createHttpError(
-                HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred",
-            ),
+            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
 }

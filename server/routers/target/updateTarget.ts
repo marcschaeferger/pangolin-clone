@@ -11,20 +11,22 @@ import { fromError } from "zod-validation-error";
 import { addPeer } from "../gerbil/peers";
 import { addTargets } from "../newt/targets";
 
-const updateTargetParamsSchema = z.object({
-    targetId: z.string().transform(Number).pipe(z.number().int().positive()),
-});
+const updateTargetParamsSchema = z
+    .object({
+        targetId: z.string().transform(Number).pipe(z.number().int().positive())
+    })
+    .strict();
 
 const updateTargetBodySchema = z
     .object({
         ip: z.string().ip().optional(), // for now we cant update the ip; you will have to delete
         method: z.string().min(1).max(10).optional(),
         port: z.number().int().min(1).max(65535).optional(),
-        enabled: z.boolean().optional(),
+        enabled: z.boolean().optional()
     })
     .strict()
     .refine((data) => Object.keys(data).length > 0, {
-        message: "At least one field must be provided for update",
+        message: "At least one field must be provided for update"
     });
 
 export async function updateTarget(
@@ -74,7 +76,7 @@ export async function updateTarget(
         // get the resource
         const [resource] = await db
             .select({
-                siteId: resources.siteId,
+                siteId: resources.siteId
             })
             .from(resources)
             .where(eq(resources.resourceId, updatedTarget.resourceId!));
@@ -107,14 +109,14 @@ export async function updateTarget(
                 // TODO: is this all inefficient?
                 // Fetch resources for this site
                 const resourcesRes = await db.query.resources.findMany({
-                    where: eq(resources.siteId, site.siteId),
+                    where: eq(resources.siteId, site.siteId)
                 });
 
                 // Fetch targets for all resources of this site
                 const targetIps = await Promise.all(
                     resourcesRes.map(async (resource) => {
                         const targetsRes = await db.query.targets.findMany({
-                            where: eq(targets.resourceId, resource.resourceId),
+                            where: eq(targets.resourceId, resource.resourceId)
                         });
                         return targetsRes.map((target) => `${target.ip}/32`);
                     })
@@ -122,7 +124,7 @@ export async function updateTarget(
 
                 await addPeer(site.exitNodeId!, {
                     publicKey: site.pubKey,
-                    allowedIps: targetIps.flat(),
+                    allowedIps: targetIps.flat()
                 });
             } else if (site.type == "newt") {
                 // get the newt on the site by querying the newt table for siteId
@@ -140,7 +142,7 @@ export async function updateTarget(
             success: true,
             error: false,
             message: "Target updated successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

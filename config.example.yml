@@ -25,9 +25,10 @@ gerbil:
     block_size: 16
     subnet_group: 10.0.0.0/8
 
-rate_limit:
-    window_minutes: 1
-    max_requests: 100
+rate_limits:
+    global:
+        window_minutes: 1
+        max_requests: 100
 
 email:
     smtp_host: host.hoster.net

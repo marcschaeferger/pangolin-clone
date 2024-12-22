@@ -9,10 +9,12 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
-const removeUserSchema = z.object({
-    userId: z.string(),
-    orgId: z.string(),
-});
+const removeUserSchema = z
+    .object({
+        userId: z.string(),
+        orgId: z.string()
+    })
+    .strict();
 
 export async function removeUserOrg(
     req: Request,
@@ -70,7 +72,7 @@ export async function removeUserOrg(
             success: true,
             error: false,
             message: "User remove from org successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

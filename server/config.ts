@@ -16,7 +16,7 @@ const environmentSchema = z.object({
     app: z.object({
         base_url: z.string().url(),
         log_level: z.enum(["debug", "info", "warn", "error"]),
-        save_logs: z.boolean(),
+        save_logs: z.boolean()
     }),
     server: z.object({
         external_port: portSchema,
@@ -26,24 +26,32 @@ const environmentSchema = z.object({
         secure_cookies: z.boolean(),
         signup_secret: z.string().optional(),
         session_cookie_name: z.string(),
-        resource_session_cookie_name: z.string(),
+        resource_session_cookie_name: z.string()
     }),
     traefik: z.object({
         http_entrypoint: z.string(),
         https_entrypoint: z.string().optional(),
         cert_resolver: z.string().optional(),
-        prefer_wildcard_cert: z.boolean().optional(),
+        prefer_wildcard_cert: z.boolean().optional()
     }),
     gerbil: z.object({
         start_port: portSchema,
         base_endpoint: z.string(),
         use_subdomain: z.boolean(),
         subnet_group: z.string(),
-        block_size: z.number().positive().gt(0),
+        block_size: z.number().positive().gt(0)
     }),
-    rate_limit: z.object({
-        window_minutes: z.number().positive().gt(0),
-        max_requests: z.number().positive().gt(0),
+    rate_limits: z.object({
+        global: z.object({
+            window_minutes: z.number().positive().gt(0),
+            max_requests: z.number().positive().gt(0)
+        }),
+        auth: z
+            .object({
+                window_minutes: z.number().positive().gt(0),
+                max_requests: z.number().positive().gt(0)
+            })
+            .optional()
     }),
     email: z
         .object({
@@ -51,7 +59,7 @@ const environmentSchema = z.object({
             smtp_port: portSchema.optional(),
             smtp_user: z.string().optional(),
             smtp_pass: z.string().optional(),
-            no_reply: z.string().email().optional(),
+            no_reply: z.string().email().optional()
         })
         .optional(),
     flags: z
@@ -59,9 +67,9 @@ const environmentSchema = z.object({
             allow_org_subdomain_changing: z.boolean().optional(),
             require_email_verification: z.boolean().optional(),
             disable_signup_without_invite: z.boolean().optional(),
-            require_signup_secret: z.boolean().optional(),
+            require_signup_secret: z.boolean().optional()
         })
-        .optional(),
+        .optional()
 });
 
 const loadConfig = (configPath: string) => {
@@ -72,7 +80,7 @@ const loadConfig = (configPath: string) => {
     } catch (error) {
         if (error instanceof Error) {
             throw new Error(
-                `Error loading configuration file: ${error.message}`,
+                `Error loading configuration file: ${error.message}`
             );
         }
         throw error;
@@ -94,21 +102,21 @@ if (!environment) {
         try {
             const exampleConfigContent = fs.readFileSync(
                 exampleConfigPath,
-                "utf8",
+                "utf8"
             );
             fs.writeFileSync(configFilePath1, exampleConfigContent, "utf8");
             environment = loadConfig(configFilePath1);
         } catch (error) {
             if (error instanceof Error) {
                 throw new Error(
-                    `Error creating configuration file from example: ${error.message}`,
+                    `Error creating configuration file from example: ${error.message}`
                 );
             }
             throw error;
         }
     } else {
         throw new Error(
-            "No configuration file found and no example configuration available",
+            "No configuration file found and no example configuration available"
         );
     }
 }

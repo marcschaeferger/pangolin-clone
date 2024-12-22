@@ -139,39 +139,36 @@ export async function verifyResourceSession(
             );
 
             if (resourceSession) {
-                return allowed(res);
+                if (pincode && resourceSession.pincodeId) {
+                    logger.debug(
+                        "Resource allowed because pincode session is valid"
+                    );
+                    return allowed(res);
+                }
 
-                // Might not be needed
-                // if (pincode && resourceSession.pincodeId) {
-                //     logger.debug(
-                //         "Resource allowed because pincode session is valid"
-                //     );
-                //     return allowed(res);
-                // }
-                //
-                // if (password && resourceSession.passwordId) {
-                //     logger.debug(
-                //         "Resource allowed because password session is valid"
-                //     );
-                //     return allowed(res);
-                // }
-                //
-                // if (
-                //     resource.emailWhitelistEnabled &&
-                //     resourceSession.whitelistId
-                // ) {
-                //     logger.debug(
-                //         "Resource allowed because whitelist session is valid"
-                //     );
-                //     return allowed(res);
-                // }
-                //
-                // if (resourceSession.accessTokenId) {
-                //     logger.debug(
-                //         "Resource allowed because access token session is valid"
-                //     );
-                //     return allowed(res);
-                // }
+                if (password && resourceSession.passwordId) {
+                    logger.debug(
+                        "Resource allowed because password session is valid"
+                    );
+                    return allowed(res);
+                }
+
+                if (
+                    resource.emailWhitelistEnabled &&
+                    resourceSession.whitelistId
+                ) {
+                    logger.debug(
+                        "Resource allowed because whitelist session is valid"
+                    );
+                    return allowed(res);
+                }
+
+                if (resourceSession.accessTokenId) {
+                    logger.debug(
+                        "Resource allowed because access token session is valid"
+                    );
+                    return allowed(res);
+                }
             }
         }
 

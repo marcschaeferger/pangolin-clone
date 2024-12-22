@@ -3,8 +3,9 @@ import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
 import { response } from "@server/utils";
 import { User } from "@server/db/schema";
-import { sendEmailVerificationCode } from "./sendEmailVerificationCode";
+import { sendEmailVerificationCode } from "../../auth/sendEmailVerificationCode";
 import config from "@server/config";
+import logger from "@server/logger";
 
 export type RequestEmailVerificationCodeResponse = {
     codeSent: boolean;
@@ -40,14 +41,15 @@ export async function requestEmailVerificationCode(
 
         return response<RequestEmailVerificationCodeResponse>(res, {
             data: {
-                codeSent: true,
+                codeSent: true
             },
             status: HttpCode.OK,
             success: true,
             error: false,
-            message: `Email verification code sent to ${user.email}`,
+            message: `Email verification code sent to ${user.email}`
         });
     } catch (error) {
+        logger.error(error);
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,

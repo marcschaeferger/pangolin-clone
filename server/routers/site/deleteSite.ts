@@ -11,9 +11,11 @@ import { deletePeer } from "../gerbil/peers";
 import { fromError } from "zod-validation-error";
 import { sendToClient } from "../ws";
 
-const deleteSiteSchema = z.object({
-    siteId: z.string().transform(Number).pipe(z.number().int().positive()),
-});
+const deleteSiteSchema = z
+    .object({
+        siteId: z.string().transform(Number).pipe(z.number().int().positive())
+    })
+    .strict();
 
 export async function deleteSite(
     req: Request,
@@ -60,7 +62,7 @@ export async function deleteSite(
                 if (deletedNewt) {
                     const payload = {
                         type: `newt/terminate`,
-                        data: {},
+                        data: {}
                     };
                     sendToClient(deletedNewt.newtId, payload);
 
@@ -79,7 +81,7 @@ export async function deleteSite(
             success: true,
             error: false,
             message: "Site deleted successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

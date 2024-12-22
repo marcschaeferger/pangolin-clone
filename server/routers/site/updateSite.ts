@@ -9,14 +9,16 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
-const updateSiteParamsSchema = z.object({
-    siteId: z.string().transform(Number).pipe(z.number().int().positive()),
-});
+const updateSiteParamsSchema = z
+    .object({
+        siteId: z.string().transform(Number).pipe(z.number().int().positive())
+    })
+    .strict();
 
 const updateSiteBodySchema = z
     .object({
         name: z.string().min(1).max(255).optional(),
-        subdomain: z.string().min(1).max(255).optional(),
+        subdomain: z.string().min(1).max(255).optional()
         // pubKey: z.string().optional(),
         // subnet: z.string().optional(),
         // exitNode: z.number().int().positive().optional(),
@@ -25,7 +27,7 @@ const updateSiteBodySchema = z
     })
     .strict()
     .refine((data) => Object.keys(data).length > 0, {
-        message: "At least one field must be provided for update",
+        message: "At least one field must be provided for update"
     });
 
 export async function updateSite(
@@ -77,7 +79,7 @@ export async function updateSite(
             success: true,
             error: false,
             message: "Site updated successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

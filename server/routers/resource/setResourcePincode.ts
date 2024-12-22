@@ -9,6 +9,7 @@ import { fromError } from "zod-validation-error";
 import { hash } from "@node-rs/argon2";
 import { response } from "@server/utils";
 import stoi from "@server/utils/stoi";
+import logger from "@server/logger";
 
 const setResourceAuthMethodsParamsSchema = z.object({
     resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
@@ -81,6 +82,7 @@ export async function setResourcePincode(
             status: HttpCode.CREATED,
         });
     } catch (error) {
+        logger.error(error);
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,

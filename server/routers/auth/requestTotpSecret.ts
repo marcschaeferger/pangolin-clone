@@ -12,10 +12,13 @@ import { eq } from "drizzle-orm";
 import { verify } from "@node-rs/argon2";
 import { createTOTPKeyURI } from "oslo/otp";
 import config from "@server/config";
+import logger from "@server/logger";
 
-export const requestTotpSecretBody = z.object({
-    password: z.string(),
-});
+export const requestTotpSecretBody = z
+    .object({
+        password: z.string()
+    })
+    .strict();
 
 export type RequestTotpSecretBody = z.infer<typeof requestTotpSecretBody>;
 
@@ -26,7 +29,7 @@ export type RequestTotpSecretResponse = {
 export async function requestTotpSecret(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
 ): Promise<any> {
     const parsedBody = requestTotpSecretBody.safeParse(req.body);
 
@@ -34,8 +37,8 @@ export async function requestTotpSecret(
         return next(
             createHttpError(
                 HttpCode.BAD_REQUEST,
-                fromError(parsedBody.error).toString(),
-            ),
+                fromError(parsedBody.error).toString()
+            )
         );
     }
 
@@ -48,7 +51,7 @@ export async function requestTotpSecret(
             memoryCost: 19456,
             timeCost: 2,
             outputLen: 32,
-            parallelism: 1,
+            parallelism: 1
         });
         if (!validPassword) {
             return next(unauthorized());
@@ -58,8 +61,8 @@ export async function requestTotpSecret(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    "User has already enabled two-factor authentication",
-                ),
+                    "User has already enabled two-factor authentication"
+                )
             );
         }
 
@@ -70,25 +73,26 @@ export async function requestTotpSecret(
         await db
             .update(users)
             .set({
-                twoFactorSecret: secret,
+                twoFactorSecret: secret
             })
             .where(eq(users.userId, user.userId));
 
         return response<RequestTotpSecretResponse>(res, {
             data: {
-                secret: uri,
+                secret: uri
             },
             success: true,
             error: false,
             message: "TOTP secret generated successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
+        logger.error(error);
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,
-                "Failed to generate TOTP secret",
-            ),
+                "Failed to generate TOTP secret"
+            )
         );
     }
 }

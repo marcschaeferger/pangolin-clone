@@ -5,11 +5,12 @@ import { fromError } from "zod-validation-error";
 import HttpCode from "@server/types/HttpCode";
 import { response } from "@server/utils";
 import { validateResourceSessionToken } from "@server/auth/resource";
+import logger from "@server/logger";
 
 export const params = z.object({
     token: z.string(),
     resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
-});
+}).strict();
 
 export type CheckResourceSessionParams = z.infer<typeof params>;
 
@@ -54,6 +55,7 @@ export async function checkResourceSession(
             status: HttpCode.OK,
         });
     } catch (e) {
+        logger.error(e);
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,

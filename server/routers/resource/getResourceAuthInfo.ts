@@ -4,17 +4,23 @@ import { db } from "@server/db";
 import {
     resourcePassword,
     resourcePincode,
-    resources,
+    resources
 } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import { fromError } from "zod-validation-error";
+import logger from "@server/logger";
 
-const getResourceAuthInfoSchema = z.object({
-    resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
-});
+const getResourceAuthInfoSchema = z
+    .object({
+        resourceId: z
+            .string()
+            .transform(Number)
+            .pipe(z.number().int().positive())
+    })
+    .strict();
 
 export type GetResourceAuthInfoResponse = {
     resourceId: number;
@@ -30,7 +36,7 @@ export type GetResourceAuthInfoResponse = {
 export async function getResourceAuthInfo(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
 ): Promise<any> {
     try {
         const parsedParams = getResourceAuthInfoSchema.safeParse(req.params);
@@ -38,8 +44,8 @@ export async function getResourceAuthInfo(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    fromError(parsedParams.error).toString(),
-                ),
+                    fromError(parsedParams.error).toString()
+                )
             );
         }
 
@@ -50,11 +56,11 @@ export async function getResourceAuthInfo(
             .from(resources)
             .leftJoin(
                 resourcePincode,
-                eq(resourcePincode.resourceId, resources.resourceId),
+                eq(resourcePincode.resourceId, resources.resourceId)
             )
             .leftJoin(
                 resourcePassword,
-                eq(resourcePassword.resourceId, resources.resourceId),
+                eq(resourcePassword.resourceId, resources.resourceId)
             )
             .where(eq(resources.resourceId, resourceId))
             .limit(1);
@@ -67,7 +73,7 @@ export async function getResourceAuthInfo(
 
         if (!resource) {
             return next(
-                createHttpError(HttpCode.NOT_FOUND, "Resource not found"),
+                createHttpError(HttpCode.NOT_FOUND, "Resource not found")
             );
         }
 
@@ -85,14 +91,12 @@ export async function getResourceAuthInfo(
             success: true,
             error: false,
             message: "Resource auth info retrieved successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
+        logger.error(error);
         return next(
-            createHttpError(
-                HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred",
-            ),
+            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
 }

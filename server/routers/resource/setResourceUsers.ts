@@ -9,13 +9,20 @@ import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { eq } from "drizzle-orm";
 
-const setUserResourcesBodySchema = z.object({
-    userIds: z.array(z.string()),
-});
+const setUserResourcesBodySchema = z
+    .object({
+        userIds: z.array(z.string())
+    })
+    .strict();
 
-const setUserResourcesParamsSchema = z.object({
-    resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
-});
+const setUserResourcesParamsSchema = z
+    .object({
+        resourceId: z
+            .string()
+            .transform(Number)
+            .pipe(z.number().int().positive())
+    })
+    .strict();
 
 export async function setResourceUsers(
     req: Request,
@@ -66,7 +73,7 @@ export async function setResourceUsers(
                 success: true,
                 error: false,
                 message: "Users set for resource successfully",
-                status: HttpCode.CREATED,
+                status: HttpCode.CREATED
             });
         });
     } catch (error) {

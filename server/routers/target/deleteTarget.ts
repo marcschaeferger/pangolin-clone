@@ -11,9 +11,11 @@ import { addPeer } from "../gerbil/peers";
 import { fromError } from "zod-validation-error";
 import { removeTargets } from "../newt/targets";
 
-const deleteTargetSchema = z.object({
-    targetId: z.string().transform(Number).pipe(z.number().int().positive()),
-});
+const deleteTargetSchema = z
+    .object({
+        targetId: z.string().transform(Number).pipe(z.number().int().positive())
+    })
+    .strict();
 
 export async function deleteTarget(
     req: Request,
@@ -49,7 +51,7 @@ export async function deleteTarget(
         // get the resource
         const [resource] = await db
             .select({
-                siteId: resources.siteId,
+                siteId: resources.siteId
             })
             .from(resources)
             .where(eq(resources.resourceId, deletedTarget.resourceId!));
@@ -83,14 +85,14 @@ export async function deleteTarget(
                 // TODO: is this all inefficient?
                 // Fetch resources for this site
                 const resourcesRes = await db.query.resources.findMany({
-                    where: eq(resources.siteId, site.siteId),
+                    where: eq(resources.siteId, site.siteId)
                 });
 
                 // Fetch targets for all resources of this site
                 const targetIps = await Promise.all(
                     resourcesRes.map(async (resource) => {
                         const targetsRes = await db.query.targets.findMany({
-                            where: eq(targets.resourceId, resource.resourceId),
+                            where: eq(targets.resourceId, resource.resourceId)
                         });
                         return targetsRes.map((target) => `${target.ip}/32`);
                     })
@@ -98,7 +100,7 @@ export async function deleteTarget(
 
                 await addPeer(site.exitNodeId!, {
                     publicKey: site.pubKey,
-                    allowedIps: targetIps.flat(),
+                    allowedIps: targetIps.flat()
                 });
             } else if (site.type == "newt") {
                 // get the newt on the site by querying the newt table for siteId
@@ -117,7 +119,7 @@ export async function deleteTarget(
             success: true,
             error: false,
             message: "Target deleted successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

@@ -9,18 +9,20 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
-const updateOrgParamsSchema = z.object({
-    orgId: z.string(),
-});
+const updateOrgParamsSchema = z
+    .object({
+        orgId: z.string()
+    })
+    .strict();
 
 const updateOrgBodySchema = z
     .object({
         name: z.string().min(1).max(255).optional(),
-        domain: z.string().min(1).max(255).optional(),
+        domain: z.string().min(1).max(255).optional()
     })
     .strict()
     .refine((data) => Object.keys(data).length > 0, {
-        message: "At least one field must be provided for update",
+        message: "At least one field must be provided for update"
     });
 
 export async function updateOrg(
@@ -72,7 +74,7 @@ export async function updateOrg(
             success: true,
             error: false,
             message: "Organization updated successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

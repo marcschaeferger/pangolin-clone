@@ -10,9 +10,11 @@ import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
-const deleteOrgSchema = z.object({
-    orgId: z.string(),
-});
+const deleteOrgSchema = z
+    .object({
+        orgId: z.string()
+    })
+    .strict();
 
 export async function deleteOrg(
     req: Request,
@@ -65,7 +67,7 @@ export async function deleteOrg(
             success: true,
             error: false,
             message: "Organization deleted successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

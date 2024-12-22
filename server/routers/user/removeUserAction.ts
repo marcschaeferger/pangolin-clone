@@ -9,14 +9,18 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
-const removeUserActionParamsSchema = z.object({
-    userId: z.string(),
-});
+const removeUserActionParamsSchema = z
+    .object({
+        userId: z.string()
+    })
+    .strict();
 
-const removeUserActionSchema = z.object({
-    actionId: z.string(),
-    orgId: z.string(),
-});
+const removeUserActionSchema = z
+    .object({
+        actionId: z.string(),
+        orgId: z.string()
+    })
+    .strict();
 
 export async function removeUserAction(
     req: Request,
@@ -73,7 +77,7 @@ export async function removeUserAction(
             success: true,
             error: false,
             message: "Action removed from user successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

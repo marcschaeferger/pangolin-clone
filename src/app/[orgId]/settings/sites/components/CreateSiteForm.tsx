@@ -8,7 +8,7 @@ import {
     FormField,
     FormItem,
     FormLabel,
-    FormMessage,
+    FormMessage
 } from "@app/components/ui/form";
 import { Input } from "@app/components/ui/input";
 import { useToast } from "@app/hooks/useToast";
@@ -24,11 +24,15 @@ import {
     CredenzaDescription,
     CredenzaFooter,
     CredenzaHeader,
-    CredenzaTitle,
+    CredenzaTitle
 } from "@app/components/Credenza";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { useParams, useRouter } from "next/navigation";
-import { CreateSiteBody, PickSiteDefaultsResponse } from "@server/routers/site";
+import {
+    CreateSiteBody,
+    CreateSiteResponse,
+    PickSiteDefaultsResponse
+} from "@server/routers/site";
 import { generateKeypair } from "../[niceId]/components/wireguardConfig";
 import CopyTextBox from "@app/components/CopyTextBox";
 import { Checkbox } from "@app/components/ui/checkbox";
@@ -37,42 +41,49 @@ import {
     SelectContent,
     SelectItem,
     SelectTrigger,
-    SelectValue,
+    SelectValue
 } from "@app/components/ui/select";
 import { formatAxiosError } from "@app/lib/utils";
 import { createApiClient } from "@app/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
+import { SiteRow } from "./SitesTable";
+import { AxiosResponse } from "axios";
 
 const method = [
     { label: "Newt", value: "newt" },
-    { label: "Wireguard", value: "wireguard" },
+    { label: "WireGuard", value: "wireguard" }
 ] as const;
 
-const accountFormSchema = z.object({
+const createSiteFormSchema = z.object({
     name: z
         .string()
         .min(2, {
-            message: "Name must be at least 2 characters.",
+            message: "Name must be at least 2 characters."
         })
         .max(30, {
-            message: "Name must not be longer than 30 characters.",
+            message: "Name must not be longer than 30 characters."
         }),
-    method: z.enum(["wireguard", "newt"]),
+    method: z.enum(["wireguard", "newt"])
 });
 
-type AccountFormValues = z.infer<typeof accountFormSchema>;
+type CreateSiteFormValues = z.infer<typeof createSiteFormSchema>;
 
-const defaultValues: Partial<AccountFormValues> = {
+const defaultValues: Partial<CreateSiteFormValues> = {
     name: "",
-    method: "newt",
+    method: "newt"
 };
 
 type CreateSiteFormProps = {
     open: boolean;
     setOpen: (open: boolean) => void;
+    onCreate?: (site: SiteRow) => void;
 };
 
-export default function CreateSiteForm({ open, setOpen }: CreateSiteFormProps) {
+export default function CreateSiteForm({
+    open,
+    setOpen,
+    onCreate
+}: CreateSiteFormProps) {
     const { toast } = useToast();
 
     const api = createApiClient(useEnvContext());
@@ -96,9 +107,9 @@ export default function CreateSiteForm({ open, setOpen }: CreateSiteFormProps) {
         setIsChecked(checked);
     };
 
-    const form = useForm<AccountFormValues>({
-        resolver: zodResolver(accountFormSchema),
-        defaultValues,
+    const form = useForm<CreateSiteFormValues>({
+        resolver: zodResolver(createSiteFormSchema),
+        defaultValues
     });
 
     useEffect(() => {
@@ -114,7 +125,7 @@ export default function CreateSiteForm({ open, setOpen }: CreateSiteFormProps) {
                     toast({
                         variant: "destructive",
                         title: "Error picking site defaults",
-                        description: formatAxiosError(e),
+                        description: formatAxiosError(e)
                     });
                 })
                 .then((res) => {
@@ -125,7 +136,7 @@ export default function CreateSiteForm({ open, setOpen }: CreateSiteFormProps) {
         }
     }, [open]);
 
-    async function onSubmit(data: AccountFormValues) {
+    async function onSubmit(data: CreateSiteFormValues) {
         setLoading(true);
         if (!siteDefaults || !keypair) {
             return;
@@ -135,29 +146,44 @@ export default function CreateSiteForm({ open, setOpen }: CreateSiteFormProps) {
             subnet: siteDefaults.subnet,
             exitNodeId: siteDefaults.exitNodeId,
             pubKey: keypair.publicKey,
-            type: data.method,
+            type: data.method
         };
         if (data.method === "newt") {
             payload.secret = siteDefaults.newtSecret;
             payload.newtId = siteDefaults.newtId;
         }
         const res = await api
-            .put(`/org/${orgId}/site/`, payload)
+            .put<
+                AxiosResponse<CreateSiteResponse>
+            >(`/org/${orgId}/site/`, payload)
             .catch((e) => {
                 toast({
                     variant: "destructive",
                     title: "Error creating site",
-                    description: formatAxiosError(e),
+                    description: formatAxiosError(e)
                 });
             });
 
         if (res && res.status === 201) {
             const niceId = res.data.data.niceId;
             // navigate to the site page
-            router.push(`/${orgId}/settings/sites/${niceId}`);
+            // router.push(`/${orgId}/settings/sites/${niceId}`);
 
             // close the modal
             setOpen(false);
+
+            const data = res.data.data;
+
+            onCreate?.({
+                name: data.name,
+                id: data.siteId,
+                nice: data.niceId.toString(),
+                mbIn: "0 MB",
+                mbOut: "0 MB",
+                orgId: orgId as string,
+                type: data.type as any,
+                online: false
+            });
         }
 
         setLoading(false);
@@ -275,8 +301,8 @@ PersistentKeepalive = 5`
                                         {form.watch("method") === "wireguard" &&
                                         !isLoading ? (
                                             <CopyTextBox text={wgConfig} />
-                                        ) : form.watch("method") === "wireguard" &&
-                                          isLoading ? (
+                                        ) : form.watch("method") ===
+                                              "wireguard" && isLoading ? (
                                             <p>
                                                 Loading WireGuard
                                                 configuration...

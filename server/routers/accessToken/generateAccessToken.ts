@@ -5,7 +5,11 @@ import {
     SESSION_COOKIE_EXPIRES
 } from "@server/auth";
 import db from "@server/db";
-import { ResourceAccessToken, resourceAccessToken, resources } from "@server/db/schema";
+import {
+    ResourceAccessToken,
+    resourceAccessToken,
+    resources
+} from "@server/db/schema";
 import HttpCode from "@server/types/HttpCode";
 import response from "@server/utils/response";
 import { eq } from "drizzle-orm";
@@ -16,17 +20,27 @@ import { fromError } from "zod-validation-error";
 import logger from "@server/logger";
 import { createDate, TimeSpan } from "oslo";
 
-export const generateAccessTokenBodySchema = z.object({
-    validForSeconds: z.number().int().positive().optional(), // seconds
-    title: z.string().optional(),
-    description: z.string().optional()
-});
+export const generateAccessTokenBodySchema = z
+    .object({
+        validForSeconds: z.number().int().positive().optional(), // seconds
+        title: z.string().optional(),
+        description: z.string().optional()
+    })
+    .strict();
 
-export const generateAccssTokenParamsSchema = z.object({
-    resourceId: z.string().transform(Number).pipe(z.number().int().positive())
-});
+export const generateAccssTokenParamsSchema = z
+    .object({
+        resourceId: z
+            .string()
+            .transform(Number)
+            .pipe(z.number().int().positive())
+    })
+    .strict();
 
-export type GenerateAccessTokenResponse = ResourceAccessToken;
+export type GenerateAccessTokenResponse = Omit<
+    ResourceAccessToken,
+    "tokenHash"
+> & { accessToken: string };
 
 export async function generateAccessToken(
     req: Request,
@@ -77,25 +91,38 @@ export async function generateAccessToken(
 
         const token = generateIdFromEntropySize(25);
 
-        // const tokenHash = await hash(token, {
-        //     memoryCost: 19456,
-        //     timeCost: 2,
-        //     outputLen: 32,
-        //     parallelism: 1
-        // });
+        const tokenHash = await hash(token, {
+            memoryCost: 19456,
+            timeCost: 2,
+            outputLen: 32,
+            parallelism: 1
+        });
 
         const id = generateId(15);
-        const [result] = await db.insert(resourceAccessToken).values({
-            accessTokenId: id,
-            orgId: resource.orgId,
-            resourceId,
-            tokenHash: token,
-            expiresAt: expiresAt || null,
-            sessionLength: sessionLength,
-            title: title || null,
-            description: description || null,
-            createdAt: new Date().getTime()
-        }).returning();
+        const [result] = await db
+            .insert(resourceAccessToken)
+            .values({
+                accessTokenId: id,
+                orgId: resource.orgId,
+                resourceId,
+                tokenHash,
+                expiresAt: expiresAt || null,
+                sessionLength: sessionLength,
+                title: title || null,
+                description: description || null,
+                createdAt: new Date().getTime()
+            })
+            .returning({
+                accessTokenId: resourceAccessToken.accessTokenId,
+                orgId: resourceAccessToken.orgId,
+                resourceId: resourceAccessToken.resourceId,
+                expiresAt: resourceAccessToken.expiresAt,
+                sessionLength: resourceAccessToken.sessionLength,
+                title: resourceAccessToken.title,
+                description: resourceAccessToken.description,
+                createdAt: resourceAccessToken.createdAt
+            })
+            .execute();
 
         if (!result) {
             return next(
@@ -107,7 +134,7 @@ export async function generateAccessToken(
         }
 
         return response<GenerateAccessTokenResponse>(res, {
-            data: result,
+            data: { ...result, accessToken: token },
             success: true,
             error: false,
             message: "Resource access token generated successfully",

@@ -5,7 +5,7 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuTrigger,
+    DropdownMenuTrigger
 } from "@app/components/ui/dropdown-menu";
 import { Button } from "@app/components/ui/button";
 import { ArrowRight, ArrowUpDown, Crown, MoreHorizontal } from "lucide-react";
@@ -43,7 +43,7 @@ export default function UsersTable({ users: u }: UsersTableProps) {
 
     const router = useRouter();
 
-    const api  = createApiClient(useEnvContext());
+    const api = createApiClient(useEnvContext());
 
     const user = useUserContext();
     const { org } = useOrgContext();
@@ -64,7 +64,7 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
-            },
+            }
         },
         {
             accessorKey: "status",
@@ -80,7 +80,7 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
-            },
+            }
         },
         {
             accessorKey: "role",
@@ -108,7 +108,7 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                         <span>{userRow.role}</span>
                     </div>
                 );
-            },
+            }
         },
         {
             id: "actions",
@@ -149,20 +149,19 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                                                 </Link>
                                             </DropdownMenuItem>
                                             {userRow.email !== user?.email && (
-                                                <DropdownMenuItem>
-                                                    <button
-                                                        className="text-red-500"
-                                                        onClick={() => {
-                                                            setIsDeleteModalOpen(
-                                                                true,
-                                                            );
-                                                            setSelectedUser(
-                                                                userRow,
-                                                            );
-                                                        }}
-                                                    >
+                                                <DropdownMenuItem
+                                                    onClick={() => {
+                                                        setIsDeleteModalOpen(
+                                                            true
+                                                        );
+                                                        setSelectedUser(
+                                                            userRow
+                                                        );
+                                                    }}
+                                                >
+                                                    <span className="text-red-500">
                                                         Remove User
-                                                    </button>
+                                                    </span>
                                                 </DropdownMenuItem>
                                             )}
                                         </DropdownMenuContent>
@@ -183,8 +182,8 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                         </div>
                     </>
                 );
-            },
-        },
+            }
+        }
     ];
 
     async function removeUser() {
@@ -197,8 +196,8 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                         title: "Failed to remove user",
                         description: formatAxiosError(
                             e,
-                            "An error occurred while removing the user.",
-                        ),
+                            "An error occurred while removing the user."
+                        )
                     });
                 });
 
@@ -206,11 +205,11 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                 toast({
                     variant: "default",
                     title: "User removed",
-                    description: `The user ${selectedUser.email} has been removed from the organization.`,
+                    description: `The user ${selectedUser.email} has been removed from the organization.`
                 });
 
                 setUsers((prev) =>
-                    prev.filter((u) => u.id !== selectedUser?.id),
+                    prev.filter((u) => u.id !== selectedUser?.id)
                 );
             }
         }

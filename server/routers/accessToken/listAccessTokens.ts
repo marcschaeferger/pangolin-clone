@@ -23,6 +23,7 @@ const listAccessTokensParamsSchema = z
             .pipe(z.number().int().positive().optional()),
         orgId: z.string().optional()
     })
+    .strict()
     .refine((data) => !!data.resourceId !== !!data.orgId, {
         message: "Either resourceId or orgId must be provided, but not both"
     });
@@ -65,7 +66,10 @@ function queryAccessTokens(
         return db
             .select(cols)
             .from(resourceAccessToken)
-            .leftJoin(resources, eq(resourceAccessToken.resourceId, resources.resourceId))
+            .leftJoin(
+                resources,
+                eq(resourceAccessToken.resourceId, resources.resourceId)
+            )
             .where(
                 and(
                     inArray(
@@ -83,7 +87,10 @@ function queryAccessTokens(
         return db
             .select(cols)
             .from(resourceAccessToken)
-            .leftJoin(resources, eq(resourceAccessToken.resourceId, resources.resourceId))
+            .leftJoin(
+                resources,
+                eq(resourceAccessToken.resourceId, resources.resourceId)
+            )
             .where(
                 and(
                     inArray(

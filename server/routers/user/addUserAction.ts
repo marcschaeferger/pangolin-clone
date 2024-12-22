@@ -9,11 +9,13 @@ import logger from "@server/logger";
 import { eq } from "drizzle-orm";
 import { fromError } from "zod-validation-error";
 
-const addUserActionSchema = z.object({
-    userId: z.string(),
-    actionId: z.string(),
-    orgId: z.string(),
-});
+const addUserActionSchema = z
+    .object({
+        userId: z.string(),
+        actionId: z.string(),
+        orgId: z.string()
+    })
+    .strict();
 
 export async function addUserAction(
     req: Request,
@@ -52,7 +54,7 @@ export async function addUserAction(
             .values({
                 userId,
                 actionId,
-                orgId,
+                orgId
             })
             .returning();
 
@@ -61,7 +63,7 @@ export async function addUserAction(
             success: true,
             error: false,
             message: "Action added to user successfully",
-            status: HttpCode.CREATED,
+            status: HttpCode.CREATED
         });
     } catch (error) {
         logger.error(error);

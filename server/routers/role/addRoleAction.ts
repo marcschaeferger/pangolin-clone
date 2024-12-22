@@ -9,13 +9,17 @@ import logger from "@server/logger";
 import { eq } from "drizzle-orm";
 import { fromError } from "zod-validation-error";
 
-const addRoleActionParamSchema = z.object({
-    roleId: z.string().transform(Number).pipe(z.number().int().positive()),
-});
+const addRoleActionParamSchema = z
+    .object({
+        roleId: z.string().transform(Number).pipe(z.number().int().positive())
+    })
+    .strict();
 
-const addRoleActionSchema = z.object({
-    actionId: z.string(),
-});
+const addRoleActionSchema = z
+    .object({
+        actionId: z.string()
+    })
+    .strict();
 
 export async function addRoleAction(
     req: Request,
@@ -66,7 +70,7 @@ export async function addRoleAction(
             .values({
                 roleId,
                 actionId,
-                orgId: role[0].orgId!,
+                orgId: role[0].orgId!
             })
             .returning();
 
@@ -75,7 +79,7 @@ export async function addRoleAction(
             success: true,
             error: false,
             message: "Action added to role successfully",
-            status: HttpCode.CREATED,
+            status: HttpCode.CREATED
         });
     } catch (error) {
         logger.error(error);

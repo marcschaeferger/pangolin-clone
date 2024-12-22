@@ -12,9 +12,14 @@ import { isIpInCidr } from "@server/utils/ip";
 import { fromError } from "zod-validation-error";
 import { addTargets } from "../newt/targets";
 
-const createTargetParamsSchema = z.object({
-    resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
-});
+const createTargetParamsSchema = z
+    .object({
+        resourceId: z
+            .string()
+            .transform(Number)
+            .pipe(z.number().int().positive())
+    })
+    .strict();
 
 const createTargetSchema = z
     .object({
@@ -22,7 +27,7 @@ const createTargetSchema = z
         method: z.string().min(1).max(10),
         port: z.number().int().min(1).max(65535),
         protocol: z.string().optional(),
-        enabled: z.boolean().default(true),
+        enabled: z.boolean().default(true)
     })
     .strict();
 
@@ -61,7 +66,7 @@ export async function createTarget(
         // get the resource
         const [resource] = await db
             .select({
-                siteId: resources.siteId,
+                siteId: resources.siteId
             })
             .from(resources)
             .where(eq(resources.resourceId, resourceId));
@@ -91,7 +96,10 @@ export async function createTarget(
         }
 
         // make sure the target is within the site subnet
-        if (site.type == "wireguard" && !isIpInCidr(targetData.ip, site.subnet!)) {
+        if (
+            site.type == "wireguard" &&
+            !isIpInCidr(targetData.ip, site.subnet!)
+        ) {
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
@@ -102,7 +110,7 @@ export async function createTarget(
 
         // Fetch resources for this site
         const resourcesRes = await db.query.resources.findMany({
-            where: eq(resources.siteId, site.siteId),
+            where: eq(resources.siteId, site.siteId)
         });
 
         // TODO: is this all inefficient?
@@ -112,7 +120,7 @@ export async function createTarget(
         await Promise.all(
             resourcesRes.map(async (resource) => {
                 const targetsRes = await db.query.targets.findMany({
-                    where: eq(targets.resourceId, resource.resourceId),
+                    where: eq(targets.resourceId, resource.resourceId)
                 });
                 targetsRes.forEach((target) => {
                     targetIps.push(`${target.ip}/32`);
@@ -147,7 +155,7 @@ export async function createTarget(
                 resourceId,
                 protocol: "tcp", // hard code for now
                 internalPort,
-                ...targetData,
+                ...targetData
             })
             .returning();
 
@@ -155,7 +163,7 @@ export async function createTarget(
             if (site.type == "wireguard") {
                 await addPeer(site.exitNodeId!, {
                     publicKey: site.pubKey,
-                    allowedIps: targetIps.flat(),
+                    allowedIps: targetIps.flat()
                 });
             } else if (site.type == "newt") {
                 // get the newt on the site by querying the newt table for siteId
@@ -174,7 +182,7 @@ export async function createTarget(
             success: true,
             error: false,
             message: "Target created successfully",
-            status: HttpCode.CREATED,
+            status: HttpCode.CREATED
         });
     } catch (error) {
         logger.error(error);

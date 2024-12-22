@@ -9,9 +9,14 @@ import { z } from "zod";
 import { fromError } from "zod-validation-error";
 import logger from "@server/logger";
 
-const listTargetsParamsSchema = z.object({
-    resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
-});
+const listTargetsParamsSchema = z
+    .object({
+        resourceId: z
+            .string()
+            .transform(Number)
+            .pipe(z.number().int().positive())
+    })
+    .strict();
 
 const listTargetsSchema = z.object({
     limit: z
@@ -25,7 +30,7 @@ const listTargetsSchema = z.object({
         .optional()
         .default("0")
         .transform(Number)
-        .pipe(z.number().int().nonnegative()),
+        .pipe(z.number().int().nonnegative())
 });
 
 function queryTargets(resourceId: number) {
@@ -37,7 +42,7 @@ function queryTargets(resourceId: number) {
             port: targets.port,
             protocol: targets.protocol,
             enabled: targets.enabled,
-            resourceId: targets.resourceId,
+            resourceId: targets.resourceId
             // resourceName: resources.name,
         })
         .from(targets)
@@ -97,13 +102,13 @@ export async function listTargets(
                 pagination: {
                     total: totalCount,
                     limit,
-                    offset,
-                },
+                    offset
+                }
             },
             success: true,
             error: false,
             message: "Targets retrieved successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

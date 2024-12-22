@@ -10,21 +10,23 @@ import { fromError } from "zod-validation-error";
 import { ActionsEnum } from "@server/auth/actions";
 import { eq, and } from "drizzle-orm";
 
-const createRoleParamsSchema = z.object({
-    orgId: z.string(),
-});
+const createRoleParamsSchema = z
+    .object({
+        orgId: z.string()
+    })
+    .strict();
 
 const createRoleSchema = z
     .object({
         name: z.string().min(1).max(255),
-        description: z.string().optional(),
+        description: z.string().optional()
     })
     .strict();
 
 export const defaultRoleAllowedActions: ActionsEnum[] = [
     ActionsEnum.getOrg,
     ActionsEnum.getResource,
-    ActionsEnum.listResources,
+    ActionsEnum.listResources
 ];
 
 export type CreateRoleBody = z.infer<typeof createRoleSchema>;
@@ -64,7 +66,7 @@ export async function createRole(
         const allRoles = await db
             .select({
                 roleId: roles.roleId,
-                name: roles.name,
+                name: roles.name
             })
             .from(roles)
             .leftJoin(orgs, eq(roles.orgId, orgs.orgId))
@@ -84,7 +86,7 @@ export async function createRole(
             .insert(roles)
             .values({
                 ...roleData,
-                orgId,
+                orgId
             })
             .returning();
 
@@ -94,7 +96,7 @@ export async function createRole(
                 defaultRoleAllowedActions.map((action) => ({
                     roleId: newRole[0].roleId,
                     actionId: action,
-                    orgId,
+                    orgId
                 }))
             )
             .execute();
@@ -104,7 +106,7 @@ export async function createRole(
             success: true,
             error: false,
             message: "Role created successfully",
-            status: HttpCode.CREATED,
+            status: HttpCode.CREATED
         });
     } catch (error) {
         logger.error(error);

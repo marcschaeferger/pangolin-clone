@@ -14,7 +14,8 @@ import ResourceNotFound from "./components/ResourceNotFound";
 import ResourceAccessDenied from "./components/ResourceAccessDenied";
 import { cookies } from "next/headers";
 import { CheckResourceSessionResponse } from "@server/routers/auth";
-import AccessTokenInvalid from "./components/AccessTokenInvalid";
+import AccessTokenInvalid from "./components/AccessToken";
+import AccessToken from "./components/AccessToken";
 
 export default async function ResourceAuthPage(props: {
     params: Promise<{ resourceId: number }>;
@@ -49,35 +50,6 @@ export default async function ResourceAuthPage(props: {
     }
 
     const redirectUrl = searchParams.redirect || authInfo.url;
-
-    if (searchParams.token) {
-        let doRedirect = false;
-        try {
-            const res = await internal.post<
-                AxiosResponse<AuthWithAccessTokenResponse>
-            >(
-                `/auth/resource/${params.resourceId}/access-token`,
-                {
-                    accessToken: searchParams.token
-                },
-                await authCookieHeader()
-            );
-
-            if (res.data.data.session) {
-                doRedirect = true;
-            }
-        } catch (e) {
-            return (
-                <div className="w-full max-w-md">
-                    <AccessTokenInvalid />
-                </div>
-            );
-        }
-
-        if (doRedirect) {
-            redirect(redirectUrl);
-        }
-    }
 
     const hasAuth =
         authInfo.password ||
@@ -144,6 +116,20 @@ export default async function ResourceAuthPage(props: {
         if (doRedirect) {
             redirect(redirectUrl);
         }
+    }
+
+    if (searchParams.token) {
+        const [accessTokenId, accessToken] = searchParams.token.split(".");
+        return (
+            <div className="w-full max-w-md">
+                <AccessToken
+                    accessToken={accessToken}
+                    accessTokenId={accessTokenId}
+                    resourceId={params.resourceId}
+                    redirectUrl={redirectUrl}
+                />
+            </div>
+        );
     }
 
     return (

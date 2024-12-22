@@ -9,13 +9,17 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
-const removeRoleSiteParamsSchema = z.object({
-    roleId: z.string().transform(Number).pipe(z.number().int().positive()),
-});
+const removeRoleSiteParamsSchema = z
+    .object({
+        roleId: z.string().transform(Number).pipe(z.number().int().positive())
+    })
+    .strict();
 
-const removeRoleSiteSchema = z.object({
-    siteId: z.string().transform(Number).pipe(z.number().int().positive()),
-});
+const removeRoleSiteSchema = z
+    .object({
+        siteId: z.string().transform(Number).pipe(z.number().int().positive())
+    })
+    .strict();
 
 export async function removeRoleSite(
     req: Request,
@@ -85,7 +89,7 @@ export async function removeRoleSite(
             success: true,
             error: false,
             message: "Site removed from role successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);
