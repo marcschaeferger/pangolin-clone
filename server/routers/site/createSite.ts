@@ -13,6 +13,7 @@ import { fromError } from "zod-validation-error";
 import { hash } from "@node-rs/argon2";
 import { newts } from "@server/db/schema";
 import moment from "moment";
+import { hashPassword } from "@server/auth/password";
 
 const createSiteParamsSchema = z
     .object({
@@ -122,12 +123,7 @@ export async function createSite(
 
         // add the peer to the exit node
         if (type == "newt") {
-            const secretHash = await hash(secret!, {
-                memoryCost: 19456,
-                timeCost: 2,
-                outputLen: 32,
-                parallelism: 1
-            });
+            const secretHash = await hashPassword(secret!);
 
             await db.insert(newts).values({
                 newtId: newtId!,

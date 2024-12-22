@@ -2,7 +2,7 @@ import { verify } from "@node-rs/argon2";
 import {
     createSession,
     generateSessionToken,
-    verifySession,
+    verifySession
 } from "@server/auth";
 import db from "@server/db";
 import { newts } from "@server/db/schema";
@@ -14,11 +14,12 @@ import createHttpError from "http-errors";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
 import { createNewtSession, validateNewtSessionToken } from "@server/auth/newt";
+import { verifyPassword } from "@server/auth/password";
 
 export const newtGetTokenBodySchema = z.object({
     newtId: z.string(),
     secret: z.string(),
-    token: z.string().optional(),
+    token: z.string().optional()
 });
 
 export type NewtGetTokenBody = z.infer<typeof newtGetTokenBodySchema>;
@@ -43,16 +44,14 @@ export async function getToken(
 
     try {
         if (token) {
-            const { session, newt } = await validateNewtSessionToken(
-                token
-            );
+            const { session, newt } = await validateNewtSessionToken(token);
             if (session) {
                 return response<null>(res, {
                     data: null,
                     success: true,
                     error: false,
                     message: "Token session already valid",
-                    status: HttpCode.OK,
+                    status: HttpCode.OK
                 });
             }
         }
@@ -72,22 +71,13 @@ export async function getToken(
 
         const existingNewt = existingNewtRes[0];
 
-        const validSecret = await verify(
-            existingNewt.secretHash,
+        const validSecret = await verifyPassword(
             secret,
-            {
-                memoryCost: 19456,
-                timeCost: 2,
-                outputLen: 32,
-                parallelism: 1,
-            }
+            existingNewt.secretHash
         );
         if (!validSecret) {
             return next(
-                createHttpError(
-                    HttpCode.BAD_REQUEST,
-                    "Secret is incorrect"
-                )
+                createHttpError(HttpCode.BAD_REQUEST, "Secret is incorrect")
             );
         }
 
@@ -101,7 +91,7 @@ export async function getToken(
             success: true,
             error: false,
             message: "Token created successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (e) {
         console.error(e);

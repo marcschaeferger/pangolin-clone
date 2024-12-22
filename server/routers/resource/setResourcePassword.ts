@@ -9,6 +9,7 @@ import { fromError } from "zod-validation-error";
 import { hash } from "@node-rs/argon2";
 import { response } from "@server/utils";
 import logger from "@server/logger";
+import { hashPassword } from "@server/auth/password";
 
 const setResourceAuthMethodsParamsSchema = z.object({
     resourceId: z.string().transform(Number).pipe(z.number().int().positive())
@@ -57,12 +58,7 @@ export async function setResourcePassword(
                 .where(eq(resourcePassword.resourceId, resourceId));
 
             if (password) {
-                const passwordHash = await hash(password, {
-                    memoryCost: 19456,
-                    timeCost: 2,
-                    outputLen: 32,
-                    parallelism: 1
-                });
+                const passwordHash = await hashPassword(password);
 
                 await trx
                     .insert(resourcePassword)

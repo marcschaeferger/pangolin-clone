@@ -4,11 +4,12 @@ import { twoFactorBackupCodes } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import { decodeHex } from "oslo/encoding";
 import { TOTPController } from "oslo/otp";
+import { verifyPassword } from "./password";
 
 export async function verifyTotpCode(
     code: string,
     secret: string,
-    userId: string,
+    userId: string
 ): Promise<boolean> {
     if (code.length !== 6) {
         const validBackupCode = await verifyBackUpCode(code, userId);
@@ -16,7 +17,7 @@ export async function verifyTotpCode(
     } else {
         const validOTP = await new TOTPController().verify(
             code,
-            decodeHex(secret),
+            decodeHex(secret)
         );
 
         return validOTP;
@@ -25,7 +26,7 @@ export async function verifyTotpCode(
 
 export async function verifyBackUpCode(
     code: string,
-    userId: string,
+    userId: string
 ): Promise<boolean> {
     const allHashed = await db
         .select()
@@ -38,12 +39,7 @@ export async function verifyBackUpCode(
 
     let validId;
     for (const hashedCode of allHashed) {
-        const validCode = await verify(hashedCode.codeHash, code, {
-            memoryCost: 19456,
-            timeCost: 2,
-            outputLen: 32,
-            parallelism: 1,
-        });
+        const validCode = await verifyPassword(code, hashedCode.codeHash);
         if (validCode) {
             validId = hashedCode.codeId;
         }

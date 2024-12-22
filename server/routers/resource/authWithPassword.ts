@@ -15,6 +15,7 @@ import {
 } from "@server/auth/resource";
 import config from "@server/config";
 import logger from "@server/logger";
+import { verifyPassword } from "@server/auth/password";
 
 export const authWithPasswordBodySchema = z
     .object({
@@ -105,15 +106,9 @@ export async function authWithPassword(
             );
         }
 
-        const validPassword = await verify(
-            definedPassword.passwordHash,
+        const validPassword = await verifyPassword(
             password,
-            {
-                memoryCost: 19456,
-                timeCost: 2,
-                outputLen: 32,
-                parallelism: 1
-            }
+            definedPassword.passwordHash
         );
         if (!validPassword) {
             return next(

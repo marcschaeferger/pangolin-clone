@@ -7,16 +7,22 @@ import { response } from "@server/utils";
 import { db } from "@server/db";
 import { passwordResetTokens, users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
-import { sha256 } from "oslo/crypto";
+import { alphabet, generateRandomString, sha256 } from "oslo/crypto";
 import { encodeHex } from "oslo/encoding";
 import { createDate } from "oslo";
 import logger from "@server/logger";
 import { generateIdFromEntropySize } from "@server/auth";
 import { TimeSpan } from "oslo";
+import config from "@server/config";
+import { sendEmail } from "@server/emails";
+import ResetPasswordCode from "@server/emails/templates/ResetPasswordCode";
+import { hashPassword } from "@server/auth/password";
 
-export const requestPasswordResetBody = z.object({
-    email: z.string().email(),
-}).strict();
+export const requestPasswordResetBody = z
+    .object({
+        email: z.string().email()
+    })
+    .strict();
 
 export type RequestPasswordResetBody = z.infer<typeof requestPasswordResetBody>;
 
@@ -27,7 +33,7 @@ export type RequestPasswordResetResponse = {
 export async function requestPasswordReset(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
 ): Promise<any> {
     const parsedBody = requestPasswordResetBody.safeParse(req.body);
 
@@ -35,8 +41,8 @@ export async function requestPasswordReset(
         return next(
             createHttpError(
                 HttpCode.BAD_REQUEST,
-                fromError(parsedBody.error).toString(),
-            ),
+                fromError(parsedBody.error).toString()
+            )
         );
     }
 
@@ -52,8 +58,8 @@ export async function requestPasswordReset(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    "No user with that email exists",
-                ),
+                    "A user with that email does not exist"
+                )
             );
         }
 
@@ -61,36 +67,47 @@ export async function requestPasswordReset(
             .delete(passwordResetTokens)
             .where(eq(passwordResetTokens.userId, existingUser[0].userId));
 
-        const token = generateIdFromEntropySize(25);
-        const tokenHash = encodeHex(
-            await sha256(new TextEncoder().encode(token)),
-        );
+        const token = generateRandomString(8, alphabet("0-9", "A-Z", "a-z"));
+        const tokenHash = await hashPassword(token);
 
         await db.insert(passwordResetTokens).values({
             userId: existingUser[0].userId,
+            email: existingUser[0].email,
             tokenHash,
-            expiresAt: createDate(new TimeSpan(2, "h")).getTime(),
+            expiresAt: createDate(new TimeSpan(2, "h")).getTime()
         });
 
-        // TODO: send email with link to reset password on dashboard
-        // something like: https://example.com/auth/reset-password?email=${email}&?token=${token}
-        // for now, just log the token
+        const url = `${config.app.base_url}/auth/reset-password?email=${email}&token=${token}`;
+
+        await sendEmail(
+            ResetPasswordCode({
+                email,
+                code: token,
+                link: url
+            }),
+            {
+                from: config.email?.no_reply,
+                to: email,
+                subject: "Reset your password"
+            }
+        );
+
         return response<RequestPasswordResetResponse>(res, {
             data: {
-                sentEmail: true,
+                sentEmail: true
             },
             success: true,
             error: false,
-            message: "Password reset email sent",
-            status: HttpCode.OK,
+            message: "Password reset requested",
+            status: HttpCode.OK
         });
     } catch (e) {
         logger.error(e);
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,
-                "Failed to process password reset request",
-            ),
+                "Failed to process password reset request"
+            )
         );
     }
 }

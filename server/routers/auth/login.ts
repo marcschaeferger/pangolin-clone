@@ -3,7 +3,7 @@ import {
     createSession,
     generateSessionToken,
     serializeSessionCookie,
-    verifySession,
+    verifySession
 } from "@server/auth";
 import db from "@server/db";
 import { users } from "@server/db/schema";
@@ -17,12 +17,15 @@ import { fromError } from "zod-validation-error";
 import { verifyTotpCode } from "@server/auth/2fa";
 import config from "@server/config";
 import logger from "@server/logger";
+import { verifyPassword } from "@server/auth/password";
 
-export const loginBodySchema = z.object({
-    email: z.string().email(),
-    password: z.string(),
-    code: z.string().optional(),
-}).strict();
+export const loginBodySchema = z
+    .object({
+        email: z.string().email(),
+        password: z.string(),
+        code: z.string().optional()
+    })
+    .strict();
 
 export type LoginBody = z.infer<typeof loginBodySchema>;
 
@@ -57,7 +60,7 @@ export async function login(
                 success: true,
                 error: false,
                 message: "Already logged in",
-                status: HttpCode.OK,
+                status: HttpCode.OK
             });
         }
 
@@ -76,15 +79,9 @@ export async function login(
 
         const existingUser = existingUserRes[0];
 
-        const validPassword = await verify(
-            existingUser.passwordHash,
+        const validPassword = await verifyPassword(
             password,
-            {
-                memoryCost: 19456,
-                timeCost: 2,
-                outputLen: 32,
-                parallelism: 1,
-            }
+            existingUser.passwordHash
         );
         if (!validPassword) {
             return next(
@@ -102,7 +99,7 @@ export async function login(
                     success: true,
                     error: false,
                     message: "Two-factor authentication required",
-                    status: HttpCode.ACCEPTED,
+                    status: HttpCode.ACCEPTED
                 });
             }
 
@@ -137,7 +134,7 @@ export async function login(
                 success: true,
                 error: false,
                 message: "Email verification code sent",
-                status: HttpCode.OK,
+                status: HttpCode.OK
             });
         }
 
@@ -146,7 +143,7 @@ export async function login(
             success: true,
             error: false,
             message: "Logged in successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (e) {
         logger.error(e);

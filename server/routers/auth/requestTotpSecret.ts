@@ -13,6 +13,7 @@ import { verify } from "@node-rs/argon2";
 import { createTOTPKeyURI } from "oslo/otp";
 import config from "@server/config";
 import logger from "@server/logger";
+import { verifyPassword } from "@server/auth/password";
 
 export const requestTotpSecretBody = z
     .object({
@@ -47,12 +48,7 @@ export async function requestTotpSecret(
     const user = req.user as User;
 
     try {
-        const validPassword = await verify(user.passwordHash, password, {
-            memoryCost: 19456,
-            timeCost: 2,
-            outputLen: 32,
-            parallelism: 1
-        });
+        const validPassword = await verifyPassword(password, user.passwordHash);
         if (!validPassword) {
             return next(unauthorized());
         }

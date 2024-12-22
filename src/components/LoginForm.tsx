@@ -35,6 +35,7 @@ import {
     InputOTPSeparator,
     InputOTPSlot
 } from "./ui/input-otp";
+import Link from "next/link";
 
 type LoginFormProps = {
     redirect?: string;
@@ -79,7 +80,7 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
 
     async function onSubmit(values: any) {
         const { email, password } = form.getValues();
-        const { code } = mfaForm.getValues()
+        const { code } = mfaForm.getValues();
 
         setLoading(true);
 
@@ -151,23 +152,36 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
                                 </FormItem>
                             )}
                         />
-                        <FormField
-                            control={form.control}
-                            name="password"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Password</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            type="password"
-                                            placeholder="Enter your password"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+
+                        <div className="space-y-4">
+                            <FormField
+                                control={form.control}
+                                name="password"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Password</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="password"
+                                                placeholder="Enter your password"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <div className="text-center">
+                                <Link
+                                    href={`/auth/reset-password${form.getValues().email ? `?email=${form.getValues().email}` : ""}`}
+                                    className="text-sm text-muted-foreground"
+                                >
+                                    Forgot password? Click here
+                                </Link>
+                            </div>
+                        </div>
+
                         {error && (
                             <Alert variant="destructive">
                                 <AlertDescription>{error}</AlertDescription>

@@ -16,6 +16,7 @@ import config from "@server/config";
 import logger from "@server/logger";
 import { verify } from "@node-rs/argon2";
 import { isWithinExpirationDate } from "oslo";
+import { verifyPassword } from "@server/auth/password";
 
 const authWithAccessTokenBodySchema = z
     .object({
@@ -104,12 +105,8 @@ export async function authWithAccessToken(
             );
         }
 
-        const validCode = await verify(tokenItem.tokenHash, accessToken, {
-            memoryCost: 19456,
-            timeCost: 2,
-            outputLen: 32,
-            parallelism: 1
-        });
+        const validCode = await verifyPassword(tokenItem.tokenHash, accessToken);
+
         if (!validCode) {
             return next(
                 createHttpError(HttpCode.UNAUTHORIZED, "Invalid access token")
