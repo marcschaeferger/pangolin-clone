@@ -96,7 +96,9 @@ export const newts = sqliteTable("newt", {
     newtId: text("id").primaryKey(),
     secretHash: text("secretHash").notNull(),
     dateCreated: text("dateCreated").notNull(),
-    siteId: integer("siteId").references(() => sites.siteId)
+    siteId: integer("siteId").references(() => sites.siteId, {
+        onDelete: "cascade"
+    })
 });
 
 export const twoFactorBackupCodes = sqliteTable("twoFactorBackupCodes", {

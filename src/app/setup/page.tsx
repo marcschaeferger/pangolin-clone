@@ -32,6 +32,7 @@ import {
     FormMessage
 } from "@app/components/ui/form";
 import { Alert, AlertDescription } from "@app/components/ui/alert";
+import CreateSiteForm from "../[orgId]/settings/sites/components/CreateSiteForm";
 
 type Step = "org" | "site" | "resources";
 
@@ -45,6 +46,7 @@ export default function StepperForm() {
     const [orgIdTaken, setOrgIdTaken] = useState(false);
 
     const [loading, setLoading] = useState(false);
+    const [isChecked, setIsChecked] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const orgForm = useForm<z.infer<typeof orgSchema>>({
@@ -292,18 +294,38 @@ export default function StepperForm() {
                         )}
 
                         {currentStep === "site" && (
-                            <div className="flex justify-end">
-                                <Button
-                                    type="submit"
-                                    variant="outline"
-                                    onClick={() => {
+                            <div>
+                                <CreateSiteForm
+                                    setLoading={(val) => setLoading(val)}
+                                    setChecked={(val) => setIsChecked(val)}
+                                    orgId={orgForm.getValues().orgId}
+                                    onCreate={() => {
                                         router.push(
-                                            `/${orgForm.getValues().orgId}/settings/sites`
+                                            `/${orgForm.getValues().orgId}/settings/resources`
                                         );
                                     }}
-                                >
-                                    Skip for now
-                                </Button>
+                                />
+                                <div className="flex justify-between mt-6">
+                                    <Button
+                                        type="submit"
+                                        variant="outline"
+                                        onClick={() => {
+                                            router.push(
+                                                `/${orgForm.getValues().orgId}/settings/sites`
+                                            );
+                                        }}
+                                    >
+                                        Skip for now
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        form="create-site-form"
+                                        loading={loading}
+                                        disabled={loading || !isChecked}
+                                    >
+                                        Create Site
+                                    </Button>
+                                </div>
                             </div>
                         )}
                     </section>

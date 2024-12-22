@@ -26,6 +26,7 @@ import { useToast } from "@app/hooks/useToast";
 import { formatAxiosError } from "@app/lib/utils";
 import { createApiClient } from "@app/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
+import CreateSiteFormModal from "./CreateSiteModal";
 
 export type SiteRow = {
     id: number;
@@ -68,6 +69,8 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
             .then(() => {
                 router.refresh();
                 setIsDeleteModalOpen(false);
+
+                const newRows = rows.filter((row) => row.id !== siteId);
             });
     };
 
@@ -188,7 +191,6 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
             },
             cell: ({ row }) => {
                 const originalRow = row.original;
-                console.log(originalRow.online);
 
                 if (originalRow.online) {
                     return (
@@ -257,12 +259,13 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
 
     return (
         <>
-            <CreateSiteForm
+            <CreateSiteFormModal
                 open={isCreateModalOpen}
                 setOpen={setIsCreateModalOpen}
                 onCreate={(val) => {
                     setRows([val, ...rows]);
                 }}
+                orgId={orgId}
             />
 
             {selectedSite && (
