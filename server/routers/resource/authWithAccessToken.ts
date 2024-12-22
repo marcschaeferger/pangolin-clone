@@ -17,13 +17,21 @@ import logger from "@server/logger";
 import { verify } from "@node-rs/argon2";
 import { isWithinExpirationDate } from "oslo";
 
-const authWithAccessTokenBodySchema = z.object({
-    accessToken: z.string()
-});
+const authWithAccessTokenBodySchema = z
+    .object({
+        accessToken: z.string(),
+        accessTokenId: z.string()
+    })
+    .strict();
 
-const authWithAccessTokenParamsSchema = z.object({
-    resourceId: z.string().transform(Number).pipe(z.number().int().positive())
-});
+const authWithAccessTokenParamsSchema = z
+    .object({
+        resourceId: z
+            .string()
+            .transform(Number)
+            .pipe(z.number().int().positive())
+    })
+    .strict();
 
 export type AuthWithAccessTokenResponse = {
     session?: string;
@@ -57,9 +65,7 @@ export async function authWithAccessToken(
     }
 
     const { resourceId } = parsedParams.data;
-    const { accessToken: at } = parsedBody.data;
-
-    const [accessTokenId, accessToken] = at.split(".");
+    const { accessToken, accessTokenId } = parsedBody.data;
 
     try {
         const [result] = await db
@@ -86,7 +92,7 @@ export async function authWithAccessToken(
                     HttpCode.UNAUTHORIZED,
                     createHttpError(
                         HttpCode.BAD_REQUEST,
-                        "Email is not whitelisted"
+                        "Access token does not exist for resource"
                     )
                 )
             );
@@ -98,14 +104,12 @@ export async function authWithAccessToken(
             );
         }
 
-        // const validCode = await verify(tokenItem.tokenHash, accessToken, {
-        //     memoryCost: 19456,
-        //     timeCost: 2,
-        //     outputLen: 32,
-        //     parallelism: 1
-        // });
-        const validCode = accessToken === tokenItem.tokenHash;
-
+        const validCode = await verify(tokenItem.tokenHash, accessToken, {
+            memoryCost: 19456,
+            timeCost: 2,
+            outputLen: 32,
+            parallelism: 1
+        });
         if (!validCode) {
             return next(
                 createHttpError(HttpCode.UNAUTHORIZED, "Invalid access token")

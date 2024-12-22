@@ -12,9 +12,14 @@ import { addPeer } from "../gerbil/peers";
 import { removeTargets } from "../newt/targets";
 
 // Define Zod schema for request parameters validation
-const deleteResourceSchema = z.object({
-    resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
-});
+const deleteResourceSchema = z
+    .object({
+        resourceId: z
+            .string()
+            .transform(Number)
+            .pipe(z.number().int().positive())
+    })
+    .strict();
 
 export async function deleteResource(
     req: Request,
@@ -67,20 +72,20 @@ export async function deleteResource(
                 )
             );
         }
-        
+
         if (site.pubKey) {
             if (site.type == "wireguard") {
                 // TODO: is this all inefficient?
                 // Fetch resources for this site
                 const resourcesRes = await db.query.resources.findMany({
-                    where: eq(resources.siteId, site.siteId),
+                    where: eq(resources.siteId, site.siteId)
                 });
 
                 // Fetch targets for all resources of this site
                 const targetIps = await Promise.all(
                     resourcesRes.map(async (resource) => {
                         const targetsRes = await db.query.targets.findMany({
-                            where: eq(targets.resourceId, resource.resourceId),
+                            where: eq(targets.resourceId, resource.resourceId)
                         });
                         return targetsRes.map((target) => `${target.ip}/32`);
                     })
@@ -88,7 +93,7 @@ export async function deleteResource(
 
                 await addPeer(site.exitNodeId!, {
                     publicKey: site.pubKey,
-                    allowedIps: targetIps.flat(),
+                    allowedIps: targetIps.flat()
                 });
             } else if (site.type == "newt") {
                 // get the newt on the site by querying the newt table for siteId
@@ -107,7 +112,7 @@ export async function deleteResource(
             success: true,
             error: false,
             message: "Resource deleted successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

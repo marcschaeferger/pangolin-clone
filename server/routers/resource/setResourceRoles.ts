@@ -9,13 +9,20 @@ import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { eq, and, ne } from "drizzle-orm";
 
-const setResourceRolesBodySchema = z.object({
-    roleIds: z.array(z.number().int().positive()),
-});
+const setResourceRolesBodySchema = z
+    .object({
+        roleIds: z.array(z.number().int().positive())
+    })
+    .strict();
 
-const setResourceRolesParamsSchema = z.object({
-    resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
-});
+const setResourceRolesParamsSchema = z
+    .object({
+        resourceId: z
+            .string()
+            .transform(Number)
+            .pipe(z.number().int().positive())
+    })
+    .strict();
 
 export async function setResourceRoles(
     req: Request,
@@ -99,7 +106,7 @@ export async function setResourceRoles(
                 success: true,
                 error: false,
                 message: "Roles set for resource successfully",
-                status: HttpCode.CREATED,
+                status: HttpCode.CREATED
             });
         });
     } catch (error) {

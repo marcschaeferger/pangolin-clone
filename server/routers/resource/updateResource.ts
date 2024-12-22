@@ -10,9 +10,14 @@ import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { subdomainSchema } from "@server/schemas/subdomainSchema";
 
-const updateResourceParamsSchema = z.object({
-    resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
-});
+const updateResourceParamsSchema = z
+    .object({
+        resourceId: z
+            .string()
+            .transform(Number)
+            .pipe(z.number().int().positive())
+    })
+    .strict();
 
 const updateResourceBodySchema = z
     .object({
@@ -21,18 +26,18 @@ const updateResourceBodySchema = z
         ssl: z.boolean().optional(),
         sso: z.boolean().optional(),
         blockAccess: z.boolean().optional(),
-        emailWhitelistEnabled: z.boolean().optional(),
+        emailWhitelistEnabled: z.boolean().optional()
         // siteId: z.number(),
     })
     .strict()
     .refine((data) => Object.keys(data).length > 0, {
-        message: "At least one field must be provided for update",
+        message: "At least one field must be provided for update"
     });
 
 export async function updateResource(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
 ): Promise<any> {
     try {
         const parsedParams = updateResourceParamsSchema.safeParse(req.params);
@@ -40,8 +45,8 @@ export async function updateResource(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    fromError(parsedParams.error).toString(),
-                ),
+                    fromError(parsedParams.error).toString()
+                )
             );
         }
 
@@ -50,8 +55,8 @@ export async function updateResource(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    fromError(parsedBody.error).toString(),
-                ),
+                    fromError(parsedBody.error).toString()
+                )
             );
         }
 
@@ -68,8 +73,8 @@ export async function updateResource(
             return next(
                 createHttpError(
                     HttpCode.NOT_FOUND,
-                    `Resource with ID ${resourceId} not found`,
-                ),
+                    `Resource with ID ${resourceId} not found`
+                )
             );
         }
 
@@ -77,8 +82,8 @@ export async function updateResource(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    "Resource does not have a domain",
-                ),
+                    "Resource does not have a domain"
+                )
             );
         }
 
@@ -88,7 +93,7 @@ export async function updateResource(
 
         const updatePayload = {
             ...updateData,
-            ...(fullDomain && { fullDomain }),
+            ...(fullDomain && { fullDomain })
         };
 
         const updatedResource = await db
@@ -101,8 +106,8 @@ export async function updateResource(
             return next(
                 createHttpError(
                     HttpCode.NOT_FOUND,
-                    `Resource with ID ${resourceId} not found`,
-                ),
+                    `Resource with ID ${resourceId} not found`
+                )
             );
         }
 
@@ -111,15 +116,12 @@ export async function updateResource(
             success: true,
             error: false,
             message: "Resource updated successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);
         return next(
-            createHttpError(
-                HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred",
-            ),
+            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
 }

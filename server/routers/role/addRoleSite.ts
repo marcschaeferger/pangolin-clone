@@ -9,13 +9,17 @@ import logger from "@server/logger";
 import { eq } from "drizzle-orm";
 import { fromError } from "zod-validation-error";
 
-const addRoleSiteParamsSchema = z.object({
-    roleId: z.string().transform(Number).pipe(z.number().int().positive()),
-});
+const addRoleSiteParamsSchema = z
+    .object({
+        roleId: z.string().transform(Number).pipe(z.number().int().positive())
+    })
+    .strict();
 
-const addRoleSiteSchema = z.object({
-    siteId: z.string().transform(Number).pipe(z.number().int().positive()),
-});
+const addRoleSiteSchema = z
+    .object({
+        siteId: z.string().transform(Number).pipe(z.number().int().positive())
+    })
+    .strict();
 
 export async function addRoleSite(
     req: Request,
@@ -51,7 +55,7 @@ export async function addRoleSite(
             .insert(roleSites)
             .values({
                 roleId,
-                siteId,
+                siteId
             })
             .returning();
 
@@ -63,7 +67,7 @@ export async function addRoleSite(
         for (const resource of siteResources) {
             await db.insert(roleResources).values({
                 roleId,
-                resourceId: resource.resourceId,
+                resourceId: resource.resourceId
             });
         }
 
@@ -72,7 +76,7 @@ export async function addRoleSite(
             success: true,
             error: false,
             message: "Site added to role successfully",
-            status: HttpCode.CREATED,
+            status: HttpCode.CREATED
         });
     } catch (error) {
         logger.error(error);

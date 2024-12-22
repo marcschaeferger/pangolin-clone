@@ -9,9 +9,14 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
-const listResourceRolesSchema = z.object({
-    resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
-});
+const listResourceRolesSchema = z
+    .object({
+        resourceId: z
+            .string()
+            .transform(Number)
+            .pipe(z.number().int().positive())
+    })
+    .strict();
 
 async function query(resourceId: number) {
     return await db
@@ -19,7 +24,7 @@ async function query(resourceId: number) {
             roleId: roles.roleId,
             name: roles.name,
             description: roles.description,
-            isAdmin: roles.isAdmin,
+            isAdmin: roles.isAdmin
         })
         .from(roleResources)
         .innerJoin(roles, eq(roleResources.roleId, roles.roleId))
@@ -52,12 +57,12 @@ export async function listResourceRoles(
 
         return response<ListResourceRolesResponse>(res, {
             data: {
-                roles: resourceRolesList,
+                roles: resourceRolesList
             },
             success: true,
             error: false,
             message: "Resource roles retrieved successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

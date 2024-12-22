@@ -24,13 +24,20 @@ import config from "@server/config";
 import { AuthWithPasswordResponse } from "./authWithPassword";
 import { isValidOtp, sendResourceOtpEmail } from "@server/auth/resourceOtp";
 
-export const authWithPincodeBodySchema = z.object({
-    pincode: z.string()
-});
+export const authWithPincodeBodySchema = z
+    .object({
+        pincode: z.string()
+    })
+    .strict();
 
-export const authWithPincodeParamsSchema = z.object({
-    resourceId: z.string().transform(Number).pipe(z.number().int().positive())
-});
+export const authWithPincodeParamsSchema = z
+    .object({
+        resourceId: z
+            .string()
+            .transform(Number)
+            .pipe(z.number().int().positive())
+    })
+    .strict();
 
 export type AuthWithPincodeResponse = {
     session?: string;
@@ -128,10 +135,7 @@ export async function authWithPincode(
             pincodeId: definedPincode.pincodeId
         });
         const cookieName = `${config.server.resource_session_cookie_name}_${resource.resourceId}`;
-        const cookie = serializeResourceSessionCookie(
-            cookieName,
-            token,
-        );
+        const cookie = serializeResourceSessionCookie(cookieName, token);
         res.appendHeader("Set-Cookie", cookie);
 
         return response<AuthWithPincodeResponse>(res, {

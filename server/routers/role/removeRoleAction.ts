@@ -9,13 +9,17 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
-const removeRoleActionParamsSchema = z.object({
-    roleId: z.string().transform(Number).pipe(z.number().int().positive()),
-});
+const removeRoleActionParamsSchema = z
+    .object({
+        roleId: z.string().transform(Number).pipe(z.number().int().positive())
+    })
+    .strict();
 
-const removeRoleActionSchema = z.object({
-    actionId: z.string(),
-});
+const removeRoleActionSchema = z
+    .object({
+        actionId: z.string()
+    })
+    .strict();
 
 export async function removeRoleAction(
     req: Request,
@@ -71,7 +75,7 @@ export async function removeRoleAction(
             success: true,
             error: false,
             message: "Action removed from role successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

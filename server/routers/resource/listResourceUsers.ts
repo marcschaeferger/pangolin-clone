@@ -9,15 +9,20 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
-const listResourceUsersSchema = z.object({
-    resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
-});
+const listResourceUsersSchema = z
+    .object({
+        resourceId: z
+            .string()
+            .transform(Number)
+            .pipe(z.number().int().positive())
+    })
+    .strict();
 
 async function queryUsers(resourceId: number) {
     return await db
         .select({
             userId: userResources.userId,
-            email: users.email,
+            email: users.email
         })
         .from(userResources)
         .innerJoin(users, eq(userResources.userId, users.userId))
@@ -50,12 +55,12 @@ export async function listResourceUsers(
 
         return response<ListResourceUsersResponse>(res, {
             data: {
-                users: resourceUsersList,
+                users: resourceUsersList
             },
             success: true,
             error: false,
             message: "Resource users retrieved successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

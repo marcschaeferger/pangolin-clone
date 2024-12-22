@@ -46,9 +46,9 @@ export default async function ShareLinksPage(props: ShareLinksPageProps) {
         redirect(`/${params.orgId}/settings/resources`);
     }
 
-    const rows: ShareLinkRow[] = tokens.map((token) => {
-        return token;
-    });
+    const rows: ShareLinkRow[] = tokens.map(
+        (token) => ({ ...token }) as ShareLinkRow
+    );
 
     return (
         <>

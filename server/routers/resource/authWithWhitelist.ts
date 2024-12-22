@@ -22,14 +22,21 @@ import config from "@server/config";
 import { isValidOtp, sendResourceOtpEmail } from "@server/auth/resourceOtp";
 import logger from "@server/logger";
 
-const authWithWhitelistBodySchema = z.object({
-    email: z.string().email(),
-    otp: z.string().optional()
-});
+const authWithWhitelistBodySchema = z
+    .object({
+        email: z.string().email(),
+        otp: z.string().optional()
+    })
+    .strict();
 
-const authWithWhitelistParamsSchema = z.object({
-    resourceId: z.string().transform(Number).pipe(z.number().int().positive())
-});
+const authWithWhitelistParamsSchema = z
+    .object({
+        resourceId: z
+            .string()
+            .transform(Number)
+            .pipe(z.number().int().positive())
+    })
+    .strict();
 
 export type AuthWithWhitelistResponse = {
     otpSent?: boolean;
@@ -171,10 +178,7 @@ export async function authWithWhitelist(
             whitelistId: whitelistedEmail.whitelistId
         });
         const cookieName = `${config.server.resource_session_cookie_name}_${resource.resourceId}`;
-        const cookie = serializeResourceSessionCookie(
-            cookieName,
-            token,
-        );
+        const cookie = serializeResourceSessionCookie(cookieName, token);
         res.appendHeader("Set-Cookie", cookie);
 
         return response<AuthWithWhitelistResponse>(res, {

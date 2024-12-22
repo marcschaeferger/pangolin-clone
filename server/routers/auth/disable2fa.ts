@@ -10,11 +10,12 @@ import { eq } from "drizzle-orm";
 import { response } from "@server/utils";
 import { verifyPassword } from "@server/auth/password";
 import { verifyTotpCode } from "@server/auth/2fa";
+import logger from "@server/logger";
 
 export const disable2faBody = z.object({
     password: z.string(),
     code: z.string().optional(),
-});
+}).strict();
 
 export type Disable2faBody = z.infer<typeof disable2faBody>;
 
@@ -100,6 +101,7 @@ export async function disable2fa(
             status: HttpCode.OK,
         });
     } catch (error) {
+        logger.error(error);
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,

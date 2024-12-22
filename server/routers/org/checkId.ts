@@ -9,9 +9,11 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
-const getOrgSchema = z.object({
-    orgId: z.string(),
-});
+const getOrgSchema = z
+    .object({
+        orgId: z.string()
+    })
+    .strict();
 
 export async function checkId(
     req: Request,
@@ -43,7 +45,7 @@ export async function checkId(
                 success: true,
                 error: false,
                 message: "Organization ID already exists",
-                status: HttpCode.OK,
+                status: HttpCode.OK
             });
         }
 
@@ -52,7 +54,7 @@ export async function checkId(
             success: true,
             error: false,
             message: "Organization ID is available",
-            status: HttpCode.NOT_FOUND,
+            status: HttpCode.NOT_FOUND
         });
     } catch (error) {
         logger.error(error);

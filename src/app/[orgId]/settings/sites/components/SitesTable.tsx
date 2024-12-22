@@ -6,10 +6,16 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuTrigger,
+    DropdownMenuTrigger
 } from "@app/components/ui/dropdown-menu";
 import { Button } from "@app/components/ui/button";
-import { ArrowRight, ArrowUpDown, Check, MoreHorizontal, X } from "lucide-react";
+import {
+    ArrowRight,
+    ArrowUpDown,
+    Check,
+    MoreHorizontal,
+    X
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AxiosResponse } from "axios";
@@ -20,6 +26,7 @@ import { useToast } from "@app/hooks/useToast";
 import { formatAxiosError } from "@app/lib/utils";
 import { createApiClient } from "@app/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
+import CreateSiteFormModal from "./CreateSiteModal";
 
 export type SiteRow = {
     id: number;
@@ -45,13 +52,9 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedSite, setSelectedSite] = useState<SiteRow | null>(null);
+    const [rows, setRows] = useState<SiteRow[]>(sites);
 
     const api = createApiClient(useEnvContext());
-
-    const callApi = async () => {
-        const res = await api.put<AxiosResponse<any>>(`/newt`);
-        console.log(res);
-    };
 
     const deleteSite = (siteId: number) => {
         api.delete(`/site/${siteId}`)
@@ -60,12 +63,14 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                 toast({
                     variant: "destructive",
                     title: "Error deleting site",
-                    description: formatAxiosError(e, "Error deleting site"),
+                    description: formatAxiosError(e, "Error deleting site")
                 });
             })
             .then(() => {
                 router.refresh();
                 setIsDeleteModalOpen(false);
+
+                const newRows = rows.filter((row) => row.id !== siteId);
             });
     };
 
@@ -84,7 +89,7 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
-            },
+            }
         },
         {
             accessorKey: "nice",
@@ -100,7 +105,7 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
-            },
+            }
         },
         {
             accessorKey: "mbIn",
@@ -116,7 +121,7 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
-            },
+            }
         },
         {
             accessorKey: "mbOut",
@@ -132,7 +137,7 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
-            },
+            }
         },
         {
             accessorKey: "type",
@@ -167,7 +172,7 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                         </div>
                     );
                 }
-            },
+            }
         },
         {
             accessorKey: "online",
@@ -186,24 +191,23 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
             },
             cell: ({ row }) => {
                 const originalRow = row.original;
-                console.log(originalRow.online);
-                
+
                 if (originalRow.online) {
                     return (
                         <span className="text-green-500 flex items-center space-x-2">
-                        <Check className="w-4 h-4" />
-                        <span>Online</span>
+                            <Check className="w-4 h-4" />
+                            <span>Online</span>
                         </span>
                     );
                 } else {
                     return (
                         <span className="text-red-500 flex items-center space-x-2">
-                        <X className="w-4 h-4" />
-                        <span>Offline</span>
+                            <X className="w-4 h-4" />
+                            <span>Offline</span>
                         </span>
                     );
                 }
-            },
+            }
         },
         {
             id: "actions",
@@ -229,16 +233,13 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                                         View settings
                                     </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                    <button
-                                        onClick={() => {
-                                            setSelectedSite(siteRow);
-                                            setIsDeleteModalOpen(true);
-                                        }}
-                                        className="text-red-500"
-                                    >
-                                        Delete
-                                    </button>
+                                <DropdownMenuItem
+                                    onClick={() => {
+                                        setSelectedSite(siteRow);
+                                        setIsDeleteModalOpen(true);
+                                    }}
+                                >
+                                    <span className="text-red-500">Delete</span>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -252,15 +253,19 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                         </Link>
                     </div>
                 );
-            },
-        },
+            }
+        }
     ];
 
     return (
         <>
-            <CreateSiteForm
+            <CreateSiteFormModal
                 open={isCreateModalOpen}
                 setOpen={setIsCreateModalOpen}
+                onCreate={(val) => {
+                    setRows([val, ...rows]);
+                }}
+                orgId={orgId}
             />
 
             {selectedSite && (
@@ -302,12 +307,11 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
 
             <SitesDataTable
                 columns={columns}
-                data={sites}
+                data={rows}
                 addSite={() => {
                     setIsCreateModalOpen(true);
                 }}
             />
-            {/* <button onClick={callApi}>Create Newt</button> */}
         </>
     );
 }

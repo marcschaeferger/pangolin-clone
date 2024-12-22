@@ -11,12 +11,13 @@ import { response } from "@server/utils";
 import { hashPassword, verifyPassword } from "@server/auth/password";
 import { verifyTotpCode } from "@server/auth/2fa";
 import { passwordSchema } from "@server/auth/passwordSchema";
+import logger from "@server/logger";
 
 export const changePasswordBody = z.object({
     oldPassword: z.string(),
     newPassword: passwordSchema,
     code: z.string().optional(),
-});
+}).strict();
 
 export type ChangePasswordBody = z.infer<typeof changePasswordBody>;
 
@@ -108,6 +109,7 @@ export async function changePassword(
             status: HttpCode.OK,
         });
     } catch (error) {
+        logger.error(error);
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,

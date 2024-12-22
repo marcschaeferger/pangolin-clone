@@ -19,7 +19,7 @@ async function queryUser(orgId: string, userId: string) {
             roleId: userOrgs.roleId,
             roleName: roles.name,
             isOwner: userOrgs.isOwner,
-            isAdmin: roles.isAdmin,
+            isAdmin: roles.isAdmin
         })
         .from(userOrgs)
         .leftJoin(roles, eq(userOrgs.roleId, roles.roleId))
@@ -33,10 +33,12 @@ export type GetOrgUserResponse = NonNullable<
     Awaited<ReturnType<typeof queryUser>>
 >;
 
-const getOrgUserParamsSchema = z.object({
-    userId: z.string(),
-    orgId: z.string(),
-});
+const getOrgUserParamsSchema = z
+    .object({
+        userId: z.string(),
+        orgId: z.string()
+    })
+    .strict();
 
 export async function getOrgUser(
     req: Request,
@@ -109,7 +111,7 @@ export async function getOrgUser(
             success: true,
             error: false,
             message: "User retrieved successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

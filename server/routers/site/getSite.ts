@@ -10,16 +10,18 @@ import logger from "@server/logger";
 import stoi from "@server/utils/stoi";
 import { fromError } from "zod-validation-error";
 
-const getSiteSchema = z.object({
-    siteId: z
-        .string()
-        .optional()
-        .transform(stoi)
-        .pipe(z.number().int().positive().optional())
-        .optional(),
-    niceId: z.string().optional(),
-    orgId: z.string().optional(),
-});
+const getSiteSchema = z
+    .object({
+        siteId: z
+            .string()
+            .optional()
+            .transform(stoi)
+            .pipe(z.number().int().positive().optional())
+            .optional(),
+        niceId: z.string().optional(),
+        orgId: z.string().optional()
+    })
+    .strict();
 
 export type GetSiteResponse = {
     siteId: number;
@@ -79,15 +81,15 @@ export async function getSite(
                 siteId: site[0].siteId,
                 niceId: site[0].niceId,
                 name: site[0].name,
-                subnet: site[0].subnet,
+                subnet: site[0].subnet
             },
             success: true,
             error: false,
             message: "Site retrieved successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
-        logger.error("Error from getSite: ", error);
+        logger.error(error);
         return next(
             createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );

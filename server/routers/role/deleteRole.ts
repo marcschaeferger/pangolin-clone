@@ -9,13 +9,17 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
-const deleteRoleSchema = z.object({
-    roleId: z.string().transform(Number).pipe(z.number().int().positive()),
-});
+const deleteRoleSchema = z
+    .object({
+        roleId: z.string().transform(Number).pipe(z.number().int().positive())
+    })
+    .strict();
 
-const deelteRoleBodySchema = z.object({
-    roleId: z.string().transform(Number).pipe(z.number().int().positive()),
-});
+const deelteRoleBodySchema = z
+    .object({
+        roleId: z.string().transform(Number).pipe(z.number().int().positive())
+    })
+    .strict();
 
 export async function deleteRole(
     req: Request,
@@ -108,7 +112,7 @@ export async function deleteRole(
             success: true,
             error: false,
             message: "Role deleted successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

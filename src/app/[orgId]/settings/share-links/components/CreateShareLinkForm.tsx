@@ -197,12 +197,16 @@ export default function CreateShareLinkForm({
             const link = constructShareLink(
                 values.resourceId,
                 token.accessTokenId,
-                token.tokenHash
+                token.accessToken
             );
             setLink(link);
             onCreated?.({
-                ...token,
-                resourceName: values.resourceName
+                accessTokenId: token.accessTokenId,
+                resourceId: token.resourceId,
+                resourceName: values.resourceName,
+                title: token.title,
+                createdAt: token.createdAt,
+                expiresAt: token.expiresAt
             });
         }
 
@@ -285,7 +289,9 @@ export default function CreateShareLinkForm({
                                                                                 r
                                                                             ) => (
                                                                                 <CommandItem
-                                                                                    value={r.name}
+                                                                                    value={
+                                                                                        r.name
+                                                                                    }
                                                                                     key={
                                                                                         r.resourceId
                                                                                     }
@@ -441,6 +447,10 @@ export default function CreateShareLinkForm({
                             )}
                             {link && (
                                 <div className="max-w-md space-y-4">
+                                    <p>
+                                        You will be able to see this link once.
+                                        Make sure to copy it.
+                                    </p>
                                     <p>
                                         Anyone with this link can access the
                                         resource. Share it with care.

@@ -9,13 +9,17 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
-const removeUserSiteParamsSchema = z.object({
-    userId: z.string(),
-});
+const removeUserSiteParamsSchema = z
+    .object({
+        userId: z.string()
+    })
+    .strict();
 
-const removeUserSiteSchema = z.object({
-    siteId: z.number().int().positive(),
-});
+const removeUserSiteSchema = z
+    .object({
+        siteId: z.number().int().positive()
+    })
+    .strict();
 
 export async function removeUserSite(
     req: Request,
@@ -85,7 +89,7 @@ export async function removeUserSite(
             success: true,
             error: false,
             message: "Site removed from user successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

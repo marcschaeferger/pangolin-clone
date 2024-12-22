@@ -8,7 +8,7 @@ import { fromError } from "zod-validation-error";
 import createHttpError from "http-errors";
 import response from "@server/utils/response";
 import { SqliteError } from "better-sqlite3";
-import { sendEmailVerificationCode } from "./sendEmailVerificationCode";
+import { sendEmailVerificationCode } from "../../auth/sendEmailVerificationCode";
 import { passwordSchema } from "@server/auth/passwordSchema";
 import { eq } from "drizzle-orm";
 import moment from "moment";
@@ -20,6 +20,7 @@ import {
 } from "@server/auth";
 import { ActionsEnum } from "@server/auth/actions";
 import config from "@server/config";
+import logger from "@server/logger";
 
 export const signupBodySchema = z.object({
     email: z.string().email(),
@@ -153,6 +154,7 @@ export async function signup(
                 )
             );
         } else {
+            logger.error(e);
             return next(
                 createHttpError(
                     HttpCode.INTERNAL_SERVER_ERROR,

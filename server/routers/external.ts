@@ -1,4 +1,5 @@
 import { Router } from "express";
+import config from "@server/config";
 import * as site from "./site";
 import * as org from "./org";
 import * as resource from "./resource";
@@ -419,8 +420,12 @@ export const authRouter = Router();
 unauthenticated.use("/auth", authRouter);
 authRouter.use(
     rateLimitMiddleware({
-        windowMin: 10,
-        max: 75,
+        windowMin:
+            config.rate_limits.auth?.window_minutes ||
+            config.rate_limits.global.window_minutes,
+        max:
+            config.rate_limits.auth?.max_requests ||
+            config.rate_limits.global.max_requests,
         type: "IP_AND_PATH"
     })
 );

@@ -6,13 +6,13 @@ import logger from "@server/logger";
 import {
     createBlankSessionTokenCookie,
     invalidateSession,
-    SESSION_COOKIE_NAME,
+    SESSION_COOKIE_NAME
 } from "@server/auth";
 
 export async function logout(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
 ): Promise<any> {
     const sessionId = req.cookies[SESSION_COOKIE_NAME];
 
@@ -20,8 +20,8 @@ export async function logout(
         return next(
             createHttpError(
                 HttpCode.BAD_REQUEST,
-                "You must be logged in to sign out",
-            ),
+                "You must be logged in to sign out"
+            )
         );
     }
 
@@ -34,15 +34,12 @@ export async function logout(
             success: true,
             error: false,
             message: "Logged out successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
-        logger.error("Failed to log out", error);
+        logger.error(error);
         return next(
-            createHttpError(
-                HttpCode.INTERNAL_SERVER_ERROR,
-                "Failed to log out",
-            ),
+            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "Failed to log out")
         );
     }
 }

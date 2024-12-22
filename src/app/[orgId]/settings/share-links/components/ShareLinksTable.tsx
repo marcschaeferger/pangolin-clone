@@ -34,9 +34,14 @@ import moment from "moment";
 import CreateShareLinkForm from "./CreateShareLinkForm";
 import { constructShareLink } from "@app/lib/shareLinks";
 
-export type ShareLinkRow = ArrayElement<
-    ListAccessTokensResponse["accessTokens"]
->;
+export type ShareLinkRow = {
+    accessTokenId: string;
+    resourceId: number;
+    resourceName: string;
+    title: string | null;
+    createdAt: number;
+    expiresAt: number | null;
+};
 
 type ShareLinksTableProps = {
     shareLinks: ShareLinkRow[];
@@ -64,7 +69,10 @@ export default function ShareLinksTable({
         await api.delete(`/access-token/${id}`).catch((e) => {
             toast({
                 title: "Failed to delete link",
-                description: formatAxiosError(e, "An error occurred deleting link"),
+                description: formatAxiosError(
+                    e,
+                    "An error occurred deleting link"
+                )
             });
         });
 
@@ -73,7 +81,7 @@ export default function ShareLinksTable({
 
         toast({
             title: "Link deleted",
-            description: "The link has been deleted",
+            description: "The link has been deleted"
         });
     }
 
@@ -123,69 +131,69 @@ export default function ShareLinksTable({
                 );
             }
         },
-        {
-            accessorKey: "domain",
-            header: "Link",
-            cell: ({ row }) => {
-                const r = row.original;
-
-                const link = constructShareLink(
-                    r.resourceId,
-                    r.accessTokenId,
-                    r.tokenHash
-                );
-
-                return (
-                    <div className="flex items-center">
-                        <Link
-                            href={link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="hover:underline mr-2"
-                        >
-                            {formatLink(link)}
-                        </Link>
-                        <Button
-                            variant="ghost"
-                            className="h-6 w-6 p-0"
-                            onClick={() => {
-                                navigator.clipboard.writeText(link);
-                                const originalIcon = document.querySelector(
-                                    `#icon-${r.accessTokenId}`
-                                );
-                                if (originalIcon) {
-                                    originalIcon.classList.add("hidden");
-                                }
-                                const checkIcon = document.querySelector(
-                                    `#check-icon-${r.accessTokenId}`
-                                );
-                                if (checkIcon) {
-                                    checkIcon.classList.remove("hidden");
-                                    setTimeout(() => {
-                                        checkIcon.classList.add("hidden");
-                                        if (originalIcon) {
-                                            originalIcon.classList.remove(
-                                                "hidden"
-                                            );
-                                        }
-                                    }, 2000);
-                                }
-                            }}
-                        >
-                            <Copy
-                                id={`icon-${r.accessTokenId}`}
-                                className="h-4 w-4"
-                            />
-                            <Check
-                                id={`check-icon-${r.accessTokenId}`}
-                                className="hidden text-green-500 h-4 w-4"
-                            />
-                            <span className="sr-only">Copy link</span>
-                        </Button>
-                    </div>
-                );
-            }
-        },
+        // {
+        //     accessorKey: "domain",
+        //     header: "Link",
+        //     cell: ({ row }) => {
+        //         const r = row.original;
+        //
+        //         const link = constructShareLink(
+        //             r.resourceId,
+        //             r.accessTokenId,
+        //             r.tokenHash
+        //         );
+        //
+        //         return (
+        //             <div className="flex items-center">
+        //                 <Link
+        //                     href={link}
+        //                     target="_blank"
+        //                     rel="noopener noreferrer"
+        //                     className="hover:underline mr-2"
+        //                 >
+        //                     {formatLink(link)}
+        //                 </Link>
+        //                 <Button
+        //                     variant="ghost"
+        //                     className="h-6 w-6 p-0"
+        //                     onClick={() => {
+        //                         navigator.clipboard.writeText(link);
+        //                         const originalIcon = document.querySelector(
+        //                             `#icon-${r.accessTokenId}`
+        //                         );
+        //                         if (originalIcon) {
+        //                             originalIcon.classList.add("hidden");
+        //                         }
+        //                         const checkIcon = document.querySelector(
+        //                             `#check-icon-${r.accessTokenId}`
+        //                         );
+        //                         if (checkIcon) {
+        //                             checkIcon.classList.remove("hidden");
+        //                             setTimeout(() => {
+        //                                 checkIcon.classList.add("hidden");
+        //                                 if (originalIcon) {
+        //                                     originalIcon.classList.remove(
+        //                                         "hidden"
+        //                                     );
+        //                                 }
+        //                             }, 2000);
+        //                         }
+        //                     }}
+        //                 >
+        //                     <Copy
+        //                         id={`icon-${r.accessTokenId}`}
+        //                         className="h-4 w-4"
+        //                     />
+        //                     <Check
+        //                         id={`check-icon-${r.accessTokenId}`}
+        //                         className="hidden text-green-500 h-4 w-4"
+        //                     />
+        //                     <span className="sr-only">Copy link</span>
+        //                 </Button>
+        //             </div>
+        //         );
+        //     }
+        // },
         {
             accessorKey: "createdAt",
             header: ({ column }) => {

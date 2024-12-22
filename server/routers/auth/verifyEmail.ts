@@ -9,10 +9,13 @@ import { User, emailVerificationCodes, users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import { isWithinExpirationDate } from "oslo";
 import config from "@server/config";
+import logger from "@server/logger";
 
-export const verifyEmailBody = z.object({
-    code: z.string(),
-});
+export const verifyEmailBody = z
+    .object({
+        code: z.string()
+    })
+    .strict();
 
 export type VerifyEmailBody = z.infer<typeof verifyEmailBody>;
 
@@ -66,7 +69,7 @@ export async function verifyEmail(
             await db
                 .update(users)
                 .set({
-                    emailVerified: true,
+                    emailVerified: true
                 })
                 .where(eq(users.userId, user.userId));
         } else {
@@ -84,10 +87,11 @@ export async function verifyEmail(
             message: "Email verified",
             status: HttpCode.OK,
             data: {
-                valid,
-            },
+                valid
+            }
         });
     } catch (error) {
+        logger.error(error);
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,

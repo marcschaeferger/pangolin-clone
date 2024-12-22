@@ -14,12 +14,15 @@ import { passwordSchema } from "@server/auth/passwordSchema";
 import { encodeHex } from "oslo/encoding";
 import { isWithinExpirationDate } from "oslo";
 import { invalidateAllSessions } from "@server/auth";
+import logger from "@server/logger";
 
-export const resetPasswordBody = z.object({
-    token: z.string(),
-    newPassword: passwordSchema,
-    code: z.string().optional(),
-});
+export const resetPasswordBody = z
+    .object({
+        token: z.string(),
+        newPassword: passwordSchema,
+        code: z.string().optional()
+    })
+    .strict();
 
 export type ResetPasswordBody = z.infer<typeof resetPasswordBody>;
 
@@ -30,7 +33,7 @@ export type ResetPasswordResponse = {
 export async function resetPassword(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
 ): Promise<any> {
     const parsedBody = resetPasswordBody.safeParse(req.body);
 
@@ -38,8 +41,8 @@ export async function resetPassword(
         return next(
             createHttpError(
                 HttpCode.BAD_REQUEST,
-                fromError(parsedBody.error).toString(),
-            ),
+                fromError(parsedBody.error).toString()
+            )
         );
     }
 
@@ -47,7 +50,7 @@ export async function resetPassword(
 
     try {
         const tokenHash = encodeHex(
-            await sha256(new TextEncoder().encode(token)),
+            await sha256(new TextEncoder().encode(token))
         );
 
         const resetRequest = await db
@@ -63,8 +66,8 @@ export async function resetPassword(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    "Invalid or expired password reset token",
-                ),
+                    "Invalid or expired password reset token"
+                )
             );
         }
 
@@ -77,8 +80,8 @@ export async function resetPassword(
             return next(
                 createHttpError(
                     HttpCode.INTERNAL_SERVER_ERROR,
-                    "User not found",
-                ),
+                    "User not found"
+                )
             );
         }
 
@@ -89,22 +92,22 @@ export async function resetPassword(
                     success: true,
                     error: false,
                     message: "Two-factor authentication required",
-                    status: HttpCode.ACCEPTED,
+                    status: HttpCode.ACCEPTED
                 });
             }
 
             const validOTP = await verifyTotpCode(
                 code!,
                 user[0].twoFactorSecret!,
-                user[0].userId,
+                user[0].userId
             );
 
             if (!validOTP) {
                 return next(
                     createHttpError(
                         HttpCode.BAD_REQUEST,
-                        "Invalid two-factor authentication code",
-                    ),
+                        "Invalid two-factor authentication code"
+                    )
                 );
             }
         }
@@ -129,14 +132,15 @@ export async function resetPassword(
             success: true,
             error: false,
             message: "Password reset successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (e) {
+        logger.error(e);
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,
-                "Failed to reset password",
-            ),
+                "Failed to reset password"
+            )
         );
     }
 }

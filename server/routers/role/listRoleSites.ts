@@ -9,9 +9,11 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
-const listRoleSitesSchema = z.object({
-    roleId: z.string().transform(Number).pipe(z.number().int().positive()),
-});
+const listRoleSitesSchema = z
+    .object({
+        roleId: z.string().transform(Number).pipe(z.number().int().positive())
+    })
+    .strict();
 
 export async function listRoleSites(
     req: Request,
@@ -34,7 +36,7 @@ export async function listRoleSites(
         const roleSitesList = await db
             .select({
                 siteId: sites.siteId,
-                name: sites.name,
+                name: sites.name
             })
             .from(roleSites)
             .innerJoin(sites, eq(roleSites.siteId, sites.siteId))
@@ -47,7 +49,7 @@ export async function listRoleSites(
             success: true,
             error: false,
             message: "Role sites retrieved successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

@@ -8,14 +8,15 @@ import createHttpError from "http-errors";
 import { fromError } from "zod-validation-error";
 import { hash } from "@node-rs/argon2";
 import { response } from "@server/utils";
+import logger from "@server/logger";
 
 const setResourceAuthMethodsParamsSchema = z.object({
-    resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
+    resourceId: z.string().transform(Number).pipe(z.number().int().positive())
 });
 
 const setResourceAuthMethodsBodySchema = z
     .object({
-        password: z.string().min(4).max(100).nullable(),
+        password: z.string().min(4).max(100).nullable()
     })
     .strict();
 
@@ -60,7 +61,7 @@ export async function setResourcePassword(
                     memoryCost: 19456,
                     timeCost: 2,
                     outputLen: 32,
-                    parallelism: 1,
+                    parallelism: 1
                 });
 
                 await trx
@@ -74,9 +75,10 @@ export async function setResourcePassword(
             success: true,
             error: false,
             message: "Resource password set successfully",
-            status: HttpCode.CREATED,
+            status: HttpCode.CREATED
         });
     } catch (error) {
+        logger.error(error);
         return next(
             createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );

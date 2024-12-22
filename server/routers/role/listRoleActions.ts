@@ -9,9 +9,11 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
-const listRoleActionsSchema = z.object({
-    roleId: z.string().transform(Number).pipe(z.number().int().positive()),
-});
+const listRoleActionsSchema = z
+    .object({
+        roleId: z.string().transform(Number).pipe(z.number().int().positive())
+    })
+    .strict();
 
 export async function listRoleActions(
     req: Request,
@@ -35,7 +37,7 @@ export async function listRoleActions(
             .select({
                 actionId: actions.actionId,
                 name: actions.name,
-                description: actions.description,
+                description: actions.description
             })
             .from(roleActions)
             .innerJoin(actions, eq(roleActions.actionId, actions.actionId))
@@ -48,7 +50,7 @@ export async function listRoleActions(
             success: true,
             error: false,
             message: "Role actions retrieved successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

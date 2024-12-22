@@ -16,7 +16,7 @@ import { TimeSpan } from "oslo";
 
 export const requestPasswordResetBody = z.object({
     email: z.string().email(),
-});
+}).strict();
 
 export type RequestPasswordResetBody = z.infer<typeof requestPasswordResetBody>;
 
@@ -85,6 +85,7 @@ export async function requestPasswordReset(
             status: HttpCode.OK,
         });
     } catch (e) {
+        logger.error(e);
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,

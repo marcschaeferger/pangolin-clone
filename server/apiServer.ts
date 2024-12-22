@@ -38,9 +38,9 @@ export function createApiServer() {
     if (!dev) {
         apiServer.use(
             rateLimitMiddleware({
-                windowMin: config.rate_limit.window_minutes,
-                max: config.rate_limit.max_requests,
-                type: "IP_ONLY",
+                windowMin: config.rate_limits.global.window_minutes,
+                max: config.rate_limits.global.max_requests,
+                type: "IP_AND_PATH",
             }),
         );
     }

@@ -9,9 +9,11 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
-const getTargetSchema = z.object({
-    targetId: z.string().transform(Number).pipe(z.number().int().positive()),
-});
+const getTargetSchema = z
+    .object({
+        targetId: z.string().transform(Number).pipe(z.number().int().positive())
+    })
+    .strict();
 
 export async function getTarget(
     req: Request,
@@ -51,7 +53,7 @@ export async function getTarget(
             success: true,
             error: false,
             message: "Target retrieved successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

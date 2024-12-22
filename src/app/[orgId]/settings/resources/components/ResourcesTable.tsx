@@ -6,7 +6,7 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuTrigger,
+    DropdownMenuTrigger
 } from "@app/components/ui/dropdown-menu";
 import { Button } from "@app/components/ui/button";
 import {
@@ -17,7 +17,7 @@ import {
     Check,
     ArrowUpRight,
     ShieldOff,
-    ShieldCheck,
+    ShieldCheck
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -64,7 +64,7 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                 toast({
                     variant: "destructive",
                     title: "Error deleting resource",
-                    description: formatAxiosError(e, "Error deleting resource"),
+                    description: formatAxiosError(e, "Error deleting resource")
                 });
             })
             .then(() => {
@@ -88,7 +88,7 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
-            },
+            }
         },
         {
             accessorKey: "site",
@@ -117,7 +117,7 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                         <ArrowUpRight className="ml-2 h-4 w-4" />
                     </Button>
                 );
-            },
+            }
         },
         {
             accessorKey: "domain",
@@ -139,16 +139,16 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                             className="h-6 w-6 p-0"
                             onClick={() => {
                                 navigator.clipboard.writeText(
-                                    resourceRow.domain,
+                                    resourceRow.domain
                                 );
                                 const originalIcon = document.querySelector(
-                                    `#icon-${resourceRow.id}`,
+                                    `#icon-${resourceRow.id}`
                                 );
                                 if (originalIcon) {
                                     originalIcon.classList.add("hidden");
                                 }
                                 const checkIcon = document.querySelector(
-                                    `#check-icon-${resourceRow.id}`,
+                                    `#check-icon-${resourceRow.id}`
                                 );
                                 if (checkIcon) {
                                     checkIcon.classList.remove("hidden");
@@ -156,7 +156,7 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                                         checkIcon.classList.add("hidden");
                                         if (originalIcon) {
                                             originalIcon.classList.remove(
-                                                "hidden",
+                                                "hidden"
                                             );
                                         }
                                     }, 2000);
@@ -175,7 +175,7 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                         </Button>
                     </div>
                 );
-            },
+            }
         },
         {
             accessorKey: "hasAuth",
@@ -209,7 +209,7 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                         )}
                     </div>
                 );
-            },
+            }
         },
         {
             id: "actions",
@@ -241,18 +241,15 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                                             View settings
                                         </Link>
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem>
-                                        <button
-                                            onClick={() => {
-                                                setSelectedResource(
-                                                    resourceRow,
-                                                );
-                                                setIsDeleteModalOpen(true);
-                                            }}
-                                            className="text-red-500"
-                                        >
+                                    <DropdownMenuItem
+                                        onClick={() => {
+                                            setSelectedResource(resourceRow);
+                                            setIsDeleteModalOpen(true);
+                                        }}
+                                    >
+                                        <span className="text-red-500">
                                             Delete
-                                        </button>
+                                        </span>
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
@@ -267,8 +264,8 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                         </div>
                     </>
                 );
-            },
-        },
+            }
+        }
     ];
 
     return (

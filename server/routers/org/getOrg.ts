@@ -8,9 +8,11 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 
-const getOrgSchema = z.object({
-    orgId: z.string(),
-});
+const getOrgSchema = z
+    .object({
+        orgId: z.string()
+    })
+    .strict();
 
 export type GetOrgResponse = {
     org: Org;
@@ -51,12 +53,12 @@ export async function getOrg(
 
         return response<GetOrgResponse>(res, {
             data: {
-                org: org[0],
+                org: org[0]
             },
             success: true,
             error: false,
             message: "Organization retrieved successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

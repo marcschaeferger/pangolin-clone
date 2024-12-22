@@ -9,13 +9,20 @@ import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { and, eq } from "drizzle-orm";
 
-const setResourceWhitelistBodySchema = z.object({
-    emails: z.array(z.string().email()).max(50)
-});
+const setResourceWhitelistBodySchema = z
+    .object({
+        emails: z.array(z.string().email()).max(50)
+    })
+    .strict();
 
-const setResourceWhitelistParamsSchema = z.object({
-    resourceId: z.string().transform(Number).pipe(z.number().int().positive())
-});
+const setResourceWhitelistParamsSchema = z
+    .object({
+        resourceId: z
+            .string()
+            .transform(Number)
+            .pipe(z.number().int().positive())
+    })
+    .strict();
 
 export async function setResourceWhitelist(
     req: Request,

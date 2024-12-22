@@ -7,7 +7,7 @@ import {
     FormField,
     FormItem,
     FormLabel,
-    FormMessage,
+    FormMessage
 } from "@app/components/ui/form";
 import { Input } from "@app/components/ui/input";
 import {
@@ -15,7 +15,7 @@ import {
     SelectContent,
     SelectItem,
     SelectTrigger,
-    SelectValue,
+    SelectValue
 } from "@app/components/ui/select";
 import { useToast } from "@app/hooks/useToast";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,13 +33,14 @@ import {
     CredenzaDescription,
     CredenzaFooter,
     CredenzaHeader,
-    CredenzaTitle,
+    CredenzaTitle
 } from "@app/components/Credenza";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { ListRolesResponse } from "@server/routers/role";
 import { formatAxiosError } from "@app/lib/utils";
 import { createApiClient } from "@app/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
+import { Checkbox } from "@app/components/ui/checkbox";
 
 type InviteUserFormProps = {
     open: boolean;
@@ -49,20 +50,24 @@ type InviteUserFormProps = {
 const formSchema = z.object({
     email: z.string().email({ message: "Invalid email address" }),
     validForHours: z.string().min(1, { message: "Please select a duration" }),
-    roleId: z.string().min(1, { message: "Please select a role" }),
+    roleId: z.string().min(1, { message: "Please select a role" })
 });
 
 export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
     const { toast } = useToast();
     const { org } = useOrgContext();
 
-    const api = createApiClient(useEnvContext());
+    const { env } = useEnvContext();
+
+    const api = createApiClient({ env });
 
     const [inviteLink, setInviteLink] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [expiresInDays, setExpiresInDays] = useState(1);
 
     const [roles, setRoles] = useState<{ roleId: number; name: string }[]>([]);
+
+    const [sendEmail, setSendEmail] = useState(env.EMAIL_ENABLED === "true");
 
     const validFor = [
         { hours: 24, name: "1 day" },
@@ -71,7 +76,7 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
         { hours: 96, name: "4 days" },
         { hours: 120, name: "5 days" },
         { hours: 144, name: "6 days" },
-        { hours: 168, name: "7 days" },
+        { hours: 168, name: "7 days" }
     ];
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -79,8 +84,8 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
         defaultValues: {
             email: "",
             validForHours: "72",
-            roleId: "",
-        },
+            roleId: ""
+        }
     });
 
     useEffect(() => {
@@ -90,9 +95,9 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
 
         async function fetchRoles() {
             const res = await api
-                .get<AxiosResponse<ListRolesResponse>>(
-                    `/org/${org?.org.orgId}/roles`
-                )
+                .get<
+                    AxiosResponse<ListRolesResponse>
+                >(`/org/${org?.org.orgId}/roles`)
                 .catch((e) => {
                     console.error(e);
                     toast({
@@ -101,7 +106,7 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
                         description: formatAxiosError(
                             e,
                             "An error occurred while fetching the roles"
-                        ),
+                        )
                     });
                 });
 
@@ -127,6 +132,7 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
                     email: values.email,
                     roleId: parseInt(values.roleId),
                     validHours: parseInt(values.validForHours),
+                    sendEmail: sendEmail
                 } as InviteUserBody
             )
             .catch((e) => {
@@ -136,7 +142,7 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
                     description: formatAxiosError(
                         e,
                         "An error occurred while inviting the user"
-                    ),
+                    )
                 });
             });
 
@@ -145,7 +151,7 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
             toast({
                 variant: "default",
                 title: "User invited",
-                description: "The user has been successfully invited.",
+                description: "The user has been successfully invited."
             });
 
             setExpiresInDays(parseInt(values.validForHours) / 24);
@@ -198,6 +204,27 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
                                                 </FormItem>
                                             )}
                                         />
+
+                                        {env.EMAIL_ENABLED === "true" && (
+                                            <div className="flex items-center space-x-2">
+                                                <Checkbox
+                                                    id="send-email"
+                                                    checked={sendEmail}
+                                                    onCheckedChange={(e) =>
+                                                        setSendEmail(
+                                                            e as boolean
+                                                        )
+                                                    }
+                                                />
+                                                <label
+                                                    htmlFor="send-email"
+                                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                                >
+                                                    Send invite email to user
+                                                </label>
+                                            </div>
+                                        )}
+
                                         <FormField
                                             control={form.control}
                                             name="roleId"
@@ -281,11 +308,21 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
 
                             {inviteLink && (
                                 <div className="max-w-md space-y-4">
-                                    <p>
-                                        The user has been successfully invited.
-                                        They must access the link below to
-                                        accept the invitation.
-                                    </p>
+                                    {sendEmail && (
+                                        <p>
+                                            An email has been sent to the user
+                                            with the access link below. They
+                                            must access the link to accept the
+                                            invitation.
+                                        </p>
+                                    )}
+                                    {!sendEmail && (
+                                        <p>
+                                            The user has been invited. They must
+                                            access the link below to accept the
+                                            invitation.
+                                        </p>
+                                    )}
                                     <p>
                                         The invite will expire in{" "}
                                         <b>

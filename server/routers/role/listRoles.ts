@@ -10,9 +10,11 @@ import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import stoi from "@server/utils/stoi";
 
-const listRolesParamsSchema = z.object({
-    orgId: z.string(),
-});
+const listRolesParamsSchema = z
+    .object({
+        orgId: z.string()
+    })
+    .strict();
 
 const listRolesSchema = z.object({
     limit: z
@@ -26,7 +28,7 @@ const listRolesSchema = z.object({
         .optional()
         .default("0")
         .transform(Number)
-        .pipe(z.number().int().nonnegative()),
+        .pipe(z.number().int().nonnegative())
 });
 
 async function queryRoles(orgId: string, limit: number, offset: number) {
@@ -37,7 +39,7 @@ async function queryRoles(orgId: string, limit: number, offset: number) {
             isAdmin: roles.isAdmin,
             name: roles.name,
             description: roles.description,
-            orgName: orgs.name,
+            orgName: orgs.name
         })
         .from(roles)
         .leftJoin(orgs, eq(roles.orgId, orgs.orgId))
@@ -100,13 +102,13 @@ export async function listRoles(
                 pagination: {
                     total: totalCount,
                     limit,
-                    offset,
-                },
+                    offset
+                }
             },
             success: true,
             error: false,
             message: "Roles retrieved successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

@@ -22,7 +22,7 @@ export const loginBodySchema = z.object({
     email: z.string().email(),
     password: z.string(),
     code: z.string().optional(),
-});
+}).strict();
 
 export type LoginBody = z.infer<typeof loginBodySchema>;
 
@@ -149,6 +149,7 @@ export async function login(
             status: HttpCode.OK,
         });
     } catch (e) {
+        logger.error(e);
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,

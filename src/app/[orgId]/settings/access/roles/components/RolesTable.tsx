@@ -5,7 +5,7 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuTrigger,
+    DropdownMenuTrigger
 } from "@app/components/ui/dropdown-menu";
 import { Button } from "@app/components/ui/button";
 import { ArrowUpDown, Crown, MoreHorizontal } from "lucide-react";
@@ -54,11 +54,11 @@ export default function UsersTable({ roles: r }: RolesTableProps) {
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
-            },
+            }
         },
         {
             accessorKey: "description",
-            header: "Description",
+            header: "Description"
         },
         {
             id: "actions",
@@ -90,16 +90,15 @@ export default function UsersTable({ roles: r }: RolesTableProps) {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
-                                        <DropdownMenuItem>
-                                            <button
-                                                className="text-red-500"
-                                                onClick={() => {
-                                                    setIsDeleteModalOpen(true);
-                                                    setUserToRemove(roleRow);
-                                                }}
-                                            >
+                                        <DropdownMenuItem
+                                            onClick={() => {
+                                                setIsDeleteModalOpen(true);
+                                                setUserToRemove(roleRow);
+                                            }}
+                                        >
+                                            <span className="text-red-500">
                                                 Delete Role
-                                            </button>
+                                            </span>
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
@@ -107,8 +106,8 @@ export default function UsersTable({ roles: r }: RolesTableProps) {
                         </div>
                     </>
                 );
-            },
-        },
+            }
+        }
     ];
 
     return (
@@ -128,9 +127,7 @@ export default function UsersTable({ roles: r }: RolesTableProps) {
                     roleToDelete={roleToRemove}
                     afterDelete={() => {
                         setRoles((prev) =>
-                            prev.filter(
-                                (r) => r.roleId !== roleToRemove.roleId,
-                            ),
+                            prev.filter((r) => r.roleId !== roleToRemove.roleId)
                         );
                         setUserToRemove(null);
                     }}

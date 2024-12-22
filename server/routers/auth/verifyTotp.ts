@@ -10,10 +10,13 @@ import { eq } from "drizzle-orm";
 import { alphabet, generateRandomString } from "oslo/crypto";
 import { hashPassword } from "@server/auth/password";
 import { verifyTotpCode } from "@server/auth/2fa";
+import logger from "@server/logger";
 
-export const verifyTotpBody = z.object({
-    code: z.string(),
-});
+export const verifyTotpBody = z
+    .object({
+        code: z.string()
+    })
+    .strict();
 
 export type VerifyTotpBody = z.infer<typeof verifyTotpBody>;
 
@@ -82,7 +85,7 @@ export async function verifyTotp(
 
                 await db.insert(twoFactorBackupCodes).values({
                     userId: user.userId,
-                    codeHash: hash,
+                    codeHash: hash
                 });
             }
         }
@@ -92,16 +95,17 @@ export async function verifyTotp(
         return response<VerifyTotpResponse>(res, {
             data: {
                 valid,
-                ...(valid && codes ? { backupCodes: codes } : {}),
+                ...(valid && codes ? { backupCodes: codes } : {})
             },
             success: true,
             error: false,
             message: valid
                 ? "Code is valid. Two-factor is now enabled"
                 : "Code is invalid",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
+        logger.error(error);
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,

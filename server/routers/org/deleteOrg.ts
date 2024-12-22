@@ -18,9 +18,11 @@ import { fromError } from "zod-validation-error";
 import { sendToClient } from "../ws";
 import { deletePeer } from "../gerbil/peers";
 
-const deleteOrgSchema = z.object({
-    orgId: z.string()
-});
+const deleteOrgSchema = z
+    .object({
+        orgId: z.string()
+    })
+    .strict();
 
 export async function deleteOrg(
     req: Request,

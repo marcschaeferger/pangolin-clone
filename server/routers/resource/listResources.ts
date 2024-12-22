@@ -7,7 +7,7 @@ import {
     userResources,
     roleResources,
     resourcePassword,
-    resourcePincode,
+    resourcePincode
 } from "@server/db/schema";
 import response from "@server/utils/response";
 import HttpCode from "@server/types/HttpCode";
@@ -23,10 +23,11 @@ const listResourcesParamsSchema = z
             .optional()
             .transform(stoi)
             .pipe(z.number().int().positive().optional()),
-        orgId: z.string().optional(),
+        orgId: z.string().optional()
     })
+    .strict()
     .refine((data) => !!data.siteId !== !!data.orgId, {
-        message: "Either siteId or orgId must be provided, but not both",
+        message: "Either siteId or orgId must be provided, but not both"
     });
 
 const listResourcesSchema = z.object({
@@ -42,13 +43,13 @@ const listResourcesSchema = z.object({
         .optional()
         .default("0")
         .transform(Number)
-        .pipe(z.number().int().nonnegative()),
+        .pipe(z.number().int().nonnegative())
 });
 
 function queryResources(
     accessibleResourceIds: number[],
     siteId?: number,
-    orgId?: string,
+    orgId?: string
 ) {
     if (siteId) {
         return db
@@ -68,17 +69,17 @@ function queryResources(
             .leftJoin(sites, eq(resources.siteId, sites.siteId))
             .leftJoin(
                 resourcePassword,
-                eq(resourcePassword.resourceId, resources.resourceId),
+                eq(resourcePassword.resourceId, resources.resourceId)
             )
             .leftJoin(
                 resourcePincode,
-                eq(resourcePincode.resourceId, resources.resourceId),
+                eq(resourcePincode.resourceId, resources.resourceId)
             )
             .where(
                 and(
                     inArray(resources.resourceId, accessibleResourceIds),
-                    eq(resources.siteId, siteId),
-                ),
+                    eq(resources.siteId, siteId)
+                )
             );
     } else if (orgId) {
         return db
@@ -98,17 +99,17 @@ function queryResources(
             .leftJoin(sites, eq(resources.siteId, sites.siteId))
             .leftJoin(
                 resourcePassword,
-                eq(resourcePassword.resourceId, resources.resourceId),
+                eq(resourcePassword.resourceId, resources.resourceId)
             )
             .leftJoin(
                 resourcePincode,
-                eq(resourcePincode.resourceId, resources.resourceId),
+                eq(resourcePincode.resourceId, resources.resourceId)
             )
             .where(
                 and(
                     inArray(resources.resourceId, accessibleResourceIds),
-                    eq(resources.orgId, orgId),
-                ),
+                    eq(resources.orgId, orgId)
+                )
             );
     }
 }
@@ -121,7 +122,7 @@ export type ListResourcesResponse = {
 export async function listResources(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
 ): Promise<any> {
     try {
         const parsedQuery = listResourcesSchema.safeParse(req.query);
@@ -129,8 +130,8 @@ export async function listResources(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedQuery.error.errors.map((e) => e.message).join(", "),
-                ),
+                    parsedQuery.error.errors.map((e) => e.message).join(", ")
+                )
             );
         }
         const { limit, offset } = parsedQuery.data;
@@ -140,8 +141,8 @@ export async function listResources(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedParams.error.errors.map((e) => e.message).join(", "),
-                ),
+                    parsedParams.error.errors.map((e) => e.message).join(", ")
+                )
             );
         }
         const { siteId, orgId } = parsedParams.data;
@@ -150,29 +151,29 @@ export async function listResources(
             return next(
                 createHttpError(
                     HttpCode.FORBIDDEN,
-                    "User does not have access to this organization",
-                ),
+                    "User does not have access to this organization"
+                )
             );
         }
 
         const accessibleResources = await db
             .select({
-                resourceId: sql<number>`COALESCE(${userResources.resourceId}, ${roleResources.resourceId})`,
+                resourceId: sql<number>`COALESCE(${userResources.resourceId}, ${roleResources.resourceId})`
             })
             .from(userResources)
             .fullJoin(
                 roleResources,
-                eq(userResources.resourceId, roleResources.resourceId),
+                eq(userResources.resourceId, roleResources.resourceId)
             )
             .where(
                 or(
                     eq(userResources.userId, req.user!.userId),
-                    eq(roleResources.roleId, req.userOrgRoleId!),
-                ),
+                    eq(roleResources.roleId, req.userOrgRoleId!)
+                )
             );
 
         const accessibleResourceIds = accessibleResources.map(
-            (resource) => resource.resourceId,
+            (resource) => resource.resourceId
         );
 
         let countQuery: any = db
@@ -192,21 +193,18 @@ export async function listResources(
                 pagination: {
                     total: totalCount,
                     limit,
-                    offset,
-                },
+                    offset
+                }
             },
             success: true,
             error: false,
             message: "Resources retrieved successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);
         return next(
-            createHttpError(
-                HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred",
-            ),
+            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
 }
