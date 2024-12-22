@@ -118,7 +118,7 @@ export async function verifyTotp(
 async function generateBackupCodes(): Promise<string[]> {
     const codes = [];
     for (let i = 0; i < 10; i++) {
-        const code = generateRandomString(8, alphabet("0-9", "A-Z", "a-z"));
+        const code = generateRandomString(6, alphabet("0-9", "A-Z", "a-z"));
         codes.push(code);
     }
     return codes;

@@ -11,7 +11,9 @@ export async function verifyTotpCode(
     secret: string,
     userId: string
 ): Promise<boolean> {
-    if (code.length !== 6) {
+    // if code is digits only, it's totp
+    const isTotp = /^\d+$/.test(code);
+    if (!isTotp) {
         const validBackupCode = await verifyBackUpCode(code, userId);
         return validBackupCode;
     } else {

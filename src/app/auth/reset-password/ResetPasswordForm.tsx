@@ -45,6 +45,7 @@ import { createApiClient } from "@app/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { passwordSchema } from "@server/auth/passwordSchema";
 import { get } from "http";
+import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
 
 const requestSchema = z.object({
     email: z.string().email()
@@ -354,6 +355,7 @@ export default function ResetPasswordForm({
                                                         <InputOTP
                                                             maxLength={6}
                                                             {...field}
+                                                            pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
                                                         >
                                                             <InputOTPGroup>
                                                                 <InputOTPSlot

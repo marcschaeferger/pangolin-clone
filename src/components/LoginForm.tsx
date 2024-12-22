@@ -36,6 +36,7 @@ import {
     InputOTPSlot
 } from "./ui/input-otp";
 import Link from "next/link";
+import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
 
 type LoginFormProps = {
     redirect?: string;
@@ -61,7 +62,7 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
-    const [mfaRequested, setMfaRequested] = useState(false);
+    const [mfaRequested, setMfaRequested] = useState(true);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -129,7 +130,7 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
     }
 
     return (
-        <div>
+        <div className="space-y-8">
             {!mfaRequested && (
                 <Form {...form}>
                     <form
@@ -213,7 +214,7 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
                                     <FormLabel>Authenticator Code</FormLabel>
                                     <FormControl>
                                         <div className="flex justify-center">
-                                            <InputOTP maxLength={6} {...field}>
+                                            <InputOTP maxLength={6} {...field} pattern={REGEXP_ONLY_DIGITS_AND_CHARS}>
                                                 <InputOTPGroup>
                                                     <InputOTPSlot index={0} />
                                                     <InputOTPSlot index={1} />
