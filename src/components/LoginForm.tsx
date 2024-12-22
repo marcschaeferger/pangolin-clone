@@ -62,7 +62,7 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
-    const [mfaRequested, setMfaRequested] = useState(true);
+    const [mfaRequested, setMfaRequested] = useState(false);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),

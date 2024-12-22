@@ -48,8 +48,8 @@ export const ResetPasswordCode = ({ email, code, link }: Props) => {
                             <a href={link} className="text-primary">
                                 click here
                             </a>{" "}
-                            and follow the instructions to reset your
-                            password, or manually enter the following code:
+                            and follow the instructions to reset your password,
+                            or manually enter the following code:
                         </Text>
                         <Section className="text-center my-6">
                             <Text className="inline-block bg-primary text-xl font-bold text-white py-2 px-4 border border-gray-300 rounded-xl">
@@ -59,6 +59,11 @@ export const ResetPasswordCode = ({ email, code, link }: Props) => {
                         <Text className="text-base text-gray-700 mt-2">
                             If you didn’t request this, you can safely ignore
                             this email.
+                        </Text>
+                        <Text className="text-sm text-gray-500 mt-6">
+                            Best regards,
+                            <br />
+                            Fossorial
                         </Text>
                     </Container>
                 </Body>

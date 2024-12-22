@@ -63,6 +63,11 @@ export const VerifyEmail = ({
                             If you didn’t request this, you can safely ignore
                             this email.
                         </Text>
+                        <Text className="text-sm text-gray-500 mt-6">
+                            Best regards,
+                            <br />
+                            Fossorial
+                        </Text>
                     </Container>
                 </Body>
             </Tailwind>

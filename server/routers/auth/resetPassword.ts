@@ -1,3 +1,4 @@
+import config from "@server/config";
 import { Request, Response, NextFunction } from "express";
 import createHttpError from "http-errors";
 import { z } from "zod";
@@ -15,6 +16,8 @@ import { encodeHex } from "oslo/encoding";
 import { isWithinExpirationDate } from "oslo";
 import { invalidateAllSessions } from "@server/auth";
 import logger from "@server/logger";
+import ConfirmPasswordReset from "@server/emails/templates/NotifyResetPassword";
+import { sendEmail } from "@server/emails";
 
 export const resetPasswordBody = z
     .object({
@@ -141,7 +144,11 @@ export async function resetPassword(
             .delete(passwordResetTokens)
             .where(eq(passwordResetTokens.email, email));
 
-        // TODO: send email to user confirming password reset
+        await sendEmail(ConfirmPasswordReset({ email }), {
+            from: config.email?.no_reply,
+            to: email,
+            subject: "Password Reset Confirmation"
+        })
 
         return response<ResetPasswordResponse>(res, {
             data: null,
