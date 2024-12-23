@@ -10,6 +10,7 @@ import {
     CommandInput,
     CommandItem,
     CommandList,
+    CommandSeparator
 } from "@app/components/ui/command";
 import {
     DropdownMenu,
@@ -18,12 +19,12 @@ import {
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
-    DropdownMenuTrigger,
+    DropdownMenuTrigger
 } from "@app/components/ui/dropdown-menu";
 import {
     Popover,
     PopoverContent,
-    PopoverTrigger,
+    PopoverTrigger
 } from "@app/components/ui/popover";
 import {
     Select,
@@ -31,13 +32,23 @@ import {
     SelectGroup,
     SelectItem,
     SelectTrigger,
-    SelectValue,
+    SelectValue
 } from "@app/components/ui/select";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { useToast } from "@app/hooks/useToast";
 import { cn, formatAxiosError } from "@app/lib/utils";
 import { ListOrgsResponse } from "@server/routers/org";
-import { Check, ChevronsUpDown, Plus } from "lucide-react";
+import {
+    Check,
+    ChevronsUpDown,
+    Laptop,
+    LogOut,
+    Moon,
+    Plus,
+    Sun,
+    User
+} from "lucide-react";
+import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -51,8 +62,12 @@ type HeaderProps = {
 
 export default function Header({ email, orgId, name, orgs }: HeaderProps) {
     const { toast } = useToast();
+    const { setTheme, theme } = useTheme();
 
     const [open, setOpen] = useState(false);
+    const [userTheme, setUserTheme] = useState<"light" | "dark" | "system">(
+        theme as "light" | "dark" | "system"
+    );
 
     const router = useRouter();
 
@@ -72,12 +87,17 @@ export default function Header({ email, orgId, name, orgs }: HeaderProps) {
                 console.error("Error logging out", e);
                 toast({
                     title: "Error logging out",
-                    description: formatAxiosError(e, "Error logging out"),
+                    description: formatAxiosError(e, "Error logging out")
                 });
             })
             .then(() => {
                 router.push("/auth/login");
             });
+    }
+
+    function handleThemeChange(theme: "light" | "dark" | "system") {
+        setUserTheme(theme);
+        setTheme(theme);
     }
 
     return (
@@ -104,22 +124,54 @@ export default function Header({ email, orgId, name, orgs }: HeaderProps) {
                         >
                             <DropdownMenuLabel className="font-normal">
                                 <div className="flex flex-col space-y-1">
-                                    {name && (
-                                        <p className="text-sm font-medium leading-none truncate">
-                                            {name}
-                                        </p>
-                                    )}
-                                    <p className="text-xs leading-none text-muted-foreground truncate">
+                                    <p className="text-sm font-medium leading-none">
+                                        Signed in as
+                                    </p>
+                                    <p className="text-xs leading-none text-muted-foreground">
                                         {email}
                                     </p>
                                 </div>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuGroup>
-                                <DropdownMenuItem onClick={logout}>
-                                    Logout
-                                </DropdownMenuItem>
-                            </DropdownMenuGroup>
+                            <DropdownMenuItem>
+                                <User className="mr-2 h-4 w-4" />
+                                <span>User Settings</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuLabel>Theme</DropdownMenuLabel>
+                            {(["light", "dark", "system"] as const).map(
+                                (themeOption) => (
+                                    <DropdownMenuItem
+                                        key={themeOption}
+                                        onClick={() =>
+                                            handleThemeChange(themeOption)
+                                        }
+                                    >
+                                        {themeOption === "light" && (
+                                            <Sun className="mr-2 h-4 w-4" />
+                                        )}
+                                        {themeOption === "dark" && (
+                                            <Moon className="mr-2 h-4 w-4" />
+                                        )}
+                                        {themeOption === "system" && (
+                                            <Laptop className="mr-2 h-4 w-4" />
+                                        )}
+                                        <span className="capitalize">
+                                            {themeOption}
+                                        </span>
+                                        {userTheme === themeOption && (
+                                            <span className="absolute right-2 flex h-3.5 w-3.5 items-center justify-center">
+                                                <span className="h-2 w-2 rounded-full bg-primary"></span>
+                                            </span>
+                                        )}
+                                    </DropdownMenuItem>
+                                )
+                            )}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => logout()}>
+                                <LogOut className="mr-2 h-4 w-4" />
+                                <span>Log out</span>
+                            </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                     <span className="truncate max-w-[150px] md:max-w-none font-medium">
@@ -163,7 +215,7 @@ export default function Header({ email, orgId, name, orgs }: HeaderProps) {
                                             {orgId
                                                 ? orgs.find(
                                                       (org) =>
-                                                          org.orgId === orgId,
+                                                          org.orgId === orgId
                                                   )?.name
                                                 : "Select organization..."}
                                         </span>
@@ -176,25 +228,30 @@ export default function Header({ email, orgId, name, orgs }: HeaderProps) {
                             <Command>
                                 <CommandInput placeholder="Search..." />
                                 <CommandEmpty>
-                                    No organization found.
+                                    No organizations found.
                                 </CommandEmpty>
-                                <CommandGroup className="[50px]">
+                                <CommandGroup heading="Create">
                                     <CommandList>
                                         <CommandItem
-                                            className="flex items-center border border-input mb-2 cursor-pointer"
+                                            className="flex items-center cursor-pointer"
                                             onSelect={(currentValue) => {
                                                 router.push("/setup");
                                             }}
                                         >
-                                            <Plus className="mr-2 h-4 w-4"/>
+                                            <Plus className="mr-2 h-4 w-4" />
                                             New Organization
                                         </CommandItem>
+                                    </CommandList>
+                                </CommandGroup>
+                                <CommandSeparator />
+                                <CommandGroup heading="Organizations">
+                                    <CommandList>
                                         {orgs.map((org) => (
                                             <CommandItem
                                                 key={org.orgId}
                                                 onSelect={(currentValue) => {
                                                     router.push(
-                                                        `/${org.orgId}/settings`,
+                                                        `/${org.orgId}/settings`
                                                     );
                                                 }}
                                             >
@@ -203,7 +260,7 @@ export default function Header({ email, orgId, name, orgs }: HeaderProps) {
                                                         "mr-2 h-4 w-4",
                                                         orgId === org.orgId
                                                             ? "opacity-100"
-                                                            : "opacity-0",
+                                                            : "opacity-0"
                                                     )}
                                                 />
                                                 {org.name}
