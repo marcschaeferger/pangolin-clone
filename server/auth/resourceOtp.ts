@@ -8,6 +8,7 @@ import { sendEmail } from "@server/emails";
 import ResourceOTPCode from "@server/emails/templates/ResourceOTPCode";
 import config from "@server/config";
 import { hash, verify } from "@node-rs/argon2";
+import { hashPassword } from "./password";
 
 export async function sendResourceOtpEmail(
     email: string,
@@ -47,12 +48,7 @@ export async function generateResourceOtpCode(
 
     const otp = generateRandomString(8, alphabet("0-9", "A-Z", "a-z"));
 
-    const otpHash = await hash(otp, {
-        memoryCost: 19456,
-        timeCost: 2,
-        outputLen: 32,
-        parallelism: 1,
-    });
+    const otpHash = await hashPassword(otp);
 
     await db.insert(resourceOtp).values({
         resourceId,
@@ -84,12 +80,7 @@ export async function isValidOtp(
         return false;
     }
 
-    const validCode = await verify(record[0].otpHash, otp, {
-        memoryCost: 19456,
-        timeCost: 2,
-        outputLen: 32,
-        parallelism: 1
-    });
+    const validCode = await verifyPassword(otp, record[0].otpHash);
     if (!validCode) {
         return false;
     }

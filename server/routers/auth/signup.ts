@@ -21,6 +21,7 @@ import {
 import { ActionsEnum } from "@server/auth/actions";
 import config from "@server/config";
 import logger from "@server/logger";
+import { hashPassword } from "@server/auth/password";
 
 export const signupBodySchema = z.object({
     email: z.string().email(),
@@ -51,12 +52,7 @@ export async function signup(
 
     const { email, password } = parsedBody.data;
 
-    const passwordHash = await hash(password, {
-        memoryCost: 19456,
-        timeCost: 2,
-        outputLen: 32,
-        parallelism: 1,
-    });
+    const passwordHash = await hashPassword(password);
     const userId = generateId(15);
 
     try {

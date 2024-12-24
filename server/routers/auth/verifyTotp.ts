@@ -92,6 +92,15 @@ export async function verifyTotp(
 
         // TODO: send email to user confirming two-factor authentication is enabled
 
+        if (!valid) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    "Invalid two-factor authentication code"
+                )
+            );
+        }
+
         return response<VerifyTotpResponse>(res, {
             data: {
                 valid,
@@ -118,7 +127,7 @@ export async function verifyTotp(
 async function generateBackupCodes(): Promise<string[]> {
     const codes = [];
     for (let i = 0; i < 10; i++) {
-        const code = generateRandomString(8, alphabet("0-9", "A-Z", "a-z"));
+        const code = generateRandomString(6, alphabet("0-9", "A-Z", "a-z"));
         codes.push(code);
     }
     return codes;

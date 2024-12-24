@@ -11,6 +11,7 @@ import moment from "moment";
 import { generateSessionToken } from "@server/auth";
 import { createNewtSession } from "@server/auth/newt";
 import { fromError } from "zod-validation-error";
+import { hashPassword } from "@server/auth/password";
 
 export const createNewtBodySchema = z.object({});
 
@@ -54,13 +55,7 @@ export async function createNewt(
             );
         }
 
-        // generate a newtId and secret
-        const secretHash = await hash(secret, {
-            memoryCost: 19456,
-            timeCost: 2,
-            outputLen: 32,
-            parallelism: 1,
-        });
+        const secretHash = await hashPassword(secret);
 
         await db.insert(newts).values({
             newtId: newtId,
@@ -99,7 +94,7 @@ export async function createNewt(
             );
         } else {
             console.error(e);
-            
+
             return next(
                 createHttpError(
                     HttpCode.INTERNAL_SERVER_ERROR,

@@ -30,8 +30,8 @@ export default async function OrgLayout(props: {
         const getOrgUser = cache(() =>
             internal.get<AxiosResponse<GetOrgUserResponse>>(
                 `/org/${orgId}/user/${user.userId}`,
-                cookie,
-            ),
+                cookie
+            )
         );
         const orgUser = await getOrgUser();
     } catch {
@@ -40,10 +40,7 @@ export default async function OrgLayout(props: {
 
     try {
         const getOrg = cache(() =>
-            internal.get<AxiosResponse<GetOrgResponse>>(
-                `/org/${orgId}`,
-                cookie,
-            ),
+            internal.get<AxiosResponse<GetOrgResponse>>(`/org/${orgId}`, cookie)
         );
         await getOrg();
     } catch {

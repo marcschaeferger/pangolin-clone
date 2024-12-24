@@ -11,20 +11,12 @@ import {
 } from "@react-email/components";
 import * as React from "react";
 
-interface ResourceOTPCodeProps {
-    email?: string;
-    resourceName: string;
-    orgName: string;
-    otp: string;
+interface Props {
+    email: string;
 }
 
-export const ResourceOTPCode = ({
-    email,
-    resourceName,
-    orgName: organizationName,
-    otp
-}: ResourceOTPCodeProps) => {
-    const previewText = `Your one-time password for ${resourceName} is ready!`;
+export const ConfirmPasswordReset = ({ email }: Props) => {
+    const previewText = `Your password has been reset`;
 
     return (
         <Html>
@@ -35,7 +27,7 @@ export const ResourceOTPCode = ({
                     theme: {
                         extend: {
                             colors: {
-                                primary: "#F97317"
+                                primary: "#16A34A"
                             }
                         }
                     }
@@ -44,24 +36,25 @@ export const ResourceOTPCode = ({
                 <Body className="font-sans">
                     <Container className="bg-white border border-solid border-gray-200 p-6 max-w-lg mx-auto my-8 rounded-lg">
                         <Heading className="text-2xl font-semibold text-gray-800 text-center">
-                            Your One-Time Password
+                            Your password has been successfully reset
                         </Heading>
                         <Text className="text-base text-gray-700 mt-4">
                             Hi {email || "there"},
                         </Text>
                         <Text className="text-base text-gray-700 mt-2">
-                            You’ve requested a one-time password (OTP) to
-                            authenticate with the resource{" "}
-                            <strong>{resourceName}</strong> in{" "}
-                            <strong>{organizationName}</strong>. Use the OTP
-                            below to complete your authentication:
+                            This email confirms that your password has just been
+                            reset. If you made this change, no further action is
+                            required.
                         </Text>
                         <Section className="text-center my-6">
-                            <Text className="inline-block bg-primary text-xl font-bold text-white py-2 px-4 border border-gray-300 rounded-xl">
-                                {otp}
+                            <Text className="text-base text-gray-700">
+                                If you did not request this change, please
+                                contact our support team immediately.
                             </Text>
                         </Section>
-
+                        <Text className="text-base text-gray-700 mt-2">
+                            Thank you for keeping your account secure.
+                        </Text>
                         <Text className="text-sm text-gray-500 mt-6">
                             Best regards,
                             <br />
@@ -74,4 +67,4 @@ export const ResourceOTPCode = ({
     );
 };
 
-export default ResourceOTPCode;
+export default ConfirmPasswordReset;

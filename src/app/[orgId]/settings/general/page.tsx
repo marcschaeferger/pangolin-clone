@@ -57,12 +57,11 @@ export default function GeneralPage() {
 
     async function deleteOrg() {
         try {
-
-        const res = await api
-            .delete<AxiosResponse<DeleteOrgResponse>>(`/org/${org?.org.orgId}`);
+            const res = await api.delete<AxiosResponse<DeleteOrgResponse>>(
+                `/org/${org?.org.orgId}`
+            );
             if (res.status === 200) {
                 console.log("Org deleted");
-                
             }
         } catch (err) {
             console.error(err);
@@ -72,7 +71,7 @@ export default function GeneralPage() {
                 description: formatAxiosError(
                     err,
                     "An error occurred while deleting the org."
-                ),
+                )
             });
         }
     }
@@ -118,61 +117,63 @@ export default function GeneralPage() {
                         </p>
                     </div>
                 }
-                buttonText="Confirm delete organization"
+                buttonText="Confirm Delete Organization"
                 onConfirm={deleteOrg}
                 string={org?.org.name || ""}
-                title="Delete organization"
+                title="Delete Organization"
             />
 
-            <Form {...form}>
-                <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-8 max-w-lg"
-                >
-                    <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Name</FormLabel>
-                                <FormControl>
-                                    <Input {...field} />
-                                </FormControl>
-                                <FormDescription>
-                                    This is the display name of the org
-                                </FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <Button type="submit">Save Changes</Button>
-                </form>
-            </Form>
-
-            <Card className="max-w-lg border-red-900 mt-5">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-red-600">
-                        <AlertTriangle className="h-5 w-5" />
-                        Danger Zone
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-sm mb-4">
-                        Once you delete this org, there is no going back. Please
-                        be certain.
-                    </p>
-                </CardContent>
-                <CardFooter className="flex justify-end gap-2">
-                    <Button
-                        variant="destructive"
-                        onClick={() => setIsDeleteModalOpen(true)}
-                        className="flex items-center gap-2"
+            <section className="space-y-8 max-w-lg">
+                <Form {...form}>
+                    <form
+                        onSubmit={form.handleSubmit(onSubmit)}
+                        className="space-y-4"
                     >
-                        <Trash2 className="h-4 w-4" />
-                        Delete
-                    </Button>
-                </CardFooter>
-            </Card>
+                        <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Name</FormLabel>
+                                    <FormControl>
+                                        <Input {...field} />
+                                    </FormControl>
+                                    <FormDescription>
+                                        This is the display name of the org
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <Button type="submit">Save Changes</Button>
+                    </form>
+                </Form>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                            <AlertTriangle className="h-5 w-5" />
+                            Danger Zone
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm">
+                            Once you delete this org, there is no going back.
+                            Please be certain.
+                        </p>
+                    </CardContent>
+                    <CardFooter className="flex justify-end gap-2">
+                        <Button
+                            variant="destructive"
+                            onClick={() => setIsDeleteModalOpen(true)}
+                            className="flex items-center gap-2"
+                        >
+                            <Trash2 className="h-4 w-4" />
+                            Delete Organization Data
+                        </Button>
+                    </CardFooter>
+                </Card>
+            </section>
         </>
     );
 }

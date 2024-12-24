@@ -448,11 +448,11 @@ authRouter.post(
     verifySessionMiddleware,
     auth.requestEmailVerificationCode
 );
-authRouter.post(
-    "/change-password",
-    verifySessionUserMiddleware,
-    auth.changePassword
-);
+// authRouter.post(
+//     "/change-password",
+//     verifySessionUserMiddleware,
+//     auth.changePassword
+// );
 authRouter.post("/reset-password/request", auth.requestPasswordReset);
 authRouter.post("/reset-password/", auth.resetPassword);
 

@@ -412,7 +412,7 @@ export default function ResourceAuthenticationPage() {
                             onSubmit={usersRolesForm.handleSubmit(
                                 onSubmitUsersRoles
                             )}
-                            className="space-y-8"
+                            className="space-y-4"
                         >
                             <FormField
                                 control={usersRolesForm.control}
@@ -639,7 +639,7 @@ export default function ResourceAuthenticationPage() {
 
                             {whitelistEnabled && (
                                 <Form {...whitelistForm}>
-                                    <form className="space-y-8">
+                                    <form className="space-y-4">
                                         <FormField
                                             control={whitelistForm.control}
                                             name="emails"

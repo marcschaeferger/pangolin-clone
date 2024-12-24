@@ -19,6 +19,7 @@ import { z } from "zod";
 import { fromError } from "zod-validation-error";
 import logger from "@server/logger";
 import { createDate, TimeSpan } from "oslo";
+import { hashPassword } from "@server/auth/password";
 
 export const generateAccessTokenBodySchema = z
     .object({
@@ -91,12 +92,7 @@ export async function generateAccessToken(
 
         const token = generateIdFromEntropySize(25);
 
-        const tokenHash = await hash(token, {
-            memoryCost: 19456,
-            timeCost: 2,
-            outputLen: 32,
-            parallelism: 1
-        });
+        const tokenHash = await hashPassword(token);
 
         const id = generateId(15);
         const [result] = await db

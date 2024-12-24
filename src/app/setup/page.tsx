@@ -188,7 +188,7 @@ export default function StepperForm() {
                             <Form {...orgForm}>
                                 <form
                                     onSubmit={orgForm.handleSubmit(orgSubmit)}
-                                    className="space-y-8"
+                                    className="space-y-4"
                                 >
                                     <FormField
                                         control={orgForm.control}

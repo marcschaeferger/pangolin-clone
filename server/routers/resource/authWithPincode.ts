@@ -23,6 +23,7 @@ import logger from "@server/logger";
 import config from "@server/config";
 import { AuthWithPasswordResponse } from "./authWithPassword";
 import { isValidOtp, sendResourceOtpEmail } from "@server/auth/resourceOtp";
+import { verifyPassword } from "@server/auth/password";
 
 export const authWithPincodeBodySchema = z
     .object({
@@ -116,12 +117,10 @@ export async function authWithPincode(
             );
         }
 
-        const validPincode = await verify(definedPincode.pincodeHash, pincode, {
-            memoryCost: 19456,
-            timeCost: 2,
-            outputLen: 32,
-            parallelism: 1
-        });
+        const validPincode = verifyPassword(
+            pincode,
+            definedPincode.pincodeHash
+        );
         if (!validPincode) {
             return next(
                 createHttpError(HttpCode.UNAUTHORIZED, "Incorrect PIN")

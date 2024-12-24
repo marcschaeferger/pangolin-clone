@@ -8,7 +8,7 @@ import {
     Section,
     Text,
     Tailwind,
-    Button,
+    Button
 } from "@react-email/components";
 import * as React from "react";
 
@@ -25,7 +25,7 @@ export const SendInviteLink = ({
     inviteLink,
     orgName,
     inviterName,
-    expiresInDays,
+    expiresInDays
 }: SendInviteLinkProps) => {
     const previewText = `${inviterName} invited to join ${orgName}`;
 
@@ -33,15 +33,17 @@ export const SendInviteLink = ({
         <Html>
             <Head />
             <Preview>{previewText}</Preview>
-            <Tailwind config={{
-                theme: {
-                    extend: {
-                        colors: {
-                            primary: "#F97317"
+            <Tailwind
+                config={{
+                    theme: {
+                        extend: {
+                            colors: {
+                                primary: "#F97317"
+                            }
                         }
                     }
-                }
-            }}>
+                }}
+            >
                 <Body className="font-sans">
                     <Container className="bg-white border border-solid border-gray-200 p-6 max-w-lg mx-auto my-8 rounded-lg">
                         <Heading className="text-2xl font-semibold text-gray-800 text-center">
@@ -71,6 +73,12 @@ export const SendInviteLink = ({
                                 Accept invitation to {orgName}
                             </Button>
                         </Section>
+
+                        <Text className="text-sm text-gray-500 mt-6">
+                            Best regards,
+                            <br />
+                            Fossorial
+                        </Text>
                     </Container>
                 </Body>
             </Tailwind>

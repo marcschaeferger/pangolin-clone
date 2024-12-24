@@ -150,6 +150,7 @@ export const emailVerificationCodes = sqliteTable("emailVerificationCodes", {
 
 export const passwordResetTokens = sqliteTable("passwordResetTokens", {
     tokenId: integer("id").primaryKey({ autoIncrement: true }),
+    email: text("email").notNull(),
     userId: text("userId")
         .notNull()
         .references(() => users.userId, { onDelete: "cascade" }),

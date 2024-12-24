@@ -11,20 +11,14 @@ import {
 } from "@react-email/components";
 import * as React from "react";
 
-interface ResourceOTPCodeProps {
-    email?: string;
-    resourceName: string;
-    orgName: string;
-    otp: string;
+interface Props {
+    email: string;
+    code: string;
+    link: string;
 }
 
-export const ResourceOTPCode = ({
-    email,
-    resourceName,
-    orgName: organizationName,
-    otp
-}: ResourceOTPCodeProps) => {
-    const previewText = `Your one-time password for ${resourceName} is ready!`;
+export const ResetPasswordCode = ({ email, code, link }: Props) => {
+    const previewText = `Reset your password, ${email}`;
 
     return (
         <Html>
@@ -44,24 +38,28 @@ export const ResourceOTPCode = ({
                 <Body className="font-sans">
                     <Container className="bg-white border border-solid border-gray-200 p-6 max-w-lg mx-auto my-8 rounded-lg">
                         <Heading className="text-2xl font-semibold text-gray-800 text-center">
-                            Your One-Time Password
+                            You've requested to reset your password
                         </Heading>
                         <Text className="text-base text-gray-700 mt-4">
                             Hi {email || "there"},
                         </Text>
                         <Text className="text-base text-gray-700 mt-2">
-                            You’ve requested a one-time password (OTP) to
-                            authenticate with the resource{" "}
-                            <strong>{resourceName}</strong> in{" "}
-                            <strong>{organizationName}</strong>. Use the OTP
-                            below to complete your authentication:
+                            You’ve requested to reset your password. Please{" "}
+                            <a href={link} className="text-primary">
+                                click here
+                            </a>{" "}
+                            and follow the instructions to reset your password,
+                            or manually enter the following code:
                         </Text>
                         <Section className="text-center my-6">
                             <Text className="inline-block bg-primary text-xl font-bold text-white py-2 px-4 border border-gray-300 rounded-xl">
-                                {otp}
+                                {code}
                             </Text>
                         </Section>
-
+                        <Text className="text-base text-gray-700 mt-2">
+                            If you didn’t request this, you can safely ignore
+                            this email.
+                        </Text>
                         <Text className="text-sm text-gray-500 mt-6">
                             Best regards,
                             <br />
@@ -74,4 +72,4 @@ export const ResourceOTPCode = ({
     );
 };
 
-export default ResourceOTPCode;
+export default ResetPasswordCode;

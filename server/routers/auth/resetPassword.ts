@@ -1,3 +1,4 @@
+import config from "@server/config";
 import { Request, Response, NextFunction } from "express";
 import createHttpError from "http-errors";
 import { z } from "zod";
@@ -8,19 +9,22 @@ import { db } from "@server/db";
 import { passwordResetTokens, users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import { sha256 } from "oslo/crypto";
-import { hashPassword } from "@server/auth/password";
+import { hashPassword, verifyPassword } from "@server/auth/password";
 import { verifyTotpCode } from "@server/auth/2fa";
 import { passwordSchema } from "@server/auth/passwordSchema";
 import { encodeHex } from "oslo/encoding";
 import { isWithinExpirationDate } from "oslo";
 import { invalidateAllSessions } from "@server/auth";
 import logger from "@server/logger";
+import ConfirmPasswordReset from "@server/emails/templates/NotifyResetPassword";
+import { sendEmail } from "@server/emails";
 
 export const resetPasswordBody = z
     .object({
-        token: z.string(),
+        email: z.string().email(),
+        token: z.string(), // reset secret code
         newPassword: passwordSchema,
-        code: z.string().optional()
+        code: z.string().optional() // 2fa code
     })
     .strict();
 
@@ -46,27 +50,28 @@ export async function resetPassword(
         );
     }
 
-    const { token, newPassword, code } = parsedBody.data;
+    const { token, newPassword, code, email } = parsedBody.data;
 
     try {
-        const tokenHash = encodeHex(
-            await sha256(new TextEncoder().encode(token))
-        );
-
         const resetRequest = await db
             .select()
             .from(passwordResetTokens)
-            .where(eq(passwordResetTokens.tokenHash, tokenHash));
+            .where(eq(passwordResetTokens.email, email));
 
-        if (
-            !resetRequest ||
-            !resetRequest.length ||
-            !isWithinExpirationDate(new Date(resetRequest[0].expiresAt))
-        ) {
+        if (!resetRequest || !resetRequest.length) {
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    "Invalid or expired password reset token"
+                    "Invalid password reset token"
+                )
+            );
+        }
+
+        if (!isWithinExpirationDate(new Date(resetRequest[0].expiresAt))) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    "Password reset token has expired"
                 )
             );
         }
@@ -112,6 +117,20 @@ export async function resetPassword(
             }
         }
 
+        const isTokenValid = await verifyPassword(
+            token,
+            resetRequest[0].tokenHash
+        );
+
+        if (!isTokenValid) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    "Invalid password reset token"
+                )
+            );
+        }
+
         const passwordHash = await hashPassword(newPassword);
 
         await invalidateAllSessions(resetRequest[0].userId);
@@ -123,9 +142,13 @@ export async function resetPassword(
 
         await db
             .delete(passwordResetTokens)
-            .where(eq(passwordResetTokens.tokenHash, tokenHash));
+            .where(eq(passwordResetTokens.email, email));
 
-        // TODO: send email to user confirming password reset
+        await sendEmail(ConfirmPasswordReset({ email }), {
+            from: config.email?.no_reply,
+            to: email,
+            subject: "Password Reset Confirmation"
+        })
 
         return response<ResetPasswordResponse>(res, {
             data: null,

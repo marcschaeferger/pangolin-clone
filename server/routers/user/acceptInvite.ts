@@ -10,6 +10,7 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { isWithinExpirationDate } from "oslo";
+import { verifyPassword } from "@server/auth/password";
 
 const acceptInviteBodySchema = z
     .object({
@@ -62,12 +63,10 @@ export async function acceptInvite(
             );
         }
 
-        const validToken = await verify(existingInvite[0].tokenHash, token, {
-            memoryCost: 19456,
-            timeCost: 2,
-            outputLen: 32,
-            parallelism: 1
-        });
+        const validToken = await verifyPassword(
+            token,
+            existingInvite[0].tokenHash
+        );
         if (!validToken) {
             return next(
                 createHttpError(

@@ -203,7 +203,7 @@ PersistentKeepalive = 5`
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-8"
+                    className="space-y-4"
                     id="create-site-form"
                 >
                     <FormField

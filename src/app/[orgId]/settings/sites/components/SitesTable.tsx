@@ -195,14 +195,14 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                 if (originalRow.online) {
                     return (
                         <span className="text-green-500 flex items-center space-x-2">
-                            <Check className="w-4 h-4" />
+                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                             <span>Online</span>
                         </span>
                     );
                 } else {
                     return (
-                        <span className="text-red-500 flex items-center space-x-2">
-                            <X className="w-4 h-4" />
+                        <span className="text-gray-500 flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
                             <span>Offline</span>
                         </span>
                     );
