@@ -27,7 +27,6 @@ export async function verifyUserIsOrgOwner(
             )
         );
     }
-
     try {
         if (!req.userOrg) {
             const res = await db
@@ -56,6 +55,8 @@ export async function verifyUserIsOrgOwner(
                 )
             );
         }
+        
+        return next();
     } catch (e) {
         return next(
             createHttpError(

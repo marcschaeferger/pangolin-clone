@@ -51,6 +51,7 @@ import { ArrayElement } from "@server/types/ArrayElement";
 import { formatAxiosError } from "@app/lib/utils";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { createApiClient } from "@app/api";
+import { GetSiteResponse } from "@server/routers/site";
 
 const addTargetSchema = z.object({
     ip: z.string().ip(),
@@ -85,6 +86,7 @@ export default function ReverseProxyTargets(props: {
     const api = createApiClient(useEnvContext());
 
     const [targets, setTargets] = useState<LocalTarget[]>([]);
+    const [site, setSite] = useState<GetSiteResponse>();
     const [targetsToRemove, setTargetsToRemove] = useState<number[]>([]);
     const [sslEnabled, setSslEnabled] = useState(resource.ssl);
 
@@ -103,7 +105,7 @@ export default function ReverseProxyTargets(props: {
     });
 
     useEffect(() => {
-        const fetchSites = async () => {
+        const fetchTargets = async () => {
             try {
                 const res = await api.get<AxiosResponse<ListTargetsResponse>>(
                     `/resource/${params.resourceId}/targets`,
@@ -126,7 +128,30 @@ export default function ReverseProxyTargets(props: {
                 setPageLoading(false);
             }
         };
-        fetchSites();
+        fetchTargets();
+
+        const fetchSite = async () => {
+            try {
+                const res = await api.get<AxiosResponse<GetSiteResponse>>(
+                    `/site/${resource.siteId}`,
+                );
+
+                if (res.status === 200) {
+                    setSite(res.data.data);
+                }
+            } catch (err) {
+                console.error(err);
+                toast({
+                    variant: "destructive",
+                    title: "Failed to fetch resource",
+                    description: formatAxiosError(
+                        err,
+                        "An error occurred while fetching resource",
+                    ),
+                });
+            }
+        }
+        fetchSite();
     }, []);
 
     async function addTarget(data: AddTargetFormValues) {
@@ -146,6 +171,20 @@ export default function ReverseProxyTargets(props: {
             return;
         }
 
+        if (site && site.type == "wireguard" && site.subnet) {
+            // make sure that the target IP is within the site subnet
+            const targetIp = data.ip;
+            const subnet = site.subnet;
+            if (!isIPInSubnet(targetIp, subnet)) {
+                toast({
+                    variant: "destructive",
+                    title: "Invalid target IP",
+                    description: "Target IP must be within the site subnet",
+                });
+                return;
+            }
+        }
+
         const newTarget: LocalTarget = {
             ...data,
             enabled: true,
@@ -157,7 +196,7 @@ export default function ReverseProxyTargets(props: {
         setTargets([...targets, newTarget]);
         addTargetForm.reset();
     }
-    
+
     const removeTarget = (targetId: number) => {
         setTargets([
             ...targets.filter((target) => target.targetId !== targetId),
@@ -601,4 +640,41 @@ export default function ReverseProxyTargets(props: {
             </div>
         </>
     );
+}
+
+function isIPInSubnet(subnet: string, ip: string): boolean {
+    // Split subnet into IP and mask parts
+    const [subnetIP, maskBits] = subnet.split('/');
+    const mask = parseInt(maskBits);
+    
+    if (mask < 0 || mask > 32) {
+        throw new Error('Invalid subnet mask. Must be between 0 and 32.');
+    }
+
+    // Convert IP addresses to binary numbers
+    const subnetNum = ipToNumber(subnetIP);
+    const ipNum = ipToNumber(ip);
+    
+    // Calculate subnet mask
+    const maskNum = mask === 32 ? -1 : ~((1 << (32 - mask)) - 1);
+    
+    // Check if the IP is in the subnet
+    return (subnetNum & maskNum) === (ipNum & maskNum);
+}
+
+function ipToNumber(ip: string): number {
+    // Validate IP address format
+    const parts = ip.split('.');
+    if (parts.length !== 4) {
+        throw new Error('Invalid IP address format');
+    }
+    
+    // Convert IP octets to 32-bit number
+    return parts.reduce((num, octet) => {
+        const oct = parseInt(octet);
+        if (isNaN(oct) || oct < 0 || oct > 255) {
+            throw new Error('Invalid IP address octet');
+        }
+        return (num << 8) + oct;
+    }, 0);
 }

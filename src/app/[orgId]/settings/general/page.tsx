@@ -30,6 +30,8 @@ import {
     CardHeader,
     CardTitle
 } from "@/components/ui/card";
+import { AxiosResponse } from "axios";
+import { DeleteOrgResponse } from "@server/routers/org";
 
 const GeneralFormSchema = z.object({
     name: z.string()
@@ -54,18 +56,25 @@ export default function GeneralPage() {
     });
 
     async function deleteOrg() {
-        await api
-            .delete(`/org/${org?.org.orgId}`)
-            .catch((e) => {
-                toast({
-                    variant: "destructive",
-                    title: "Failed to delete org",
-                    description: formatAxiosError(
-                        e,
-                        "An error occurred while deleting the org."
-                    ),
-                });
+        try {
+
+        const res = await api
+            .delete<AxiosResponse<DeleteOrgResponse>>(`/org/${org?.org.orgId}`);
+            if (res.status === 200) {
+                console.log("Org deleted");
+                
+            }
+        } catch (err) {
+            console.error(err);
+            toast({
+                variant: "destructive",
+                title: "Failed to delete org",
+                description: formatAxiosError(
+                    err,
+                    "An error occurred while deleting the org."
+                ),
             });
+        }
     }
 
     async function onSubmit(data: GeneralFormValues) {

@@ -28,6 +28,7 @@ export type GetSiteResponse = {
     name: string;
     subdomain: string;
     subnet: string;
+    type: string;
 };
 
 export async function getSite(
@@ -81,7 +82,8 @@ export async function getSite(
                 siteId: site[0].siteId,
                 niceId: site[0].niceId,
                 name: site[0].name,
-                subnet: site[0].subnet
+                subnet: site[0].subnet,
+                type: site[0].type
             },
             success: true,
             error: false,
