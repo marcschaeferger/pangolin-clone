@@ -214,7 +214,13 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
                                     <FormLabel>Authenticator Code</FormLabel>
                                     <FormControl>
                                         <div className="flex justify-center">
-                                            <InputOTP maxLength={6} {...field} pattern={REGEXP_ONLY_DIGITS_AND_CHARS}>
+                                            <InputOTP
+                                                maxLength={6}
+                                                {...field}
+                                                pattern={
+                                                    REGEXP_ONLY_DIGITS_AND_CHARS
+                                                }
+                                            >
                                                 <InputOTPGroup>
                                                     <InputOTPSlot index={0} />
                                                     <InputOTPSlot index={1} />

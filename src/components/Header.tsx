@@ -15,7 +15,6 @@ import {
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
@@ -26,14 +25,6 @@ import {
     PopoverContent,
     PopoverTrigger
 } from "@app/components/ui/popover";
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectTrigger,
-    SelectValue
-} from "@app/components/ui/select";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { useToast } from "@app/hooks/useToast";
 import { cn, formatAxiosError } from "@app/lib/utils";
@@ -45,40 +36,39 @@ import {
     LogOut,
     Moon,
     Plus,
-    Sun,
-    User
+    Sun
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Enable2FaForm from "./Enable2FaForm";
+import { userUserContext } from "@app/hooks/useUserContext";
 
 type HeaderProps = {
-    name?: string;
-    email: string;
-    orgId: string;
-    orgs: ListOrgsResponse["orgs"];
+    orgId?: string;
+    orgs?: ListOrgsResponse["orgs"];
 };
 
-export default function Header({ email, orgId, name, orgs }: HeaderProps) {
+export function Header({ orgId, orgs }: HeaderProps) {
     const { toast } = useToast();
     const { setTheme, theme } = useTheme();
+
+    const { user, updateUser } = userUserContext();
 
     const [open, setOpen] = useState(false);
     const [userTheme, setUserTheme] = useState<"light" | "dark" | "system">(
         theme as "light" | "dark" | "system"
     );
 
+    const [openEnable2fa, setOpenEnable2fa] = useState(false);
+
     const router = useRouter();
 
     const api = createApiClient(useEnvContext());
 
     function getInitials() {
-        if (name) {
-            const [firstName, lastName] = name.split(" ");
-            return `${firstName[0]}${lastName[0]}`;
-        }
-        return email.substring(0, 2).toUpperCase();
+        return user.email.substring(0, 2).toUpperCase();
     }
 
     function logout() {
@@ -102,6 +92,8 @@ export default function Header({ email, orgId, name, orgs }: HeaderProps) {
 
     return (
         <>
+            <Enable2FaForm open={openEnable2fa} setOpen={setOpenEnable2fa} />
+
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <DropdownMenu>
@@ -128,15 +120,23 @@ export default function Header({ email, orgId, name, orgs }: HeaderProps) {
                                         Signed in as
                                     </p>
                                     <p className="text-xs leading-none text-muted-foreground">
-                                        {email}
+                                        {user.email}
                                     </p>
                                 </div>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem>
-                                <User className="mr-2 h-4 w-4" />
-                                <span>User Settings</span>
-                            </DropdownMenuItem>
+                            {!user.twoFactorEnabled && (
+                                <DropdownMenuItem
+                                    onClick={() => setOpenEnable2fa(true)}
+                                >
+                                    <span>Enable Two-factor</span>
+                                </DropdownMenuItem>
+                            )}
+                            {user.twoFactorEnabled && (
+                                <DropdownMenuItem>
+                                    <span>Disable Two-factor</span>
+                                </DropdownMenuItem>
+                            )}
                             <DropdownMenuSeparator />
                             <DropdownMenuLabel>Theme</DropdownMenuLabel>
                             {(["light", "dark", "system"] as const).map(
@@ -175,7 +175,7 @@ export default function Header({ email, orgId, name, orgs }: HeaderProps) {
                         </DropdownMenuContent>
                     </DropdownMenu>
                     <span className="truncate max-w-[150px] md:max-w-none font-medium">
-                        {name || email}
+                        {user.email}
                     </span>
                 </div>
 
@@ -197,82 +197,88 @@ export default function Header({ email, orgId, name, orgs }: HeaderProps) {
                         </div>
                     </div>
 
-                    <Popover open={open} onOpenChange={setOpen}>
-                        <PopoverTrigger asChild>
-                            <Button
-                                variant="outline"
-                                size="lg"
-                                role="combobox"
-                                aria-expanded={open}
-                                className="w-full md:w-[200px] h-12 px-3 py-4 bg-neutral hover:bg-neutral"
-                            >
-                                <div className="flex items-center justify-between w-full">
-                                    <div className="flex flex-col items-start">
-                                        <span className="font-bold text-sm">
-                                            Organization
-                                        </span>
-                                        <span className="text-sm text-muted-foreground">
-                                            {orgId
-                                                ? orgs.find(
-                                                      (org) =>
-                                                          org.orgId === orgId
-                                                  )?.name
-                                                : "Select organization..."}
-                                        </span>
+                    {orgs && (
+                        <Popover open={open} onOpenChange={setOpen}>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    size="lg"
+                                    role="combobox"
+                                    aria-expanded={open}
+                                    className="w-full md:w-[200px] h-12 px-3 py-4 bg-neutral hover:bg-neutral"
+                                >
+                                    <div className="flex items-center justify-between w-full">
+                                        <div className="flex flex-col items-start">
+                                            <span className="font-bold text-sm">
+                                                Organization
+                                            </span>
+                                            <span className="text-sm text-muted-foreground">
+                                                {orgId
+                                                    ? orgs?.find(
+                                                          (org) =>
+                                                              org.orgId ===
+                                                              orgId
+                                                      )?.name
+                                                    : "None selected"}
+                                            </span>
+                                        </div>
+                                        <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
                                     </div>
-                                    <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
-                                </div>
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="[100px] md:w-[180px] p-0">
-                            <Command>
-                                <CommandInput placeholder="Search..." />
-                                <CommandEmpty>
-                                    No organizations found.
-                                </CommandEmpty>
-                                <CommandGroup heading="Create">
-                                    <CommandList>
-                                        <CommandItem
-                                            className="flex items-center cursor-pointer"
-                                            onSelect={(currentValue) => {
-                                                router.push("/setup");
-                                            }}
-                                        >
-                                            <Plus className="mr-2 h-4 w-4" />
-                                            New Organization
-                                        </CommandItem>
-                                    </CommandList>
-                                </CommandGroup>
-                                <CommandSeparator />
-                                <CommandGroup heading="Organizations">
-                                    <CommandList>
-                                        {orgs.map((org) => (
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="[100px] md:w-[180px] p-0">
+                                <Command>
+                                    <CommandInput placeholder="Search..." />
+                                    <CommandEmpty>
+                                        No organizations found.
+                                    </CommandEmpty>
+                                    <CommandGroup heading="Create">
+                                        <CommandList>
                                             <CommandItem
-                                                key={org.orgId}
                                                 onSelect={(currentValue) => {
-                                                    router.push(
-                                                        `/${org.orgId}/settings`
-                                                    );
+                                                    router.push("/setup");
                                                 }}
                                             >
-                                                <Check
-                                                    className={cn(
-                                                        "mr-2 h-4 w-4",
-                                                        orgId === org.orgId
-                                                            ? "opacity-100"
-                                                            : "opacity-0"
-                                                    )}
-                                                />
-                                                {org.name}
+                                                <Plus className="mr-2 h-4 w-4" />
+                                                New Organization
                                             </CommandItem>
-                                        ))}
-                                    </CommandList>
-                                </CommandGroup>
-                            </Command>
-                        </PopoverContent>
-                    </Popover>
+                                        </CommandList>
+                                    </CommandGroup>
+                                    <CommandSeparator />
+                                    <CommandGroup heading="Organizations">
+                                        <CommandList>
+                                            {orgs.map((org) => (
+                                                <CommandItem
+                                                    key={org.orgId}
+                                                    onSelect={(
+                                                        currentValue
+                                                    ) => {
+                                                        router.push(
+                                                            `/${org.orgId}/settings`
+                                                        );
+                                                    }}
+                                                >
+                                                    <Check
+                                                        className={cn(
+                                                            "mr-2 h-4 w-4",
+                                                            orgId === org.orgId
+                                                                ? "opacity-100"
+                                                                : "opacity-0"
+                                                        )}
+                                                    />
+                                                    {org.name}
+                                                </CommandItem>
+                                            ))}
+                                        </CommandList>
+                                    </CommandGroup>
+                                </Command>
+                            </PopoverContent>
+                        </Popover>
+                    )}
                 </div>
             </div>
         </>
     );
 }
+
+export default Header;

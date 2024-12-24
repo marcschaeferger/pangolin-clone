@@ -226,7 +226,7 @@ export default function CreateShareLinkForm({
             >
                 <CredenzaContent>
                     <CredenzaHeader>
-                        <CredenzaTitle>Create Sharable Link</CredenzaTitle>
+                        <CredenzaTitle>Create Shareable Link</CredenzaTitle>
                         <CredenzaDescription>
                             Anyone with this link can access the resource
                         </CredenzaDescription>
@@ -436,10 +436,10 @@ export default function CreateShareLinkForm({
                                                 Expiration time is how long the
                                                 link will be usable and provide
                                                 access to the resource. After
-                                                this time, the link will expire
-                                                and no longer work, and users
-                                                who used this link will lose
-                                                access to the resource.
+                                                this time, the link will no
+                                                longer work, and users who used
+                                                this link will lose access to
+                                                the resource.
                                             </p>
                                         </div>
                                     </form>

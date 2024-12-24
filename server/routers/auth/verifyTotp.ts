@@ -92,6 +92,15 @@ export async function verifyTotp(
 
         // TODO: send email to user confirming two-factor authentication is enabled
 
+        if (!valid) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    "Invalid two-factor authentication code"
+                )
+            );
+        }
+
         return response<VerifyTotpResponse>(res, {
             data: {
                 valid,

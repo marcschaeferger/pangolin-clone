@@ -1,7 +1,7 @@
 import { Metadata } from "next";
-import { TopbarNav } from "./components/TopbarNav";
+import { TopbarNav } from "@app/components/TopbarNav";
 import { Cog, Combine, Link, Settings, Users, Waypoints } from "lucide-react";
-import Header from "./components/Header";
+import { Header } from "@app/components/Header";
 import { verifySession } from "@app/lib/auth/verifySession";
 import { redirect } from "next/navigation";
 import { internal } from "@app/api";
@@ -10,6 +10,7 @@ import { GetOrgResponse, ListOrgsResponse } from "@server/routers/org";
 import { authCookieHeader } from "@app/api/cookies";
 import { cache } from "react";
 import { GetOrgUserResponse } from "@server/routers/user";
+import UserProvider from "@app/providers/UserProvider";
 
 export const dynamic = "force-dynamic";
 
@@ -99,17 +100,17 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
             <div className="w-full border-b bg-neutral-100 dark:bg-neutral-800 select-none sm:px-0 px-3 fixed top-0 z-10">
                 <div className="container mx-auto flex flex-col content-between">
                     <div className="my-4">
-                        <Header
-                            email={user.email}
-                            orgId={params.orgId}
-                            orgs={orgs}
-                        />
+                        <UserProvider user={user}>
+                            <Header orgId={params.orgId} orgs={orgs} />
+                        </UserProvider>
                     </div>
                     <TopbarNav items={topNavItems} orgId={params.orgId} />
                 </div>
             </div>
 
-            <div className="container mx-auto sm:px-0 px-3 pt-[165px]">{children}</div>
+            <div className="container mx-auto sm:px-0 px-3 pt-[165px]">
+                {children}
+            </div>
         </>
     );
 }
