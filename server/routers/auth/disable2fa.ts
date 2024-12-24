@@ -11,11 +11,16 @@ import { response } from "@server/utils";
 import { verifyPassword } from "@server/auth/password";
 import { verifyTotpCode } from "@server/auth/2fa";
 import logger from "@server/logger";
+import { sendEmail } from "@server/emails";
+import TwoFactorAuthNotification from "@server/emails/templates/TwoFactorAuthNotification";
+import config from "@server/config";
 
-export const disable2faBody = z.object({
-    password: z.string(),
-    code: z.string().optional(),
-}).strict();
+export const disable2faBody = z
+    .object({
+        password: z.string(),
+        code: z.string().optional()
+    })
+    .strict();
 
 export type Disable2faBody = z.infer<typeof disable2faBody>;
 
@@ -26,7 +31,7 @@ export type Disable2faResponse = {
 export async function disable2fa(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
 ): Promise<any> {
     const parsedBody = disable2faBody.safeParse(req.body);
 
@@ -34,8 +39,8 @@ export async function disable2fa(
         return next(
             createHttpError(
                 HttpCode.BAD_REQUEST,
-                fromError(parsedBody.error).toString(),
-            ),
+                fromError(parsedBody.error).toString()
+            )
         );
     }
 
@@ -52,8 +57,8 @@ export async function disable2fa(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    "Two-factor authentication is already disabled",
-                ),
+                    "Two-factor authentication is already disabled"
+                )
             );
         } else {
             if (!code) {
@@ -62,7 +67,7 @@ export async function disable2fa(
                     success: true,
                     error: false,
                     message: "Two-factor authentication required",
-                    status: HttpCode.ACCEPTED,
+                    status: HttpCode.ACCEPTED
                 });
             }
         }
@@ -70,15 +75,15 @@ export async function disable2fa(
         const validOTP = await verifyTotpCode(
             code,
             user.twoFactorSecret!,
-            user.userId,
+            user.userId
         );
 
         if (!validOTP) {
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    "The two-factor code you entered is incorrect",
-                ),
+                    "The two-factor code you entered is incorrect"
+                )
             );
         }
 
@@ -91,22 +96,32 @@ export async function disable2fa(
             .delete(twoFactorBackupCodes)
             .where(eq(twoFactorBackupCodes.userId, user.userId));
 
-        // TODO: send email to user confirming two-factor authentication is disabled
+        sendEmail(
+            TwoFactorAuthNotification({
+                email: user.email,
+                enabled: false
+            }),
+            {
+                to: user.email,
+                from: config.email?.no_reply,
+                subject: "Two-factor authentication disabled"
+            }
+        );
 
         return response<null>(res, {
             data: null,
             success: true,
             error: false,
             message: "Two-factor authentication disabled",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,
-                "Failed to disable two-factor authentication",
-            ),
+                "Failed to disable two-factor authentication"
+            )
         );
     }
 }

@@ -103,8 +103,6 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
 
             const data = res.data.data;
 
-            console.log(data);
-
             if (data?.codeRequested) {
                 setMfaRequested(true);
                 setLoading(false);
@@ -136,6 +134,7 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
                         className="space-y-4"
+                        id="form"
                     >
                         <FormField
                             control={form.control}
@@ -182,93 +181,120 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
                                 </Link>
                             </div>
                         </div>
-
-                        {error && (
-                            <Alert variant="destructive">
-                                <AlertDescription>{error}</AlertDescription>
-                            </Alert>
-                        )}
-                        <Button
-                            type="submit"
-                            className="w-full"
-                            loading={loading}
-                        >
-                            <LockIcon className="w-4 h-4 mr-2" />
-                            Login
-                        </Button>
                     </form>
                 </Form>
             )}
 
             {mfaRequested && (
-                <Form {...mfaForm}>
-                    <form
-                        onSubmit={mfaForm.handleSubmit(onSubmit)}
-                        className="space-y-4"
-                    >
-                        <FormField
-                            control={mfaForm.control}
-                            name="code"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Authenticator Code</FormLabel>
-                                    <FormControl>
-                                        <div className="flex justify-center">
-                                            <InputOTP
-                                                maxLength={6}
-                                                {...field}
-                                                pattern={
-                                                    REGEXP_ONLY_DIGITS_AND_CHARS
-                                                }
-                                            >
-                                                <InputOTPGroup>
-                                                    <InputOTPSlot index={0} />
-                                                    <InputOTPSlot index={1} />
-                                                    <InputOTPSlot index={2} />
-                                                </InputOTPGroup>
-                                                <InputOTPSeparator />
-                                                <InputOTPGroup>
-                                                    <InputOTPSlot index={3} />
-                                                    <InputOTPSlot index={4} />
-                                                    <InputOTPSlot index={5} />
-                                                </InputOTPGroup>
-                                            </InputOTP>
-                                        </div>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        {error && (
-                            <Alert variant="destructive">
-                                <AlertDescription>{error}</AlertDescription>
-                            </Alert>
-                        )}
-
-                        <div className="space-y-4">
-                            <Button
-                                type="submit"
-                                className="w-full"
-                                loading={loading}
-                            >
-                                <LockIcon className="w-4 h-4 mr-2" />
-                                Submit Code
-                            </Button>
-                            <Button
-                                type="button"
-                                className="w-full"
-                                variant="outline"
-                                onClick={() => {
-                                    setMfaRequested(false);
-                                    mfaForm.reset();
-                                }}
-                            >
-                                Back to Login
-                            </Button>
-                        </div>
-                    </form>
-                </Form>
+                <>
+                    <div className="text-center">
+                        <h3 className="text-lg font-medium">
+                            Two-Factor Authentication
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                            Enter the code from your authenticator app.
+                        </p>
+                    </div>
+                    <Form {...mfaForm}>
+                        <form
+                            onSubmit={mfaForm.handleSubmit(onSubmit)}
+                            className="space-y-4"
+                            id="form"
+                        >
+                            <FormField
+                                control={mfaForm.control}
+                                name="code"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormControl>
+                                            <div className="flex justify-center">
+                                                <InputOTP
+                                                    maxLength={6}
+                                                    {...field}
+                                                    pattern={
+                                                        REGEXP_ONLY_DIGITS_AND_CHARS
+                                                    }
+                                                >
+                                                    <InputOTPGroup>
+                                                        <InputOTPSlot
+                                                            index={0}
+                                                        />
+                                                        <InputOTPSlot
+                                                            index={1}
+                                                        />
+                                                        <InputOTPSlot
+                                                            index={2}
+                                                        />
+                                                    </InputOTPGroup>
+                                                    <InputOTPGroup>
+                                                        <InputOTPSlot
+                                                            index={3}
+                                                        />
+                                                        <InputOTPSlot
+                                                            index={4}
+                                                        />
+                                                        <InputOTPSlot
+                                                            index={5}
+                                                        />
+                                                    </InputOTPGroup>
+                                                </InputOTP>
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </form>
+                    </Form>
+                </>
             )}
+
+            {error && (
+                <Alert variant="destructive">
+                    <AlertDescription>{error}</AlertDescription>
+                </Alert>
+            )}
+
+            <div className="space-y-4">
+                {mfaRequested && (
+                    <Button
+                        type="submit"
+                        form="form"
+                        className="w-full"
+                        loading={loading}
+                        disabled={loading}
+                    >
+                        Submit Code
+                    </Button>
+                )}
+
+                {!mfaRequested && (
+                    <Button
+                        type="submit"
+                        form="form"
+                        className="w-full"
+                        loading={loading}
+                        disabled={loading}
+                    >
+                        <LockIcon className="w-4 h-4 mr-2" />
+                        Login
+                    </Button>
+                )}
+
+                {mfaRequested && (
+                    <Button
+                        type="button"
+                        className="w-full"
+                        variant="outline"
+                        onClick={() => {
+                            setMfaRequested(false);
+                            mfaForm.reset();
+                        }}
+                    >
+                        Back to Login
+                    </Button>
+                )}
+            </div>
         </div>
     );
 }

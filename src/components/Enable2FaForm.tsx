@@ -39,7 +39,7 @@ import { useToast } from "@app/hooks/useToast";
 import { formatAxiosError } from "@app/lib/utils";
 import CopyTextBox from "@app/components/CopyTextBox";
 import { QRCodeSVG } from "qrcode.react";
-import { userUserContext } from "@app/hooks/useUserContext";
+import { useUserContext } from "@app/hooks/useUserContext";
 
 const enableSchema = z.object({
     password: z.string().min(1, { message: "Password is required" })
@@ -57,6 +57,7 @@ type Enable2FaProps = {
 export default function Enable2FaForm({ open, setOpen }: Enable2FaProps) {
     const [step, setStep] = useState(1);
     const [secretKey, setSecretKey] = useState("");
+    const [secretUri, setSecretUri] = useState("");
     const [verificationCode, setVerificationCode] = useState("");
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
@@ -65,7 +66,7 @@ export default function Enable2FaForm({ open, setOpen }: Enable2FaProps) {
 
     const { toast } = useToast();
 
-    const { user, updateUser } = userUserContext();
+    const { user, updateUser } = useUserContext();
 
     const api = createApiClient(useEnvContext());
 
@@ -106,6 +107,7 @@ export default function Enable2FaForm({ open, setOpen }: Enable2FaProps) {
 
         if (res && res.data.data.secret) {
             setSecretKey(res.data.data.secret);
+            setSecretUri(res.data.data.uri);
             setStep(2);
         }
 
@@ -132,7 +134,7 @@ export default function Enable2FaForm({ open, setOpen }: Enable2FaProps) {
 
         if (res && res.data.data.valid) {
             setBackupCodes(res.data.data.backupCodes || []);
-            updateUser({ twoFactorEnabled: true })
+            updateUser({ twoFactorEnabled: true });
             setStep(3);
         }
 
@@ -203,11 +205,11 @@ export default function Enable2FaForm({ open, setOpen }: Enable2FaProps) {
                     {step === 2 && (
                         <div className="space-y-4">
                             <p>
-                                scan this qr code with your authenticator app or
+                                Scan this QR code with your authenticator app or
                                 enter the secret key manually:
                             </p>
-                            <div classname="w-64 h-64 mx-auto flex items-center justify-center">
-                                <qrcodesvg value={secretkey} size={256} />
+                            <div className="w-64 h-64 mx-auto flex items-center justify-center">
+                                <QRCodeSVG value={secretUri} size={256} />
                             </div>
                             <div className="max-w-md mx-auto">
                                 <CopyTextBox
@@ -231,7 +233,7 @@ export default function Enable2FaForm({ open, setOpen }: Enable2FaProps) {
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>
-                                                        Verification Code
+                                                        Authenticator Code
                                                     </FormLabel>
                                                     <FormControl>
                                                         <Input

@@ -25,6 +25,7 @@ export type RequestTotpSecretBody = z.infer<typeof requestTotpSecretBody>;
 
 export type RequestTotpSecretResponse = {
     secret: string;
+    uri: string;
 };
 
 export async function requestTotpSecret(
@@ -75,7 +76,8 @@ export async function requestTotpSecret(
 
         return response<RequestTotpSecretResponse>(res, {
             data: {
-                secret: uri
+                secret,
+                uri
             },
             success: true,
             error: false,

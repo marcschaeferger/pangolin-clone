@@ -43,7 +43,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Enable2FaForm from "./Enable2FaForm";
-import { userUserContext } from "@app/hooks/useUserContext";
+import { useUserContext } from "@app/hooks/useUserContext";
+import Disable2FaForm from "./Disable2FaForm";
 
 type HeaderProps = {
     orgId?: string;
@@ -54,7 +55,7 @@ export function Header({ orgId, orgs }: HeaderProps) {
     const { toast } = useToast();
     const { setTheme, theme } = useTheme();
 
-    const { user, updateUser } = userUserContext();
+    const { user, updateUser } = useUserContext();
 
     const [open, setOpen] = useState(false);
     const [userTheme, setUserTheme] = useState<"light" | "dark" | "system">(
@@ -62,6 +63,7 @@ export function Header({ orgId, orgs }: HeaderProps) {
     );
 
     const [openEnable2fa, setOpenEnable2fa] = useState(false);
+    const [openDisable2fa, setOpenDisable2fa] = useState(false);
 
     const router = useRouter();
 
@@ -93,6 +95,7 @@ export function Header({ orgId, orgs }: HeaderProps) {
     return (
         <>
             <Enable2FaForm open={openEnable2fa} setOpen={setOpenEnable2fa} />
+            <Disable2FaForm open={openDisable2fa} setOpen={setOpenDisable2fa} />
 
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -133,7 +136,9 @@ export function Header({ orgId, orgs }: HeaderProps) {
                                 </DropdownMenuItem>
                             )}
                             {user.twoFactorEnabled && (
-                                <DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onClick={() => setOpenDisable2fa(true)}
+                                >
                                     <span>Disable Two-factor</span>
                                 </DropdownMenuItem>
                             )}
