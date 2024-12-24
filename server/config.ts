@@ -132,6 +132,17 @@ if (!parsedConfig.success) {
     throw new Error(`Invalid configuration file: ${errors}`);
 }
 
+const packageJsonPath = path.join(__DIRNAME, "..", "package.json");
+let packageJson: any;
+if (fs.existsSync && fs.existsSync(packageJsonPath)) {
+    const packageJsonContent = fs.readFileSync(packageJsonPath, "utf8");
+    packageJson = JSON.parse(packageJsonContent);
+
+    if (packageJson.version) {
+        process.env.APP_VERSION = packageJson.version;
+    }
+}
+
 process.env.NEXT_PORT = parsedConfig.data.server.next_port.toString();
 process.env.SERVER_EXTERNAL_PORT =
     parsedConfig.data.server.external_port.toString();

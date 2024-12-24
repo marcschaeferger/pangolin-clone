@@ -63,6 +63,7 @@ import { Checkbox } from "@app/components/ui/checkbox";
 import { GenerateAccessTokenResponse } from "@server/routers/accessToken";
 import { constructShareLink } from "@app/lib/shareLinks";
 import { ShareLinkRow } from "./ShareLinksTable";
+import { QRCodeSVG } from "qrcode.react";
 
 type FormProps = {
     open: boolean;
@@ -448,14 +449,24 @@ export default function CreateShareLinkForm({
                             {link && (
                                 <div className="max-w-md space-y-4">
                                     <p>
-                                        You will be able to see this link once.
+                                        You will only be able to see this link once.
                                         Make sure to copy it.
                                     </p>
                                     <p>
                                         Anyone with this link can access the
                                         resource. Share it with care.
                                     </p>
-                                    <CopyTextBox text={link} wrapText={false} />
+
+                                    <div className="w-64 h-64 mx-auto flex items-center justify-center">
+                                        <QRCodeSVG
+                                            value={link}
+                                            size={256}
+                                        />
+                                    </div>
+
+                                    <div className="mx-auto">
+                                        <CopyTextBox text={link} wrapText={false} />
+                                    </div>
                                 </div>
                             )}
                         </div>

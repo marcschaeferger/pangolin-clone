@@ -203,11 +203,11 @@ export default function Enable2FaForm({ open, setOpen }: Enable2FaProps) {
                     {step === 2 && (
                         <div className="space-y-4">
                             <p>
-                                Scan this QR code with your authenticator app or
+                                scan this qr code with your authenticator app or
                                 enter the secret key manually:
                             </p>
-                            <div className="w-64 h-64 mx-auto flex items-center justify-center">
-                                <QRCodeSVG value={secretKey} size={256} />
+                            <div classname="w-64 h-64 mx-auto flex items-center justify-center">
+                                <qrcodesvg value={secretkey} size={256} />
                             </div>
                             <div className="max-w-md mx-auto">
                                 <CopyTextBox

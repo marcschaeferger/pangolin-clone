@@ -178,7 +178,7 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
                                     href={`/auth/reset-password${form.getValues().email ? `?email=${form.getValues().email}` : ""}`}
                                     className="text-sm text-muted-foreground"
                                 >
-                                    Forgot password? Click here
+                                    Forgot password?
                                 </Link>
                             </div>
                         </div>

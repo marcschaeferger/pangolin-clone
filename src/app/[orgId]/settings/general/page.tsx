@@ -139,7 +139,7 @@ export default function GeneralPage() {
                     </form>
                 </Form>
 
-                <Card className="border-red-900">
+                <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-red-600">
                             <AlertTriangle className="h-5 w-5" />
