@@ -11,6 +11,9 @@ import { alphabet, generateRandomString } from "oslo/crypto";
 import { hashPassword } from "@server/auth/password";
 import { verifyTotpCode } from "@server/auth/2fa";
 import logger from "@server/logger";
+import { sendEmail } from "@server/emails";
+import TwoFactorAuthNotification from "@server/emails/templates/TwoFactorAuthNotification";
+import config from "@server/config";
 
 export const verifyTotpBody = z
     .object({
@@ -92,8 +95,6 @@ export async function verifyTotp(
             });
         }
 
-        // TODO: send email to user confirming two-factor authentication is enabled
-
         if (!valid) {
             return next(
                 createHttpError(
@@ -102,6 +103,18 @@ export async function verifyTotp(
                 )
             );
         }
+
+        sendEmail(
+            TwoFactorAuthNotification({
+                email: user.email,
+                enabled: true
+            }),
+            {
+                to: user.email,
+                from: config.email?.no_reply,
+                subject: "Two-factor authentication enabled"
+            }
+        );
 
         return response<VerifyTotpResponse>(res, {
             data: {

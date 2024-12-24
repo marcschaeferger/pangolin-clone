@@ -11,6 +11,9 @@ import { response } from "@server/utils";
 import { verifyPassword } from "@server/auth/password";
 import { verifyTotpCode } from "@server/auth/2fa";
 import logger from "@server/logger";
+import { sendEmail } from "@server/emails";
+import TwoFactorAuthNotification from "@server/emails/templates/TwoFactorAuthNotification";
+import config from "@server/config";
 
 export const disable2faBody = z
     .object({
@@ -84,17 +87,22 @@ export async function disable2fa(
             );
         }
 
-        await db.transaction(async (trx) => {
-            await trx
-                .update(users)
-                .set({ twoFactorEnabled: false })
-                .where(eq(users.userId, user.userId));
+        await db
+            .update(users)
+            .set({ twoFactorEnabled: false })
+            .where(eq(users.userId, user.userId));
 
-            await trx
-                .delete(twoFactorBackupCodes)
-                .where(eq(twoFactorBackupCodes.userId, user.userId));
-        });
-        // TODO: send email to user confirming two-factor authentication is disabled
+        sendEmail(
+            TwoFactorAuthNotification({
+                email: user.email,
+                enabled: false
+            }),
+            {
+                to: user.email,
+                from: config.email?.no_reply,
+                subject: "Two-factor authentication disabled"
+            }
+        );
 
         return response<null>(res, {
             data: null,

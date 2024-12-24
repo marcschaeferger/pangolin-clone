@@ -13,7 +13,6 @@ import { UsersDataTable } from "./UsersDataTable";
 import { useState } from "react";
 import InviteUserForm from "./InviteUserForm";
 import ConfirmDeleteDialog from "@app/components/ConfirmDeleteDialog";
-import { useUserContext } from "@app/hooks/useUserContext";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { useToast } from "@app/hooks/useToast";
 import Link from "next/link";
@@ -21,6 +20,7 @@ import { useRouter } from "next/navigation";
 import { formatAxiosError } from "@app/lib/utils";
 import { createApiClient } from "@app/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
+import { useUserContext } from "@app/hooks/useUserContext";
 
 export type UserRow = {
     id: string;
@@ -45,7 +45,7 @@ export default function UsersTable({ users: u }: UsersTableProps) {
 
     const api = createApiClient(useEnvContext());
 
-    const user = useUserContext();
+    const { user, updateUser } = useUserContext();
     const { org } = useOrgContext();
     const { toast } = useToast();
 
