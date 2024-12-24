@@ -62,16 +62,18 @@ export async function verifyEmail(
         const valid = await isValidCode(user, code);
 
         if (valid) {
-            await db
-                .delete(emailVerificationCodes)
-                .where(eq(emailVerificationCodes.userId, user.userId));
+            await db.transaction(async (trx) => {
+                await trx
+                    .delete(emailVerificationCodes)
+                    .where(eq(emailVerificationCodes.userId, user.userId));
 
-            await db
-                .update(users)
-                .set({
-                    emailVerified: true
-                })
-                .where(eq(users.userId, user.userId));
+                await trx
+                    .update(users)
+                    .set({
+                        emailVerified: true
+                    })
+                    .where(eq(users.userId, user.userId));
+            });
         } else {
             return next(
                 createHttpError(

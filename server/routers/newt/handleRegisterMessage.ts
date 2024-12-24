@@ -39,14 +39,13 @@ export const handleRegisterMessage: MessageHandler = async (context) => {
         return;
     }
 
-    const [updatedSite] = await db
-    .update(sites)
+    await db
+        .update(sites)
         .set({
             pubKey: publicKey
         })
         .where(eq(sites.siteId, siteId))
         .returning();
-
 
     const [exitNode] = await db
         .select()
@@ -67,34 +66,40 @@ export const handleRegisterMessage: MessageHandler = async (context) => {
     // add the peer to the exit node
     await addPeer(site.exitNodeId, {
         publicKey: publicKey,
-        allowedIps: [site.subnet],
+        allowedIps: [site.subnet]
     });
 
-    const siteResources = await db.select().from(resources).where(eq(resources.siteId, siteId));
+    const siteResources = await db
+        .select()
+        .from(resources)
+        .where(eq(resources.siteId, siteId));
 
     // get the targets from the resourceIds
     const siteTargets = await db
-    .select()
-    .from(targets)
-    .where(
-        inArray(
-            targets.resourceId,
-            siteResources.map(resource => resource.resourceId)
-        )
-    );
+        .select()
+        .from(targets)
+        .where(
+            inArray(
+                targets.resourceId,
+                siteResources.map((resource) => resource.resourceId)
+            )
+        );
 
     const udpTargets = siteTargets
         .filter((target) => target.protocol === "udp")
         .map((target) => {
-            return `${target.internalPort ? target.internalPort + ":" : ""}${target.ip}:${target.port}`;
+            return `${target.internalPort ? target.internalPort + ":" : ""}${
+                target.ip
+            }:${target.port}`;
         });
 
     const tcpTargets = siteTargets
         .filter((target) => target.protocol === "tcp")
         .map((target) => {
-            return `${target.internalPort ? target.internalPort + ":" : ""}${target.ip}:${target.port}`;
+            return `${target.internalPort ? target.internalPort + ":" : ""}${
+                target.ip
+            }:${target.port}`;
         });
-
 
     return {
         message: {
@@ -106,11 +111,11 @@ export const handleRegisterMessage: MessageHandler = async (context) => {
                 tunnelIP: site.subnet.split("/")[0],
                 targets: {
                     udp: udpTargets,
-                    tcp: tcpTargets,
+                    tcp: tcpTargets
                 }
-            },
+            }
         },
         broadcast: false, // Send to all clients
-        excludeSender: false, // Include sender in broadcast
+        excludeSender: false // Include sender in broadcast
     };
 };

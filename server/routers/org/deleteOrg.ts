@@ -24,9 +24,7 @@ const deleteOrgSchema = z
     })
     .strict();
 
-export type DeleteOrgResponse = {
-
-}
+export type DeleteOrgResponse = {};
 
 export async function deleteOrg(
     req: Request,
@@ -79,39 +77,47 @@ export async function deleteOrg(
             .where(eq(sites.orgId, orgId))
             .limit(1);
 
-        if (sites) {
-            for (const site of orgSites) {
-                if (site.pubKey) {
-                    if (site.type == "wireguard") {
-                        await deletePeer(site.exitNodeId!, site.pubKey);
-                    } else if (site.type == "newt") {
-                        // get the newt on the site by querying the newt table for siteId
-                        const [deletedNewt] = await db
-                            .delete(newts)
-                            .where(eq(newts.siteId, site.siteId))
-                            .returning();
-                        if (deletedNewt) {
-                            const payload = {
-                                type: `newt/terminate`,
-                                data: {}
-                            };
-                            sendToClient(deletedNewt.newtId, payload);
+        await db.transaction(async (trx) => {
+            if (sites) {
+                for (const site of orgSites) {
+                    if (site.pubKey) {
+                        if (site.type == "wireguard") {
+                            await deletePeer(site.exitNodeId!, site.pubKey);
+                        } else if (site.type == "newt") {
+                            // get the newt on the site by querying the newt table for siteId
+                            const [deletedNewt] = await trx
+                                .delete(newts)
+                                .where(eq(newts.siteId, site.siteId))
+                                .returning();
+                            if (deletedNewt) {
+                                const payload = {
+                                    type: `newt/terminate`,
+                                    data: {}
+                                };
+                                sendToClient(deletedNewt.newtId, payload);
 
-                            // delete all of the sessions for the newt
-                            await db.delete(newtSessions)
-                                .where(
-                                    eq(newtSessions.newtId, deletedNewt.newtId)
-                                );
+                                // delete all of the sessions for the newt
+                                await trx
+                                    .delete(newtSessions)
+                                    .where(
+                                        eq(
+                                            newtSessions.newtId,
+                                            deletedNewt.newtId
+                                        )
+                                    );
+                            }
                         }
                     }
+
+                    logger.info(`Deleting site ${site.siteId}`);
+                    await trx
+                        .delete(sites)
+                        .where(eq(sites.siteId, site.siteId));
                 }
-
-                logger.info(`Deleting site ${site.siteId}`);
-                await db.delete(sites).where(eq(sites.siteId, site.siteId))
             }
-        }
 
-        await db.delete(orgs).where(eq(orgs.orgId, orgId));
+            await trx.delete(orgs).where(eq(orgs.orgId, orgId));
+        });
 
         return response(res, {
             data: null,

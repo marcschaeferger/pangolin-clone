@@ -82,31 +82,33 @@ export async function createRole(
             );
         }
 
-        const newRole = await db
-            .insert(roles)
-            .values({
-                ...roleData,
-                orgId
-            })
-            .returning();
-
-        await db
-            .insert(roleActions)
-            .values(
-                defaultRoleAllowedActions.map((action) => ({
-                    roleId: newRole[0].roleId,
-                    actionId: action,
+        await db.transaction(async (trx) => {
+            const newRole = await trx
+                .insert(roles)
+                .values({
+                    ...roleData,
                     orgId
-                }))
-            )
-            .execute();
+                })
+                .returning();
 
-        return response<Role>(res, {
-            data: newRole[0],
-            success: true,
-            error: false,
-            message: "Role created successfully",
-            status: HttpCode.CREATED
+            await trx
+                .insert(roleActions)
+                .values(
+                    defaultRoleAllowedActions.map((action) => ({
+                        roleId: newRole[0].roleId,
+                        actionId: action,
+                        orgId
+                    }))
+                )
+                .execute();
+
+            return response<Role>(res, {
+                data: newRole[0],
+                success: true,
+                error: false,
+                message: "Role created successfully",
+                status: HttpCode.CREATED
+            });
         });
     } catch (error) {
         logger.error(error);

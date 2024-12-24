@@ -94,64 +94,69 @@ export async function createSite(
             };
         }
 
-        const [newSite] = await db.insert(sites).values(payload).returning();
+        await db.transaction(async (trx) => {
+            const [newSite] = await trx
+                .insert(sites)
+                .values(payload)
+                .returning();
 
-        const adminRole = await db
-            .select()
-            .from(roles)
-            .where(and(eq(roles.isAdmin, true), eq(roles.orgId, orgId)))
-            .limit(1);
+            const adminRole = await trx
+                .select()
+                .from(roles)
+                .where(and(eq(roles.isAdmin, true), eq(roles.orgId, orgId)))
+                .limit(1);
 
-        if (adminRole.length === 0) {
-            return next(
-                createHttpError(HttpCode.NOT_FOUND, `Admin role not found`)
-            );
-        }
-
-        await db.insert(roleSites).values({
-            roleId: adminRole[0].roleId,
-            siteId: newSite.siteId
-        });
-
-        if (req.userOrgRoleId != adminRole[0].roleId) {
-            // make sure the user can access the site
-            db.insert(userSites).values({
-                userId: req.user?.userId!,
-                siteId: newSite.siteId
-            });
-        }
-
-        // add the peer to the exit node
-        if (type == "newt") {
-            const secretHash = await hashPassword(secret!);
-
-            await db.insert(newts).values({
-                newtId: newtId!,
-                secretHash,
-                siteId: newSite.siteId,
-                dateCreated: moment().toISOString()
-            });
-        } else if (type == "wireguard") {
-            if (!pubKey) {
+            if (adminRole.length === 0) {
                 return next(
-                    createHttpError(
-                        HttpCode.BAD_REQUEST,
-                        "Public key is required for wireguard sites"
-                    )
+                    createHttpError(HttpCode.NOT_FOUND, `Admin role not found`)
                 );
             }
-            await addPeer(exitNodeId, {
-                publicKey: pubKey,
-                allowedIps: []
-            });
-        }
 
-        return response<CreateSiteResponse>(res, {
-            data: newSite,
-            success: true,
-            error: false,
-            message: "Site created successfully",
-            status: HttpCode.CREATED
+            await trx.insert(roleSites).values({
+                roleId: adminRole[0].roleId,
+                siteId: newSite.siteId
+            });
+
+            if (req.userOrgRoleId != adminRole[0].roleId) {
+                // make sure the user can access the site
+                trx.insert(userSites).values({
+                    userId: req.user?.userId!,
+                    siteId: newSite.siteId
+                });
+            }
+
+            // add the peer to the exit node
+            if (type == "newt") {
+                const secretHash = await hashPassword(secret!);
+
+                await trx.insert(newts).values({
+                    newtId: newtId!,
+                    secretHash,
+                    siteId: newSite.siteId,
+                    dateCreated: moment().toISOString()
+                });
+            } else if (type == "wireguard") {
+                if (!pubKey) {
+                    return next(
+                        createHttpError(
+                            HttpCode.BAD_REQUEST,
+                            "Public key is required for wireguard sites"
+                        )
+                    );
+                }
+                await addPeer(exitNodeId, {
+                    publicKey: pubKey,
+                    allowedIps: []
+                });
+            }
+
+            return response<CreateSiteResponse>(res, {
+                data: newSite,
+                success: true,
+                error: false,
+                message: "Site created successfully",
+                status: HttpCode.CREATED
+            });
         });
     } catch (error) {
         logger.error(error);
