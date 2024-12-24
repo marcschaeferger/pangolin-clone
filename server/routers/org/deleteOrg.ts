@@ -24,6 +24,10 @@ const deleteOrgSchema = z
     })
     .strict();
 
+export type DeleteOrgResponse = {
+
+}
+
 export async function deleteOrg(
     req: Request,
     res: Response,
@@ -41,7 +45,6 @@ export async function deleteOrg(
         }
 
         const { orgId } = parsedParams.data;
-
         // Check if the user has permission to list sites
         const hasPermission = await checkUserActionPermission(
             ActionsEnum.deleteOrg,
@@ -55,7 +58,6 @@ export async function deleteOrg(
                 )
             );
         }
-
         const [org] = await db
             .select()
             .from(orgs)
@@ -70,7 +72,6 @@ export async function deleteOrg(
                 )
             );
         }
-
         // we need to handle deleting each site
         const orgSites = await db
             .select()
@@ -97,20 +98,20 @@ export async function deleteOrg(
                             sendToClient(deletedNewt.newtId, payload);
 
                             // delete all of the sessions for the newt
-                            db.delete(newtSessions)
+                            await db.delete(newtSessions)
                                 .where(
                                     eq(newtSessions.newtId, deletedNewt.newtId)
-                                )
-                                .run();
+                                );
                         }
                     }
                 }
 
-                db.delete(sites).where(eq(sites.siteId, site.siteId)).run();
+                logger.info(`Deleting site ${site.siteId}`);
+                await db.delete(sites).where(eq(sites.siteId, site.siteId))
             }
         }
 
-        await db.delete(orgs).where(eq(orgs.orgId, orgId)).returning();
+        await db.delete(orgs).where(eq(orgs.orgId, orgId));
 
         return response(res, {
             data: null,

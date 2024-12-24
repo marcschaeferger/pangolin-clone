@@ -30,6 +30,9 @@ import {
     CardHeader,
     CardTitle
 } from "@/components/ui/card";
+import { AxiosResponse } from "axios";
+import { DeleteOrgResponse, ListOrgsResponse } from "@server/routers/org";
+import { redirect, useRouter } from "next/navigation";
 
 const GeneralFormSchema = z.object({
     name: z.string()
@@ -41,6 +44,7 @@ export default function GeneralPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
     const { orgUser } = userOrgUserContext();
+    const router = useRouter();
     const { org } = useOrgContext();
     const { toast } = useToast();
     const api = createApiClient(useEnvContext());
@@ -54,16 +58,54 @@ export default function GeneralPage() {
     });
 
     async function deleteOrg() {
-        await api.delete(`/org/${org?.org.orgId}`).catch((e) => {
+        try {
+            const res = await api.delete<AxiosResponse<DeleteOrgResponse>>(
+                `/org/${org?.org.orgId}`
+            );
+            if (res.status === 200) {
+                pickNewOrgAndNavigate();
+            }
+        } catch (err) {
+            console.error(err);
             toast({
                 variant: "destructive",
                 title: "Failed to delete org",
                 description: formatAxiosError(
-                    e,
+                    err,
                     "An error occurred while deleting the org."
                 )
             });
-        });
+        }
+    }
+
+    async function pickNewOrgAndNavigate() {
+        try {
+
+            const res = await api.get<AxiosResponse<ListOrgsResponse>>(
+                `/orgs`
+            );
+            
+            if (res.status === 200) {
+                if (res.data.data.orgs.length > 0) {
+                    const orgId = res.data.data.orgs[0].orgId;
+                    // go to `/${orgId}/settings`);
+                    router.push(`/${orgId}/settings`);
+                } else {
+                    // go to `/setup`
+                    router.push("/setup");
+                }
+            }
+        } catch (err) {
+            console.error(err);
+            toast({
+                variant: "destructive",
+                title: "Failed to fetch orgs",
+                description: formatAxiosError(
+                    err,
+                    "An error occurred while listing your orgs"
+                )
+            });
+        }
     }
 
     async function onSubmit(data: GeneralFormValues) {

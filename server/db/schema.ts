@@ -130,8 +130,10 @@ export const userOrgs = sqliteTable("userOrgs", {
         .notNull()
         .references(() => users.userId),
     orgId: text("orgId")
-        .notNull()
-        .references(() => orgs.orgId),
+        .references(() => orgs.orgId, {
+            onDelete: "cascade"
+        })
+        .notNull(),
     roleId: integer("roleId")
         .notNull()
         .references(() => roles.roleId),
