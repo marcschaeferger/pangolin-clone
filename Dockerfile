@@ -8,7 +8,7 @@ RUN npm install --legacy-peer-deps
 
 COPY . .
 
-RUN npx drizzle-kit generate --dialect sqlite --schema ./server/db/schema.ts --out migrations
+RUN npx drizzle-kit generate --dialect sqlite --schema ./server/db/schema.ts --out init
 
 RUN npm run build
 

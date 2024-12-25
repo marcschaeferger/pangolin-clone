@@ -356,6 +356,11 @@ export const resourceOtp = sqliteTable("resourceOtp", {
     expiresAt: integer("expiresAt").notNull()
 });
 
+export const versionMigrations = sqliteTable("versionMigrations", {
+    version: text("version").primaryKey(),
+    executedAt: integer("executedAt").notNull()
+});
+
 export type Org = InferSelectModel<typeof orgs>;
 export type User = InferSelectModel<typeof users>;
 export type Site = InferSelectModel<typeof sites>;

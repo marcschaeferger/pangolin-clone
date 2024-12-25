@@ -11,5 +11,5 @@ export async function copyInConfig() {
     // update the domain on all of the orgs where the domain is not equal to the new domain
     // TODO: eventually each org could have a unique domain that we do not want to overwrite, so this will be unnecessary
     await db.update(orgs).set({ domain }).where(ne(orgs.domain, domain));
-    logger.info("Updated orgs with new domain");
+    logger.debug("Updated orgs with new domain");
 }

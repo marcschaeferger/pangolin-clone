@@ -9,8 +9,8 @@ async function startServers() {
 
     // Start all servers
     const apiServer = createApiServer();
-    const nextServer = await createNextServer();
     const internalServer = createInternalServer();
+    const nextServer = await createNextServer();
 
     return {
         apiServer,
