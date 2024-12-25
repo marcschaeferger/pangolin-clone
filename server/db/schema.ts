@@ -394,3 +394,5 @@ export type ResourcePincode = InferSelectModel<typeof resourcePincode>;
 export type ResourcePassword = InferSelectModel<typeof resourcePassword>;
 export type ResourceOtp = InferSelectModel<typeof resourceOtp>;
 export type ResourceAccessToken = InferSelectModel<typeof resourceAccessToken>;
+export type ResourceWhitelist = InferSelectModel<typeof resourceWhitelist>;
+export type VersionMigration = InferSelectModel<typeof versionMigrations>;
