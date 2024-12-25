@@ -22,5 +22,13 @@ export default async function SetupLayout({
         redirect("/?redirect=/setup");
     }
 
-    return <div className="w-full max-w-2xl mx-auto p-3 md:mt-32">{children}</div>;
+    if (
+        !(process.env.DISABLE_USER_CREATE_ORG === "false" || user.serverAdmin)
+    ) {
+        redirect("/");
+    }
+
+    return (
+        <div className="w-full max-w-2xl mx-auto p-3 md:mt-32">{children}</div>
+    );
 }

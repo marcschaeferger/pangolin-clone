@@ -16,16 +16,19 @@ import {
     createSession,
     generateId,
     generateSessionToken,
-    serializeSessionCookie,
+    serializeSessionCookie
 } from "@server/auth";
 import { ActionsEnum } from "@server/auth/actions";
 import config from "@server/config";
 import logger from "@server/logger";
 import { hashPassword } from "@server/auth/password";
+import { checkValidInvite } from "@server/auth/checkValidInvite";
 
 export const signupBodySchema = z.object({
     email: z.string().email(),
     password: passwordSchema,
+    inviteToken: z.string().optional(),
+    inviteId: z.string().optional()
 });
 
 export type SignUpBody = z.infer<typeof signupBodySchema>;
@@ -50,10 +53,38 @@ export async function signup(
         );
     }
 
-    const { email, password } = parsedBody.data;
+    const { email, password, inviteToken, inviteId } = parsedBody.data;
+
+    logger.debug("signup", { email, password, inviteToken, inviteId });
 
     const passwordHash = await hashPassword(password);
     const userId = generateId(15);
+
+    if (config.flags?.disable_signup_without_invite) {
+        if (!inviteToken || !inviteId) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    "Signups are disabled without an invite code"
+                )
+            );
+        }
+
+        const { error, existingInvite } = await checkValidInvite({
+            token: inviteToken,
+            inviteId
+        });
+
+        if (error) {
+            return next(createHttpError(HttpCode.BAD_REQUEST, error));
+        }
+
+        if (!existingInvite) {
+            return next(
+                createHttpError(HttpCode.BAD_REQUEST, "Invite does not exist")
+            );
+        }
+    }
 
     try {
         const existing = await db
@@ -89,12 +120,15 @@ export async function signup(
 
             if (diff < 2) {
                 // If the user was created less than 2 hours ago, we don't want to create a new user
-                return next(
-                    createHttpError(
-                        HttpCode.BAD_REQUEST,
-                        "A verification email was already sent to this email address. Please check your email for the verification code."
-                    )
-                );
+                return response<SignUpResponse>(res, {
+                    data: {
+                        emailVerificationRequired: true
+                    },
+                    success: true,
+                    error: false,
+                    message: `A user with that email address already exists. We sent an email to ${email} with a verification code.`,
+                    status: HttpCode.OK
+                });
             } else {
                 // If the user was created more than 2 hours ago, we want to delete the old user and create a new one
                 await db.delete(users).where(eq(users.userId, user.userId));
@@ -105,7 +139,7 @@ export async function signup(
             userId: userId,
             email: email,
             passwordHash,
-            dateCreated: moment().toISOString(),
+            dateCreated: moment().toISOString()
         });
 
         // give the user their default permissions:
@@ -125,12 +159,12 @@ export async function signup(
 
             return response<SignUpResponse>(res, {
                 data: {
-                    emailVerificationRequired: true,
+                    emailVerificationRequired: true
                 },
                 success: true,
                 error: false,
                 message: `User created successfully. We sent an email to ${email} with a verification code.`,
-                status: HttpCode.OK,
+                status: HttpCode.OK
             });
         }
 
@@ -139,7 +173,7 @@ export async function signup(
             success: true,
             error: false,
             message: "User created successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (e) {
         if (e instanceof SqliteError && e.code === "SQLITE_CONSTRAINT_UNIQUE") {

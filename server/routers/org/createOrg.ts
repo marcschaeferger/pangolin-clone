@@ -28,6 +28,18 @@ export async function createOrg(
     next: NextFunction
 ): Promise<any> {
     try {
+        // should this be in a middleware?
+        if (config.flags?.disable_user_create_org) {
+            if (!req.user?.serverAdmin) {
+                return next(
+                    createHttpError(
+                        HttpCode.FORBIDDEN,
+                        "Only server admins can create organizations"
+                    )
+                );
+            }
+        }
+
         const parsedBody = createOrgSchema.safeParse(req.body);
         if (!parsedBody.success) {
             return next(

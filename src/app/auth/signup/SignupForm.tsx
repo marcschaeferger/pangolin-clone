@@ -32,6 +32,8 @@ import { useEnvContext } from "@app/hooks/useEnvContext";
 
 type SignupFormProps = {
     redirect?: string;
+    inviteId?: string;
+    inviteToken?: string;
 };
 
 const formSchema = z
@@ -45,7 +47,7 @@ const formSchema = z
         message: "Passwords do not match",
     });
 
-export default function SignupForm({ redirect }: SignupFormProps) {
+export default function SignupForm({ redirect, inviteId, inviteToken }: SignupFormProps) {
     const router = useRouter();
 
     const api = createApiClient(useEnvContext());
@@ -70,6 +72,8 @@ export default function SignupForm({ redirect }: SignupFormProps) {
             .put<AxiosResponse<SignUpResponse>>("/auth/signup", {
                 email,
                 password,
+                inviteId,
+                inviteToken
             })
             .catch((e) => {
                 console.error(e);

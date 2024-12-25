@@ -15,6 +15,7 @@ async function queryUser(userId: string) {
             email: users.email,
             twoFactorEnabled: users.twoFactorEnabled,
             emailVerified: users.emailVerified,
+            serverAdmin: users.serverAdmin
         })
         .from(users)
         .where(eq(users.userId, userId))
@@ -56,7 +57,7 @@ export async function getUser(
             success: true,
             error: false,
             message: "User retrieved successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

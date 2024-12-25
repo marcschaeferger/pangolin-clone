@@ -34,7 +34,7 @@ export async function ensureActions() {
                     defaultRoles.map((role) => ({
                         roleId: role.roleId!,
                         actionId,
-                        orgId: role.orgId!,
+                        orgId: role.orgId!
                     }))
                 )
                 .execute();
@@ -62,7 +62,7 @@ export async function createAdminRole(orgId: string) {
             orgId,
             isAdmin: true,
             name: "Admin",
-            description: "Admin role with the most permissions",
+            description: "Admin role with the most permissions"
         })
         .returning({ roleId: roles.roleId })
         .execute();
@@ -82,7 +82,7 @@ export async function createAdminRole(orgId: string) {
             actionIds.map((action) => ({
                 roleId,
                 actionId: action.actionId,
-                orgId,
+                orgId
             }))
         )
         .execute();
