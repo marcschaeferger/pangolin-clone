@@ -11,6 +11,7 @@ import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { isWithinExpirationDate } from "oslo";
 import { verifyPassword } from "@server/auth/password";
+import { checkValidInvite } from "@server/auth/checkValidInvite";
 
 const acceptInviteBodySchema = z
     .object({
@@ -42,44 +43,25 @@ export async function acceptInvite(
 
         const { token, inviteId } = parsedBody.data;
 
-        const existingInvite = await db
-            .select()
-            .from(userInvites)
-            .where(eq(userInvites.inviteId, inviteId))
-            .limit(1);
-
-        if (!existingInvite.length) {
-            return next(
-                createHttpError(
-                    HttpCode.BAD_REQUEST,
-                    "Invite ID or token is invalid"
-                )
-            );
-        }
-
-        if (!isWithinExpirationDate(new Date(existingInvite[0].expiresAt))) {
-            return next(
-                createHttpError(HttpCode.BAD_REQUEST, "Invite has expired")
-            );
-        }
-
-        const validToken = await verifyPassword(
+        const { error, existingInvite } = await checkValidInvite({
             token,
-            existingInvite[0].tokenHash
-        );
-        if (!validToken) {
+            inviteId
+        });
+
+        if (error) {
+            return next(createHttpError(HttpCode.BAD_REQUEST, error));
+        }
+
+        if (!existingInvite) {
             return next(
-                createHttpError(
-                    HttpCode.BAD_REQUEST,
-                    "Invite ID or token is invalid"
-                )
+                createHttpError(HttpCode.BAD_REQUEST, "Invite does not exist")
             );
         }
 
         const existingUser = await db
             .select()
             .from(users)
-            .where(eq(users.email, existingInvite[0].email))
+            .where(eq(users.email, existingInvite.email))
             .limit(1);
         if (!existingUser.length) {
             return next(
@@ -90,7 +72,7 @@ export async function acceptInvite(
             );
         }
 
-        if (req.user && req.user.email !== existingInvite[0].email) {
+        if (req.user && req.user.email !== existingInvite.email) {
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
@@ -104,7 +86,7 @@ export async function acceptInvite(
         const existingRole = await db
             .select()
             .from(roles)
-            .where(eq(roles.roleId, existingInvite[0].roleId))
+            .where(eq(roles.roleId, existingInvite.roleId))
             .limit(1);
         if (existingRole.length) {
             roleId = existingRole[0].roleId;
@@ -122,8 +104,8 @@ export async function acceptInvite(
             // add the user to the org
             await trx.insert(userOrgs).values({
                 userId: existingUser[0].userId,
-                orgId: existingInvite[0].orgId,
-                roleId: existingInvite[0].roleId
+                orgId: existingInvite.orgId,
+                roleId: existingInvite.roleId
             });
 
             // delete the invite
@@ -131,9 +113,9 @@ export async function acceptInvite(
                 .delete(userInvites)
                 .where(eq(userInvites.inviteId, inviteId));
         });
-        
+
         return response<AcceptInviteResponse>(res, {
-            data: { accepted: true, orgId: existingInvite[0].orgId },
+            data: { accepted: true, orgId: existingInvite.orgId },
             success: true,
             error: false,
             message: "Invite accepted",

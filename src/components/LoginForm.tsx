@@ -57,7 +57,9 @@ const mfaSchema = z.object({
 export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
     const router = useRouter();
 
-    const api = createApiClient(useEnvContext());
+    const { env } = useEnvContext();
+
+    const api = createApiClient({ env });
 
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);

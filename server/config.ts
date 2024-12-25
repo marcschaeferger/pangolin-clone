@@ -62,12 +62,17 @@ const environmentSchema = z.object({
             no_reply: z.string().email().optional()
         })
         .optional(),
+    users: z.object({
+        server_admin: z.object({
+            email: z.string().email(),
+            password: z.string()
+        })
+    }),
     flags: z
         .object({
-            allow_org_subdomain_changing: z.boolean().optional(),
             require_email_verification: z.boolean().optional(),
             disable_signup_without_invite: z.boolean().optional(),
-            require_signup_secret: z.boolean().optional()
+            disable_user_create_org: z.boolean().optional()
         })
         .optional()
 });
@@ -156,5 +161,13 @@ process.env.SESSION_COOKIE_NAME = parsedConfig.data.server.session_cookie_name;
 process.env.RESOURCE_SESSION_COOKIE_NAME =
     parsedConfig.data.server.resource_session_cookie_name;
 process.env.EMAIL_ENABLED = parsedConfig.data.email ? "true" : "false";
+process.env.DISABLE_SIGNUP_WITHOUT_INVITE = parsedConfig.data.flags
+    ?.disable_signup_without_invite
+    ? "true"
+    : "false";
+process.env.DISABLE_USER_CREATE_ORG = parsedConfig.data.flags
+    ?.disable_user_create_org
+    ? "true"
+    : "false";
 
 export default parsedConfig.data;

@@ -37,5 +37,12 @@ email:
     smtp_pass: aaaaaaaaaaaaaaaaaa
     no_reply: no-reply@example.io
 
+users:
+    server_admin:
+        email: admin@example.com
+        password: Password123!
+
 flags:
     require_email_verification: true
+    disable_signup_without_invite: true
+    disable_user_create_org: true

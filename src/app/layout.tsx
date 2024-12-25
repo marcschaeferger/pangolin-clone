@@ -37,7 +37,10 @@ export default async function RootLayout({
                             SERVER_EXTERNAL_PORT: process.env
                                 .SERVER_EXTERNAL_PORT as string,
                             ENVIRONMENT: process.env.ENVIRONMENT as string,
-                            EMAIL_ENABLED: process.env.EMAIL_ENABLED as string
+                            EMAIL_ENABLED: process.env.EMAIL_ENABLED as string,
+                            // optional
+                            DISABLE_USER_CREATE_ORG: process.env.DISABLE_USER_CREATE_ORG,
+                            DISABLE_SIGNUP_WITHOUT_INVITE: process.env.DISABLE_SIGNUP_WITHOUT_INVITE,
                         }}
                     >
                         {children}

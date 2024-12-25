@@ -96,12 +96,18 @@ export default function Disable2FaForm({ open, setOpen }: Disable2FaProps) {
         setLoading(false);
     };
 
+    function reset() {
+        disableForm.reset();
+        setStep("password");
+        setLoading(false);
+    }
+
     return (
         <Credenza
             open={open}
             onOpenChange={(val) => {
                 setOpen(val);
-                setLoading(false);
+                reset();
             }}
         >
             <CredenzaContent>

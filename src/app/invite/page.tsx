@@ -21,7 +21,7 @@ export default async function InvitePage(props: {
     const user = await verifySession();
 
     if (!user) {
-        redirect(`/?redirect=/invite?token=${params.token}`);
+        redirect(`/auth/signup?redirect=/invite?token=${params.token}`);
     }
 
     const parts = tokenParam.split("-");

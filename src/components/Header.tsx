@@ -67,7 +67,9 @@ export function Header({ orgId, orgs }: HeaderProps) {
 
     const router = useRouter();
 
-    const api = createApiClient(useEnvContext());
+    const { env } = useEnvContext();
+
+    const api = createApiClient({ env });
 
     function getInitials() {
         return user.email.substring(0, 2).toUpperCase();
@@ -126,6 +128,11 @@ export function Header({ orgId, orgs }: HeaderProps) {
                                         {user.email}
                                     </p>
                                 </div>
+                                {user.serverAdmin && (
+                                    <p className="text-xs leading-none text-muted-foreground mt-2">
+                                        Server Admin
+                                    </p>
+                                )}
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             {!user.twoFactorEnabled && (
@@ -237,19 +244,28 @@ export function Header({ orgId, orgs }: HeaderProps) {
                                     <CommandEmpty>
                                         No organizations found.
                                     </CommandEmpty>
-                                    <CommandGroup heading="Create">
-                                        <CommandList>
-                                            <CommandItem
-                                                onSelect={(currentValue) => {
-                                                    router.push("/setup");
-                                                }}
-                                            >
-                                                <Plus className="mr-2 h-4 w-4" />
-                                                New Organization
-                                            </CommandItem>
-                                        </CommandList>
-                                    </CommandGroup>
-                                    <CommandSeparator />
+                                    {(env.DISABLE_USER_CREATE_ORG === "false" ||
+                                        user.serverAdmin) && (
+                                        <>
+                                            <CommandGroup heading="Create">
+                                                <CommandList>
+                                                    <CommandItem
+                                                        onSelect={(
+                                                            currentValue
+                                                        ) => {
+                                                            router.push(
+                                                                "/setup"
+                                                            );
+                                                        }}
+                                                    >
+                                                        <Plus className="mr-2 h-4 w-4" />
+                                                        New Organization
+                                                    </CommandItem>
+                                                </CommandList>
+                                            </CommandGroup>
+                                            <CommandSeparator />
+                                        </>
+                                    )}
                                     <CommandGroup heading="Organizations">
                                         <CommandList>
                                             {orgs.map((org) => (

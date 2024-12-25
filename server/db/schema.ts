@@ -89,7 +89,10 @@ export const users = sqliteTable("user", {
     emailVerified: integer("emailVerified", { mode: "boolean" })
         .notNull()
         .default(false),
-    dateCreated: text("dateCreated").notNull()
+    dateCreated: text("dateCreated").notNull(),
+    serverAdmin: integer("serverAdmin", { mode: "boolean" })
+        .notNull()
+        .default(false)
 });
 
 export const newts = sqliteTable("newt", {

@@ -154,12 +154,25 @@ export default function Enable2FaForm({ open, setOpen }: Enable2FaProps) {
         }
     };
 
+    function reset() {
+        setLoading(false);
+        setStep(1);
+        setSecretKey("");
+        setSecretUri("");
+        setVerificationCode("");
+        setError("");
+        setSuccess(false);
+        setBackupCodes([]);
+        enableForm.reset();
+        confirmForm.reset();
+    }
+
     return (
         <Credenza
             open={open}
             onOpenChange={(val) => {
                 setOpen(val);
-                setLoading(false);
+                reset();
             }}
         >
             <CredenzaContent>
