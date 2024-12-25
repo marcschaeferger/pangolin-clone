@@ -92,10 +92,6 @@ export async function disable2fa(
             .set({ twoFactorEnabled: false })
             .where(eq(users.userId, user.userId));
 
-        await db
-            .delete(twoFactorBackupCodes)
-            .where(eq(twoFactorBackupCodes.userId, user.userId));
-
         sendEmail(
             TwoFactorAuthNotification({
                 email: user.email,

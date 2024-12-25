@@ -76,21 +76,23 @@ export async function verifyTotp(
         let codes;
         if (valid) {
             // if valid, enable two-factor authentication; the totp secret is no longer temporary
-            await db
-                .update(users)
-                .set({ twoFactorEnabled: true })
-                .where(eq(users.userId, user.userId));
+            await db.transaction(async (trx) => {
+                await trx
+                    .update(users)
+                    .set({ twoFactorEnabled: true })
+                    .where(eq(users.userId, user.userId));
 
-            const backupCodes = await generateBackupCodes();
-            codes = backupCodes;
-            for (const code of backupCodes) {
-                const hash = await hashPassword(code);
+                const backupCodes = await generateBackupCodes();
+                codes = backupCodes;
+                for (const code of backupCodes) {
+                    const hash = await hashPassword(code);
 
-                await db.insert(twoFactorBackupCodes).values({
-                    userId: user.userId,
-                    codeHash: hash
-                });
-            }
+                    await trx.insert(twoFactorBackupCodes).values({
+                        userId: user.userId,
+                        codeHash: hash
+                    });
+                }
+            });
         }
 
         if (!valid) {

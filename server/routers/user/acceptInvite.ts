@@ -100,15 +100,19 @@ export async function acceptInvite(
             );
         }
 
-        // add the user to the org
-        await db.insert(userOrgs).values({
-            userId: existingUser[0].userId,
-            orgId: existingInvite.orgId,
-            roleId: existingInvite.roleId
-        });
+        await db.transaction(async (trx) => {
+            // add the user to the org
+            await trx.insert(userOrgs).values({
+                userId: existingUser[0].userId,
+                orgId: existingInvite.orgId,
+                roleId: existingInvite.roleId
+            });
 
-        // delete the invite
-        await db.delete(userInvites).where(eq(userInvites.inviteId, inviteId));
+            // delete the invite
+            await trx
+                .delete(userInvites)
+                .where(eq(userInvites.inviteId, inviteId));
+        });
 
         return response<AcceptInviteResponse>(res, {
             data: { accepted: true, orgId: existingInvite.orgId },

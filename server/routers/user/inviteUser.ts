@@ -130,21 +130,26 @@ export async function inviteUser(
 
         const tokenHash = await hashPassword(token);
 
-        // delete any existing invites for this email
-        await db
-            .delete(userInvites)
-            .where(
-                and(eq(userInvites.email, email), eq(userInvites.orgId, orgId))
-            )
-            .execute();
+        await db.transaction(async (trx) => {
+            // delete any existing invites for this email
+            await trx
+                .delete(userInvites)
+                .where(
+                    and(
+                        eq(userInvites.email, email),
+                        eq(userInvites.orgId, orgId)
+                    )
+                )
+                .execute();
 
-        await db.insert(userInvites).values({
-            inviteId,
-            orgId,
-            email,
-            expiresAt,
-            tokenHash,
-            roleId
+            await trx.insert(userInvites).values({
+                inviteId,
+                orgId,
+                email,
+                expiresAt,
+                tokenHash,
+                roleId
+            });
         });
 
         const inviteLink = `${config.app.base_url}/invite?token=${inviteId}-${token}`;

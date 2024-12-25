@@ -51,38 +51,43 @@ export async function removeRoleSite(
 
         const { roleId } = parsedBody.data;
 
-        const deletedRoleSite = await db
-            .delete(roleSites)
-            .where(
-                and(eq(roleSites.roleId, roleId), eq(roleSites.siteId, siteId))
-            )
-            .returning();
-
-        if (deletedRoleSite.length === 0) {
-            return next(
-                createHttpError(
-                    HttpCode.NOT_FOUND,
-                    `Site with ID ${siteId} not found for role with ID ${roleId}`
-                )
-            );
-        }
-
-        const siteResources = await db
-            .select()
-            .from(resources)
-            .where(eq(resources.siteId, siteId));
-
-        for (const resource of siteResources) {
-            await db
-                .delete(roleResources)
+        await db.transaction(async (trx) => {
+            const deletedRoleSite = await trx
+                .delete(roleSites)
                 .where(
                     and(
-                        eq(roleResources.roleId, roleId),
-                        eq(roleResources.resourceId, resource.resourceId)
+                        eq(roleSites.roleId, roleId),
+                        eq(roleSites.siteId, siteId)
                     )
                 )
                 .returning();
-        }
+
+            if (deletedRoleSite.length === 0) {
+                return next(
+                    createHttpError(
+                        HttpCode.NOT_FOUND,
+                        `Site with ID ${siteId} not found for role with ID ${roleId}`
+                    )
+                );
+            }
+
+            const siteResources = await db
+                .select()
+                .from(resources)
+                .where(eq(resources.siteId, siteId));
+
+            for (const resource of siteResources) {
+                await trx
+                    .delete(roleResources)
+                    .where(
+                        and(
+                            eq(roleResources.roleId, roleId),
+                            eq(roleResources.resourceId, resource.resourceId)
+                        )
+                    )
+                    .returning();
+            }
+        });
 
         return response(res, {
             data: null,

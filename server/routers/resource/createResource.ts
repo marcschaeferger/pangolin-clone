@@ -89,50 +89,50 @@ export async function createResource(
         }
 
         const fullDomain = `${subdomain}.${org[0].domain}`;
+        await db.transaction(async (trx) => {
+            const newResource = await trx
+                .insert(resources)
+                .values({
+                    siteId,
+                    fullDomain,
+                    orgId,
+                    name,
+                    subdomain,
+                    ssl: true
+                })
+                .returning();
 
-        const newResource = await db
-            .insert(resources)
-            .values({
-                siteId,
-                fullDomain,
-                orgId,
-                name,
-                subdomain,
-                ssl: true
-            })
-            .returning();
+            const adminRole = await db
+                .select()
+                .from(roles)
+                .where(and(eq(roles.isAdmin, true), eq(roles.orgId, orgId)))
+                .limit(1);
 
-        const adminRole = await db
-            .select()
-            .from(roles)
-            .where(and(eq(roles.isAdmin, true), eq(roles.orgId, orgId)))
-            .limit(1);
+            if (adminRole.length === 0) {
+                return next(
+                    createHttpError(HttpCode.NOT_FOUND, `Admin role not found`)
+                );
+            }
 
-        if (adminRole.length === 0) {
-            return next(
-                createHttpError(HttpCode.NOT_FOUND, `Admin role not found`)
-            );
-        }
-
-        await db.insert(roleResources).values({
-            roleId: adminRole[0].roleId,
-            resourceId: newResource[0].resourceId
-        });
-
-        if (req.userOrgRoleId != adminRole[0].roleId) {
-            // make sure the user can access the resource
-            await db.insert(userResources).values({
-                userId: req.user?.userId!,
+            await trx.insert(roleResources).values({
+                roleId: adminRole[0].roleId,
                 resourceId: newResource[0].resourceId
             });
-        }
 
-        response<CreateResourceResponse>(res, {
-            data: newResource[0],
-            success: true,
-            error: false,
-            message: "Resource created successfully",
-            status: HttpCode.CREATED
+            if (req.userOrgRoleId != adminRole[0].roleId) {
+                // make sure the user can access the resource
+                await trx.insert(userResources).values({
+                    userId: req.user?.userId!,
+                    resourceId: newResource[0].resourceId
+                });
+            }
+            response<CreateResourceResponse>(res, {
+                data: newResource[0],
+                success: true,
+                error: false,
+                message: "Resource created successfully",
+                status: HttpCode.CREATED
+            });
         });
     } catch (error) {
         if (

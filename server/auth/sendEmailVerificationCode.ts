@@ -31,18 +31,18 @@ async function generateEmailVerificationCode(
     userId: string,
     email: string
 ): Promise<string> {
-    await db
-        .delete(emailVerificationCodes)
-        .where(eq(emailVerificationCodes.userId, userId));
-
     const code = generateRandomString(8, alphabet("0-9"));
+    await db.transaction(async (trx) => {
+        await trx
+            .delete(emailVerificationCodes)
+            .where(eq(emailVerificationCodes.userId, userId));
 
-    await db.insert(emailVerificationCodes).values({
-        userId,
-        email,
-        code,
-        expiresAt: createDate(new TimeSpan(15, "m")).getTime()
+        await trx.insert(emailVerificationCodes).values({
+            userId,
+            email,
+            code,
+            expiresAt: createDate(new TimeSpan(15, "m")).getTime()
+        });
     });
-
     return code;
 }

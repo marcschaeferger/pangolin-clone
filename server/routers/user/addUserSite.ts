@@ -34,33 +34,36 @@ export async function addUserSite(
 
         const { userId, siteId } = parsedBody.data;
 
-        const newUserSite = await db
-            .insert(userSites)
-            .values({
-                userId,
-                siteId
-            })
-            .returning();
+        await db.transaction(async (trx) => {
+            const newUserSite = await trx
+                .insert(userSites)
+                .values({
+                    userId,
+                    siteId
+                })
+                .returning();
 
-        const siteResources = await db
-            .select()
-            .from(resources)
-            .where(eq(resources.siteId, siteId));
+            const siteResources = await trx
+                .select()
+                .from(resources)
+                .where(eq(resources.siteId, siteId));
 
-        for (const resource of siteResources) {
-            await db.insert(userResources).values({
-                userId,
-                resourceId: resource.resourceId
+            for (const resource of siteResources) {
+                await trx.insert(userResources).values({
+                    userId,
+                    resourceId: resource.resourceId
+                });
+            }
+
+            return response(res, {
+                data: newUserSite[0],
+                success: true,
+                error: false,
+                message: "Site added to user successfully",
+                status: HttpCode.CREATED
             });
-        }
-
-        return response(res, {
-            data: newUserSite[0],
-            success: true,
-            error: false,
-            message: "Site added to user successfully",
-            status: HttpCode.CREATED
         });
+        
     } catch (error) {
         logger.error(error);
         return next(

@@ -51,32 +51,34 @@ export async function addRoleSite(
 
         const { roleId } = parsedParams.data;
 
-        const newRoleSite = await db
-            .insert(roleSites)
-            .values({
-                roleId,
-                siteId
-            })
-            .returning();
+        await db.transaction(async (trx) => {
+            const newRoleSite = await trx
+                .insert(roleSites)
+                .values({
+                    roleId,
+                    siteId
+                })
+                .returning();
 
-        const siteResources = await db
-            .select()
-            .from(resources)
-            .where(eq(resources.siteId, siteId));
+            const siteResources = await db
+                .select()
+                .from(resources)
+                .where(eq(resources.siteId, siteId));
 
-        for (const resource of siteResources) {
-            await db.insert(roleResources).values({
-                roleId,
-                resourceId: resource.resourceId
+            for (const resource of siteResources) {
+                await trx.insert(roleResources).values({
+                    roleId,
+                    resourceId: resource.resourceId
+                });
+            }
+
+            return response(res, {
+                data: newRoleSite[0],
+                success: true,
+                error: false,
+                message: "Site added to role successfully",
+                status: HttpCode.CREATED
             });
-        }
-
-        return response(res, {
-            data: newRoleSite[0],
-            success: true,
-            error: false,
-            message: "Site added to role successfully",
-            status: HttpCode.CREATED
         });
     } catch (error) {
         logger.error(error);

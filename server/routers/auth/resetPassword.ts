@@ -135,20 +135,22 @@ export async function resetPassword(
 
         await invalidateAllSessions(resetRequest[0].userId);
 
-        await db
-            .update(users)
-            .set({ passwordHash })
-            .where(eq(users.userId, resetRequest[0].userId));
+        await db.transaction(async (trx) => {
+            await trx
+                .update(users)
+                .set({ passwordHash })
+                .where(eq(users.userId, resetRequest[0].userId));
 
-        await db
-            .delete(passwordResetTokens)
-            .where(eq(passwordResetTokens.email, email));
+            await trx
+                .delete(passwordResetTokens)
+                .where(eq(passwordResetTokens.email, email));
+        });
 
         await sendEmail(ConfirmPasswordReset({ email }), {
             from: config.email?.no_reply,
             to: email,
             subject: "Password Reset Confirmation"
-        })
+        });
 
         return response<ResetPasswordResponse>(res, {
             data: null,

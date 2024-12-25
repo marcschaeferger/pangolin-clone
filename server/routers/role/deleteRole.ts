@@ -98,15 +98,17 @@ export async function deleteRole(
             );
         }
 
-        // move all users from the userOrgs table with roleId to newRoleId
-        await db
-            .update(userOrgs)
-            .set({ roleId: newRoleId })
-            .where(eq(userOrgs.roleId, roleId));
+        await db.transaction(async (trx) => {
+            // move all users from the userOrgs table with roleId to newRoleId
+            await trx
+                .update(userOrgs)
+                .set({ roleId: newRoleId })
+                .where(eq(userOrgs.roleId, roleId));
 
-        // delete the old role
-        await db.delete(roles).where(eq(roles.roleId, roleId));
-
+            // delete the old role
+            await trx.delete(roles).where(eq(roles.roleId, roleId));
+        });
+        
         return response(res, {
             data: null,
             success: true,

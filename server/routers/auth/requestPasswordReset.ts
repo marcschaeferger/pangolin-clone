@@ -63,18 +63,23 @@ export async function requestPasswordReset(
             );
         }
 
-        await db
-            .delete(passwordResetTokens)
-            .where(eq(passwordResetTokens.userId, existingUser[0].userId));
+        const token = generateRandomString(
+            8,
+            alphabet("0-9", "A-Z", "a-z")
+        );
+        await db.transaction(async (trx) => {
+            await trx
+                .delete(passwordResetTokens)
+                .where(eq(passwordResetTokens.userId, existingUser[0].userId));
 
-        const token = generateRandomString(8, alphabet("0-9", "A-Z", "a-z"));
-        const tokenHash = await hashPassword(token);
+            const tokenHash = await hashPassword(token);
 
-        await db.insert(passwordResetTokens).values({
-            userId: existingUser[0].userId,
-            email: existingUser[0].email,
-            tokenHash,
-            expiresAt: createDate(new TimeSpan(2, "h")).getTime()
+            await trx.insert(passwordResetTokens).values({
+                userId: existingUser[0].userId,
+                email: existingUser[0].email,
+                tokenHash,
+                expiresAt: createDate(new TimeSpan(2, "h")).getTime()
+            });
         });
 
         const url = `${config.app.base_url}/auth/reset-password?email=${email}&token=${token}`;

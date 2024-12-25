@@ -3,11 +3,10 @@ import { resourceOtp } from "@server/db/schema";
 import { and, eq } from "drizzle-orm";
 import { createDate, isWithinExpirationDate, TimeSpan } from "oslo";
 import { alphabet, generateRandomString, sha256 } from "oslo/crypto";
-import { encodeHex } from "oslo/encoding";
 import { sendEmail } from "@server/emails";
 import ResourceOTPCode from "@server/emails/templates/ResourceOTPCode";
 import config from "@server/config";
-import { hash, verify } from "@node-rs/argon2";
+import { verifyPassword } from "./password";
 import { hashPassword } from "./password";
 
 export async function sendResourceOtpEmail(
@@ -37,24 +36,25 @@ export async function generateResourceOtpCode(
     resourceId: number,
     email: string
 ): Promise<string> {
-    await db
-        .delete(resourceOtp)
-        .where(
-            and(
-                eq(resourceOtp.email, email),
-                eq(resourceOtp.resourceId, resourceId)
-            )
-        );
-
     const otp = generateRandomString(8, alphabet("0-9", "A-Z", "a-z"));
+    await db.transaction(async (trx) => {
+        await trx
+            .delete(resourceOtp)
+            .where(
+                and(
+                    eq(resourceOtp.email, email),
+                    eq(resourceOtp.resourceId, resourceId)
+                )
+            );
 
-    const otpHash = await hashPassword(otp);
+        const otpHash = await hashPassword(otp);
 
-    await db.insert(resourceOtp).values({
-        resourceId,
-        email,
-        otpHash,
-        expiresAt: createDate(new TimeSpan(15, "m")).getTime()
+        await trx.insert(resourceOtp).values({
+            resourceId,
+            email,
+            otpHash,
+            expiresAt: createDate(new TimeSpan(15, "m")).getTime()
+        });
     });
 
     return otp;

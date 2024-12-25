@@ -51,38 +51,43 @@ export async function removeUserSite(
 
         const { siteId } = parsedBody.data;
 
-        const deletedUserSite = await db
-            .delete(userSites)
-            .where(
-                and(eq(userSites.userId, userId), eq(userSites.siteId, siteId))
-            )
-            .returning();
-
-        if (deletedUserSite.length === 0) {
-            return next(
-                createHttpError(
-                    HttpCode.NOT_FOUND,
-                    `Site with ID ${siteId} not found for user with ID ${userId}`
-                )
-            );
-        }
-
-        const siteResources = await db
-            .select()
-            .from(resources)
-            .where(eq(resources.siteId, siteId));
-
-        for (const resource of siteResources) {
-            await db
-                .delete(userResources)
+        await db.transaction(async (trx) => {
+            const deletedUserSite = await trx
+                .delete(userSites)
                 .where(
                     and(
-                        eq(userResources.userId, userId),
-                        eq(userResources.resourceId, resource.resourceId)
+                        eq(userSites.userId, userId),
+                        eq(userSites.siteId, siteId)
                     )
                 )
                 .returning();
-        }
+
+            if (deletedUserSite.length === 0) {
+                return next(
+                    createHttpError(
+                        HttpCode.NOT_FOUND,
+                        `Site with ID ${siteId} not found for user with ID ${userId}`
+                    )
+                );
+            }
+
+            const siteResources = await trx
+                .select()
+                .from(resources)
+                .where(eq(resources.siteId, siteId));
+
+            for (const resource of siteResources) {
+                await trx
+                    .delete(userResources)
+                    .where(
+                        and(
+                            eq(userResources.userId, userId),
+                            eq(userResources.resourceId, resource.resourceId)
+                        )
+                    )
+                    .returning();
+            }
+        });
 
         return response(res, {
             data: null,
