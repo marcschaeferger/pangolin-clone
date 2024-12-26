@@ -88,19 +88,20 @@ export async function validateResourceSessionToken(
             .where(eq(resourceSessions.sessionId, resourceSessions.sessionId));
         return { resourceSession: null };
     } else if (
-        !resourceSession.doNotExtend &&
         Date.now() >=
             resourceSession.expiresAt - resourceSession.sessionLength / 2
     ) {
-        resourceSession.expiresAt = new Date(
-            Date.now() + resourceSession.sessionLength
-        ).getTime();
-        await db
+        if (!resourceSession.doNotExtend) {
+            resourceSession.expiresAt = new Date(
+                Date.now() + resourceSession.sessionLength
+            ).getTime();
+            await db
             .update(resourceSessions)
             .set({
                 expiresAt: resourceSession.expiresAt
             })
             .where(eq(resourceSessions.sessionId, resourceSession.sessionId));
+        }
     }
 
     return { resourceSession };

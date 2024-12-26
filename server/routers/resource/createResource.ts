@@ -51,7 +51,9 @@ export async function createResource(
             );
         }
 
-        const { name, subdomain } = parsedBody.data;
+        let { name, subdomain } = parsedBody.data;
+
+        subdomain = subdomain.toLowerCase(); // always to lower case
 
         // Validate request params
         const parsedParams = createResourceParamsSchema.safeParse(req.params);

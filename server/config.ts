@@ -14,7 +14,7 @@ const portSchema = z.number().positive().gt(0).lte(65535);
 
 const environmentSchema = z.object({
     app: z.object({
-        base_url: z.string().url(),
+        base_url: z.string().url().transform((url) => url.toLowerCase()),
         log_level: z.enum(["debug", "info", "warn", "error"]),
         save_logs: z.boolean()
     }),
@@ -22,9 +22,8 @@ const environmentSchema = z.object({
         external_port: portSchema,
         internal_port: portSchema,
         next_port: portSchema,
-        internal_hostname: z.string(),
+        internal_hostname: z.string().transform((url) => url.toLowerCase()),
         secure_cookies: z.boolean(),
-        signup_secret: z.string().optional(),
         session_cookie_name: z.string(),
         resource_session_cookie_name: z.string()
     }),
@@ -36,7 +35,7 @@ const environmentSchema = z.object({
     }),
     gerbil: z.object({
         start_port: portSchema,
-        base_endpoint: z.string(),
+        base_endpoint: z.string().transform((url) => url.toLowerCase()),
         use_subdomain: z.boolean(),
         subnet_group: z.string(),
         block_size: z.number().positive().gt(0)
