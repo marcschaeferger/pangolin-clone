@@ -105,7 +105,7 @@ export async function authWithAccessToken(
             );
         }
 
-        const validCode = await verifyPassword(tokenItem.tokenHash, accessToken);
+        const validCode = await verifyPassword(accessToken, tokenItem.tokenHash);
 
         if (!validCode) {
             return next(
@@ -132,7 +132,7 @@ export async function authWithAccessToken(
             accessTokenId: tokenItem.accessTokenId,
             sessionLength: tokenItem.sessionLength,
             expiresAt: tokenItem.expiresAt,
-            doNotExtend: tokenItem.expiresAt ? false : true
+            doNotExtend: tokenItem.expiresAt ? true : false
         });
         const cookieName = `${config.server.resource_session_cookie_name}_${resource.resourceId}`;
         const cookie = serializeResourceSessionCookie(cookieName, token);

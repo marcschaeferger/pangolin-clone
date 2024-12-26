@@ -41,7 +41,7 @@ export async function setupServerAdmin() {
                     await trx
                         .update(users)
                         .set({ passwordHash })
-                        .where(eq(users.email, email));
+                        .where(eq(users.userId, existing.userId));
 
                     // this isn't using the transaction, but it's probably fine
                     await invalidateAllSessions(existing.userId);
@@ -50,6 +50,7 @@ export async function setupServerAdmin() {
                 }
 
                 if (existing.serverAdmin) {
+                    logger.info(`Server admin (${email}) already exists`)
                     return;
                 }
 
@@ -62,7 +63,7 @@ export async function setupServerAdmin() {
                     })
                     .where(eq(users.email, email));
 
-                logger.info(`Server admin (${email}) updated`);
+                logger.info(`Server admin (${email}) set`);
                 return;
             }
 

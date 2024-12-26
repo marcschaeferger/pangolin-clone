@@ -1,6 +1,6 @@
 {
     "name": "@fossorial/pangolin",
-    "version": "1.0.0",
+    "version": "1.0.0-beta.1",
     "private": true,
     "type": "module",
     "scripts": {
@@ -9,7 +9,7 @@
         "db:push": "npx tsx server/db/migrate.ts",
         "db:studio": "drizzle-kit studio",
         "build": "mkdir -p dist && next build && node esbuild.mjs -e server/index.ts -o dist/server.mjs",
-        "start": "NODE_ENV=development ENVIRONMENT=prod node dist/server.mjs",
+        "start": "NODE_ENV=development ENVIRONMENT=prod NODE_OPTIONS=--enable-source-maps node dist/server.mjs",
         "email": "email dev --dir server/emails/templates --port 3005"
     },
     "dependencies": {
