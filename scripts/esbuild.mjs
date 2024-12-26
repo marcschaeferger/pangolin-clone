@@ -62,7 +62,7 @@ esbuild
                 packagePath: getPackagePaths(),
             }),
         ],
-        sourcemap: false,
+        sourcemap: true,
         target: "node20",
     })
     .then(() => {
