@@ -22,5 +22,6 @@ next-env.d.ts
 *.log
 .machinelogs*.json
 *-audit.json
-config
 package-lock.json
+config/
+install/

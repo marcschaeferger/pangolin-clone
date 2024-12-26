@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"strings"
 	"text/template"
+	"unicode"
 )
 
 //go:embed fs/*
@@ -99,7 +100,19 @@ func collectUserInput(reader *bufio.Reader) Config {
 	// Admin user configuration
 	fmt.Println("\n=== Admin User Configuration ===")
 	config.AdminUserEmail = readString(reader, "Enter admin user email", "admin@"+config.Domain)
-	config.AdminUserPassword = readString(reader, "Enter admin user password", "")
+	for {
+		config.AdminUserPassword = readString(reader, "Enter admin user password", "")
+		if valid, message := validatePassword(config.AdminUserPassword); valid {
+			break
+		} else {
+			fmt.Println("Invalid password:", message)
+			fmt.Println("Password requirements:")
+			fmt.Println("- At least one uppercase English letter")
+			fmt.Println("- At least one lowercase English letter")
+			fmt.Println("- At least one digit")
+			fmt.Println("- At least one special character")
+		}
+	}
 
 	// Security settings
 	fmt.Println("\n=== Security Settings ===")
@@ -133,6 +146,52 @@ func collectUserInput(reader *bufio.Reader) Config {
 	}
 
 	return config
+}
+
+func validatePassword(password string) (bool, string) {
+	if len(password) == 0 {
+		return false, "Password cannot be empty"
+	}
+
+	var (
+		hasUpper   bool
+		hasLower   bool
+		hasDigit   bool
+		hasSpecial bool
+	)
+
+	for _, char := range password {
+		switch {
+		case unicode.IsUpper(char):
+			hasUpper = true
+		case unicode.IsLower(char):
+			hasLower = true
+		case unicode.IsDigit(char):
+			hasDigit = true
+		case unicode.IsPunct(char) || unicode.IsSymbol(char):
+			hasSpecial = true
+		}
+	}
+
+	var missing []string
+	if !hasUpper {
+		missing = append(missing, "an uppercase letter")
+	}
+	if !hasLower {
+		missing = append(missing, "a lowercase letter")
+	}
+	if !hasDigit {
+		missing = append(missing, "a digit")
+	}
+	if !hasSpecial {
+		missing = append(missing, "a special character")
+	}
+
+	if len(missing) > 0 {
+		return false, fmt.Sprintf("Password must contain %s", strings.Join(missing, ", "))
+	}
+
+	return true, ""
 }
 
 func createConfigFiles(config Config) error {
