@@ -8,12 +8,12 @@ import { versionMigrations } from "@server/db/schema";
 import { desc } from "drizzle-orm";
 
 // Import all migrations explicitly
-import migration100 from "./scripts/1.0.0";
+import migration100beta1 from "./scripts/1.0.0-beta1";
 // Add new migration imports here as they are created
 
 // Define the migration list with versions and their corresponding functions
 const migrations = [
-    { version: "1.0.0", run: migration100 }
+    { version: "1.0.0-beta.1", run: migration100beta1 }
     // Add new migrations here as they are created
 ] as const;
 
