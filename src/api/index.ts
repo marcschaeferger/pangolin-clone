@@ -32,7 +32,8 @@ export function createApiClient({ env }: { env: env }): AxiosInstance {
         baseURL,
         timeout: 10000,
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "X-CSRF-Token": "x-csrf-protection"
         }
     });
 

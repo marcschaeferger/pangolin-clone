@@ -7,9 +7,8 @@
         "dev": "NODE_ENV=development ENVIRONMENT=dev tsx watch server/index.ts",
         "db:generate": "drizzle-kit generate",
         "db:push": "npx tsx server/db/migrate.ts",
-        "db:hydrate": "npx tsx scripts/hydrate.ts",
         "db:studio": "drizzle-kit studio",
-        "build": "mkdir -p dist && next build && node scripts/esbuild.mjs -e server/index.ts -o dist/server.mjs",
+        "build": "mkdir -p dist && next build && node esbuild.mjs -e server/index.ts -o dist/server.mjs",
         "start": "NODE_ENV=development ENVIRONMENT=prod NODE_OPTIONS=--enable-source-maps node dist/server.mjs",
         "email": "email dev --dir server/emails/templates --port 3005"
     },

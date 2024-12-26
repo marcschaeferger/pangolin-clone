@@ -6,11 +6,12 @@ import logger from "@server/logger";
 import {
     errorHandlerMiddleware,
     notFoundMiddleware,
-    rateLimitMiddleware,
+    rateLimitMiddleware
 } from "@server/middlewares";
 import { authenticated, unauthenticated } from "@server/routers/external";
 import { router as wsRouter, handleWSUpgrade } from "@server/routers/ws";
 import { logIncomingMiddleware } from "./middlewares/logIncoming";
+import { csrfProtectionMiddleware } from "./middlewares/csrfProtection";
 import helmet from "helmet";
 
 const dev = process.env.ENVIRONMENT !== "prod";
@@ -25,13 +26,21 @@ export function createApiServer() {
         apiServer.use(
             cors({
                 origin: `http://localhost:${config.server.next_port}`,
-                credentials: true,
-            }),
+                credentials: true
+            })
         );
     } else {
-        apiServer.use(cors());
+        const corsOptions = {
+            origin: config.app.base_url,
+            methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+            allowedHeaders: ["Content-Type", "X-CSRF-Token"]
+        };
+
+        apiServer.use(cors(corsOptions));
         apiServer.use(helmet());
+        apiServer.use(csrfProtectionMiddleware);
     }
+
     apiServer.use(cookieParser());
     apiServer.use(express.json());
 
@@ -40,8 +49,8 @@ export function createApiServer() {
             rateLimitMiddleware({
                 windowMin: config.rate_limits.global.window_minutes,
                 max: config.rate_limits.global.max_requests,
-                type: "IP_AND_PATH",
-            }),
+                type: "IP_AND_PATH"
+            })
         );
     }
 
@@ -62,7 +71,7 @@ export function createApiServer() {
     const httpServer = apiServer.listen(externalPort, (err?: any) => {
         if (err) throw err;
         logger.info(
-            `API server is running on http://localhost:${externalPort}`,
+            `API server is running on http://localhost:${externalPort}`
         );
     });
 
