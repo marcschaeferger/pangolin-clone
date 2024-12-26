@@ -33,8 +33,7 @@ export function createApiServer() {
         const corsOptions = {
             origin: config.app.base_url,
             methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-            allowedHeaders: ["Content-Type", "X-CSRF-Token"],
-            credentials: true
+            allowedHeaders: ["Content-Type", "X-CSRF-Token"]
         };
 
         apiServer.use(cors(corsOptions));
