@@ -1,0 +1,48 @@
+app:
+    base_url: https://{{.Domain}}
+    log_level: info
+    save_logs: false
+
+server:
+    external_port: 3000
+    internal_port: 3001
+    next_port: 3002
+    internal_hostname: pangolin
+    secure_cookies: false
+    session_cookie_name: session
+    resource_session_cookie_name: resource_session
+
+traefik:
+    cert_resolver: letsencrypt
+    http_entrypoint: web
+    https_entrypoint: websecure
+    prefer_wildcard_cert: false
+
+gerbil:
+    start_port: 51820
+    base_endpoint: {{.Domain}}
+    use_subdomain: false
+    block_size: 16
+    subnet_group: 10.0.0.0/8
+
+rate_limits:
+    global:
+        window_minutes: 1
+        max_requests: 100
+{{if .EnableEmail}}
+email:
+    smtp_host: {{.EmailSMTPHost}}
+    smtp_port: {{.EmailSMTPPort}}
+    smtp_user: {{.EmailSMTPUser}}
+    smtp_pass: {{.EmailSMTPPass}}
+    no_reply: {{.EmailNoReply}}
+{{end}}
+users:
+    server_admin:
+        email: {{.AdminUserEmail}}
+        password: {{.AdminUserPassword}}
+
+flags:
+    require_email_verification: {{.EnableEmail}}
+    disable_signup_without_invite: {{.DisableSignupWithoutInvite}}
+    disable_user_create_org: {{.DisableUserCreateOrg}}

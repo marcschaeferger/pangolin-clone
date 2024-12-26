@@ -26,6 +26,5 @@ migrations
 package-lock.json
 tsconfig.tsbuildinfo
 config/
-config.yml
 dist
 .dist
