@@ -35,16 +35,24 @@ type Config struct {
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 
-	config := collectUserInput(reader)
-	createConfigFiles(config)
+	// check if the user is root
+	if os.Geteuid() != 0 {
+		fmt.Println("This script must be run as root")
+		os.Exit(1)
+	}
 
-	if !isDockerInstalled() && runtime.GOOS == "linux" {
-		if shouldInstallDocker() {
-			// ask user if they want to install docker
-			if readBool(reader, "Would you like to install Docker?", true) {
+	// check if there is already a config file
+	if _, err := os.Stat("config/config.yml"); err != nil {
+		config := collectUserInput(reader)
+		createConfigFiles(config)
+
+		if !isDockerInstalled() && runtime.GOOS == "linux" {
+			if shouldInstallDocker() {
 				installDocker()
 			}
 		}
+	} else {
+		fmt.Println("Config file already exists... skipping configuration")
 	}
 
 	if isDockerInstalled() {
@@ -124,11 +132,11 @@ func collectUserInput(reader *bufio.Reader) Config {
 	config.EnableEmail = readBool(reader, "Enable email functionality", false)
 
 	if config.EnableEmail {
-		config.EmailSMTPHost = readString(reader, "Enter SMTP host: ", "")
-		config.EmailSMTPPort = readInt(reader, "Enter SMTP port (default 587): ", 587)
-		config.EmailSMTPUser = readString(reader, "Enter SMTP username: ", "")
-		config.EmailSMTPPass = readString(reader, "Enter SMTP password: ", "")
-		config.EmailNoReply = readString(reader, "Enter no-reply email address: ", "")
+		config.EmailSMTPHost = readString(reader, "Enter SMTP host", "")
+		config.EmailSMTPPort = readInt(reader, "Enter SMTP port (default 587)", 587)
+		config.EmailSMTPUser = readString(reader, "Enter SMTP username", "")
+		config.EmailSMTPPass = readString(reader, "Enter SMTP password", "")
+		config.EmailNoReply = readString(reader, "Enter no-reply email address", "")
 	}
 
 	// Validate required fields
@@ -301,6 +309,26 @@ func installDocker() error {
             dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo &&
             dnf install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
         `)
+	case strings.Contains(osRelease, "ID=opensuse") || strings.Contains(osRelease, "ID=\"opensuse-"):
+		installCmd = exec.Command("bash", "-c", `
+			zypper install -y docker docker-compose &&
+			systemctl enable docker
+		`)
+	case strings.Contains(osRelease, "ID=rhel") || strings.Contains(osRelease, "ID=\"rhel"):
+		installCmd = exec.Command("bash", "-c", `
+			dnf remove -y runc &&
+			dnf -y install yum-utils &&
+			dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.repo &&
+			dnf install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin &&
+			systemctl enable docker
+		`)
+	case strings.Contains(osRelease, "ID=amzn"):
+		installCmd = exec.Command("bash", "-c", `
+			yum update -y &&
+			yum install -y docker &&
+			systemctl enable docker &&
+			usermod -a -G docker ec2-user
+		`)
 	default:
 		return fmt.Errorf("unsupported Linux distribution")
 	}
@@ -319,36 +347,27 @@ func isDockerInstalled() bool {
 }
 
 func pullAndStartContainers() error {
-	containers := []string{
-		"traefik:v3.1",
-		"fossorial/pangolin:latest",
-		"fossorial/gerbil:latest",
-	}
-
-	for _, container := range containers {
-		fmt.Printf("Pulling %s...\n", container)
-		cmd := exec.Command("docker", "pull", container)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		if err := cmd.Run(); err != nil {
-			return fmt.Errorf("failed to pull %s: %v", container, err)
-		}
-	}
-
 	fmt.Println("Starting containers...")
 
 	// First try docker compose (new style)
-	cmd := exec.Command("docker", "compose", "-f", "docker-compose.yml", "up", "-d")
+	cmd := exec.Command("docker", "compose", "-f", "docker-compose.yml", "pull")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 
-	// If docker compose fails, try docker-compose (legacy style)
 	if err != nil {
-		cmd = exec.Command("docker-compose", "-f", "docker-compose.yml", "up", "-d")
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		err = cmd.Run()
+		fmt.Println("Failed to start containers using docker compose, falling back to docker-compose command")
+		os.Exit(1)
+	}
+
+	cmd = exec.Command("docker", "compose", "-f", "docker-compose.yml", "up", "-d")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err = cmd.Run()
+
+	if err != nil {
+		fmt.Println("Failed to start containers using docker-compose command")
+		os.Exit(1)
 	}
 
 	return err
