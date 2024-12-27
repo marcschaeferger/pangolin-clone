@@ -4,3 +4,4 @@ export * from "./deleteOrg";
 export * from "./updateOrg";
 export * from "./listOrgs";
 export * from "./checkId";
+export * from "./getOrgOverview";

@@ -1,6 +1,8 @@
 import { internal } from "@app/api";
 import { authCookieHeader } from "@app/api/cookies";
+import ProfileIcon from "@app/components/ProfileIcon";
 import { verifySession } from "@app/lib/auth/verifySession";
+import UserProvider from "@app/providers/UserProvider";
 import { GetOrgResponse } from "@server/routers/org";
 import { GetOrgUserResponse } from "@server/routers/user";
 import { AxiosResponse } from "axios";
@@ -47,5 +49,9 @@ export default async function OrgLayout(props: {
         redirect(`/`);
     }
 
-    return <>{props.children}</>;
+    return (
+        <>
+            {props.children}
+        </>
+    );
 }

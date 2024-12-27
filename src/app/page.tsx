@@ -1,5 +1,6 @@
 import { internal } from "@app/api";
 import { authCookieHeader } from "@app/api/cookies";
+import ProfileIcon from "@app/components/ProfileIcon";
 import { verifySession } from "@app/lib/auth/verifySession";
 import UserProvider from "@app/providers/UserProvider";
 import { ListOrgsResponse } from "@server/routers/org";
@@ -8,11 +9,15 @@ import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { cache } from "react";
+import OrganizationLanding from "./components/OrganizationLanding";
 
 export const dynamic = "force-dynamic";
 
 export default async function Page(props: {
-    searchParams: Promise<{ redirect: string | undefined, t: string | undefined }>;
+    searchParams: Promise<{
+        redirect: string | undefined;
+        t: string | undefined;
+    }>;
 }) {
     const params = await props.searchParams; // this is needed to prevent static optimization
 
@@ -42,39 +47,42 @@ export default async function Page(props: {
     try {
         const res = await internal.get<AxiosResponse<ListOrgsResponse>>(
             `/orgs`,
-            await authCookieHeader(),
+            await authCookieHeader()
         );
 
         if (res && res.data.data.orgs) {
             orgs = res.data.data.orgs;
         }
-    } catch (e) {
-        console.error(e);
-    }
+    } catch (e) {}
 
     if (!orgs.length) {
-        redirect("/setup");
+        if (
+            process.env.DISABLE_USER_CREATE_ORG === "false" ||
+            user.serverAdmin
+        ) {
+            redirect("/setup");
+        }
     }
 
     return (
         <>
-            <UserProvider user={user}>
-                <p>Logged in as {user.email}</p>
-            </UserProvider>
-
-            <div className="mt-4">
-                {orgs.map((org) => (
-                    <Link
-                        key={org.orgId}
-                        href={`/${org.orgId}/settings`}
-                        className="text-primary underline"
-                    >
-                        <div className="flex items-center">
-                            {org.name}
-                            <ArrowUpRight className="w-4 h-4" />
+            <div className="p-3">
+                {user && (
+                    <UserProvider user={user}>
+                        <div>
+                            <ProfileIcon />
                         </div>
-                    </Link>
-                ))}
+                    </UserProvider>
+                )}
+
+                <div className="w-full max-w-md mx-auto md:mt-32 mt-4">
+                    <OrganizationLanding
+                        organizations={orgs.map((org) => ({
+                            name: org.name,
+                            id: org.orgId
+                        }))}
+                    />
+                </div>
             </div>
         </>
     );

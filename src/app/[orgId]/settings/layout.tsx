@@ -91,9 +91,7 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
         if (res && res.data.data.orgs) {
             orgs = res.data.data.orgs;
         }
-    } catch (e) {
-        console.error("Error fetching orgs", e);
-    }
+    } catch (e) {}
 
     return (
         <>

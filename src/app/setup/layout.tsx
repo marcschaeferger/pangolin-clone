@@ -1,4 +1,6 @@
+import ProfileIcon from "@app/components/ProfileIcon";
 import { verifySession } from "@app/lib/auth/verifySession";
+import UserProvider from "@app/providers/UserProvider";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { cache } from "react";
@@ -29,6 +31,20 @@ export default async function SetupLayout({
     }
 
     return (
-        <div className="w-full max-w-2xl mx-auto p-3 md:mt-32">{children}</div>
+        <>
+            <div className="p-3">
+                {user && (
+                    <UserProvider user={user}>
+                        <div>
+                            <ProfileIcon />
+                        </div>
+                    </UserProvider>
+                )}
+
+                <div className="w-full max-w-2xl mx-auto md:mt-32 mt-4">
+                    {children}
+                </div>
+            </div>
+        </>
     );
 }

@@ -336,6 +336,8 @@ authenticated.get(
     accessToken.listAccessTokens
 );
 
+authenticated.get(`/org/:orgId/overview`, verifyOrgAccess, org.getOrgOverview);
+
 unauthenticated.get("/resource/:resourceId/auth", resource.getResourceAuthInfo);
 
 // authenticated.get(

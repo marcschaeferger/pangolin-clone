@@ -18,13 +18,10 @@ export default async function RolesPage(props: RolesPageProps) {
 
     let roles: ListRolesResponse["roles"] = [];
     const res = await internal
-        .get<AxiosResponse<ListRolesResponse>>(
-            `/org/${params.orgId}/roles`,
-            await authCookieHeader()
-        )
-        .catch((e) => {
-            console.error(e);
-        });
+        .get<
+            AxiosResponse<ListRolesResponse>
+        >(`/org/${params.orgId}/roles`, await authCookieHeader())
+        .catch((e) => {});
 
     if (res && res.status === 200) {
         roles = res.data.data.roles;
@@ -33,13 +30,10 @@ export default async function RolesPage(props: RolesPageProps) {
     let org: GetOrgResponse | null = null;
     const getOrg = cache(async () =>
         internal
-            .get<AxiosResponse<GetOrgResponse>>(
-                `/org/${params.orgId}`,
-                await authCookieHeader()
-            )
-            .catch((e) => {
-                console.error(e);
-            })
+            .get<
+                AxiosResponse<GetOrgResponse>
+            >(`/org/${params.orgId}`, await authCookieHeader())
+            .catch((e) => {})
     );
     const orgRes = await getOrg();
 

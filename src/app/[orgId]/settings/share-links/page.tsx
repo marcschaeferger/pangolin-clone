@@ -24,9 +24,7 @@ export default async function ShareLinksPage(props: ShareLinksPageProps) {
             await authCookieHeader()
         );
         tokens = res.data.data.accessTokens;
-    } catch (e) {
-        console.error("Error fetching tokens", e);
-    }
+    } catch (e) {}
 
     let org = null;
     try {

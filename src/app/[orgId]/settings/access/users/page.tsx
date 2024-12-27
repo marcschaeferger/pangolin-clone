@@ -23,13 +23,10 @@ export default async function UsersPage(props: UsersPageProps) {
 
     let users: ListUsersResponse["users"] = [];
     const res = await internal
-        .get<AxiosResponse<ListUsersResponse>>(
-            `/org/${params.orgId}/users`,
-            await authCookieHeader()
-        )
-        .catch((e) => {
-            console.error(e);
-        });
+        .get<
+            AxiosResponse<ListUsersResponse>
+        >(`/org/${params.orgId}/users`, await authCookieHeader())
+        .catch((e) => {});
 
     if (res && res.status === 200) {
         users = res.data.data.users;
@@ -38,10 +35,9 @@ export default async function UsersPage(props: UsersPageProps) {
     let org: GetOrgResponse | null = null;
     const getOrg = cache(async () =>
         internal
-            .get<AxiosResponse<GetOrgResponse>>(
-                `/org/${params.orgId}`,
-                await authCookieHeader()
-            )
+            .get<
+                AxiosResponse<GetOrgResponse>
+            >(`/org/${params.orgId}`, await authCookieHeader())
             .catch((e) => {
                 console.error(e);
             })
@@ -58,7 +54,7 @@ export default async function UsersPage(props: UsersPageProps) {
             email: user.email,
             status: "Confirmed",
             role: user.isOwner ? "Owner" : user.roleName || "Member",
-            isOwner: user.isOwner || false,
+            isOwner: user.isOwner || false
         };
     });
 

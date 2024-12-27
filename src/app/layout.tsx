@@ -24,9 +24,6 @@ export default async function RootLayout({
 }>) {
     const version = process.env.APP_VERSION;
 
-    const getUser = cache(verifySession);
-    const user = await getUser();
-
     return (
         <html suppressHydrationWarning>
             <body className={`${font.className}`}>

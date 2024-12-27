@@ -15,12 +15,10 @@ export default async function SitesPage(props: SitesPageProps) {
     try {
         const res = await internal.get<AxiosResponse<ListSitesResponse>>(
             `/org/${params.orgId}/sites`,
-            await authCookieHeader(),
+            await authCookieHeader()
         );
         sites = res.data.data.sites;
-    } catch (e) {
-        console.error("Error fetching sites", e);
-    }
+    } catch (e) {}
 
     function formatSize(mb: number): string {
         if (mb >= 1024 * 1024) {
@@ -41,7 +39,7 @@ export default async function SitesPage(props: SitesPageProps) {
             mbOut: formatSize(site.megabytesOut || 0),
             orgId: params.orgId,
             type: site.type as any,
-            online: site.online,
+            online: site.online
         };
     });
 

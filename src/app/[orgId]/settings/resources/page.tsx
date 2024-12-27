@@ -19,20 +19,18 @@ export default async function ResourcesPage(props: ResourcesPageProps) {
     try {
         const res = await internal.get<AxiosResponse<ListResourcesResponse>>(
             `/org/${params.orgId}/resources`,
-            await authCookieHeader(),
+            await authCookieHeader()
         );
         resources = res.data.data.resources;
-    } catch (e) {
-        console.error("Error fetching resources", e);
-    }
+    } catch (e) {}
 
     let org = null;
     try {
         const getOrg = cache(async () =>
             internal.get<AxiosResponse<GetOrgResponse>>(
                 `/org/${params.orgId}`,
-                await authCookieHeader(),
-            ),
+                await authCookieHeader()
+            )
         );
         const res = await getOrg();
         org = res.data.data;
