@@ -9,8 +9,8 @@ server:
     next_port: 3002
     internal_hostname: pangolin
     secure_cookies: false
-    session_cookie_name: session
-    resource_session_cookie_name: resource_session
+    session_cookie_name: p_session
+    resource_session_cookie_name: p_resource_session
 
 traefik:
     cert_resolver: letsencrypt
