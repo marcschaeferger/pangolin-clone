@@ -59,8 +59,8 @@ export const receiveBandwidth = async (
                 await trx
                     .update(sites)
                     .set({
-                        megabytesIn: (site.megabytesIn || 0) + bytesIn,
-                        megabytesOut: (site.megabytesOut || 0) + bytesOut,
+                        megabytesOut: (site.megabytesIn || 0) + bytesIn,
+                        megabytesIn: (site.megabytesOut || 0) + bytesOut,
                         lastBandwidthUpdate: new Date().toISOString(),
                         online
                     })
