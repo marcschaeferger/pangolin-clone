@@ -68,7 +68,7 @@ export const SendInviteLink = ({
                         <Section className="text-center my-6">
                             <Button
                                 href={inviteLink}
-                                className="rounded-lg bg-primary px-[12px] py-[9px] text-center font-semibold text-white cursor-pointer"
+                                className="rounded-lg bg-primary px-[12px] py-[9px] text-center font-semibold text-white cursor-pointer text-xl"
                             >
                                 Accept invitation to {orgName}
                             </Button>

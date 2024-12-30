@@ -421,6 +421,7 @@ export default function ResourceAuthenticationPage() {
                                     <FormItem className="flex flex-col items-start">
                                         <FormLabel>Roles</FormLabel>
                                         <FormControl>
+                                            {/* @ts-ignore */}
                                             <TagInput
                                                 {...field}
                                                 activeTagIndex={
@@ -454,9 +455,9 @@ export default function ResourceAuthenticationPage() {
                                                     tag: {
                                                         body: "bg-muted hover:bg-accent text-foreground py-2 px-3 rounded-full"
                                                     },
-                                                    input: "border-none bg-transparent text-inherit placeholder:text-inherit shadow-none",
+                                                    input: "text-base md:text-sm border-none bg-transparent text-inherit placeholder:text-inherit shadow-none",
                                                     inlineTagsContainer:
-                                                        "bg-transparent"
+                                                        "bg-transparent p-2"
                                                 }}
                                             />
                                         </FormControl>
@@ -476,6 +477,7 @@ export default function ResourceAuthenticationPage() {
                                     <FormItem className="flex flex-col items-start">
                                         <FormLabel>Users</FormLabel>
                                         <FormControl>
+                                            {/* @ts-ignore */}
                                             <TagInput
                                                 {...field}
                                                 activeTagIndex={
@@ -509,9 +511,9 @@ export default function ResourceAuthenticationPage() {
                                                     tag: {
                                                         body: "bg-muted hover:bg-accent text-foreground py-2 px-3 rounded-full"
                                                     },
-                                                    input: "border-none bg-transparent text-inherit placeholder:text-inherit shadow-none",
+                                                    input: "text-base md:text-sm border-none bg-transparent text-inherit placeholder:text-inherit shadow-none",
                                                     inlineTagsContainer:
-                                                        "bg-transparent"
+                                                        "bg-transparent p-2"
                                                 }}
                                             />
                                         </FormControl>
@@ -649,6 +651,7 @@ export default function ResourceAuthenticationPage() {
                                                         Whitelisted Emails
                                                     </FormLabel>
                                                     <FormControl>
+                                                        {/* @ts-ignore */}
                                                         <TagInput
                                                             {...field}
                                                             activeTagIndex={
@@ -691,9 +694,9 @@ export default function ResourceAuthenticationPage() {
                                                                 tag: {
                                                                     body: "bg-muted hover:bg-accent text-foreground py-2 px-3 rounded-full"
                                                                 },
-                                                                input: "border-none bg-transparent text-inherit placeholder:text-inherit shadow-none",
+                                                                input: "text-base md:text-sm border-none bg-transparent text-inherit placeholder:text-inherit shadow-none",
                                                                 inlineTagsContainer:
-                                                                    "bg-transparent"
+                                                                    "bg-transparent p-2"
                                                             }}
                                                         />
                                                     </FormControl>

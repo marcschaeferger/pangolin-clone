@@ -24,6 +24,15 @@ import {
     DrawerTitle,
     DrawerTrigger
 } from "@/components/ui/drawer";
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetFooter,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger
+} from "./ui/sheet";
 
 interface BaseProps {
     children: React.ReactNode;
@@ -44,7 +53,7 @@ const desktop = "(min-width: 768px)";
 const Credenza = ({ children, ...props }: RootCredenzaProps) => {
     const isDesktop = useMediaQuery(desktop);
     // const isDesktop = true;
-    const Credenza = isDesktop ? Dialog : Drawer;
+    const Credenza = isDesktop ? Dialog : Sheet;
 
     return <Credenza {...props}>{children}</Credenza>;
 };
@@ -53,7 +62,7 @@ const CredenzaTrigger = ({ className, children, ...props }: CredenzaProps) => {
     const isDesktop = useMediaQuery(desktop);
     // const isDesktop = true;
 
-    const CredenzaTrigger = isDesktop ? DialogTrigger : DrawerTrigger;
+    const CredenzaTrigger = isDesktop ? DialogTrigger : SheetTrigger;
 
     return (
         <CredenzaTrigger className={className} {...props}>
@@ -79,10 +88,14 @@ const CredenzaContent = ({ className, children, ...props }: CredenzaProps) => {
     const isDesktop = useMediaQuery(desktop);
     // const isDesktop = true;
 
-    const CredenzaContent = isDesktop ? DialogContent : DrawerContent;
+    const CredenzaContent = isDesktop ? DialogContent : SheetContent;
 
     return (
-        <CredenzaContent className={className} {...props}>
+        <CredenzaContent
+            className={cn("overflow-y-auto max-h-screen", className)}
+            {...props}
+            side={"bottom"}
+        >
             {children}
         </CredenzaContent>
     );
@@ -98,7 +111,7 @@ const CredenzaDescription = ({
 
     const CredenzaDescription = isDesktop
         ? DialogDescription
-        : DrawerDescription;
+        : SheetDescription;
 
     return (
         <CredenzaDescription className={className} {...props}>
@@ -111,7 +124,7 @@ const CredenzaHeader = ({ className, children, ...props }: CredenzaProps) => {
     const isDesktop = useMediaQuery(desktop);
     // const isDesktop = true;
 
-    const CredenzaHeader = isDesktop ? DialogHeader : DrawerHeader;
+    const CredenzaHeader = isDesktop ? DialogHeader : SheetHeader;
 
     return (
         <CredenzaHeader className={className} {...props}>
@@ -124,7 +137,7 @@ const CredenzaTitle = ({ className, children, ...props }: CredenzaProps) => {
     const isDesktop = useMediaQuery(desktop);
     // const isDesktop = true;
 
-    const CredenzaTitle = isDesktop ? DialogTitle : DrawerTitle;
+    const CredenzaTitle = isDesktop ? DialogTitle : SheetTitle;
 
     return (
         <CredenzaTitle className={className} {...props}>
@@ -134,25 +147,24 @@ const CredenzaTitle = ({ className, children, ...props }: CredenzaProps) => {
 };
 
 const CredenzaBody = ({ className, children, ...props }: CredenzaProps) => {
-    return (
-        <div className={cn("px-4 md:px-0 mb-4", className)} {...props}>
-            {children}
-        </div>
-    );
-
-    //     return (
-    //     <div className={cn("px-0 mb-4", className)} {...props}>
+    // return (
+    //     <div className={cn("px-4 md:px-0 mb-4", className)} {...props}>
     //         {children}
     //     </div>
     // );
 
+    return (
+        <div className={cn("px-0 mb-4", className)} {...props}>
+            {children}
+        </div>
+    );
 };
 
 const CredenzaFooter = ({ className, children, ...props }: CredenzaProps) => {
     const isDesktop = useMediaQuery(desktop);
     // const isDesktop = true;
 
-    const CredenzaFooter = isDesktop ? DialogFooter : DrawerFooter;
+    const CredenzaFooter = isDesktop ? DialogFooter : SheetFooter;
 
     return (
         <CredenzaFooter className={className} {...props}>
