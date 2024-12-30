@@ -71,10 +71,48 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                 setIsDeleteModalOpen(false);
 
                 const newRows = rows.filter((row) => row.id !== siteId);
+
+                setRows(newRows);
             });
     };
 
     const columns: ColumnDef<SiteRow>[] = [
+        {
+            id: "dots",
+            cell: ({ row }) => {
+                const siteRow = row.original;
+                const router = useRouter();
+
+                return (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuItem>
+                                <Link
+                                    className="block w-full"
+                                    href={`/${siteRow.orgId}/settings/sites/${siteRow.nice}`}
+                                >
+                                    View settings
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                onClick={() => {
+                                    setSelectedSite(siteRow);
+                                    setIsDeleteModalOpen(true);
+                                }}
+                            >
+                                <span className="text-red-500">Delete</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                );
+            }
+        },
         {
             accessorKey: "name",
             header: ({ column }) => {
@@ -89,6 +127,41 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
+            }
+        },
+        {
+            accessorKey: "online",
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() =>
+                            column.toggleSorting(column.getIsSorted() === "asc")
+                        }
+                    >
+                        Online
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                );
+            },
+            cell: ({ row }) => {
+                const originalRow = row.original;
+
+                if (originalRow.online) {
+                    return (
+                        <span className="text-green-500 flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span>Online</span>
+                        </span>
+                    );
+                } else {
+                    return (
+                        <span className="text-neutral-500 flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
+                            <span>Offline</span>
+                        </span>
+                    );
+                }
             }
         },
         {
@@ -175,74 +248,11 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
             }
         },
         {
-            accessorKey: "online",
-            header: ({ column }) => {
-                return (
-                    <Button
-                        variant="ghost"
-                        onClick={() =>
-                            column.toggleSorting(column.getIsSorted() === "asc")
-                        }
-                    >
-                        Online
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                );
-            },
-            cell: ({ row }) => {
-                const originalRow = row.original;
-
-                if (originalRow.online) {
-                    return (
-                        <span className="text-green-500 flex items-center space-x-2">
-                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                            <span>Online</span>
-                        </span>
-                    );
-                } else {
-                    return (
-                        <span className="text-gray-500 flex items-center space-x-2">
-                            <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
-                            <span>Offline</span>
-                        </span>
-                    );
-                }
-            }
-        },
-        {
             id: "actions",
             cell: ({ row }) => {
-                const router = useRouter();
-
                 const siteRow = row.original;
-
                 return (
                     <div className="flex items-center justify-end">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                    <span className="sr-only">Open menu</span>
-                                    <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuItem>
-                                    <Link
-                                        href={`/${siteRow.orgId}/settings/sites/${siteRow.nice}`}
-                                    >
-                                        View settings
-                                    </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                    onClick={() => {
-                                        setSelectedSite(siteRow);
-                                        setIsDeleteModalOpen(true);
-                                    }}
-                                >
-                                    <span className="text-red-500">Delete</span>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
                         <Link
                             href={`/${siteRow.orgId}/settings/sites/${siteRow.nice}`}
                         >

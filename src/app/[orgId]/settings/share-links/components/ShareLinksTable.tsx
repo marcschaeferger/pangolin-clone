@@ -87,6 +87,48 @@ export default function ShareLinksTable({
 
     const columns: ColumnDef<ShareLinkRow>[] = [
         {
+            id: "actions",
+            cell: ({ row }) => {
+                const router = useRouter();
+
+                const resourceRow = row.original;
+
+                return (
+                    <>
+                        <div>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        variant="ghost"
+                                        className="h-8 w-8 p-0"
+                                    >
+                                        <span className="sr-only">
+                                            Open menu
+                                        </span>
+                                        <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem>
+                                        <button
+                                            onClick={() =>
+                                                deleteSharelink(
+                                                    resourceRow.accessTokenId
+                                                )
+                                            }
+                                            className="text-red-500"
+                                        >
+                                            Delete
+                                        </button>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    </>
+                );
+            }
+        },
+        {
             accessorKey: "resourceName",
             header: ({ column }) => {
                 return (
@@ -235,48 +277,6 @@ export default function ShareLinksTable({
                     return moment(r.expiresAt).format("lll");
                 }
                 return "Never";
-            }
-        },
-        {
-            id: "actions",
-            cell: ({ row }) => {
-                const router = useRouter();
-
-                const resourceRow = row.original;
-
-                return (
-                    <>
-                        <div className="flex items-center justify-end">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button
-                                        variant="ghost"
-                                        className="h-8 w-8 p-0"
-                                    >
-                                        <span className="sr-only">
-                                            Open menu
-                                        </span>
-                                        <MoreHorizontal className="h-4 w-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuItem>
-                                        <button
-                                            onClick={() =>
-                                                deleteSharelink(
-                                                    resourceRow.accessTokenId
-                                                )
-                                            }
-                                            className="text-red-500"
-                                        >
-                                            Delete
-                                        </button>
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
-                    </>
-                );
             }
         }
     ];

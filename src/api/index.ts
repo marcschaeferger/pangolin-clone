@@ -8,8 +8,9 @@ export function createApiClient({ env }: { env: env }): AxiosInstance {
         return apiInstance;
     }
 
-    if (apiInstance) {
-        return apiInstance
+    if (typeof window === "undefined") {
+        // @ts-ignore
+        return;
     }
 
     let baseURL;
@@ -45,7 +46,8 @@ export const internal = axios.create({
     baseURL: `http://localhost:${process.env.SERVER_EXTERNAL_PORT}/api/v1`,
     timeout: 10000,
     headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "X-CSRF-Token": "x-csrf-protection"
     }
 });
 

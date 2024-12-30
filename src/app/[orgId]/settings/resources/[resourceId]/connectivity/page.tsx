@@ -9,7 +9,7 @@ import {
     SelectContent,
     SelectItem,
     SelectTrigger,
-    SelectValue,
+    SelectValue
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { AxiosResponse } from "axios";
@@ -24,7 +24,7 @@ import {
     FormField,
     FormItem,
     FormLabel,
-    FormMessage,
+    FormMessage
 } from "@app/components/ui/form";
 import { CreateTargetResponse } from "@server/routers/target";
 import {
@@ -34,7 +34,7 @@ import {
     getPaginationRowModel,
     getCoreRowModel,
     useReactTable,
-    flexRender,
+    flexRender
 } from "@tanstack/react-table";
 import {
     Table,
@@ -42,7 +42,7 @@ import {
     TableCell,
     TableHead,
     TableHeader,
-    TableRow,
+    TableRow
 } from "@app/components/ui/table";
 import { useToast } from "@app/hooks/useToast";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
@@ -59,9 +59,9 @@ const addTargetSchema = z.object({
     port: z
         .string()
         .refine((val) => !isNaN(Number(val)), {
-            message: "Port must be a number",
+            message: "Port must be a number"
         })
-        .transform((val) => Number(val)),
+        .transform((val) => Number(val))
     // protocol: z.string(),
 });
 
@@ -99,16 +99,16 @@ export default function ReverseProxyTargets(props: {
         defaultValues: {
             ip: "",
             method: "http",
-            port: "80",
+            port: "80"
             // protocol: "TCP",
-        },
+        }
     });
 
     useEffect(() => {
         const fetchTargets = async () => {
             try {
                 const res = await api.get<AxiosResponse<ListTargetsResponse>>(
-                    `/resource/${params.resourceId}/targets`,
+                    `/resource/${params.resourceId}/targets`
                 );
 
                 if (res.status === 200) {
@@ -121,8 +121,8 @@ export default function ReverseProxyTargets(props: {
                     title: "Failed to fetch targets",
                     description: formatAxiosError(
                         err,
-                        "An error occurred while fetching targets",
-                    ),
+                        "An error occurred while fetching targets"
+                    )
                 });
             } finally {
                 setPageLoading(false);
@@ -133,7 +133,7 @@ export default function ReverseProxyTargets(props: {
         const fetchSite = async () => {
             try {
                 const res = await api.get<AxiosResponse<GetSiteResponse>>(
-                    `/site/${resource.siteId}`,
+                    `/site/${resource.siteId}`
                 );
 
                 if (res.status === 200) {
@@ -146,27 +146,28 @@ export default function ReverseProxyTargets(props: {
                     title: "Failed to fetch resource",
                     description: formatAxiosError(
                         err,
-                        "An error occurred while fetching resource",
-                    ),
+                        "An error occurred while fetching resource"
+                    )
                 });
             }
-        }
+        };
         fetchSite();
     }, []);
 
     async function addTarget(data: AddTargetFormValues) {
         // Check if target with same IP, port and method already exists
         const isDuplicate = targets.some(
-            target => target.ip === data.ip &&
-                     target.port === data.port &&
-                     target.method === data.method
+            (target) =>
+                target.ip === data.ip &&
+                target.port === data.port &&
+                target.method === data.method
         );
 
         if (isDuplicate) {
             toast({
                 variant: "destructive",
                 title: "Duplicate target",
-                description: "A target with these settings already exists",
+                description: "A target with these settings already exists"
             });
             return;
         }
@@ -179,7 +180,7 @@ export default function ReverseProxyTargets(props: {
                 toast({
                     variant: "destructive",
                     title: "Invalid target IP",
-                    description: "Target IP must be within the site subnet",
+                    description: "Target IP must be within the site subnet"
                 });
                 return;
             }
@@ -190,7 +191,7 @@ export default function ReverseProxyTargets(props: {
             enabled: true,
             targetId: new Date().getTime(),
             new: true,
-            resourceId: resource.resourceId,
+            resourceId: resource.resourceId
         };
 
         setTargets([...targets, newTarget]);
@@ -199,7 +200,7 @@ export default function ReverseProxyTargets(props: {
 
     const removeTarget = (targetId: number) => {
         setTargets([
-            ...targets.filter((target) => target.targetId !== targetId),
+            ...targets.filter((target) => target.targetId !== targetId)
         ]);
 
         if (!targets.find((target) => target.targetId === targetId)?.new) {
@@ -212,8 +213,8 @@ export default function ReverseProxyTargets(props: {
             targets.map((target) =>
                 target.targetId === targetId
                     ? { ...target, ...data, updated: true }
-                    : target,
-            ),
+                    : target
+            )
         );
     }
 
@@ -222,7 +223,7 @@ export default function ReverseProxyTargets(props: {
             setLoading(true);
 
             const res = await api.post(`/resource/${params.resourceId}`, {
-                ssl: sslEnabled,
+                ssl: sslEnabled
             });
 
             updateResource({ ssl: sslEnabled });
@@ -233,7 +234,7 @@ export default function ReverseProxyTargets(props: {
                     port: target.port,
                     // protocol: target.protocol,
                     method: target.method,
-                    enabled: target.enabled,
+                    enabled: target.enabled
                 };
 
                 if (target.new) {
@@ -244,7 +245,7 @@ export default function ReverseProxyTargets(props: {
                 } else if (target.updated) {
                     const res = await api.post(
                         `/target/${target.targetId}`,
-                        data,
+                        data
                     );
                 }
 
@@ -253,23 +254,23 @@ export default function ReverseProxyTargets(props: {
                         let res = {
                             ...t,
                             new: false,
-                            updated: false,
+                            updated: false
                         };
                         return res;
-                    }),
+                    })
                 ]);
             }
 
             for (const targetId of targetsToRemove) {
                 await api.delete(`/target/${targetId}`);
                 setTargets(
-                    targets.filter((target) => target.targetId !== targetId),
+                    targets.filter((target) => target.targetId !== targetId)
                 );
             }
 
             toast({
                 title: "Resource updated",
-                description: "Resource and targets updated successfully",
+                description: "Resource and targets updated successfully"
             });
 
             setTargetsToRemove([]);
@@ -280,8 +281,8 @@ export default function ReverseProxyTargets(props: {
                 title: "Operation failed",
                 description: formatAxiosError(
                     err,
-                    "An error occurred during the save operation",
-                ),
+                    "An error occurred during the save operation"
+                )
             });
         }
 
@@ -299,13 +300,15 @@ export default function ReverseProxyTargets(props: {
                         updateTarget(row.original.targetId, { method: value })
                     }
                 >
-                    <SelectTrigger>{row.original.method}</SelectTrigger>
+                    <SelectTrigger className="min-w-[100px]">
+                        {row.original.method}
+                    </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="http">http</SelectItem>
                         <SelectItem value="https">https</SelectItem>
                     </SelectContent>
                 </Select>
-            ),
+            )
         },
         {
             accessorKey: "ip",
@@ -313,13 +316,14 @@ export default function ReverseProxyTargets(props: {
             cell: ({ row }) => (
                 <Input
                     defaultValue={row.original.ip}
+                    className="min-w-[150px]"
                     onBlur={(e) =>
                         updateTarget(row.original.targetId, {
-                            ip: e.target.value,
+                            ip: e.target.value
                         })
                     }
                 />
-            ),
+            )
         },
         {
             accessorKey: "port",
@@ -328,13 +332,14 @@ export default function ReverseProxyTargets(props: {
                 <Input
                     type="number"
                     defaultValue={row.original.port}
+                    className="min-w-[100px]"
                     onBlur={(e) =>
                         updateTarget(row.original.targetId, {
-                            port: parseInt(e.target.value, 10),
+                            port: parseInt(e.target.value, 10)
                         })
                     }
                 />
-            ),
+            )
         },
         // {
         //     accessorKey: "protocol",
@@ -364,7 +369,7 @@ export default function ReverseProxyTargets(props: {
                         updateTarget(row.original.targetId, { enabled: val })
                     }
                 />
-            ),
+            )
         },
         {
             id: "actions",
@@ -387,8 +392,8 @@ export default function ReverseProxyTargets(props: {
                         </Button>
                     </div>
                 </>
-            ),
-        },
+            )
+        }
     ];
 
     const table = useReactTable({
@@ -397,7 +402,7 @@ export default function ReverseProxyTargets(props: {
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
+        getFilteredRowModel: getFilteredRowModel()
     });
 
     if (pageLoading) {
@@ -437,7 +442,7 @@ export default function ReverseProxyTargets(props: {
                         <Form {...addTargetForm}>
                             <form
                                 onSubmit={addTargetForm.handleSubmit(
-                                    addTarget as any,
+                                    addTarget as any
                                 )}
                                 className="space-y-4"
                             >
@@ -452,11 +457,11 @@ export default function ReverseProxyTargets(props: {
                                                     <Select
                                                         {...field}
                                                         onValueChange={(
-                                                            value,
+                                                            value
                                                         ) => {
                                                             addTargetForm.setValue(
                                                                 "method",
-                                                                value,
+                                                                value
                                                             );
                                                         }}
                                                     >
@@ -585,10 +590,10 @@ export default function ReverseProxyTargets(props: {
                                                                           .column
                                                                           .columnDef
                                                                           .header,
-                                                                      header.getContext(),
+                                                                      header.getContext()
                                                                   )}
                                                         </TableHead>
-                                                    ),
+                                                    )
                                                 )}
                                             </TableRow>
                                         ))}
@@ -607,7 +612,7 @@ export default function ReverseProxyTargets(props: {
                                                                 cell.column
                                                                     .columnDef
                                                                     .cell,
-                                                                cell.getContext(),
+                                                                cell.getContext()
                                                             )}
                                                         </TableCell>
                                                     ))}
@@ -644,36 +649,36 @@ export default function ReverseProxyTargets(props: {
 
 function isIPInSubnet(subnet: string, ip: string): boolean {
     // Split subnet into IP and mask parts
-    const [subnetIP, maskBits] = subnet.split('/');
+    const [subnetIP, maskBits] = subnet.split("/");
     const mask = parseInt(maskBits);
-    
+
     if (mask < 0 || mask > 32) {
-        throw new Error('Invalid subnet mask. Must be between 0 and 32.');
+        throw new Error("Invalid subnet mask. Must be between 0 and 32.");
     }
 
     // Convert IP addresses to binary numbers
     const subnetNum = ipToNumber(subnetIP);
     const ipNum = ipToNumber(ip);
-    
+
     // Calculate subnet mask
     const maskNum = mask === 32 ? -1 : ~((1 << (32 - mask)) - 1);
-    
+
     // Check if the IP is in the subnet
     return (subnetNum & maskNum) === (ipNum & maskNum);
 }
 
 function ipToNumber(ip: string): number {
     // Validate IP address format
-    const parts = ip.split('.');
+    const parts = ip.split(".");
     if (parts.length !== 4) {
-        throw new Error('Invalid IP address format');
+        throw new Error("Invalid IP address format");
     }
-    
+
     // Convert IP octets to 32-bit number
     return parts.reduce((num, octet) => {
         const oct = parseInt(octet);
         if (isNaN(oct) || oct < 0 || oct > 255) {
-            throw new Error('Invalid IP address octet');
+            throw new Error("Invalid IP address octet");
         }
         return (num << 8) + oct;
     }, 0);

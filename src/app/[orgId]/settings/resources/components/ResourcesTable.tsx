@@ -75,6 +75,43 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
 
     const columns: ColumnDef<ResourceRow>[] = [
         {
+            accessorKey: "dots",
+            header: "",
+            cell: ({ row }) => {
+                const resourceRow = row.original;
+                const router = useRouter();
+
+                return (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuItem>
+                                <Link
+                                    className="block w-full"
+                                    href={`/${resourceRow.orgId}/settings/resources/${resourceRow.id}`}
+                                >
+                                    View settings
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                onClick={() => {
+                                    setSelectedResource(resourceRow);
+                                    setIsDeleteModalOpen(true);
+                                }}
+                            >
+                                <span className="text-red-500">Delete</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                );
+            }
+        },
+        {
             accessorKey: "name",
             header: ({ column }) => {
                 return (
@@ -214,55 +251,18 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
         {
             id: "actions",
             cell: ({ row }) => {
-                const router = useRouter();
-
                 const resourceRow = row.original;
-
                 return (
-                    <>
-                        <div className="flex items-center justify-end">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button
-                                        variant="ghost"
-                                        className="h-8 w-8 p-0"
-                                    >
-                                        <span className="sr-only">
-                                            Open menu
-                                        </span>
-                                        <MoreHorizontal className="h-4 w-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuItem>
-                                        <Link
-                                            href={`/${resourceRow.orgId}/settings/resources/${resourceRow.id}`}
-                                        >
-                                            View settings
-                                        </Link>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        onClick={() => {
-                                            setSelectedResource(resourceRow);
-                                            setIsDeleteModalOpen(true);
-                                        }}
-                                    >
-                                        <span className="text-red-500">
-                                            Delete
-                                        </span>
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                            <Link
-                                href={`/${resourceRow.orgId}/settings/resources/${resourceRow.id}`}
-                            >
-                                <Button variant={"gray"} className="ml-2">
-                                    Edit
-                                    <ArrowRight className="ml-2 w-4 h-4" />
-                                </Button>
-                            </Link>
-                        </div>
-                    </>
+                    <div className="flex items-center justify-end">
+                        <Link
+                            href={`/${resourceRow.orgId}/settings/resources/${resourceRow.id}`}
+                        >
+                            <Button variant={"gray"} className="ml-2">
+                                Edit
+                                <ArrowRight className="ml-2 w-4 h-4" />
+                            </Button>
+                        </Link>
+                    </div>
                 );
             }
         }

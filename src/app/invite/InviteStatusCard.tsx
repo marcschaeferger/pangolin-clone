@@ -7,7 +7,7 @@ import {
     CardContent,
     CardFooter,
     CardHeader,
-    CardTitle
+    CardTitle,
 } from "@app/components/ui/card";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { XCircle } from "lucide-react";
@@ -20,7 +20,7 @@ type InviteStatusCardProps = {
 
 export default function InviteStatusCard({
     type,
-    token
+    token,
 }: InviteStatusCardProps) {
     const router = useRouter();
 

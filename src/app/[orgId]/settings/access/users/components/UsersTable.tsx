@@ -51,6 +51,64 @@ export default function UsersTable({ users: u }: UsersTableProps) {
 
     const columns: ColumnDef<UserRow>[] = [
         {
+            id: "dots",
+            cell: ({ row }) => {
+                const userRow = row.original;
+                return (
+                    <>
+                        <div>
+                            {userRow.isOwner && (
+                                <MoreHorizontal className="h-4 w-4 opacity-0" />
+                            )}
+                            {!userRow.isOwner && (
+                                <>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button
+                                                variant="ghost"
+                                                className="h-8 w-8 p-0"
+                                            >
+                                                <span className="sr-only">
+                                                    Open menu
+                                                </span>
+                                                <MoreHorizontal className="h-4 w-4" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                            <DropdownMenuItem>
+                                                <Link
+                                                    href={`/${org?.org.orgId}/settings/access/users/${userRow.id}`}
+                                                    className="block w-full"
+                                                >
+                                                    Manage User
+                                                </Link>
+                                            </DropdownMenuItem>
+                                            {userRow.email !== user?.email && (
+                                                <DropdownMenuItem
+                                                    onClick={() => {
+                                                        setIsDeleteModalOpen(
+                                                            true
+                                                        );
+                                                        setSelectedUser(
+                                                            userRow
+                                                        );
+                                                    }}
+                                                >
+                                                    <span className="text-red-500">
+                                                        Remove User
+                                                    </span>
+                                                </DropdownMenuItem>
+                                            )}
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </>
+                            )}
+                        </div>
+                    </>
+                );
+            }
+        },
+        {
             accessorKey: "email",
             header: ({ column }) => {
                 return (
@@ -114,73 +172,27 @@ export default function UsersTable({ users: u }: UsersTableProps) {
             id: "actions",
             cell: ({ row }) => {
                 const userRow = row.original;
-
                 return (
-                    <>
-                        <div className="flex items-center justify-end">
-                            {userRow.isOwner && (
-                                <Button
-                                    variant="ghost"
-                                    className="opacity-0 cursor-default"
-                                >
-                                    Placeholder
+                    <div className="flex items-center justify-end">
+                        {userRow.isOwner && (
+                            <Button
+                                variant="ghost"
+                                className="opacity-0 cursor-default"
+                            >
+                                Placeholder
+                            </Button>
+                        )}
+                        {!userRow.isOwner && (
+                            <Link
+                                href={`/${org?.org.orgId}/settings/access/users/${userRow.id}`}
+                            >
+                                <Button variant={"gray"} className="ml-2">
+                                    Manage
+                                    <ArrowRight className="ml-2 w-4 h-4" />
                                 </Button>
-                            )}
-                            {!userRow.isOwner && (
-                                <>
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button
-                                                variant="ghost"
-                                                className="h-8 w-8 p-0"
-                                            >
-                                                <span className="sr-only">
-                                                    Open menu
-                                                </span>
-                                                <MoreHorizontal className="h-4 w-4" />
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                            <DropdownMenuItem>
-                                                <Link
-                                                    href={`/${org?.org.orgId}/settings/access/users/${userRow.id}`}
-                                                >
-                                                    Manage User
-                                                </Link>
-                                            </DropdownMenuItem>
-                                            {userRow.email !== user?.email && (
-                                                <DropdownMenuItem
-                                                    onClick={() => {
-                                                        setIsDeleteModalOpen(
-                                                            true
-                                                        );
-                                                        setSelectedUser(
-                                                            userRow
-                                                        );
-                                                    }}
-                                                >
-                                                    <span className="text-red-500">
-                                                        Remove User
-                                                    </span>
-                                                </DropdownMenuItem>
-                                            )}
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                    <Link
-                                        href={`/${org?.org.orgId}/settings/access/users/${userRow.id}`}
-                                    >
-                                        <Button
-                                            variant={"gray"}
-                                            className="ml-2"
-                                        >
-                                            Manage
-                                            <ArrowRight className="ml-2 w-4 h-4" />
-                                        </Button>
-                                    </Link>
-                                </>
-                            )}
-                        </div>
-                    </>
+                            </Link>
+                        )}
+                    </div>
                 );
             }
         }
