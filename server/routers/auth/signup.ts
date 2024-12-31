@@ -84,6 +84,15 @@ export async function signup(
                 createHttpError(HttpCode.BAD_REQUEST, "Invite does not exist")
             );
         }
+
+        if (existingInvite.email !== email) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    "Invite is not for this user"
+                )
+            );
+        }
     }
 
     try {

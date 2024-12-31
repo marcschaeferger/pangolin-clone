@@ -20,10 +20,6 @@ export default async function InvitePage(props: {
 
     const user = await verifySession();
 
-    if (!user) {
-        redirect(`/auth/signup?redirect=/invite?token=${params.token}`);
-    }
-
     const parts = tokenParam.split("-");
     if (parts.length !== 2) {
         return (
@@ -70,9 +66,17 @@ export default async function InvitePage(props: {
         }
     }
 
+    const type = cardType();
+
+    console.log("card type is", type, error)
+
+    if (!user && type === "user_does_not_exist") {
+        redirect(`/auth/signup?redirect=/invite?token=${params.token}`);
+    }
+
     return (
         <>
-            <InviteStatusCard type={cardType()} token={tokenParam} />
+            <InviteStatusCard type={type} token={tokenParam} />
         </>
     );
 }

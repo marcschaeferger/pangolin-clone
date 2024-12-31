@@ -5,19 +5,34 @@ import {
     CardContent,
     CardDescription,
     CardHeader,
-    CardTitle,
+    CardTitle
 } from "@/components/ui/card";
+import { createApiClient } from "@app/api";
 import LoginForm from "@app/components/LoginForm";
+import { useEnvContext } from "@app/hooks/useEnvContext";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 type DashboardLoginFormProps = {
     redirect?: string;
 };
 
 export default function DashboardLoginForm({
-    redirect,
+    redirect
 }: DashboardLoginFormProps) {
     const router = useRouter();
+    // const api = createApiClient(useEnvContext());
+    //
+    // useEffect(() => {
+    //     const logout = async () => {
+    //         try {
+    //             await api.post("/auth/logout");
+    //             console.log("user logged out");
+    //         } catch (e) {}
+    //     };
+    //
+    //     logout();
+    // });
 
     return (
         <Card className="w-full max-w-md">

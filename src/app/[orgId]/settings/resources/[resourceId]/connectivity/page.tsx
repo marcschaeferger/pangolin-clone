@@ -304,8 +304,8 @@ export default function ReverseProxyTargets(props: {
                         {row.original.method}
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="http">http</SelectItem>
-                        <SelectItem value="https">https</SelectItem>
+                        <SelectItem value="http">HTTP</SelectItem>
+                        <SelectItem value="https">HTTPS</SelectItem>
                     </SelectContent>
                 </Select>
             )

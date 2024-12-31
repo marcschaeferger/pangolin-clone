@@ -10,6 +10,7 @@ import {
     Tailwind
 } from "@react-email/components";
 import * as React from "react";
+import LetterHead from "./components/LetterHead";
 
 interface Props {
     email: string;
@@ -35,15 +36,7 @@ export const ConfirmPasswordReset = ({ email }: Props) => {
             >
                 <Body className="font-sans relative">
                     <Container className="bg-white border border-solid border-gray-200 p-6 max-w-lg mx-auto my-8 rounded-lg">
-                        <div className="flex items-center justify-between">
-                            <div className="text-sm font-bold text-orange-500">
-                                Pangolin
-                            </div>
-
-                            <div className="text-sm text-gray-500">
-                                {new Date().toLocaleDateString()}
-                            </div>
-                        </div>
+                        <LetterHead />
 
                         <Heading className="text-2xl font-semibold text-gray-800 text-center">
                             Password Reset Confirmation
@@ -55,10 +48,6 @@ export const ConfirmPasswordReset = ({ email }: Props) => {
                             This email confirms that your password has just been
                             reset. If you made this change, no further action is
                             required.
-                        </Text>
-                        <Text className="text-base text-gray-700">
-                            If you did not request this change, please contact
-                            our support team immediately.
                         </Text>
                         <Text className="text-base text-gray-700 mt-2">
                             Thank you for keeping your account secure.

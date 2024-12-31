@@ -10,6 +10,7 @@ import {
     Tailwind
 } from "@react-email/components";
 import * as React from "react";
+import LetterHead from "./components/LetterHead";
 
 interface Props {
     email: string;
@@ -36,15 +37,7 @@ export const TwoFactorAuthNotification = ({ email, enabled }: Props) => {
             >
                 <Body className="font-sans">
                     <Container className="bg-white border border-solid border-gray-200 p-6 max-w-lg mx-auto my-8 rounded-lg">
-                        <div className="flex items-center justify-between">
-                            <div className="text-sm font-bold text-orange-500">
-                                Pangolin
-                            </div>
-
-                            <div className="text-sm text-gray-500">
-                                {new Date().toLocaleDateString()}
-                            </div>
-                        </div>
+                        <LetterHead />
 
                         <Heading className="text-2xl font-semibold text-gray-800 text-center">
                             Two-Factor Authentication{" "}
@@ -71,10 +64,6 @@ export const TwoFactorAuthNotification = ({ email, enabled }: Props) => {
                                 enabling it to protect your account.
                             </Text>
                         )}
-                        <Text className="text-base text-gray-700 mt-2">
-                            If you did not make this change, please contact our
-                            support team immediately.
-                        </Text>
                         <Text className="text-sm text-gray-500 mt-6">
                             Best regards,
                             <br />

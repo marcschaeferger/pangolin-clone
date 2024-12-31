@@ -12,6 +12,7 @@ import { fromError } from "zod-validation-error";
 import { isWithinExpirationDate } from "oslo";
 import { verifyPassword } from "@server/auth/password";
 import { checkValidInvite } from "@server/auth/checkValidInvite";
+import { verifySession } from "@server/auth";
 
 const acceptInviteBodySchema = z
     .object({
@@ -72,7 +73,9 @@ export async function acceptInvite(
             );
         }
 
-        if (req.user && req.user.email !== existingInvite.email) {
+        const { user, session } = await verifySession(req);
+
+        if (user && user.email !== existingInvite.email) {
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,

@@ -10,6 +10,7 @@ import {
     Tailwind
 } from "@react-email/components";
 import * as React from "react";
+import LetterHead from "./components/LetterHead";
 
 interface VerifyEmailProps {
     username?: string;
@@ -22,7 +23,7 @@ export const VerifyEmail = ({
     verificationCode,
     verifyLink
 }: VerifyEmailProps) => {
-    const previewText = `Verify your email, ${username}`;
+    const previewText = `Your verification code is ${verificationCode}`;
 
     return (
         <Html>
@@ -41,15 +42,7 @@ export const VerifyEmail = ({
             >
                 <Body className="font-sans">
                     <Container className="bg-white border border-solid border-gray-200 p-6 max-w-lg mx-auto my-8 rounded-lg">
-                        <div className="flex items-center justify-between">
-                            <div className="text-sm font-bold text-orange-500">
-                                Pangolin
-                            </div>
-
-                            <div className="text-sm text-gray-500">
-                                {new Date().toLocaleDateString()}
-                            </div>
-                        </div>
+                        <LetterHead />
 
                         <Heading className="text-2xl font-semibold text-gray-800 text-center">
                             Please Verify Your Email

@@ -6,6 +6,7 @@ import logger from "@server/logger";
 export async function sendEmail(
     template: ReactElement,
     opts: {
+        name: string | undefined;
         from: string | undefined;
         to: string | undefined;
         subject: string;
@@ -23,14 +24,15 @@ export async function sendEmail(
 
     const emailHtml = await render(template);
 
-    const options = {
-        from: opts.from,
+    await emailClient.sendMail({
+        from: {
+            name: opts.name || "Pangolin Proxy",
+            address: opts.from,
+        },
         to: opts.to,
         subject: opts.subject,
         html: emailHtml,
-    };
-
-    await emailClient.sendMail(options);
+    });
 }
 
 export default sendEmail;

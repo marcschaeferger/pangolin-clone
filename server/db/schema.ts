@@ -131,7 +131,7 @@ export const newtSessions = sqliteTable("newtSession", {
 export const userOrgs = sqliteTable("userOrgs", {
     userId: text("userId")
         .notNull()
-        .references(() => users.userId),
+        .references(() => users.userId, { onDelete: "cascade" }),
     orgId: text("orgId")
         .references(() => orgs.orgId, {
             onDelete: "cascade"

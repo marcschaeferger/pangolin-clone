@@ -11,6 +11,7 @@ import {
     Button
 } from "@react-email/components";
 import * as React from "react";
+import LetterHead from "./components/LetterHead";
 
 interface SendInviteLinkProps {
     email: string;
@@ -27,7 +28,7 @@ export const SendInviteLink = ({
     inviterName,
     expiresInDays
 }: SendInviteLinkProps) => {
-    const previewText = `${inviterName} invited to join ${orgName}`;
+    const previewText = `${inviterName} invited you to join ${orgName}`;
 
     return (
         <Html>
@@ -46,18 +47,10 @@ export const SendInviteLink = ({
             >
                 <Body className="font-sans">
                     <Container className="bg-white border border-solid border-gray-200 p-6 max-w-lg mx-auto my-8 rounded-lg">
-                        <div className="flex items-center justify-between">
-                            <div className="text-sm font-bold text-orange-500">
-                                Pangolin
-                            </div>
-
-                            <div className="text-sm text-gray-500">
-                                {new Date().toLocaleDateString()}
-                            </div>
-                        </div>
+                        <LetterHead />
 
                         <Heading className="text-2xl font-semibold text-gray-800 text-center">
-                            You're Invite to Join {orgName}
+                            Invited to Join {orgName}
                         </Heading>
                         <Text className="text-base text-gray-700 mt-4">
                             Hi {email || "there"},

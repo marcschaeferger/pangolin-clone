@@ -137,7 +137,7 @@ authenticated.post(
     verifyUserHasAction(ActionsEnum.inviteUser),
     user.inviteUser
 ); // maybe make this /invite/create instead
-authenticated.post("/invite/accept", user.acceptInvite);
+unauthenticated.post("/invite/accept", user.acceptInvite); // this is supposed to be unauthenticated
 
 authenticated.get(
     "/resource/:resourceId/roles",
