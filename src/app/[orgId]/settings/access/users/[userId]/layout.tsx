@@ -11,9 +11,10 @@ import {
     BreadcrumbLink,
     BreadcrumbList,
     BreadcrumbPage,
-    BreadcrumbSeparator,
+    BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
 import Link from "next/link";
+import { cache } from "react";
 
 interface UserLayoutProps {
     children: React.ReactNode;
@@ -27,10 +28,13 @@ export default async function UserLayoutProps(props: UserLayoutProps) {
 
     let user = null;
     try {
-        const res = await internal.get<AxiosResponse<GetOrgUserResponse>>(
-            `/org/${params.orgId}/user/${params.userId}`,
-            await authCookieHeader(),
+        const getOrgUser = cache(async () =>
+            internal.get<AxiosResponse<GetOrgUserResponse>>(
+                `/org/${params.orgId}/user/${params.userId}`,
+                await authCookieHeader()
+            )
         );
+        const res = await getOrgUser();
         user = res.data.data;
     } catch {
         redirect(`/${params.orgId}/settings/sites`);
@@ -39,8 +43,8 @@ export default async function UserLayoutProps(props: UserLayoutProps) {
     const sidebarNavItems = [
         {
             title: "Access Controls",
-            href: "/{orgId}/settings/access/users/{userId}/access-controls",
-        },
+            href: "/{orgId}/settings/access/users/{userId}/access-controls"
+        }
     ];
 
     return (

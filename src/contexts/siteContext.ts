@@ -2,7 +2,7 @@ import { GetSiteResponse } from "@server/routers/site/getSite";
 import { createContext } from "react";
 
 interface SiteContextType {
-    site: GetSiteResponse | null;
+    site: GetSiteResponse;
     updateSite: (updatedSite: Partial<GetSiteResponse>) => void;
 }
 

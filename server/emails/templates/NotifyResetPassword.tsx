@@ -33,10 +33,20 @@ export const ConfirmPasswordReset = ({ email }: Props) => {
                     }
                 }}
             >
-                <Body className="font-sans">
+                <Body className="font-sans relative">
                     <Container className="bg-white border border-solid border-gray-200 p-6 max-w-lg mx-auto my-8 rounded-lg">
+                        <div className="flex items-center justify-between">
+                            <div className="text-sm font-bold text-orange-500">
+                                Pangolin
+                            </div>
+
+                            <div className="text-sm text-gray-500">
+                                {new Date().toLocaleDateString()}
+                            </div>
+                        </div>
+
                         <Heading className="text-2xl font-semibold text-gray-800 text-center">
-                            Your password has been successfully reset
+                            Password Reset Confirmation
                         </Heading>
                         <Text className="text-base text-gray-700 mt-4">
                             Hi {email || "there"},
@@ -46,12 +56,10 @@ export const ConfirmPasswordReset = ({ email }: Props) => {
                             reset. If you made this change, no further action is
                             required.
                         </Text>
-                        <Section className="text-center my-6">
-                            <Text className="text-base text-gray-700">
-                                If you did not request this change, please
-                                contact our support team immediately.
-                            </Text>
-                        </Section>
+                        <Text className="text-base text-gray-700">
+                            If you did not request this change, please contact
+                            our support team immediately.
+                        </Text>
                         <Text className="text-base text-gray-700 mt-2">
                             Thank you for keeping your account secure.
                         </Text>

@@ -13,6 +13,8 @@ type ResourcesPageProps = {
     params: Promise<{ orgId: string }>;
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function ResourcesPage(props: ResourcesPageProps) {
     const params = await props.params;
     let resources: ListResourcesResponse["resources"] = [];

@@ -13,6 +13,8 @@ type ShareLinksPageProps = {
     params: Promise<{ orgId: string }>;
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function ShareLinksPage(props: ShareLinksPageProps) {
     const params = await props.params;
 

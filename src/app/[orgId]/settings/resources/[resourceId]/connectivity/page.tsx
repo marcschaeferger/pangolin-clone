@@ -429,7 +429,7 @@ export default function ReverseProxyTargets(props: {
                     </div>
                 </section>
 
-                <hr className="lg:max-w-2xl" />
+                <hr />
 
                 <section className="space-y-8">
                     <SettingsSectionTitle

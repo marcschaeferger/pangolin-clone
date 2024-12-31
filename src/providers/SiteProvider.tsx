@@ -6,14 +6,14 @@ import { useState } from "react";
 
 interface SiteProviderProps {
     children: React.ReactNode;
-    site: GetSiteResponse | null;
+    site: GetSiteResponse;
 }
 
 export function SiteProvider({
     children,
-    site: serverSite,
+    site: serverSite
 }: SiteProviderProps) {
-    const [site, setSite] = useState<GetSiteResponse | null>(serverSite);
+    const [site, setSite] = useState<GetSiteResponse>(serverSite);
 
     const updateSite = (updatedSite: Partial<GetSiteResponse>) => {
         if (!site) {
@@ -25,7 +25,7 @@ export function SiteProvider({
             }
             return {
                 ...prev,
-                ...updatedSite,
+                ...updatedSite
             };
         });
     };

@@ -13,8 +13,9 @@ import {
     BreadcrumbItem,
     BreadcrumbList,
     BreadcrumbPage,
-    BreadcrumbSeparator,
+    BreadcrumbSeparator
 } from "@app/components/ui/breadcrumb";
+import SiteInfoCard from "./components/SiteInfoCard";
 
 interface SettingsLayoutProps {
     children: React.ReactNode;
@@ -30,7 +31,7 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
     try {
         const res = await internal.get<AxiosResponse<GetSiteResponse>>(
             `/org/${params.orgId}/site/${params.niceId}`,
-            await authCookieHeader(),
+            await authCookieHeader()
         );
         site = res.data.data;
     } catch {
@@ -40,8 +41,8 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
     const sidebarNavItems = [
         {
             title: "General",
-            href: "/{orgId}/settings/sites/{niceId}/general",
-        },
+            href: "/{orgId}/settings/sites/{niceId}/general"
+        }
     ];
 
     return (
@@ -66,10 +67,10 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
             />
 
             <SiteProvider site={site}>
-                <SidebarSettings
-                    sidebarNavItems={sidebarNavItems}
-                    limitWidth={true}
-                >
+                <SidebarSettings sidebarNavItems={sidebarNavItems}>
+                    <div className="mb-8">
+                        <SiteInfoCard />
+                    </div>
                     {children}
                 </SidebarSettings>
             </SiteProvider>

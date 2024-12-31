@@ -13,6 +13,8 @@ type RolesPageProps = {
     params: Promise<{ orgId: string }>;
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function RolesPage(props: RolesPageProps) {
     const params = await props.params;
 

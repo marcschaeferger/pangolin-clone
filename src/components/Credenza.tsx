@@ -90,11 +90,19 @@ const CredenzaContent = ({ className, children, ...props }: CredenzaProps) => {
 
     const CredenzaContent = isDesktop ? DialogContent : SheetContent;
 
-    return (
+    return isDesktop ? (
+        <CredenzaContent
+            className={cn("overflow-y-auto max-h-screen", className)}
+            {...props}
+        >
+            {children}
+        </CredenzaContent>
+    ) : (
         <CredenzaContent
             className={cn("overflow-y-auto max-h-screen", className)}
             {...props}
             side={"bottom"}
+            onOpenAutoFocus={(e) => e.preventDefault()}
         >
             {children}
         </CredenzaContent>

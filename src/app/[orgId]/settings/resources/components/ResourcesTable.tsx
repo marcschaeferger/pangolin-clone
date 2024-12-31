@@ -29,6 +29,7 @@ import { formatAxiosError } from "@app/lib/utils";
 import { useToast } from "@app/hooks/useToast";
 import { createApiClient } from "@app/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
+import CopyToClipboard from "@app/components/CopyToClipboard";
 
 export type ResourceRow = {
     id: number;
@@ -162,55 +163,7 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
             cell: ({ row }) => {
                 const resourceRow = row.original;
                 return (
-                    <div className="flex items-center">
-                        <Link
-                            href={resourceRow.domain}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="hover:underline mr-2"
-                        >
-                            {resourceRow.domain}
-                        </Link>
-                        <Button
-                            variant="ghost"
-                            className="h-6 w-6 p-0"
-                            onClick={() => {
-                                navigator.clipboard.writeText(
-                                    resourceRow.domain
-                                );
-                                const originalIcon = document.querySelector(
-                                    `#icon-${resourceRow.id}`
-                                );
-                                if (originalIcon) {
-                                    originalIcon.classList.add("hidden");
-                                }
-                                const checkIcon = document.querySelector(
-                                    `#check-icon-${resourceRow.id}`
-                                );
-                                if (checkIcon) {
-                                    checkIcon.classList.remove("hidden");
-                                    setTimeout(() => {
-                                        checkIcon.classList.add("hidden");
-                                        if (originalIcon) {
-                                            originalIcon.classList.remove(
-                                                "hidden"
-                                            );
-                                        }
-                                    }, 2000);
-                                }
-                            }}
-                        >
-                            <Copy
-                                id={`icon-${resourceRow.id}`}
-                                className="h-4 w-4"
-                            />
-                            <Check
-                                id={`check-icon-${resourceRow.id}`}
-                                className="hidden text-green-500 h-4 w-4"
-                            />
-                            <span className="sr-only">Copy domain</span>
-                        </Button>
-                    </div>
+                    <CopyToClipboard text={resourceRow.domain} isLink={true} />
                 );
             }
         },

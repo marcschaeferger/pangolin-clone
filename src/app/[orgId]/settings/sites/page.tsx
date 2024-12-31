@@ -9,6 +9,8 @@ type SitesPageProps = {
     params: Promise<{ orgId: string }>;
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function SitesPage(props: SitesPageProps) {
     const params = await props.params;
     let sites: ListSitesResponse["sites"] = [];

@@ -41,17 +41,28 @@ export const VerifyEmail = ({
             >
                 <Body className="font-sans">
                     <Container className="bg-white border border-solid border-gray-200 p-6 max-w-lg mx-auto my-8 rounded-lg">
+                        <div className="flex items-center justify-between">
+                            <div className="text-sm font-bold text-orange-500">
+                                Pangolin
+                            </div>
+
+                            <div className="text-sm text-gray-500">
+                                {new Date().toLocaleDateString()}
+                            </div>
+                        </div>
+
                         <Heading className="text-2xl font-semibold text-gray-800 text-center">
-                            Please verify your email
+                            Please Verify Your Email
                         </Heading>
                         <Text className="text-base text-gray-700 mt-4">
                             Hi {username || "there"},
                         </Text>
                         <Text className="text-base text-gray-700 mt-2">
                             You’ve requested to verify your email. Please use
-                            the code below to complete the verification process upon logging in.
+                            the code below to complete the verification process
+                            upon logging in.
                         </Text>
-                        <Section className="text-center my-6">
+                        <Section className="text-center">
                             <Text className="inline-block bg-primary text-xl font-bold text-white py-2 px-4 border border-gray-300 rounded-xl">
                                 {verificationCode}
                             </Text>

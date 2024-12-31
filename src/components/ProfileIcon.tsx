@@ -65,7 +65,7 @@ export default function ProfileIcon() {
             <Enable2FaForm open={openEnable2fa} setOpen={setOpenEnable2fa} />
             <Disable2FaForm open={openDisable2fa} setOpen={setOpenDisable2fa} />
 
-            <div className="flex items-center gap-4 flex-grow min-w-0">
+            <div className="flex items-center md:gap-4 gap-2 flex-grow min-w-0">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button

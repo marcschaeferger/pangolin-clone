@@ -18,7 +18,12 @@ const updateSiteParamsSchema = z
 const updateSiteBodySchema = z
     .object({
         name: z.string().min(1).max(255).optional(),
-        subdomain: z.string().min(1).max(255).optional()
+        // subdomain: z
+        //     .string()
+        //     .min(1)
+        //     .max(255)
+        //     .transform((val) => val.toLowerCase())
+        //     .optional()
         // pubKey: z.string().optional(),
         // subnet: z.string().optional(),
         // exitNode: z.number().int().positive().optional(),

@@ -43,6 +43,16 @@ export const ResourceOTPCode = ({
             >
                 <Body className="font-sans">
                     <Container className="bg-white border border-solid border-gray-200 p-6 max-w-lg mx-auto my-8 rounded-lg">
+                        <div className="flex items-center justify-between">
+                            <div className="text-sm font-bold text-orange-500">
+                                Pangolin
+                            </div>
+
+                            <div className="text-sm text-gray-500">
+                                {new Date().toLocaleDateString()}
+                            </div>
+                        </div>
+
                         <Heading className="text-2xl font-semibold text-gray-800 text-center">
                             Your One-Time Password
                         </Heading>
@@ -56,12 +66,11 @@ export const ResourceOTPCode = ({
                             <strong>{organizationName}</strong>. Use the OTP
                             below to complete your authentication:
                         </Text>
-                        <Section className="text-center my-6">
+                        <Section className="text-center">
                             <Text className="inline-block bg-primary text-xl font-bold text-white py-2 px-4 border border-gray-300 rounded-xl">
                                 {otp}
                             </Text>
                         </Section>
-
                         <Text className="text-sm text-gray-500 mt-6">
                             Best regards,
                             <br />

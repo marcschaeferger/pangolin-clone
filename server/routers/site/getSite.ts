@@ -23,13 +23,25 @@ const getSiteSchema = z
     })
     .strict();
 
-export type GetSiteResponse = {
-    siteId: number;
-    name: string;
-    subdomain: string;
-    subnet: string;
-    type: string;
-};
+async function query(siteId?: number, niceId?: string, orgId?: string) {
+    if (siteId) {
+        const [res] = await db
+            .select()
+            .from(sites)
+            .where(eq(sites.siteId, siteId))
+            .limit(1);
+        return res;
+    } else if (niceId && orgId) {
+        const [res] = await db
+            .select()
+            .from(sites)
+            .where(and(eq(sites.niceId, niceId), eq(sites.orgId, orgId)))
+            .limit(1);
+        return res;
+    }
+}
+
+export type GetSiteResponse = NonNullable<Awaited<ReturnType<typeof query>>>;
 
 export async function getSite(
     req: Request,
@@ -49,42 +61,14 @@ export async function getSite(
 
         const { siteId, niceId, orgId } = parsedParams.data;
 
-        let site;
-        if (siteId) {
-            site = await db
-                .select()
-                .from(sites)
-                .where(eq(sites.siteId, siteId))
-                .limit(1);
-        } else if (niceId && orgId) {
-            site = await db
-                .select()
-                .from(sites)
-                .where(and(eq(sites.niceId, niceId), eq(sites.orgId, orgId)))
-                .limit(1);
-        }
+        const site = await query(siteId, niceId, orgId);
 
         if (!site) {
             return next(createHttpError(HttpCode.NOT_FOUND, "Site not found"));
         }
 
-        if (site.length === 0) {
-            return next(
-                createHttpError(
-                    HttpCode.NOT_FOUND,
-                    `Site with ID ${siteId} not found`
-                )
-            );
-        }
-
-        return response(res, {
-            data: {
-                siteId: site[0].siteId,
-                niceId: site[0].niceId,
-                name: site[0].name,
-                subnet: site[0].subnet,
-                type: site[0].type
-            },
+        return response<GetSiteResponse>(res, {
+            data: site,
             success: true,
             error: false,
             message: "Site retrieved successfully",

@@ -46,8 +46,18 @@ export const SendInviteLink = ({
             >
                 <Body className="font-sans">
                     <Container className="bg-white border border-solid border-gray-200 p-6 max-w-lg mx-auto my-8 rounded-lg">
+                        <div className="flex items-center justify-between">
+                            <div className="text-sm font-bold text-orange-500">
+                                Pangolin
+                            </div>
+
+                            <div className="text-sm text-gray-500">
+                                {new Date().toLocaleDateString()}
+                            </div>
+                        </div>
+
                         <Heading className="text-2xl font-semibold text-gray-800 text-center">
-                            You're invited to join a Fossorial organization
+                            You're Invite to Join {orgName}
                         </Heading>
                         <Text className="text-base text-gray-700 mt-4">
                             Hi {email || "there"},
@@ -65,12 +75,12 @@ export const SendInviteLink = ({
                                 {expiresInDays === "1" ? "day" : "days"}.
                             </b>
                         </Text>
-                        <Section className="text-center my-6">
+                        <Section className="text-center">
                             <Button
                                 href={inviteLink}
                                 className="rounded-lg bg-primary px-[12px] py-[9px] text-center font-semibold text-white cursor-pointer text-xl"
                             >
-                                Accept invitation to {orgName}
+                                Accept Invite to {orgName}
                             </Button>
                         </Section>
 

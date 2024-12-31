@@ -37,8 +37,18 @@ export const ResetPasswordCode = ({ email, code, link }: Props) => {
             >
                 <Body className="font-sans">
                     <Container className="bg-white border border-solid border-gray-200 p-6 max-w-lg mx-auto my-8 rounded-lg">
+                        <div className="flex items-center justify-between">
+                            <div className="text-sm font-bold text-orange-500">
+                                Pangolin
+                            </div>
+
+                            <div className="text-sm text-gray-500">
+                                {new Date().toLocaleDateString()}
+                            </div>
+                        </div>
+
                         <Heading className="text-2xl font-semibold text-gray-800 text-center">
-                            You've requested to reset your password
+                            Password Reset Request
                         </Heading>
                         <Text className="text-base text-gray-700 mt-4">
                             Hi {email || "there"},
@@ -51,7 +61,7 @@ export const ResetPasswordCode = ({ email, code, link }: Props) => {
                             and follow the instructions to reset your password,
                             or manually enter the following code:
                         </Text>
-                        <Section className="text-center my-6">
+                        <Section className="text-center">
                             <Text className="inline-block bg-primary text-xl font-bold text-white py-2 px-4 border border-gray-300 rounded-xl">
                                 {code}
                             </Text>
