@@ -159,6 +159,9 @@ export async function createTarget(
             })
             .returning();
 
+        // add the new target to the targetIps array
+        targetIps.push(`${targetData.ip}/32`);
+
         if (site.pubKey) {
             if (site.type == "wireguard") {
                 await addPeer(site.exitNodeId!, {
