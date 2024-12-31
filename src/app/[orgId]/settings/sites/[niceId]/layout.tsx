@@ -50,7 +50,7 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
                 <Breadcrumb>
                     <BreadcrumbList>
                         <BreadcrumbItem>
-                            <Link href="../../">Sites</Link>
+                            <Link href="../">Sites</Link>
                         </BreadcrumbItem>
                         <BreadcrumbSeparator />
                         <BreadcrumbItem>

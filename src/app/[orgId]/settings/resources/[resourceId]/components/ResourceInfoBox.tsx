@@ -69,7 +69,7 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
                         )}
                     </div>
 
-                    <div className="flex items-center space-x-2 bg-muted p-1 pl-3 rounded-md">
+                    <div className="flex items-center space-x-2 bg-muted p-1 pl-3 rounded-md lg:max-w-xl">
                         <LinkIcon className="h-4 w-4" />
                         <a
                             href={fullUrl}

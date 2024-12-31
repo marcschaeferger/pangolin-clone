@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -35,6 +35,12 @@ export function SidebarNav({
     const resourceId = params.resourceId as string;
     const userId = params.userId as string;
 
+    const [selectedValue, setSelectedValue] = React.useState<string>(getSelectedValue());
+
+    useEffect(() => {
+        setSelectedValue(getSelectedValue());
+    }, [usePathname()]);
+
     const router = useRouter();
 
     const handleSelectChange = (value: string) => {
@@ -58,9 +64,10 @@ export function SidebarNav({
 
     return (
         <div>
-            <div className="block lg:hidden px-4">
+            <div className="block lg:hidden">
                 <Select
-                    defaultValue={getSelectedValue()}
+                    defaultValue={selectedValue}
+                    value={selectedValue}
                     onValueChange={handleSelectChange}
                     disabled={disabled}
                 >

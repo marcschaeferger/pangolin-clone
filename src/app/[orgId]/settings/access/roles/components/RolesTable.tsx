@@ -41,40 +41,15 @@ export default function UsersTable({ roles: r }: RolesTableProps) {
 
     const columns: ColumnDef<RoleRow>[] = [
         {
-            accessorKey: "name",
-            header: ({ column }) => {
-                return (
-                    <Button
-                        variant="ghost"
-                        onClick={() =>
-                            column.toggleSorting(column.getIsSorted() === "asc")
-                        }
-                    >
-                        Name
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                );
-            }
-        },
-        {
-            accessorKey: "description",
-            header: "Description"
-        },
-        {
             id: "actions",
             cell: ({ row }) => {
                 const roleRow = row.original;
 
                 return (
                     <>
-                        <div className="flex items-center justify-end">
+                        <div>
                             {roleRow.isAdmin && (
-                                <Button
-                                    variant="ghost"
-                                    className="h-8 w-8 p-0 opacity-0 cursor-default"
-                                >
-                                    Placeholder
-                                </Button>
+                                <MoreHorizontal className="h-4 w-4 opacity-0" />
                             )}
                             {!roleRow.isAdmin && (
                                 <DropdownMenu>
@@ -107,6 +82,26 @@ export default function UsersTable({ roles: r }: RolesTableProps) {
                     </>
                 );
             }
+        },
+        {
+            accessorKey: "name",
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() =>
+                            column.toggleSorting(column.getIsSorted() === "asc")
+                        }
+                    >
+                        Name
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                );
+            }
+        },
+        {
+            accessorKey: "description",
+            header: "Description"
         }
     ];
 

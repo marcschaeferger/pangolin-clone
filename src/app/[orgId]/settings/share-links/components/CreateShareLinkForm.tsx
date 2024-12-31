@@ -63,7 +63,7 @@ import { Checkbox } from "@app/components/ui/checkbox";
 import { GenerateAccessTokenResponse } from "@server/routers/accessToken";
 import { constructShareLink } from "@app/lib/shareLinks";
 import { ShareLinkRow } from "./ShareLinksTable";
-import { QRCodeSVG } from "qrcode.react";
+import { QRCodeCanvas, QRCodeSVG } from "qrcode.react";
 
 type FormProps = {
     open: boolean;
@@ -449,23 +449,23 @@ export default function CreateShareLinkForm({
                             {link && (
                                 <div className="max-w-md space-y-4">
                                     <p>
-                                        You will only be able to see this link once.
-                                        Make sure to copy it.
+                                        You will only be able to see this link
+                                        once. Make sure to copy it.
                                     </p>
                                     <p>
                                         Anyone with this link can access the
                                         resource. Share it with care.
                                     </p>
 
-                                    <div className="w-64 h-64 mx-auto flex items-center justify-center">
-                                        <QRCodeSVG
-                                            value={link}
-                                            size={256}
-                                        />
+                                    <div className="h-[250px] w-full mx-auto flex items-center justify-center">
+                                        <QRCodeCanvas value={link} size={200} />
                                     </div>
 
                                     <div className="mx-auto">
-                                        <CopyTextBox text={link} wrapText={false} />
+                                        <CopyTextBox
+                                            text={link}
+                                            wrapText={false}
+                                        />
                                     </div>
                                 </div>
                             )}
@@ -473,8 +473,8 @@ export default function CreateShareLinkForm({
                     </CredenzaBody>
                     <CredenzaFooter>
                         <Button
-                            type="submit"
-                            form="share-link-form"
+                            type="button"
+                            onClick={form.handleSubmit(onSubmit)}
                             loading={loading}
                             disabled={link !== null || loading}
                         >

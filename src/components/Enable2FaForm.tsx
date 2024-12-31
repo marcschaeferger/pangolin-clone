@@ -38,7 +38,7 @@ import {
 import { useToast } from "@app/hooks/useToast";
 import { formatAxiosError } from "@app/lib/utils";
 import CopyTextBox from "@app/components/CopyTextBox";
-import { QRCodeSVG } from "qrcode.react";
+import { QRCodeCanvas, QRCodeSVG } from "qrcode.react";
 import { useUserContext } from "@app/hooks/useUserContext";
 
 const enableSchema = z.object({
@@ -221,15 +221,10 @@ export default function Enable2FaForm({ open, setOpen }: Enable2FaProps) {
                                 Scan this QR code with your authenticator app or
                                 enter the secret key manually:
                             </p>
-                            <div className="w-64 h-64 mx-auto flex items-center justify-center">
-                                <QRCodeSVG value={secretUri} size={256} />
+                            <div className="h-[250px] mx-auto flex items-center justify-center">
+                                <QRCodeCanvas value={secretUri} size={200} />
                             </div>
-                            <div className="max-w-md mx-auto">
-                                <CopyTextBox
-                                    text={secretKey}
-                                    wrapText={false}
-                                />
-                            </div>
+                            <CopyTextBox text={secretUri} wrapText={false} />
 
                             <Form {...confirmForm}>
                                 <form
@@ -288,10 +283,16 @@ export default function Enable2FaForm({ open, setOpen }: Enable2FaProps) {
                 <CredenzaFooter>
                     {(step === 1 || step === 2) && (
                         <Button
-                            type="submit"
-                            form="form"
+                            type="button"
                             loading={loading}
                             disabled={loading}
+                            onClick={() => {
+                                if (step === 1) {
+                                    enableForm.handleSubmit(request2fa)();
+                                } else {
+                                    confirmForm.handleSubmit(confirm2fa)();
+                                }
+                            }}
                         >
                             Submit
                         </Button>
