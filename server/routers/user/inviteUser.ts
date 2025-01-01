@@ -152,7 +152,7 @@ export async function inviteUser(
             });
         });
 
-        const inviteLink = `${config.app.base_url}/invite?token=${inviteId}-${token}`;
+        const inviteLink = `${config.getRawConfig().app.base_url}/invite?token=${inviteId}-${token}`;
 
         if (doEmail) {
             await sendEmail(
@@ -165,7 +165,7 @@ export async function inviteUser(
                 }),
                 {
                     to: email,
-                    from: config.email?.no_reply,
+                    from: config.getRawConfig().email?.no_reply,
                     subject: "You're invited to join a Fossorial organization"
                 }
             );

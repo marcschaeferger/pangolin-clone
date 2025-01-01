@@ -127,7 +127,7 @@ export async function login(
 
         if (
             !existingUser.emailVerified &&
-            config.flags?.require_email_verification
+            config.getRawConfig().flags?.require_email_verification
         ) {
             return response<LoginResponse>(res, {
                 data: { emailVerificationRequired: true },

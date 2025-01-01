@@ -5,25 +5,26 @@ import config from "@server/config";
 import logger from "@server/logger";
 
 function createEmailClient() {
-    if (
-        !config.email?.smtp_host ||
-        !config.email?.smtp_pass ||
-        !config.email?.smtp_port ||
-        !config.email?.smtp_user
-    ) {
-        logger.warn(
-            "Email SMTP configuration is missing. Emails will not be sent.",
-        );
-        return;
-    }
+    const emailConfig = config.getRawConfig().email;
+if (
+    !emailConfig?.smtp_host ||
+    !emailConfig?.smtp_pass ||
+    !emailConfig?.smtp_port ||
+    !emailConfig?.smtp_user
+) {
+    logger.warn(
+        "Email SMTP configuration is missing. Emails will not be sent.",
+    );
+    return;
+}
 
     return nodemailer.createTransport({
-        host: config.email.smtp_host,
-        port: config.email.smtp_port,
+        host: emailConfig.smtp_host,
+        port: emailConfig.smtp_port,
         secure: false,
         auth: {
-            user: config.email.smtp_user,
-            pass: config.email.smtp_pass,
+            user: emailConfig.smtp_user,
+            pass: emailConfig.smtp_pass,
         },
     });
 }

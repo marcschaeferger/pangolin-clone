@@ -60,7 +60,7 @@ export async function signup(
     const passwordHash = await hashPassword(password);
     const userId = generateId(15);
 
-    if (config.flags?.disable_signup_without_invite) {
+    if (config.getRawConfig().flags?.disable_signup_without_invite) {
         if (!inviteToken || !inviteId) {
             return next(
                 createHttpError(
@@ -102,7 +102,7 @@ export async function signup(
             .where(eq(users.email, email));
 
         if (existing && existing.length > 0) {
-            if (!config.flags?.require_email_verification) {
+            if (!config.getRawConfig().flags?.require_email_verification) {
                 return next(
                     createHttpError(
                         HttpCode.BAD_REQUEST,
@@ -163,7 +163,7 @@ export async function signup(
         const cookie = serializeSessionCookie(token);
         res.appendHeader("Set-Cookie", cookie);
 
-        if (config.flags?.require_email_verification) {
+        if (config.getRawConfig().flags?.require_email_verification) {
             sendEmailVerificationCode(email, userId);
 
             return response<SignUpResponse>(res, {

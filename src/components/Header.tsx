@@ -48,17 +48,19 @@ export function Header({ orgId, orgs }: HeaderProps) {
                     <div className="hidden md:block">
                         <div className="flex items-center gap-4 mr-4">
                             <Link
-                                href="/docs"
+                                href="https://docs.fossorial.io"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="text-muted-foreground hover:text-foreground"
                             >
                                 Documentation
                             </Link>
-                            <Link
-                                href="/support"
+                            <a
+                                href="mailto:support@fossorial.io"
                                 className="text-muted-foreground hover:text-foreground"
                             >
                                 Support
-                            </Link>
+                            </a>
                         </div>
                     </div>
 

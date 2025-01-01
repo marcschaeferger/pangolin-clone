@@ -26,7 +26,7 @@ export async function sendResourceOtpEmail(
         }),
         {
             to: email,
-            from: config.email?.no_reply,
+            from: config.getRawConfig().email?.no_reply,
             subject: `Your one-time code to access ${resourceName}`
         }
     );

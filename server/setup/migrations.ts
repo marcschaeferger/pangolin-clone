@@ -1,14 +1,15 @@
-import { __DIRNAME } from "@server/config";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import db, { exists } from "@server/db";
 import path from "path";
 import semver from "semver";
 import { versionMigrations } from "@server/db/schema";
 import { desc } from "drizzle-orm";
-
-// Import all migrations explicitly
+import { __DIRNAME } from "@server/consts";
+import { loadAppVersion } from "@server/utils/loadAppVersion";
 import m1 from "./scripts/1.0.0-beta1";
-// Add new migration imports here as they are created
+
+// THIS CANNOT IMPORT ANYTHING FROM THE SERVER
+// EXCEPT FOR THE DATABASE AND THE SCHEMA
 
 // Define the migration list with versions and their corresponding functions
 const migrations = [
@@ -16,34 +17,32 @@ const migrations = [
     // Add new migrations here as they are created
 ] as const;
 
-export async function runMigrations() {
-    if (!process.env.APP_VERSION) {
-        throw new Error("APP_VERSION is not set in the environment");
-    }
+// Run the migrations
+await runMigrations();
 
-    if (process.env.ENVIRONMENT !== "prod") {
-        console.info("Skipping migrations in non-prod environment");
-        return;
+export async function runMigrations() {
+    const appVersion = loadAppVersion();
+    if (!appVersion) {
+        throw new Error("APP_VERSION is not set in the environment");
     }
 
     if (exists) {
         await executeScripts();
     } else {
-        console.info("Running migrations...");
+        console.log("Running migrations...");
         try {
             migrate(db, {
                 migrationsFolder: path.join(__DIRNAME, "init") // put here during the docker build
             });
-            console.info("Migrations completed successfully.");
+            console.log("Migrations completed successfully.");
         } catch (error) {
             console.error("Error running migrations:", error);
         }
 
-        // insert process.env.APP_VERSION into the versionMigrations table
         await db
             .insert(versionMigrations)
             .values({
-                version: process.env.APP_VERSION,
+                version: appVersion,
                 executedAt: Date.now()
             })
             .execute();
@@ -60,7 +59,7 @@ async function executeScripts() {
             .limit(1);
 
         const startVersion = lastExecuted[0]?.version ?? "0.0.0";
-        console.info(`Starting migrations from version ${startVersion}`);
+        console.log(`Starting migrations from version ${startVersion}`);
 
         // Filter and sort migrations
         const pendingMigrations = migrations
@@ -69,7 +68,7 @@ async function executeScripts() {
 
         // Run migrations in order
         for (const migration of pendingMigrations) {
-            console.info(`Running migration ${migration.version}`);
+            console.log(`Running migration ${migration.version}`);
 
             try {
                 await migration.run();
@@ -83,7 +82,7 @@ async function executeScripts() {
                     })
                     .execute();
 
-                console.info(
+                console.log(
                     `Successfully completed migration ${migration.version}`
                 );
             } catch (error) {
@@ -95,7 +94,7 @@ async function executeScripts() {
             }
         }
 
-        console.info("All migrations completed successfully");
+        console.log("All migrations completed successfully");
     } catch (error) {
         console.error("Migration process failed:", error);
         throw error;

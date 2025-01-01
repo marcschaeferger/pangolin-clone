@@ -423,11 +423,11 @@ unauthenticated.use("/auth", authRouter);
 authRouter.use(
     rateLimitMiddleware({
         windowMin:
-            config.rate_limits.auth?.window_minutes ||
-            config.rate_limits.global.window_minutes,
+            config.getRawConfig().rate_limits.auth?.window_minutes ||
+            config.getRawConfig().rate_limits.global.window_minutes,
         max:
-            config.rate_limits.auth?.max_requests ||
-            config.rate_limits.global.max_requests,
+            config.getRawConfig().rate_limits.auth?.max_requests ||
+            config.getRawConfig().rate_limits.global.max_requests,
         type: "IP_AND_PATH"
     })
 );

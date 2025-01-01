@@ -134,7 +134,7 @@ export async function authWithAccessToken(
             expiresAt: tokenItem.expiresAt,
             doNotExtend: tokenItem.expiresAt ? true : false
         });
-        const cookieName = `${config.server.resource_session_cookie_name}_${resource.resourceId}`;
+        const cookieName = `${config.getRawConfig().server.resource_session_cookie_name}_${resource.resourceId}`;
         const cookie = serializeResourceSessionCookie(cookieName, token);
         res.appendHeader("Set-Cookie", cookie);
 

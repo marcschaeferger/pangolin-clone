@@ -52,14 +52,14 @@ export async function getConfig(req: Request, res: Response, next: NextFunction)
             const address = await getNextAvailableSubnet();
             const listenPort = await getNextAvailablePort();
             let subEndpoint = "";
-            if (config.gerbil.use_subdomain) {
+            if (config.getRawConfig().gerbil.use_subdomain) {
                 subEndpoint = await getUniqueExitNodeEndpointName();
             }
 
             // create a new exit node
             exitNode = await db.insert(exitNodes).values({
                 publicKey,
-                endpoint: `${subEndpoint}${subEndpoint != "" ? "." : ""}${config.gerbil.base_endpoint}`,
+                endpoint: `${subEndpoint}${subEndpoint != "" ? "." : ""}${config.getRawConfig().gerbil.base_endpoint}`,
                 address,
                 listenPort,
                 reachableAt,
@@ -122,7 +122,7 @@ async function getNextAvailableSubnet(): Promise<string> {
     }).from(exitNodes);
 
     const addresses = existingAddresses.map(a => a.address);
-    let subnet = findNextAvailableCidr(addresses, config.gerbil.block_size, config.gerbil.subnet_group);
+    let subnet = findNextAvailableCidr(addresses, config.getRawConfig().gerbil.block_size, config.getRawConfig().gerbil.subnet_group);
     if (!subnet) {
         throw new Error('No available subnets remaining in space');
     }
@@ -139,7 +139,7 @@ async function getNextAvailablePort(): Promise<number> {
     }).from(exitNodes);
 
     // Find the first available port between 1024 and 65535
-    let nextPort = config.gerbil.start_port;
+    let nextPort = config.getRawConfig().gerbil.start_port;
     for (const port of existingPorts) {
         if (port.listenPort > nextPort) {
             break;

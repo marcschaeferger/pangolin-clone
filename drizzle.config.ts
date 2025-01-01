@@ -1,5 +1,5 @@
+import { APP_PATH } from "@server/consts";
 import { defineConfig } from "drizzle-kit";
-import config, { APP_PATH } from "@server/config";
 import path from "path";
 
 export default defineConfig({

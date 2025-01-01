@@ -3,7 +3,7 @@ import { readFileSync } from "fs";
 import { db } from "@server/db";
 import { exitNodes, sites } from "./schema";
 import { eq, and } from "drizzle-orm";
-import { __DIRNAME } from "@server/config";
+import { __DIRNAME } from "@server/consts";
 
 // Load the names from the names.json file
 const dev = process.env.ENVIRONMENT !== "prod";

@@ -1,7 +1,8 @@
 import "winston-daily-rotate-file";
-import config, { APP_PATH } from "@server/config";
+import config from "@server/config";
 import * as winston from "winston";
 import path from "path";
+import { APP_PATH } from "./consts";
 
 const hformat = winston.format.printf(
     ({ level, label, message, timestamp, stack, ...metadata }) => {
@@ -18,7 +19,7 @@ const hformat = winston.format.printf(
 
 const transports: any = [new winston.transports.Console({})];
 
-if (config.app.save_logs) {
+if (config.getRawConfig().app.save_logs) {
     transports.push(
         new winston.transports.DailyRotateFile({
             filename: path.join(APP_PATH, "logs", "pangolin-%DATE%.log"),
@@ -49,7 +50,7 @@ if (config.app.save_logs) {
 }
 
 const logger = winston.createLogger({
-    level: config.app.log_level.toLowerCase(),
+    level: config.getRawConfig().app.log_level.toLowerCase(),
     format: winston.format.combine(
         winston.format.errors({ stack: true }),
         winston.format.colorize(),

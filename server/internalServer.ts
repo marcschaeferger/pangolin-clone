@@ -10,7 +10,7 @@ import {
 } from "@server/middlewares";
 import internal from "@server/routers/internal";
 
-const internalPort = config.server.internal_port;
+const internalPort = config.getRawConfig().server.internal_port;
 
 export function createInternalServer() {
     const internalServer = express();

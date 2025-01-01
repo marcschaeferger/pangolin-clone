@@ -8,8 +8,8 @@
         "db:generate": "drizzle-kit generate",
         "db:push": "npx tsx server/db/migrate.ts",
         "db:studio": "drizzle-kit studio",
-        "build": "mkdir -p dist && next build && node esbuild.mjs -e server/index.ts -o dist/server.mjs",
-        "start": "NODE_ENV=development ENVIRONMENT=prod NODE_OPTIONS=--enable-source-maps node dist/server.mjs",
+        "build": "mkdir -p dist && next build && node esbuild.mjs -e server/index.ts -o dist/server.mjs && node esbuild.mjs -e server/setup/migrations.ts -o dist/migrations.mjs",
+        "start": "NODE_ENV=development ENVIRONMENT=prod sh -c 'node dist/migrations.mjs && node dist/server.mjs'",
         "email": "email dev --dir server/emails/templates --port 3005"
     },
     "dependencies": {

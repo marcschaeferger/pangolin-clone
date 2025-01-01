@@ -15,7 +15,7 @@ import { csrfProtectionMiddleware } from "./middlewares/csrfProtection";
 import helmet from "helmet";
 
 const dev = process.env.ENVIRONMENT !== "prod";
-const externalPort = config.server.external_port;
+const externalPort = config.getRawConfig().server.external_port;
 
 export function createApiServer() {
     const apiServer = express();
@@ -25,13 +25,13 @@ export function createApiServer() {
     if (dev) {
         apiServer.use(
             cors({
-                origin: `http://localhost:${config.server.next_port}`,
+                origin: `http://localhost:${config.getRawConfig().server.next_port}`,
                 credentials: true
             })
         );
     } else {
         const corsOptions = {
-            origin: config.app.base_url,
+            origin: config.getRawConfig().app.base_url,
             methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
             allowedHeaders: ["Content-Type", "X-CSRF-Token"]
         };
@@ -47,8 +47,8 @@ export function createApiServer() {
     if (!dev) {
         apiServer.use(
             rateLimitMiddleware({
-                windowMin: config.rate_limits.global.window_minutes,
-                max: config.rate_limits.global.max_requests,
+                windowMin: config.getRawConfig().rate_limits.global.window_minutes,
+                max: config.getRawConfig().rate_limits.global.max_requests,
                 type: "IP_AND_PATH"
             })
         );

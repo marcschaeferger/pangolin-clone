@@ -34,7 +34,7 @@ export const verifySessionUserMiddleware = async (
 
     if (
         !existingUser[0].emailVerified &&
-        config.flags?.require_email_verification
+        config.getRawConfig().flags?.require_email_verification
     ) {
         return next(
             createHttpError(HttpCode.BAD_REQUEST, "Email is not verified") // Might need to change the response type?

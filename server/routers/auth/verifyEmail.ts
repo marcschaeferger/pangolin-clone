@@ -28,7 +28,7 @@ export async function verifyEmail(
     res: Response,
     next: NextFunction
 ): Promise<any> {
-    if (!config.flags?.require_email_verification) {
+    if (!config.getRawConfig().flags?.require_email_verification) {
         return next(
             createHttpError(
                 HttpCode.BAD_REQUEST,

@@ -1,14 +1,10 @@
 import fs from "fs";
 import yaml from "js-yaml";
 import path from "path";
-import { fileURLToPath } from "url";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
-
-export const __FILENAME = fileURLToPath(import.meta.url);
-export const __DIRNAME = path.dirname(__FILENAME);
-
-export const APP_PATH = path.join("config");
+import { __DIRNAME, APP_PATH } from "@server/consts";
+import { loadAppVersion } from "@server/utils/loadAppVersion";
 
 const portSchema = z.number().positive().gt(0).lte(65535);
 
@@ -86,10 +82,6 @@ export class Config {
         this.loadConfig();
     }
 
-    public getRawConfig() {
-        return this.rawConfig;
-    }
-
     public loadConfig() {
         const loadConfig = (configPath: string) => {
             try {
@@ -160,16 +152,11 @@ export class Config {
             throw new Error(`Invalid configuration file: ${errors}`);
         }
 
-        const packageJsonPath = path.join(__DIRNAME, "..", "package.json");
-        let packageJson: any;
-        if (fs.existsSync && fs.existsSync(packageJsonPath)) {
-            const packageJsonContent = fs.readFileSync(packageJsonPath, "utf8");
-            packageJson = JSON.parse(packageJsonContent);
-
-            if (packageJson.version) {
-                process.env.APP_VERSION = packageJson.version;
-            }
+        const appVersion = loadAppVersion();
+        if (!appVersion) {
+            throw new Error("Could not load the application version");
         }
+        process.env.APP_VERSION = appVersion;
 
         process.env.NEXT_PORT = parsedConfig.data.server.next_port.toString();
         process.env.SERVER_EXTERNAL_PORT =
@@ -195,6 +182,22 @@ export class Config {
             : "false";
 
         this.rawConfig = parsedConfig.data;
+    }
+
+    public getRawConfig() {
+        return this.rawConfig;
+    }
+
+    public getBaseDomain(): string {
+        const newUrl = new URL(this.rawConfig.app.base_url);
+        const hostname = newUrl.hostname;
+        const parts = hostname.split(".");
+
+        if (parts.length <= 2) {
+            return parts.join(".");
+        }
+
+        return parts.slice(1).join(".");
     }
 }
 

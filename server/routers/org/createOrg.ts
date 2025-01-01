@@ -11,7 +11,6 @@ import { createAdminRole } from "@server/setup/ensureActions";
 import config from "@server/config";
 import { fromError } from "zod-validation-error";
 import { defaultRoleAllowedActions } from "../role";
-import { extractBaseDomain } from "@server/utils/extractBaseDomain";
 
 const createOrgSchema = z
     .object({
@@ -30,7 +29,7 @@ export async function createOrg(
 ): Promise<any> {
     try {
         // should this be in a middleware?
-        if (config.flags?.disable_user_create_org) {
+        if (config.getRawConfig().flags?.disable_user_create_org) {
             if (!req.user?.serverAdmin) {
                 return next(
                     createHttpError(
@@ -83,8 +82,8 @@ export async function createOrg(
         let org: Org | null = null;
 
         await db.transaction(async (trx) => {
-            // create a url from config.app.base_url and get the hostname
-            const domain = extractBaseDomain(config.app.base_url);
+            // create a url from config.getRawConfig().app.base_url and get the hostname
+            const domain = config.getBaseDomain();
 
             const newOrg = await trx
                 .insert(orgs)

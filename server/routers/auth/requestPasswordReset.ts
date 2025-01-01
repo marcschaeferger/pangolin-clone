@@ -82,7 +82,7 @@ export async function requestPasswordReset(
             });
         });
 
-        const url = `${config.app.base_url}/auth/reset-password?email=${email}&token=${token}`;
+        const url = `${config.getRawConfig().app.base_url}/auth/reset-password?email=${email}&token=${token}`;
 
         await sendEmail(
             ResetPasswordCode({
@@ -91,7 +91,7 @@ export async function requestPasswordReset(
                 link: url
             }),
             {
-                from: config.email?.no_reply,
+                from: config.getRawConfig().email?.no_reply,
                 to: email,
                 subject: "Reset your password"
             }

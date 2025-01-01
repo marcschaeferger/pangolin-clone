@@ -111,7 +111,7 @@ export async function verifyTotp(
             }),
             {
                 to: user.email,
-                from: config.email?.no_reply,
+                from: config.getRawConfig().email?.no_reply,
                 subject: "Two-factor authentication enabled"
             }
         );

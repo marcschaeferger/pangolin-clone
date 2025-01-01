@@ -147,7 +147,7 @@ export async function resetPassword(
         });
 
         await sendEmail(ConfirmPasswordReset({ email }), {
-            from: config.email?.no_reply,
+            from: config.getRawConfig().email?.no_reply,
             to: email,
             subject: "Password Reset Confirmation"
         });

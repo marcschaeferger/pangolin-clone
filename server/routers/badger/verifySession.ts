@@ -101,13 +101,13 @@ export async function verifyResourceSession(
             return allowed(res);
         }
 
-        const redirectUrl = `${config.app.base_url}/auth/resource/${encodeURIComponent(resource.resourceId)}?redirect=${encodeURIComponent(originalRequestURL)}`;
+        const redirectUrl = `${config.getRawConfig().app.base_url}/auth/resource/${encodeURIComponent(resource.resourceId)}?redirect=${encodeURIComponent(originalRequestURL)}`;
 
         if (!sessions) {
             return notAllowed(res);
         }
 
-        const sessionToken = sessions[config.server.session_cookie_name];
+        const sessionToken = sessions[config.getRawConfig().server.session_cookie_name];
 
         // check for unified login
         if (sso && sessionToken) {
@@ -129,7 +129,7 @@ export async function verifyResourceSession(
 
         const resourceSessionToken =
             sessions[
-                `${config.server.resource_session_cookie_name}_${resource.resourceId}`
+                `${config.getRawConfig().server.resource_session_cookie_name}_${resource.resourceId}`
             ];
 
         if (resourceSessionToken) {
@@ -213,7 +213,7 @@ async function isUserAllowedToAccessResource(
     user: User,
     resource: Resource
 ): Promise<boolean> {
-    if (config.flags?.require_email_verification && !user.emailVerified) {
+    if (config.getRawConfig().flags?.require_email_verification && !user.emailVerified) {
         return false;
     }
 

@@ -12,7 +12,7 @@ import { fromError } from "zod-validation-error";
 export async function setupServerAdmin() {
     const {
         server_admin: { email, password }
-    } = config.users;
+    } = config.getRawConfig().users;
 
     const parsed = passwordSchema.safeParse(password);
 

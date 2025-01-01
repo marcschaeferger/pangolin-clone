@@ -4,7 +4,7 @@ import { parse } from "url";
 import logger from "@server/logger";
 import config from "@server/config";
 
-const nextPort = config.server.next_port;
+const nextPort = config.getRawConfig().server.next_port;
 
 export async function createNextServer() {
     //   const app = next({ dev });

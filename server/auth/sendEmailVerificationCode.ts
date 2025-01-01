@@ -17,11 +17,11 @@ export async function sendEmailVerificationCode(
         VerifyEmail({
             username: email,
             verificationCode: code,
-            verifyLink: `${config.app.base_url}/auth/verify-email`
+            verifyLink: `${config.getRawConfig().app.base_url}/auth/verify-email`
         }),
         {
             to: email,
-            from: config.email?.no_reply,
+            from: config.getRawConfig().email?.no_reply,
             subject: "Verify your email address"
         }
     );

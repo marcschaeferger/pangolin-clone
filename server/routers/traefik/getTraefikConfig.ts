@@ -50,12 +50,12 @@ export async function traefikConfigProvider(
                         [badgerMiddlewareName]: {
                             apiBaseUrl: new URL(
                                 "/api/v1",
-                                `http://${config.server.internal_hostname}:${config.server.internal_port}`,
+                                `http://${config.getRawConfig().server.internal_hostname}:${config.getRawConfig().server.internal_port}`,
                             ).href,
                             resourceSessionCookieName:
-                                config.server.resource_session_cookie_name,
+                                config.getRawConfig().server.resource_session_cookie_name,
                             userSessionCookieName:
-                                config.server.session_cookie_name,
+                                config.getRawConfig().server.session_cookie_name,
                         },
                     },
                 },
@@ -95,8 +95,8 @@ export async function traefikConfigProvider(
             }
 
             const tls = {
-                certResolver: config.traefik.cert_resolver,
-                ...(config.traefik.prefer_wildcard_cert
+                certResolver: config.getRawConfig().traefik.cert_resolver,
+                ...(config.getRawConfig().traefik.prefer_wildcard_cert
                     ? {
                           domains: [
                               {
@@ -110,8 +110,8 @@ export async function traefikConfigProvider(
             http.routers![routerName] = {
                 entryPoints: [
                     resource.ssl
-                        ? config.traefik.https_entrypoint
-                        : config.traefik.http_entrypoint,
+                        ? config.getRawConfig().traefik.https_entrypoint
+                        : config.getRawConfig().traefik.http_entrypoint,
                 ],
                 middlewares: [badgerMiddlewareName],
                 service: serviceName,
@@ -122,7 +122,7 @@ export async function traefikConfigProvider(
             if (resource.ssl) {
                 // this is a redirect router; all it does is redirect to the https version if tls is enabled
                 http.routers![routerName + "-redirect"] = {
-                    entryPoints: [config.traefik.http_entrypoint],
+                    entryPoints: [config.getRawConfig().traefik.http_entrypoint],
                     middlewares: [redirectMiddlewareName],
                     service: serviceName,
                     rule: `Host(\`${fullDomain}\`)`,

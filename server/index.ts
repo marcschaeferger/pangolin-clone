@@ -1,8 +1,8 @@
+import { runSetupFunctions } from "./setup";
 import { createApiServer } from "./apiServer";
 import { createNextServer } from "./nextServer";
 import { createInternalServer } from "./internalServer";
 import { User, UserOrg } from "./db/schema";
-import { runSetupFunctions } from "./setup";
 
 async function startServers() {
     await runSetupFunctions();
