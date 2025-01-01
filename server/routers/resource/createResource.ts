@@ -53,8 +53,6 @@ export async function createResource(
 
         let { name, subdomain } = parsedBody.data;
 
-        subdomain = subdomain.toLowerCase(); // always to lower case
-
         // Validate request params
         const parsedParams = createResourceParamsSchema.safeParse(req.params);
         if (!parsedParams.success) {

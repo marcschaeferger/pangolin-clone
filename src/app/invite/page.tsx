@@ -44,7 +44,6 @@ export default async function InvitePage(props: {
             await authCookieHeader()
         )
         .catch((e) => {
-            console.error(e);
             error = formatAxiosError(e);
         });
 
@@ -67,8 +66,6 @@ export default async function InvitePage(props: {
     }
 
     const type = cardType();
-
-    console.log("card type is", type, error)
 
     if (!user && type === "user_does_not_exist") {
         redirect(`/auth/signup?redirect=/invite?token=${params.token}`);

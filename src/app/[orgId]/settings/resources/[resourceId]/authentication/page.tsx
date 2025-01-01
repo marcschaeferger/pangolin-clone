@@ -398,7 +398,7 @@ export default function ResourceAuthenticationPage() {
                                 onCheckedChange={(val) => setSsoEnabled(val)}
                             />
                             <Label htmlFor="sso-toggle">
-                                Allow Unified Login
+                                Use Platform SSO
                             </Label>
                         </div>
                         <span className="text-muted-foreground text-sm">

@@ -12,12 +12,12 @@ import { eq } from "drizzle-orm";
 import config from "@server/config";
 import type { RandomReader } from "@oslojs/crypto/random";
 import { generateRandomString } from "@oslojs/crypto/random";
+import { extractBaseDomain } from "@server/utils/extractBaseDomain";
 
 export const SESSION_COOKIE_NAME = config.server.session_cookie_name;
 export const SESSION_COOKIE_EXPIRES = 1000 * 60 * 60 * 24 * 30;
 export const SECURE_COOKIES = config.server.secure_cookies;
-export const COOKIE_DOMAIN =
-    "." + new URL(config.app.base_url).hostname.split(".").slice(-2).join(".");
+export const COOKIE_DOMAIN = "." + extractBaseDomain(config.app.base_url);
 
 export function generateSessionToken(): string {
     const bytes = new Uint8Array(20);

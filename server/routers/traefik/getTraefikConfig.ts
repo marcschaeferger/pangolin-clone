@@ -41,8 +41,6 @@ export async function traefikConfigProvider(
         const badgerMiddlewareName = "badger";
         const redirectMiddlewareName = "redirect-to-https";
 
-        // const baseDomain = new URL(config.app.base_url).hostname;
-
         const http: any = {
             routers: {},
             services: {},

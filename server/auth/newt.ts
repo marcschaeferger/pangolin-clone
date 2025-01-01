@@ -9,12 +9,12 @@ import { Newt, newts, newtSessions, NewtSession } from "@server/db/schema";
 import db from "@server/db";
 import { eq } from "drizzle-orm";
 import config from "@server/config";
+import { extractBaseDomain } from "@server/utils/extractBaseDomain";
 
 export const SESSION_COOKIE_NAME = "session";
 export const SESSION_COOKIE_EXPIRES = 1000 * 60 * 60 * 24 * 30;
 export const SECURE_COOKIES = config.server.secure_cookies;
-export const COOKIE_DOMAIN =
-    "." + new URL(config.app.base_url).hostname.split(".").slice(-2).join(".");
+export const COOKIE_DOMAIN = "." + extractBaseDomain(config.app.base_url);
 
 export async function createNewtSession(
     token: string,

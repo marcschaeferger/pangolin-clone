@@ -11,6 +11,7 @@ import { createAdminRole } from "@server/setup/ensureActions";
 import config from "@server/config";
 import { fromError } from "zod-validation-error";
 import { defaultRoleAllowedActions } from "../role";
+import { extractBaseDomain } from "@server/utils/extractBaseDomain";
 
 const createOrgSchema = z
     .object({
@@ -83,7 +84,7 @@ export async function createOrg(
 
         await db.transaction(async (trx) => {
             // create a url from config.app.base_url and get the hostname
-            const domain = new URL(config.app.base_url).hostname;
+            const domain = extractBaseDomain(config.app.base_url);
 
             const newOrg = await trx
                 .insert(orgs)

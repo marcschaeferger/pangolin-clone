@@ -1,9 +1,9 @@
-import { z } from "zod";
-import { fromError } from "zod-validation-error";
-import path from "path";
 import fs from "fs";
 import yaml from "js-yaml";
+import path from "path";
 import { fileURLToPath } from "url";
+import { z } from "zod";
+import { fromError } from "zod-validation-error";
 
 export const __FILENAME = fileURLToPath(import.meta.url);
 export const __DIRNAME = path.dirname(__FILENAME);
@@ -79,102 +79,125 @@ const environmentSchema = z.object({
         .optional()
 });
 
-export function getConfig() {
-    const loadConfig = (configPath: string) => {
-        try {
-            const yamlContent = fs.readFileSync(configPath, "utf8");
-            const config = yaml.load(yamlContent);
-            return config;
-        } catch (error) {
-            if (error instanceof Error) {
-                throw new Error(
-                    `Error loading configuration file: ${error.message}`
-                );
-            }
-            throw error;
-        }
-    };
+export class Config {
+    private rawConfig!: z.infer<typeof environmentSchema>;
 
-    const configFilePath1 = path.join(APP_PATH, "config.yml");
-    const configFilePath2 = path.join(APP_PATH, "config.yaml");
-
-    let environment: any;
-    if (fs.existsSync(configFilePath1)) {
-        environment = loadConfig(configFilePath1);
-    } else if (fs.existsSync(configFilePath2)) {
-        environment = loadConfig(configFilePath2);
+    constructor() {
+        this.loadConfig();
     }
-    if (!environment) {
-        const exampleConfigPath = path.join(__DIRNAME, "config.example.yml");
-        if (fs.existsSync(exampleConfigPath)) {
+
+    public getRawConfig() {
+        return this.rawConfig;
+    }
+
+    public loadConfig() {
+        const loadConfig = (configPath: string) => {
             try {
-                const exampleConfigContent = fs.readFileSync(
-                    exampleConfigPath,
-                    "utf8"
-                );
-                fs.writeFileSync(configFilePath1, exampleConfigContent, "utf8");
-                environment = loadConfig(configFilePath1);
+                const yamlContent = fs.readFileSync(configPath, "utf8");
+                const config = yaml.load(yamlContent);
+                return config;
             } catch (error) {
                 if (error instanceof Error) {
                     throw new Error(
-                        `Error creating configuration file from example: ${error.message}`
+                        `Error loading configuration file: ${error.message}`
                     );
                 }
                 throw error;
             }
-        } else {
-            throw new Error(
-                "No configuration file found and no example configuration available"
+        };
+
+        const configFilePath1 = path.join(APP_PATH, "config.yml");
+        const configFilePath2 = path.join(APP_PATH, "config.yaml");
+
+        let environment: any;
+        if (fs.existsSync(configFilePath1)) {
+            environment = loadConfig(configFilePath1);
+        } else if (fs.existsSync(configFilePath2)) {
+            environment = loadConfig(configFilePath2);
+        }
+        if (!environment) {
+            const exampleConfigPath = path.join(
+                __DIRNAME,
+                "config.example.yml"
             );
+            if (fs.existsSync(exampleConfigPath)) {
+                try {
+                    const exampleConfigContent = fs.readFileSync(
+                        exampleConfigPath,
+                        "utf8"
+                    );
+                    fs.writeFileSync(
+                        configFilePath1,
+                        exampleConfigContent,
+                        "utf8"
+                    );
+                    environment = loadConfig(configFilePath1);
+                } catch (error) {
+                    if (error instanceof Error) {
+                        throw new Error(
+                            `Error creating configuration file from example: ${
+                                error.message
+                            }`
+                        );
+                    }
+                    throw error;
+                }
+            } else {
+                throw new Error(
+                    "No configuration file found and no example configuration available"
+                );
+            }
         }
-    }
 
-    if (!environment) {
-        throw new Error("No configuration file found");
-    }
-
-    const parsedConfig = environmentSchema.safeParse(environment);
-
-    if (!parsedConfig.success) {
-        const errors = fromError(parsedConfig.error);
-        throw new Error(`Invalid configuration file: ${errors}`);
-    }
-
-    const packageJsonPath = path.join(__DIRNAME, "..", "package.json");
-    let packageJson: any;
-    if (fs.existsSync && fs.existsSync(packageJsonPath)) {
-        const packageJsonContent = fs.readFileSync(packageJsonPath, "utf8");
-        packageJson = JSON.parse(packageJsonContent);
-
-        if (packageJson.version) {
-            process.env.APP_VERSION = packageJson.version;
+        if (!environment) {
+            throw new Error("No configuration file found");
         }
+
+        const parsedConfig = environmentSchema.safeParse(environment);
+
+        if (!parsedConfig.success) {
+            const errors = fromError(parsedConfig.error);
+            throw new Error(`Invalid configuration file: ${errors}`);
+        }
+
+        const packageJsonPath = path.join(__DIRNAME, "..", "package.json");
+        let packageJson: any;
+        if (fs.existsSync && fs.existsSync(packageJsonPath)) {
+            const packageJsonContent = fs.readFileSync(packageJsonPath, "utf8");
+            packageJson = JSON.parse(packageJsonContent);
+
+            if (packageJson.version) {
+                process.env.APP_VERSION = packageJson.version;
+            }
+        }
+
+        process.env.NEXT_PORT = parsedConfig.data.server.next_port.toString();
+        process.env.SERVER_EXTERNAL_PORT =
+            parsedConfig.data.server.external_port.toString();
+        process.env.SERVER_INTERNAL_PORT =
+            parsedConfig.data.server.internal_port.toString();
+        process.env.FLAGS_EMAIL_VERIFICATION_REQUIRED = parsedConfig.data.flags
+            ?.require_email_verification
+            ? "true"
+            : "false";
+        process.env.SESSION_COOKIE_NAME =
+            parsedConfig.data.server.session_cookie_name;
+        process.env.RESOURCE_SESSION_COOKIE_NAME =
+            parsedConfig.data.server.resource_session_cookie_name;
+        process.env.EMAIL_ENABLED = parsedConfig.data.email ? "true" : "false";
+        process.env.DISABLE_SIGNUP_WITHOUT_INVITE = parsedConfig.data.flags
+            ?.disable_signup_without_invite
+            ? "true"
+            : "false";
+        process.env.DISABLE_USER_CREATE_ORG = parsedConfig.data.flags
+            ?.disable_user_create_org
+            ? "true"
+            : "false";
+
+        this.rawConfig = parsedConfig.data;
     }
-
-    process.env.NEXT_PORT = parsedConfig.data.server.next_port.toString();
-    process.env.SERVER_EXTERNAL_PORT =
-        parsedConfig.data.server.external_port.toString();
-    process.env.SERVER_INTERNAL_PORT =
-        parsedConfig.data.server.internal_port.toString();
-    process.env.FLAGS_EMAIL_VERIFICATION_REQUIRED = parsedConfig.data.flags
-        ?.require_email_verification
-        ? "true"
-        : "false";
-    process.env.SESSION_COOKIE_NAME =
-        parsedConfig.data.server.session_cookie_name;
-    process.env.RESOURCE_SESSION_COOKIE_NAME =
-        parsedConfig.data.server.resource_session_cookie_name;
-    process.env.EMAIL_ENABLED = parsedConfig.data.email ? "true" : "false";
-    process.env.DISABLE_SIGNUP_WITHOUT_INVITE = parsedConfig.data.flags
-        ?.disable_signup_without_invite
-        ? "true"
-        : "false";
-    process.env.DISABLE_USER_CREATE_ORG = parsedConfig.data.flags
-        ?.disable_user_create_org
-        ? "true"
-        : "false";
-
-    return parsedConfig.data;
 }
 
-export default getConfig();
+export const config = new Config();
+
+export default config;

@@ -1,4 +1,3 @@
-import logger from "@server/logger";
 import { __DIRNAME } from "@server/config";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import db, { exists } from "@server/db";
@@ -8,12 +7,12 @@ import { versionMigrations } from "@server/db/schema";
 import { desc } from "drizzle-orm";
 
 // Import all migrations explicitly
-import migration100beta1 from "./scripts/1.0.0-beta1";
+import m1 from "./scripts/1.0.0-beta1";
 // Add new migration imports here as they are created
 
 // Define the migration list with versions and their corresponding functions
 const migrations = [
-    { version: "1.0.0-beta.1", run: migration100beta1 }
+    { version: "1.0.0-beta.1", run: m1 }
     // Add new migrations here as they are created
 ] as const;
 
@@ -23,21 +22,21 @@ export async function runMigrations() {
     }
 
     if (process.env.ENVIRONMENT !== "prod") {
-        logger.info("Skipping migrations in non-prod environment");
+        console.info("Skipping migrations in non-prod environment");
         return;
     }
 
     if (exists) {
         await executeScripts();
     } else {
-        logger.info("Running migrations...");
+        console.info("Running migrations...");
         try {
             migrate(db, {
                 migrationsFolder: path.join(__DIRNAME, "init") // put here during the docker build
             });
-            logger.info("Migrations completed successfully.");
+            console.info("Migrations completed successfully.");
         } catch (error) {
-            logger.error("Error running migrations:", error);
+            console.error("Error running migrations:", error);
         }
 
         // insert process.env.APP_VERSION into the versionMigrations table
@@ -61,7 +60,7 @@ async function executeScripts() {
             .limit(1);
 
         const startVersion = lastExecuted[0]?.version ?? "0.0.0";
-        logger.info(`Starting migrations from version ${startVersion}`);
+        console.info(`Starting migrations from version ${startVersion}`);
 
         // Filter and sort migrations
         const pendingMigrations = migrations
@@ -70,7 +69,7 @@ async function executeScripts() {
 
         // Run migrations in order
         for (const migration of pendingMigrations) {
-            logger.info(`Running migration ${migration.version}`);
+            console.info(`Running migration ${migration.version}`);
 
             try {
                 await migration.run();
@@ -84,11 +83,11 @@ async function executeScripts() {
                     })
                     .execute();
 
-                logger.info(
+                console.info(
                     `Successfully completed migration ${migration.version}`
                 );
             } catch (error) {
-                logger.error(
+                console.error(
                     `Failed to run migration ${migration.version}:`,
                     error
                 );
@@ -96,9 +95,9 @@ async function executeScripts() {
             }
         }
 
-        logger.info("All migrations completed successfully");
+        console.info("All migrations completed successfully");
     } catch (error) {
-        logger.error("Migration process failed:", error);
+        console.error("Migration process failed:", error);
         throw error;
     }
 }
