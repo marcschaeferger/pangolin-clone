@@ -10,11 +10,11 @@ import {
     roles,
     userResources
 } from "@server/db/schema";
-import response from "@server/utils/response";
+import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import { eq, and } from "drizzle-orm";
-import stoi from "@server/utils/stoi";
+import stoi from "@server/lib/stoi";
 import { fromError } from "zod-validation-error";
 import { subdomainSchema } from "@server/schemas/subdomainSchema";
 import logger from "@server/logger";

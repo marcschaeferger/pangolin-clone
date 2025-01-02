@@ -5,7 +5,7 @@ import { createDate, isWithinExpirationDate, TimeSpan } from "oslo";
 import { alphabet, generateRandomString, sha256 } from "oslo/crypto";
 import { sendEmail } from "@server/emails";
 import ResourceOTPCode from "@server/emails/templates/ResourceOTPCode";
-import config from "@server/config";
+import config from "@server/lib/config";
 import { verifyPassword } from "./password";
 import { hashPassword } from "./password";
 

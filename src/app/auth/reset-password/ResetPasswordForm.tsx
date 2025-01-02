@@ -25,14 +25,12 @@ import { Input } from "@/components/ui/input";
 import {
     InputOTP,
     InputOTPGroup,
-    InputOTPSeparator,
     InputOTPSlot
 } from "@/components/ui/input-otp";
 import { AxiosResponse } from "axios";
 import {
     RequestPasswordResetBody,
     RequestPasswordResetResponse,
-    resetPasswordBody,
     ResetPasswordBody,
     ResetPasswordResponse
 } from "@server/routers/auth";
@@ -40,12 +38,11 @@ import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "../../../components/ui/alert";
 import { useToast } from "@app/hooks/useToast";
 import { useRouter } from "next/navigation";
-import { formatAxiosError } from "@app/lib/utils";
-import { createApiClient } from "@app/api";
+import { formatAxiosError } from "@app/lib/api";;
+import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
-import { passwordSchema } from "@server/auth/passwordSchema";
-import { get } from "http";
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
+import { passwordSchema } from "@server/auth/passwordSchema";
 
 const requestSchema = z.object({
     email: z.string().email()

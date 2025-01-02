@@ -1,15 +1,14 @@
-import { internal } from "@app/api";
-import { authCookieHeader } from "@app/api/cookies";
+import { internal } from "@app/lib/api";
+import { authCookieHeader } from "@app/lib/api/cookies";
 import { ListUsersResponse } from "@server/routers/user";
 import { AxiosResponse } from "axios";
-import UsersTable, { UserRow } from "./components/UsersTable";
+import UsersTable, { UserRow } from "./UsersTable";
 import { GetOrgResponse } from "@server/routers/org";
 import { cache } from "react";
 import OrgProvider from "@app/providers/OrgProvider";
 import UserProvider from "@app/providers/UserProvider";
 import { verifySession } from "@app/lib/auth/verifySession";
-import { SidebarSettings } from "@app/components/SidebarSettings";
-import AccessPageHeaderAndNav from "../components/AccessPageHeaderAndNav";
+import AccessPageHeaderAndNav from "../AccessPageHeaderAndNav";
 
 type UsersPageProps = {
     params: Promise<{ orgId: string }>;

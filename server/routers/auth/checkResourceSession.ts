@@ -3,8 +3,8 @@ import createHttpError from "http-errors";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
 import HttpCode from "@server/types/HttpCode";
-import { response } from "@server/utils";
-import { validateResourceSessionToken } from "@server/auth/resource";
+import { response } from "@server/lib";
+import { validateResourceSessionToken } from "@server/auth/sessions/resource";
 import logger from "@server/logger";
 
 export const params = z.object({

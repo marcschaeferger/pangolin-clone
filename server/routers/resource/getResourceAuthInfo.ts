@@ -7,7 +7,7 @@ import {
     resources
 } from "@server/db/schema";
 import { eq } from "drizzle-orm";
-import response from "@server/utils/response";
+import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import { fromError } from "zod-validation-error";

@@ -2,7 +2,7 @@ import next from "next";
 import express from "express";
 import { parse } from "url";
 import logger from "@server/logger";
-import config from "@server/config";
+import config from "@server/lib/config";
 
 const nextPort = config.getRawConfig().server.next_port;
 

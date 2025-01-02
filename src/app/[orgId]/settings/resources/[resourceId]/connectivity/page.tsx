@@ -48,9 +48,9 @@ import { useToast } from "@app/hooks/useToast";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { useResourceContext } from "@app/hooks/useResourceContext";
 import { ArrayElement } from "@server/types/ArrayElement";
-import { formatAxiosError } from "@app/lib/utils";
+import { formatAxiosError } from "@app/lib/api/formatAxiosError";;
 import { useEnvContext } from "@app/hooks/useEnvContext";
-import { createApiClient } from "@app/api";
+import { createApiClient } from "@app/lib/api";
 import { GetSiteResponse } from "@server/routers/site";
 
 const addTargetSchema = z.object({

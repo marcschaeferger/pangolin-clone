@@ -1,8 +1,8 @@
-import { internal } from "@app/api";
-import { authCookieHeader } from "@app/api/cookies";
+import { internal } from "@app/lib/api";
+import { authCookieHeader } from "@app/lib/api/cookies";
 import { ListSitesResponse } from "@server/routers/site";
 import { AxiosResponse } from "axios";
-import SitesTable, { SiteRow } from "./components/SitesTable";
+import SitesTable, { SiteRow } from "./SitesTable";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 
 type SitesPageProps = {

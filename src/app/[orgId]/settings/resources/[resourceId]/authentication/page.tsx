@@ -6,7 +6,7 @@ import { useToast } from "@app/hooks/useToast";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { useResourceContext } from "@app/hooks/useResourceContext";
 import { AxiosResponse } from "axios";
-import { formatAxiosError } from "@app/lib/utils";
+import { formatAxiosError } from "@app/lib/api";;
 import {
     GetResourceAuthInfoResponse,
     GetResourceWhitelistResponse,
@@ -33,10 +33,10 @@ import { ListUsersResponse } from "@server/routers/user";
 import { Switch } from "@app/components/ui/switch";
 import { Label } from "@app/components/ui/label";
 import { Binary, Key, ShieldCheck } from "lucide-react";
-import SetResourcePasswordForm from "./components/SetResourcePasswordForm";
+import SetResourcePasswordForm from "./SetResourcePasswordForm";
 import { Separator } from "@app/components/ui/separator";
-import SetResourcePincodeForm from "./components/SetResourcePincodeForm";
-import { createApiClient } from "@app/api";
+import SetResourcePincodeForm from "./SetResourcePincodeForm";
+import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 
 const UsersRolesFormSchema = z.object({

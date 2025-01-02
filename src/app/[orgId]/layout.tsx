@@ -1,5 +1,5 @@
-import { internal } from "@app/api";
-import { authCookieHeader } from "@app/api/cookies";
+import { internal } from "@app/lib/api";
+import { authCookieHeader } from "@app/lib/api/cookies";
 import ProfileIcon from "@app/components/ProfileIcon";
 import { verifySession } from "@app/lib/auth/verifySession";
 import UserProvider from "@app/providers/UserProvider";

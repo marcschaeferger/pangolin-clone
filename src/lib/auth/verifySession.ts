@@ -1,5 +1,5 @@
-import { internal } from "@app/api";
-import { authCookieHeader } from "@app/api/cookies";
+import { internal } from "@app/lib/api";
+import { authCookieHeader } from "@app/lib/api/cookies";
 import { GetUserResponse } from "@server/routers/user";
 import { AxiosResponse } from "axios";
 

@@ -12,7 +12,7 @@ import {
     userSites
 } from "@server/db/schema";
 import { and, count, eq, inArray } from "drizzle-orm";
-import response from "@server/utils/response";
+import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";

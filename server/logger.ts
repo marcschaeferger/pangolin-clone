@@ -1,8 +1,8 @@
 import "winston-daily-rotate-file";
-import config from "@server/config";
+import config from "@server/lib/config";
 import * as winston from "winston";
 import path from "path";
-import { APP_PATH } from "./consts";
+import { APP_PATH } from "./lib/consts";
 
 const hformat = winston.format.printf(
     ({ level, label, message, timestamp, stack, ...metadata }) => {

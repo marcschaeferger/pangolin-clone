@@ -28,3 +28,4 @@ tsconfig.tsbuildinfo
 config/
 dist
 .dist
+installer

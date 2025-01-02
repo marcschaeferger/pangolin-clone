@@ -1,6 +1,6 @@
 import { db } from "@server/db";
 import { orgs } from "../db/schema";
-import config from "@server/config";
+import config from "@server/lib/config";
 import { ne } from "drizzle-orm";
 import logger from "@server/logger";
 

@@ -18,8 +18,8 @@ import { useForm } from "react-hook-form";
 import { useToast } from "@app/hooks/useToast";
 import { useRouter } from "next/navigation";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
-import { formatAxiosError } from "@app/lib/utils";
-import { createApiClient } from "@app/api";
+import { formatAxiosError } from "@app/lib/api";;
+import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 
 const GeneralFormSchema = z.object({

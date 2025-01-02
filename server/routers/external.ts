@@ -1,5 +1,5 @@
 import { Router } from "express";
-import config from "@server/config";
+import config from "@server/lib/config";
 import * as site from "./site";
 import * as org from "./org";
 import * as resource from "./resource";

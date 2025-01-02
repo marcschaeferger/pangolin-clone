@@ -1,6 +1,6 @@
-import { internal } from "@app/api";
-import { authCookieHeader } from "@app/api/cookies";
-import ResourcesTable, { ResourceRow } from "./components/ResourcesTable";
+import { internal } from "@app/lib/api";
+import { authCookieHeader } from "@app/lib/api/cookies";
+import ResourcesTable, { ResourceRow } from "./ResourcesTable";
 import { AxiosResponse } from "axios";
 import { ListResourcesResponse } from "@server/routers/resource";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";

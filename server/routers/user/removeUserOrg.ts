@@ -3,7 +3,7 @@ import { z } from "zod";
 import { db } from "@server/db";
 import { userOrgs, userResources, users, userSites } from "@server/db/schema";
 import { and, eq } from "drizzle-orm";
-import response from "@server/utils/response";
+import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";

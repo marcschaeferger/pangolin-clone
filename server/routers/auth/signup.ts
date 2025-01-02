@@ -1,15 +1,13 @@
 import { NextFunction, Request, Response } from "express";
 import db from "@server/db";
-import { hash } from "@node-rs/argon2";
 import HttpCode from "@server/types/HttpCode";
 import { z } from "zod";
-import { userActions, users } from "@server/db/schema";
+import { users } from "@server/db/schema";
 import { fromError } from "zod-validation-error";
 import createHttpError from "http-errors";
-import response from "@server/utils/response";
+import response from "@server/lib/response";
 import { SqliteError } from "better-sqlite3";
 import { sendEmailVerificationCode } from "../../auth/sendEmailVerificationCode";
-import { passwordSchema } from "@server/auth/passwordSchema";
 import { eq } from "drizzle-orm";
 import moment from "moment";
 import {
@@ -17,12 +15,12 @@ import {
     generateId,
     generateSessionToken,
     serializeSessionCookie
-} from "@server/auth";
-import { ActionsEnum } from "@server/auth/actions";
-import config from "@server/config";
+} from "@server/auth/sessions/app";
+import config from "@server/lib/config";
 import logger from "@server/logger";
 import { hashPassword } from "@server/auth/password";
 import { checkValidInvite } from "@server/auth/checkValidInvite";
+import { passwordSchema } from "@server/auth/passwordSchema";
 
 export const signupBodySchema = z.object({
     email: z.string().email(),

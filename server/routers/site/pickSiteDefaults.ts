@@ -2,12 +2,12 @@ import { Request, Response, NextFunction } from "express";
 import { db } from "@server/db";
 import { exitNodes, sites } from "@server/db/schema";
 import { eq } from "drizzle-orm";
-import response from "@server/utils/response";
+import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
-import { findNextAvailableCidr } from "@server/utils/ip";
-import { generateId } from "@server/auth";
+import { findNextAvailableCidr } from "@server/lib/ip";
+import { generateId } from "@server/auth/sessions/app";
 
 export type PickSiteDefaultsResponse = {
     exitNodeId: number;

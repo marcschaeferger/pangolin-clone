@@ -5,11 +5,11 @@ import HttpCode from "@server/types/HttpCode";
 import { z } from "zod";
 import { newts } from "@server/db/schema";
 import createHttpError from "http-errors";
-import response from "@server/utils/response";
+import response from "@server/lib/response";
 import { SqliteError } from "better-sqlite3";
 import moment from "moment";
-import { generateSessionToken } from "@server/auth";
-import { createNewtSession } from "@server/auth/newt";
+import { generateSessionToken } from "@server/auth/sessions/app";
+import { createNewtSession } from "@server/auth/sessions/newt";
 import { fromError } from "zod-validation-error";
 import { hashPassword } from "@server/auth/password";
 

@@ -9,12 +9,12 @@ import {
     resourcePassword,
     resourcePincode
 } from "@server/db/schema";
-import response from "@server/utils/response";
+import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import { sql, eq, or, inArray, and, count } from "drizzle-orm";
 import logger from "@server/logger";
-import stoi from "@server/utils/stoi";
+import stoi from "@server/lib/stoi";
 
 const listResourcesParamsSchema = z
     .object({

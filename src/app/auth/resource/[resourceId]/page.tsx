@@ -3,19 +3,19 @@ import {
     GetResourceAuthInfoResponse,
     GetResourceResponse
 } from "@server/routers/resource";
-import ResourceAuthPortal from "./components/ResourceAuthPortal";
-import { internal, priv } from "@app/api";
+import ResourceAuthPortal from "./ResourceAuthPortal";
+import { internal, priv } from "@app/lib/api";
 import { AxiosResponse } from "axios";
-import { authCookieHeader } from "@app/api/cookies";
+import { authCookieHeader } from "@app/lib/api/cookies";
 import { cache } from "react";
 import { verifySession } from "@app/lib/auth/verifySession";
 import { redirect } from "next/navigation";
-import ResourceNotFound from "./components/ResourceNotFound";
-import ResourceAccessDenied from "./components/ResourceAccessDenied";
+import ResourceNotFound from "./ResourceNotFound";
+import ResourceAccessDenied from "./ResourceAccessDenied";
 import { cookies } from "next/headers";
 import { CheckResourceSessionResponse } from "@server/routers/auth";
-import AccessTokenInvalid from "./components/AccessToken";
-import AccessToken from "./components/AccessToken";
+import AccessTokenInvalid from "./AccessToken";
+import AccessToken from "./AccessToken";
 
 export default async function ResourceAuthPage(props: {
     params: Promise<{ resourceId: number }>;

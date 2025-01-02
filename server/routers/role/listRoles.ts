@@ -2,13 +2,13 @@ import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
 import { roles, orgs } from "@server/db/schema";
-import response from "@server/utils/response";
+import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import { sql, eq } from "drizzle-orm";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
-import stoi from "@server/utils/stoi";
+import stoi from "@server/lib/stoi";
 
 const listRolesParamsSchema = z
     .object({

@@ -3,7 +3,7 @@ import Database from "better-sqlite3";
 import * as schema from "@server/db/schema";
 import path from "path";
 import fs from "fs/promises";
-import { APP_PATH } from "@server/consts";
+import { APP_PATH } from "@server/lib/consts";
 
 export const location = path.join(APP_PATH, "db", "db.sqlite");
 export const exists = await checkFileExists(location);

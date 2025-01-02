@@ -3,11 +3,11 @@ import { z } from "zod";
 import { db } from "@server/db";
 import { sites } from "@server/db/schema";
 import { eq, and } from "drizzle-orm";
-import response from "@server/utils/response";
+import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
-import stoi from "@server/utils/stoi";
+import stoi from "@server/lib/stoi";
 import { fromError } from "zod-validation-error";
 
 const getSiteSchema = z

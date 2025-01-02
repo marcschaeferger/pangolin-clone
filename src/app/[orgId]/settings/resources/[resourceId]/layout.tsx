@@ -1,19 +1,19 @@
 import ResourceProvider from "@app/providers/ResourceProvider";
-import { internal } from "@app/api";
+import { internal } from "@app/lib/api";
 import {
     GetResourceAuthInfoResponse,
     GetResourceResponse,
 } from "@server/routers/resource";
 import { AxiosResponse } from "axios";
 import { redirect } from "next/navigation";
-import { authCookieHeader } from "@app/api/cookies";
+import { authCookieHeader } from "@app/lib/api/cookies";
 import { SidebarSettings } from "@app/components/SidebarSettings";
 import {  Cloud, Settings, Shield } from "lucide-react";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { GetOrgResponse } from "@server/routers/org";
 import OrgProvider from "@app/providers/OrgProvider";
 import { cache } from "react";
-import ResourceInfoBox from "./components/ResourceInfoBox";
+import ResourceInfoBox from "./ResourceInfoBox";
 import {
     Breadcrumb,
     BreadcrumbItem,

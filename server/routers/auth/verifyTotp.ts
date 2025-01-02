@@ -3,17 +3,17 @@ import createHttpError from "http-errors";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
 import HttpCode from "@server/types/HttpCode";
-import { response } from "@server/utils";
+import { response } from "@server/lib";
 import { db } from "@server/db";
 import { twoFactorBackupCodes, User, users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import { alphabet, generateRandomString } from "oslo/crypto";
 import { hashPassword } from "@server/auth/password";
-import { verifyTotpCode } from "@server/auth/2fa";
+import { verifyTotpCode } from "@server/auth/totp";
 import logger from "@server/logger";
 import { sendEmail } from "@server/emails";
 import TwoFactorAuthNotification from "@server/emails/templates/TwoFactorAuthNotification";
-import config from "@server/config";
+import config from "@server/lib/config";
 
 export const verifyTotpBody = z
     .object({

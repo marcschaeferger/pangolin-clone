@@ -1,6 +1,6 @@
 "use client";
 
-import { SidebarNav } from "@app/components/sidebar-nav";
+import { SidebarNav } from "@app/components/SidebarNav";
 import React from "react";
 
 interface SideBarSettingsProps {
@@ -18,7 +18,7 @@ export function SidebarSettings({
     children,
     sidebarNavItems,
     disabled,
-    limitWidth,
+    limitWidth
 }: SideBarSettingsProps) {
     return (
         <div className="space-y-8 pb-16k">

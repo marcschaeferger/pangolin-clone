@@ -1,8 +1,8 @@
-import { generateSessionToken } from "@server/auth";
+import { generateSessionToken } from "@server/auth/sessions/app";
 import db from "@server/db";
 import { resourceAccessToken, resources } from "@server/db/schema";
 import HttpCode from "@server/types/HttpCode";
-import response from "@server/utils/response";
+import response from "@server/lib/response";
 import { eq, and } from "drizzle-orm";
 import { NextFunction, Request, Response } from "express";
 import createHttpError from "http-errors";
@@ -11,8 +11,8 @@ import { fromError } from "zod-validation-error";
 import {
     createResourceSession,
     serializeResourceSessionCookie
-} from "@server/auth/resource";
-import config from "@server/config";
+} from "@server/auth/sessions/resource";
+import config from "@server/lib/config";
 import logger from "@server/logger";
 import { verify } from "@node-rs/argon2";
 import { isWithinExpirationDate } from "oslo";

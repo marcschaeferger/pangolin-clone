@@ -6,7 +6,7 @@ import { Socket } from "net";
 import { Newt, newts, NewtSession } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import db from "@server/db";
-import { validateNewtSessionToken } from "@server/auth/newt";
+import { validateNewtSessionToken } from "@server/auth/sessions/newt";
 import { messageHandlers } from "./messageHandlers";
 import logger from "@server/logger";
 
@@ -64,7 +64,7 @@ const addClient = (newtId: string, ws: AuthenticatedWebSocket): void => {
 const removeClient = (newtId: string, ws: AuthenticatedWebSocket): void => {
     const existingClients = connectedClients.get(newtId) || [];
     const updatedClients = existingClients.filter(client => client !== ws);
-    
+
     if (updatedClients.length === 0) {
         connectedClients.delete(newtId);
         logger.info(`All connections removed for Newt ID: ${newtId}`);
@@ -145,18 +145,18 @@ const setupConnection = (ws: AuthenticatedWebSocket, newt: Newt): void => {
         try {
             const message: WSMessage = JSON.parse(data.toString());
             // logger.info(`Message received from Newt ID ${newtId}:`, message);
-    
+
             // Validate message format
             if (!message.type || typeof message.type !== "string") {
                 throw new Error("Invalid message format: missing or invalid type");
             }
-    
+
             // Get the appropriate handler for the message type
             const handler = messageHandlers[message.type];
             if (!handler) {
                 throw new Error(`Unsupported message type: ${message.type}`);
             }
-    
+
             // Process the message and get response
             const response = await handler({
                 message,
@@ -166,7 +166,7 @@ const setupConnection = (ws: AuthenticatedWebSocket, newt: Newt): void => {
                 broadcastToAllExcept,
                 connectedClients
             });
-    
+
             // Send response if one was returned
             if (response) {
                 if (response.broadcast) {
@@ -191,13 +191,13 @@ const setupConnection = (ws: AuthenticatedWebSocket, newt: Newt): void => {
                 }
             }));
         }
-    });    
-    
+    });
+
     ws.on("close", () => {
         removeClient(newt.newtId, ws);
         logger.info(`Client disconnected - Newt ID: ${newt.newtId}`);
     });
-    
+
     ws.on("error", (error: Error) => {
         logger.error(`WebSocket error for Newt ID ${newt.newtId}:`, error);
     });

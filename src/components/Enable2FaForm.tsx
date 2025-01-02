@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
-import { createApiClient } from "@app/api";
+import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { AxiosResponse } from "axios";
 import {
@@ -36,7 +36,7 @@ import {
     CredenzaTitle
 } from "@app/components/Credenza";
 import { useToast } from "@app/hooks/useToast";
-import { formatAxiosError } from "@app/lib/utils";
+import { formatAxiosError } from "@app/lib/api";;
 import CopyTextBox from "@app/components/CopyTextBox";
 import { QRCodeCanvas, QRCodeSVG } from "qrcode.react";
 import { useUserContext } from "@app/hooks/useUserContext";

@@ -3,7 +3,7 @@ import {
     generateId,
     generateIdFromEntropySize,
     SESSION_COOKIE_EXPIRES
-} from "@server/auth";
+} from "@server/auth/sessions/app";
 import db from "@server/db";
 import {
     ResourceAccessToken,
@@ -11,7 +11,7 @@ import {
     resources
 } from "@server/db/schema";
 import HttpCode from "@server/types/HttpCode";
-import response from "@server/utils/response";
+import response from "@server/lib/response";
 import { eq } from "drizzle-orm";
 import { NextFunction, Request, Response } from "express";
 import createHttpError from "http-errors";

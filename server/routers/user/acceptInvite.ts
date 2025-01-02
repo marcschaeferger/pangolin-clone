@@ -1,18 +1,15 @@
-import { verify } from "@node-rs/argon2";
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
 import { roles, userInvites, userOrgs, users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
-import response from "@server/utils/response";
+import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
-import { isWithinExpirationDate } from "oslo";
-import { verifyPassword } from "@server/auth/password";
 import { checkValidInvite } from "@server/auth/checkValidInvite";
-import { verifySession } from "@server/auth";
+import { verifySession } from "@server/auth/sessions/verifySession";
 
 const acceptInviteBodySchema = z
     .object({

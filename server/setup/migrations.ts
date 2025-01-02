@@ -4,8 +4,8 @@ import path from "path";
 import semver from "semver";
 import { versionMigrations } from "@server/db/schema";
 import { desc } from "drizzle-orm";
-import { __DIRNAME } from "@server/consts";
-import { loadAppVersion } from "@server/utils/loadAppVersion";
+import { __DIRNAME } from "@server/lib/consts";
+import { loadAppVersion } from "@server/lib/loadAppVersion";
 import m1 from "./scripts/1.0.0-beta1";
 
 // THIS CANNOT IMPORT ANYTHING FROM THE SERVER

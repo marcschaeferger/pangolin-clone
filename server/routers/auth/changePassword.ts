@@ -2,22 +2,28 @@ import { Request, Response, NextFunction } from "express";
 import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
 import { fromError } from "zod-validation-error";
-import { unauthorized, invalidateAllSessions } from "@server/auth";
 import { z } from "zod";
 import { db } from "@server/db";
 import { User, users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
-import { response } from "@server/utils";
-import { hashPassword, verifyPassword } from "@server/auth/password";
-import { verifyTotpCode } from "@server/auth/2fa";
-import { passwordSchema } from "@server/auth/passwordSchema";
+import { response } from "@server/lib";
+import {
+    hashPassword,
+    verifyPassword
+} from "@server/auth/password";
+import { verifyTotpCode } from "@server/auth/totp";
 import logger from "@server/logger";
+import { unauthorized } from "@server/auth/unauthorizedResponse";
+import { invalidateAllSessions } from "@server/auth/sessions/app";
+import { passwordSchema } from "@server/auth/passwordSchema";
 
-export const changePasswordBody = z.object({
-    oldPassword: z.string(),
-    newPassword: passwordSchema,
-    code: z.string().optional(),
-}).strict();
+export const changePasswordBody = z
+    .object({
+        oldPassword: z.string(),
+        newPassword: passwordSchema,
+        code: z.string().optional()
+    })
+    .strict();
 
 export type ChangePasswordBody = z.infer<typeof changePasswordBody>;
 
@@ -28,7 +34,7 @@ export type ChangePasswordResponse = {
 export async function changePassword(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
 ): Promise<any> {
     const parsedBody = changePasswordBody.safeParse(req.body);
 
@@ -36,8 +42,8 @@ export async function changePassword(
         return next(
             createHttpError(
                 HttpCode.BAD_REQUEST,
-                fromError(parsedBody.error).toString(),
-            ),
+                fromError(parsedBody.error).toString()
+            )
         );
     }
 
@@ -49,14 +55,14 @@ export async function changePassword(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    "New password cannot be the same as the old password",
-                ),
+                    "New password cannot be the same as the old password"
+                )
             );
         }
 
         const validPassword = await verifyPassword(
             oldPassword,
-            user.passwordHash,
+            user.passwordHash
         );
         if (!validPassword) {
             return next(unauthorized());
@@ -69,21 +75,21 @@ export async function changePassword(
                     success: true,
                     error: false,
                     message: "Two-factor authentication required",
-                    status: HttpCode.ACCEPTED,
+                    status: HttpCode.ACCEPTED
                 });
             }
             const validOTP = await verifyTotpCode(
                 code!,
                 user.twoFactorSecret!,
-                user.userId,
+                user.userId
             );
 
             if (!validOTP) {
                 return next(
                     createHttpError(
                         HttpCode.BAD_REQUEST,
-                        "The two-factor code you entered is incorrect",
-                    ),
+                        "The two-factor code you entered is incorrect"
+                    )
                 );
             }
         }
@@ -93,7 +99,7 @@ export async function changePassword(
         await db
             .update(users)
             .set({
-                passwordHash: hash,
+                passwordHash: hash
             })
             .where(eq(users.userId, user.userId));
 
@@ -106,15 +112,15 @@ export async function changePassword(
             success: true,
             error: false,
             message: "Password changed successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,
-                "Failed to authenticate user",
-            ),
+                "Failed to authenticate user"
+            )
         );
     }
 }

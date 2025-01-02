@@ -1,13 +1,13 @@
-import { generateId, invalidateAllSessions } from "@server/auth";
+import { generateId, invalidateAllSessions } from "@server/auth/sessions/app";
 import { hashPassword, verifyPassword } from "@server/auth/password";
-import { passwordSchema } from "@server/auth/passwordSchema";
-import config from "@server/config";
+import config from "@server/lib/config";
 import db from "@server/db";
 import { users } from "@server/db/schema";
 import logger from "@server/logger";
 import { eq } from "drizzle-orm";
 import moment from "moment";
 import { fromError } from "zod-validation-error";
+import { passwordSchema } from "@server/auth/passwordSchema";
 
 export async function setupServerAdmin() {
     const {

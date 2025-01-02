@@ -16,7 +16,7 @@ import {
     PopoverTrigger
 } from "@app/components/ui/popover";
 import { useEnvContext } from "@app/hooks/useEnvContext";
-import { cn } from "@app/lib/utils";
+import { cn } from "@app/lib/cn";
 import { ListOrgsResponse } from "@server/routers/org";
 import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import Link from "next/link";

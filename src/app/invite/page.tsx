@@ -1,11 +1,11 @@
-import { internal } from "@app/api";
-import { authCookieHeader } from "@app/api/cookies";
+import { internal } from "@app/lib/api";
+import { authCookieHeader } from "@app/lib/api/cookies";
 import { verifySession } from "@app/lib/auth/verifySession";
 import { AcceptInviteResponse } from "@server/routers/user";
 import { AxiosResponse } from "axios";
 import { redirect } from "next/navigation";
 import InviteStatusCard from "./InviteStatusCard";
-import { formatAxiosError } from "@app/lib/utils";
+import { formatAxiosError } from "@app/lib/api";;
 
 export default async function InvitePage(props: {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;

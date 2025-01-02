@@ -1,13 +1,13 @@
 import { Request, Response, NextFunction } from "express";
 import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
-import response from "@server/utils/response";
+import response from "@server/lib/response";
 import logger from "@server/logger";
 import {
     createBlankSessionTokenCookie,
     invalidateSession,
     SESSION_COOKIE_NAME
-} from "@server/auth";
+} from "@server/auth/sessions/app";
 
 export async function logout(
     req: Request,

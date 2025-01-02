@@ -2,7 +2,7 @@ import { ErrorRequestHandler, NextFunction, Response } from "express";
 import ErrorResponse from "@server/types/ErrorResponse";
 import HttpCode from "@server/types/HttpCode";
 import logger from "@server/logger";
-import config from "@server/config";
+import config from "@server/lib/config";
 
 export const errorHandlerMiddleware: ErrorRequestHandler = (
     error,

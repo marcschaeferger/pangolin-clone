@@ -41,7 +41,7 @@ import {
 } from "@app/components/Credenza";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { Description } from "@radix-ui/react-toast";
-import { createApiClient } from "@app/api";
+import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 
 type InviteUserFormProps = {

@@ -1,5 +1,5 @@
-import { internal } from "@app/api";
-import { authCookieHeader } from "@app/api/cookies";
+import { internal } from "@app/lib/api";
+import { authCookieHeader } from "@app/lib/api/cookies";
 import { AxiosResponse } from "axios";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { redirect } from "next/navigation";
@@ -7,7 +7,7 @@ import { cache } from "react";
 import { GetOrgResponse } from "@server/routers/org";
 import OrgProvider from "@app/providers/OrgProvider";
 import { ListAccessTokensResponse } from "@server/routers/accessToken";
-import ShareLinksTable, { ShareLinkRow } from "./components/ShareLinksTable";
+import ShareLinksTable, { ShareLinkRow } from "./ShareLinksTable";
 
 type ShareLinksPageProps = {
     params: Promise<{ orgId: string }>;

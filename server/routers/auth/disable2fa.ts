@@ -2,18 +2,18 @@ import { Request, Response, NextFunction } from "express";
 import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
 import { fromError } from "zod-validation-error";
-import { unauthorized } from "@server/auth";
 import { z } from "zod";
 import { db } from "@server/db";
-import { twoFactorBackupCodes, User, users } from "@server/db/schema";
+import { User, users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
-import { response } from "@server/utils";
+import { response } from "@server/lib";
 import { verifyPassword } from "@server/auth/password";
-import { verifyTotpCode } from "@server/auth/2fa";
+import { verifyTotpCode } from "@server/auth/totp";
 import logger from "@server/logger";
 import { sendEmail } from "@server/emails";
 import TwoFactorAuthNotification from "@server/emails/templates/TwoFactorAuthNotification";
-import config from "@server/config";
+import config from "@server/lib/config";
+import { unauthorized } from "@server/auth/unauthorizedResponse";
 
 export const disable2faBody = z
     .object({

@@ -1,6 +1,6 @@
 "use client";
 
-import { createApiClient } from "@app/api";
+import { createApiClient } from "@app/lib/api";
 import { Avatar, AvatarFallback } from "@app/components/ui/avatar";
 import { Button } from "@app/components/ui/button";
 import {
@@ -13,7 +13,7 @@ import {
 } from "@app/components/ui/dropdown-menu";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { useToast } from "@app/hooks/useToast";
-import { formatAxiosError } from "@app/lib/utils";
+import { formatAxiosError } from "@app/lib/api";;
 import { Laptop, LogOut, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";

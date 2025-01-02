@@ -7,7 +7,7 @@ import {
     CardHeader,
     CardTitle
 } from "@/components/ui/card";
-import { createApiClient } from "@app/api";
+import { createApiClient } from "@app/lib/api";
 import LoginForm from "@app/components/LoginForm";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { useRouter } from "next/navigation";

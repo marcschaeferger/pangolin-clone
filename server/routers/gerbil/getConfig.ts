@@ -3,13 +3,13 @@ import { z } from 'zod';
 import { sites, resources, targets, exitNodes } from '@server/db/schema';
 import { db } from '@server/db';
 import { eq } from 'drizzle-orm';
-import response from "@server/utils/response";
+import response from "@server/lib/response";
 import HttpCode from '@server/types/HttpCode';
 import createHttpError from 'http-errors';
 import logger from '@server/logger';
-import config from "@server/config";
+import config from "@server/lib/config";
 import { getUniqueExitNodeEndpointName } from '@server/db/names';
-import { findNextAvailableCidr } from "@server/utils/ip";
+import { findNextAvailableCidr } from "@server/lib/ip";
 import { fromError } from 'zod-validation-error';
 // Define Zod schema for request validation
 const getConfigSchema = z.object({
@@ -34,7 +34,7 @@ export async function getConfig(req: Request, res: Response, next: NextFunction)
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    fromError(parsedParams.error).toString() 
+                    fromError(parsedParams.error).toString()
                 )
             );
         }

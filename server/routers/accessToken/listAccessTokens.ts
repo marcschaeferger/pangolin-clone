@@ -7,12 +7,12 @@ import {
     roleResources,
     resourceAccessToken
 } from "@server/db/schema";
-import response from "@server/utils/response";
+import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import { sql, eq, or, inArray, and, count, isNull, lt, gt } from "drizzle-orm";
 import logger from "@server/logger";
-import stoi from "@server/utils/stoi";
+import stoi from "@server/lib/stoi";
 
 const listAccessTokensParamsSchema = z
     .object({

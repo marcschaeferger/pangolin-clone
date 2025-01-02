@@ -3,12 +3,12 @@ import { z } from "zod";
 import { db } from "@server/db";
 import { userOrgs, roles } from "@server/db/schema";
 import { eq, and } from "drizzle-orm";
-import response from "@server/utils/response";
+import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
-import stoi from "@server/utils/stoi";
+import stoi from "@server/lib/stoi";
 
 const addUserRoleParamsSchema = z
     .object({

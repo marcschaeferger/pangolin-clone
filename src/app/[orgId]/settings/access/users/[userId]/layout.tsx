@@ -1,7 +1,7 @@
-import { internal } from "@app/api";
+import { internal } from "@app/lib/api";
 import { AxiosResponse } from "axios";
 import { redirect } from "next/navigation";
-import { authCookieHeader } from "@app/api/cookies";
+import { authCookieHeader } from "@app/lib/api/cookies";
 import { SidebarSettings } from "@app/components/SidebarSettings";
 import { GetOrgUserResponse } from "@server/routers/user";
 import OrgUserProvider from "@app/providers/OrgUserProvider";

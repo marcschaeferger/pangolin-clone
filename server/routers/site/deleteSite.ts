@@ -3,7 +3,7 @@ import { z } from "zod";
 import { db } from "@server/db";
 import { newts, newtSessions, sites } from "@server/db/schema";
 import { eq } from "drizzle-orm";
-import response from "@server/utils/response";
+import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
@@ -77,7 +77,7 @@ export async function deleteSite(
 
             await trx.delete(sites).where(eq(sites.siteId, siteId));
         });
-        
+
         return response(res, {
             data: null,
             success: true,

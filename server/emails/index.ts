@@ -1,7 +1,7 @@
 export * from "@server/emails/sendEmail";
 
 import nodemailer from "nodemailer";
-import config from "@server/config";
+import config from "@server/lib/config";
 import logger from "@server/logger";
 
 function createEmailClient() {

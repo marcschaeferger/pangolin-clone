@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createApiClient } from "@app/api";
+import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { AxiosResponse } from "axios";
 import { Disable2faBody, Disable2faResponse } from "@server/routers/auth";
@@ -29,7 +29,7 @@ import {
     CredenzaTitle
 } from "@app/components/Credenza";
 import { useToast } from "@app/hooks/useToast";
-import { formatAxiosError } from "@app/lib/utils";
+import { formatAxiosError } from "@app/lib/api";;
 import { useUserContext } from "@app/hooks/useUserContext";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "./ui/input-otp";
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";

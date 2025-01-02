@@ -2,13 +2,13 @@ import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
 import { newts, resources, sites, Target, targets } from "@server/db/schema";
-import response from "@server/utils/response";
+import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { addPeer } from "../gerbil/peers";
 import { eq, and } from "drizzle-orm";
-import { isIpInCidr } from "@server/utils/ip";
+import { isIpInCidr } from "@server/lib/ip";
 import { fromError } from "zod-validation-error";
 import { addTargets } from "../newt/targets";
 

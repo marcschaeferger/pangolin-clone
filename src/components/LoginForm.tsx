@@ -25,9 +25,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LoginResponse } from "@server/routers/auth";
 import { useRouter } from "next/navigation";
 import { AxiosResponse } from "axios";
-import { formatAxiosError } from "@app/lib/utils";
+import { formatAxiosError } from "@app/lib/api";;
 import { LockIcon } from "lucide-react";
-import { createApiClient } from "@app/api";
+import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import {
     InputOTP,

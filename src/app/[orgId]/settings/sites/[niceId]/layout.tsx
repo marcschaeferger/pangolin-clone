@@ -1,9 +1,9 @@
 import SiteProvider from "@app/providers/SiteProvider";
-import { internal } from "@app/api";
+import { internal } from "@app/lib/api";
 import { GetSiteResponse } from "@server/routers/site";
 import { AxiosResponse } from "axios";
 import { redirect } from "next/navigation";
-import { authCookieHeader } from "@app/api/cookies";
+import { authCookieHeader } from "@app/lib/api/cookies";
 import { SidebarSettings } from "@app/components/SidebarSettings";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -15,7 +15,7 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator
 } from "@app/components/ui/breadcrumb";
-import SiteInfoCard from "./components/SiteInfoCard";
+import SiteInfoCard from "./SiteInfoCard";
 
 interface SettingsLayoutProps {
     children: React.ReactNode;

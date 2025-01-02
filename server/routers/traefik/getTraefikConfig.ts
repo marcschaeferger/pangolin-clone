@@ -4,7 +4,7 @@ import * as schema from "@server/db/schema";
 import { and, eq, isNotNull } from "drizzle-orm";
 import logger from "@server/logger";
 import HttpCode from "@server/types/HttpCode";
-import config from "@server/config";
+import config from "@server/lib/config";
 
 export async function traefikConfigProvider(
     _: Request,

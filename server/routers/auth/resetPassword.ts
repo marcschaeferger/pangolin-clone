@@ -1,23 +1,21 @@
-import config from "@server/config";
+import config from "@server/lib/config";
 import { Request, Response, NextFunction } from "express";
 import createHttpError from "http-errors";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
 import HttpCode from "@server/types/HttpCode";
-import { response } from "@server/utils";
+import { response } from "@server/lib";
 import { db } from "@server/db";
 import { passwordResetTokens, users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
-import { sha256 } from "oslo/crypto";
 import { hashPassword, verifyPassword } from "@server/auth/password";
-import { verifyTotpCode } from "@server/auth/2fa";
-import { passwordSchema } from "@server/auth/passwordSchema";
-import { encodeHex } from "oslo/encoding";
+import { verifyTotpCode } from "@server/auth/totp";
 import { isWithinExpirationDate } from "oslo";
-import { invalidateAllSessions } from "@server/auth";
+import { invalidateAllSessions } from "@server/auth/sessions/app";
 import logger from "@server/logger";
 import ConfirmPasswordReset from "@server/emails/templates/NotifyResetPassword";
 import { sendEmail } from "@server/emails";
+import { passwordSchema } from "@server/auth/passwordSchema";
 
 export const resetPasswordBody = z
     .object({

@@ -3,8 +3,8 @@ import { NextFunction, Request, Response } from "express";
 import createHttpError from "http-errors";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
-import { response } from "@server/utils/response";
-import { validateSessionToken } from "@server/auth";
+import { response } from "@server/lib/response";
+import { validateSessionToken } from "@server/auth/sessions/app";
 import db from "@server/db";
 import {
     resourceAccessToken,
@@ -16,8 +16,8 @@ import {
     userOrgs
 } from "@server/db/schema";
 import { and, eq } from "drizzle-orm";
-import config from "@server/config";
-import { validateResourceSessionToken } from "@server/auth/resource";
+import config from "@server/lib/config";
+import { validateResourceSessionToken } from "@server/auth/sessions/resource";
 import { Resource, roleResources, userResources } from "@server/db/schema";
 import logger from "@server/logger";
 

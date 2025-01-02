@@ -4,16 +4,14 @@ import { z } from "zod";
 import { fromError } from "zod-validation-error";
 import { encodeHex } from "oslo/encoding";
 import HttpCode from "@server/types/HttpCode";
-import { unauthorized } from "@server/auth";
-import { response } from "@server/utils";
+import { response } from "@server/lib";
 import { db } from "@server/db";
 import { User, users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
-import { verify } from "@node-rs/argon2";
 import { createTOTPKeyURI } from "oslo/otp";
-import config from "@server/config";
 import logger from "@server/logger";
 import { verifyPassword } from "@server/auth/password";
+import { unauthorized } from "@server/auth/unauthorizedResponse";
 
 export const requestTotpSecretBody = z
     .object({

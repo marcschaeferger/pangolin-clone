@@ -4,7 +4,7 @@ import { resourceAccessToken, resources, userOrgs } from "@server/db/schema";
 import { and, eq } from "drizzle-orm";
 import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
-import { canUserAccessResource } from "./helpers/canUserAccessResource";
+import { canUserAccessResource } from "@server/lib/canUserAccessResource";
 
 export async function verifyAccessTokenAccess(
     req: Request,

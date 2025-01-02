@@ -1,5 +1,5 @@
 import { verify } from "@node-rs/argon2";
-import { generateSessionToken } from "@server/auth";
+import { generateSessionToken } from "@server/auth/sessions/app";
 import db from "@server/db";
 import {
     orgs,
@@ -9,7 +9,7 @@ import {
     resourceWhitelist
 } from "@server/db/schema";
 import HttpCode from "@server/types/HttpCode";
-import response from "@server/utils/response";
+import response from "@server/lib/response";
 import { and, eq } from "drizzle-orm";
 import { NextFunction, Request, Response } from "express";
 import createHttpError from "http-errors";
@@ -18,9 +18,9 @@ import { fromError } from "zod-validation-error";
 import {
     createResourceSession,
     serializeResourceSessionCookie
-} from "@server/auth/resource";
+} from "@server/auth/sessions/resource";
 import logger from "@server/logger";
-import config from "@server/config";
+import config from "@server/lib/config";
 import { AuthWithPasswordResponse } from "./authWithPassword";
 import { isValidOtp, sendResourceOtpEmail } from "@server/auth/resourceOtp";
 import { verifyPassword } from "@server/auth/password";

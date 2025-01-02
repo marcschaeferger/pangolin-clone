@@ -14,8 +14,8 @@ import {
     CardTitle
 } from "@app/components/ui/card";
 import CopyTextBox from "@app/components/CopyTextBox";
-import { formatAxiosError } from "@app/lib/utils";
-import { createApiClient } from "@app/api";
+import { formatAxiosError } from "@app/lib/api";;
+import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { Separator } from "@/components/ui/separator";
 import { z } from "zod";
@@ -32,7 +32,7 @@ import {
     FormMessage
 } from "@app/components/ui/form";
 import { Alert, AlertDescription } from "@app/components/ui/alert";
-import CreateSiteForm from "../[orgId]/settings/sites/components/CreateSiteForm";
+import CreateSiteForm from "../[orgId]/settings/sites/CreateSiteForm";
 
 type Step = "org" | "site" | "resources";
 

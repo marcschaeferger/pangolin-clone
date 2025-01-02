@@ -2,7 +2,7 @@ import { db } from "@server/db";
 import { orgs, roleSites, sites, userSites } from "@server/db/schema";
 import logger from "@server/logger";
 import HttpCode from "@server/types/HttpCode";
-import response from "@server/utils/response";
+import response from "@server/lib/response";
 import { and, count, eq, inArray, or, sql } from "drizzle-orm";
 import { NextFunction, Request, Response } from "express";
 import createHttpError from "http-errors";

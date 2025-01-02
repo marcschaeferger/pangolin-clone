@@ -5,7 +5,7 @@ import db from "@server/db";
 import logger from "@server/logger";
 import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
-import response from "@server/utils/response";
+import response from "@server/lib/response";
 
 interface PeerBandwidth {
     publicKey: string;

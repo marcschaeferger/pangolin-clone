@@ -1,19 +1,16 @@
-import { verify } from "@node-rs/argon2";
 import {
-    createSession,
     generateSessionToken,
-    verifySession
-} from "@server/auth";
+} from "@server/auth/sessions/app";
 import db from "@server/db";
 import { newts } from "@server/db/schema";
 import HttpCode from "@server/types/HttpCode";
-import response from "@server/utils/response";
+import response from "@server/lib/response";
 import { eq } from "drizzle-orm";
 import { NextFunction, Request, Response } from "express";
 import createHttpError from "http-errors";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
-import { createNewtSession, validateNewtSessionToken } from "@server/auth/newt";
+import { createNewtSession, validateNewtSessionToken } from "@server/auth/sessions/newt";
 import { verifyPassword } from "@server/auth/password";
 
 export const newtGetTokenBodySchema = z.object({

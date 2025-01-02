@@ -1,13 +1,13 @@
-import { internal } from "@app/api";
-import { authCookieHeader } from "@app/api/cookies";
+import { internal } from "@app/lib/api";
+import { authCookieHeader } from "@app/lib/api/cookies";
 import { AxiosResponse } from "axios";
 import { GetOrgResponse } from "@server/routers/org";
 import { cache } from "react";
 import OrgProvider from "@app/providers/OrgProvider";
 import { ListRolesResponse } from "@server/routers/role";
-import RolesTable, { RoleRow } from "./components/RolesTable";
+import RolesTable, { RoleRow } from "./RolesTable";
 import { SidebarSettings } from "@app/components/SidebarSettings";
-import AccessPageHeaderAndNav from "../components/AccessPageHeaderAndNav";
+import AccessPageHeaderAndNav from "../AccessPageHeaderAndNav";
 
 type RolesPageProps = {
     params: Promise<{ orgId: string }>;

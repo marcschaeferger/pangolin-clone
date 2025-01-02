@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { cn, formatAxiosError } from "@/lib/utils";
+import { formatAxiosError } from "@app/lib/api";
 import { Button } from "@/components/ui/button";
 import {
     Form,
@@ -39,10 +39,10 @@ import { GetResourceAuthInfoResponse } from "@server/routers/resource";
 import { useToast } from "@app/hooks/useToast";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { useOrgContext } from "@app/hooks/useOrgContext";
-import CustomDomainInput from "../components/CustomDomainInput";
-import ResourceInfoBox from "../components/ResourceInfoBox";
+import CustomDomainInput from "../CustomDomainInput";
+import ResourceInfoBox from "../ResourceInfoBox";
 import { subdomainSchema } from "@server/schemas/subdomainSchema";
-import { createApiClient } from "@app/api";
+import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 
 const GeneralFormSchema = z.object({

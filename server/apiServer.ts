@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import config from "@server/config";
+import config from "@server/lib/config";
 import logger from "@server/logger";
 import {
     errorHandlerMiddleware,

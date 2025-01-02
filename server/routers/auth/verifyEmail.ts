@@ -3,12 +3,12 @@ import createHttpError from "http-errors";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
 import HttpCode from "@server/types/HttpCode";
-import { response } from "@server/utils";
+import { response } from "@server/lib";
 import { db } from "@server/db";
 import { User, emailVerificationCodes, users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import { isWithinExpirationDate } from "oslo";
-import config from "@server/config";
+import config from "@server/lib/config";
 import logger from "@server/logger";
 
 export const verifyEmailBody = z

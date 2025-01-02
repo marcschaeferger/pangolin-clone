@@ -33,8 +33,8 @@ import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "../../../components/ui/alert";
 import { useToast } from "@app/hooks/useToast";
 import { useRouter } from "next/navigation";
-import { formatAxiosError } from "@app/lib/utils";
-import { createApiClient } from "@app/api";
+import { formatAxiosError } from "@app/lib/api";;
+import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 
 const FormSchema = z.object({

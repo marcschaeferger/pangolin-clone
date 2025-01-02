@@ -3,12 +3,12 @@ import { z } from "zod";
 import { db } from "@server/db";
 import { eq } from "drizzle-orm";
 import { Org, orgs, roleActions, roles, userOrgs } from "@server/db/schema";
-import response from "@server/utils/response";
+import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { createAdminRole } from "@server/setup/ensureActions";
-import config from "@server/config";
+import config from "@server/lib/config";
 import { fromError } from "zod-validation-error";
 import { defaultRoleAllowedActions } from "../role";
 

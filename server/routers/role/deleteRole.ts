@@ -3,7 +3,7 @@ import { z } from "zod";
 import { db } from "@server/db";
 import { roles, userOrgs } from "@server/db/schema";
 import { eq } from "drizzle-orm";
-import response from "@server/utils/response";
+import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
@@ -108,7 +108,7 @@ export async function deleteRole(
             // delete the old role
             await trx.delete(roles).where(eq(roles.roleId, roleId));
         });
-        
+
         return response(res, {
             data: null,
             success: true,

@@ -26,8 +26,8 @@ import { SignUpResponse } from "@server/routers/auth";
 import { useRouter } from "next/navigation";
 import { passwordSchema } from "@server/auth/passwordSchema";
 import { AxiosResponse } from "axios";
-import { formatAxiosError } from "@app/lib/utils";
-import { createApiClient } from "@app/api";
+import { formatAxiosError } from "@app/lib/api";;
+import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 
 type SignupFormProps = {

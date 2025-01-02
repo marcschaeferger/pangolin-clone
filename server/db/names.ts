@@ -3,15 +3,15 @@ import { readFileSync } from "fs";
 import { db } from "@server/db";
 import { exitNodes, sites } from "./schema";
 import { eq, and } from "drizzle-orm";
-import { __DIRNAME } from "@server/consts";
+import { __DIRNAME } from "@server/lib/consts";
 
 // Load the names from the names.json file
 const dev = process.env.ENVIRONMENT !== "prod";
 let file;
 if (!dev) {
-    file = join(__DIRNAME, "names.json");
+    file = join("names.json");
 } else {
-    file = join(__DIRNAME, "/db/names.json");
+    file = join("server/db/names.json");
 }
 export const names = JSON.parse(readFileSync(file, "utf-8"));
 

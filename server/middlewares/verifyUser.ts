@@ -1,12 +1,13 @@
 import { NextFunction, Response } from "express";
 import ErrorResponse from "@server/types/ErrorResponse";
-import { unauthorized, verifySession } from "@server/auth";
 import { db } from "@server/db";
 import { users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
-import config from "@server/config";
+import config from "@server/lib/config";
+import { verifySession } from "@server/auth/sessions/verifySession";
+import { unauthorized } from "@server/auth/unauthorizedResponse";
 
 export const verifySessionUserMiddleware = async (
     req: any,
