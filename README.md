@@ -7,6 +7,12 @@ Pangolin is a self-hosted tunneled reverse proxy management server with identity
 -   [Installation Instructions](https://docs.fossorial.io)
 -   [Full Documentation](https://docs.fossorial.io)
 
+## Preview
+
+<img src="public/screenshots/preview.png" alt="Preview"/>
+
+_Sites page of Pangolin showing multiple site-to-site tunnels connected to the central server._
+
 ## Key Features
 
 ### Reverse Proxy Through WireGuard Tunnel
@@ -26,6 +32,12 @@ Pangolin is a self-hosted tunneled reverse proxy management server with identity
     -   **Temporary, self-destructing share links.**
     -   Resource specific pin codes.
     -   Resource specific passwords.
+
+### Simple Dashboard UI
+
+-   Manage sites, users, and roles with a clean and intuitive UI.
+-   Monitor site usage and connectivity.
+-   Light and dark mode options.
 
 ### Easy Deployment
 
@@ -58,10 +70,12 @@ Pangolin has a straightforward and simple dashboard UI:
     <tr>
       <td align="center"><img src="public/screenshots/auth.png" alt="Authentication Example" width="200"/></td>
       <td align="center"><img src="public/screenshots/connectivity.png" alt="Connectivity Example" width="200"/></td>
+      <td align="center"></td>
     </tr>
     <tr>
       <td align="center"><b>Authentication</b></td>
       <td align="center"><b>Connectivity</b></td>
+      <td align="center"><b></b></td>
     </tr>
   </table>
 </div>
@@ -100,29 +114,6 @@ Pangolin was inspired by several existing projects and concepts:
 
 -   **Authentic and Authelia**:  
     These projects inspired Pangolin’s centralized authentication system for proxies, enabling robust user and role management.
-
-## Technical Setup
-
-### Components Overview
-
-Pangolin’s architecture consists of the following components, each designed to handle a specific aspect of the system:
-
-1. **Pangolin** (Management Application & Central Server):  
-   The central hub for managing users, roles, organizations, and resources. Pangolin handles authentication, access control, and API management.
-
-2. [**Gerbil**](https://github.com/fosrl/gerbil) (WireGuard Interface Management):  
-   Acts as the intermediary for managing WireGuard configurations. It creates and maintains the secure tunnels between sites and the Pangolin server.
-
-3. [**Traefik**](https://github.com/traefik/traefik) (Reverse Proxy):  
-   A high-performance, modular reverse proxy that routes requests to private resources. Traefik is widely adopted, and its plugin system allows further customization and security enhancements. For example:
-
-    - Out-of-the-box compatibility with plugins like Fail2Ban or CrowdSec.
-    - Enhanced security via our custom Traefik plugin [**Badger**](https://github.com/fosrl/badger), which acts as an authentication bouncer.
-
-4. [**Newt**](https://github.com/fosrl/newt) (Minimal User Space WireGuard Client):  
-   A lightweight client designed to run on the private network. Newt:
-    - Connects to the Pangolin server via WebSocket for managing endpoints.
-    - Facilitates networking through its connection to Gerbil over the encrypted tunnel.
 
 ## Licensing
 
