@@ -199,7 +199,7 @@ PersistentKeepalive = 5`
     const newtConfig = `newt --id ${siteDefaults?.newtId} --secret ${siteDefaults?.newtSecret} --endpoint ${proto}//${siteDefaults?.endpoint}`;
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-4">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}

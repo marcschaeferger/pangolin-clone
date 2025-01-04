@@ -5,10 +5,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@app/providers/ThemeProvider";
 import EnvProvider from "@app/providers/EnvProvider";
 import { Separator } from "@app/components/ui/separator";
-import { cache } from "react";
-import { verifySession } from "@app/lib/auth/verifySession";
-import Header from "@app/components/Header";
-import UserProvider from "@app/providers/UserProvider";
 
 export const metadata: Metadata = {
     title: `Dashboard - Pangolin`,
@@ -26,7 +22,7 @@ export default async function RootLayout({
 
     return (
         <html suppressHydrationWarning>
-            <body className={`${font.className}`}>
+            <body className={`${font.className} min-h-screen flex flex-col`}>
                 <ThemeProvider
                     attribute="class"
                     defaultTheme="system"
@@ -34,23 +30,22 @@ export default async function RootLayout({
                     disableTransitionOnChange
                 >
                     <EnvProvider
-                        // it's import not to pass all of process.env here in case of secrets
-                        // select only the necessary ones
                         env={{
                             NEXT_PORT: process.env.NEXT_PORT as string,
                             SERVER_EXTERNAL_PORT: process.env
                                 .SERVER_EXTERNAL_PORT as string,
                             ENVIRONMENT: process.env.ENVIRONMENT as string,
                             EMAIL_ENABLED: process.env.EMAIL_ENABLED as string,
-                            // optional
                             DISABLE_USER_CREATE_ORG:
                                 process.env.DISABLE_USER_CREATE_ORG,
                             DISABLE_SIGNUP_WITHOUT_INVITE:
                                 process.env.DISABLE_SIGNUP_WITHOUT_INVITE
                         }}
                     >
-                        {children}
+                        {/* Main content */}
+                        <div className="flex-grow">{children}</div>
 
+                        {/* Footer */}
                         <footer className="w-full mt-12 py-3 mb-4">
                             <div className="container mx-auto flex flex-wrap justify-center items-center h-4 space-x-4 text-sm text-neutral-400 select-none">
                                 <div className="whitespace-nowrap">

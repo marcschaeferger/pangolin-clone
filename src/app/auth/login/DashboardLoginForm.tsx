@@ -37,7 +37,7 @@ export default function DashboardLoginForm({
     return (
         <Card className="w-full max-w-md">
             <CardHeader>
-                <CardTitle>Login</CardTitle>
+                <CardTitle>Welcome to Pangolin</CardTitle>
                 <CardDescription>
                     Enter your credentials to access your dashboard
                 </CardDescription>

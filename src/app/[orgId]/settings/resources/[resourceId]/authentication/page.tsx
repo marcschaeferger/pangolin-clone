@@ -6,7 +6,7 @@ import { useToast } from "@app/hooks/useToast";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { useResourceContext } from "@app/hooks/useResourceContext";
 import { AxiosResponse } from "axios";
-import { formatAxiosError } from "@app/lib/api";;
+import { formatAxiosError } from "@app/lib/api";
 import {
     GetResourceAuthInfoResponse,
     GetResourceWhitelistResponse,
@@ -383,7 +383,7 @@ export default function ResourceAuthenticationPage() {
             )}
 
             <div className="space-y-12">
-                <section className="space-y-8 lg:max-w-2xl">
+                <section className="space-y-4 lg:max-w-2xl">
                     <SettingsSectionTitle
                         title="Users & Roles"
                         description="Configure which users and roles can visit this resource"
@@ -397,9 +397,7 @@ export default function ResourceAuthenticationPage() {
                                 defaultChecked={resource.sso}
                                 onCheckedChange={(val) => setSsoEnabled(val)}
                             />
-                            <Label htmlFor="sso-toggle">
-                                Use Platform SSO
-                            </Label>
+                            <Label htmlFor="sso-toggle">Use Platform SSO</Label>
                         </div>
                         <span className="text-muted-foreground text-sm">
                             Existing users will only have to login once for all
@@ -414,120 +412,134 @@ export default function ResourceAuthenticationPage() {
                             )}
                             className="space-y-4"
                         >
-                            <FormField
-                                control={usersRolesForm.control}
-                                name="roles"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col items-start">
-                                        <FormLabel>Roles</FormLabel>
-                                        <FormControl>
-                                            {/* @ts-ignore */}
-                                            <TagInput
-                                                {...field}
-                                                activeTagIndex={
-                                                    activeRolesTagIndex
-                                                }
-                                                setActiveTagIndex={
-                                                    setActiveRolesTagIndex
-                                                }
-                                                placeholder="Enter a role"
-                                                tags={
-                                                    usersRolesForm.getValues()
-                                                        .roles
-                                                }
-                                                setTags={(newRoles) => {
-                                                    usersRolesForm.setValue(
-                                                        "roles",
-                                                        newRoles as [
-                                                            Tag,
-                                                            ...Tag[]
-                                                        ]
-                                                    );
-                                                }}
-                                                enableAutocomplete={true}
-                                                autocompleteOptions={allRoles}
-                                                allowDuplicates={false}
-                                                restrictTagsToAutocompleteOptions={
-                                                    true
-                                                }
-                                                sortTags={true}
-                                                styleClasses={{
-                                                    tag: {
-                                                        body: "bg-muted hover:bg-accent text-foreground py-2 px-3 rounded-full"
-                                                    },
-                                                    input: "text-base md:text-sm border-none bg-transparent text-inherit placeholder:text-inherit shadow-none",
-                                                    inlineTagsContainer:
-                                                        "bg-transparent p-2"
-                                                }}
-                                            />
-                                        </FormControl>
-                                        <FormDescription>
-                                            These roles will be able to access
-                                            this resource. Admins can always
-                                            access this resource.
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={usersRolesForm.control}
-                                name="users"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col items-start">
-                                        <FormLabel>Users</FormLabel>
-                                        <FormControl>
-                                            {/* @ts-ignore */}
-                                            <TagInput
-                                                {...field}
-                                                activeTagIndex={
-                                                    activeUsersTagIndex
-                                                }
-                                                setActiveTagIndex={
-                                                    setActiveUsersTagIndex
-                                                }
-                                                placeholder="Enter a user"
-                                                tags={
-                                                    usersRolesForm.getValues()
-                                                        .users
-                                                }
-                                                setTags={(newUsers) => {
-                                                    usersRolesForm.setValue(
-                                                        "users",
-                                                        newUsers as [
-                                                            Tag,
-                                                            ...Tag[]
-                                                        ]
-                                                    );
-                                                }}
-                                                enableAutocomplete={true}
-                                                autocompleteOptions={allUsers}
-                                                allowDuplicates={false}
-                                                restrictTagsToAutocompleteOptions={
-                                                    true
-                                                }
-                                                sortTags={true}
-                                                styleClasses={{
-                                                    tag: {
-                                                        body: "bg-muted hover:bg-accent text-foreground py-2 px-3 rounded-full"
-                                                    },
-                                                    input: "text-base md:text-sm border-none bg-transparent text-inherit placeholder:text-inherit shadow-none",
-                                                    inlineTagsContainer:
-                                                        "bg-transparent p-2"
-                                                }}
-                                            />
-                                        </FormControl>
-                                        <FormDescription>
-                                            Users added here will be able to
-                                            access this resource. A user will
-                                            always have access to a resource if
-                                            they have a role that has access to
-                                            it.
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                            {ssoEnabled && (
+                                <>
+                                    <FormField
+                                        control={usersRolesForm.control}
+                                        name="roles"
+                                        render={({ field }) => (
+                                            <FormItem className="flex flex-col items-start">
+                                                <FormLabel>Roles</FormLabel>
+                                                <FormControl>
+                                                    {/* @ts-ignore */}
+                                                    <TagInput
+                                                        {...field}
+                                                        activeTagIndex={
+                                                            activeRolesTagIndex
+                                                        }
+                                                        setActiveTagIndex={
+                                                            setActiveRolesTagIndex
+                                                        }
+                                                        placeholder="Enter a role"
+                                                        tags={
+                                                            usersRolesForm.getValues()
+                                                                .roles
+                                                        }
+                                                        setTags={(newRoles) => {
+                                                            usersRolesForm.setValue(
+                                                                "roles",
+                                                                newRoles as [
+                                                                    Tag,
+                                                                    ...Tag[]
+                                                                ]
+                                                            );
+                                                        }}
+                                                        enableAutocomplete={
+                                                            true
+                                                        }
+                                                        autocompleteOptions={
+                                                            allRoles
+                                                        }
+                                                        allowDuplicates={false}
+                                                        restrictTagsToAutocompleteOptions={
+                                                            true
+                                                        }
+                                                        sortTags={true}
+                                                        styleClasses={{
+                                                            tag: {
+                                                                body: "bg-muted hover:bg-accent text-foreground py-2 px-3 rounded-full"
+                                                            },
+                                                            input: "text-base md:text-sm border-none bg-transparent text-inherit placeholder:text-inherit shadow-none",
+                                                            inlineTagsContainer:
+                                                                "bg-transparent p-2"
+                                                        }}
+                                                    />
+                                                </FormControl>
+                                                <FormDescription>
+                                                    These roles will be able to
+                                                    access this resource. Admins
+                                                    can always access this
+                                                    resource.
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={usersRolesForm.control}
+                                        name="users"
+                                        render={({ field }) => (
+                                            <FormItem className="flex flex-col items-start">
+                                                <FormLabel>Users</FormLabel>
+                                                <FormControl>
+                                                    {/* @ts-ignore */}
+                                                    <TagInput
+                                                        {...field}
+                                                        activeTagIndex={
+                                                            activeUsersTagIndex
+                                                        }
+                                                        setActiveTagIndex={
+                                                            setActiveUsersTagIndex
+                                                        }
+                                                        placeholder="Enter a user"
+                                                        tags={
+                                                            usersRolesForm.getValues()
+                                                                .users
+                                                        }
+                                                        setTags={(newUsers) => {
+                                                            usersRolesForm.setValue(
+                                                                "users",
+                                                                newUsers as [
+                                                                    Tag,
+                                                                    ...Tag[]
+                                                                ]
+                                                            );
+                                                        }}
+                                                        enableAutocomplete={
+                                                            true
+                                                        }
+                                                        autocompleteOptions={
+                                                            allUsers
+                                                        }
+                                                        allowDuplicates={false}
+                                                        restrictTagsToAutocompleteOptions={
+                                                            true
+                                                        }
+                                                        sortTags={true}
+                                                        styleClasses={{
+                                                            tag: {
+                                                                body: "bg-muted hover:bg-accent text-foreground py-2 px-3 rounded-full"
+                                                            },
+                                                            input: "text-base md:text-sm border-none bg-transparent text-inherit placeholder:text-inherit shadow-none",
+                                                            inlineTagsContainer:
+                                                                "bg-transparent p-2"
+                                                        }}
+                                                    />
+                                                </FormControl>
+                                                <FormDescription>
+                                                    Users added here will be
+                                                    able to access this
+                                                    resource. A user will always
+                                                    have access to a resource if
+                                                    they have a role that has
+                                                    access to it.
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </>
+                            )}
                             <Button
                                 type="submit"
                                 loading={loadingSaveUsersRoles}
@@ -541,7 +553,7 @@ export default function ResourceAuthenticationPage() {
 
                 <Separator />
 
-                <section className="space-y-8 lg:max-w-2xl">
+                <section className="space-y-4 lg:max-w-2xl">
                     <SettingsSectionTitle
                         title="Authentication Methods"
                         description="Allow access to the resource via additional auth methods"
@@ -617,101 +629,108 @@ export default function ResourceAuthenticationPage() {
 
                 <Separator />
 
-                <section className="space-y-8 lg:max-w-2xl">
-                {env.EMAIL_ENABLED === "true" && (
-                    <>
-                        <div>
-                            <div className="flex items-center space-x-2 mb-2">
-                                <Switch
-                                    id="whitelist-toggle"
-                                    defaultChecked={
-                                        resource.emailWhitelistEnabled
-                                    }
-                                    onCheckedChange={(val) =>
-                                        setWhitelistEnabled(val)
-                                    }
-                                />
-                                <Label htmlFor="whitelist-toggle">
-                                    Email Whitelist
-                                </Label>
-                            </div>
-                            <span className="text-muted-foreground text-sm">
-                                Enable resource whitelist to require email-based
-                                authentication (one-time passwords) for resource
-                                access.
-                            </span>
-                        </div>
-
-                        {whitelistEnabled && (
-                            <Form {...whitelistForm}>
-                                <form className="space-y-4">
-                                    <FormField
-                                        control={whitelistForm.control}
-                                        name="emails"
-                                        render={({ field }) => (
-                                            <FormItem className="flex flex-col items-start">
-                                                <FormLabel>
-                                                    Whitelisted Emails
-                                                </FormLabel>
-                                                <FormControl>
-                                                    {/* @ts-ignore */}
-                                                    <TagInput
-                                                        {...field}
-                                                        activeTagIndex={
-                                                            activeEmailTagIndex
-                                                        }
-                                                        validateTag={(tag) => {
-                                                            return z
-                                                                .string()
-                                                                .email()
-                                                                .safeParse(tag)
-                                                                .success;
-                                                        }}
-                                                        setActiveTagIndex={
-                                                            setActiveEmailTagIndex
-                                                        }
-                                                        placeholder="Enter an email"
-                                                        tags={
-                                                            whitelistForm.getValues()
-                                                                .emails
-                                                        }
-                                                        setTags={(newRoles) => {
-                                                            whitelistForm.setValue(
-                                                                "emails",
-                                                                newRoles as [
-                                                                    Tag,
-                                                                    ...Tag[]
-                                                                ]
-                                                            );
-                                                        }}
-                                                        allowDuplicates={false}
-                                                        sortTags={true}
-                                                        styleClasses={{
-                                                            tag: {
-                                                                body: "bg-muted hover:bg-accent text-foreground py-2 px-3 rounded-full"
-                                                            },
-                                                            input: "text-base md:text-sm border-none bg-transparent text-inherit placeholder:text-inherit shadow-none",
-                                                            inlineTagsContainer:
-                                                                "bg-transparent p-2"
-                                                        }}
-                                                    />
-                                                </FormControl>
-                                            </FormItem>
-                                        )}
+                <section className="space-y-4 lg:max-w-2xl">
+                    {env.EMAIL_ENABLED === "true" && (
+                        <>
+                            <div>
+                                <div className="flex items-center space-x-2 mb-2">
+                                    <Switch
+                                        id="whitelist-toggle"
+                                        defaultChecked={
+                                            resource.emailWhitelistEnabled
+                                        }
+                                        onCheckedChange={(val) =>
+                                            setWhitelistEnabled(val)
+                                        }
                                     />
-                                </form>
-                            </Form>
-                        )}
+                                    <Label htmlFor="whitelist-toggle">
+                                        Email Whitelist
+                                    </Label>
+                                </div>
+                                <span className="text-muted-foreground text-sm">
+                                    Enable resource whitelist to require
+                                    email-based authentication (one-time
+                                    passwords) for resource access.
+                                </span>
+                            </div>
 
-                        <Button
-                            loading={loadingSaveWhitelist}
-                            disabled={loadingSaveWhitelist}
-                            onClick={saveWhitelist}
-                        >
-                            Save Whitelist
-                        </Button>
-                    </>
-                )}
+                            {whitelistEnabled && (
+                                <Form {...whitelistForm}>
+                                    <form className="space-y-4">
+                                        <FormField
+                                            control={whitelistForm.control}
+                                            name="emails"
+                                            render={({ field }) => (
+                                                <FormItem className="flex flex-col items-start">
+                                                    <FormLabel>
+                                                        Whitelisted Emails
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        {/* @ts-ignore */}
+                                                        <TagInput
+                                                            {...field}
+                                                            activeTagIndex={
+                                                                activeEmailTagIndex
+                                                            }
+                                                            validateTag={(
+                                                                tag
+                                                            ) => {
+                                                                return z
+                                                                    .string()
+                                                                    .email()
+                                                                    .safeParse(
+                                                                        tag
+                                                                    ).success;
+                                                            }}
+                                                            setActiveTagIndex={
+                                                                setActiveEmailTagIndex
+                                                            }
+                                                            placeholder="Enter an email"
+                                                            tags={
+                                                                whitelistForm.getValues()
+                                                                    .emails
+                                                            }
+                                                            setTags={(
+                                                                newRoles
+                                                            ) => {
+                                                                whitelistForm.setValue(
+                                                                    "emails",
+                                                                    newRoles as [
+                                                                        Tag,
+                                                                        ...Tag[]
+                                                                    ]
+                                                                );
+                                                            }}
+                                                            allowDuplicates={
+                                                                false
+                                                            }
+                                                            sortTags={true}
+                                                            styleClasses={{
+                                                                tag: {
+                                                                    body: "bg-muted hover:bg-accent text-foreground py-2 px-3 rounded-full"
+                                                                },
+                                                                input: "text-base md:text-sm border-none bg-transparent text-inherit placeholder:text-inherit shadow-none",
+                                                                inlineTagsContainer:
+                                                                    "bg-transparent p-2"
+                                                            }}
+                                                        />
+                                                    </FormControl>
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </form>
+                                </Form>
+                            )}
+
+                            <Button
+                                loading={loadingSaveWhitelist}
+                                disabled={loadingSaveWhitelist}
+                                onClick={saveWhitelist}
+                            >
+                                Save Whitelist
+                            </Button>
+                        </>
+                    )}
                 </section>
             </div>
         </>

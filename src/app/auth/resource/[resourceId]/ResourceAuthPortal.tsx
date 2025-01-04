@@ -401,7 +401,7 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
                                                     disabled={loadingLogin}
                                                 >
                                                     <LockIcon className="w-4 h-4 mr-2" />
-                                                    Login with PIN
+                                                    Log in with PIN
                                                 </Button>
                                             </form>
                                         </Form>
@@ -456,7 +456,7 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
                                                     disabled={loadingLogin}
                                                 >
                                                     <LockIcon className="w-4 h-4 mr-2" />
-                                                    Login with Password
+                                                    Log In with Password
                                                 </Button>
                                             </form>
                                         </Form>

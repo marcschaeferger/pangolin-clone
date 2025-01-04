@@ -84,7 +84,7 @@ export default function GeneralPage() {
             const res = await api.get<AxiosResponse<ListOrgsResponse>>(
                 `/orgs`
             );
-            
+
             if (res.status === 200) {
                 if (res.data.data.orgs.length > 0) {
                     const orgId = res.data.data.orgs[0].orgId;

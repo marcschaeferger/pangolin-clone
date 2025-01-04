@@ -304,8 +304,8 @@ export default function ReverseProxyTargets(props: {
                         {row.original.method}
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="http">HTTP</SelectItem>
-                        <SelectItem value="https">HTTPS</SelectItem>
+                        <SelectItem value="http">http</SelectItem>
+                        <SelectItem value="https">https</SelectItem>
                     </SelectContent>
                 </Select>
             )
@@ -412,7 +412,7 @@ export default function ReverseProxyTargets(props: {
     return (
         <>
             <div className="space-y-12">
-                <section className="space-y-8">
+                <section className="space-y-4">
                     <SettingsSectionTitle
                         title="SSL"
                         description="Setup SSL to secure your connections with LetsEncrypt certificates"
@@ -431,14 +431,14 @@ export default function ReverseProxyTargets(props: {
 
                 <hr />
 
-                <section className="space-y-8">
+                <section className="space-y-4">
                     <SettingsSectionTitle
                         title="Targets"
                         description="Setup targets to route traffic to your services"
                         size="1xl"
                     />
 
-                    <div className="space-y-8">
+                    <div className="space-y-4">
                         <Form {...addTargetForm}>
                             <form
                                 onSubmit={addTargetForm.handleSubmit(
@@ -470,18 +470,18 @@ export default function ReverseProxyTargets(props: {
                                                         </SelectTrigger>
                                                         <SelectContent>
                                                             <SelectItem value="http">
-                                                                HTTP
+                                                                http
                                                             </SelectItem>
                                                             <SelectItem value="https">
-                                                                HTTPS
+                                                                https
                                                             </SelectItem>
                                                         </SelectContent>
                                                     </Select>
                                                 </FormControl>
-                                                <FormDescription>
-                                                    Choose the method for how
-                                                    the target is accessed.
-                                                </FormDescription>
+                                                {/* <FormDescription> */}
+                                                {/*     Choose the method for how */}
+                                                {/*     the target is accessed. */}
+                                                {/* </FormDescription> */}
                                                 <FormMessage />
                                             </FormItem>
                                         )}
@@ -497,10 +497,9 @@ export default function ReverseProxyTargets(props: {
                                                 <FormControl>
                                                     <Input id="ip" {...field} />
                                                 </FormControl>
-                                                <FormDescription>
-                                                    Enter the IP address of the
-                                                    target.
-                                                </FormDescription>
+                                                {/* <FormDescription> */}
+                                                {/*     Use the IP of the resource on your private network if using Newt, or the peer IP if using raw WireGuard. */}
+                                                {/* </FormDescription> */}
                                                 <FormMessage />
                                             </FormItem>
                                         )}
@@ -519,10 +518,10 @@ export default function ReverseProxyTargets(props: {
                                                         required
                                                     />
                                                 </FormControl>
-                                                <FormDescription>
-                                                    Specify the port number for
-                                                    the target.
-                                                </FormDescription>
+                                                {/* <FormDescription> */}
+                                                {/*     Specify the port number for */}
+                                                {/*     the target. */}
+                                                {/* </FormDescription> */}
                                                 <FormMessage />
                                             </FormItem>
                                         )}

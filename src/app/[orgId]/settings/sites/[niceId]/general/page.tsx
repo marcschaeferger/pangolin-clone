@@ -67,7 +67,7 @@ export default function GeneralPage() {
 
     return (
         <>
-            <div className="space-y-8 max-w-xl">
+            <div className="space-y-4 max-w-xl">
                 <SettingsSectionTitle
                     title="General Settings"
                     description="Configure the general settings for this site"

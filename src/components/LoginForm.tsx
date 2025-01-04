@@ -130,7 +130,7 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
     }
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-4">
             {!mfaRequested && (
                 <Form {...form}>
                     <form
@@ -179,7 +179,7 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
                                     href={`/auth/reset-password${form.getValues().email ? `?email=${form.getValues().email}` : ""}`}
                                     className="text-sm text-muted-foreground"
                                 >
-                                    Forgot password?
+                                    Forgot your password?
                                 </Link>
                             </div>
                         </div>
@@ -279,7 +279,7 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
                         disabled={loading}
                     >
                         <LockIcon className="w-4 h-4 mr-2" />
-                        Login
+                        Log In
                     </Button>
                 )}
 
@@ -293,7 +293,7 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
                             mfaForm.reset();
                         }}
                     >
-                        Back to Login
+                        Back to Log In
                     </Button>
                 )}
             </div>

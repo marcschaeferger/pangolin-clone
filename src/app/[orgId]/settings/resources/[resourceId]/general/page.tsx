@@ -125,7 +125,7 @@ export default function GeneralForm() {
     return (
         <>
             <div className="space-y-12 lg:max-w-2xl">
-                <section className="space-y-8">
+                <section className="space-y-4">
                     <SettingsSectionTitle
                         title="General Settings"
                         description="Configure the general settings for this resource"

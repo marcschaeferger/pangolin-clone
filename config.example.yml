@@ -1,6 +1,6 @@
 app:
-    base_url: https://fossorial.io
-    log_level: debug
+    base_url: https://proxy.example.com
+    log_level: info
     save_logs: false
 
 server:
@@ -20,7 +20,7 @@ traefik:
 
 gerbil:
     start_port: 51820
-    base_endpoint: fossorial.io
+    base_endpoint: proxy.example.com
     use_subdomain: false
     block_size: 16
     subnet_group: 10.0.0.0/8
@@ -33,9 +33,9 @@ rate_limits:
 email:
     smtp_host: host.hoster.net
     smtp_port: 587
-    smtp_user: no-reply@example.io
+    smtp_user: no-reply@example.com
     smtp_pass: aaaaaaaaaaaaaaaaaa
-    no_reply: no-reply@example.io
+    no_reply: no-reply@example.com
 
 users:
     server_admin:
@@ -46,3 +46,4 @@ flags:
     require_email_verification: true
     disable_signup_without_invite: true
     disable_user_create_org: true
+
