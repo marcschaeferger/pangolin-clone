@@ -158,7 +158,7 @@ export default function DeleteRoleForm({
                         </CredenzaDescription>
                     </CredenzaHeader>
                     <CredenzaBody>
-                        <div className="space-y-8">
+                        <div className="space-y-4">
                             <div className="space-y-4">
                                 <p>
                                     You're about to delete the{" "}

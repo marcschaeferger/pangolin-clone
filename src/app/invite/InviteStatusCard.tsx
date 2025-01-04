@@ -91,7 +91,7 @@ export default function InviteStatusCard({
             );
         } else if (type === "wrong_user") {
             return (
-                <Button onClick={goToLogin}>Login in as different user</Button>
+                <Button onClick={goToLogin}>Log in as different user</Button>
             );
         } else if (type === "user_does_not_exist") {
             return <Button onClick={goToSignup}>Create an account</Button>;

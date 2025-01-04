@@ -5,6 +5,7 @@ import { z } from "zod";
 import { fromError } from "zod-validation-error";
 import { __DIRNAME, APP_PATH } from "@server/lib/consts";
 import { loadAppVersion } from "@server/lib/loadAppVersion";
+import { passwordSchema } from "@server/auth/passwordSchema";
 
 const portSchema = z.number().positive().gt(0).lte(65535);
 
@@ -53,17 +54,17 @@ const environmentSchema = z.object({
     }),
     email: z
         .object({
-            smtp_host: z.string().optional(),
-            smtp_port: portSchema.optional(),
-            smtp_user: z.string().optional(),
-            smtp_pass: z.string().optional(),
-            no_reply: z.string().email().optional()
+            smtp_host: z.string(),
+            smtp_port: portSchema,
+            smtp_user: z.string(),
+            smtp_pass: z.string(),
+            no_reply: z.string().email(),
         })
         .optional(),
     users: z.object({
         server_admin: z.object({
             email: z.string().email(),
-            password: z.string()
+            password: passwordSchema
         })
     }),
     flags: z
