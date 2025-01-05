@@ -60,16 +60,22 @@ export const SitesSplashCard = () => {
                             Runs in shell on macOS, Linux, and Windows
                         </li>
                     </ul>
-                    <Button className="w-full" variant="secondary">
+
+                    <div className="mt-4">
                         <Link
                             href="https://docs.fossorial.io/Newt/install"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center"
                         >
-                            Install Newt <ArrowRight className="ml-2 w-4 h-4" />
+                            <Button
+                                className="w-full flex items-center"
+                                variant="secondary"
+                            >
+                                Install Newt{" "}
+                                <ArrowRight className="ml-2 w-4 h-4" />
+                            </Button>
                         </Link>
-                    </Button>
+                    </div>
                 </div>
                 <div className="space-y-4">
                     <h3 className="text-xl font-semibold flex items-center gap-2">
