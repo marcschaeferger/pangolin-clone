@@ -56,7 +56,7 @@ export function EmailHeading({ children }: { children: React.ReactNode }) {
 }
 
 export function EmailGreeting({ children }: { children: React.ReactNode }) {
-    return <p className="text-lg text-gray-700 my-4">{children}</p>;
+    return <p className="text-base text-gray-700 my-4">{children}</p>;
 }
 
 // EmailText: For general text content
@@ -82,10 +82,20 @@ export function EmailSection({
     children: React.ReactNode;
     className?: string;
 }) {
-    return <div className={`text-center my-4 ${className}`}>{children}</div>;
+    return <div className={`text-center my-6 ${className}`}>{children}</div>;
 }
 
 // EmailFooter: For closing or signature
 export function EmailFooter({ children }: { children: React.ReactNode }) {
     return <div className="text-sm text-gray-500 mt-6">{children}</div>;
+}
+
+export function EmailSignature() {
+    return (
+        <p>
+            Best regards,
+            <br />
+            Fossorial
+        </p>
+    );
 }

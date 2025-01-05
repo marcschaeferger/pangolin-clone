@@ -13,6 +13,7 @@ import {
     EmailGreeting,
     EmailHeading,
     EmailLetterHead,
+    EmailSignature,
     EmailText
 } from "./components/Email";
 
@@ -47,9 +48,7 @@ export const ConfirmPasswordReset = ({ email }: Props) => {
                         </EmailText>
 
                         <EmailFooter>
-                            Best regards,
-                            <br />
-                            Fossorial
+                            <EmailSignature />
                         </EmailFooter>
                     </EmailContainer>
                 </Body>

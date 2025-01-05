@@ -76,6 +76,11 @@ export default function GeneralPage() {
 
         updateSite({ name: data.name });
 
+        toast({
+            title: "Site updated",
+            description: "The site has been updated."
+        });
+
         setLoading(false);
 
         router.refresh();

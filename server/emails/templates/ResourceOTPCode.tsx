@@ -13,7 +13,8 @@ import {
     EmailText,
     EmailFooter,
     EmailSection,
-    EmailGreeting
+    EmailGreeting,
+    EmailSignature
 } from "./components/Email";
 import { themeColors } from "./lib/theme";
 import CopyCodeBox from "./components/CopyCodeBox";
@@ -60,9 +61,7 @@ export const ResourceOTPCode = ({
                         </EmailSection>
 
                         <EmailFooter>
-                            Best regards,
-                            <br />
-                            Fossorial
+                            <EmailSignature />
                         </EmailFooter>
                     </EmailContainer>
                 </Body>

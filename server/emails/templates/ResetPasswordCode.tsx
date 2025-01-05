@@ -14,6 +14,7 @@ import {
     EmailHeading,
     EmailLetterHead,
     EmailSection,
+    EmailSignature,
     EmailText
 } from "./components/Email";
 import CopyCodeBox from "./components/CopyCodeBox";
@@ -59,9 +60,7 @@ export const ResetPasswordCode = ({ email, code, link }: Props) => {
                         </EmailText>
 
                         <EmailFooter>
-                            Best regards,
-                            <br />
-                            Fossorial
+                            <EmailSignature />
                         </EmailFooter>
                     </EmailContainer>
                 </Body>

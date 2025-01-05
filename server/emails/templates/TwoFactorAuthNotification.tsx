@@ -13,6 +13,7 @@ import {
     EmailGreeting,
     EmailHeading,
     EmailLetterHead,
+    EmailSignature,
     EmailText
 } from "./components/Email";
 
@@ -61,9 +62,7 @@ export const TwoFactorAuthNotification = ({ email, enabled }: Props) => {
                         )}
 
                         <EmailFooter>
-                            Best regards,
-                            <br />
-                            Fossorial
+                            <EmailSignature />
                         </EmailFooter>
                     </EmailContainer>
                 </Body>

@@ -1,10 +1,4 @@
-import {
-    Body,
-    Head,
-    Html,
-    Preview,
-    Tailwind
-} from "@react-email/components";
+import { Body, Head, Html, Preview, Tailwind } from "@react-email/components";
 import * as React from "react";
 import { themeColors } from "./lib/theme";
 import {
@@ -14,6 +8,7 @@ import {
     EmailHeading,
     EmailLetterHead,
     EmailSection,
+    EmailSignature,
     EmailText
 } from "./components/Email";
 import CopyCodeBox from "./components/CopyCodeBox";
@@ -60,9 +55,7 @@ export const VerifyEmail = ({
                         </EmailText>
 
                         <EmailFooter>
-                            Best regards,
-                            <br />
-                            Fossorial
+                            <EmailSignature />
                         </EmailFooter>
                     </EmailContainer>
                 </Body>

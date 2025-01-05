@@ -14,6 +14,7 @@ import {
     EmailHeading,
     EmailLetterHead,
     EmailSection,
+    EmailSignature,
     EmailText
 } from "./components/Email";
 import ButtonLink from "./components/ButtonLink";
@@ -70,9 +71,7 @@ export const SendInviteLink = ({
                         </EmailSection>
 
                         <EmailFooter>
-                            Best regards,
-                            <br />
-                            Fossorial
+                            <EmailSignature />
                         </EmailFooter>
                     </EmailContainer>
                 </Body>
