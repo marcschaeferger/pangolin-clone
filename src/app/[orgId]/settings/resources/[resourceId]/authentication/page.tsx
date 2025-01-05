@@ -637,111 +637,106 @@ export default function ResourceAuthenticationPage() {
                     </SettingsSectionBody>
                 </SettingsSection>
 
-                <SettingsSection>
-                    <SettingsSectionHeader>
-                        <SettingsSectionTitle>
-                            One-time Passwords
-                        </SettingsSectionTitle>
-                        <SettingsSectionDescription>
-                            Require email-based authentication for resource
-                            access
-                        </SettingsSectionDescription>
-                    </SettingsSectionHeader>
-                    <SettingsSectionBody>
-                        {env.email.emailEnabled && (
-                            <>
-                                <SwitchInput
-                                    id="whitelist-toggle"
-                                    label="Email Whitelist"
-                                    defaultChecked={
-                                        resource.emailWhitelistEnabled
-                                    }
-                                    onCheckedChange={setWhitelistEnabled}
-                                />
+                {env.email.emailEnabled && (
+                    <SettingsSection>
+                        <SettingsSectionHeader>
+                            <SettingsSectionTitle>
+                                One-time Passwords
+                            </SettingsSectionTitle>
+                            <SettingsSectionDescription>
+                                Require email-based authentication for resource
+                                access
+                            </SettingsSectionDescription>
+                        </SettingsSectionHeader>
+                        <SettingsSectionBody>
+                            <SwitchInput
+                                id="whitelist-toggle"
+                                label="Email Whitelist"
+                                defaultChecked={resource.emailWhitelistEnabled}
+                                onCheckedChange={setWhitelistEnabled}
+                            />
 
-                                {whitelistEnabled && (
-                                    <Form {...whitelistForm}>
-                                        <form id="whitelist-form">
-                                            <FormField
-                                                control={whitelistForm.control}
-                                                name="emails"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>
-                                                            Whitelisted Emails
-                                                        </FormLabel>
-                                                        <FormControl>
-                                                            {/* @ts-ignore */}
-                                                            {/* @ts-ignore */}
-                                                            <TagInput
-                                                                {...field}
-                                                                activeTagIndex={
-                                                                    activeEmailTagIndex
-                                                                }
-                                                                validateTag={(
-                                                                    tag
-                                                                ) => {
-                                                                    return z
-                                                                        .string()
-                                                                        .email()
-                                                                        .safeParse(
-                                                                            tag
-                                                                        )
-                                                                        .success;
-                                                                }}
-                                                                setActiveTagIndex={
-                                                                    setActiveEmailTagIndex
-                                                                }
-                                                                placeholder="Enter an email"
-                                                                tags={
-                                                                    whitelistForm.getValues()
-                                                                        .emails
-                                                                }
-                                                                setTags={(
-                                                                    newRoles
-                                                                ) => {
-                                                                    whitelistForm.setValue(
-                                                                        "emails",
-                                                                        newRoles as [
-                                                                            Tag,
-                                                                            ...Tag[]
-                                                                        ]
-                                                                    );
-                                                                }}
-                                                                allowDuplicates={
-                                                                    false
-                                                                }
-                                                                sortTags={true}
-                                                                styleClasses={{
-                                                                    tag: {
-                                                                        body: "bg-muted hover:bg-accent text-foreground py-2 px-3 rounded-full"
-                                                                    },
-                                                                    input: "text-base md:text-sm border-none bg-transparent text-inherit placeholder:text-inherit shadow-none",
-                                                                    inlineTagsContainer:
-                                                                        "bg-transparent p-2"
-                                                                }}
-                                                            />
-                                                        </FormControl>
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </form>
-                                    </Form>
-                                )}
-                            </>
-                        )}
-                    </SettingsSectionBody>
-                    <SettingsSectionFooter>
-                        <Button
-                            onClick={saveWhitelist}
-                            form="whitelist-form"
-                            loading={loadingSaveWhitelist}
-                            disabled={loadingSaveWhitelist}
-                        >
-                            Save Whitelist
-                        </Button>
-                    </SettingsSectionFooter>
-                </SettingsSection>
+                            {whitelistEnabled && (
+                                <Form {...whitelistForm}>
+                                    <form id="whitelist-form">
+                                        <FormField
+                                            control={whitelistForm.control}
+                                            name="emails"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        Whitelisted Emails
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        {/* @ts-ignore */}
+                                                        {/* @ts-ignore */}
+                                                        <TagInput
+                                                            {...field}
+                                                            activeTagIndex={
+                                                                activeEmailTagIndex
+                                                            }
+                                                            validateTag={(
+                                                                tag
+                                                            ) => {
+                                                                return z
+                                                                    .string()
+                                                                    .email()
+                                                                    .safeParse(
+                                                                        tag
+                                                                    ).success;
+                                                            }}
+                                                            setActiveTagIndex={
+                                                                setActiveEmailTagIndex
+                                                            }
+                                                            placeholder="Enter an email"
+                                                            tags={
+                                                                whitelistForm.getValues()
+                                                                    .emails
+                                                            }
+                                                            setTags={(
+                                                                newRoles
+                                                            ) => {
+                                                                whitelistForm.setValue(
+                                                                    "emails",
+                                                                    newRoles as [
+                                                                        Tag,
+                                                                        ...Tag[]
+                                                                    ]
+                                                                );
+                                                            }}
+                                                            allowDuplicates={
+                                                                false
+                                                            }
+                                                            sortTags={true}
+                                                            styleClasses={{
+                                                                tag: {
+                                                                    body: "bg-muted hover:bg-accent text-foreground py-2 px-3 rounded-full"
+                                                                },
+                                                                input: "text-base md:text-sm border-none bg-transparent text-inherit placeholder:text-inherit shadow-none",
+                                                                inlineTagsContainer:
+                                                                    "bg-transparent p-2"
+                                                            }}
+                                                        />
+                                                    </FormControl>
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </form>
+                                </Form>
+                            )}
+                        </SettingsSectionBody>
+                        <SettingsSectionFooter>
+                            <Button
+                                onClick={saveWhitelist}
+                                form="whitelist-form"
+                                loading={loadingSaveWhitelist}
+                                disabled={loadingSaveWhitelist}
+                            >
+                                Save Whitelist
+                            </Button>
+                        </SettingsSectionFooter>
+                    </SettingsSection>
+                )}
             </SettingsContainer>
         </>
     );
