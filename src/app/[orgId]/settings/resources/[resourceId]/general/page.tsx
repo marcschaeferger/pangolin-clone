@@ -149,6 +149,7 @@ export default function GeneralForm() {
                             <form
                                 onSubmit={form.handleSubmit(onSubmit)}
                                 className="space-y-4"
+                                id="general-settings-form"
                             >
                                 <FormField
                                     control={form.control}

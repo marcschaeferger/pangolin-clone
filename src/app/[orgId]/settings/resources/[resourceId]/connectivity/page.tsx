@@ -65,7 +65,7 @@ import {
 import { SwitchInput } from "@app/components/SwitchInput";
 
 const addTargetSchema = z.object({
-    ip: z.string().ip(),
+    ip: z.union([z.string().ip(), z.literal("localhost")]),
     method: z.string(),
     port: z.coerce.number().int().positive()
     // protocol: z.string(),
