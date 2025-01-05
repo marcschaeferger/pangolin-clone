@@ -117,8 +117,8 @@ Pangolin was inspired by several existing projects and concepts:
 
 ## Licensing
 
-Pangolin is released under the ... license. For inquiries about commercial licensing, please contact us.
+Pangolin is dual licensed under the AGPLv3 and the Fossorial Commercial license. For inquiries about commercial licensing, please contact us.
 
 ## Contributions
 
-Please see [CONTRIBUTIONS](./CONTRIBUTIONS.md) in the repository for guidelines and best practices.
+Please see [CONTRIBUTIONS](./CONTRIBUTING.md) in the repository for guidelines and best practices.
