@@ -15,6 +15,7 @@ import {
     Table,
     TableBody,
     TableCell,
+    TableContainer,
     TableHead,
     TableHeader,
     TableRow,
@@ -88,7 +89,7 @@ export function UsersDataTable<TData, TValue>({
                     <Plus className="mr-2 h-4 w-4" /> Invite User
                 </Button>
             </div>
-            <div className="border rounded-md">
+            <TableContainer>
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
@@ -141,7 +142,7 @@ export function UsersDataTable<TData, TValue>({
                         )}
                     </TableBody>
                 </Table>
-            </div>
+            </TableContainer>
             <div className="mt-4">
                 <DataTablePagination table={table} />
             </div>

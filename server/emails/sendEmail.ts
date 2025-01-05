@@ -26,7 +26,7 @@ export async function sendEmail(
 
     await emailClient.sendMail({
         from: {
-            name: opts.name || "Pangolin Proxy",
+            name: opts.name || "Pangolin",
             address: opts.from,
         },
         to: opts.to,

@@ -1,5 +1,6 @@
 import ProfileIcon from "@app/components/ProfileIcon";
 import { verifySession } from "@app/lib/auth/verifySession";
+import { pullEnv } from "@app/lib/pullEnv";
 import UserProvider from "@app/providers/UserProvider";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
@@ -20,12 +21,14 @@ export default async function SetupLayout({
     const getUser = cache(verifySession);
     const user = await getUser();
 
+    const env = pullEnv();
+
     if (!user) {
         redirect("/?redirect=/setup");
     }
 
     if (
-        !(process.env.DISABLE_USER_CREATE_ORG === "false" || user.serverAdmin)
+        !(!env.flags.disableUserCreateOrg || user.serverAdmin)
     ) {
         redirect("/");
     }

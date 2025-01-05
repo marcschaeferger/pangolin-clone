@@ -1,16 +1,20 @@
 import {
     Body,
-    Container,
     Head,
-    Heading,
     Html,
     Preview,
-    Section,
-    Text,
     Tailwind
 } from "@react-email/components";
 import * as React from "react";
-import LetterHead from "./components/LetterHead";
+import { themeColors } from "./lib/theme";
+import {
+    EmailContainer,
+    EmailFooter,
+    EmailGreeting,
+    EmailHeading,
+    EmailLetterHead,
+    EmailText
+} from "./components/Email";
 
 interface Props {
     email: string;
@@ -23,41 +27,31 @@ export const ConfirmPasswordReset = ({ email }: Props) => {
         <Html>
             <Head />
             <Preview>{previewText}</Preview>
-            <Tailwind
-                config={{
-                    theme: {
-                        extend: {
-                            colors: {
-                                primary: "#16A34A"
-                            }
-                        }
-                    }
-                }}
-            >
+            <Tailwind config={themeColors}>
                 <Body className="font-sans relative">
-                    <Container className="bg-white border border-solid border-gray-200 p-6 max-w-lg mx-auto my-8 rounded-lg">
-                        <LetterHead />
+                    <EmailContainer>
+                        <EmailLetterHead />
 
-                        <Heading className="text-2xl font-semibold text-gray-800 text-center">
-                            Password Reset Confirmation
-                        </Heading>
-                        <Text className="text-base text-gray-700 mt-4">
-                            Hi {email || "there"},
-                        </Text>
-                        <Text className="text-base text-gray-700 mt-2">
+                        <EmailHeading>Password Reset Confirmation</EmailHeading>
+
+                        <EmailGreeting>Hi {email || "there"},</EmailGreeting>
+
+                        <EmailText>
                             This email confirms that your password has just been
                             reset. If you made this change, no further action is
                             required.
-                        </Text>
-                        <Text className="text-base text-gray-700 mt-2">
+                        </EmailText>
+
+                        <EmailText>
                             Thank you for keeping your account secure.
-                        </Text>
-                        <Text className="text-sm text-gray-500 mt-6">
+                        </EmailText>
+
+                        <EmailFooter>
                             Best regards,
                             <br />
                             Fossorial
-                        </Text>
-                    </Container>
+                        </EmailFooter>
+                    </EmailContainer>
                 </Body>
             </Tailwind>
         </Html>

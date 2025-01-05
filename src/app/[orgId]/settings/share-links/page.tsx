@@ -8,6 +8,7 @@ import { GetOrgResponse } from "@server/routers/org";
 import OrgProvider from "@app/providers/OrgProvider";
 import { ListAccessTokensResponse } from "@server/routers/accessToken";
 import ShareLinksTable, { ShareLinkRow } from "./ShareLinksTable";
+import ShareableLinksSplash from "./ShareLinksSplash";
 
 type ShareLinksPageProps = {
     params: Promise<{ orgId: string }>;
@@ -52,6 +53,8 @@ export default async function ShareLinksPage(props: ShareLinksPageProps) {
 
     return (
         <>
+            <ShareableLinksSplash />
+
             <SettingsSectionTitle
                 title="Manage Share Links"
                 description="Create shareable links to grant temporary or permanent access to your resources"

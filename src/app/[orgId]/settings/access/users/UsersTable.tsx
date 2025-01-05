@@ -159,7 +159,7 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                 const userRow = row.original;
 
                 return (
-                    <div className="flex flex-row items-center gap-1">
+                    <div className="flex flex-row items-center gap-2">
                         {userRow.isOwner && (
                             <Crown className="w-4 h-4 text-yellow-600" />
                         )}
@@ -186,7 +186,7 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                             <Link
                                 href={`/${org?.org.orgId}/settings/access/users/${userRow.id}`}
                             >
-                                <Button variant={"gray"} className="ml-2">
+                                <Button variant={"outline"} className="ml-2">
                                     Manage
                                     <ArrowRight className="ml-2 w-4 h-4" />
                                 </Button>

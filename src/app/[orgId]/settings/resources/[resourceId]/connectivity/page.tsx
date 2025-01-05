@@ -40,28 +40,34 @@ import {
     Table,
     TableBody,
     TableCell,
+    TableContainer,
     TableHead,
     TableHeader,
     TableRow
 } from "@app/components/ui/table";
 import { useToast } from "@app/hooks/useToast";
-import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { useResourceContext } from "@app/hooks/useResourceContext";
 import { ArrayElement } from "@server/types/ArrayElement";
-import { formatAxiosError } from "@app/lib/api/formatAxiosError";;
+import { formatAxiosError } from "@app/lib/api/formatAxiosError";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { createApiClient } from "@app/lib/api";
 import { GetSiteResponse } from "@server/routers/site";
+import {
+    SettingsContainer,
+    SettingsSection,
+    SettingsSectionHeader,
+    SettingsSectionTitle,
+    SettingsSectionDescription,
+    SettingsSectionBody,
+    SettingsSectionForm,
+    SettingsSectionFooter
+} from "@app/components/Settings";
+import { SwitchInput } from "@app/components/SwitchInput";
 
 const addTargetSchema = z.object({
     ip: z.string().ip(),
     method: z.string(),
-    port: z
-        .string()
-        .refine((val) => !isNaN(Number(val)), {
-            message: "Port must be a number"
-        })
-        .transform((val) => Number(val))
+    port: z.coerce.number().int().positive()
     // protocol: z.string(),
 });
 
@@ -99,7 +105,7 @@ export default function ReverseProxyTargets(props: {
         defaultValues: {
             ip: "",
             method: "http",
-            port: "80"
+            port: 80
             // protocol: "TCP",
         }
     });
@@ -154,7 +160,7 @@ export default function ReverseProxyTargets(props: {
         fetchSite();
     }, []);
 
-    async function addTarget(data: AddTargetFormValues) {
+    async function addTarget(data: z.infer<typeof addTargetSchema>) {
         // Check if target with same IP, port and method already exists
         const isDuplicate = targets.some(
             (target) =>
@@ -218,15 +224,9 @@ export default function ReverseProxyTargets(props: {
         );
     }
 
-    async function saveAll() {
+    async function saveTargets() {
         try {
             setLoading(true);
-
-            const res = await api.post(`/resource/${params.resourceId}`, {
-                ssl: sslEnabled
-            });
-
-            updateResource({ ssl: sslEnabled });
 
             for (let target of targets) {
                 const data = {
@@ -269,8 +269,8 @@ export default function ReverseProxyTargets(props: {
             }
 
             toast({
-                title: "Resource updated",
-                description: "Resource and targets updated successfully"
+                title: "Targets updated",
+                description: "Targets updated successfully"
             });
 
             setTargetsToRemove([]);
@@ -287,6 +287,20 @@ export default function ReverseProxyTargets(props: {
         }
 
         setLoading(false);
+    }
+
+    async function saveSsl(val: boolean) {
+        const res = await api.post(`/resource/${params.resourceId}`, {
+            ssl: val
+        });
+
+        setSslEnabled(val);
+        updateResource({ ssl: sslEnabled });
+
+        toast({
+            title: "SSL Configuration",
+            description: "SSL configuration updated successfully"
+        });
     }
 
     const columns: ColumnDef<LocalTarget>[] = [
@@ -410,239 +424,180 @@ export default function ReverseProxyTargets(props: {
     }
 
     return (
-        <>
-            <div className="space-y-12">
-                <section className="space-y-4">
-                    <SettingsSectionTitle
-                        title="SSL"
-                        description="Setup SSL to secure your connections with LetsEncrypt certificates"
-                        size="1xl"
+        <SettingsContainer>
+            {/* SSL Section */}
+            <SettingsSection>
+                <SettingsSectionHeader>
+                    <SettingsSectionTitle>
+                        SSL Configuration
+                    </SettingsSectionTitle>
+                    <SettingsSectionDescription>
+                        Setup SSL to secure your connections with LetsEncrypt
+                        certificates
+                    </SettingsSectionDescription>
+                </SettingsSectionHeader>
+                <SettingsSectionBody>
+                    <SwitchInput
+                        id="ssl-toggle"
+                        label="Enable SSL (https)"
+                        defaultChecked={resource.ssl}
+                        onCheckedChange={async (val) => {
+                            await saveSsl(val);
+                        }}
                     />
+                </SettingsSectionBody>
+            </SettingsSection>
 
-                    <div className="flex items-center space-x-2">
-                        <Switch
-                            id="ssl-toggle"
-                            defaultChecked={resource.ssl}
-                            onCheckedChange={(val) => setSslEnabled(val)}
-                        />
-                        <Label htmlFor="ssl-toggle">Enable SSL (https)</Label>
-                    </div>
-                </section>
-
-                <hr />
-
-                <section className="space-y-4">
-                    <SettingsSectionTitle
-                        title="Targets"
-                        description="Setup targets to route traffic to your services"
-                        size="1xl"
-                    />
-
-                    <div className="space-y-4">
-                        <Form {...addTargetForm}>
-                            <form
-                                onSubmit={addTargetForm.handleSubmit(
-                                    addTarget as any
-                                )}
-                                className="space-y-4"
-                            >
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                    <FormField
-                                        control={addTargetForm.control}
-                                        name="method"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Method</FormLabel>
-                                                <FormControl>
-                                                    <Select
-                                                        {...field}
-                                                        onValueChange={(
-                                                            value
-                                                        ) => {
-                                                            addTargetForm.setValue(
-                                                                "method",
-                                                                value
-                                                            );
-                                                        }}
-                                                    >
-                                                        <SelectTrigger id="method">
-                                                            <SelectValue placeholder="Select method" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="http">
-                                                                http
-                                                            </SelectItem>
-                                                            <SelectItem value="https">
-                                                                https
-                                                            </SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </FormControl>
-                                                {/* <FormDescription> */}
-                                                {/*     Choose the method for how */}
-                                                {/*     the target is accessed. */}
-                                                {/* </FormDescription> */}
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={addTargetForm.control}
-                                        name="ip"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>
-                                                    IP Address
-                                                </FormLabel>
-                                                <FormControl>
-                                                    <Input id="ip" {...field} />
-                                                </FormControl>
-                                                {/* <FormDescription> */}
-                                                {/*     Use the IP of the resource on your private network if using Newt, or the peer IP if using raw WireGuard. */}
-                                                {/* </FormDescription> */}
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={addTargetForm.control}
-                                        name="port"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Port</FormLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        id="port"
-                                                        type="number"
-                                                        {...field}
-                                                        required
-                                                    />
-                                                </FormControl>
-                                                {/* <FormDescription> */}
-                                                {/*     Specify the port number for */}
-                                                {/*     the target. */}
-                                                {/* </FormDescription> */}
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    {/* <FormField
+            {/* Targets Section */}
+            <SettingsSection>
+                <SettingsSectionHeader>
+                    <SettingsSectionTitle>
+                        Target Configuration
+                    </SettingsSectionTitle>
+                    <SettingsSectionDescription>
+                        Setup targets to route traffic to your services
+                    </SettingsSectionDescription>
+                </SettingsSectionHeader>
+                <SettingsSectionBody>
+                    <Form {...addTargetForm}>
+                        <form
+                            onSubmit={addTargetForm.handleSubmit(addTarget)}
+                            className="space-y-4"
+                        >
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <FormField
                                     control={addTargetForm.control}
-                                    name="protocol"
+                                    name="method"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Protocol</FormLabel>
+                                            <FormLabel>Method</FormLabel>
                                             <FormControl>
                                                 <Select
                                                     {...field}
                                                     onValueChange={(value) => {
                                                         addTargetForm.setValue(
-                                                            "protocol",
+                                                            "method",
                                                             value
                                                         );
                                                     }}
                                                 >
-                                                    <SelectTrigger id="protocol">
-                                                        <SelectValue placeholder="Select protocol" />
+                                                    <SelectTrigger id="method">
+                                                        <SelectValue placeholder="Select method" />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        <SelectItem value="UDP">
-                                                            UDP
+                                                        <SelectItem value="http">
+                                                            http
                                                         </SelectItem>
-                                                        <SelectItem value="TCP">
-                                                            TCP
+                                                        <SelectItem value="https">
+                                                            https
                                                         </SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                             </FormControl>
-                                            <FormDescription>
-                                                Select the protocol used by the
-                                                target
-                                            </FormDescription>
                                             <FormMessage />
                                         </FormItem>
                                     )}
-                                /> */}
-                                </div>
-                                <Button type="submit" variant="gray">
-                                    Add Target
-                                </Button>
-                            </form>
-                        </Form>
-
-                        <div className="rounded-md border">
-                            <Table>
-                                <TableHeader>
-                                    {table
-                                        .getHeaderGroups()
-                                        .map((headerGroup) => (
-                                            <TableRow key={headerGroup.id}>
-                                                {headerGroup.headers.map(
-                                                    (header) => (
-                                                        <TableHead
-                                                            key={header.id}
-                                                        >
-                                                            {header.isPlaceholder
-                                                                ? null
-                                                                : flexRender(
-                                                                      header
-                                                                          .column
-                                                                          .columnDef
-                                                                          .header,
-                                                                      header.getContext()
-                                                                  )}
-                                                        </TableHead>
-                                                    )
-                                                )}
-                                            </TableRow>
-                                        ))}
-                                </TableHeader>
-                                <TableBody>
-                                    {table.getRowModel().rows?.length ? (
-                                        table.getRowModel().rows.map((row) => (
-                                            <TableRow key={row.id}>
-                                                {row
-                                                    .getVisibleCells()
-                                                    .map((cell) => (
-                                                        <TableCell
-                                                            key={cell.id}
-                                                        >
-                                                            {flexRender(
-                                                                cell.column
-                                                                    .columnDef
-                                                                    .cell,
-                                                                cell.getContext()
-                                                            )}
-                                                        </TableCell>
-                                                    ))}
-                                            </TableRow>
-                                        ))
-                                    ) : (
-                                        <TableRow>
-                                            <TableCell
-                                                colSpan={columns.length}
-                                                className="h-24 text-center"
-                                            >
-                                                No targets. Add a target using
-                                                the form.
-                                            </TableCell>
-                                        </TableRow>
+                                />
+                                <FormField
+                                    control={addTargetForm.control}
+                                    name="ip"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>IP Address</FormLabel>
+                                            <FormControl>
+                                                <Input id="ip" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
                                     )}
-                                </TableBody>
-                            </Table>
-                        </div>
+                                />
+                                <FormField
+                                    control={addTargetForm.control}
+                                    name="port"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Port</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    id="port"
+                                                    type="number"
+                                                    {...field}
+                                                    required
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+                            <Button type="submit" variant="outline">
+                                Add Target
+                            </Button>
+                        </form>
+                    </Form>
 
-                        <Button
-                            onClick={saveAll}
-                            loading={loading}
-                            disabled={loading}
-                        >
-                            Save Changes
-                        </Button>
-                    </div>
-                </section>
-            </div>
-        </>
+                    <TableContainer>
+                        <Table>
+                            <TableHeader>
+                                {table.getHeaderGroups().map((headerGroup) => (
+                                    <TableRow key={headerGroup.id}>
+                                        {headerGroup.headers.map((header) => (
+                                            <TableHead key={header.id}>
+                                                {header.isPlaceholder
+                                                    ? null
+                                                    : flexRender(
+                                                          header.column
+                                                              .columnDef.header,
+                                                          header.getContext()
+                                                      )}
+                                            </TableHead>
+                                        ))}
+                                    </TableRow>
+                                ))}
+                            </TableHeader>
+                            <TableBody>
+                                {table.getRowModel().rows?.length ? (
+                                    table.getRowModel().rows.map((row) => (
+                                        <TableRow key={row.id}>
+                                            {row
+                                                .getVisibleCells()
+                                                .map((cell) => (
+                                                    <TableCell key={cell.id}>
+                                                        {flexRender(
+                                                            cell.column
+                                                                .columnDef.cell,
+                                                            cell.getContext()
+                                                        )}
+                                                    </TableCell>
+                                                ))}
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell
+                                            colSpan={columns.length}
+                                            className="h-24 text-center"
+                                        >
+                                            No targets. Add a target using the
+                                            form.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </SettingsSectionBody>
+                <SettingsSectionFooter>
+                    <Button
+                        onClick={saveTargets}
+                        loading={loading}
+                        disabled={loading}
+                    >
+                        Save Targets
+                    </Button>
+                </SettingsSectionFooter>
+            </SettingsSection>
+        </SettingsContainer>
     );
 }
 

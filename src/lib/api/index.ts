@@ -1,9 +1,9 @@
-import { env } from "@app/lib/types/env";
+import { Env } from "@app/lib/types/env";
 import axios, { AxiosInstance } from "axios";
 
 let apiInstance: AxiosInstance | null = null;
 
-export function createApiClient({ env }: { env: env }): AxiosInstance {
+export function createApiClient({ env }: { env: Env }): AxiosInstance {
     if (apiInstance) {
         return apiInstance;
     }
@@ -16,9 +16,9 @@ export function createApiClient({ env }: { env: env }): AxiosInstance {
     let baseURL;
     const suffix = "api/v1";
 
-    if (window.location.port === env.NEXT_PORT) {
+    if (window.location.port === env.server.nextPort) {
         // this means the user is addressing the server directly
-        baseURL = `${window.location.protocol}//${window.location.hostname}:${env.SERVER_EXTERNAL_PORT}/${suffix}`;
+        baseURL = `${window.location.protocol}//${window.location.hostname}:${env.server.externalPort}/${suffix}`;
         axios.defaults.withCredentials = true;
     } else {
         // user is accessing through a proxy

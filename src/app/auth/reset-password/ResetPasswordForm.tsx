@@ -364,8 +364,6 @@ export default function ResetPasswordForm({
                                                                 <InputOTPSlot
                                                                     index={2}
                                                                 />
-                                                            </InputOTPGroup>
-                                                            <InputOTPGroup>
                                                                 <InputOTPSlot
                                                                     index={3}
                                                                 />

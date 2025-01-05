@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import { GetOrgResponse } from "@server/routers/org";
 import OrgProvider from "@app/providers/OrgProvider";
+import ResourcesSplashCard from "./ResourcesSplashCard";
 
 type ResourcesPageProps = {
     params: Promise<{ orgId: string }>;
@@ -62,6 +63,8 @@ export default async function ResourcesPage(props: ResourcesPageProps) {
 
     return (
         <>
+            <ResourcesSplashCard />
+
             <SettingsSectionTitle
                 title="Manage Resources"
                 description="Create secure proxies to your private applications"

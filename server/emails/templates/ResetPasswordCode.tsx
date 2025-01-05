@@ -1,16 +1,22 @@
 import {
     Body,
-    Container,
     Head,
-    Heading,
     Html,
     Preview,
-    Section,
-    Text,
     Tailwind
 } from "@react-email/components";
 import * as React from "react";
-import LetterHead from "./components/LetterHead";
+import { themeColors } from "./lib/theme";
+import {
+    EmailContainer,
+    EmailFooter,
+    EmailGreeting,
+    EmailHeading,
+    EmailLetterHead,
+    EmailSection,
+    EmailText
+} from "./components/Email";
+import CopyCodeBox from "./components/CopyCodeBox";
 
 interface Props {
     email: string;
@@ -25,50 +31,39 @@ export const ResetPasswordCode = ({ email, code, link }: Props) => {
         <Html>
             <Head />
             <Preview>{previewText}</Preview>
-            <Tailwind
-                config={{
-                    theme: {
-                        extend: {
-                            colors: {
-                                primary: "#F97317"
-                            }
-                        }
-                    }
-                }}
-            >
+            <Tailwind config={themeColors}>
                 <Body className="font-sans">
-                    <Container className="bg-white border border-solid border-gray-200 p-6 max-w-lg mx-auto my-8 rounded-lg">
-                        <LetterHead />
+                    <EmailContainer>
+                        <EmailLetterHead />
 
-                        <Heading className="text-2xl font-semibold text-gray-800 text-center">
-                            Password Reset Request
-                        </Heading>
-                        <Text className="text-base text-gray-700 mt-4">
-                            Hi {email || "there"},
-                        </Text>
-                        <Text className="text-base text-gray-700 mt-2">
+                        <EmailHeading>Password Reset Request</EmailHeading>
+
+                        <EmailGreeting>Hi {email || "there"},</EmailGreeting>
+
+                        <EmailText>
                             You’ve requested to reset your password. Please{" "}
                             <a href={link} className="text-primary">
                                 click here
                             </a>{" "}
                             and follow the instructions to reset your password,
                             or manually enter the following code:
-                        </Text>
-                        <Section className="text-center">
-                            <Text className="inline-block bg-primary text-xl font-bold text-white py-2 px-4 border border-gray-300 rounded-xl">
-                                {code}
-                            </Text>
-                        </Section>
-                        <Text className="text-base text-gray-700 mt-2">
+                        </EmailText>
+
+                        <EmailSection>
+                            <CopyCodeBox text={code} />
+                        </EmailSection>
+
+                        <EmailText>
                             If you didn’t request this, you can safely ignore
                             this email.
-                        </Text>
-                        <Text className="text-sm text-gray-500 mt-6">
+                        </EmailText>
+
+                        <EmailFooter>
                             Best regards,
                             <br />
                             Fossorial
-                        </Text>
-                    </Container>
+                        </EmailFooter>
+                    </EmailContainer>
                 </Body>
             </Tailwind>
         </Html>

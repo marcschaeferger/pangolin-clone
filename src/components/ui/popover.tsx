@@ -7,7 +7,16 @@ import { cn } from "@app/lib/cn"
 
 const Popover = PopoverPrimitive.Root
 
-const PopoverTrigger = PopoverPrimitive.Trigger
+const PopoverTrigger = React.forwardRef<
+    React.ElementRef<typeof PopoverPrimitive.Trigger>,
+    React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Trigger>
+>(({ className, ...props }, ref) => (
+    <PopoverPrimitive.Trigger
+        ref={ref}
+        className={cn(className, "rounded-md")}
+        {...props}
+    />
+))
 
 const PopoverContent = React.forwardRef<
   React.ElementRef<typeof PopoverPrimitive.Content>,

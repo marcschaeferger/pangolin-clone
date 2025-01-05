@@ -11,7 +11,7 @@ import {
     FormField,
     FormItem,
     FormLabel,
-    FormMessage,
+    FormMessage
 } from "@/components/ui/form";
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 import { Input } from "@/components/ui/input";
@@ -21,13 +21,13 @@ import {
     CommandGroup,
     CommandInput,
     CommandItem,
-    CommandList,
+    CommandList
 } from "@/components/ui/command";
 
 import {
     Popover,
     PopoverContent,
-    PopoverTrigger,
+    PopoverTrigger
 } from "@/components/ui/popover";
 import { useResourceContext } from "@app/hooks/useResourceContext";
 import { ListSitesResponse } from "@server/routers/site";
@@ -37,7 +37,16 @@ import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { GetResourceAuthInfoResponse } from "@server/routers/resource";
 import { useToast } from "@app/hooks/useToast";
-import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
+import {
+    SettingsContainer,
+    SettingsSection,
+    SettingsSectionHeader,
+    SettingsSectionTitle,
+    SettingsSectionDescription,
+    SettingsSectionBody,
+    SettingsSectionForm,
+    SettingsSectionFooter
+} from "@app/components/Settings";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import CustomDomainInput from "../CustomDomainInput";
 import ResourceInfoBox from "../ResourceInfoBox";
@@ -47,7 +56,7 @@ import { useEnvContext } from "@app/hooks/useEnvContext";
 
 const GeneralFormSchema = z.object({
     name: z.string(),
-    subdomain: subdomainSchema,
+    subdomain: subdomainSchema
     // siteId: z.number(),
 });
 
@@ -72,10 +81,10 @@ export default function GeneralForm() {
         resolver: zodResolver(GeneralFormSchema),
         defaultValues: {
             name: resource.name,
-            subdomain: resource.subdomain,
+            subdomain: resource.subdomain
             // siteId: resource.siteId!,
         },
-        mode: "onChange",
+        mode: "onChange"
     });
 
     useEffect(() => {
@@ -95,7 +104,7 @@ export default function GeneralForm() {
             `resource/${resource?.resourceId}`,
             {
                 name: data.name,
-                subdomain: data.subdomain,
+                subdomain: data.subdomain
                 // siteId: data.siteId,
             }
         )
@@ -106,13 +115,13 @@ export default function GeneralForm() {
                     description: formatAxiosError(
                         e,
                         "An error occurred while updating the resource"
-                    ),
+                    )
                 });
             })
             .then(() => {
                 toast({
                     title: "Resource updated",
-                    description: "The resource has been updated successfully",
+                    description: "The resource has been updated successfully"
                 });
 
                 updateResource({ name: data.name, subdomain: data.subdomain });
@@ -123,153 +132,85 @@ export default function GeneralForm() {
     }
 
     return (
-        <>
-            <div className="space-y-12 lg:max-w-2xl">
-                <section className="space-y-4">
-                    <SettingsSectionTitle
-                        title="General Settings"
-                        description="Configure the general settings for this resource"
-                        size="1xl"
-                    />
+        <SettingsContainer>
+            <SettingsSection>
+                <SettingsSectionHeader>
+                    <SettingsSectionTitle>
+                        General Settings
+                    </SettingsSectionTitle>
+                    <SettingsSectionDescription>
+                        Configure the general settings for this resource
+                    </SettingsSectionDescription>
+                </SettingsSectionHeader>
 
-                    <Form {...form}>
-                        <form
-                            onSubmit={form.handleSubmit(onSubmit)}
-                            className="space-y-4"
-                        >
-                            <FormField
-                                control={form.control}
-                                name="name"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Name</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} />
-                                        </FormControl>
-                                        <FormDescription>
-                                            This is the display name of the
-                                            resource.
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="subdomain"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Subdomain</FormLabel>
-                                        <FormControl>
-                                            <CustomDomainInput
-                                                value={field.value}
-                                                domainSuffix={domainSuffix}
-                                                placeholder="Enter subdomain"
-                                                onChange={(value) =>
-                                                    form.setValue(
-                                                        "subdomain",
-                                                        value
-                                                    )
-                                                }
-                                            />
-                                        </FormControl>
-                                        <FormDescription>
-                                            This is the subdomain that will be
-                                            used to access the resource.
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            {/* <FormField
-                            control={form.control}
-                            name="siteId"
-                            render={({ field }) => (
-                                <FormItem className="flex flex-col">
-                                    <FormLabel>Site</FormLabel>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <FormControl>
-                                                <Button
-                                                    variant="outline"
-                                                    role="combobox"
-                                                    className={cn(
-                                                        "w-[350px] justify-between",
-                                                        !field.value &&
-                                                            "text-muted-foreground"
-                                                    )}
-                                                >
-                                                    {field.value
-                                                        ? sites.find(
-                                                              (site) =>
-                                                                  site.siteId ===
-                                                                  field.value
-                                                          )?.name
-                                                        : "Select site"}
-                                                    <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                                </Button>
-                                            </FormControl>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-[350px] p-0">
-                                            <Command>
-                                                <CommandInput placeholder="Search sites" />
-                                                <CommandList>
-                                                    <CommandEmpty>
-                                                        No sites found.
-                                                    </CommandEmpty>
-                                                    <CommandGroup>
-                                                        {sites.map((site) => (
-                                                            <CommandItem
-                                                                value={
-                                                                    site.name
-                                                                }
-                                                                key={
-                                                                    site.siteId
-                                                                }
-                                                                onSelect={() => {
-                                                                    form.setValue(
-                                                                        "siteId",
-                                                                        site.siteId
-                                                                    );
-                                                                }}
-                                                            >
-                                                                <CheckIcon
-                                                                    className={cn(
-                                                                        "mr-2 h-4 w-4",
-                                                                        site.siteId ===
-                                                                            field.value
-                                                                            ? "opacity-100"
-                                                                            : "opacity-0"
-                                                                    )}
-                                                                />
-                                                                {site.name}
-                                                            </CommandItem>
-                                                        ))}
-                                                    </CommandGroup>
-                                                </CommandList>
-                                            </Command>
-                                        </PopoverContent>
-                                    </Popover>
-                                    <FormDescription>
-                                        This is the site that will be used in
-                                        the dashboard.
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        /> */}
-                            <Button
-                                type="submit"
-                                loading={saveLoading}
-                                disabled={saveLoading}
+                <SettingsSectionBody>
+                    <SettingsSectionForm>
+                        <Form {...form}>
+                            <form
+                                onSubmit={form.handleSubmit(onSubmit)}
+                                className="space-y-4"
                             >
-                                Save Changes
-                            </Button>
-                        </form>
-                    </Form>
-                </section>
-            </div>
-        </>
+                                <FormField
+                                    control={form.control}
+                                    name="name"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Name</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} />
+                                            </FormControl>
+                                            <FormDescription>
+                                                This is the display name of the
+                                                resource.
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="subdomain"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Subdomain</FormLabel>
+                                            <FormControl>
+                                                <CustomDomainInput
+                                                    value={field.value}
+                                                    domainSuffix={domainSuffix}
+                                                    placeholder="Enter subdomain"
+                                                    onChange={(value) =>
+                                                        form.setValue(
+                                                            "subdomain",
+                                                            value
+                                                        )
+                                                    }
+                                                />
+                                            </FormControl>
+                                            <FormDescription>
+                                                This is the subdomain that will
+                                                be used to access the resource.
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </form>
+                        </Form>
+                    </SettingsSectionForm>
+                </SettingsSectionBody>
+
+                <SettingsSectionFooter>
+                    <Button
+                        type="submit"
+                        loading={saveLoading}
+                        disabled={saveLoading}
+                        form="general-settings-form"
+                    >
+                        Save Settings
+                    </Button>
+                </SettingsSectionFooter>
+            </SettingsSection>
+        </SettingsContainer>
     );
 }

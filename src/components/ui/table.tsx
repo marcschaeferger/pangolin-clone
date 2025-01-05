@@ -2,6 +2,10 @@ import * as React from "react"
 
 import { cn } from "@app/lib/cn"
 
+export function TableContainer({ children }: { children: React.ReactNode }) {
+    return <div className="border rounded-md bg-card">{children}</div>
+}
+
 const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>

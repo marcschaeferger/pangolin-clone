@@ -67,7 +67,7 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
 
     const [roles, setRoles] = useState<{ roleId: number; name: string }[]>([]);
 
-    const [sendEmail, setSendEmail] = useState(env.EMAIL_ENABLED === "true");
+    const [sendEmail, setSendEmail] = useState(env.email.emailEnabled);
 
     const validFor = [
         { hours: 24, name: "1 day" },
@@ -205,7 +205,7 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
                                             )}
                                         />
 
-                                        {env.EMAIL_ENABLED === "true" && (
+                                        {env.email.emailEnabled && (
                                             <div className="flex items-center space-x-2">
                                                 <Checkbox
                                                     id="send-email"

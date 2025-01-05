@@ -90,14 +90,7 @@ const CredenzaContent = ({ className, children, ...props }: CredenzaProps) => {
 
     const CredenzaContent = isDesktop ? DialogContent : SheetContent;
 
-    return isDesktop ? (
-        <CredenzaContent
-            className={cn("overflow-y-auto max-h-screen", className)}
-            {...props}
-        >
-            {children}
-        </CredenzaContent>
-    ) : (
+    return (
         <CredenzaContent
             className={cn("overflow-y-auto max-h-screen", className)}
             {...props}

@@ -48,7 +48,7 @@ export function Header({ orgId, orgs }: HeaderProps) {
                     <div className="hidden md:block">
                         <div className="flex items-center gap-4 mr-4">
                             <Link
-                                href="https://docs.fossorial.io"
+                                href="https://docs.fossorial.io/Pangolin/overview"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-muted-foreground hover:text-foreground"
@@ -99,7 +99,7 @@ export function Header({ orgId, orgs }: HeaderProps) {
                                     <CommandEmpty>
                                         No organizations found.
                                     </CommandEmpty>
-                                    {(env.DISABLE_USER_CREATE_ORG === "false" ||
+                                    {(!env.flags.disableUserCreateOrg ||
                                         user.serverAdmin) && (
                                         <>
                                             <CommandGroup heading="Create">

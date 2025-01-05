@@ -256,7 +256,7 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                         <Link
                             href={`/${siteRow.orgId}/settings/sites/${siteRow.nice}`}
                         >
-                            <Button variant={"gray"} className="ml-2">
+                            <Button variant={"outline"} className="ml-2">
                                 Edit
                                 <ArrowRight className="ml-2 w-4 h-4" />
                             </Button>

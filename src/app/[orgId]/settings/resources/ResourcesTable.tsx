@@ -210,7 +210,7 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                         <Link
                             href={`/${resourceRow.orgId}/settings/resources/${resourceRow.id}`}
                         >
-                            <Button variant={"gray"} className="ml-2">
+                            <Button variant={"outline"} className="ml-2">
                                 Edit
                                 <ArrowRight className="ml-2 w-4 h-4" />
                             </Button>

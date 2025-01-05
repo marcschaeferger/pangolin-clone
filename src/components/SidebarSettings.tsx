@@ -21,8 +21,8 @@ export function SidebarSettings({
     limitWidth
 }: SideBarSettingsProps) {
     return (
-        <div className="space-y-8 pb-16k">
-            <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-32 lg:space-y-0">
+        <div className="space-y-4">
+            <div className="flex flex-col space-y-4 lg:flex-row lg:space-x-6 lg:space-y-0">
                 <aside className="lg:w-1/5">
                     <SidebarNav items={sidebarNavItems} disabled={disabled} />
                 </aside>

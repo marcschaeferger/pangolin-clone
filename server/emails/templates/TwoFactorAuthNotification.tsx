@@ -1,16 +1,20 @@
 import {
     Body,
-    Container,
     Head,
-    Heading,
     Html,
     Preview,
-    Section,
-    Text,
     Tailwind
 } from "@react-email/components";
 import * as React from "react";
-import LetterHead from "./components/LetterHead";
+import { themeColors } from "./lib/theme";
+import {
+    EmailContainer,
+    EmailFooter,
+    EmailGreeting,
+    EmailHeading,
+    EmailLetterHead,
+    EmailText
+} from "./components/Email";
 
 interface Props {
     email: string;
@@ -24,52 +28,44 @@ export const TwoFactorAuthNotification = ({ email, enabled }: Props) => {
         <Html>
             <Head />
             <Preview>{previewText}</Preview>
-            <Tailwind
-                config={{
-                    theme: {
-                        extend: {
-                            colors: {
-                                primary: "#16A34A"
-                            }
-                        }
-                    }
-                }}
-            >
+            <Tailwind config={themeColors}>
                 <Body className="font-sans">
-                    <Container className="bg-white border border-solid border-gray-200 p-6 max-w-lg mx-auto my-8 rounded-lg">
-                        <LetterHead />
+                    <EmailContainer>
+                        <EmailLetterHead />
 
-                        <Heading className="text-2xl font-semibold text-gray-800 text-center">
+                        <EmailHeading>
                             Two-Factor Authentication{" "}
                             {enabled ? "Enabled" : "Disabled"}
-                        </Heading>
-                        <Text className="text-base text-gray-700 mt-4">
-                            Hi {email || "there"},
-                        </Text>
-                        <Text className="text-base text-gray-700 mt-2">
+                        </EmailHeading>
+
+                        <EmailGreeting>Hi {email || "there"},</EmailGreeting>
+
+                        <EmailText>
                             This email confirms that Two-Factor Authentication
                             has been successfully{" "}
                             {enabled ? "enabled" : "disabled"} on your account.
-                        </Text>
+                        </EmailText>
+
                         {enabled ? (
-                            <Text className="text-base text-gray-700">
+                            <EmailText>
                                 With Two-Factor Authentication enabled, your
                                 account is now more secure. Please ensure you
                                 keep your authentication method safe.
-                            </Text>
+                            </EmailText>
                         ) : (
-                            <Text className="text-base text-gray-700">
+                            <EmailText>
                                 With Two-Factor Authentication disabled, your
                                 account may be less secure. We recommend
                                 enabling it to protect your account.
-                            </Text>
+                            </EmailText>
                         )}
-                        <Text className="text-sm text-gray-500 mt-6">
+
+                        <EmailFooter>
                             Best regards,
                             <br />
                             Fossorial
-                        </Text>
-                    </Container>
+                        </EmailFooter>
+                    </EmailContainer>
                 </Body>
             </Tailwind>
         </Html>

@@ -88,7 +88,7 @@ export function SidebarNav({
             </div>
             <nav
                 className={cn(
-                    "hidden lg:flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-3",
+                    "hidden lg:flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-3 pr-8",
                     disabled && "opacity-50 pointer-events-none",
                     className
                 )}
@@ -102,7 +102,7 @@ export function SidebarNav({
                             buttonVariants({ variant: "ghost" }),
                             pathname === hydrateHref(item.href) &&
                                 !pathname.includes("create")
-                                ? "bg-muted hover:bg-muted dark:bg-border dark:hover:bg-border"
+                                ? "bg-accent hover:bg-accent dark:bg-border dark:hover:bg-border"
                                 : "hover:bg-transparent hover:underline",
                             "justify-start",
                             disabled && "cursor-not-allowed"

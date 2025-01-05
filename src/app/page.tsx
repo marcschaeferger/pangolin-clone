@@ -10,6 +10,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import OrganizationLanding from "./components/OrganizationLanding";
+import { pullEnv } from "@app/lib/pullEnv";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,8 @@ export default async function Page(props: {
     }>;
 }) {
     const params = await props.searchParams; // this is needed to prevent static optimization
+
+    const env = pullEnv();
 
     const getUser = cache(verifySession);
     const user = await getUser({ skipCheckVerifyEmail: true });
@@ -34,7 +37,7 @@ export default async function Page(props: {
 
     if (
         !user.emailVerified &&
-        process.env.FLAGS_EMAIL_VERIFICATION_REQUIRED === "true"
+        env.flags.emailVerificationRequired
     ) {
         if (params.redirect) {
             redirect(`/auth/verify-email?redirect=${params.redirect}`);
@@ -57,7 +60,7 @@ export default async function Page(props: {
 
     if (!orgs.length) {
         if (
-            process.env.DISABLE_USER_CREATE_ORG === "false" ||
+            !env.flags.disableUserCreateOrg ||
             user.serverAdmin
         ) {
             redirect("/setup");

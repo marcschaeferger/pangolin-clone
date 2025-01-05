@@ -38,7 +38,7 @@ export default async function Page(props: {
                     }
                     className="underline"
                 >
-                    Go to login
+                    Go back to log in
                 </Link>
             </p>
         </>

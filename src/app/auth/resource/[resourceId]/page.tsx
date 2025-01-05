@@ -16,6 +16,7 @@ import { cookies } from "next/headers";
 import { CheckResourceSessionResponse } from "@server/routers/auth";
 import AccessTokenInvalid from "./AccessToken";
 import AccessToken from "./AccessToken";
+import { pullEnv } from "@app/lib/pullEnv";
 
 export default async function ResourceAuthPage(props: {
     params: Promise<{ resourceId: number }>;
@@ -26,6 +27,8 @@ export default async function ResourceAuthPage(props: {
 }) {
     const params = await props.params;
     const searchParams = await props.searchParams;
+
+    const env = pullEnv();
 
     let authInfo: GetResourceAuthInfoResponse | undefined;
     try {
@@ -42,7 +45,9 @@ export default async function ResourceAuthPage(props: {
     const user = await getUser({ skipCheckVerifyEmail: true });
 
     if (!authInfo) {
-        {/* @ts-ignore */} // TODO: fix this
+        {
+            /* @ts-ignore */
+        } // TODO: fix this
         return (
             <div className="w-full max-w-md">
                 <ResourceNotFound />
@@ -63,11 +68,7 @@ export default async function ResourceAuthPage(props: {
         !authInfo.pincode &&
         !authInfo.whitelist;
 
-    if (
-        user &&
-        !user.emailVerified &&
-        process.env.FLAGS_EMAIL_VERIFICATION_REQUIRED === "true"
-    ) {
+    if (user && !user.emailVerified && env.flags.emailVerificationRequired) {
         redirect(
             `/auth/verify-email?redirect=/auth/resource/${authInfo.resourceId}`
         );
@@ -75,7 +76,7 @@ export default async function ResourceAuthPage(props: {
 
     const allCookies = await cookies();
     const cookieName =
-        process.env.RESOURCE_SESSION_COOKIE_NAME + `_${params.resourceId}`;
+        env.server.resourceSessionCookieName + `_${params.resourceId}`;
     const sessionId = allCookies.get(cookieName)?.value ?? null;
 
     if (sessionId) {

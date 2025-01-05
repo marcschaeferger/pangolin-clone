@@ -4,6 +4,7 @@ import { ListSitesResponse } from "@server/routers/site";
 import { AxiosResponse } from "axios";
 import SitesTable, { SiteRow } from "./SitesTable";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
+import SitesSplashCard from "./SitesSplashCard";
 
 type SitesPageProps = {
     params: Promise<{ orgId: string }>;
@@ -47,6 +48,8 @@ export default async function SitesPage(props: SitesPageProps) {
 
     return (
         <>
+            <SitesSplashCard />
+
             <SettingsSectionTitle
                 title="Manage Sites"
                 description="Allow connectivity to your network through secure tunnels"

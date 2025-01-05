@@ -1,16 +1,22 @@
 import {
     Body,
-    Container,
     Head,
-    Heading,
     Html,
     Preview,
-    Section,
-    Text,
     Tailwind
 } from "@react-email/components";
 import * as React from "react";
-import LetterHead from "./components/LetterHead";
+import { themeColors } from "./lib/theme";
+import {
+    EmailContainer,
+    EmailFooter,
+    EmailGreeting,
+    EmailHeading,
+    EmailLetterHead,
+    EmailSection,
+    EmailText
+} from "./components/Email";
+import CopyCodeBox from "./components/CopyCodeBox";
 
 interface VerifyEmailProps {
     username?: string;
@@ -29,47 +35,36 @@ export const VerifyEmail = ({
         <Html>
             <Head />
             <Preview>{previewText}</Preview>
-            <Tailwind
-                config={{
-                    theme: {
-                        extend: {
-                            colors: {
-                                primary: "#F97317"
-                            }
-                        }
-                    }
-                }}
-            >
+            <Tailwind config={themeColors}>
                 <Body className="font-sans">
-                    <Container className="bg-white border border-solid border-gray-200 p-6 max-w-lg mx-auto my-8 rounded-lg">
-                        <LetterHead />
+                    <EmailContainer>
+                        <EmailLetterHead />
 
-                        <Heading className="text-2xl font-semibold text-gray-800 text-center">
-                            Please Verify Your Email
-                        </Heading>
-                        <Text className="text-base text-gray-700 mt-4">
-                            Hi {username || "there"},
-                        </Text>
-                        <Text className="text-base text-gray-700 mt-2">
+                        <EmailHeading>Please Verify Your Email</EmailHeading>
+
+                        <EmailGreeting>Hi {username || "there"},</EmailGreeting>
+
+                        <EmailText>
                             You’ve requested to verify your email. Please use
                             the code below to complete the verification process
                             upon logging in.
-                        </Text>
-                        <Section className="text-center">
-                            <Text className="inline-block bg-primary text-xl font-bold text-white py-2 px-4 border border-gray-300 rounded-xl">
-                                {verificationCode}
-                            </Text>
-                        </Section>
-                        <Text className="text-base text-gray-700 mt-2">
+                        </EmailText>
+
+                        <EmailSection>
+                            <CopyCodeBox text={verificationCode} />
+                        </EmailSection>
+
+                        <EmailText>
                             If you didn’t request this, you can safely ignore
                             this email.
-                        </Text>
-                        <Text className="text-sm text-gray-500 mt-6">
+                        </EmailText>
+
+                        <EmailFooter>
                             Best regards,
                             <br />
                             Fossorial
-                        </Text>
-                    </Container>
+                        </EmailFooter>
+                    </EmailContainer>
                 </Body>
             </Tailwind>
         </Html>
