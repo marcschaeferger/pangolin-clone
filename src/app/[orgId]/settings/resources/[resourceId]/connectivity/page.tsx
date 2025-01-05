@@ -59,19 +59,16 @@ import {
     SettingsSectionTitle,
     SettingsSectionDescription,
     SettingsSectionBody,
-    SettingsSectionForm,
     SettingsSectionFooter
 } from "@app/components/Settings";
 import { SwitchInput } from "@app/components/SwitchInput";
 
 const addTargetSchema = z.object({
-    ip: z.string().ip(),
+    ip: z.string().ip().or(z.literal('localhost')),
     method: z.string(),
     port: z.coerce.number().int().positive()
     // protocol: z.string(),
 });
-
-type AddTargetFormValues = z.infer<typeof addTargetSchema>;
 
 type LocalTarget = Omit<
     ArrayElement<ListTargetsResponse["targets"]> & {
@@ -182,7 +179,7 @@ export default function ReverseProxyTargets(props: {
             // make sure that the target IP is within the site subnet
             const targetIp = data.ip;
             const subnet = site.subnet;
-            if (!isIPInSubnet(targetIp, subnet)) {
+            if (targetIp === "localhost" || !isIPInSubnet(targetIp, subnet)) {
                 toast({
                     variant: "destructive",
                     title: "Invalid target IP",
