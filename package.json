@@ -3,6 +3,13 @@
     "version": "1.0.0-beta.1",
     "private": true,
     "type": "module",
+    "description": "Tunneled Reverse Proxy Management Server with Identity and Access Control and Dashboard UI",
+    "homepage": "https://github.com/fosrl/pangolin",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/fosrl/pangolin"
+    },
+    "license": "SEE LICENSE IN LICENSE.md AND README.md",
     "scripts": {
         "dev": "NODE_ENV=development ENVIRONMENT=dev tsx watch server/index.ts",
         "db:generate": "drizzle-kit generate",
