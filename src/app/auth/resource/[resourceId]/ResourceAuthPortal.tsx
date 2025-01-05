@@ -42,15 +42,20 @@ import {
 } from "@app/components/ui/input-otp";
 import { useRouter } from "next/navigation";
 import { Alert, AlertDescription } from "@app/components/ui/alert";
-import { formatAxiosError } from "@app/lib/api";;
+import { formatAxiosError } from "@app/lib/api";
 import { AxiosResponse } from "axios";
 import LoginForm from "@app/components/LoginForm";
-import { AuthWithPasswordResponse, AuthWithAccessTokenResponse, AuthWithWhitelistResponse } from "@server/routers/resource";
+import {
+    AuthWithPasswordResponse,
+    AuthWithAccessTokenResponse,
+    AuthWithWhitelistResponse
+} from "@server/routers/resource";
 import { redirect } from "next/dist/server/api-utils";
 import ResourceAccessDenied from "./ResourceAccessDenied";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { useToast } from "@app/hooks/useToast";
+import Link from "next/link";
 
 const pinSchema = z.object({
     pin: z
@@ -264,7 +269,15 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
                 <div>
                     <div className="text-center mb-2">
                         <span className="text-sm text-muted-foreground">
-                            Powered by Fossorial
+                            Powered by{" "}
+                            <Link
+                                href="https://github.com/fosrl/pangolin"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline"
+                            >
+                                Pangolin
+                            </Link>
                         </span>
                     </div>
                     <Card>

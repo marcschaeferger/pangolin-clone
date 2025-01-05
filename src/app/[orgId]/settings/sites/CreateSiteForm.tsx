@@ -38,7 +38,7 @@ import { SiteRow } from "./SitesTable";
 import { AxiosResponse } from "axios";
 import { Button } from "@app/components/ui/button";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, SquareArrowOutUpRight } from "lucide-react";
 
 const createSiteFormSchema = z.object({
     name: z
@@ -290,7 +290,7 @@ PersistentKeepalive = 5`
                                     {" "}
                                     Learn how to install Newt on your system
                                 </span>
-                                <ArrowUpRight className="w-5 h-5" />
+                                <SquareArrowOutUpRight size={14} />
                             </Link>
                         </>
                     )}
