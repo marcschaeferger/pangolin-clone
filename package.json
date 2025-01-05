@@ -9,7 +9,7 @@
         "type": "git",
         "url": "https://github.com/fosrl/pangolin"
     },
-    "license": "SEE LICENSE IN LICENSE.md AND README.md",
+    "license": "SEE LICENSE IN LICENSE AND README.md",
     "scripts": {
         "dev": "NODE_ENV=development ENVIRONMENT=dev tsx watch server/index.ts",
         "db:generate": "drizzle-kit generate",

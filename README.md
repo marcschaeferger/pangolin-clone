@@ -11,7 +11,7 @@ Pangolin is a self-hosted tunneled reverse proxy management server with identity
 
 <img src="public/screenshots/sites.png" alt="Preview"/>
 
-_Sites page of Pangolin showing multiple site-to-site tunnels connected to the central server._
+_Sites page of Pangolin dashboard (dark mode) showing multiple tunnels connected to the central server._
 
 ## Key Features
 
