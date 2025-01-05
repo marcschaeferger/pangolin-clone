@@ -1,5 +1,6 @@
 import SignupForm from "@app/app/auth/signup/SignupForm";
 import { verifySession } from "@app/lib/auth/verifySession";
+import { pullEnv } from "@app/lib/pullEnv";
 import { Mail } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -14,9 +15,11 @@ export default async function Page(props: {
     const getUser = cache(verifySession);
     const user = await getUser();
 
+    const env = pullEnv();
+
     const isInvite = searchParams?.redirect?.includes("/invite");
 
-    if (process.env.DISABLE_SIGNUP_WITHOUT_INVITE === "true" && !isInvite) {
+    if (env.flags.disableSignupWithoutInvite && !isInvite) {
         redirect("/");
     }
 
