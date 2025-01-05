@@ -1,6 +1,6 @@
 # Pangolin
 
-Pangolin is a self-hosted tunneled reverse proxy management server with identity and access management, designed to securely expose private resources through encrypted [WireGuard](https://www.wireguard.com/) tunnels running in user space. With Pangolin, you retain full control over your infrastructure while providing a user-friendly and feature-rich solution for managing proxies, authentication, and access, and simplifying complex network setups, all with a clean and simple UI.
+Pangolin is a self-hosted tunneled reverse proxy management server with identity and access management, designed to securely expose private resources through use with the Traefik reverse proxy and Wireguard tunnel clients like Newt. With Pangolin, you retain full control over your infrastructure while providing a user-friendly and feature-rich solution for managing proxies, authentication, and access, and simplifying complex network setups, all with a clean and simple UI.
 
 ### Installation and Documentation
 
@@ -25,6 +25,7 @@ _Sites page of Pangolin showing multiple site-to-site tunnels connected to the c
 ### Identity & Access Management
 
 -   Centralized authentication system using platform SSO. **Users will only have to manage one login.**
+-   Totp with backup codes for two-factor authentication.
 -   Create organizations, each with multiple sites, users, and roles.
 -   **Role-based access control** to manage resource access permissions.
 -   Additional authentication options include:
@@ -38,6 +39,7 @@ _Sites page of Pangolin showing multiple site-to-site tunnels connected to the c
 -   Manage sites, users, and roles with a clean and intuitive UI.
 -   Monitor site usage and connectivity.
 -   Light and dark mode options.
+-   Mobile friendly.
 
 ### Easy Deployment
 
