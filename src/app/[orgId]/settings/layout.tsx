@@ -36,7 +36,7 @@ const topNavItems = [
         icon: <Users className="h-4 w-4" />
     },
     {
-        title: "Sharable Links",
+        title: "Shareable Links",
         href: "/{orgId}/settings/share-links",
         icon: <Link className="h-4 w-4" />
     },
@@ -95,7 +95,7 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
 
     return (
         <>
-            <div className="w-full border-b bg-neutral-100 dark:bg-neutral-800 select-none sm:px-0 px-3 fixed top-0 z-10">
+            <div className="w-full border-b bg-card select-none sm:px-0 px-3 fixed top-0 z-10">
                 <div className="container mx-auto flex flex-col content-between">
                     <div className="my-4">
                         <UserProvider user={user}>

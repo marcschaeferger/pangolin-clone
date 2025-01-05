@@ -60,9 +60,7 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
                                 <div className="flex items-center space-x-2 text-yellow-500">
                                     <ShieldOff className="w-4 h-4" />
                                     <span>
-                                        This resource is not protected with any
-                                        auth method. Anyone can access this
-                                        resource.
+                                        Anyone can access this resource.
                                     </span>
                                 </div>
                             )}

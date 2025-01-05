@@ -1,8 +1,8 @@
-import { env } from "@app/lib/types/env";
+import { Env } from "@app/lib/types/env";
 import { createContext } from "react";
 
 interface EnvContextType {
-    env: env;
+    env: Env;
 }
 
 const EnvContext = createContext<EnvContextType | undefined>(undefined);

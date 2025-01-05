@@ -1,17 +1,22 @@
 import {
     Body,
-    Container,
     Head,
-    Heading,
     Html,
     Preview,
-    Section,
-    Text,
     Tailwind,
-    Button
 } from "@react-email/components";
 import * as React from "react";
-import LetterHead from "./components/LetterHead";
+import { themeColors } from "./lib/theme";
+import {
+    EmailContainer,
+    EmailFooter,
+    EmailGreeting,
+    EmailHeading,
+    EmailLetterHead,
+    EmailSection,
+    EmailText
+} from "./components/Email";
+import ButtonLink from "./components/ButtonLink";
 
 interface SendInviteLinkProps {
     email: string;
@@ -34,55 +39,42 @@ export const SendInviteLink = ({
         <Html>
             <Head />
             <Preview>{previewText}</Preview>
-            <Tailwind
-                config={{
-                    theme: {
-                        extend: {
-                            colors: {
-                                primary: "#F97317"
-                            }
-                        }
-                    }
-                }}
-            >
+            <Tailwind config={themeColors}>
                 <Body className="font-sans">
-                    <Container className="bg-white border border-solid border-gray-200 p-6 max-w-lg mx-auto my-8 rounded-lg">
-                        <LetterHead />
+                    <EmailContainer>
+                        <EmailLetterHead />
 
-                        <Heading className="text-2xl font-semibold text-gray-800 text-center">
-                            Invited to Join {orgName}
-                        </Heading>
-                        <Text className="text-base text-gray-700 mt-4">
-                            Hi {email || "there"},
-                        </Text>
-                        <Text className="text-base text-gray-700 mt-2">
+                        <EmailHeading>Invited to Join {orgName}</EmailHeading>
+
+                        <EmailGreeting>Hi {email || "there"},</EmailGreeting>
+
+                        <EmailText>
                             You’ve been invited to join the organization{" "}
-                            {orgName}
+                            <strong>{orgName}</strong>
                             {inviterName ? ` by ${inviterName}.` : "."} Please
                             access the link below to accept the invite.
-                        </Text>
-                        <Text className="text-base text-gray-700 mt-2">
+                        </EmailText>
+
+                        <EmailText>
                             This invite will expire in{" "}
-                            <b>
+                            <strong>
                                 {expiresInDays}{" "}
                                 {expiresInDays === "1" ? "day" : "days"}.
-                            </b>
-                        </Text>
-                        <Section className="text-center">
-                            <Button
-                                href={inviteLink}
-                                className="rounded-lg bg-primary px-[12px] py-[9px] text-center font-semibold text-white cursor-pointer text-xl"
-                            >
-                                Accept Invite to {orgName}
-                            </Button>
-                        </Section>
+                            </strong>
+                        </EmailText>
 
-                        <Text className="text-sm text-gray-500 mt-6">
+                        <EmailSection>
+                            <ButtonLink href={inviteLink}>
+                                Accept Invite to {orgName}
+                            </ButtonLink>
+                        </EmailSection>
+
+                        <EmailFooter>
                             Best regards,
                             <br />
                             Fossorial
-                        </Text>
-                    </Container>
+                        </EmailFooter>
+                    </EmailContainer>
                 </Body>
             </Tailwind>
         </Html>

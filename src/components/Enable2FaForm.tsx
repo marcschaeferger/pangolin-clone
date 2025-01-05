@@ -224,7 +224,9 @@ export default function Enable2FaForm({ open, setOpen }: Enable2FaProps) {
                             <div className="h-[250px] mx-auto flex items-center justify-center">
                                 <QRCodeCanvas value={secretUri} size={200} />
                             </div>
-                            <CopyTextBox text={secretUri} wrapText={false} />
+                            <div className="max-w-md mx-auto">
+                                <CopyTextBox text={secretUri} wrapText={false} />
+                            </div>
 
                             <Form {...confirmForm}>
                                 <form

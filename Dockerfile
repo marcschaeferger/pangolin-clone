@@ -29,4 +29,6 @@ COPY --from=builder /app/init ./dist/init
 COPY config.example.yml ./dist/config.example.yml
 COPY server/db/names.json ./dist/names.json
 
+COPY public ./public
+
 CMD ["npm", "start"]

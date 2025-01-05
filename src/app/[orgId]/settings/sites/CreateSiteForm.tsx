@@ -36,6 +36,9 @@ import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { SiteRow } from "./SitesTable";
 import { AxiosResponse } from "axios";
+import { Button } from "@app/components/ui/button";
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 
 const createSiteFormSchema = z.object({
     name: z
@@ -273,6 +276,24 @@ PersistentKeepalive = 5`
                     <span className="text-sm text-muted-foreground">
                         You will only be able to see the configuration once.
                     </span>
+
+                    {form.watch("method") === "newt" && (
+                        <>
+                            <br />
+                            <Link
+                                className="text-sm text-primary flex items-center gap-1"
+                                href="https://docs.fossorial.io/Newt/install"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <span>
+                                    {" "}
+                                    Learn how to install Newt on your system
+                                </span>
+                                <ArrowUpRight className="w-5 h-5" />
+                            </Link>
+                        </>
+                    )}
 
                     <div className="flex items-center space-x-2">
                         <Checkbox

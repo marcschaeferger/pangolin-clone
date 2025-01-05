@@ -37,6 +37,7 @@ import {
 } from "./ui/input-otp";
 import Link from "next/link";
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
+import Image from 'next/image'
 
 type LoginFormProps = {
     redirect?: string;
@@ -227,8 +228,6 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
                                                         <InputOTPSlot
                                                             index={2}
                                                         />
-                                                    </InputOTPGroup>
-                                                    <InputOTPGroup>
                                                         <InputOTPSlot
                                                             index={3}
                                                         />

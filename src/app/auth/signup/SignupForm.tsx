@@ -12,23 +12,24 @@ import {
     FormField,
     FormItem,
     FormLabel,
-    FormMessage,
+    FormMessage
 } from "@/components/ui/form";
 import {
     Card,
     CardContent,
     CardDescription,
     CardHeader,
-    CardTitle,
+    CardTitle
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { SignUpResponse } from "@server/routers/auth";
 import { useRouter } from "next/navigation";
 import { passwordSchema } from "@server/auth/passwordSchema";
 import { AxiosResponse } from "axios";
-import { formatAxiosError } from "@app/lib/api";;
+import { formatAxiosError } from "@app/lib/api";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
+import Image from "next/image";
 
 type SignupFormProps = {
     redirect?: string;
@@ -40,14 +41,18 @@ const formSchema = z
     .object({
         email: z.string().email({ message: "Invalid email address" }),
         password: passwordSchema,
-        confirmPassword: passwordSchema,
+        confirmPassword: passwordSchema
     })
     .refine((data) => data.password === data.confirmPassword, {
         path: ["confirmPassword"],
-        message: "Passwords do not match",
+        message: "Passwords do not match"
     });
 
-export default function SignupForm({ redirect, inviteId, inviteToken }: SignupFormProps) {
+export default function SignupForm({
+    redirect,
+    inviteId,
+    inviteToken
+}: SignupFormProps) {
     const router = useRouter();
 
     const api = createApiClient(useEnvContext());
@@ -60,8 +65,8 @@ export default function SignupForm({ redirect, inviteId, inviteToken }: SignupFo
         defaultValues: {
             email: "",
             password: "",
-            confirmPassword: "",
-        },
+            confirmPassword: ""
+        }
     });
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -109,10 +114,22 @@ export default function SignupForm({ redirect, inviteId, inviteToken }: SignupFo
     return (
         <Card className="w-full max-w-md">
             <CardHeader>
-                <CardTitle>Create Account</CardTitle>
-                <CardDescription>
-                    Enter your details to create an account
-                </CardDescription>
+                <div className="flex flex-row items-center justify-center">
+                    <Image
+                        src={`/logo/pangolin_orange.svg`}
+                        alt="Pangolin Logo"
+                        width="100"
+                        height="100"
+                    />
+                </div>
+                <div className="text-center space-y-1">
+                    <h1 className="text-2xl font-bold mt-1">
+                        Welcome to Pangolin
+                    </h1>
+                    <p className="text-sm text-muted-foreground">
+                        Create an account to get started
+                    </p>
+                </div>
             </CardHeader>
             <CardContent>
                 <Form {...form}>

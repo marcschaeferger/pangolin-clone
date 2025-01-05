@@ -23,7 +23,7 @@ export default function CopyTextBox({ text = "", wrapText = false }) {
     };
 
     return (
-        <div className="relative w-full border rounded-md">
+        <div className="relative w-full border rounded-md bg-card">
             <pre
                 ref={textRef}
                 className={`p-4 pr-16 text-sm w-full ${
@@ -38,7 +38,7 @@ export default function CopyTextBox({ text = "", wrapText = false }) {
                 variant="outline"
                 size="icon"
                 type="button"
-                className="absolute top-1 right-1 z-10"
+                className="absolute top-1 right-1 z-10 bg-card"
                 onClick={copyToClipboard}
                 aria-label="Copy to clipboard"
             >

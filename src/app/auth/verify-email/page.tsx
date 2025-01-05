@@ -1,5 +1,6 @@
 import VerifyEmailForm from "@app/app/auth/verify-email/VerifyEmailForm";
 import { verifySession } from "@app/lib/auth/verifySession";
+import { pullEnv } from "@app/lib/pullEnv";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 
@@ -8,7 +9,9 @@ export const dynamic = "force-dynamic";
 export default async function Page(props: {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-    if (process.env.FLAGS_EMAIL_VERIFICATION_REQUIRED !== "true") {
+    const env = pullEnv();
+
+    if (!env.flags.emailVerificationRequired) {
         redirect("/");
     }
 

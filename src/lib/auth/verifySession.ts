@@ -2,12 +2,15 @@ import { internal } from "@app/lib/api";
 import { authCookieHeader } from "@app/lib/api/cookies";
 import { GetUserResponse } from "@server/routers/user";
 import { AxiosResponse } from "axios";
+import { pullEnv } from "../pullEnv";
 
 export async function verifySession({
     skipCheckVerifyEmail,
 }: {
     skipCheckVerifyEmail?: boolean;
 } = {}): Promise<GetUserResponse | null> {
+    const env = pullEnv();
+
     try {
         const res = await internal.get<AxiosResponse<GetUserResponse>>(
             "/user",
@@ -23,7 +26,7 @@ export async function verifySession({
         if (
             !skipCheckVerifyEmail &&
             !user.emailVerified &&
-            process.env.FLAGS_EMAIL_VERIFICATION_REQUIRED == "true"
+            env.flags.emailVerificationRequired
         ) {
             return null;
         }

@@ -1,11 +1,11 @@
 "use client";
 
 import EnvContext from "@app/contexts/envContext";
-import { env } from "@app/lib/types/env";
+import { Env } from "@app/lib/types/env";
 
 interface ApiProviderProps {
     children: React.ReactNode;
-    env: env;
+    env: Env;
 }
 
 export function EnvProvider({ children, env }: ApiProviderProps) {

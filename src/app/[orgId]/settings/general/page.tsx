@@ -21,7 +21,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
-import { formatAxiosError } from "@app/lib/api";;
+import { formatAxiosError } from "@app/lib/api";
 import { AlertTriangle, Trash2 } from "lucide-react";
 import {
     Card,
@@ -33,6 +33,16 @@ import {
 import { AxiosResponse } from "axios";
 import { DeleteOrgResponse, ListOrgsResponse } from "@server/routers/org";
 import { redirect, useRouter } from "next/navigation";
+import {
+    SettingsContainer,
+    SettingsSection,
+    SettingsSectionHeader,
+    SettingsSectionTitle,
+    SettingsSectionDescription,
+    SettingsSectionBody,
+    SettingsSectionForm,
+    SettingsSectionFooter
+} from "@app/components/Settings";
 
 const GeneralFormSchema = z.object({
     name: z.string()
@@ -80,10 +90,7 @@ export default function GeneralPage() {
 
     async function pickNewOrgAndNavigate() {
         try {
-
-            const res = await api.get<AxiosResponse<ListOrgsResponse>>(
-                `/orgs`
-            );
+            const res = await api.get<AxiosResponse<ListOrgsResponse>>(`/orgs`);
 
             if (res.status === 200) {
                 if (res.data.data.orgs.length > 0) {
@@ -126,7 +133,7 @@ export default function GeneralPage() {
     }
 
     return (
-        <>
+        <SettingsContainer>
             <ConfirmDeleteDialog
                 open={isDeleteModalOpen}
                 setOpen={(val) => {
@@ -138,12 +145,10 @@ export default function GeneralPage() {
                             Are you sure you want to delete the organization{" "}
                             <b>{org?.org.name}?</b>
                         </p>
-
                         <p className="mb-2">
                             This action is irreversible and will delete all
                             associated data.
                         </p>
-
                         <p>
                             To confirm, type the name of the organization below.
                         </p>
@@ -155,57 +160,75 @@ export default function GeneralPage() {
                 title="Delete Organization"
             />
 
-            <section className="space-y-8 max-w-lg">
-                <Form {...form}>
-                    <form
-                        onSubmit={form.handleSubmit(onSubmit)}
-                        className="space-y-4"
-                    >
-                        <FormField
-                            control={form.control}
-                            name="name"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Name</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} />
-                                    </FormControl>
-                                    <FormDescription>
-                                        This is the display name of the org
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <Button type="submit">Save Changes</Button>
-                    </form>
-                </Form>
+            <SettingsSection>
+                <SettingsSectionHeader>
+                    <SettingsSectionTitle>
+                        Organization Settings
+                    </SettingsSectionTitle>
+                    <SettingsSectionDescription>
+                        Manage your organization details and configuration
+                    </SettingsSectionDescription>
+                </SettingsSectionHeader>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-red-600">
-                            <AlertTriangle className="h-5 w-5" />
-                            Danger Zone
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-sm">
-                            Once you delete this org, there is no going back.
-                            Please be certain.
-                        </p>
-                    </CardContent>
-                    <CardFooter className="flex justify-end gap-2">
-                        <Button
-                            variant="destructive"
-                            onClick={() => setIsDeleteModalOpen(true)}
-                            className="flex items-center gap-2"
-                        >
-                            <Trash2 className="h-4 w-4" />
-                            Delete Organization Data
-                        </Button>
-                    </CardFooter>
-                </Card>
-            </section>
-        </>
+                <SettingsSectionBody>
+                    <SettingsSectionForm>
+                        <Form {...form}>
+                            <form
+                                onSubmit={form.handleSubmit(onSubmit)}
+                                className="space-y-4"
+                                id="org-settings-form"
+                            >
+                                <FormField
+                                    control={form.control}
+                                    name="name"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Name</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} />
+                                            </FormControl>
+                                            <FormDescription>
+                                                This is the display name of the
+                                                org
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </form>
+                        </Form>
+                    </SettingsSectionForm>
+                </SettingsSectionBody>
+
+                <SettingsSectionFooter>
+                    <Button type="submit" form="org-settings-form">
+                        Save Settings
+                    </Button>
+                </SettingsSectionFooter>
+            </SettingsSection>
+
+            <SettingsSection>
+                <SettingsSectionHeader>
+                    <SettingsSectionTitle>
+                        <AlertTriangle className="h-5 w-5" />
+                        Danger Zone
+                    </SettingsSectionTitle>
+                    <SettingsSectionDescription>
+                        Once you delete this org, there is no going back. Please
+                        be certain.
+                    </SettingsSectionDescription>
+                </SettingsSectionHeader>
+
+                <SettingsSectionFooter>
+                    <Button
+                        variant="destructive"
+                        onClick={() => setIsDeleteModalOpen(true)}
+                        className="flex items-center gap-2"
+                    >
+                        Delete Organization Data
+                    </Button>
+                </SettingsSectionFooter>
+            </SettingsSection>
+        </SettingsContainer>
     );
 }

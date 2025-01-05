@@ -12,6 +12,7 @@ import LoginForm from "@app/components/LoginForm";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import Image from "next/image";
 
 type DashboardLoginFormProps = {
     redirect?: string;
@@ -37,10 +38,20 @@ export default function DashboardLoginForm({
     return (
         <Card className="w-full max-w-md">
             <CardHeader>
-                <CardTitle>Welcome to Pangolin</CardTitle>
-                <CardDescription>
-                    Enter your credentials to access your dashboard
-                </CardDescription>
+                <div className="flex flex-row items-center justify-center">
+                    <Image
+                        src={`/logo/pangolin_orange.svg`}
+                        alt="Pangolin Logo"
+                        width="100"
+                        height="100"
+                    />
+                </div>
+                <div className="text-center space-y-1">
+                    <h1 className="text-2xl font-bold mt-1">
+                        Welcome to Pangolin
+                    </h1>
+                    <p className="text-sm text-muted-foreground">Log in to get started</p>
+                </div>
             </CardHeader>
             <CardContent>
                 <LoginForm

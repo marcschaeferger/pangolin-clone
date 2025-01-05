@@ -38,7 +38,7 @@ export default function ProfileIcon() {
     const [openDisable2fa, setOpenDisable2fa] = useState(false);
 
     function getInitials() {
-        return user.email.substring(0, 2).toUpperCase();
+        return user.email.substring(0, 1).toUpperCase();
     }
 
     function handleThemeChange(theme: "light" | "dark" | "system") {
@@ -144,8 +144,8 @@ export default function ProfileIcon() {
                         )}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => logout()}>
-                            <LogOut className="mr-2 h-4 w-4" />
-                            <span>Log out</span>
+                            {/* <LogOut className="mr-2 h-4 w-4" /> */}
+                            <span>Log Out</span>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

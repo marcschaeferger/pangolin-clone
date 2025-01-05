@@ -1,16 +1,22 @@
 import {
     Body,
-    Container,
     Head,
-    Heading,
     Html,
     Preview,
-    Section,
-    Text,
     Tailwind
 } from "@react-email/components";
 import * as React from "react";
-import LetterHead from "./components/LetterHead";
+import {
+    EmailContainer,
+    EmailLetterHead,
+    EmailHeading,
+    EmailText,
+    EmailFooter,
+    EmailSection,
+    EmailGreeting
+} from "./components/Email";
+import { themeColors } from "./lib/theme";
+import CopyCodeBox from "./components/CopyCodeBox";
 
 interface ResourceOTPCodeProps {
     email?: string;
@@ -31,44 +37,34 @@ export const ResourceOTPCode = ({
         <Html>
             <Head />
             <Preview>{previewText}</Preview>
-            <Tailwind
-                config={{
-                    theme: {
-                        extend: {
-                            colors: {
-                                primary: "#F97317"
-                            }
-                        }
-                    }
-                }}
-            >
+            <Tailwind config={themeColors}>
                 <Body className="font-sans">
-                    <Container className="bg-white border border-solid border-gray-200 p-6 max-w-lg mx-auto my-8 rounded-lg">
-                        <LetterHead />
+                    <EmailContainer>
+                        <EmailLetterHead />
 
-                        <Heading className="text-2xl font-semibold text-gray-800 text-center">
+                        <EmailHeading>
                             Your One-Time Password for {resourceName}
-                        </Heading>
-                        <Text className="text-base text-gray-700 mt-4">
-                            Hi {email || "there"},
-                        </Text>
-                        <Text className="text-base text-gray-700 mt-2">
+                        </EmailHeading>
+
+                        <EmailGreeting>Hi {email || "there"},</EmailGreeting>
+
+                        <EmailText>
                             You’ve requested a one-time password to access{" "}
                             <strong>{resourceName}</strong> in{" "}
                             <strong>{organizationName}</strong>. Use the code
                             below to complete your authentication:
-                        </Text>
-                        <Section className="text-center">
-                            <Text className="inline-block bg-primary text-xl font-bold text-white py-2 px-4 border border-gray-300 rounded-xl">
-                                {otp}
-                            </Text>
-                        </Section>
-                        <Text className="text-sm text-gray-500 mt-6">
+                        </EmailText>
+
+                        <EmailSection>
+                            <CopyCodeBox text={otp} />
+                        </EmailSection>
+
+                        <EmailFooter>
                             Best regards,
                             <br />
                             Fossorial
-                        </Text>
-                    </Container>
+                        </EmailFooter>
+                    </EmailContainer>
                 </Body>
             </Tailwind>
         </Html>

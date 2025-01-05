@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import DashboardLoginForm from "./DashboardLoginForm";
 import { Mail } from "lucide-react";
+import { pullEnv } from "@app/lib/pullEnv";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,9 @@ export default async function Page(props: {
 
     const isInvite = searchParams?.redirect?.includes("/invite");
 
-    const signUpDisabled = process.env.DISABLE_SIGNUP_WITHOUT_INVITE === "true";
+    const env = pullEnv();
+
+    const signUpDisabled = env.flags.disableSignupWithoutInvite;
 
     if (user) {
         redirect("/");

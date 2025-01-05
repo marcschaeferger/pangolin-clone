@@ -9,7 +9,7 @@ import { __DIRNAME } from "@server/lib/consts";
 const dev = process.env.ENVIRONMENT !== "prod";
 let file;
 if (!dev) {
-    file = join("names.json");
+    file = join(__DIRNAME, "names.json");
 } else {
     file = join("server/db/names.json");
 }
