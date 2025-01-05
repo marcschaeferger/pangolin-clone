@@ -59,6 +59,9 @@ export default function GeneralPage() {
     const { toast } = useToast();
     const api = createApiClient(useEnvContext());
 
+    const [loadingDelete, setLoadingDelete] = useState(false);
+    const [loadingSave, setLoadingSave] = useState(false);
+
     const form = useForm<GeneralFormValues>({
         resolver: zodResolver(GeneralFormSchema),
         defaultValues: {
@@ -68,10 +71,17 @@ export default function GeneralPage() {
     });
 
     async function deleteOrg() {
+        setLoadingDelete(true);
         try {
             const res = await api.delete<AxiosResponse<DeleteOrgResponse>>(
                 `/org/${org?.org.orgId}`
             );
+
+            toast({
+                title: "Organization deleted",
+                description: "The organization and its data has been deleted."
+            });
+
             if (res.status === 200) {
                 pickNewOrgAndNavigate();
             }
@@ -85,6 +95,8 @@ export default function GeneralPage() {
                     "An error occurred while deleting the org."
                 )
             });
+        } finally {
+            setLoadingDelete(false);
         }
     }
 
@@ -116,9 +128,18 @@ export default function GeneralPage() {
     }
 
     async function onSubmit(data: GeneralFormValues) {
+        setLoadingSave(true);
         await api
             .post(`/org/${org?.org.orgId}`, {
                 name: data.name
+            })
+            .then(() => {
+                toast({
+                    title: "Organization updated",
+                    description: "The organization has been updated."
+                });
+
+                router.refresh();
             })
             .catch((e) => {
                 toast({
@@ -129,6 +150,9 @@ export default function GeneralPage() {
                         "An error occurred while updating the org."
                     )
                 });
+            })
+            .finally(() => {
+                setLoadingSave(false);
             });
     }
 
@@ -201,7 +225,12 @@ export default function GeneralPage() {
                 </SettingsSectionBody>
 
                 <SettingsSectionFooter>
-                    <Button type="submit" form="org-settings-form">
+                    <Button
+                        type="submit"
+                        form="org-settings-form"
+                        loading={loadingSave}
+                        disabled={loadingSave}
+                    >
                         Save Settings
                     </Button>
                 </SettingsSectionFooter>
@@ -224,6 +253,8 @@ export default function GeneralPage() {
                         variant="destructive"
                         onClick={() => setIsDeleteModalOpen(true)}
                         className="flex items-center gap-2"
+                        loading={loadingDelete}
+                        disabled={loadingDelete}
                     >
                         Delete Organization Data
                     </Button>

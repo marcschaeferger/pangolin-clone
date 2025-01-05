@@ -736,6 +736,7 @@ export default function ResourceAuthenticationPage() {
                             onClick={saveWhitelist}
                             form="whitelist-form"
                             loading={loadingSaveWhitelist}
+                            disabled={loadingSaveWhitelist}
                         >
                             Save Whitelist
                         </Button>

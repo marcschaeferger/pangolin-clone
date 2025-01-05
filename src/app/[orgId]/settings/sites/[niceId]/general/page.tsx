@@ -30,6 +30,7 @@ import {
 import { formatAxiosError } from "@app/lib/api";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
+import { useState } from "react";
 
 const GeneralFormSchema = z.object({
     name: z.string()
@@ -43,6 +44,8 @@ export default function GeneralPage() {
 
     const api = createApiClient(useEnvContext());
 
+    const [loading, setLoading] = useState(false);
+
     const router = useRouter();
 
     const form = useForm<GeneralFormValues>({
@@ -54,6 +57,8 @@ export default function GeneralPage() {
     });
 
     async function onSubmit(data: GeneralFormValues) {
+        setLoading(true);
+
         await api
             .post(`/site/${site?.siteId}`, {
                 name: data.name
@@ -70,6 +75,8 @@ export default function GeneralPage() {
             });
 
         updateSite({ name: data.name });
+
+        setLoading(false);
 
         router.refresh();
     }
@@ -117,7 +124,12 @@ export default function GeneralPage() {
                 </SettingsSectionBody>
 
                 <SettingsSectionFooter>
-                    <Button type="submit" form="general-settings-form">
+                    <Button
+                        type="submit"
+                        form="general-settings-form"
+                        loading={loading}
+                        disabled={loading}
+                    >
                         Save Settings
                     </Button>
                 </SettingsSectionFooter>

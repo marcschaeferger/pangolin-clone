@@ -86,15 +86,15 @@ export default function InviteStatusCard({
                         router.push("/");
                     }}
                 >
-                    Go home
+                    Go Home
                 </Button>
             );
         } else if (type === "wrong_user") {
             return (
-                <Button onClick={goToLogin}>Log in as different user</Button>
+                <Button onClick={goToLogin}>Log In as a Different User</Button>
             );
         } else if (type === "user_does_not_exist") {
-            return <Button onClick={goToSignup}>Create an account</Button>;
+            return <Button onClick={goToSignup}>Create an Account</Button>;
         }
     }
 
