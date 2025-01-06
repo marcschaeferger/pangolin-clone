@@ -294,12 +294,21 @@ func installDocker() error {
 	var installCmd *exec.Cmd
 
 	switch {
-	case strings.Contains(osRelease, "ID=ubuntu") || strings.Contains(osRelease, "ID=debian"):
+	case strings.Contains(osRelease, "ID=ubuntu"):
 		installCmd = exec.Command("bash", "-c", `
             apt-get update && 
             apt-get install -y apt-transport-https ca-certificates curl software-properties-common &&
             curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg &&
             echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list &&
+            apt-get update &&
+            apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+        `)
+	case strings.Contains(osRelease, "ID=debian"):
+		installCmd = exec.Command("bash", "-c", `
+            apt-get update && 
+            apt-get install -y apt-transport-https ca-certificates curl software-properties-common &&
+            curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg &&
+            echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list &&
             apt-get update &&
             apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
         `)
@@ -332,7 +341,6 @@ func installDocker() error {
 	default:
 		return fmt.Errorf("unsupported Linux distribution")
 	}
-
 	installCmd.Stdout = os.Stdout
 	installCmd.Stderr = os.Stderr
 	return installCmd.Run()
