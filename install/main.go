@@ -289,48 +289,66 @@ func installDocker() error {
 	if err != nil {
 		return fmt.Errorf("failed to detect Linux distribution: %v", err)
 	}
-
 	osRelease := string(output)
-	var installCmd *exec.Cmd
 
+	// Detect system architecture
+	archCmd := exec.Command("uname", "-m")
+	archOutput, err := archCmd.Output()
+	if err != nil {
+		return fmt.Errorf("failed to detect system architecture: %v", err)
+	}
+	arch := strings.TrimSpace(string(archOutput))
+
+	// Map architecture to Docker's architecture naming
+	var dockerArch string
+	switch arch {
+	case "x86_64":
+		dockerArch = "amd64"
+	case "aarch64":
+		dockerArch = "arm64"
+	default:
+		return fmt.Errorf("unsupported architecture: %s", arch)
+	}
+
+	var installCmd *exec.Cmd
 	switch {
 	case strings.Contains(osRelease, "ID=ubuntu"):
-		installCmd = exec.Command("bash", "-c", `
-            apt-get update && 
-            apt-get install -y apt-transport-https ca-certificates curl software-properties-common &&
-            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg &&
-            echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list &&
-            apt-get update &&
-            apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-        `)
+		installCmd = exec.Command("bash", "-c", fmt.Sprintf(`
+			apt-get update && 
+			apt-get install -y apt-transport-https ca-certificates curl software-properties-common &&
+			curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg &&
+			echo "deb [arch=%s signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list &&
+			apt-get update &&
+			apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+		`, dockerArch))
 	case strings.Contains(osRelease, "ID=debian"):
-		installCmd = exec.Command("bash", "-c", `
-            apt-get update && 
-            apt-get install -y apt-transport-https ca-certificates curl software-properties-common &&
-            curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg &&
-            echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list &&
-            apt-get update &&
-            apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-        `)
+		installCmd = exec.Command("bash", "-c", fmt.Sprintf(`
+			apt-get update && 
+			apt-get install -y apt-transport-https ca-certificates curl software-properties-common &&
+			curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg &&
+			echo "deb [arch=%s signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list &&
+			apt-get update &&
+			apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+		`, dockerArch))
 	case strings.Contains(osRelease, "ID=fedora"):
-		installCmd = exec.Command("bash", "-c", `
-            dnf -y install dnf-plugins-core &&
-            dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo &&
-            dnf install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-        `)
+		installCmd = exec.Command("bash", "-c", fmt.Sprintf(`
+			dnf -y install dnf-plugins-core &&
+			dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo &&
+			dnf install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+		`))
 	case strings.Contains(osRelease, "ID=opensuse") || strings.Contains(osRelease, "ID=\"opensuse-"):
 		installCmd = exec.Command("bash", "-c", `
 			zypper install -y docker docker-compose &&
 			systemctl enable docker
 		`)
 	case strings.Contains(osRelease, "ID=rhel") || strings.Contains(osRelease, "ID=\"rhel"):
-		installCmd = exec.Command("bash", "-c", `
+		installCmd = exec.Command("bash", "-c", fmt.Sprintf(`
 			dnf remove -y runc &&
 			dnf -y install yum-utils &&
 			dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.repo &&
 			dnf install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin &&
 			systemctl enable docker
-		`)
+		`))
 	case strings.Contains(osRelease, "ID=amzn"):
 		installCmd = exec.Command("bash", "-c", `
 			yum update -y &&
