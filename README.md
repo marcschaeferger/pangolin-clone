@@ -96,7 +96,7 @@ Pangolin has a straightforward and simple dashboard UI:
 
 3. **Connect Private Sites**:
     - Install Newt or use another WireGuard client on private sites.
-    - Automaticlaly establish a connection from these sites to the central server.
+    - Automatically establish a connection from these sites to the central server.
 4. **Configure Users & Roles**
     - Define organizations and invite users.
     - Implement user- or role-based permissions to control resource access.
