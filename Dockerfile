@@ -26,7 +26,7 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/init ./dist/init
 
-COPY config.example.yml ./dist/config.example.yml
+COPY config/config.example.yml ./dist/config.example.yml
 COPY server/db/names.json ./dist/names.json
 
 COPY public ./public
