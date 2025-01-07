@@ -25,7 +25,7 @@ next-env.d.ts
 migrations
 package-lock.json
 tsconfig.tsbuildinfo
-config/
+config/config.yml
 dist
 .dist
 installer
