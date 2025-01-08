@@ -64,7 +64,7 @@ import {
 import { SwitchInput } from "@app/components/SwitchInput";
 
 const addTargetSchema = z.object({
-    ip: z.union([z.string().ip(), z.literal("localhost")]),
+    ip: z.string(),
     method: z.string(),
     port: z.coerce.number().int().positive()
     // protocol: z.string(),
@@ -179,7 +179,7 @@ export default function ReverseProxyTargets(props: {
             // make sure that the target IP is within the site subnet
             const targetIp = data.ip;
             const subnet = site.subnet;
-            if (targetIp === "localhost" || !isIPInSubnet(targetIp, subnet)) {
+            if (!isIPInSubnet(targetIp, subnet)) {
                 toast({
                     variant: "destructive",
                     title: "Invalid target IP",
