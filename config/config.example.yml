@@ -1,5 +1,6 @@
 app:
-    base_url: http://localhost
+    dashboard_url: http://localhost
+    base_domain: localhost
     log_level: debug
     save_logs: false
 

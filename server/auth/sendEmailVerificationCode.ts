@@ -17,7 +17,7 @@ export async function sendEmailVerificationCode(
         VerifyEmail({
             username: email,
             verificationCode: code,
-            verifyLink: `${config.getRawConfig().app.base_url}/auth/verify-email`
+            verifyLink: `${config.getRawConfig().app.dashboard_url}/auth/verify-email`
         }),
         {
             to: email,

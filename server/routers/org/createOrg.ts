@@ -82,7 +82,6 @@ export async function createOrg(
         let org: Org | null = null;
 
         await db.transaction(async (trx) => {
-            // create a url from config.getRawConfig().app.base_url and get the hostname
             const domain = config.getBaseDomain();
 
             const newOrg = await trx

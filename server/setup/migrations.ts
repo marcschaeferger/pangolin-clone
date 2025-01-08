@@ -7,13 +7,15 @@ import { desc } from "drizzle-orm";
 import { __DIRNAME } from "@server/lib/consts";
 import { loadAppVersion } from "@server/lib/loadAppVersion";
 import m1 from "./scripts/1.0.0-beta1";
+import m2 from "./scripts/1.0.0-beta2";
 
 // THIS CANNOT IMPORT ANYTHING FROM THE SERVER
 // EXCEPT FOR THE DATABASE AND THE SCHEMA
 
 // Define the migration list with versions and their corresponding functions
 const migrations = [
-    { version: "1.0.0-beta.1", run: m1 }
+    { version: "1.0.0-beta.1", run: m1 },
+    { version: "1.0.0-beta.2", run: m2 }
     // Add new migrations here as they are created
 ] as const;
 

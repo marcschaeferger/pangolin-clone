@@ -29,3 +29,4 @@ config/config.yml
 dist
 .dist
 installer
+*.tar
