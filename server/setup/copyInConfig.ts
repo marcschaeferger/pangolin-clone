@@ -5,7 +5,6 @@ import { eq, ne } from "drizzle-orm";
 import logger from "@server/logger";
 
 export async function copyInConfig() {
-    // create a url from config.getRawConfig().app.base_url and get the hostname
     const domain = config.getBaseDomain();
     const endpoint = config.getRawConfig().gerbil.base_endpoint;
 

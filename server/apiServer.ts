@@ -31,7 +31,7 @@ export function createApiServer() {
         );
     } else {
         const corsOptions = {
-            origin: config.getRawConfig().app.base_url,
+            origin: config.getRawConfig().app.dashboard_url,
             methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
             allowedHeaders: ["Content-Type", "X-CSRF-Token"]
         };

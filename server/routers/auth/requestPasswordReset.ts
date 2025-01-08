@@ -82,7 +82,7 @@ export async function requestPasswordReset(
             });
         });
 
-        const url = `${config.getRawConfig().app.base_url}/auth/reset-password?email=${email}&token=${token}`;
+        const url = `${config.getRawConfig().app.dashboard_url}/auth/reset-password?email=${email}&token=${token}`;
 
         await sendEmail(
             ResetPasswordCode({

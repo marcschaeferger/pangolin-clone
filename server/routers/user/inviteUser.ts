@@ -152,7 +152,7 @@ export async function inviteUser(
             });
         });
 
-        const inviteLink = `${config.getRawConfig().app.base_url}/invite?token=${inviteId}-${token}`;
+        const inviteLink = `${config.getRawConfig().app.dashboard_url}/invite?token=${inviteId}-${token}`;
 
         if (doEmail) {
             await sendEmail(

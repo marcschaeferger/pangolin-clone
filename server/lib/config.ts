@@ -3,18 +3,25 @@ import yaml from "js-yaml";
 import path from "path";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
-import { __DIRNAME, APP_PATH } from "@server/lib/consts";
+import { __DIRNAME, APP_PATH, configFilePath1, configFilePath2 } from "@server/lib/consts";
 import { loadAppVersion } from "@server/lib/loadAppVersion";
 import { passwordSchema } from "@server/auth/passwordSchema";
 
 const portSchema = z.number().positive().gt(0).lte(65535);
+const hostnameSchema = z
+    .string()
+    .regex(
+        /^(?!-)[a-zA-Z0-9-]{1,63}(?<!-)(\.[a-zA-Z]{2,})*$/,
+        "Invalid hostname. Must be a valid hostname like 'localhost' or 'test.example.com'."
+    );
 
 const environmentSchema = z.object({
     app: z.object({
-        base_url: z
+        dashboard_url: z
             .string()
             .url()
             .transform((url) => url.toLowerCase()),
+        base_domain: hostnameSchema,
         log_level: z.enum(["debug", "info", "warn", "error"]),
         save_logs: z.boolean()
     }),
@@ -58,7 +65,7 @@ const environmentSchema = z.object({
             smtp_port: portSchema,
             smtp_user: z.string(),
             smtp_pass: z.string(),
-            no_reply: z.string().email(),
+            no_reply: z.string().email()
         })
         .optional(),
     users: z.object({
@@ -98,9 +105,6 @@ export class Config {
                 throw error;
             }
         };
-
-        const configFilePath1 = path.join(APP_PATH, "config.yml");
-        const configFilePath2 = path.join(APP_PATH, "config.yaml");
 
         let environment: any;
         if (fs.existsSync(configFilePath1)) {
@@ -190,15 +194,7 @@ export class Config {
     }
 
     public getBaseDomain(): string {
-        const newUrl = new URL(this.rawConfig.app.base_url);
-        const hostname = newUrl.hostname;
-        const parts = hostname.split(".");
-
-        if (parts.length <= 2) {
-            return parts.join(".");
-        }
-
-        return parts.slice(1).join(".");
+        return this.rawConfig.app.base_domain;
     }
 }
 
