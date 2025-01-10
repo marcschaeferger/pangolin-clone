@@ -83,6 +83,7 @@ export default async function Page(props: {
 
                 <div className="w-full max-w-md mx-auto md:mt-32 mt-4">
                     <OrganizationLanding
+                        disableCreateOrg={env.flags.disableUserCreateOrg && !user.serverAdmin}
                         organizations={orgs.map((org) => ({
                             name: org.name,
                             id: org.orgId
