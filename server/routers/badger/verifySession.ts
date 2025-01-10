@@ -101,7 +101,8 @@ export async function verifyResourceSession(
             return allowed(res);
         }
 
-        const redirectUrl = `${config.getRawConfig().app.dashboard_url}/auth/resource/${encodeURIComponent(resource.resourceId)}?redirect=${encodeURIComponent(originalRequestURL)}`;
+        // const redirectUrl = `${config.getRawConfig().app.dashboard_url}/auth/resource/${encodeURIComponent(resource.resourceId)}?redirect=${encodeURIComponent(originalRequestURL)}`;
+        const redirectUrl = `${config.getRawConfig().app.dashboard_url}/auth/resource/${encodeURIComponent(resource.resourceId)}`;
 
         if (!sessions) {
             return notAllowed(res);

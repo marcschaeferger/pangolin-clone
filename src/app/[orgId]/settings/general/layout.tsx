@@ -26,7 +26,7 @@ export default async function GeneralSettingsPage({
     const user = await getUser();
 
     if (!user) {
-        redirect(`/?redirect=/${orgId}/settings/general`);
+        redirect(`/`);
     }
 
     let orgUser = null;

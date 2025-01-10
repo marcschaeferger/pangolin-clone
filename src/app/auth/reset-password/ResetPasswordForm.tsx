@@ -43,6 +43,7 @@ import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
 import { passwordSchema } from "@server/auth/passwordSchema";
+import { cleanRedirect } from "@app/lib/cleanRedirect";
 
 const requestSchema = z.object({
     email: z.string().email()
@@ -186,11 +187,9 @@ export default function ResetPasswordForm({
             setSuccessMessage("Password reset successfully! Back to login...");
 
             setTimeout(() => {
-                if (redirect && redirect.includes("http")) {
-                    window.location.href = redirect;
-                }
                 if (redirect) {
-                    router.push(redirect);
+                    const safe = cleanRedirect(redirect);
+                    router.push(safe);
                 } else {
                     router.push("/login");
                 }

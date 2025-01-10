@@ -5,6 +5,7 @@ import { cache } from "react";
 import DashboardLoginForm from "./DashboardLoginForm";
 import { Mail } from "lucide-react";
 import { pullEnv } from "@app/lib/pullEnv";
+import { cleanRedirect } from "@app/lib/cleanRedirect";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,11 @@ export default async function Page(props: {
         redirect("/");
     }
 
+    let redirectUrl: string | undefined = undefined;
+    if (searchParams.redirect) {
+        redirectUrl = cleanRedirect(searchParams.redirect as string);
+    }
+
     return (
         <>
             {isInvite && (
@@ -42,16 +48,16 @@ export default async function Page(props: {
                 </div>
             )}
 
-            <DashboardLoginForm redirect={searchParams.redirect as string} />
+            <DashboardLoginForm redirect={redirectUrl} />
 
             {(!signUpDisabled || isInvite) && (
                 <p className="text-center text-muted-foreground mt-4">
                     Don't have an account?{" "}
                     <Link
                         href={
-                            !searchParams.redirect
+                            !redirectUrl
                                 ? `/auth/signup`
-                                : `/auth/signup?redirect=${searchParams.redirect}`
+                                : `/auth/signup?redirect=${redirectUrl}`
                         }
                         className="underline"
                     >

@@ -11,6 +11,7 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import OrganizationLanding from "./components/OrganizationLanding";
 import { pullEnv } from "@app/lib/pullEnv";
+import { cleanRedirect } from "@app/lib/cleanRedirect";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +30,8 @@ export default async function Page(props: {
 
     if (!user) {
         if (params.redirect) {
-            redirect(`/auth/login?redirect=${params.redirect}`);
+            const safe = cleanRedirect(params.redirect);
+            redirect(`/auth/login?redirect=${safe}`);
         } else {
             redirect(`/auth/login`);
         }
@@ -40,7 +42,8 @@ export default async function Page(props: {
         env.flags.emailVerificationRequired
     ) {
         if (params.redirect) {
-            redirect(`/auth/verify-email?redirect=${params.redirect}`);
+            const safe = cleanRedirect(params.redirect);
+            redirect(`/auth/verify-email?redirect=${safe}`);
         } else {
             redirect(`/auth/verify-email`);
         }

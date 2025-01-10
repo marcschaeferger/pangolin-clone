@@ -41,7 +41,7 @@ import Image from 'next/image'
 
 type LoginFormProps = {
     redirect?: string;
-    onLogin?: () => void;
+    onLogin?: () => void | Promise<void>;
 };
 
 const formSchema = z.object({

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import ResetPasswordForm from "./ResetPasswordForm";
 import Link from "next/link";
+import { cleanRedirect } from "@app/lib/cleanRedirect";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,11 @@ export default async function Page(props: {
         redirect("/");
     }
 
+    let redirectUrl: string | undefined = undefined;
+    if (searchParams.redirect) {
+        redirectUrl = cleanRedirect(searchParams.redirect);
+    }
+
     return (
         <>
             <ResetPasswordForm
@@ -34,7 +40,7 @@ export default async function Page(props: {
                     href={
                         !searchParams.redirect
                             ? `/auth/signup`
-                            : `/auth/signup?redirect=${searchParams.redirect}`
+                            : `/auth/signup?redirect=${redirectUrl}`
                     }
                     className="underline"
                 >
