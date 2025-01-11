@@ -45,7 +45,10 @@ func main() {
 	// check if there is already a config file
 	if _, err := os.Stat("config/config.yml"); err != nil {
 		config := collectUserInput(reader)
-		createConfigFiles(config)
+		if err := createConfigFiles(config); err != nil {
+			fmt.Printf("Error creating config files: %v\n", err)
+			os.Exit(1)
+		}
 
 		if !isDockerInstalled() && runtime.GOOS == "linux" {
 			if shouldInstallDocker() {
@@ -104,7 +107,7 @@ func collectUserInput(reader *bufio.Reader) Config {
 	// Basic configuration
 	fmt.Println("\n=== Basic Configuration ===")
 	config.BaseDomain = readString(reader, "Enter your base domain (no subdomain e.g. example.com)", "")
-	config.DashboardDomain = readString(reader, "Enter the domain for the Pangolin dashboard (e.g. example.com OR proxy.example.com)", config.BaseDomain)
+	config.DashboardDomain = readString(reader, "Enter the domain for the Pangolin dashboard", "pangolin."+config.BaseDomain)
 	config.LetsEncryptEmail = readString(reader, "Enter email for Let's Encrypt certificates", "")
 
 	// Admin user configuration
@@ -275,8 +278,26 @@ func createConfigFiles(config Config) error {
 		return fmt.Errorf("error walking config files: %v", err)
 	}
 
-	// move the docker-compose.yml file to the root directory
-	os.Rename("config/docker-compose.yml", "docker-compose.yml")
+	// get the current directory
+	dir, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("failed to get current directory: %v", err)
+	}
+
+	sourcePath := filepath.Join(dir, "config/docker-compose.yml")
+	destPath := filepath.Join(dir, "docker-compose.yml")
+
+	// Check if source file exists
+	if _, err := os.Stat(sourcePath); err != nil {
+		return fmt.Errorf("source docker-compose.yml not found: %v", err)
+	}
+
+	// Try to move the file
+	err = os.Rename(sourcePath, destPath)
+	if err != nil {
+		return fmt.Errorf("failed to move docker-compose.yml from %s to %s: %v",
+			sourcePath, destPath, err)
+	}
 
 	return nil
 }

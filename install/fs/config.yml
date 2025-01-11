@@ -21,7 +21,7 @@ traefik:
 
 gerbil:
     start_port: 51820
-    base_endpoint: {{.Domain}}
+    base_endpoint: {{.DashboardDomain}}
     use_subdomain: false
     block_size: 24
     site_block_size: 30
