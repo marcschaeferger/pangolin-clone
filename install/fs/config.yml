@@ -1,6 +1,6 @@
 app:
-    dashboard_url: https://{{.Domain}}
-    base_domain: {{.Domain}}
+    dashboard_url: https://{{.DashboardDomain}}
+    base_domain: {{.BaseDomain}}
     log_level: info
     save_logs: false
 
