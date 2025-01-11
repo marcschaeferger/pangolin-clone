@@ -55,7 +55,17 @@ export default async function ResourceAuthPage(props: {
         );
     }
 
-    const redirectUrl = searchParams.redirect || authInfo.url;
+    let redirectUrl = authInfo.url;
+    if (searchParams.redirect) {
+        try {
+            const serverResourceHost = new URL(authInfo.url).host;
+            const redirectHost = new URL(searchParams.redirect).host;
+
+            if (serverResourceHost === redirectHost) {
+                redirectUrl = searchParams.redirect;
+            }
+        } catch (e) {}
+    }
 
     const hasAuth =
         authInfo.password ||

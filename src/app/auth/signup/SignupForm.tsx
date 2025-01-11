@@ -30,6 +30,7 @@ import { formatAxiosError } from "@app/lib/api";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import Image from "next/image";
+import { cleanRedirect } from "@app/lib/cleanRedirect";
 
 type SignupFormProps = {
     redirect?: string;
@@ -92,17 +93,17 @@ export default function SignupForm({
 
             if (res.data?.data?.emailVerificationRequired) {
                 if (redirect) {
-                    router.push(`/auth/verify-email?redirect=${redirect}`);
+                    const safe = cleanRedirect(redirect);
+                    router.push(`/auth/verify-email?redirect=${safe}`);
                 } else {
                     router.push("/auth/verify-email");
                 }
                 return;
             }
 
-            if (redirect && redirect.includes("http")) {
-                window.location.href = redirect;
-            } else if (redirect) {
-                router.push(redirect);
+            if (redirect) {
+                const safe = cleanRedirect(redirect);
+                router.push(safe);
             } else {
                 router.push("/");
             }

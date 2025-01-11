@@ -1,6 +1,10 @@
 {
     "name": "@fosrl/pangolin",
+<<<<<<< HEAD
     "version": "1.0.0-beta.2",
+=======
+    "version": "1.0.0-beta.3",
+>>>>>>> c3d19454f7f5c5546a7efb47c23fc040dbbf94d2
     "private": true,
     "type": "module",
     "description": "Tunneled Reverse Proxy Management Server with Identity and Access Control and Dashboard UI",

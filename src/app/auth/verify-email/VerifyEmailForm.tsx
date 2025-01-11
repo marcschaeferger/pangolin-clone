@@ -36,6 +36,7 @@ import { useRouter } from "next/navigation";
 import { formatAxiosError } from "@app/lib/api";;
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
+import { cleanRedirect } from "@app/lib/cleanRedirect";
 
 const FormSchema = z.object({
     email: z.string().email({ message: "Invalid email address" }),
@@ -91,11 +92,9 @@ export default function VerifyEmailForm({
                 "Email successfully verified! Redirecting you..."
             );
             setTimeout(() => {
-                if (redirect && redirect.includes("http")) {
-                    window.location.href = redirect;
-                }
                 if (redirect) {
-                    router.push(redirect);
+                    const safe = cleanRedirect(redirect);
+                    router.push(safe);
                 } else {
                     router.push("/");
                 }

@@ -3,7 +3,15 @@ import yaml from "js-yaml";
 import path from "path";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
+<<<<<<< HEAD
 import { __DIRNAME, APP_PATH, configFilePath1, configFilePath2 } from "@server/lib/consts";
+=======
+import {
+    __DIRNAME,
+    configFilePath1,
+    configFilePath2
+} from "@server/lib/consts";
+>>>>>>> c3d19454f7f5c5546a7efb47c23fc040dbbf94d2
 import { loadAppVersion } from "@server/lib/loadAppVersion";
 import { passwordSchema } from "@server/auth/passwordSchema";
 
@@ -11,9 +19,15 @@ const portSchema = z.number().positive().gt(0).lte(65535);
 const hostnameSchema = z
     .string()
     .regex(
+<<<<<<< HEAD
         /^(?!-)[a-zA-Z0-9-]{1,63}(?<!-)(\.[a-zA-Z]{2,})*$/,
         "Invalid hostname. Must be a valid hostname like 'localhost' or 'test.example.com'."
     );
+=======
+        /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)+([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$/
+    )
+    .or(z.literal("localhost"));
+>>>>>>> c3d19454f7f5c5546a7efb47c23fc040dbbf94d2
 
 const environmentSchema = z.object({
     app: z.object({
