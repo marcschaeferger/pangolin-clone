@@ -21,7 +21,7 @@ export default async function AuthLayout({ children }: AuthLayoutProps) {
         <>
             {user && (
                 <UserProvider user={user}>
-                    <div>
+                    <div className="p-3">
                         <ProfileIcon />
                     </div>
                 </UserProvider>
