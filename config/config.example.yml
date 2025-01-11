@@ -21,9 +21,9 @@ traefik:
 gerbil:
     start_port: 51820
     base_endpoint: localhost
-    block_size: 16
-    site_block_size: 29
-    subnet_group: 10.0.0.0/8
+    block_size: 24
+    site_block_size: 30
+    subnet_group: 100.89.137.0/20
     use_subdomain: true
 
 rate_limits:
