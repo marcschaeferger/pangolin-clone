@@ -57,6 +57,7 @@ export default function ProfileIcon() {
             })
             .then(() => {
                 router.push("/auth/login");
+                router.refresh();
             });
     }
 

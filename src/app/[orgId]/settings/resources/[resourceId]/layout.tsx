@@ -2,13 +2,12 @@ import ResourceProvider from "@app/providers/ResourceProvider";
 import { internal } from "@app/lib/api";
 import {
     GetResourceAuthInfoResponse,
-    GetResourceResponse,
+    GetResourceResponse
 } from "@server/routers/resource";
 import { AxiosResponse } from "axios";
 import { redirect } from "next/navigation";
 import { authCookieHeader } from "@app/lib/api/cookies";
 import { SidebarSettings } from "@app/components/SidebarSettings";
-import {  Cloud, Settings, Shield } from "lucide-react";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { GetOrgResponse } from "@server/routers/org";
 import OrgProvider from "@app/providers/OrgProvider";
@@ -20,7 +19,7 @@ import {
     BreadcrumbLink,
     BreadcrumbList,
     BreadcrumbPage,
-    BreadcrumbSeparator,
+    BreadcrumbSeparator
 } from "@app/components/ui/breadcrumb";
 import Link from "next/link";
 
@@ -39,7 +38,7 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
     try {
         const res = await internal.get<AxiosResponse<GetResourceResponse>>(
             `/resource/${params.resourceId}`,
-            await authCookieHeader(),
+            await authCookieHeader()
         );
         resource = res.data.data;
     } catch {
@@ -68,8 +67,8 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
         const getOrg = cache(async () =>
             internal.get<AxiosResponse<GetOrgResponse>>(
                 `/org/${params.orgId}`,
-                await authCookieHeader(),
-            ),
+                await authCookieHeader()
+            )
         );
         const res = await getOrg();
         org = res.data.data;
@@ -84,19 +83,19 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
     const sidebarNavItems = [
         {
             title: "General",
-            href: `/{orgId}/settings/resources/{resourceId}/general`,
+            href: `/{orgId}/settings/resources/{resourceId}/general`
             // icon: <Settings className="w-4 h-4" />,
         },
         {
             title: "Connectivity",
-            href: `/{orgId}/settings/resources/{resourceId}/connectivity`,
+            href: `/{orgId}/settings/resources/{resourceId}/connectivity`
             // icon: <Cloud className="w-4 h-4" />,
         },
         {
             title: "Authentication",
-            href: `/{orgId}/settings/resources/{resourceId}/authentication`,
+            href: `/{orgId}/settings/resources/{resourceId}/authentication`
             // icon: <Shield className="w-4 h-4" />,
-        },
+        }
     ];
 
     return (

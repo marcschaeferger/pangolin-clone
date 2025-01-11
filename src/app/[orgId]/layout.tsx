@@ -25,7 +25,7 @@ export default async function OrgLayout(props: {
     const user = await getUser();
 
     if (!user) {
-        redirect(`/?redirect=/${orgId}`);
+        redirect(`/`);
     }
 
     try {

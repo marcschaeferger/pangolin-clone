@@ -1,5 +1,6 @@
 import VerifyEmailForm from "@app/app/auth/verify-email/VerifyEmailForm";
 import { verifySession } from "@app/lib/auth/verifySession";
+import { cleanRedirect } from "@app/lib/cleanRedirect";
 import { pullEnv } from "@app/lib/pullEnv";
 import { redirect } from "next/navigation";
 import { cache } from "react";
@@ -27,11 +28,16 @@ export default async function Page(props: {
         redirect("/");
     }
 
+    let redirectUrl: string | undefined;
+    if (searchParams.redirect) {
+        redirectUrl = cleanRedirect(searchParams.redirect as string);
+    }
+
     return (
         <>
             <VerifyEmailForm
                 email={user.email}
-                redirect={searchParams.redirect as string}
+                redirect={redirectUrl}
             />
         </>
     );

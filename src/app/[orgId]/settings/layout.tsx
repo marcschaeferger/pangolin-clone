@@ -61,7 +61,7 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
     const user = await getUser();
 
     if (!user) {
-        redirect(`/?redirect=/${params.orgId}/`);
+        redirect(`/`);
     }
 
     const cookie = await authCookieHeader();

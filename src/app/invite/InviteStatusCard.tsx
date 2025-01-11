@@ -14,7 +14,7 @@ import { XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 type InviteStatusCardProps = {
-    type: "rejected" | "wrong_user" | "user_does_not_exist";
+    type: "rejected" | "wrong_user" | "user_does_not_exist" | "not_logged_in";
     token: string;
 };
 

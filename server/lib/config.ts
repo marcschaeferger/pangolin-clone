@@ -45,7 +45,8 @@ const environmentSchema = z.object({
         base_endpoint: z.string().transform((url) => url.toLowerCase()),
         use_subdomain: z.boolean(),
         subnet_group: z.string(),
-        block_size: z.number().positive().gt(0)
+        block_size: z.number().positive().gt(0),
+        site_block_size: z.number().positive().gt(0)
     }),
     rate_limits: z.object({
         global: z.object({

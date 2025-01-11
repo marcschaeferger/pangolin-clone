@@ -60,6 +60,8 @@ export default async function InvitePage(props: {
             )
         ) {
             return "user_does_not_exist";
+        } else if (error.includes("You must be logged in to accept an invite")) {
+            return "not_logged_in";
         } else {
             return "rejected";
         }
@@ -69,6 +71,10 @@ export default async function InvitePage(props: {
 
     if (!user && type === "user_does_not_exist") {
         redirect(`/auth/signup?redirect=/invite?token=${params.token}`);
+    }
+
+    if (!user && type === "not_logged_in") {
+        redirect(`/auth/login?redirect=/invite?token=${params.token}`);
     }
 
     return (

@@ -1,5 +1,6 @@
 import SignupForm from "@app/app/auth/signup/SignupForm";
 import { verifySession } from "@app/lib/auth/verifySession";
+import { cleanRedirect } from "@app/lib/cleanRedirect";
 import { pullEnv } from "@app/lib/pullEnv";
 import { Mail } from "lucide-react";
 import Link from "next/link";
@@ -41,6 +42,11 @@ export default async function Page(props: {
         }
     }
 
+    let redirectUrl: string | undefined;
+    if (searchParams.redirect) {
+        redirectUrl = cleanRedirect(searchParams.redirect);
+    }
+
     return (
         <>
             {isInvite && (
@@ -59,7 +65,7 @@ export default async function Page(props: {
             )}
 
             <SignupForm
-                redirect={searchParams.redirect as string}
+                redirect={redirectUrl}
                 inviteToken={inviteToken}
                 inviteId={inviteId}
             />
@@ -68,9 +74,9 @@ export default async function Page(props: {
                 Already have an account?{" "}
                 <Link
                     href={
-                        !searchParams.redirect
+                        !redirectUrl
                             ? `/auth/login`
-                            : `/auth/login?redirect=${searchParams.redirect}`
+                            : `/auth/login?redirect=${redirectUrl}`
                     }
                     className="underline"
                 >

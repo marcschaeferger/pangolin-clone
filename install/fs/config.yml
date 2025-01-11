@@ -1,6 +1,6 @@
 app:
-    dashboard_url: https://{{.Domain}}
-    base_domain: {{.Domain}}
+    dashboard_url: https://{{.DashboardDomain}}
+    base_domain: {{.BaseDomain}}
     log_level: info
     save_logs: false
 
@@ -21,10 +21,11 @@ traefik:
 
 gerbil:
     start_port: 51820
-    base_endpoint: {{.Domain}}
+    base_endpoint: {{.DashboardDomain}}
     use_subdomain: false
-    block_size: 16
-    subnet_group: 10.0.0.0/8
+    block_size: 24
+    site_block_size: 30
+    subnet_group: 100.89.137.0/20
 
 rate_limits:
     global:

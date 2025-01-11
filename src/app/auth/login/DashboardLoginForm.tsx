@@ -13,6 +13,7 @@ import { useEnvContext } from "@app/hooks/useEnvContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Image from "next/image";
+import { cleanRedirect } from "@app/lib/cleanRedirect";
 
 type DashboardLoginFormProps = {
     redirect?: string;
@@ -57,10 +58,9 @@ export default function DashboardLoginForm({
                 <LoginForm
                     redirect={redirect}
                     onLogin={() => {
-                        if (redirect && redirect.includes("http")) {
-                            window.location.href = redirect;
-                        } else if (redirect) {
-                            router.push(redirect);
+                        if (redirect) {
+                            const safe = cleanRedirect(redirect);
+                            router.push(safe);
                         } else {
                             router.push("/");
                         }
