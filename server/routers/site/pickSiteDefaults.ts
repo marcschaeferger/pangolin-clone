@@ -8,6 +8,7 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { findNextAvailableCidr } from "@server/lib/ip";
 import { generateId } from "@server/auth/sessions/app";
+import config from "@server/lib/config";
 
 export type PickSiteDefaultsResponse = {
     exitNodeId: number;
@@ -51,9 +52,9 @@ export async function pickSiteDefaults(
 
         // TODO: we need to lock this subnet for some time so someone else does not take it
         let subnets = sitesQuery.map((site) => site.subnet);
-        // exclude the exit node address by replacing after the / with a /28
-        subnets.push(exitNode.address.replace(/\/\d+$/, "/29"));
-        const newSubnet = findNextAvailableCidr(subnets, 29, exitNode.address);
+        // exclude the exit node address by replacing after the / with a site block size
+        subnets.push(exitNode.address.replace(/\/\d+$/, `/${config.getRawConfig().gerbil.site_block_size}`));
+        const newSubnet = findNextAvailableCidr(subnets, config.getRawConfig().gerbil.site_block_size, exitNode.address);
         if (!newSubnet) {
             return next(
                 createHttpError(

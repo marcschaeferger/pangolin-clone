@@ -352,7 +352,7 @@ export default function ReverseProxyTargets(props: {
         },
         {
             accessorKey: "ip",
-            header: "IP Address",
+            header: "IP / Hostname",
             cell: ({ row }) => (
                 <Input
                     defaultValue={row.original.ip}

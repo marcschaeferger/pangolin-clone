@@ -72,6 +72,16 @@ export async function acceptInvite(
 
         const { user, session } = await verifySession(req);
 
+        // at this point we know the user exists
+        if (!user) {
+            return next(
+                createHttpError(
+                    HttpCode.UNAUTHORIZED,
+                    "You must be logged in to accept an invite"
+                )
+            );
+        }
+
         if (user && user.email !== existingInvite.email) {
             return next(
                 createHttpError(

@@ -18,7 +18,8 @@ import (
 var configFiles embed.FS
 
 type Config struct {
-	Domain                     string `yaml:"domain"`
+	BaseDomain                 string `yaml:"baseDomain"`
+	DashboardDomain            string `yaml:"dashboardUrl"`
 	LetsEncryptEmail           string `yaml:"letsEncryptEmail"`
 	AdminUserEmail             string `yaml:"adminUserEmail"`
 	AdminUserPassword          string `yaml:"adminUserPassword"`
@@ -102,12 +103,13 @@ func collectUserInput(reader *bufio.Reader) Config {
 
 	// Basic configuration
 	fmt.Println("\n=== Basic Configuration ===")
-	config.Domain = readString(reader, "Enter your domain name", "")
+	config.BaseDomain = readString(reader, "Enter your base domain (no subdomain e.g. example.com)", "")
+	config.DashboardDomain = readString(reader, "Enter the domain for the Pangolin dashboard (e.g. example.com OR proxy.example.com)", config.BaseDomain)
 	config.LetsEncryptEmail = readString(reader, "Enter email for Let's Encrypt certificates", "")
 
 	// Admin user configuration
 	fmt.Println("\n=== Admin User Configuration ===")
-	config.AdminUserEmail = readString(reader, "Enter admin user email", "admin@"+config.Domain)
+	config.AdminUserEmail = readString(reader, "Enter admin user email", "admin@"+config.BaseDomain)
 	for {
 		config.AdminUserPassword = readString(reader, "Enter admin user password", "")
 		if valid, message := validatePassword(config.AdminUserPassword); valid {
@@ -140,8 +142,12 @@ func collectUserInput(reader *bufio.Reader) Config {
 	}
 
 	// Validate required fields
-	if config.Domain == "" {
+	if config.BaseDomain == "" {
 		fmt.Println("Error: Domain name is required")
+		os.Exit(1)
+	}
+	if config.DashboardDomain == "" {
+		fmt.Println("Error: Dashboard Domain name is required")
 		os.Exit(1)
 	}
 	if config.LetsEncryptEmail == "" {
