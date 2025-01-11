@@ -62,6 +62,7 @@ import {
     SettingsSectionFooter
 } from "@app/components/Settings";
 import { SwitchInput } from "@app/components/SwitchInput";
+import { useSiteContext } from "@app/hooks/useSiteContext";
 
 // Regular expressions for validation
 const DOMAIN_REGEX =
@@ -528,11 +529,23 @@ export default function ReverseProxyTargets(props: {
                                     name="ip"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>IP Address</FormLabel>
+                                            <FormLabel>IP / Hostname</FormLabel>
                                             <FormControl>
                                                 <Input id="ip" {...field} />
                                             </FormControl>
                                             <FormMessage />
+                                            {site?.type === "newt" ? (
+                                                <FormDescription>
+                                                    This is the IP or hostname
+                                                    of the target service on
+                                                    your network.
+                                                </FormDescription>
+                                            ) : site?.type === "wireguard" ? (
+                                                <FormDescription>
+                                                    This is the IP of the
+                                                    WireGuard peer.
+                                                </FormDescription>
+                                            ) : null}
                                         </FormItem>
                                     )}
                                 />
@@ -551,6 +564,19 @@ export default function ReverseProxyTargets(props: {
                                                 />
                                             </FormControl>
                                             <FormMessage />
+                                            {site?.type === "newt" ? (
+                                                <FormDescription>
+                                                    This is the port of the
+                                                    target service on your
+                                                    network.
+                                                </FormDescription>
+                                            ) : site?.type === "wireguard" ? (
+                                                <FormDescription>
+                                                    This is the port exposed on
+                                                    an address on the WireGuard
+                                                    network.
+                                                </FormDescription>
+                                            ) : null}
                                         </FormItem>
                                     )}
                                 />
