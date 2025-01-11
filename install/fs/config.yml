@@ -24,6 +24,7 @@ gerbil:
     base_endpoint: {{.Domain}}
     use_subdomain: false
     block_size: 16
+    site_block_size: 29
     subnet_group: 10.0.0.0/8
 
 rate_limits:
