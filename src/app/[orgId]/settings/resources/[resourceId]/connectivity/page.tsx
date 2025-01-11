@@ -351,7 +351,7 @@ export default function ReverseProxyTargets(props: {
         },
         {
             accessorKey: "ip",
-            header: "IP Address",
+            header: "IP / Hostname",
             cell: ({ row }) => (
                 <Input
                     defaultValue={row.original.ip}
@@ -528,7 +528,7 @@ export default function ReverseProxyTargets(props: {
                                     name="ip"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>IP Address</FormLabel>
+                                            <FormLabel>IP / Hostname</FormLabel>
                                             <FormControl>
                                                 <Input id="ip" {...field} />
                                             </FormControl>
