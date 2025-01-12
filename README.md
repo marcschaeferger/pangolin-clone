@@ -13,6 +13,11 @@ Pangolin is a self-hosted tunneled reverse proxy management server with identity
 -   [Installation Instructions](https://docs.fossorial.io/Getting%20Started/quick-install)
 -   [Full Documentation](https://docs.fossorial.io)
 
+### Authors and Maintainers
+
+- [Milo Schwartz](https://github.com/miloschwartz)
+- [Owen Schwartz](https://github.com/oschwartz10612)
+
 ## Preview
 
 <img src="public/screenshots/sites.png" alt="Preview"/>
