@@ -12,6 +12,7 @@ server:
     secure_cookies: false
     session_cookie_name: p_session
     resource_session_cookie_name: p_resource_session
+    resource_access_token_param: p_token
 
 traefik:
     cert_resolver: letsencrypt

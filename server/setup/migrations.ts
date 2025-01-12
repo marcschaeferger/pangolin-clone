@@ -9,6 +9,7 @@ import { loadAppVersion } from "@server/lib/loadAppVersion";
 import m1 from "./scripts/1.0.0-beta1";
 import m2 from "./scripts/1.0.0-beta2";
 import m3 from "./scripts/1.0.0-beta3";
+import m4 from "./scripts/1.0.0-beta5";
 
 // THIS CANNOT IMPORT ANYTHING FROM THE SERVER
 // EXCEPT FOR THE DATABASE AND THE SCHEMA
@@ -17,7 +18,8 @@ import m3 from "./scripts/1.0.0-beta3";
 const migrations = [
     { version: "1.0.0-beta.1", run: m1 },
     { version: "1.0.0-beta.2", run: m2 },
-    { version: "1.0.0-beta.3", run: m3 }
+    { version: "1.0.0-beta.3", run: m3 },
+    { version: "1.0.0-beta.5", run: m4 }
     // Add new migrations here as they are created
 ] as const;
 

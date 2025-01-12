@@ -8,6 +8,7 @@ export type Env = {
         nextPort: string;
         sessionCookieName: string;
         resourceSessionCookieName: string;
+        resourceAccessTokenParam: string;
     },
     email: {
         emailEnabled: boolean;
