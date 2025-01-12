@@ -151,6 +151,16 @@ export async function traefikConfigProvider(
                         ],
                     },
                 };
+            } else if (site.type === "local") {
+                http.services![serviceName] = {
+                    loadBalancer: {
+                        servers: [
+                            {
+                                url: `${target.method}://${target.ip}:${target.port}`,
+                            },
+                        ],
+                    },
+                };
             }
         }
 
