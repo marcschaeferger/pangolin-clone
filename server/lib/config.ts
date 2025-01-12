@@ -32,7 +32,8 @@ const environmentSchema = z.object({
         internal_hostname: z.string().transform((url) => url.toLowerCase()),
         secure_cookies: z.boolean(),
         session_cookie_name: z.string(),
-        resource_session_cookie_name: z.string()
+        resource_session_cookie_name: z.string(),
+        resource_access_token_param: z.string()
     }),
     traefik: z.object({
         http_entrypoint: z.string(),
@@ -186,6 +187,7 @@ export class Config {
             ?.disable_user_create_org
             ? "true"
             : "false";
+        process.env.RESOURCE_ACCESS_TOKEN_PARAM = parsedConfig.data.server.resource_access_token_param;
 
         this.rawConfig = parsedConfig.data;
     }

@@ -23,7 +23,10 @@ export default async function SitesPage(props: SitesPageProps) {
         sites = res.data.data.sites;
     } catch (e) {}
 
-    function formatSize(mb: number): string {
+    function formatSize(mb: number, type: string): string {
+        if (type === "local") {
+            return "--"; // because we are not able to track the data use in a local site right now
+        }
         if (mb >= 1024 * 1024) {
             return `${(mb / (1024 * 1024)).toFixed(2)} TB`;
         } else if (mb >= 1024) {
@@ -38,8 +41,8 @@ export default async function SitesPage(props: SitesPageProps) {
             name: site.name,
             id: site.siteId,
             nice: site.niceId.toString(),
-            mbIn: formatSize(site.megabytesIn || 0),
-            mbOut: formatSize(site.megabytesOut || 0),
+            mbIn: formatSize(site.megabytesIn || 0, site.type),
+            mbOut: formatSize(site.megabytesOut || 0, site.type),
             orgId: params.orgId,
             type: site.type as any,
             online: site.online

@@ -23,7 +23,7 @@ import { useState } from "react";
 import CreateSiteForm from "./CreateSiteForm";
 import ConfirmDeleteDialog from "@app/components/ConfirmDeleteDialog";
 import { useToast } from "@app/hooks/useToast";
-import { formatAxiosError } from "@app/lib/api";;
+import { formatAxiosError } from "@app/lib/api";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import CreateSiteFormModal from "./CreateSiteModal";
@@ -146,21 +146,27 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
             },
             cell: ({ row }) => {
                 const originalRow = row.original;
-
-                if (originalRow.online) {
-                    return (
-                        <span className="text-green-500 flex items-center space-x-2">
-                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                            <span>Online</span>
-                        </span>
-                    );
+                if (
+                    originalRow.type == "newt" ||
+                    originalRow.type == "wireguard"
+                ) {
+                    if (originalRow.online) {
+                        return (
+                            <span className="text-green-500 flex items-center space-x-2">
+                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <span>Online</span>
+                            </span>
+                        );
+                    } else {
+                        return (
+                            <span className="text-neutral-500 flex items-center space-x-2">
+                                <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
+                                <span>Offline</span>
+                            </span>
+                        );
+                    }
                 } else {
-                    return (
-                        <span className="text-neutral-500 flex items-center space-x-2">
-                            <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
-                            <span>Offline</span>
-                        </span>
-                    );
+                    return <span>--</span>;
                 }
             }
         },
@@ -242,6 +248,14 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                     return (
                         <div className="flex items-center space-x-2">
                             <span>WireGuard</span>
+                        </div>
+                    );
+                }
+
+                if (originalRow.type === "local") {
+                    return (
+                        <div className="flex items-center space-x-2">
+                            <span>Local</span>
                         </div>
                     );
                 }

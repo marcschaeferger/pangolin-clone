@@ -56,6 +56,7 @@ export async function traefikConfigProvider(
                                 config.getRawConfig().server.resource_session_cookie_name,
                             userSessionCookieName:
                                 config.getRawConfig().server.session_cookie_name,
+                            accessTokenQueryParam: config.getRawConfig().server.resource_access_token_param,
                         },
                     },
                 },
@@ -141,6 +142,16 @@ export async function traefikConfigProvider(
                     },
                 };
             } else if (site.type === "wireguard") {
+                http.services![serviceName] = {
+                    loadBalancer: {
+                        servers: [
+                            {
+                                url: `${target.method}://${target.ip}:${target.port}`,
+                            },
+                        ],
+                    },
+                };
+            } else if (site.type === "local") {
                 http.services![serviceName] = {
                     loadBalancer: {
                         servers: [

@@ -123,88 +123,100 @@ export async function createTarget(
             );
         }
 
-        // make sure the target is within the site subnet
-        if (
-            site.type == "wireguard" &&
-            !isIpInCidr(targetData.ip, site.subnet!)
-        ) {
-            return next(
-                createHttpError(
-                    HttpCode.BAD_REQUEST,
-                    `Target IP is not within the site subnet`
-                )
-            );
-        }
-
-        // Fetch resources for this site
-        const resourcesRes = await db.query.resources.findMany({
-            where: eq(resources.siteId, site.siteId)
-        });
-
-        // TODO: is this all inefficient?
-        // Fetch targets for all resources of this site
-        let targetIps: string[] = [];
-        let targetInternalPorts: number[] = [];
-        await Promise.all(
-            resourcesRes.map(async (resource) => {
-                const targetsRes = await db.query.targets.findMany({
-                    where: eq(targets.resourceId, resource.resourceId)
-                });
-                targetsRes.forEach((target) => {
-                    targetIps.push(`${target.ip}/32`);
-                    if (target.internalPort) {
-                        targetInternalPorts.push(target.internalPort);
-                    }
-                });
-            })
-        );
-
-        let internalPort!: number;
-        // pick a port
-        for (let i = 40000; i < 65535; i++) {
-            if (!targetInternalPorts.includes(i)) {
-                internalPort = i;
-                break;
+        let newTarget: Target[] = [];
+        if (site.type == "local") {
+            newTarget = await db
+                .insert(targets)
+                .values({
+                    resourceId,
+                    protocol: "tcp", // hard code for now
+                    ...targetData
+                })
+                .returning();
+        } else {
+            // make sure the target is within the site subnet
+            if (
+                site.type == "wireguard" &&
+                !isIpInCidr(targetData.ip, site.subnet!)
+            ) {
+                return next(
+                    createHttpError(
+                        HttpCode.BAD_REQUEST,
+                        `Target IP is not within the site subnet`
+                    )
+                );
             }
-        }
 
-        if (!internalPort) {
-            return next(
-                createHttpError(
-                    HttpCode.BAD_REQUEST,
-                    `No available internal port`
-                )
+            // Fetch resources for this site
+            const resourcesRes = await db.query.resources.findMany({
+                where: eq(resources.siteId, site.siteId)
+            });
+
+            // TODO: is this all inefficient?
+            // Fetch targets for all resources of this site
+            let targetIps: string[] = [];
+            let targetInternalPorts: number[] = [];
+            await Promise.all(
+                resourcesRes.map(async (resource) => {
+                    const targetsRes = await db.query.targets.findMany({
+                        where: eq(targets.resourceId, resource.resourceId)
+                    });
+                    targetsRes.forEach((target) => {
+                        targetIps.push(`${target.ip}/32`);
+                        if (target.internalPort) {
+                            targetInternalPorts.push(target.internalPort);
+                        }
+                    });
+                })
             );
-        }
 
-        const newTarget = await db
-            .insert(targets)
-            .values({
-                resourceId,
-                protocol: "tcp", // hard code for now
-                internalPort,
-                ...targetData
-            })
-            .returning();
+            let internalPort!: number;
+            // pick a port
+            for (let i = 40000; i < 65535; i++) {
+                if (!targetInternalPorts.includes(i)) {
+                    internalPort = i;
+                    break;
+                }
+            }
 
-        // add the new target to the targetIps array
-        targetIps.push(`${targetData.ip}/32`);
+            if (!internalPort) {
+                return next(
+                    createHttpError(
+                        HttpCode.BAD_REQUEST,
+                        `No available internal port`
+                    )
+                );
+            }
 
-        if (site.pubKey) {
-            if (site.type == "wireguard") {
-                await addPeer(site.exitNodeId!, {
-                    publicKey: site.pubKey,
-                    allowedIps: targetIps.flat()
-                });
-            } else if (site.type == "newt") {
-                // get the newt on the site by querying the newt table for siteId
-                const [newt] = await db
-                    .select()
-                    .from(newts)
-                    .where(eq(newts.siteId, site.siteId))
-                    .limit(1);
+            newTarget = await db
+                .insert(targets)
+                .values({
+                    resourceId,
+                    protocol: "tcp", // hard code for now
+                    internalPort,
+                    ...targetData
+                })
+                .returning();
 
-                addTargets(newt.newtId, newTarget);
+            // add the new target to the targetIps array
+            targetIps.push(`${targetData.ip}/32`);
+
+            if (site.pubKey) {
+                if (site.type == "wireguard") {
+                    await addPeer(site.exitNodeId!, {
+                        publicKey: site.pubKey,
+                        allowedIps: targetIps.flat()
+                    });
+                } else if (site.type == "newt") {
+                    // get the newt on the site by querying the newt table for siteId
+                    const [newt] = await db
+                        .select()
+                        .from(newts)
+                        .where(eq(newts.siteId, site.siteId))
+                        .limit(1);
+
+                    addTargets(newt.newtId, newTarget);
+                }
             }
         }
 

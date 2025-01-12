@@ -24,7 +24,7 @@ import { useRouter } from "next/navigation";
 // import CreateResourceForm from "./CreateResourceForm";
 import { useState } from "react";
 import ConfirmDeleteDialog from "@app/components/ConfirmDeleteDialog";
-import { formatAxiosError } from "@app/lib/api";;
+import { formatAxiosError } from "@app/lib/api";
 import { useToast } from "@app/hooks/useToast";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
@@ -109,15 +109,14 @@ export default function ShareLinksTable({
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                    <DropdownMenuItem>
-                                        <button
-                                            onClick={() =>
-                                                deleteSharelink(
-                                                    resourceRow.accessTokenId
-                                                )
-                                            }
-                                            className="text-red-500"
-                                        >
+                                    <DropdownMenuItem
+                                        onClick={() => {
+                                            deleteSharelink(
+                                                resourceRow.accessTokenId
+                                            );
+                                        }}
+                                    >
+                                        <button className="text-red-500">
                                             Delete
                                         </button>
                                     </DropdownMenuItem>

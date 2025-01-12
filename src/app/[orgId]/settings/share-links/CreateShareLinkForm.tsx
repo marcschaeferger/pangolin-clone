@@ -57,14 +57,22 @@ import {
     CommandItem,
     CommandList
 } from "@app/components/ui/command";
-import { CheckIcon } from "lucide-react";
+import { CheckIcon, ChevronsUpDown } from "lucide-react";
 import { register } from "module";
 import { Label } from "@app/components/ui/label";
 import { Checkbox } from "@app/components/ui/checkbox";
 import { GenerateAccessTokenResponse } from "@server/routers/accessToken";
-import { constructShareLink } from "@app/lib/shareLinks";
+import {
+    constructDirectShareLink,
+    constructShareLink
+} from "@app/lib/shareLinks";
 import { ShareLinkRow } from "./ShareLinksTable";
 import { QRCodeCanvas, QRCodeSVG } from "qrcode.react";
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger
+} from "@app/components/ui/collapsible";
 
 type FormProps = {
     open: boolean;
@@ -75,6 +83,7 @@ type FormProps = {
 const formSchema = z.object({
     resourceId: z.number({ message: "Please select a resource" }),
     resourceName: z.string(),
+    resourceUrl: z.string(),
     timeUnit: z.string(),
     timeValue: z.coerce.number().int().positive().min(1),
     title: z.string().optional()
@@ -88,14 +97,18 @@ export default function CreateShareLinkForm({
     const { toast } = useToast();
     const { org } = useOrgContext();
 
-    const api = createApiClient(useEnvContext());
+    const { env } = useEnvContext();
+    const api = createApiClient({ env });
 
     const [link, setLink] = useState<string | null>(null);
+    const [directLink, setDirectLink] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [neverExpire, setNeverExpire] = useState(false);
 
+    const [isOpen, setIsOpen] = useState(false);
+
     const [resources, setResources] = useState<
-        { resourceId: number; name: string }[]
+        { resourceId: number; name: string; resourceUrl: string }[]
     >([]);
 
     const timeUnits = [
@@ -139,7 +152,13 @@ export default function CreateShareLinkForm({
                 });
 
             if (res?.status === 200) {
-                setResources(res.data.data.resources);
+                setResources(
+                    res.data.data.resources.map((r) => ({
+                        resourceId: r.resourceId,
+                        name: r.name,
+                        resourceUrl: `${r.ssl ? "https://" : "http://"}${r.fullDomain}/`
+                    }))
+                );
             }
         }
 
@@ -202,6 +221,13 @@ export default function CreateShareLinkForm({
                 token.accessToken
             );
             setLink(link);
+            const directLink = constructDirectShareLink(
+                env.server.resourceAccessTokenParam,
+                values.resourceUrl,
+                token.accessTokenId,
+                token.accessToken
+            );
+            setDirectLink(directLink);
             onCreated?.({
                 accessTokenId: token.accessTokenId,
                 resourceId: token.resourceId,
@@ -305,6 +331,10 @@ export default function CreateShareLinkForm({
                                                                                         form.setValue(
                                                                                             "resourceName",
                                                                                             r.name
+                                                                                        );
+                                                                                        form.setValue(
+                                                                                            "resourceUrl",
+                                                                                            r.resourceUrl
                                                                                         );
                                                                                     }}
                                                                                 >
@@ -462,12 +492,62 @@ export default function CreateShareLinkForm({
                                         <QRCodeCanvas value={link} size={200} />
                                     </div>
 
-                                    <div className="mx-auto">
-                                        <CopyTextBox
-                                            text={link}
-                                            wrapText={false}
-                                        />
-                                    </div>
+                                    <Collapsible
+                                        open={isOpen}
+                                        onOpenChange={setIsOpen}
+                                        className="space-y-2"
+                                    >
+                                        <div className="mx-auto">
+                                            <CopyTextBox
+                                                text={link}
+                                                wrapText={false}
+                                            />
+                                        </div>
+                                        <div className="flex items-center justify-between space-x-4">
+                                            <CollapsibleTrigger asChild>
+                                                <Button
+                                                    variant="text"
+                                                    size="sm"
+                                                    className="p-0 flex items-center justify-between w-full"
+                                                >
+                                                    <h4 className="text-sm font-semibold">
+                                                        See alternative share
+                                                        links
+                                                    </h4>
+                                                    <div>
+                                                        <ChevronsUpDown className="h-4 w-4" />
+                                                        <span className="sr-only">
+                                                            Toggle
+                                                        </span>
+                                                    </div>
+                                                </Button>
+                                            </CollapsibleTrigger>
+                                        </div>
+                                        <CollapsibleContent className="space-y-2">
+                                            {directLink && (
+                                                <div className="space-y-2">
+                                                    <div className="mx-auto">
+                                                        <CopyTextBox
+                                                            text={directLink}
+                                                            wrapText={false}
+                                                        />
+                                                    </div>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        This link does not
+                                                        require visiting in a
+                                                        browser to complete the
+                                                        redirect. It contains
+                                                        the access token
+                                                        directly in the URL,
+                                                        which can be useful for
+                                                        sharing with clients
+                                                        that do not support
+                                                        redirects.
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </CollapsibleContent>
+                                    </Collapsible>
                                 </div>
                             )}
                         </div>
