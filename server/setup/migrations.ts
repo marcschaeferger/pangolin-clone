@@ -33,8 +33,6 @@ export async function runMigrations() {
         throw new Error("APP_VERSION is not set in the environment");
     }
 
-    bootstrapVolume();
-
     if (exists) {
         await executeScripts();
     } else {
@@ -107,37 +105,5 @@ async function executeScripts() {
     } catch (error) {
         console.error("Migration process failed:", error);
         throw error;
-    }
-}
-
-function bootstrapVolume() {
-    const appPath = APP_PATH;
-
-    const dbDir = path.join(appPath, "db");
-    const logsDir = path.join(appPath, "logs");
-
-    // check if the db directory exists and create it if it doesn't
-    if (!existsSync(dbDir)) {
-        mkdirSync(dbDir, { recursive: true });
-    }
-
-    // check if the logs directory exists and create it if it doesn't
-    if (!existsSync(logsDir)) {
-        mkdirSync(logsDir, { recursive: true });
-    }
-
-    // THIS IS FOR TRAEFIK; NOT REALLY NEEDED, BUT JUST IN CASE
-
-    const traefikDir = path.join(appPath, "traefik");
-    const letsEncryptDir = path.join(traefikDir, "letsencrypt");
-
-    // check if the traefik directory exists and create it if it doesn't
-    if (!existsSync(traefikDir)) {
-        mkdirSync(traefikDir, { recursive: true });
-    }
-
-    // check if the letsencrypt directory exists and create it if it doesn't
-    if (!existsSync(letsEncryptDir)) {
-        mkdirSync(letsEncryptDir, { recursive: true });
     }
 }
