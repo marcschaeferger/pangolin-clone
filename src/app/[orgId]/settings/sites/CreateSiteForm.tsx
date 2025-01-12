@@ -175,6 +175,8 @@ export default function CreateSiteForm({
 
             payload = {
                 ...payload,
+                subnet: siteDefaults.subnet,
+                exitNodeId: siteDefaults.exitNodeId,
                 secret: siteDefaults.newtSecret,
                 newtId: siteDefaults.newtId
             };
