@@ -4,12 +4,13 @@ import path from "path";
 import semver from "semver";
 import { versionMigrations } from "@server/db/schema";
 import { desc } from "drizzle-orm";
-import { __DIRNAME } from "@server/lib/consts";
+import { __DIRNAME, APP_PATH } from "@server/lib/consts";
 import { loadAppVersion } from "@server/lib/loadAppVersion";
 import m1 from "./scripts/1.0.0-beta1";
 import m2 from "./scripts/1.0.0-beta2";
 import m3 from "./scripts/1.0.0-beta3";
 import m4 from "./scripts/1.0.0-beta5";
+import { existsSync, mkdirSync } from "fs";
 
 // THIS CANNOT IMPORT ANYTHING FROM THE SERVER
 // EXCEPT FOR THE DATABASE AND THE SCHEMA
@@ -31,6 +32,8 @@ export async function runMigrations() {
     if (!appVersion) {
         throw new Error("APP_VERSION is not set in the environment");
     }
+
+    bootstrapVolume();
 
     if (exists) {
         await executeScripts();
@@ -104,5 +107,37 @@ async function executeScripts() {
     } catch (error) {
         console.error("Migration process failed:", error);
         throw error;
+    }
+}
+
+function bootstrapVolume() {
+    const appPath = APP_PATH;
+
+    const dbDir = path.join(appPath, "db");
+    const logsDir = path.join(appPath, "logs");
+
+    // check if the db directory exists and create it if it doesn't
+    if (!existsSync(dbDir)) {
+        mkdirSync(dbDir, { recursive: true });
+    }
+
+    // check if the logs directory exists and create it if it doesn't
+    if (!existsSync(logsDir)) {
+        mkdirSync(logsDir, { recursive: true });
+    }
+
+    // THIS IS FOR TRAEFIK; NOT REALLY NEEDED, BUT JUST IN CASE
+
+    const traefikDir = path.join(appPath, "traefik");
+    const letsEncryptDir = path.join(traefikDir, "letsencrypt");
+
+    // check if the traefik directory exists and create it if it doesn't
+    if (!existsSync(traefikDir)) {
+        mkdirSync(traefikDir, { recursive: true });
+    }
+
+    // check if the letsencrypt directory exists and create it if it doesn't
+    if (!existsSync(letsEncryptDir)) {
+        mkdirSync(letsEncryptDir, { recursive: true });
     }
 }
