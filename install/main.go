@@ -10,27 +10,37 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"syscall"
 	"text/template"
 	"unicode"
+
+	"golang.org/x/term"
 )
+
+func loadVersions(config *Config) {
+	config.PangolinVersion = "1.0.0-beta.4"
+	config.GerbilVersion = "1.0.0-beta.1"
+}
 
 //go:embed fs/*
 var configFiles embed.FS
 
 type Config struct {
-	BaseDomain                 string `yaml:"baseDomain"`
-	DashboardDomain            string `yaml:"dashboardUrl"`
-	LetsEncryptEmail           string `yaml:"letsEncryptEmail"`
-	AdminUserEmail             string `yaml:"adminUserEmail"`
-	AdminUserPassword          string `yaml:"adminUserPassword"`
-	DisableSignupWithoutInvite bool   `yaml:"disableSignupWithoutInvite"`
-	DisableUserCreateOrg       bool   `yaml:"disableUserCreateOrg"`
-	EnableEmail                bool   `yaml:"enableEmail"`
-	EmailSMTPHost              string `yaml:"emailSMTPHost"`
-	EmailSMTPPort              int    `yaml:"emailSMTPPort"`
-	EmailSMTPUser              string `yaml:"emailSMTPUser"`
-	EmailSMTPPass              string `yaml:"emailSMTPPass"`
-	EmailNoReply               string `yaml:"emailNoReply"`
+	PangolinVersion            string
+	GerbilVersion              string
+	BaseDomain                 string
+	DashboardDomain            string
+	LetsEncryptEmail           string
+	AdminUserEmail             string
+	AdminUserPassword          string
+	DisableSignupWithoutInvite bool
+	DisableUserCreateOrg       bool
+	EnableEmail                bool
+	EmailSMTPHost              string
+	EmailSMTPPort              int
+	EmailSMTPUser              string
+	EmailSMTPPass              string
+	EmailNoReply               string
 }
 
 func main() {
@@ -45,6 +55,9 @@ func main() {
 	// check if there is already a config file
 	if _, err := os.Stat("config/config.yml"); err != nil {
 		config := collectUserInput(reader)
+
+		loadVersions(&config)
+
 		if err := createConfigFiles(config); err != nil {
 			fmt.Printf("Error creating config files: %v\n", err)
 			os.Exit(1)
@@ -82,6 +95,24 @@ func readString(reader *bufio.Reader, prompt string, defaultValue string) string
 	return input
 }
 
+func readPassword(prompt string) string {
+	fmt.Print(prompt + ": ")
+
+	// Read password without echo
+	password, err := term.ReadPassword(int(syscall.Stdin))
+	fmt.Println() // Add a newline since ReadPassword doesn't add one
+
+	if err != nil {
+		return ""
+	}
+
+	input := strings.TrimSpace(string(password))
+	if input == "" {
+		return readPassword(prompt)
+	}
+	return input
+}
+
 func readBool(reader *bufio.Reader, prompt string, defaultValue bool) bool {
 	defaultStr := "no"
 	if defaultValue {
@@ -114,16 +145,23 @@ func collectUserInput(reader *bufio.Reader) Config {
 	fmt.Println("\n=== Admin User Configuration ===")
 	config.AdminUserEmail = readString(reader, "Enter admin user email", "admin@"+config.BaseDomain)
 	for {
-		config.AdminUserPassword = readString(reader, "Enter admin user password", "")
-		if valid, message := validatePassword(config.AdminUserPassword); valid {
-			break
+		pass1 := readPassword("Create admin user password")
+		pass2 := readPassword("Confirm admin user password")
+
+		if pass1 != pass2 {
+			fmt.Println("Passwords do not match")
 		} else {
-			fmt.Println("Invalid password:", message)
-			fmt.Println("Password requirements:")
-			fmt.Println("- At least one uppercase English letter")
-			fmt.Println("- At least one lowercase English letter")
-			fmt.Println("- At least one digit")
-			fmt.Println("- At least one special character")
+			config.AdminUserPassword = pass1
+			if valid, message := validatePassword(config.AdminUserPassword); valid {
+				break
+			} else {
+				fmt.Println("Invalid password:", message)
+				fmt.Println("Password requirements:")
+				fmt.Println("- At least one uppercase English letter")
+				fmt.Println("- At least one lowercase English letter")
+				fmt.Println("- At least one digit")
+				fmt.Println("- At least one special character")
+			}
 		}
 	}
 
