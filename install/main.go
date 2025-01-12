@@ -41,6 +41,7 @@ type Config struct {
 	EmailSMTPUser              string
 	EmailSMTPPass              string
 	EmailNoReply               string
+	InstallGerbil              bool
 }
 
 func main() {
@@ -64,7 +65,7 @@ func main() {
 		}
 
 		if !isDockerInstalled() && runtime.GOOS == "linux" {
-			if shouldInstallDocker() {
+			if readBool(reader, "Docker is not installed. Would you like to install it?", true) {
 				installDocker()
 			}
 		}
@@ -140,6 +141,7 @@ func collectUserInput(reader *bufio.Reader) Config {
 	config.BaseDomain = readString(reader, "Enter your base domain (no subdomain e.g. example.com)", "")
 	config.DashboardDomain = readString(reader, "Enter the domain for the Pangolin dashboard", "pangolin."+config.BaseDomain)
 	config.LetsEncryptEmail = readString(reader, "Enter email for Let's Encrypt certificates", "")
+	config.InstallGerbil = readBool(reader, "Do you want to use Gerbil to allow tunned connections", true)
 
 	// Admin user configuration
 	fmt.Println("\n=== Admin User Configuration ===")
@@ -338,13 +340,6 @@ func createConfigFiles(config Config) error {
 	}
 
 	return nil
-}
-
-func shouldInstallDocker() bool {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Would you like to install Docker? (yes/no): ")
-	response, _ := reader.ReadString('\n')
-	return strings.ToLower(strings.TrimSpace(response)) == "yes"
 }
 
 func installDocker() error {

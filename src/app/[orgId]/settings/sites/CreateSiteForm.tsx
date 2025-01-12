@@ -49,7 +49,7 @@ const createSiteFormSchema = z.object({
         .max(30, {
             message: "Name must not be longer than 30 characters."
         }),
-    method: z.enum(["wireguard", "newt"])
+    method: z.enum(["wireguard", "newt", "local"])
 });
 
 type CreateSiteFormValues = z.infer<typeof createSiteFormSchema>;
@@ -79,17 +79,16 @@ export default function CreateSiteForm({
     const [isLoading, setIsLoading] = useState(false);
     const [isChecked, setIsChecked] = useState(false);
 
-    const router = useRouter();
-
     const [keypair, setKeypair] = useState<{
         publicKey: string;
         privateKey: string;
     } | null>(null);
+
     const [siteDefaults, setSiteDefaults] =
         useState<PickSiteDefaultsResponse | null>(null);
 
     const handleCheckboxChange = (checked: boolean) => {
-        setChecked?.(checked);
+        // setChecked?.(checked);
         setIsChecked(checked);
     };
 
@@ -97,6 +96,17 @@ export default function CreateSiteForm({
         resolver: zodResolver(createSiteFormSchema),
         defaultValues
     });
+
+    const nameField = form.watch("name");
+    const methodField = form.watch("method");
+
+    useEffect(() => {
+        const nameIsValid = nameField?.length >= 2 && nameField?.length <= 30;
+        const isFormValid = methodField === "local" || isChecked;
+
+        // Only set checked to true if name is valid AND (method is local OR checkbox is checked)
+        setChecked?.(nameIsValid && isFormValid);
+    }, [nameField, methodField, isChecked, setChecked]);
 
     useEffect(() => {
         if (!open) return;
@@ -114,11 +124,8 @@ export default function CreateSiteForm({
 
         api.get(`/org/${orgId}/pick-site-defaults`)
             .catch((e) => {
-                toast({
-                    variant: "destructive",
-                    title: "Error picking site defaults",
-                    description: formatAxiosError(e)
-                });
+                // update the default value of the form to be local method
+                form.setValue("method", "local");
             })
             .then((res) => {
                 if (res && res.status === 200) {
@@ -130,24 +137,54 @@ export default function CreateSiteForm({
     async function onSubmit(data: CreateSiteFormValues) {
         setLoading?.(true);
         setIsLoading(true);
-        if (!siteDefaults || !keypair) {
-            return;
-        }
         let payload: CreateSiteBody = {
             name: data.name,
-            subnet: siteDefaults.subnet,
-            exitNodeId: siteDefaults.exitNodeId,
-            pubKey: keypair.publicKey,
             type: data.method
         };
-        if (data.method === "newt") {
-            payload.secret = siteDefaults.newtSecret;
-            payload.newtId = siteDefaults.newtId;
+
+        if (data.method == "wireguard") {
+            if (!keypair || !siteDefaults) {
+                toast({
+                    variant: "destructive",
+                    title: "Error creating site",
+                    description: "Key pair or site defaults not found"
+                });
+                setLoading?.(false);
+                setIsLoading(false);
+                return;
+            }
+
+            payload = {
+                ...payload,
+                subnet: siteDefaults.subnet,
+                exitNodeId: siteDefaults.exitNodeId,
+                pubKey: keypair.publicKey
+            };
         }
+        if (data.method === "newt") {
+            if (!siteDefaults) {
+                toast({
+                    variant: "destructive",
+                    title: "Error creating site",
+                    description: "Site defaults not found"
+                });
+                setLoading?.(false);
+                setIsLoading(false);
+                return;
+            }
+
+            payload = {
+                ...payload,
+                secret: siteDefaults.newtSecret,
+                newtId: siteDefaults.newtId
+            };
+        }
+
         const res = await api
-            .put<
-                AxiosResponse<CreateSiteResponse>
-            >(`/org/${orgId}/site/`, payload)
+            .put<AxiosResponse<CreateSiteResponse>>(
+                `/org/${orgId}/site/`,
+                payload
+            )
             .catch((e) => {
                 toast({
                     variant: "destructive",
@@ -157,18 +194,20 @@ export default function CreateSiteForm({
             });
 
         if (res && res.status === 201) {
-            const niceId = res.data.data.niceId;
-            // navigate to the site page
-            // router.push(`/${orgId}/settings/sites/${niceId}`);
-
             const data = res.data.data;
 
             onCreate?.({
                 name: data.name,
                 id: data.siteId,
                 nice: data.niceId.toString(),
-                mbIn: "0 MB",
-                mbOut: "0 MB",
+                mbIn:
+                    data.type == "wireguard" || data.type == "newt"
+                        ? "0 MB"
+                        : "--",
+                mbOut:
+                    data.type == "wireguard" || data.type == "newt"
+                        ? "0 MB"
+                        : "--",
                 orgId: orgId as string,
                 type: data.type as any,
                 online: false
@@ -245,11 +284,20 @@ PersistentKeepalive = 5`
                                             <SelectValue placeholder="Select method" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="wireguard">
-                                                WireGuard
+                                            <SelectItem value="local">
+                                                Local
                                             </SelectItem>
-                                            <SelectItem value="newt">
+                                            <SelectItem
+                                                value="newt"
+                                                disabled={!siteDefaults}
+                                            >
                                                 Newt
+                                            </SelectItem>
+                                            <SelectItem
+                                                value="wireguard"
+                                                disabled={!siteDefaults}
+                                            >
+                                                WireGuard
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
@@ -264,50 +312,76 @@ PersistentKeepalive = 5`
 
                     <div className="w-full">
                         {form.watch("method") === "wireguard" && !isLoading ? (
-                            <CopyTextBox text={wgConfig} />
+                            <>
+                                <CopyTextBox text={wgConfig} />
+                                <span className="text-sm text-muted-foreground">
+                                    You will only be able to see the
+                                    configuration once.
+                                </span>
+                            </>
                         ) : form.watch("method") === "wireguard" &&
                           isLoading ? (
                             <p>Loading WireGuard configuration...</p>
-                        ) : (
-                            <CopyTextBox text={newtConfig} wrapText={false} />
-                        )}
+                        ) : form.watch("method") === "newt" ? (
+                            <>
+                                <CopyTextBox
+                                    text={newtConfig}
+                                    wrapText={false}
+                                />
+                                <span className="text-sm text-muted-foreground">
+                                    You will only be able to see the
+                                    configuration once.
+                                </span>
+                            </>
+                        ) : null}
                     </div>
-
-                    <span className="text-sm text-muted-foreground">
-                        You will only be able to see the configuration once.
-                    </span>
 
                     {form.watch("method") === "newt" && (
-                        <>
-                            <br />
-                            <Link
-                                className="text-sm text-primary flex items-center gap-1"
-                                href="https://docs.fossorial.io/Newt/install"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                <span>
-                                    {" "}
-                                    Learn how to install Newt on your system
-                                </span>
-                                <SquareArrowOutUpRight size={14} />
-                            </Link>
-                        </>
+                        <Link
+                            className="text-sm text-primary flex items-center gap-1"
+                            href="https://docs.fossorial.io/Newt/install"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <span>
+                                {" "}
+                                Learn how to install Newt on your system
+                            </span>
+                            <SquareArrowOutUpRight size={14} />
+                        </Link>
                     )}
 
-                    <div className="flex items-center space-x-2">
-                        <Checkbox
-                            id="terms"
-                            checked={isChecked}
-                            onCheckedChange={handleCheckboxChange}
-                        />
-                        <label
-                            htmlFor="terms"
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    {form.watch("method") === "local" && (
+                        <Link
+                            className="text-sm text-primary flex items-center gap-1"
+                            href="https://docs.fossorial.io/Pangolin/without-tunneling"
+                            target="_blank"
+                            rel="noopener noreferrer"
                         >
-                            I have copied the config
-                        </label>
-                    </div>
+                            <span>
+                                {" "}
+                                Local sites do not tunnel, learn more
+                            </span>
+                            <SquareArrowOutUpRight size={14} />
+                        </Link>
+                    )}
+
+                    {(form.watch("method") === "newt" ||
+                        form.watch("method") === "wireguard") && (
+                        <div className="flex items-center space-x-2">
+                            <Checkbox
+                                id="terms"
+                                checked={isChecked}
+                                onCheckedChange={handleCheckboxChange}
+                            />
+                            <label
+                                htmlFor="terms"
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                                I have copied the config
+                            </label>
+                        </div>
+                    )}
                 </form>
             </Form>
         </div>

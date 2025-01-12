@@ -16,37 +16,50 @@ type SiteInfoCardProps = {};
 export default function SiteInfoCard({}: SiteInfoCardProps) {
     const { site, updateSite } = useSiteContext();
 
+    const getConnectionTypeString = (type: string) => {
+        if (type === "newt") {
+            return "Newt";
+        } else if (type === "wireguard") {
+            return "WireGuard";
+        } else if (type === "local") {
+            return "Local";
+        } else {
+            return "Unknown";
+        }
+    };
+
     return (
         <Alert>
             <InfoIcon className="h-4 w-4" />
             <AlertTitle className="font-semibold">Site Information</AlertTitle>
             <AlertDescription className="mt-4">
                 <InfoSections>
-                    <InfoSection>
-                        <InfoSectionTitle>Status</InfoSectionTitle>
-                        <InfoSectionContent>
-                            {site.online ? (
-                                <div className="text-green-500 flex items-center space-x-2">
-                                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                    <span>Online</span>
-                                </div>
-                            ) : (
-                                <div className="text-neutral-500 flex items-center space-x-2">
-                                    <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
-                                    <span>Offline</span>
-                                </div>
-                            )}
-                        </InfoSectionContent>
-                    </InfoSection>
-                    <Separator orientation="vertical" />
+                    {(site.type == "newt" || site.type == "wireguard") && (
+                        <>
+                            <InfoSection>
+                                <InfoSectionTitle>Status</InfoSectionTitle>
+                                <InfoSectionContent>
+                                    {site.online ? (
+                                        <div className="text-green-500 flex items-center space-x-2">
+                                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                            <span>Online</span>
+                                        </div>
+                                    ) : (
+                                        <div className="text-neutral-500 flex items-center space-x-2">
+                                            <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
+                                            <span>Offline</span>
+                                        </div>
+                                    )}
+                                </InfoSectionContent>
+                            </InfoSection>
+
+                            <Separator orientation="vertical" />
+                        </>
+                    )}
                     <InfoSection>
                         <InfoSectionTitle>Connection Type</InfoSectionTitle>
                         <InfoSectionContent>
-                            {site.type === "newt"
-                                ? "Newt"
-                                : site.type === "wireguard"
-                                  ? "WireGuard"
-                                  : "Unknown"}
+                            {getConnectionTypeString(site.type)}
                         </InfoSectionContent>
                     </InfoSection>
                 </InfoSections>

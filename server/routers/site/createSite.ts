@@ -24,7 +24,7 @@ const createSiteParamsSchema = z
 const createSiteSchema = z
     .object({
         name: z.string().min(1).max(255),
-        exitNodeId: z.number().int().positive(),
+        exitNodeId: z.number().int().positive().optional(),
         // subdomain: z
         //     .string()
         //     .min(1)
@@ -32,7 +32,7 @@ const createSiteSchema = z
         //     .transform((val) => val.toLowerCase())
         //     .optional(),
         pubKey: z.string().optional(),
-        subnet: z.string(),
+        subnet: z.string().optional(),
         newtId: z.string().optional(),
         secret: z.string().optional(),
         type: z.string()
@@ -82,28 +82,46 @@ export async function createSite(
 
         const niceId = await getUniqueSiteName(orgId);
 
-        let payload: any = {
-            orgId,
-            exitNodeId,
-            name,
-            niceId,
-            subnet,
-            type
-        };
-
-        if (pubKey && type == "wireguard") {
-            // we dont add the pubKey for newts because the newt will generate it
-            payload = {
-                ...payload,
-                pubKey
-            };
-        }
-
         await db.transaction(async (trx) => {
-            const [newSite] = await trx
-                .insert(sites)
-                .values(payload)
-                .returning();
+            let newSite: Site;
+
+            if (exitNodeId) {
+                // we are creating a site with an exit node (tunneled)
+                if (!subnet) {
+                    return next(
+                        createHttpError(
+                            HttpCode.BAD_REQUEST,
+                            "Subnet is required for tunneled sites"
+                        )
+                    );
+                }
+
+                [newSite] = await trx
+                    .insert(sites)
+                    .values({
+                        orgId,
+                        exitNodeId,
+                        name,
+                        niceId,
+                        subnet,
+                        type,
+                        ...(pubKey && type == "wireguard" && { pubKey })
+                    })
+                    .returning();
+            } else {
+                // we are creating a site with no tunneling
+
+                [newSite] = await trx
+                    .insert(sites)
+                    .values({
+                        orgId,
+                        name,
+                        niceId,
+                        type,
+                        subnet: "0.0.0.0/0"
+                    })
+                    .returning();
+            }
 
             const adminRole = await trx
                 .select()
@@ -149,6 +167,16 @@ export async function createSite(
                         )
                     );
                 }
+
+                if (!exitNodeId) {
+                    return next(
+                        createHttpError(
+                            HttpCode.BAD_REQUEST,
+                            "Exit node ID is required for wireguard sites"
+                        )
+                    );
+                }
+
                 await addPeer(exitNodeId, {
                     publicKey: pubKey,
                     allowedIps: []
