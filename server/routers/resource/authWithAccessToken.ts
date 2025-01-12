@@ -14,9 +14,7 @@ import {
 } from "@server/auth/sessions/resource";
 import config from "@server/lib/config";
 import logger from "@server/logger";
-import { verify } from "@node-rs/argon2";
-import { isWithinExpirationDate } from "oslo";
-import { verifyPassword } from "@server/auth/password";
+import { verifyResourceAccessToken } from "@server/auth/verifyResourceAccessToken";
 
 const authWithAccessTokenBodySchema = z
     .object({
@@ -69,58 +67,38 @@ export async function authWithAccessToken(
     const { accessToken, accessTokenId } = parsedBody.data;
 
     try {
-        const [result] = await db
+        const [resource] = await db
             .select()
-            .from(resourceAccessToken)
-            .where(
-                and(
-                    eq(resourceAccessToken.resourceId, resourceId),
-                    eq(resourceAccessToken.accessTokenId, accessTokenId)
-                )
-            )
-            .leftJoin(
-                resources,
-                eq(resources.resourceId, resourceAccessToken.resourceId)
-            )
+            .from(resources)
+            .where(eq(resources.resourceId, resourceId))
             .limit(1);
-
-        const resource = result?.resources;
-        const tokenItem = result?.resourceAccessToken;
-
-        if (!tokenItem) {
-            return next(
-                createHttpError(
-                    HttpCode.UNAUTHORIZED,
-                    createHttpError(
-                        HttpCode.BAD_REQUEST,
-                        "Access token does not exist for resource"
-                    )
-                )
-            );
-        }
 
         if (!resource) {
             return next(
-                createHttpError(HttpCode.BAD_REQUEST, "Resource does not exist")
+                createHttpError(HttpCode.NOT_FOUND, "Resource not found")
             );
         }
 
-        const validCode = await verifyPassword(accessToken, tokenItem.tokenHash);
+        const { valid, error, tokenItem } = await verifyResourceAccessToken({
+            resource,
+            accessTokenId,
+            accessToken
+        });
 
-        if (!validCode) {
-            return next(
-                createHttpError(HttpCode.UNAUTHORIZED, "Invalid access token")
-            );
-        }
-
-        if (
-            tokenItem.expiresAt &&
-            !isWithinExpirationDate(new Date(tokenItem.expiresAt))
-        ) {
+        if (!valid) {
             return next(
                 createHttpError(
                     HttpCode.UNAUTHORIZED,
-                    "Access token has expired"
+                    error || "Invalid access token"
+                )
+            );
+        }
+
+        if (!tokenItem || !resource) {
+            return next(
+                createHttpError(
+                    HttpCode.UNAUTHORIZED,
+                    "Access token does not exist for resource"
                 )
             );
         }

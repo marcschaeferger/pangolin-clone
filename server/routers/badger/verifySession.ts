@@ -7,6 +7,7 @@ import { response } from "@server/lib/response";
 import { validateSessionToken } from "@server/auth/sessions/app";
 import db from "@server/db";
 import {
+    ResourceAccessToken,
     resourceAccessToken,
     resourcePassword,
     resourcePincode,
@@ -17,9 +18,15 @@ import {
 } from "@server/db/schema";
 import { and, eq } from "drizzle-orm";
 import config from "@server/lib/config";
-import { validateResourceSessionToken } from "@server/auth/sessions/resource";
+import {
+    createResourceSession,
+    serializeResourceSessionCookie,
+    validateResourceSessionToken
+} from "@server/auth/sessions/resource";
 import { Resource, roleResources, userResources } from "@server/db/schema";
 import logger from "@server/logger";
+import { verifyResourceAccessToken } from "@server/auth/verifyResourceAccessToken";
+import { generateSessionToken } from "@server/auth";
 
 const verifyResourceSessionSchema = z.object({
     sessions: z.record(z.string()).optional(),
@@ -28,6 +35,7 @@ const verifyResourceSessionSchema = z.object({
     host: z.string(),
     path: z.string(),
     method: z.string(),
+    accessToken: z.string().optional(),
     tls: z.boolean()
 });
 
@@ -59,7 +67,8 @@ export async function verifyResourceSession(
     }
 
     try {
-        const { sessions, host, originalRequestURL } = parsedBody.data;
+        const { sessions, host, originalRequestURL, accessToken: token } =
+            parsedBody.data;
 
         const [result] = await db
             .select()
@@ -103,11 +112,41 @@ export async function verifyResourceSession(
 
         const redirectUrl = `${config.getRawConfig().app.dashboard_url}/auth/resource/${encodeURIComponent(resource.resourceId)}?redirect=${encodeURIComponent(originalRequestURL)}`;
 
+        // check for access token
+        let validAccessToken: ResourceAccessToken | undefined;
+        if (token) {
+            const [accessTokenId, accessToken] = token.split(".");
+            const { valid, error, tokenItem } = await verifyResourceAccessToken(
+                {
+                    resource,
+                    accessTokenId,
+                    accessToken
+                }
+            );
+
+            if (error) {
+                logger.debug("Access token invalid: " + error);
+            }
+
+            if (valid && tokenItem) {
+                validAccessToken = tokenItem;
+
+                if (!sessions) {
+                    return await createAccessTokenSession(
+                        res,
+                        resource,
+                        tokenItem
+                    );
+                }
+            }
+        }
+
         if (!sessions) {
             return notAllowed(res);
         }
 
-        const sessionToken = sessions[config.getRawConfig().server.session_cookie_name];
+        const sessionToken =
+            sessions[config.getRawConfig().server.session_cookie_name];
 
         // check for unified login
         if (sso && sessionToken) {
@@ -172,6 +211,16 @@ export async function verifyResourceSession(
             }
         }
 
+        // At this point we have checked all sessions, but since the access token is valid, we should allow access
+        // and create a new session.
+        if (validAccessToken) {
+            return await createAccessTokenSession(
+                res,
+                resource,
+                validAccessToken
+            );
+        }
+
         logger.debug("No more auth to check, resource not allowed");
         return notAllowed(res, redirectUrl);
     } catch (e) {
@@ -209,11 +258,41 @@ function allowed(res: Response) {
     return response<VerifyUserResponse>(res, data);
 }
 
+async function createAccessTokenSession(
+    res: Response,
+    resource: Resource,
+    tokenItem: ResourceAccessToken
+) {
+    const token = generateSessionToken();
+    await createResourceSession({
+        resourceId: resource.resourceId,
+        token,
+        accessTokenId: tokenItem.accessTokenId,
+        sessionLength: tokenItem.sessionLength,
+        expiresAt: tokenItem.expiresAt,
+        doNotExtend: tokenItem.expiresAt ? true : false
+    });
+    const cookieName = `${config.getRawConfig().server.resource_session_cookie_name}_${resource.resourceId}`;
+    const cookie = serializeResourceSessionCookie(cookieName, token);
+    res.appendHeader("Set-Cookie", cookie);
+    logger.debug("Access token is valid, creating new session")
+    return response<VerifyUserResponse>(res, {
+        data: { valid: true },
+        success: true,
+        error: false,
+        message: "Access allowed",
+        status: HttpCode.OK
+    });
+}
+
 async function isUserAllowedToAccessResource(
     user: User,
     resource: Resource
 ): Promise<boolean> {
-    if (config.getRawConfig().flags?.require_email_verification && !user.emailVerified) {
+    if (
+        config.getRawConfig().flags?.require_email_verification &&
+        !user.emailVerified
+    ) {
         return false;
     }
 

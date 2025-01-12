@@ -45,11 +45,10 @@ export default async function ResourceAuthPage(props: {
     const user = await getUser({ skipCheckVerifyEmail: true });
 
     if (!authInfo) {
-        {
-            /* @ts-ignore */
-        } // TODO: fix this
+        // TODO: fix this
         return (
             <div className="w-full max-w-md">
+            {/* @ts-ignore */}
                 <ResourceNotFound />
             </div>
         );

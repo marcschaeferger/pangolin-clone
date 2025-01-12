@@ -56,6 +56,7 @@ export async function traefikConfigProvider(
                                 config.getRawConfig().server.resource_session_cookie_name,
                             userSessionCookieName:
                                 config.getRawConfig().server.session_cookie_name,
+                            accessTokenQueryParam: "p_token"
                         },
                     },
                 },

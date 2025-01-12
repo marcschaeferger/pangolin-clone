@@ -4,7 +4,7 @@ import { resources, targets, userOrgs } from "@server/db/schema";
 import { and, eq } from "drizzle-orm";
 import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
-import { canUserAccessResource } from "../lib/canUserAccessResource";
+import { canUserAccessResource } from "../auth/canUserAccessResource";
 
 export async function verifyTargetAccess(
     req: Request,

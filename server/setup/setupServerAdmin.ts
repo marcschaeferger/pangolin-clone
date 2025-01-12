@@ -69,6 +69,8 @@ export async function setupServerAdmin() {
 
             const userId = generateId(15);
 
+            await trx.update(users).set({ serverAdmin: false });
+
             await db.insert(users).values({
                 userId: userId,
                 email: email,
