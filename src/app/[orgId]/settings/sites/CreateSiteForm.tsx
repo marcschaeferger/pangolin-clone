@@ -200,8 +200,14 @@ export default function CreateSiteForm({
                 name: data.name,
                 id: data.siteId,
                 nice: data.niceId.toString(),
-                mbIn: data.type == "wireguard" || data.type == "newt" ? "0 MB" : "--",
-                mbOut: data.type == "wireguard" || data.type == "newt" ? "0 MB" : "--",
+                mbIn:
+                    data.type == "wireguard" || data.type == "newt"
+                        ? "0 MB"
+                        : "--",
+                mbOut:
+                    data.type == "wireguard" || data.type == "newt"
+                        ? "0 MB"
+                        : "--",
                 orgId: orgId as string,
                 type: data.type as any,
                 online: false
@@ -331,31 +337,33 @@ PersistentKeepalive = 5`
                     </div>
 
                     {form.watch("method") === "newt" && (
-                        <>
-                            <br />
-                            <Link
-                                className="text-sm text-primary flex items-center gap-1"
-                                href="https://docs.fossorial.io/Newt/install"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                <span>
-                                    {" "}
-                                    Learn how to install Newt on your system
-                                </span>
-                                <SquareArrowOutUpRight size={14} />
-                            </Link>
-                        </>
+                        <Link
+                            className="text-sm text-primary flex items-center gap-1"
+                            href="https://docs.fossorial.io/Newt/install"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <span>
+                                {" "}
+                                Learn how to install Newt on your system
+                            </span>
+                            <SquareArrowOutUpRight size={14} />
+                        </Link>
                     )}
 
                     {form.watch("method") === "local" && (
-                        <>
-                            <br />
-                            <p>
-                                Data will leave Traefik and go wherever you
-                                want; no tunneling involved.
-                            </p>
-                        </>
+                        <Link
+                            className="text-sm text-primary flex items-center gap-1"
+                            href="https://docs.fossorial.io/Pangolin/without-tunneling"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <span>
+                                {" "}
+                                Local sites do not tunnel, learn more
+                            </span>
+                            <SquareArrowOutUpRight size={14} />
+                        </Link>
                     )}
 
                     {(form.watch("method") === "newt" ||
