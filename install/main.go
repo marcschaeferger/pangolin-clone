@@ -18,7 +18,7 @@ import (
 )
 
 func loadVersions(config *Config) {
-	config.PangolinVersion = "1.0.0-beta.4"
+	config.PangolinVersion = "1.0.0-beta.5"
 	config.GerbilVersion = "1.0.0-beta.1"
 }
 
