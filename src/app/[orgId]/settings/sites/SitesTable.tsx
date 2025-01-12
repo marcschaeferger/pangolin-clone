@@ -245,6 +245,14 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                         </div>
                     );
                 }
+
+                if (originalRow.type === "local") {
+                    return (
+                        <div className="flex items-center space-x-2">
+                            <span>Local</span>
+                        </div>
+                    );
+                }
             }
         },
         {
