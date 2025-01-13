@@ -3,7 +3,12 @@ import yaml from "js-yaml";
 import path from "path";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
-import { __DIRNAME, APP_PATH, configFilePath1, configFilePath2 } from "@server/lib/consts";
+import {
+    __DIRNAME,
+    APP_PATH,
+    configFilePath1,
+    configFilePath2
+} from "@server/lib/consts";
 import { loadAppVersion } from "@server/lib/loadAppVersion";
 import { passwordSchema } from "@server/auth/passwordSchema";
 
@@ -132,6 +137,9 @@ export class Config {
                     );
                     environment = loadConfig(configFilePath1);
                 } catch (error) {
+                    console.log(
+                        "See the docs for information about what to include in the configuration file: https://docs.fossorial.io/Pangolin/Configuration/config"
+                    );
                     if (error instanceof Error) {
                         throw new Error(
                             `Error creating configuration file from example: ${
@@ -187,7 +195,8 @@ export class Config {
             ?.disable_user_create_org
             ? "true"
             : "false";
-        process.env.RESOURCE_ACCESS_TOKEN_PARAM = parsedConfig.data.server.resource_access_token_param;
+        process.env.RESOURCE_ACCESS_TOKEN_PARAM =
+            parsedConfig.data.server.resource_access_token_param;
 
         this.rawConfig = parsedConfig.data;
     }
