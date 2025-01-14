@@ -120,7 +120,8 @@ export async function login(
 
         const token = generateSessionToken();
         await createSession(token, existingUser.userId);
-        const cookie = serializeSessionCookie(token);
+        const isSecure = req.protocol === "https";
+        const cookie = serializeSessionCookie(token, isSecure);
 
         res.appendHeader("Set-Cookie", cookie);
 

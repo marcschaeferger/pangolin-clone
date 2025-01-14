@@ -158,7 +158,8 @@ export async function signup(
 
         const token = generateSessionToken();
         await createSession(token, userId);
-        const cookie = serializeSessionCookie(token);
+        const isSecure = req.protocol === "https";
+        const cookie = serializeSessionCookie(token, isSecure);
         res.appendHeader("Set-Cookie", cookie);
 
         if (config.getRawConfig().flags?.require_email_verification) {

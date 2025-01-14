@@ -27,7 +27,8 @@ export async function logout(
 
     try {
         await invalidateSession(sessionId);
-        res.setHeader("Set-Cookie", createBlankSessionTokenCookie());
+        const isSecure = req.protocol === "https";
+        res.setHeader("Set-Cookie", createBlankSessionTokenCookie(isSecure));
 
         return response<null>(res, {
             data: null,

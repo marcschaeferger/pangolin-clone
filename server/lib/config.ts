@@ -38,7 +38,13 @@ const environmentSchema = z.object({
         secure_cookies: z.boolean(),
         session_cookie_name: z.string(),
         resource_session_cookie_name: z.string(),
-        resource_access_token_param: z.string()
+        resource_access_token_param: z.string(),
+        cors: z.object({
+            origins: z.array(z.string()).optional(),
+            methods: z.array(z.string()).optional(),
+            allowed_headers: z.array(z.string()).optional(),
+            credentials: z.boolean().optional(),
+        }).optional()
     }),
     traefik: z.object({
         http_entrypoint: z.string(),

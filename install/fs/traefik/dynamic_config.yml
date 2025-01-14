@@ -4,6 +4,21 @@ http:
       redirectScheme:
         scheme: https
         permanent: true
+    cors:
+      headers:
+        accessControlAllowMethods:
+          - GET
+          - PUT
+          - POST
+          - DELETE
+          - PATCH
+        accessControlAllowHeaders:
+          - Content-Type
+          - X-CSRF-Token
+        accessControlAllowOriginList:
+          - https://{{.DashboardDomain}}
+        accessControlAllowCredentials: false
+
 
   routers:
     # HTTP to HTTPS redirect router
@@ -14,6 +29,7 @@ http:
         - web
       middlewares:
         - redirect-to-https
+        - cors
 
     # Next.js router (handles everything except API and WebSocket paths)
     next-router:
@@ -21,6 +37,8 @@ http:
       service: next-service
       entryPoints:
         - websecure
+      middlewares:
+        - cors
       tls:
         certResolver: letsencrypt
 
@@ -30,6 +48,8 @@ http:
       service: api-service
       entryPoints:
         - websecure
+      middlewares:
+        - cors
       tls:
         certResolver: letsencrypt
 
@@ -39,6 +59,8 @@ http:
       service: api-service
       entryPoints:
         - websecure
+      middlewares:
+        - cors
       tls:
         certResolver: letsencrypt
 

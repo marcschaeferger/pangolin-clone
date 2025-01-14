@@ -1,6 +1,6 @@
 import {
     encodeBase32LowerCaseNoPadding,
-    encodeHexLowerCase,
+    encodeHexLowerCase
 } from "@oslojs/encoding";
 import { sha256 } from "@oslojs/crypto/sha2";
 import { Session, sessions, User, users } from "@server/db/schema";
@@ -9,8 +9,10 @@ import { eq } from "drizzle-orm";
 import config from "@server/lib/config";
 import type { RandomReader } from "@oslojs/crypto/random";
 import { generateRandomString } from "@oslojs/crypto/random";
+import logger from "@server/logger";
 
-export const SESSION_COOKIE_NAME = config.getRawConfig().server.session_cookie_name;
+export const SESSION_COOKIE_NAME =
+    config.getRawConfig().server.session_cookie_name;
 export const SESSION_COOKIE_EXPIRES = 1000 * 60 * 60 * 24 * 30;
 export const SECURE_COOKIES = config.getRawConfig().server.secure_cookies;
 export const COOKIE_DOMAIN = "." + config.getBaseDomain();
@@ -24,25 +26,25 @@ export function generateSessionToken(): string {
 
 export async function createSession(
     token: string,
-    userId: string,
+    userId: string
 ): Promise<Session> {
     const sessionId = encodeHexLowerCase(
-        sha256(new TextEncoder().encode(token)),
+        sha256(new TextEncoder().encode(token))
     );
     const session: Session = {
         sessionId: sessionId,
         userId,
-        expiresAt: new Date(Date.now() + SESSION_COOKIE_EXPIRES).getTime(),
+        expiresAt: new Date(Date.now() + SESSION_COOKIE_EXPIRES).getTime()
     };
     await db.insert(sessions).values(session);
     return session;
 }
 
 export async function validateSessionToken(
-    token: string,
+    token: string
 ): Promise<SessionValidationResult> {
     const sessionId = encodeHexLowerCase(
-        sha256(new TextEncoder().encode(token)),
+        sha256(new TextEncoder().encode(token))
     );
     const result = await db
         .select({ user: users, session: sessions })
@@ -61,12 +63,12 @@ export async function validateSessionToken(
     }
     if (Date.now() >= session.expiresAt - SESSION_COOKIE_EXPIRES / 2) {
         session.expiresAt = new Date(
-            Date.now() + SESSION_COOKIE_EXPIRES,
+            Date.now() + SESSION_COOKIE_EXPIRES
         ).getTime();
         await db
             .update(sessions)
             .set({
-                expiresAt: session.expiresAt,
+                expiresAt: session.expiresAt
             })
             .where(eq(sessions.sessionId, session.sessionId));
     }
@@ -81,26 +83,38 @@ export async function invalidateAllSessions(userId: string): Promise<void> {
     await db.delete(sessions).where(eq(sessions.userId, userId));
 }
 
-export function serializeSessionCookie(token: string): string {
-    if (SECURE_COOKIES) {
-        return `${SESSION_COOKIE_NAME}=${token}; HttpOnly; SameSite=Strict; Max-Age=${SESSION_COOKIE_EXPIRES}; Path=/; Secure; Domain=${COOKIE_DOMAIN}`;
+export function serializeSessionCookie(
+    token: string,
+    isSecure: boolean
+): string {
+    if (isSecure) {
+        logger.debug("Setting cookie for secure origin");
+        if (SECURE_COOKIES) {
+            return `${SESSION_COOKIE_NAME}=${token}; HttpOnly; SameSite=Strict; Max-Age=${SESSION_COOKIE_EXPIRES}; Path=/; Secure; Domain=${COOKIE_DOMAIN}`;
+        } else {
+            return `${SESSION_COOKIE_NAME}=${token}; HttpOnly; SameSite=Strict; Max-Age=${SESSION_COOKIE_EXPIRES}; Path=/; Domain=${COOKIE_DOMAIN}`;
+        }
     } else {
-        return `${SESSION_COOKIE_NAME}=${token}; HttpOnly; SameSite=Strict; Max-Age=${SESSION_COOKIE_EXPIRES}; Path=/; Domain=${COOKIE_DOMAIN}`;
+        return `${SESSION_COOKIE_NAME}=${token}; HttpOnly; SameSite=Lax; Max-Age=${SESSION_COOKIE_EXPIRES}; Path=/;`;
     }
 }
 
-export function createBlankSessionTokenCookie(): string {
-    if (SECURE_COOKIES) {
-        return `${SESSION_COOKIE_NAME}=; HttpOnly; SameSite=Strict; Max-Age=0; Path=/; Secure; Domain=${COOKIE_DOMAIN}`;
+export function createBlankSessionTokenCookie(isSecure: boolean): string {
+    if (isSecure) {
+        if (SECURE_COOKIES) {
+            return `${SESSION_COOKIE_NAME}=; HttpOnly; SameSite=Strict; Max-Age=0; Path=/; Secure; Domain=${COOKIE_DOMAIN}`;
+        } else {
+            return `${SESSION_COOKIE_NAME}=; HttpOnly; SameSite=Strict; Max-Age=0; Path=/; Domain=${COOKIE_DOMAIN}`;
+        }
     } else {
-        return `${SESSION_COOKIE_NAME}=; HttpOnly; SameSite=Strict; Max-Age=0; Path=/; Domain=${COOKIE_DOMAIN}`;
+        return `${SESSION_COOKIE_NAME}=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/;`;
     }
 }
 
 const random: RandomReader = {
     read(bytes: Uint8Array): void {
         crypto.getRandomValues(bytes);
-    },
+    }
 };
 
 export function generateId(length: number): string {
