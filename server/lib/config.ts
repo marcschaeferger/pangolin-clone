@@ -11,6 +11,7 @@ import {
 } from "@server/lib/consts";
 import { loadAppVersion } from "@server/lib/loadAppVersion";
 import { passwordSchema } from "@server/auth/passwordSchema";
+import stoi from "./stoi";
 
 const portSchema = z.number().positive().gt(0).lte(65535);
 const hostnameSchema = z
@@ -20,31 +21,56 @@ const hostnameSchema = z
     )
     .or(z.literal("localhost"));
 
-const environmentSchema = z.object({
+const getEnvOrYaml = (envVar: string) => (valFromYaml: any) => {
+    return process.env[envVar] ?? valFromYaml;
+};
+
+const configSchema = z.object({
     app: z.object({
         dashboard_url: z
             .string()
             .url()
+            .optional()
+            .transform(getEnvOrYaml("APP_DASHBOARDURL"))
+            .pipe(z.string().url())
             .transform((url) => url.toLowerCase()),
-        base_domain: hostnameSchema,
+        base_domain: hostnameSchema
+            .optional()
+            .transform(getEnvOrYaml("APP_BASEDOMAIN"))
+            .pipe(hostnameSchema),
         log_level: z.enum(["debug", "info", "warn", "error"]),
         save_logs: z.boolean()
     }),
     server: z.object({
-        external_port: portSchema,
-        internal_port: portSchema,
-        next_port: portSchema,
+        external_port: portSchema
+            .optional()
+            .transform(getEnvOrYaml("SERVER_EXTERNALPORT"))
+            .transform(stoi)
+            .pipe(portSchema),
+        internal_port: portSchema
+            .optional()
+            .transform(getEnvOrYaml("SERVER_INTERNALPORT"))
+            .transform(stoi)
+            .pipe(portSchema),
+        next_port: portSchema
+            .optional()
+            .transform(getEnvOrYaml("SERVER_NEXTPORT"))
+            .transform(stoi)
+            .pipe(portSchema),
         internal_hostname: z.string().transform((url) => url.toLowerCase()),
         secure_cookies: z.boolean(),
         session_cookie_name: z.string(),
         resource_session_cookie_name: z.string(),
         resource_access_token_param: z.string(),
-        cors: z.object({
-            origins: z.array(z.string()).optional(),
-            methods: z.array(z.string()).optional(),
-            allowed_headers: z.array(z.string()).optional(),
-            credentials: z.boolean().optional(),
-        }).optional()
+        cors: z
+            .object({
+                origins: z.array(z.string()).optional(),
+                methods: z.array(z.string()).optional(),
+                allowed_headers: z.array(z.string()).optional(),
+                credentials: z.boolean().optional()
+            })
+            .optional(),
+        trust_proxy: z.boolean().optional().default(true)
     }),
     traefik: z.object({
         http_entrypoint: z.string(),
@@ -53,8 +79,17 @@ const environmentSchema = z.object({
         prefer_wildcard_cert: z.boolean().optional()
     }),
     gerbil: z.object({
-        start_port: portSchema,
-        base_endpoint: z.string().transform((url) => url.toLowerCase()),
+        start_port: portSchema
+            .optional()
+            .transform(getEnvOrYaml("GERBIL_STARTPORT"))
+            .transform(stoi)
+            .pipe(portSchema),
+        base_endpoint: z
+            .string()
+            .optional()
+            .transform(getEnvOrYaml("GERBIL_BASEENDPOINT"))
+            .pipe(z.string())
+            .transform((url) => url.toLowerCase()),
         use_subdomain: z.boolean(),
         subnet_group: z.string(),
         block_size: z.number().positive().gt(0),
@@ -83,8 +118,16 @@ const environmentSchema = z.object({
         .optional(),
     users: z.object({
         server_admin: z.object({
-            email: z.string().email(),
+            email: z
+                .string()
+                .email()
+                .optional()
+                .transform(getEnvOrYaml("USERS_SERVERADMIN_EMAIL"))
+                .pipe(z.string().email()),
             password: passwordSchema
+                .optional()
+                .transform(getEnvOrYaml("USERS_SERVERADMIN_PASSWORD"))
+                .pipe(passwordSchema)
         })
     }),
     flags: z
@@ -97,11 +140,17 @@ const environmentSchema = z.object({
 });
 
 export class Config {
-    private rawConfig!: z.infer<typeof environmentSchema>;
+    private rawConfig!: z.infer<typeof configSchema>;
 
     constructor() {
         this.loadConfig();
+
+        if (process.env.GENERATE_TRAEFIK_CONFIG === "true") {
+            this.createTraefikConfig();
+        }
     }
+
+    public loadEnvironment() {}
 
     public loadConfig() {
         const loadConfig = (configPath: string) => {
@@ -166,7 +215,7 @@ export class Config {
             throw new Error("No configuration file found");
         }
 
-        const parsedConfig = environmentSchema.safeParse(environment);
+        const parsedConfig = configSchema.safeParse(environment);
 
         if (!parsedConfig.success) {
             const errors = fromError(parsedConfig.error);
@@ -213,6 +262,72 @@ export class Config {
 
     public getBaseDomain(): string {
         return this.rawConfig.app.base_domain;
+    }
+
+    private createTraefikConfig() {
+        try {
+            // check if traefik_config.yml and dynamic_config.yml exists in APP_PATH/traefik
+            const defaultTraefikConfigPath = path.join(
+                __DIRNAME,
+                "traefik_config.example.yml"
+            );
+            const defaultDynamicConfigPath = path.join(
+                __DIRNAME,
+                "dynamic_config.example.yml"
+            );
+
+            const traefikPath = path.join(APP_PATH, "traefik");
+            if (!fs.existsSync(traefikPath)) {
+                return;
+            }
+
+            // load default configs
+            let traefikConfig = fs.readFileSync(
+                defaultTraefikConfigPath,
+                "utf8"
+            );
+            let dynamicConfig = fs.readFileSync(
+                defaultDynamicConfigPath,
+                "utf8"
+            );
+
+            traefikConfig = traefikConfig
+                .split("{{.LetsEncryptEmail}}")
+                .join(this.rawConfig.users.server_admin.email);
+            traefikConfig = traefikConfig
+                .split("{{.INTERNAL_PORT}}")
+                .join(this.rawConfig.server.internal_port.toString());
+
+            dynamicConfig = dynamicConfig
+                .split("{{.DashboardDomain}}")
+                .join(new URL(this.rawConfig.app.dashboard_url).hostname);
+            dynamicConfig = dynamicConfig
+                .split("{{.NEXT_PORT}}")
+                .join(this.rawConfig.server.next_port.toString());
+            dynamicConfig = dynamicConfig
+                .split("{{.EXTERNAL_PORT}}")
+                .join(this.rawConfig.server.external_port.toString());
+
+            // write thiese to the traefik directory
+            const traefikConfigPath = path.join(
+                traefikPath,
+                "traefik_config.yml"
+            );
+            const dynamicConfigPath = path.join(
+                traefikPath,
+                "dynamic_config.yml"
+            );
+
+            fs.writeFileSync(traefikConfigPath, traefikConfig, "utf8");
+            fs.writeFileSync(dynamicConfigPath, dynamicConfig, "utf8");
+
+            console.log("Traefik configuration files created");
+        } catch (e) {
+            console.log(
+                "Failed to generate the Traefik configuration files. Please create them manually."
+            );
+            console.error(e);
+        }
     }
 }
 

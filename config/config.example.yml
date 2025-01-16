@@ -38,6 +38,6 @@ users:
         password: Password123!
 
 flags:
-    require_email_verification: true
+    require_email_verification: false
     disable_signup_without_invite: true
     disable_user_create_org: true

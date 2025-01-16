@@ -20,7 +20,9 @@ const externalPort = config.getRawConfig().server.external_port;
 export function createApiServer() {
     const apiServer = express();
 
-    apiServer.set("trust proxy", 1);
+    if (config.getRawConfig().server.trust_proxy) {
+        apiServer.set("trust proxy", 1);
+    }
 
     const corsConfig = config.getRawConfig().server.cors;
 

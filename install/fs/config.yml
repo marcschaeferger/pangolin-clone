@@ -13,6 +13,11 @@ server:
     session_cookie_name: p_session
     resource_session_cookie_name: p_resource_session
     resource_access_token_param: p_token
+    cors:
+        origins: ["https://{{.DashboardDomain}}"]
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
+        headers: ["X-CSRF-Token", "Content-Type"]
+        credentials: false
 
 traefik:
     cert_resolver: letsencrypt

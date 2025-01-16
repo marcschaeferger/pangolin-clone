@@ -235,10 +235,10 @@ PersistentKeepalive = 5`
             : "";
 
     // am I at http or https?
-    let proto = "http:";
-    if (typeof window !== "undefined") {
-        proto = window.location.protocol;
-    }
+    let proto = "https:";
+    // if (typeof window !== "undefined") {
+    //     proto = window.location.protocol;
+    // }
 
     const newtConfig = `newt --id ${siteDefaults?.newtId} --secret ${siteDefaults?.newtSecret} --endpoint ${proto}//${siteDefaults?.endpoint}`;
 
