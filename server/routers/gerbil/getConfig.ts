@@ -50,7 +50,9 @@ export async function getConfig(req: Request, res: Response, next: NextFunction)
         let exitNode;
         if (exitNodeQuery.length === 0) {
             const address = await getNextAvailableSubnet();
-            const listenPort = await getNextAvailablePort();
+            // TODO: eventually we will want to get the next available port so that we can multiple exit nodes
+            // const listenPort = await getNextAvailablePort();
+            const listenPort = config.getRawConfig().gerbil.start_port;
             let subEndpoint = "";
             if (config.getRawConfig().gerbil.use_subdomain) {
                 subEndpoint = await getUniqueExitNodeEndpointName();
