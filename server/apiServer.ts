@@ -20,23 +20,32 @@ const externalPort = config.getRawConfig().server.external_port;
 export function createApiServer() {
     const apiServer = express();
 
-    // Middleware setup
-    apiServer.set("trust proxy", 1);
-    if (dev) {
-        apiServer.use(
-            cors({
-                origin: `http://localhost:${config.getRawConfig().server.next_port}`,
-                credentials: true
-            })
-        );
-    } else {
-        const corsOptions = {
-            origin: config.getRawConfig().app.dashboard_url,
-            methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-            allowedHeaders: ["Content-Type", "X-CSRF-Token"]
-        };
+    if (config.getRawConfig().server.trust_proxy) {
+        apiServer.set("trust proxy", 1);
+    }
 
-        apiServer.use(cors(corsOptions));
+    const corsConfig = config.getRawConfig().server.cors;
+
+    const options = {
+        ...(corsConfig?.origins
+            ? { origin: corsConfig.origins }
+            : {
+                  origin: (origin: any, callback: any) => {
+                      callback(null, true);
+                  }
+              }),
+        ...(corsConfig?.methods && { methods: corsConfig.methods }),
+        ...(corsConfig?.allowed_headers && {
+            allowedHeaders: corsConfig.allowed_headers
+        }),
+        credentials: !(corsConfig?.credentials === false)
+    };
+
+    logger.debug("Using CORS options", options);
+
+    apiServer.use(cors(options));
+
+    if (!dev) {
         apiServer.use(helmet());
         apiServer.use(csrfProtectionMiddleware);
     }
@@ -47,7 +56,8 @@ export function createApiServer() {
     if (!dev) {
         apiServer.use(
             rateLimitMiddleware({
-                windowMin: config.getRawConfig().rate_limits.global.window_minutes,
+                windowMin:
+                    config.getRawConfig().rate_limits.global.window_minutes,
                 max: config.getRawConfig().rate_limits.global.max_requests,
                 type: "IP_AND_PATH"
             })
