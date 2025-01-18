@@ -117,7 +117,7 @@ export async function authWithPincode(
             );
         }
 
-        const validPincode = verifyPassword(
+        const validPincode = await verifyPassword(
             pincode,
             definedPincode.pincodeHash
         );
