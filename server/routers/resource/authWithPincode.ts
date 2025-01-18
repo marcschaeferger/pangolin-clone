@@ -109,10 +109,7 @@ export async function authWithPincode(
             return next(
                 createHttpError(
                     HttpCode.UNAUTHORIZED,
-                    createHttpError(
-                        HttpCode.BAD_REQUEST,
-                        "Resource has no pincode protection"
-                    )
+                    "Resource has no pincode protection"
                 )
             );
         }
