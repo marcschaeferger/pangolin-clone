@@ -9,6 +9,6 @@ release:
 	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o bin/installer_linux_arm64
 
 clean:
-	rm bin/installer
-	rm bin/installer_linux_amd64
-	rm bin/installer_linux_arm64
+	rm -f bin/installer
+	rm -f bin/installer_linux_amd64
+	rm -f bin/installer_linux_arm64
