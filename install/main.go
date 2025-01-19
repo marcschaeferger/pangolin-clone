@@ -19,7 +19,7 @@ import (
 
 func loadVersions(config *Config) {
 	config.PangolinVersion = "1.0.0-beta.7"
-	config.GerbilVersion = "1.0.0-beta.2"
+	config.GerbilVersion = "1.0.0-beta.3"
 }
 
 //go:embed fs/*
