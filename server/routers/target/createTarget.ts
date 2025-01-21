@@ -7,10 +7,11 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { addPeer } from "../gerbil/peers";
-import { eq, and } from "drizzle-orm";
 import { isIpInCidr } from "@server/lib/ip";
 import { fromError } from "zod-validation-error";
 import { addTargets } from "../newt/targets";
+import { eq } from "drizzle-orm";
+import { pickPort } from "./ports";
 
 // Regular expressions for validation
 const DOMAIN_REGEX =
@@ -147,37 +148,7 @@ export async function createTarget(
                 );
             }
 
-            // Fetch resources for this site
-            const resourcesRes = await db.query.resources.findMany({
-                where: eq(resources.siteId, site.siteId)
-            });
-
-            // TODO: is this all inefficient?
-            // Fetch targets for all resources of this site
-            let targetIps: string[] = [];
-            let targetInternalPorts: number[] = [];
-            await Promise.all(
-                resourcesRes.map(async (resource) => {
-                    const targetsRes = await db.query.targets.findMany({
-                        where: eq(targets.resourceId, resource.resourceId)
-                    });
-                    targetsRes.forEach((target) => {
-                        targetIps.push(`${target.ip}/32`);
-                        if (target.internalPort) {
-                            targetInternalPorts.push(target.internalPort);
-                        }
-                    });
-                })
-            );
-
-            let internalPort!: number;
-            // pick a port
-            for (let i = 40000; i < 65535; i++) {
-                if (!targetInternalPorts.includes(i)) {
-                    internalPort = i;
-                    break;
-                }
-            }
+            const { internalPort, targetIps } = await pickPort(site.siteId!);
 
             if (!internalPort) {
                 return next(
