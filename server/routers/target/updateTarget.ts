@@ -10,6 +10,7 @@ import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { addPeer } from "../gerbil/peers";
 import { addTargets } from "../newt/targets";
+import { pickPort } from "./ports";
 
 // Regular expressions for validation
 const DOMAIN_REGEX =
@@ -84,15 +85,14 @@ export async function updateTarget(
         }
 
         const { targetId } = parsedParams.data;
-        const updateData = parsedBody.data;
 
-        const [updatedTarget] = await db
-            .update(targets)
-            .set(updateData)
+        const [target] = await db
+            .select()
+            .from(targets)
             .where(eq(targets.targetId, targetId))
-            .returning();
+            .limit(1);
 
-        if (!updatedTarget) {
+        if (!target) {
             return next(
                 createHttpError(
                     HttpCode.NOT_FOUND,
@@ -107,13 +107,13 @@ export async function updateTarget(
                 siteId: resources.siteId
             })
             .from(resources)
-            .where(eq(resources.resourceId, updatedTarget.resourceId!));
+            .where(eq(resources.resourceId, target.resourceId!));
 
         if (!resource) {
             return next(
                 createHttpError(
                     HttpCode.NOT_FOUND,
-                    `Resource with ID ${updatedTarget.resourceId} not found`
+                    `Resource with ID ${target.resourceId} not found`
                 )
             );
         }
@@ -132,24 +132,29 @@ export async function updateTarget(
                 )
             );
         }
+
+        const { internalPort, targetIps } = await pickPort(site.siteId!);
+
+        if (!internalPort) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    `No available internal port`
+                )
+            );
+        }
+
+        const [updatedTarget] = await db
+            .update(targets)
+            .set({
+                ...parsedBody.data,
+                internalPort
+            })
+            .where(eq(targets.targetId, targetId))
+            .returning();
+
         if (site.pubKey) {
             if (site.type == "wireguard") {
-                // TODO: is this all inefficient?
-                // Fetch resources for this site
-                const resourcesRes = await db.query.resources.findMany({
-                    where: eq(resources.siteId, site.siteId)
-                });
-
-                // Fetch targets for all resources of this site
-                const targetIps = await Promise.all(
-                    resourcesRes.map(async (resource) => {
-                        const targetsRes = await db.query.targets.findMany({
-                            where: eq(targets.resourceId, resource.resourceId)
-                        });
-                        return targetsRes.map((target) => `${target.ip}/32`);
-                    })
-                );
-
                 await addPeer(site.exitNodeId!, {
                     publicKey: site.pubKey,
                     allowedIps: targetIps.flat()
