@@ -19,7 +19,10 @@ import { passwordSchema } from "@server/auth/passwordSchema";
 
 export const resetPasswordBody = z
     .object({
-        email: z.string().email(),
+        email: z
+            .string()
+            .email()
+            .transform((v) => v.toLowerCase()),
         token: z.string(), // reset secret code
         newPassword: passwordSchema,
         code: z.string().optional() // 2fa code

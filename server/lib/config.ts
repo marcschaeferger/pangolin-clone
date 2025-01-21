@@ -37,7 +37,8 @@ const configSchema = z.object({
         base_domain: hostnameSchema
             .optional()
             .transform(getEnvOrYaml("APP_BASEDOMAIN"))
-            .pipe(hostnameSchema),
+            .pipe(hostnameSchema)
+            .transform((url) => url.toLowerCase()),
         log_level: z.enum(["debug", "info", "warn", "error"]),
         save_logs: z.boolean()
     }),
@@ -123,7 +124,8 @@ const configSchema = z.object({
                 .email()
                 .optional()
                 .transform(getEnvOrYaml("USERS_SERVERADMIN_EMAIL"))
-                .pipe(z.string().email()),
+                .pipe(z.string().email())
+                .transform((v) => v.toLowerCase()),
             password: passwordSchema
                 .optional()
                 .transform(getEnvOrYaml("USERS_SERVERADMIN_PASSWORD"))

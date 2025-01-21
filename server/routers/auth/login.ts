@@ -20,7 +20,10 @@ import { verifySession } from "@server/auth/sessions/verifySession";
 
 export const loginBodySchema = z
     .object({
-        email: z.string().email(),
+        email: z
+            .string()
+            .email()
+            .transform((v) => v.toLowerCase()),
         password: z.string(),
         code: z.string().optional()
     })

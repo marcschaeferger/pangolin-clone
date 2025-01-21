@@ -20,7 +20,10 @@ import { hashPassword } from "@server/auth/password";
 
 export const requestPasswordResetBody = z
     .object({
-        email: z.string().email()
+        email: z
+            .string()
+            .email()
+            .transform((v) => v.toLowerCase())
     })
     .strict();
 
@@ -63,10 +66,7 @@ export async function requestPasswordReset(
             );
         }
 
-        const token = generateRandomString(
-            8,
-            alphabet("0-9", "A-Z", "a-z")
-        );
+        const token = generateRandomString(8, alphabet("0-9", "A-Z", "a-z"));
         await db.transaction(async (trx) => {
             await trx
                 .delete(passwordResetTokens)

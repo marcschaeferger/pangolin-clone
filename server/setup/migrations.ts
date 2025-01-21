@@ -11,7 +11,7 @@ import m2 from "./scripts/1.0.0-beta2";
 import m3 from "./scripts/1.0.0-beta3";
 import m4 from "./scripts/1.0.0-beta5";
 import m5 from "./scripts/1.0.0-beta6";
-import { existsSync, mkdirSync } from "fs";
+import m6 from "./scripts/1.0.0-beta9";
 
 // THIS CANNOT IMPORT ANYTHING FROM THE SERVER
 // EXCEPT FOR THE DATABASE AND THE SCHEMA
@@ -22,7 +22,8 @@ const migrations = [
     { version: "1.0.0-beta.2", run: m2 },
     { version: "1.0.0-beta.3", run: m3 },
     { version: "1.0.0-beta.5", run: m4 },
-    { version: "1.0.0-beta.6", run: m5 }
+    { version: "1.0.0-beta.6", run: m5 },
+    { version: "1.0.0-beta.9", run: m6 }
     // Add new migrations here as they are created
 ] as const;
 

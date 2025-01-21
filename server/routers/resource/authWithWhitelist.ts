@@ -24,7 +24,10 @@ import logger from "@server/logger";
 
 const authWithWhitelistBodySchema = z
     .object({
-        email: z.string().email(),
+        email: z
+            .string()
+            .email()
+            .transform((v) => v.toLowerCase()),
         otp: z.string().optional()
     })
     .strict();

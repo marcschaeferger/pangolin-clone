@@ -23,7 +23,10 @@ const inviteUserParamsSchema = z
 
 const inviteUserBodySchema = z
     .object({
-        email: z.string().email(),
+        email: z
+            .string()
+            .email()
+            .transform((v) => v.toLowerCase()),
         roleId: z.number(),
         validHours: z.number().gt(0).lte(168),
         sendEmail: z.boolean().optional()

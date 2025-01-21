@@ -11,7 +11,10 @@ import { and, eq } from "drizzle-orm";
 
 const setResourceWhitelistBodySchema = z
     .object({
-        emails: z.array(z.string().email()).max(50)
+        emails: z
+            .array(z.string().email())
+            .max(50)
+            .transform((v) => v.map((e) => e.toLowerCase()))
     })
     .strict();
 

@@ -23,7 +23,7 @@ import { checkValidInvite } from "@server/auth/checkValidInvite";
 import { passwordSchema } from "@server/auth/passwordSchema";
 
 export const signupBodySchema = z.object({
-    email: z.string().email(),
+    email: z.string().email().transform((v) => v.toLowerCase()),
     password: passwordSchema,
     inviteToken: z.string().optional(),
     inviteId: z.string().optional()
