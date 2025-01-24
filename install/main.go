@@ -271,6 +271,11 @@ func createConfigFiles(config Config) error {
 		// Get the relative path by removing the "fs/" prefix
 		relPath := strings.TrimPrefix(path, "fs/")
 
+        // skip .DS_Store
+        if strings.Contains(relPath, ".DS_Store") {
+            return nil
+        }
+
 		// Create the full output path under "config/"
 		outPath := filepath.Join("config", relPath)
 
@@ -374,7 +379,7 @@ func installDocker() error {
 	switch {
 	case strings.Contains(osRelease, "ID=ubuntu"):
 		installCmd = exec.Command("bash", "-c", fmt.Sprintf(`
-			apt-get update && 
+			apt-get update &&
 			apt-get install -y apt-transport-https ca-certificates curl software-properties-common &&
 			curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg &&
 			echo "deb [arch=%s signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list &&
@@ -383,7 +388,7 @@ func installDocker() error {
 		`, dockerArch))
 	case strings.Contains(osRelease, "ID=debian"):
 		installCmd = exec.Command("bash", "-c", fmt.Sprintf(`
-			apt-get update && 
+			apt-get update &&
 			apt-get install -y apt-transport-https ca-certificates curl software-properties-common &&
 			curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg &&
 			echo "deb [arch=%s signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list &&
