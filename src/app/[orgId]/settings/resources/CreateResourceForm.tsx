@@ -257,7 +257,7 @@ export default function CreateResourceForm({
                                                                     (site) => (
                                                                         <CommandItem
                                                                             value={
-                                                                                site.name
+                                                                                site.niceId
                                                                             }
                                                                             key={
                                                                                 site.siteId
