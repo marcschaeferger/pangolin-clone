@@ -321,7 +321,7 @@ export default function ReverseProxyTargets(props: {
         });
 
         setSslEnabled(val);
-        updateResource({ ssl: sslEnabled });
+        updateResource({ ssl: val });
 
         toast({
             title: "SSL Configuration",
