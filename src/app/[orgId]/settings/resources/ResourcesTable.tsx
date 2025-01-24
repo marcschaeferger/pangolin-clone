@@ -25,7 +25,7 @@ import CreateResourceForm from "./CreateResourceForm";
 import { useState } from "react";
 import ConfirmDeleteDialog from "@app/components/ConfirmDeleteDialog";
 import { set } from "zod";
-import { formatAxiosError } from "@app/lib/api";;
+import { formatAxiosError } from "@app/lib/api";
 import { useToast } from "@app/hooks/useToast";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
@@ -91,14 +91,14 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                                <Link
-                                    className="block w-full"
-                                    href={`/${resourceRow.orgId}/settings/resources/${resourceRow.id}`}
-                                >
+                            <Link
+                                className="block w-full"
+                                href={`/${resourceRow.orgId}/settings/resources/${resourceRow.id}`}
+                            >
+                                <DropdownMenuItem>
                                     View settings
-                                </Link>
-                            </DropdownMenuItem>
+                                </DropdownMenuItem>
+                            </Link>
                             <DropdownMenuItem
                                 onClick={() => {
                                     setSelectedResource(resourceRow);
@@ -146,14 +146,14 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
             cell: ({ row }) => {
                 const resourceRow = row.original;
                 return (
-                    <Button variant="outline">
-                        <Link
-                            href={`/${resourceRow.orgId}/settings/sites/${resourceRow.siteId}`}
-                        >
+                    <Link
+                        href={`/${resourceRow.orgId}/settings/sites/${resourceRow.siteId}`}
+                    >
+                        <Button variant="outline">
                             {resourceRow.site}
-                        </Link>
-                        <ArrowUpRight className="ml-2 h-4 w-4" />
-                    </Button>
+                            <ArrowUpRight className="ml-2 h-4 w-4" />
+                        </Button>
+                    </Link>
                 );
             }
         },
