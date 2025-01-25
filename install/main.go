@@ -17,9 +17,10 @@ import (
 	"golang.org/x/term"
 )
 
+// DO NOT EDIT THIS FUNCTION; IT MATCHED BY REGEX IN CICD
 func loadVersions(config *Config) {
-	config.PangolinVersion = "1.0.0-beta.8"
-	config.GerbilVersion = "1.0.0-beta.3"
+	config.PangolinVersion = "replaceme"
+	config.GerbilVersion = "replaceme"
 }
 
 //go:embed fs/*
