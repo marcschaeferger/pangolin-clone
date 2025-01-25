@@ -62,8 +62,7 @@ export async function traefikConfigProvider(
                 },
                 [redirectMiddlewareName]: {
                     redirectScheme: {
-                        scheme: "https",
-                        permanent: true,
+                        scheme: "https"
                     },
                 },
             },
