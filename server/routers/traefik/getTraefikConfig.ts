@@ -39,7 +39,7 @@ export async function traefikConfigProvider(
         }
 
         const badgerMiddlewareName = "badger";
-        const redirectMiddlewareName = "redirect-to-https";
+        const redirectHttpsMiddlewareName = "redirect-to-https";
 
         const http: any = {
             routers: {},
@@ -52,19 +52,18 @@ export async function traefikConfigProvider(
                                 "/api/v1",
                                 `http://${config.getRawConfig().server.internal_hostname}:${config.getRawConfig().server.internal_port}`,
                             ).href,
-                            resourceSessionCookieName:
-                                config.getRawConfig().server.resource_session_cookie_name,
                             userSessionCookieName:
                                 config.getRawConfig().server.session_cookie_name,
                             accessTokenQueryParam: config.getRawConfig().server.resource_access_token_param,
+                            resourceSessionRequestParam: config.getRawConfig().server.resource_session_request_param
                         },
                     },
                 },
-                [redirectMiddlewareName]: {
+                [redirectHttpsMiddlewareName]: {
                     redirectScheme: {
                         scheme: "https"
                     },
-                },
+                }
             },
         };
         for (const item of all) {
@@ -120,10 +119,9 @@ export async function traefikConfigProvider(
             };
 
             if (resource.ssl) {
-                // this is a redirect router; all it does is redirect to the https version if tls is enabled
                 http.routers![routerName + "-redirect"] = {
                     entryPoints: [config.getRawConfig().traefik.http_entrypoint],
-                    middlewares: [redirectMiddlewareName],
+                    middlewares: [redirectHttpsMiddlewareName],
                     service: serviceName,
                     rule: `Host(\`${fullDomain}\`)`,
                 };
