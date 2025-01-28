@@ -42,7 +42,8 @@ const verifyResourceSessionSchema = z.object({
     path: z.string(),
     method: z.string(),
     accessToken: z.string().optional(),
-    tls: z.boolean()
+    tls: z.boolean(),
+    requestIp: z.string().optional()
 });
 
 export type VerifyResourceSessionSchema = z.infer<
@@ -77,8 +78,11 @@ export async function verifyResourceSession(
             sessions,
             host,
             originalRequestURL,
+            requestIp,
             accessToken: token
         } = parsedBody.data;
+
+        const clientIp = requestIp?.split(":")[0];
 
         const resourceCacheKey = `resource:${host}`;
         let resourceData:
@@ -160,6 +164,14 @@ export async function verifyResourceSession(
                 logger.debug("Access token invalid: " + error);
             }
 
+            if (!valid) {
+                if (config.getRawConfig().app.log_failed_attempts) {
+                    logger.info(
+                        `Resource access token is invalid. Resource ID: ${resource.resourceId}. IP: ${clientIp}.`
+                    );
+                }
+            }
+
             if (valid && tokenItem) {
                 validAccessToken = tokenItem;
 
@@ -174,6 +186,11 @@ export async function verifyResourceSession(
         }
 
         if (!sessions) {
+            if (config.getRawConfig().app.log_failed_attempts) {
+                logger.info(
+                    `Missing resource sessions. Resource ID: ${resource.resourceId}. IP: ${clientIp}.`
+                );
+            }
             return notAllowed(res);
         }
 
@@ -200,6 +217,11 @@ export async function verifyResourceSession(
                 logger.debug(
                     "Resource not allowed because session is a temporary request token"
                 );
+                if (config.getRawConfig().app.log_failed_attempts) {
+                    logger.info(
+                        `Resource session is an exchange token. Resource ID: ${resource.resourceId}. IP: ${clientIp}.`
+                    );
+                }
                 return notAllowed(res);
             }
 
@@ -271,6 +293,12 @@ export async function verifyResourceSession(
         }
 
         logger.debug("No more auth to check, resource not allowed");
+
+        if (config.getRawConfig().app.log_failed_attempts) {
+            logger.info(
+                `Resource access not allowed. Resource ID: ${resource.resourceId}. IP: ${clientIp}.`
+            );
+        }
         return notAllowed(res, redirectUrl);
     } catch (e) {
         console.error(e);

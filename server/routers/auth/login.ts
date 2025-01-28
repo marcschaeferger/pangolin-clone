@@ -71,6 +71,11 @@ export async function login(
             .from(users)
             .where(eq(users.email, email));
         if (!existingUserRes || !existingUserRes.length) {
+            if (config.getRawConfig().app.log_failed_attempts) {
+                logger.info(
+                    `Username or password incorrect. Email: ${email}. IP: ${req.ip}.`
+                );
+            }
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
@@ -86,6 +91,11 @@ export async function login(
             existingUser.passwordHash
         );
         if (!validPassword) {
+            if (config.getRawConfig().app.log_failed_attempts) {
+                logger.info(
+                    `Username or password incorrect. Email: ${email}. IP: ${req.ip}.`
+                );
+            }
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
@@ -112,6 +122,11 @@ export async function login(
             );
 
             if (!validOTP) {
+                if (config.getRawConfig().app.log_failed_attempts) {
+                    logger.info(
+                        `Two-factor code incorrect. Email: ${email}. IP: ${req.ip}.`
+                    );
+                }
                 return next(
                     createHttpError(
                         HttpCode.BAD_REQUEST,

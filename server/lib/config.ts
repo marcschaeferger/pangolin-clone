@@ -40,7 +40,8 @@ const configSchema = z.object({
             .pipe(hostnameSchema)
             .transform((url) => url.toLowerCase()),
         log_level: z.enum(["debug", "info", "warn", "error"]),
-        save_logs: z.boolean()
+        save_logs: z.boolean(),
+        log_failed_attempts: z.boolean().optional(),
     }),
     server: z.object({
         external_port: portSchema

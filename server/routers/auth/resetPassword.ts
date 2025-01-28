@@ -60,6 +60,11 @@ export async function resetPassword(
             .where(eq(passwordResetTokens.email, email));
 
         if (!resetRequest || !resetRequest.length) {
+            if (config.getRawConfig().app.log_failed_attempts) {
+                logger.info(
+                    `Password reset code is incorrect. Email: ${email}. IP: ${req.ip}.`
+                );
+            }
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
@@ -109,6 +114,11 @@ export async function resetPassword(
             );
 
             if (!validOTP) {
+                if (config.getRawConfig().app.log_failed_attempts) {
+                    logger.info(
+                        `Two-factor authentication code is incorrect. Email: ${email}. IP: ${req.ip}.`
+                    );
+                }
                 return next(
                     createHttpError(
                         HttpCode.BAD_REQUEST,
@@ -124,6 +134,11 @@ export async function resetPassword(
         );
 
         if (!isTokenValid) {
+            if (config.getRawConfig().app.log_failed_attempts) {
+                logger.info(
+                    `Password reset code is incorrect. Email: ${email}. IP: ${req.ip}.`
+                );
+            }
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,

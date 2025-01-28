@@ -1,10 +1,6 @@
 import { generateSessionToken } from "@server/auth/sessions/app";
 import db from "@server/db";
-import {
-    orgs,
-    resourcePincode,
-    resources,
-} from "@server/db/schema";
+import { orgs, resourcePincode, resources } from "@server/db/schema";
 import HttpCode from "@server/types/HttpCode";
 import response from "@server/lib/response";
 import { eq } from "drizzle-orm";
@@ -12,11 +8,10 @@ import { NextFunction, Request, Response } from "express";
 import createHttpError from "http-errors";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
-import {
-    createResourceSession,
-} from "@server/auth/sessions/resource";
+import { createResourceSession } from "@server/auth/sessions/resource";
 import logger from "@server/logger";
 import { verifyPassword } from "@server/auth/password";
+import config from "@server/lib/config";
 
 export const authWithPincodeBodySchema = z
     .object({
@@ -112,6 +107,11 @@ export async function authWithPincode(
             definedPincode.pincodeHash
         );
         if (!validPincode) {
+            if (config.getRawConfig().app.log_failed_attempts) {
+                logger.info(
+                    `Resource pin code incorrect. Resource ID: ${resource.resourceId}. IP: ${req.ip}.`
+                );
+            }
             return next(
                 createHttpError(HttpCode.UNAUTHORIZED, "Incorrect PIN")
             );

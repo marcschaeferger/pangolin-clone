@@ -9,11 +9,10 @@ import { NextFunction, Request, Response } from "express";
 import createHttpError from "http-errors";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
-import {
-    createResourceSession,
-} from "@server/auth/sessions/resource";
+import { createResourceSession } from "@server/auth/sessions/resource";
 import logger from "@server/logger";
 import { verifyPassword } from "@server/auth/password";
+import config from "@server/lib/config";
 
 export const authWithPasswordBodySchema = z
     .object({
@@ -82,7 +81,7 @@ export async function authWithPassword(
 
         if (!org) {
             return next(
-                createHttpError(HttpCode.BAD_REQUEST, "Resource does not exist")
+                createHttpError(HttpCode.BAD_REQUEST, "Org does not exist")
             );
         }
 
@@ -109,6 +108,11 @@ export async function authWithPassword(
             definedPassword.passwordHash
         );
         if (!validPassword) {
+            if (config.getRawConfig().app.log_failed_attempts) {
+                logger.info(
+                    `Resource password incorrect. Resource ID: ${resource.resourceId}. IP: ${req.ip}.`
+                );
+            }
             return next(
                 createHttpError(HttpCode.UNAUTHORIZED, "Incorrect password")
             );

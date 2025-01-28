@@ -8,11 +8,10 @@ import { NextFunction, Request, Response } from "express";
 import createHttpError from "http-errors";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
-import {
-    createResourceSession,
-} from "@server/auth/sessions/resource";
+import { createResourceSession } from "@server/auth/sessions/resource";
 import logger from "@server/logger";
 import { verifyResourceAccessToken } from "@server/auth/verifyResourceAccessToken";
+import config from "@server/lib/config";
 
 const authWithAccessTokenBodySchema = z
     .object({
@@ -84,6 +83,11 @@ export async function authWithAccessToken(
         });
 
         if (!valid) {
+            if (config.getRawConfig().app.log_failed_attempts) {
+                logger.info(
+                    `Resource access token invalid. Resource ID: ${resource.resourceId}. IP: ${req.ip}.`
+                );
+            }
             return next(
                 createHttpError(
                     HttpCode.UNAUTHORIZED,

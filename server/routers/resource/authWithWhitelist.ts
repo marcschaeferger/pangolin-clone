@@ -16,6 +16,7 @@ import { fromError } from "zod-validation-error";
 import { createResourceSession } from "@server/auth/sessions/resource";
 import { isValidOtp, sendResourceOtpEmail } from "@server/auth/resourceOtp";
 import logger from "@server/logger";
+import config from "@server/lib/config";
 
 const authWithWhitelistBodySchema = z
     .object({
@@ -96,7 +97,7 @@ export async function authWithWhitelist(
             // if email is not found, check for wildcard email
             const wildcard = "*@" + email.split("@")[1];
 
-            logger.debug("Checking for wildcard email: " + wildcard)
+            logger.debug("Checking for wildcard email: " + wildcard);
 
             const [result] = await db
                 .select()
@@ -120,6 +121,11 @@ export async function authWithWhitelist(
 
             // if wildcard is still not found, return unauthorized
             if (!whitelistedEmail) {
+                if (config.getRawConfig().app.log_failed_attempts) {
+                    logger.info(
+                        `Email is not whitelisted. Resource ID: ${resource?.resourceId}. Email: ${email}. IP: ${req.ip}.`
+                    );
+                }
                 return next(
                     createHttpError(
                         HttpCode.UNAUTHORIZED,
@@ -151,6 +157,11 @@ export async function authWithWhitelist(
                 otp
             );
             if (!isValidCode) {
+                if (config.getRawConfig().app.log_failed_attempts) {
+                    logger.info(
+                        `Resource email otp incorrect. Resource ID: ${resource.resourceId}. Email: ${email}. IP: ${req.ip}.`
+                    );
+                }
                 return next(
                     createHttpError(HttpCode.UNAUTHORIZED, "Incorrect OTP")
                 );

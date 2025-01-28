@@ -8,6 +8,7 @@ import {
     invalidateSession
 } from "@server/auth/sessions/app";
 import { verifySession } from "@server/auth/sessions/verifySession";
+import config from "@server/lib/config";
 
 export async function logout(
     req: Request,
@@ -16,6 +17,11 @@ export async function logout(
 ): Promise<any> {
     const { user, session } = await verifySession(req);
     if (!user || !session) {
+        if (config.getRawConfig().app.log_failed_attempts) {
+            logger.info(
+                `Log out failed because missing or invalid session. IP: ${req.ip}.`
+            );
+        }
         return next(
             createHttpError(
                 HttpCode.BAD_REQUEST,

@@ -20,7 +20,8 @@ import { response } from "@server/lib";
 
 const exchangeSessionBodySchema = z.object({
     requestToken: z.string(),
-    host: z.string()
+    host: z.string(),
+    requestIp: z.string().optional()
 });
 
 export type ExchangeSessionBodySchema = z.infer<
@@ -51,7 +52,9 @@ export async function exchangeSession(
     }
 
     try {
-        const { requestToken, host } = parsedBody.data;
+        const { requestToken, host, requestIp } = parsedBody.data;
+
+        const clientIp = requestIp?.split(":")[0];
 
         const [resource] = await db
             .select()
@@ -75,12 +78,22 @@ export async function exchangeSession(
             );
 
         if (!requestSession) {
+            if (config.getRawConfig().app.log_failed_attempts) {
+                logger.info(
+                    `Exchange token is invalid. Resource ID: ${resource.resourceId}. IP: ${clientIp}.`
+                );
+            }
             return next(
                 createHttpError(HttpCode.UNAUTHORIZED, "Invalid request token")
             );
         }
 
         if (!requestSession.isRequestToken) {
+            if (config.getRawConfig().app.log_failed_attempts) {
+                logger.info(
+                    `Exchange token is invalid. Resource ID: ${resource.resourceId}. IP: ${clientIp}.`
+                );
+            }
             return next(
                 createHttpError(HttpCode.UNAUTHORIZED, "Invalid request token")
             );
