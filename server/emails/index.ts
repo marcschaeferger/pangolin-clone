@@ -6,7 +6,7 @@ import logger from "@server/logger";
 
 function createEmailClient() {
     const emailConfig = config.getRawConfig().email;
-    if (!emailConfig || !emailConfig.no_reply) {
+    if (!emailConfig) {
         logger.warn(
             "Email SMTP configuration is missing. Emails will not be sent."
         );

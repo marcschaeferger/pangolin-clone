@@ -123,7 +123,7 @@ export async function authWithWhitelist(
             if (!whitelistedEmail) {
                 if (config.getRawConfig().app.log_failed_attempts) {
                     logger.info(
-                        `Email is not whitelisted. Resource ID: ${resource?.resourceId}. Email: ${email}. IP: ${req.ip}.`
+                        `Email is not whitelisted. Email: ${email}. IP: ${req.ip}.`
                     );
                 }
                 return next(
