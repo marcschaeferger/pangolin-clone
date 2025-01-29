@@ -41,7 +41,7 @@ const configSchema = z.object({
             .transform((url) => url.toLowerCase()),
         log_level: z.enum(["debug", "info", "warn", "error"]),
         save_logs: z.boolean(),
-        log_failed_attempts: z.boolean().optional(),
+        log_failed_attempts: z.boolean().optional()
     }),
     server: z.object({
         external_port: portSchema
@@ -128,7 +128,7 @@ const configSchema = z.object({
             smtp_user: z.string().optional(),
             smtp_pass: z.string().optional(),
             smtp_secure: z.boolean().optional(),
-            no_reply: z.string().email()
+            no_reply: z.string().email().optional()
         })
         .optional(),
     users: z.object({
@@ -278,6 +278,12 @@ export class Config {
 
     public getBaseDomain(): string {
         return this.rawConfig.app.base_domain;
+    }
+
+    public getNoReplyEmail(): string | undefined {
+        return (
+            this.rawConfig.email?.no_reply || this.rawConfig.email?.smtp_user
+        );
     }
 
     private createTraefikConfig() {

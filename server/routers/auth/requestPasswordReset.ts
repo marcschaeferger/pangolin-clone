@@ -95,7 +95,7 @@ export async function requestPasswordReset(
                 link: url
             }),
             {
-                from: config.getRawConfig().email?.no_reply,
+                from: config.getNoReplyEmail(),
                 to: email,
                 subject: "Reset your password"
             }

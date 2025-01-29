@@ -168,7 +168,7 @@ export async function inviteUser(
                 }),
                 {
                     to: email,
-                    from: config.getRawConfig().email?.no_reply,
+                    from: config.getNoReplyEmail(),
                     subject: "You're invited to join a Fossorial organization"
                 }
             );

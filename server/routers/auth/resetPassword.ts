@@ -163,7 +163,7 @@ export async function resetPassword(
         });
 
         await sendEmail(ConfirmPasswordReset({ email }), {
-            from: config.getRawConfig().email?.no_reply,
+            from: config.getNoReplyEmail(),
             to: email,
             subject: "Password Reset Confirmation"
         });
