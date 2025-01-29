@@ -59,38 +59,39 @@ import {
     SelectTrigger,
     SelectValue
 } from "@app/components/ui/select";
+import { subdomainSchema } from "@server/schemas/subdomainSchema";
 
 const createResourceFormSchema = z
     .object({
-        subdomain: z
-            .union([
-                z
-                    .string()
-                    .regex(
-                        /^(?!:\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9-_]+$/,
-                        "Invalid subdomain format"
-                    )
-                    .min(1, "Subdomain must be at least 1 character long")
-                    .transform((val) => val.toLowerCase()),
-                z.string().optional()
-            ])
-            .optional(),
+        subdomain: z.string().optional(),
         name: z.string().min(1).max(255),
         siteId: z.number(),
         http: z.boolean(),
         protocol: z.string(),
-        proxyPort: z.number().int().min(1).max(65535).optional()
+        proxyPort: z.number().optional(),
     })
     .refine(
         (data) => {
-            if (data.http === true) {
-                return true;
+            if (!data.http) {
+                return z.number().int().min(1).max(65535).safeParse(data.proxyPort).success;
             }
-            return !!data.proxyPort;
+            return true;
         },
         {
-            message: "Port number is required for non-HTTP resources",
-            path: ["proxyPort"]
+            message: "Invalid port number",
+            path: ["proxyPort"],
+        }
+    )
+    .refine(
+        (data) => {
+            if (data.http) {
+                return subdomainSchema.safeParse(data.subdomain).success;
+            }
+            return true;
+        },
+        {
+            message: "Invalid subdomain",
+            path: ["subdomain"],
         }
     );
 

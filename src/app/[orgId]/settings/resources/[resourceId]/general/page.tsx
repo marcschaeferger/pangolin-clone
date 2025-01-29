@@ -36,24 +36,44 @@ import { useOrgContext } from "@app/hooks/useOrgContext";
 import CustomDomainInput from "../CustomDomainInput";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
+import { subdomainSchema } from "@server/schemas/subdomainSchema";
 
-const GeneralFormSchema = z.object({
-    subdomain: z
-        .union([
-            z
-                .string()
-                .regex(
-                    /^(?!:\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9-_]+$/,
-                    "Invalid subdomain format"
-                )
-                .min(1, "Subdomain must be at least 1 character long")
-                .transform((val) => val.toLowerCase()),
-            z.string().optional()
-        ])
-        .optional(),
-    name: z.string().min(1).max(255),
-    proxyPort: z.number().int().min(1).max(65535).optional()
-});
+const GeneralFormSchema = z
+    .object({
+        subdomain: z.string().optional(),
+        name: z.string().min(1).max(255),
+        proxyPort: z.number().optional(),
+        http: z.boolean()
+    })
+    .refine(
+        (data) => {
+            if (!data.http) {
+                return z
+                    .number()
+                    .int()
+                    .min(1)
+                    .max(65535)
+                    .safeParse(data.proxyPort).success;
+            }
+            return true;
+        },
+        {
+            message: "Invalid port number",
+            path: ["proxyPort"]
+        }
+    )
+    .refine(
+        (data) => {
+            if (data.http) {
+                return subdomainSchema.safeParse(data.subdomain).success;
+            }
+            return true;
+        },
+        {
+            message: "Invalid subdomain",
+            path: ["subdomain"]
+        }
+    );
 
 type GeneralFormValues = z.infer<typeof GeneralFormSchema>;
 
@@ -77,7 +97,8 @@ export default function GeneralForm() {
         defaultValues: {
             name: resource.name,
             subdomain: resource.subdomain ? resource.subdomain : undefined,
-            proxyPort: resource.proxyPort ? resource.proxyPort : undefined
+            proxyPort: resource.proxyPort ? resource.proxyPort : undefined,
+            http: resource.http
         },
         mode: "onChange"
     });

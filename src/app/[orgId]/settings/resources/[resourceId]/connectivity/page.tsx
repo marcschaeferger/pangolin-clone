@@ -63,6 +63,7 @@ import {
 } from "@app/components/Settings";
 import { SwitchInput } from "@app/components/SwitchInput";
 import { useSiteContext } from "@app/hooks/useSiteContext";
+import { InfoPopup } from "@app/components/ui/info-popup";
 
 // Regular expressions for validation
 const DOMAIN_REGEX =
@@ -458,28 +459,28 @@ export default function ReverseProxyTargets(props: {
     return (
         <SettingsContainer>
             {resource.http && (
-            <SettingsSection>
-                <SettingsSectionHeader>
-                    <SettingsSectionTitle>
-                        SSL Configuration
-                    </SettingsSectionTitle>
-                    <SettingsSectionDescription>
-                        Setup SSL to secure your connections with LetsEncrypt
-                        certificates
-                    </SettingsSectionDescription>
-                </SettingsSectionHeader>
-                <SettingsSectionBody>
-                    <SwitchInput
-                        id="ssl-toggle"
-                        label="Enable SSL (https)"
-                        defaultChecked={resource.ssl}
-                        onCheckedChange={async (val) => {
-                            await saveSsl(val);
-                        }}
-                    />
-                </SettingsSectionBody>
-            </SettingsSection>
-)}
+                <SettingsSection>
+                    <SettingsSectionHeader>
+                        <SettingsSectionTitle>
+                            SSL Configuration
+                        </SettingsSectionTitle>
+                        <SettingsSectionDescription>
+                            Setup SSL to secure your connections with
+                            LetsEncrypt certificates
+                        </SettingsSectionDescription>
+                    </SettingsSectionHeader>
+                    <SettingsSectionBody>
+                        <SwitchInput
+                            id="ssl-toggle"
+                            label="Enable SSL (https)"
+                            defaultChecked={resource.ssl}
+                            onCheckedChange={async (val) => {
+                                await saveSsl(val);
+                            }}
+                        />
+                    </SettingsSectionBody>
+                </SettingsSection>
+            )}
             {/* Targets Section */}
             <SettingsSection>
                 <SettingsSectionHeader>
@@ -498,41 +499,45 @@ export default function ReverseProxyTargets(props: {
                         >
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                 {resource.http && (
-
-                                <FormField
-                                    control={addTargetForm.control}
-                                    name="method"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Method</FormLabel>
-                                            <FormControl>
-                                                <Select
-                                                    value={field.value || undefined}    
-                                                    onValueChange={(value) => {
-                                                        addTargetForm.setValue(
-                                                            "method",
+                                    <FormField
+                                        control={addTargetForm.control}
+                                        name="method"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Method</FormLabel>
+                                                <FormControl>
+                                                    <Select
+                                                        value={
+                                                            field.value ||
+                                                            undefined
+                                                        }
+                                                        onValueChange={(
                                                             value
-                                                        );
-                                                    }}
-                                                >
-                                                    <SelectTrigger id="method">
-                                                        <SelectValue placeholder="Select method" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="http">
-                                                            http
-                                                        </SelectItem>
-                                                        <SelectItem value="https">
-                                                            https
-                                                        </SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            )}
+                                                        ) => {
+                                                            addTargetForm.setValue(
+                                                                "method",
+                                                                value
+                                                            );
+                                                        }}
+                                                    >
+                                                        <SelectTrigger id="method">
+                                                            <SelectValue placeholder="Select method" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="http">
+                                                                http
+                                                            </SelectItem>
+                                                            <SelectItem value="https">
+                                                                https
+                                                            </SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                )}
 
                                 <FormField
                                     control={addTargetForm.control}
@@ -647,9 +652,9 @@ export default function ReverseProxyTargets(props: {
                             </TableBody>
                         </Table>
                     </TableContainer>
-                    <SettingsSectionDescription>
-                        Multiple targets will get load balanced by Traefik. You can use this for high availability.
-                    </SettingsSectionDescription>
+                    <p className="text-sm text-muted-foreground">
+                        Adding more than one target above will enable load balancing.
+                    </p>
                 </SettingsSectionBody>
                 <SettingsSectionFooter>
                     <Button

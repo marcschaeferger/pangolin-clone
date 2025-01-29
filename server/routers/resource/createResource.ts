@@ -17,6 +17,7 @@ import { eq, and } from "drizzle-orm";
 import stoi from "@server/lib/stoi";
 import { fromError } from "zod-validation-error";
 import logger from "@server/logger";
+import { subdomainSchema } from "@server/schemas/subdomainSchema";
 
 const createResourceParamsSchema = z
     .object({
@@ -27,36 +28,43 @@ const createResourceParamsSchema = z
 
 const createResourceSchema = z
     .object({
-        subdomain: z
-            .union([
-                z
-                    .string()
-                    .regex(
-                        /^(?!:\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9-_]+$/,
-                        "Invalid subdomain format"
-                    )
-                    .min(1, "Subdomain must be at least 1 character long")
-                    .transform((val) => val.toLowerCase()),
-                z.string().optional()
-            ])
-            .optional(),
+        subdomain: z.string().optional(),
         name: z.string().min(1).max(255),
+        siteId: z.number(),
         http: z.boolean(),
         protocol: z.string(),
-        proxyPort: z.number().int().min(1).max(65535).optional(),
-    }).refine(
+        proxyPort: z.number().optional()
+    })
+    .refine(
         (data) => {
-            if (data.http === true) {
-                return true;
+            if (!data.http) {
+                return z
+                    .number()
+                    .int()
+                    .min(1)
+                    .max(65535)
+                    .safeParse(data.proxyPort).success;
             }
-            return !!data.proxyPort;
+            return true;
         },
         {
-            message: "Port number is required for non-HTTP resources",
+            message: "Invalid port number",
             path: ["proxyPort"]
         }
+    )
+    .refine(
+        (data) => {
+            if (data.http) {
+                return subdomainSchema.safeParse(data.subdomain).success;
+            }
+            return true;
+        },
+        {
+            message: "Invalid subdomain",
+            path: ["subdomain"]
+        }
     );
-    
+
 export type CreateResourceResponse = Resource;
 
 export async function createResource(
@@ -134,7 +142,6 @@ export async function createResource(
                 );
             }
         } else {
-
             if (proxyPort === 443 || proxyPort === 80) {
                 return next(
                     createHttpError(
@@ -149,7 +156,7 @@ export async function createResource(
                 .select()
                 .from(resources)
                 .where(eq(resources.fullDomain, fullDomain));
-            
+
             if (existingResource.length > 0) {
                 return next(
                     createHttpError(
@@ -165,7 +172,7 @@ export async function createResource(
                 .insert(resources)
                 .values({
                     siteId,
-                    fullDomain: http? fullDomain : null,
+                    fullDomain: http ? fullDomain : null,
                     orgId,
                     name,
                     subdomain,
