@@ -3,12 +3,14 @@ import {
     emailVerificationCodes,
     passwordResetTokens,
     resourceOtp,
+    resources,
     resourceWhitelist,
+    targets,
     userInvites,
     users
 } from "@server/db/schema";
 import { APP_PATH, configFilePath1, configFilePath2 } from "@server/lib/consts";
-import { sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import fs from "fs";
 import yaml from "js-yaml";
 import path from "path";
@@ -33,9 +35,79 @@ export default async function migration() {
         });
     } catch (error) {
         console.log(
-            "We were unable to make all emails lower case in the database."
+            "We were unable to make all emails lower case in the database. You can safely ignore this error."
         );
         console.error(error);
+    }
+
+    try {
+        await db.transaction(async (trx) => {
+           
+            const resourcesAll = await trx.select({
+                resourceId: resources.resourceId,
+                fullDomain: resources.fullDomain,
+                subdomain: resources.subdomain
+            }).from(resources);
+
+            trx.run(`DROP INDEX resources_fullDomain_unique;`)
+            trx.run(`ALTER TABLE resources 
+                DROP COLUMN fullDomain;
+            `)
+            trx.run(`ALTER TABLE resources 
+                DROP COLUMN subdomain;
+            `)
+            trx.run(sql`ALTER TABLE resources
+                ADD COLUMN fullDomain TEXT;
+            `)
+            trx.run(sql`ALTER TABLE resources
+                ADD COLUMN subdomain TEXT;
+            `)
+            trx.run(sql`ALTER TABLE resources
+                ADD COLUMN http INTEGER DEFAULT true NOT NULL;
+            `)
+            trx.run(sql`ALTER TABLE resources
+                ADD COLUMN protocol TEXT DEFAULT 'tcp' NOT NULL;
+            `)
+            trx.run(sql`ALTER TABLE resources
+                ADD COLUMN proxyPort INTEGER;
+            `)
+
+            // write the new fullDomain and subdomain values back to the database
+            for (const resource of resourcesAll) {
+                await trx.update(resources).set({
+                    fullDomain: resource.fullDomain,
+                    subdomain: resource.subdomain
+                }).where(eq(resources.resourceId, resource.resourceId));
+            }
+
+            const targetsAll = await trx.select({
+                targetId: targets.targetId,
+                method: targets.method
+            }).from(targets);
+
+            trx.run(`ALTER TABLE targets 
+                DROP COLUMN method;
+            `)
+            trx.run(`ALTER TABLE targets 
+                DROP COLUMN protocol;
+            `)
+            trx.run(sql`ALTER TABLE targets
+                ADD COLUMN method TEXT;
+            `)
+
+            // write the new method and protocol values back to the database
+            for (const target of targetsAll) {
+                await trx.update(targets).set({
+                    method: target.method
+                }).where(eq(targets.targetId, target.targetId));
+            }
+
+        });
+    } catch (error) {
+        console.log(
+            "We were unable to make the changes to the targets and resources tables."
+        );
+        throw error;
     }
 
     try {
@@ -81,7 +153,24 @@ export default async function migration() {
             "traefik_config.yml"
         );
 
+        // Define schema for traefik config validation
         const schema = z.object({
+            entryPoints: z
+                .object({
+                    websecure: z
+                        .object({
+                            address: z.string(),
+                            transport: z
+                                .object({
+                                    respondingTimeouts: z.object({
+                                        readTimeout: z.string()
+                                    })
+                                })
+                                .optional()
+                        })
+                        .optional()
+                })
+                .optional(),
             experimental: z.object({
                 plugins: z.object({
                     badger: z.object({
@@ -101,26 +190,39 @@ export default async function migration() {
             throw new Error(fromZodError(parsedConfig.error).toString());
         }
 
+        // Ensure websecure entrypoint exists
+        if (traefikConfig.entryPoints?.websecure) {
+            // Add transport configuration
+            traefikConfig.entryPoints.websecure.transport = {
+                respondingTimeouts: {
+                    readTimeout: "30m"
+                }
+            };
+        }
+
         traefikConfig.experimental.plugins.badger.version = "v1.0.0-beta.3";
 
         const updatedTraefikYaml = yaml.dump(traefikConfig);
-
         fs.writeFileSync(traefikPath, updatedTraefikYaml, "utf8");
 
         console.log(
-            "Updated the version of Badger in your Traefik configuration to v1.0.0-beta.3."
+            "Updated the version of Badger in your Traefik configuration to v1.0.0-beta.3 and added readTimeout to websecure entrypoint in your Traefik configuration.."
         );
     } catch (e) {
         console.log(
-            "We were unable to update the version of Badger in your Traefik configuration. Please update it manually."
+            "We were unable to update the version of Badger in your Traefik configuration. Please update it manually to at least v1.0.0-beta.3. https://github.com/fosrl/badger"
         );
-        console.error(e);
+        throw e;
     }
 
     try {
         await db.transaction(async (trx) => {
-            trx.run(sql`ALTER TABLE 'resourceSessions' ADD 'isRequestToken' integer;`);
-            trx.run(sql`ALTER TABLE 'resourceSessions' ADD 'userSessionId' text REFERENCES session(id);`);
+            trx.run(
+                sql`ALTER TABLE 'resourceSessions' ADD 'isRequestToken' integer;`
+            );
+            trx.run(
+                sql`ALTER TABLE 'resourceSessions' ADD 'userSessionId' text REFERENCES session(id);`
+            );
         });
     } catch (e) {
         console.log(

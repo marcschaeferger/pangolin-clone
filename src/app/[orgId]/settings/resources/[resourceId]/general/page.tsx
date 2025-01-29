@@ -13,22 +13,7 @@ import {
     FormLabel,
     FormMessage
 } from "@/components/ui/form";
-import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 import { Input } from "@/components/ui/input";
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList
-} from "@/components/ui/command";
-
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger
-} from "@/components/ui/popover";
 import { useResourceContext } from "@app/hooks/useResourceContext";
 import { ListSitesResponse } from "@server/routers/site";
 import { useEffect, useState } from "react";
@@ -49,15 +34,25 @@ import {
 } from "@app/components/Settings";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import CustomDomainInput from "../CustomDomainInput";
-import ResourceInfoBox from "../ResourceInfoBox";
-import { subdomainSchema } from "@server/schemas/subdomainSchema";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 
 const GeneralFormSchema = z.object({
-    name: z.string(),
-    subdomain: subdomainSchema
-    // siteId: z.number(),
+    subdomain: z
+        .union([
+            z
+                .string()
+                .regex(
+                    /^(?!:\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9-_]+$/,
+                    "Invalid subdomain format"
+                )
+                .min(1, "Subdomain must be at least 1 character long")
+                .transform((val) => val.toLowerCase()),
+            z.string().optional()
+        ])
+        .optional(),
+    name: z.string().min(1).max(255),
+    proxyPort: z.number().int().min(1).max(65535).optional()
 });
 
 type GeneralFormValues = z.infer<typeof GeneralFormSchema>;
@@ -81,8 +76,8 @@ export default function GeneralForm() {
         resolver: zodResolver(GeneralFormSchema),
         defaultValues: {
             name: resource.name,
-            subdomain: resource.subdomain
-            // siteId: resource.siteId!,
+            subdomain: resource.subdomain ? resource.subdomain : undefined,
+            proxyPort: resource.proxyPort ? resource.proxyPort : undefined
         },
         mode: "onChange"
     });
@@ -169,33 +164,78 @@ export default function GeneralForm() {
                                     )}
                                 />
 
-                                <FormField
-                                    control={form.control}
-                                    name="subdomain"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Subdomain</FormLabel>
-                                            <FormControl>
-                                                <CustomDomainInput
-                                                    value={field.value}
-                                                    domainSuffix={domainSuffix}
-                                                    placeholder="Enter subdomain"
-                                                    onChange={(value) =>
-                                                        form.setValue(
-                                                            "subdomain",
-                                                            value
-                                                        )
-                                                    }
-                                                />
-                                            </FormControl>
-                                            <FormDescription>
-                                                This is the subdomain that will
-                                                be used to access the resource.
-                                            </FormDescription>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                                {resource.http ? (
+                                    <FormField
+                                        control={form.control}
+                                        name="subdomain"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Subdomain</FormLabel>
+                                                <FormControl>
+                                                    <CustomDomainInput
+                                                        value={
+                                                            field.value || ""
+                                                        }
+                                                        domainSuffix={
+                                                            domainSuffix
+                                                        }
+                                                        placeholder="Enter subdomain"
+                                                        onChange={(value) =>
+                                                            form.setValue(
+                                                                "subdomain",
+                                                                value
+                                                            )
+                                                        }
+                                                    />
+                                                </FormControl>
+                                                <FormDescription>
+                                                    This is the subdomain that
+                                                    will be used to access the
+                                                    resource.
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                ) : (
+                                    <FormField
+                                        control={form.control}
+                                        name="proxyPort"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>
+                                                    Port Number
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        type="number"
+                                                        placeholder="Enter port number"
+                                                        value={
+                                                            field.value ?? ""
+                                                        }
+                                                        onChange={(e) =>
+                                                            field.onChange(
+                                                                e.target.value
+                                                                    ? parseInt(
+                                                                          e
+                                                                              .target
+                                                                              .value
+                                                                      )
+                                                                    : null
+                                                            )
+                                                        }
+                                                    />
+                                                </FormControl>
+                                                <FormDescription>
+                                                    This is the port that will
+                                                    be used to access the
+                                                    resource.
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                )}
                             </form>
                         </Form>
                     </SettingsSectionForm>

@@ -163,7 +163,7 @@ export async function exchangeSession(
         const cookieName = `${config.getRawConfig().server.session_cookie_name}`;
         const cookie = serializeResourceSessionCookie(
             cookieName,
-            resource.fullDomain,
+            resource.fullDomain!,
             token,
             !resource.ssl
         );

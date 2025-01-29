@@ -151,7 +151,8 @@ const configSchema = z.object({
         .object({
             require_email_verification: z.boolean().optional(),
             disable_signup_without_invite: z.boolean().optional(),
-            disable_user_create_org: z.boolean().optional()
+            disable_user_create_org: z.boolean().optional(),
+            allow_raw_resources: z.boolean().optional()
         })
         .optional()
 });
@@ -254,6 +255,10 @@ export class Config {
             ?.require_email_verification
             ? "true"
             : "false";
+        process.env.FLAGS_ALLOW_RAW_RESOURCES = parsedConfig.data.flags
+        ?.allow_raw_resources
+        ? "true"
+        : "false";
         process.env.SESSION_COOKIE_NAME =
             parsedConfig.data.server.session_cookie_name;
         process.env.EMAIL_ENABLED = parsedConfig.data.email ? "true" : "false";
