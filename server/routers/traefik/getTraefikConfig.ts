@@ -106,13 +106,15 @@ export async function traefikConfigProvider(
                     : {}),
             };
 
+            const additionalMiddlewares = config.getRawConfig().traefik.additional_middlewares || [];
+
             http.routers![routerName] = {
                 entryPoints: [
                     resource.ssl
                         ? config.getRawConfig().traefik.https_entrypoint
                         : config.getRawConfig().traefik.http_entrypoint,
                 ],
-                middlewares: [badgerMiddlewareName],
+                middlewares: [badgerMiddlewareName, ...additionalMiddlewares],
                 service: serviceName,
                 rule: `Host(\`${fullDomain}\`)`,
                 ...(resource.ssl ? { tls } : {}),

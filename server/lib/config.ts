@@ -90,7 +90,8 @@ const configSchema = z.object({
         http_entrypoint: z.string(),
         https_entrypoint: z.string().optional(),
         cert_resolver: z.string().optional(),
-        prefer_wildcard_cert: z.boolean().optional()
+        prefer_wildcard_cert: z.boolean().optional(),
+        additional_middlewares: z.array(z.string()).optional()
     }),
     gerbil: z.object({
         start_port: portSchema
