@@ -84,6 +84,10 @@ export async function requestPasswordReset(
 
         const url = `${config.getRawConfig().app.dashboard_url}/auth/reset-password?email=${email}&token=${token}`;
 
+        if (!config.getRawConfig().email) {
+            logger.info(`Password reset requested for ${email}. Token: ${token}.`);
+        }
+
         await sendEmail(
             ResetPasswordCode({
                 email,
