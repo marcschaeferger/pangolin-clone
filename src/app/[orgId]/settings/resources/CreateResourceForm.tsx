@@ -45,21 +45,64 @@ import {
 } from "@app/components/ui/command";
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import CustomDomainInput from "./[resourceId]/CustomDomainInput";
-import { Axios, AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
 import { Resource } from "@server/db/schema";
 import { useOrgContext } from "@app/hooks/useOrgContext";
-import { subdomainSchema } from "@server/schemas/subdomainSchema";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { cn } from "@app/lib/cn";
+import { Switch } from "@app/components/ui/switch";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@app/components/ui/select";
+import { subdomainSchema } from "@server/schemas/subdomainSchema";
+import Link from "next/link";
+import { SquareArrowOutUpRight } from "lucide-react";
 
-const accountFormSchema = z.object({
-    subdomain: subdomainSchema,
-    name: z.string(),
-    siteId: z.number()
-});
+const createResourceFormSchema = z
+    .object({
+        subdomain: z.string().optional(),
+        name: z.string().min(1).max(255),
+        siteId: z.number(),
+        http: z.boolean(),
+        protocol: z.string(),
+        proxyPort: z.number().optional()
+    })
+    .refine(
+        (data) => {
+            if (!data.http) {
+                return z
+                    .number()
+                    .int()
+                    .min(1)
+                    .max(65535)
+                    .safeParse(data.proxyPort).success;
+            }
+            return true;
+        },
+        {
+            message: "Invalid port number",
+            path: ["proxyPort"]
+        }
+    )
+    .refine(
+        (data) => {
+            if (data.http) {
+                return subdomainSchema.safeParse(data.subdomain).success;
+            }
+            return true;
+        },
+        {
+            message: "Invalid subdomain",
+            path: ["subdomain"]
+        }
+    );
 
-type AccountFormValues = z.infer<typeof accountFormSchema>;
+type CreateResourceFormValues = z.infer<typeof createResourceFormSchema>;
 
 type CreateResourceFormProps = {
     open: boolean;
@@ -81,15 +124,18 @@ export default function CreateResourceForm({
     const router = useRouter();
 
     const { org } = useOrgContext();
+    const { env } = useEnvContext();
 
     const [sites, setSites] = useState<ListSitesResponse["sites"]>([]);
     const [domainSuffix, setDomainSuffix] = useState<string>(org.org.domain);
 
-    const form = useForm<AccountFormValues>({
-        resolver: zodResolver(accountFormSchema),
+    const form = useForm<CreateResourceFormValues>({
+        resolver: zodResolver(createResourceFormSchema),
         defaultValues: {
             subdomain: "",
-            name: "My Resource"
+            name: "My Resource",
+            http: true,
+            protocol: "tcp"
         }
     });
 
@@ -112,7 +158,7 @@ export default function CreateResourceForm({
         fetchSites();
     }, [open]);
 
-    async function onSubmit(data: AccountFormValues) {
+    async function onSubmit(data: CreateResourceFormValues) {
         console.log(data);
 
         const res = await api
@@ -120,8 +166,11 @@ export default function CreateResourceForm({
                 `/org/${orgId}/site/${data.siteId}/resource/`,
                 {
                     name: data.name,
-                    subdomain: data.subdomain
-                    // subdomain: data.subdomain,
+                    subdomain: data.http ? data.subdomain : undefined,
+                    http: data.http,
+                    protocol: data.protocol,
+                    proxyPort: data.http ? undefined : data.proxyPort,
+                    siteId: data.siteId
                 }
             )
             .catch((e) => {
@@ -188,34 +237,165 @@ export default function CreateResourceForm({
                                         </FormItem>
                                     )}
                                 />
-                                <FormField
-                                    control={form.control}
-                                    name="subdomain"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Subdomain</FormLabel>
-                                            <FormControl>
-                                                <CustomDomainInput
-                                                    value={field.value}
-                                                    domainSuffix={domainSuffix}
-                                                    placeholder="Enter subdomain"
-                                                    onChange={(value) =>
-                                                        form.setValue(
-                                                            "subdomain",
-                                                            value
-                                                        )
-                                                    }
-                                                />
-                                            </FormControl>
-                                            <FormDescription>
-                                                This is the fully qualified
-                                                domain name that will be used to
-                                                access the resource.
-                                            </FormDescription>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+
+                                {!env.flags.allowRawResources || (
+                                    <FormField
+                                        control={form.control}
+                                        name="http"
+                                        render={({ field }) => (
+                                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                                                <div className="space-y-0.5">
+                                                    <FormLabel className="text-base">
+                                                        HTTP Resource
+                                                    </FormLabel>
+                                                    <FormDescription>
+                                                        Toggle if this is an
+                                                        HTTP resource or a raw
+                                                        TCP/UDP resource
+                                                    </FormDescription>
+                                                </div>
+                                                <FormControl>
+                                                    <Switch
+                                                        checked={field.value}
+                                                        onCheckedChange={
+                                                            field.onChange
+                                                        }
+                                                    />
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+                                )}
+
+                                {form.watch("http") && (
+                                    <FormField
+                                        control={form.control}
+                                        name="subdomain"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Subdomain</FormLabel>
+                                                <FormControl>
+                                                    <CustomDomainInput
+                                                        value={
+                                                            field.value ?? ""
+                                                        }
+                                                        domainSuffix={
+                                                            domainSuffix
+                                                        }
+                                                        placeholder="Enter subdomain"
+                                                        onChange={(value) =>
+                                                            form.setValue(
+                                                                "subdomain",
+                                                                value
+                                                            )
+                                                        }
+                                                    />
+                                                </FormControl>
+                                                <FormDescription>
+                                                    This is the fully qualified
+                                                    domain name that will be
+                                                    used to access the resource.
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                )}
+
+                                {!form.watch("http") && (
+                                    <Link
+                                        className="text-sm text-primary flex items-center gap-1"
+                                        href="https://docs.fossorial.io/Getting%20Started/tcp-udp"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        <span>
+                                            Learn how to configure TCP/UDP resources
+                                        </span>
+                                        <SquareArrowOutUpRight size={14} />
+                                    </Link>
+                                )}
+
+                                {!form.watch("http") && (
+                                    <>
+                                        <FormField
+                                            control={form.control}
+                                            name="protocol"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        Protocol
+                                                    </FormLabel>
+                                                    <Select
+                                                        value={field.value}
+                                                        onValueChange={
+                                                            field.onChange
+                                                        }
+                                                    >
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select a protocol" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            <SelectItem value="tcp">
+                                                                TCP
+                                                            </SelectItem>
+                                                            <SelectItem value="udp">
+                                                                UDP
+                                                            </SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormDescription>
+                                                        The protocol to use for
+                                                        the resource
+                                                    </FormDescription>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="proxyPort"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        Port Number
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            type="number"
+                                                            placeholder="Enter port number"
+                                                            value={
+                                                                field.value ??
+                                                                ""
+                                                            }
+                                                            onChange={(e) =>
+                                                                field.onChange(
+                                                                    e.target
+                                                                        .value
+                                                                        ? parseInt(
+                                                                              e
+                                                                                  .target
+                                                                                  .value
+                                                                          )
+                                                                        : null
+                                                                )
+                                                            }
+                                                        />
+                                                    </FormControl>
+                                                    <FormDescription>
+                                                        The port number to proxy
+                                                        requests to (required
+                                                        for non-HTTP resources)
+                                                    </FormDescription>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </>
+                                )}
+
                                 <FormField
                                     control={form.control}
                                     name="siteId"
@@ -257,7 +437,7 @@ export default function CreateResourceForm({
                                                                     (site) => (
                                                                         <CommandItem
                                                                             value={
-                                                                                site.name
+                                                                                site.niceId
                                                                             }
                                                                             key={
                                                                                 site.siteId
