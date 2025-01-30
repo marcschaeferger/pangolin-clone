@@ -65,11 +65,6 @@ jobs:
                   echo "Updated install/main.go with Pangolin version $PANGOLIN_VERSION, Gerbil version $GERBIL_VERSION, and Badger version $BADGER_VERSION"
                   cat install/main.go
 
-            - name: Build and push Docker images
-              run: |
-                  TAG=${{ env.TAG }}
-                  make build-release tag=$TAG
-
             - name: Build installer
               working-directory: install
               run: |
@@ -80,3 +75,8 @@ jobs:
               with:
                   name: install-bin
                   path: install/bin/
+
+            - name: Build and push Docker images
+              run: |
+                  TAG=${{ env.TAG }}
+                  make build-release tag=$TAG
