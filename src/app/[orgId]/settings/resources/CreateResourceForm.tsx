@@ -310,7 +310,7 @@ export default function CreateResourceForm({
                                         rel="noopener noreferrer"
                                     >
                                         <span>
-                                            Learn how to use set up TCP/UDP resources
+                                            Learn how to configure TCP/UDP resources
                                         </span>
                                         <SquareArrowOutUpRight size={14} />
                                     </Link>
