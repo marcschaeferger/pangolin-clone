@@ -153,7 +153,9 @@ export default function CreateShareLinkForm({
 
             if (res?.status === 200) {
                 setResources(
-                    res.data.data.resources.map((r) => ({
+                    res.data.data.resources.filter((r) => {
+                        return r.http;
+                    }).map((r) => ({
                         resourceId: r.resourceId,
                         name: r.name,
                         resourceUrl: `${r.ssl ? "https://" : "http://"}${r.fullDomain}/`

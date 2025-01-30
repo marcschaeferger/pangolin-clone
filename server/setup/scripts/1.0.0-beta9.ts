@@ -20,6 +20,25 @@ import { fromZodError } from "zod-validation-error";
 export default async function migration() {
     console.log("Running setup script 1.0.0-beta.9...");
 
+    // make dir config/db/backups
+    const appPath = APP_PATH;
+    const dbDir = path.join(appPath, "db");
+
+    const backupsDir = path.join(dbDir, "backups");
+
+    // check if the backups directory exists and create it if it doesn't
+    if (!fs.existsSync(backupsDir)) {
+        fs.mkdirSync(backupsDir, { recursive: true });
+    }
+
+    // copy the db.sqlite file to backups
+    // add the date to the filename
+    const date = new Date();
+    const dateString = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}`;
+    const dbPath = path.join(dbDir, "db.sqlite");
+    const backupPath = path.join(backupsDir, `db_${dateString}.sqlite`);
+    fs.copyFileSync(dbPath, backupPath);
+
     await db.transaction(async (trx) => {
         try {
             // Determine which config file exists
@@ -47,6 +66,12 @@ export default async function migration() {
                 "p_session_request";
             rawConfig.server.session_cookie_name = "p_session_token"; // rename to prevent conflicts
             delete rawConfig.server.resource_session_cookie_name;
+
+            if (!rawConfig.flags) {
+                rawConfig.flags = {};
+            }
+
+            rawConfig.flags.allow_raw_resources = true;
 
             // Write the updated YAML back to the file
             const updatedYaml = yaml.dump(rawConfig);
@@ -97,7 +122,7 @@ export default async function migration() {
             const traefikFileContents = fs.readFileSync(traefikPath, "utf8");
             const traefikConfig = yaml.load(traefikFileContents) as any;
 
-            const parsedConfig = schema.safeParse(traefikConfig);
+            let parsedConfig: any = schema.safeParse(traefikConfig);
 
             if (parsedConfig.success) {
                 // Ensure websecure entrypoint exists
@@ -116,9 +141,7 @@ export default async function migration() {
                 const updatedTraefikYaml = yaml.dump(traefikConfig);
                 fs.writeFileSync(traefikPath, updatedTraefikYaml, "utf8");
 
-                console.log(
-                    "Updated the version of Badger in your Traefik configuration to v1.0.0-beta.3 and added readTimeout to websecure entrypoint in your Traefik configuration.."
-                );
+                console.log("Updated Badger version in Traefik config.");
             } else {
                 console.log(fromZodError(parsedConfig.error));
                 console.log(
@@ -131,6 +154,51 @@ export default async function migration() {
             );
             trx.rollback();
             return;
+        }
+
+        try {
+            const traefikPath = path.join(
+                APP_PATH,
+                "traefik",
+                "dynamic_config.yml"
+            );
+
+            const schema = z.object({
+                http: z.object({
+                    middlewares: z.object({
+                        "redirect-to-https": z.object({
+                            redirectScheme: z.object({
+                                scheme: z.string(),
+                                permanent: z.boolean()
+                            })
+                        })
+                    })
+                })
+            });
+
+            const traefikFileContents = fs.readFileSync(traefikPath, "utf8");
+            const traefikConfig = yaml.load(traefikFileContents) as any;
+
+            let parsedConfig: any = schema.safeParse(traefikConfig);
+
+            if (parsedConfig.success) {
+                // delete permanent from redirect-to-https middleware
+                delete traefikConfig.http.middlewares["redirect-to-https"].redirectScheme.permanent;
+
+                const updatedTraefikYaml = yaml.dump(traefikConfig);
+                fs.writeFileSync(traefikPath, updatedTraefikYaml, "utf8");
+
+                console.log("Deleted permanent from redirect-to-https middleware.");
+            } else {
+                console.log(fromZodError(parsedConfig.error));
+                console.log(
+                    "We were unable to delete the permanent field from the redirect-to-https middleware in your Traefik configuration. Please delete it manually."
+                );
+            }
+        } catch (e) {
+            console.log(
+                "We were unable to delete the permanent field from the redirect-to-https middleware in your Traefik configuration. Please delete it manually. Note that this is not a critical change but recommended."
+            );
         }
 
         trx.run(sql`UPDATE ${users} SET email = LOWER(email);`);

@@ -31,31 +31,36 @@ const migrations = [
 await runMigrations();
 
 export async function runMigrations() {
-    const appVersion = loadAppVersion();
-    if (!appVersion) {
-        throw new Error("APP_VERSION is not set in the environment");
-    }
-
-    if (exists) {
-        await executeScripts();
-    } else {
-        console.log("Running migrations...");
-        try {
-            migrate(db, {
-                migrationsFolder: path.join(__DIRNAME, "init") // put here during the docker build
-            });
-            console.log("Migrations completed successfully.");
-        } catch (error) {
-            console.error("Error running migrations:", error);
+    try {
+        const appVersion = loadAppVersion();
+        if (!appVersion) {
+            throw new Error("APP_VERSION is not set in the environment");
         }
 
-        await db
+        if (exists) {
+            await executeScripts();
+        } else {
+            console.log("Running migrations...");
+            try {
+                migrate(db, {
+                    migrationsFolder: path.join(__DIRNAME, "init") // put here during the docker build
+                });
+                console.log("Migrations completed successfully.");
+            } catch (error) {
+                console.error("Error running migrations:", error);
+            }
+
+            await db
             .insert(versionMigrations)
             .values({
                 version: appVersion,
                 executedAt: Date.now()
             })
             .execute();
+        }
+    } catch (e) {
+        console.error("Error running migrations:", e);
+        await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 60 * 24 * 1));
     }
 }
 

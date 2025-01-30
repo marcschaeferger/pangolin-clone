@@ -162,7 +162,8 @@ export default function CreateResourceForm({
                     subdomain: data.http ? data.subdomain : undefined,
                     http: data.http,
                     protocol: data.protocol,
-                    proxyPort: data.http ? undefined : data.proxyPort
+                    proxyPort: data.http ? undefined : data.proxyPort,
+                    siteId: data.siteId
                 }
             )
             .catch((e) => {
