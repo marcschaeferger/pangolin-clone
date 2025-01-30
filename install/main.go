@@ -21,6 +21,7 @@ import (
 func loadVersions(config *Config) {
 	config.PangolinVersion = "replaceme"
 	config.GerbilVersion = "replaceme"
+	// config.BadgerVersion = "replaceme"
 }
 
 //go:embed fs/*
