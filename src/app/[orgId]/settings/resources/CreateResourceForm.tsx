@@ -60,6 +60,8 @@ import {
     SelectValue
 } from "@app/components/ui/select";
 import { subdomainSchema } from "@server/schemas/subdomainSchema";
+import Link from "next/link";
+import { SquareArrowOutUpRight } from "lucide-react";
 
 const createResourceFormSchema = z
     .object({
@@ -68,18 +70,23 @@ const createResourceFormSchema = z
         siteId: z.number(),
         http: z.boolean(),
         protocol: z.string(),
-        proxyPort: z.number().optional(),
+        proxyPort: z.number().optional()
     })
     .refine(
         (data) => {
             if (!data.http) {
-                return z.number().int().min(1).max(65535).safeParse(data.proxyPort).success;
+                return z
+                    .number()
+                    .int()
+                    .min(1)
+                    .max(65535)
+                    .safeParse(data.proxyPort).success;
             }
             return true;
         },
         {
             message: "Invalid port number",
-            path: ["proxyPort"],
+            path: ["proxyPort"]
         }
     )
     .refine(
@@ -91,7 +98,7 @@ const createResourceFormSchema = z
         },
         {
             message: "Invalid subdomain",
-            path: ["subdomain"],
+            path: ["subdomain"]
         }
     );
 
@@ -162,7 +169,8 @@ export default function CreateResourceForm({
                     subdomain: data.http ? data.subdomain : undefined,
                     http: data.http,
                     protocol: data.protocol,
-                    proxyPort: data.http ? undefined : data.proxyPort
+                    proxyPort: data.http ? undefined : data.proxyPort,
+                    siteId: data.siteId
                 }
             )
             .catch((e) => {
@@ -292,6 +300,20 @@ export default function CreateResourceForm({
                                             </FormItem>
                                         )}
                                     />
+                                )}
+
+                                {!form.watch("http") && (
+                                    <Link
+                                        className="text-sm text-primary flex items-center gap-1"
+                                        href="https://docs.fossorial.io/Getting%20Started/tcp-udp"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        <span>
+                                            Learn how to configure TCP/UDP resources
+                                        </span>
+                                        <SquareArrowOutUpRight size={14} />
+                                    </Link>
                                 )}
 
                                 {!form.watch("http") && (

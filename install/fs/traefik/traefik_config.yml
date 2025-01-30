@@ -13,7 +13,7 @@ experimental:
   plugins:
     badger:
       moduleName: "github.com/fosrl/badger"
-      version: "{{.GerbilVersion}}"
+      version: "{{.BadgerVersion}}"
 
 log:
   level: "INFO"

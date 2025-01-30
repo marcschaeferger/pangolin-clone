@@ -59,16 +59,12 @@ jobs:
               run: |
                   PANGOLIN_VERSION=${{ env.TAG }}
                   GERBIL_VERSION=${{ env.LATEST_GERBIL_TAG }}
+                  BADGER_VERSION=${{ env.LATEST_BADGER_TAG }}
                   sed -i "s/config.PangolinVersion = \".*\"/config.PangolinVersion = \"$PANGOLIN_VERSION\"/" install/main.go
                   sed -i "s/config.GerbilVersion = \".*\"/config.GerbilVersion = \"$GERBIL_VERSION\"/" install/main.go
                   sed -i "s/config.BadgerVersion = \".*\"/config.BadgerVersion = \"$BADGER_VERSION\"/" install/main.go
                   echo "Updated install/main.go with Pangolin version $PANGOLIN_VERSION, Gerbil version $GERBIL_VERSION, and Badger version $BADGER_VERSION"
                   cat install/main.go
-
-            - name: Build and push Docker images
-              run: |
-                  TAG=${{ env.TAG }}
-                  make build-release tag=$TAG
 
             - name: Build installer
               working-directory: install
@@ -76,7 +72,12 @@ jobs:
                   make release
 
             - name: Upload artifacts from /install/bin
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: install-bin
                   path: install/bin/
+
+            - name: Build and push Docker images
+              run: |
+                  TAG=${{ env.TAG }}
+                  make build-release tag=$TAG
