@@ -40,7 +40,7 @@ rate_limits:
 {{if .EnableEmail}}
 email:
     smtp_host: "{{.EmailSMTPHost}}"
-    smtp_port: "{{.EmailSMTPPort}}"
+    smtp_port: {{.EmailSMTPPort}}
     smtp_user: "{{.EmailSMTPUser}}"
     smtp_pass: "{{.EmailSMTPPass}}"
     no_reply: "{{.EmailNoReply}}"
