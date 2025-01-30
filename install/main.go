@@ -21,7 +21,7 @@ import (
 func loadVersions(config *Config) {
 	config.PangolinVersion = "replaceme"
 	config.GerbilVersion = "replaceme"
-	// config.BadgerVersion = "replaceme"
+	config.BadgerVersion = "replaceme"
 }
 
 //go:embed fs/*
@@ -30,6 +30,7 @@ var configFiles embed.FS
 type Config struct {
 	PangolinVersion            string
 	GerbilVersion              string
+	BadgerVersion              string
 	BaseDomain                 string
 	DashboardDomain            string
 	LetsEncryptEmail           string
