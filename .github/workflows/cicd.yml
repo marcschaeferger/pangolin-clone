@@ -59,6 +59,7 @@ jobs:
               run: |
                   PANGOLIN_VERSION=${{ env.TAG }}
                   GERBIL_VERSION=${{ env.LATEST_GERBIL_TAG }}
+                  BADGER_VERSION=${{ env.LATEST_BADGER_TAG }}
                   sed -i "s/config.PangolinVersion = \".*\"/config.PangolinVersion = \"$PANGOLIN_VERSION\"/" install/main.go
                   sed -i "s/config.GerbilVersion = \".*\"/config.GerbilVersion = \"$GERBIL_VERSION\"/" install/main.go
                   sed -i "s/config.BadgerVersion = \".*\"/config.BadgerVersion = \"$BADGER_VERSION\"/" install/main.go
