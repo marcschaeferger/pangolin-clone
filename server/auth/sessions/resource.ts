@@ -9,7 +9,6 @@ export const SESSION_COOKIE_NAME =
     config.getRawConfig().server.session_cookie_name;
 export const SESSION_COOKIE_EXPIRES =
     1000 * 60 * 60 * config.getRawConfig().server.resource_session_length_hours;
-export const SECURE_COOKIES = config.getRawConfig().server.secure_cookies;
 
 export async function createResourceSession(opts: {
     token: string;
@@ -170,7 +169,7 @@ export function serializeResourceSessionCookie(
     token: string,
     isHttp: boolean = false
 ): string {
-    if (SECURE_COOKIES && !isHttp) {
+    if (!isHttp) {
         return `${cookieName}_s=${token}; HttpOnly; SameSite=Strict; Max-Age=${SESSION_COOKIE_EXPIRES / 1000}; Path=/; Secure; Domain=${"." + domain}`;
     } else {
         return `${cookieName}=${token}; HttpOnly; SameSite=Strict; Max-Age=${SESSION_COOKIE_EXPIRES / 1000}; Path=/; Domain=${"." + domain}`;
@@ -179,9 +178,10 @@ export function serializeResourceSessionCookie(
 
 export function createBlankResourceSessionTokenCookie(
     cookieName: string,
-    domain: string
+    domain: string,
+    isHttp: boolean = false
 ): string {
-    if (SECURE_COOKIES) {
+    if (!isHttp) {
         return `${cookieName}_s=; HttpOnly; SameSite=Strict; Max-Age=0; Path=/; Secure; Domain=${"." + domain}`;
     } else {
         return `${cookieName}=; HttpOnly; SameSite=Strict; Max-Age=0; Path=/; Domain=${"." + domain}`;

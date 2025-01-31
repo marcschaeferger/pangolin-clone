@@ -9,7 +9,6 @@ server:
     internal_port: 3001
     next_port: 3002
     internal_hostname: "pangolin"
-    secure_cookies: true
     session_cookie_name: "p_session_token"
     resource_access_token_param: "p_token"
     resource_session_request_param: "p_session_request"

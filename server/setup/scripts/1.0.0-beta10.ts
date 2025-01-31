@@ -27,14 +27,16 @@ export default async function migration() {
         const fileContents = fs.readFileSync(filePath, "utf8");
         rawConfig = yaml.load(fileContents);
 
-        rawConfig.server.secure_cookies = true;
+        delete rawConfig.server.secure_cookies;
 
         // Write the updated YAML back to the file
         const updatedYaml = yaml.dump(rawConfig);
         fs.writeFileSync(filePath, updatedYaml, "utf8");
+
+        console.log(`Removed deprecated config option: secure_cookies.`);
     } catch (e) {
         console.log(
-            `Failed to set secure_cookies to true in config. Please set it manually. https://docs.fossorial.io/Pangolin/Configuration/config`
+            `Was unable to remove deprecated config option: secure_cookies. Error: ${e}`
         );
         return;
     }
