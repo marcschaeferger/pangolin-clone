@@ -3,7 +3,7 @@ import fs from "fs";
 import yaml from "js-yaml";
 
 export default async function migration() {
-    console.log("Running setup script 1.0.0-beta.9...");
+    console.log("Running setup script 1.0.0-beta.10...");
 
     try {
         // Determine which config file exists
