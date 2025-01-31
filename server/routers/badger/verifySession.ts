@@ -26,8 +26,8 @@ import {
 import { Resource, roleResources, userResources } from "@server/db/schema";
 import logger from "@server/logger";
 import { verifyResourceAccessToken } from "@server/auth/verifyResourceAccessToken";
-import { generateSessionToken } from "@server/auth";
 import NodeCache from "node-cache";
+import { generateSessionToken } from "@server/auth/sessions/app";
 
 // We'll see if this speeds anything up
 const cache = new NodeCache({

@@ -24,7 +24,6 @@ export const SESSION_COOKIE_EXPIRES =
     60 *
     60 *
     config.getRawConfig().server.dashboard_session_length_hours;
-export const SECURE_COOKIES = config.getRawConfig().server.secure_cookies;
 export const COOKIE_DOMAIN =
     "." + new URL(config.getRawConfig().app.dashboard_url).hostname;
 
@@ -108,12 +107,7 @@ export function serializeSessionCookie(
     isSecure: boolean
 ): string {
     if (isSecure) {
-        logger.debug("Setting cookie for secure origin");
-        if (SECURE_COOKIES) {
-            return `${SESSION_COOKIE_NAME}=${token}; HttpOnly; SameSite=Strict; Max-Age=${SESSION_COOKIE_EXPIRES / 1000}; Path=/; Secure; Domain=${COOKIE_DOMAIN}`;
-        } else {
-            return `${SESSION_COOKIE_NAME}=${token}; HttpOnly; SameSite=Strict; Max-Age=${SESSION_COOKIE_EXPIRES / 1000}; Path=/; Domain=${COOKIE_DOMAIN}`;
-        }
+        return `${SESSION_COOKIE_NAME}=${token}; HttpOnly; SameSite=Strict; Max-Age=${SESSION_COOKIE_EXPIRES / 1000}; Path=/; Secure; Domain=${COOKIE_DOMAIN}`;
     } else {
         return `${SESSION_COOKIE_NAME}=${token}; HttpOnly; SameSite=Lax; Max-Age=${SESSION_COOKIE_EXPIRES}; Path=/;`;
     }
@@ -121,11 +115,7 @@ export function serializeSessionCookie(
 
 export function createBlankSessionTokenCookie(isSecure: boolean): string {
     if (isSecure) {
-        if (SECURE_COOKIES) {
-            return `${SESSION_COOKIE_NAME}=; HttpOnly; SameSite=Strict; Max-Age=0; Path=/; Secure; Domain=${COOKIE_DOMAIN}`;
-        } else {
-            return `${SESSION_COOKIE_NAME}=; HttpOnly; SameSite=Strict; Max-Age=0; Path=/; Domain=${COOKIE_DOMAIN}`;
-        }
+        return `${SESSION_COOKIE_NAME}=; HttpOnly; SameSite=Strict; Max-Age=0; Path=/; Secure; Domain=${COOKIE_DOMAIN}`;
     } else {
         return `${SESSION_COOKIE_NAME}=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/;`;
     }

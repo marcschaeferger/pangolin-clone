@@ -130,7 +130,7 @@ export default function ReverseProxyTargets(props: {
     const addTargetForm = useForm({
         resolver: zodResolver(addTargetSchema),
         defaultValues: {
-            ip: "localhost",
+            ip: "",
             method: resource.http ? "http" : null,
             port: resource.http ? 80 : resource.proxyPort || 1234
             // protocol: "TCP",

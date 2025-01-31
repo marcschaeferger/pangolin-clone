@@ -12,8 +12,7 @@ import {
     serializeResourceSessionCookie,
     validateResourceSessionToken
 } from "@server/auth/sessions/resource";
-import { generateSessionToken } from "@server/auth";
-import { SESSION_COOKIE_EXPIRES } from "@server/auth/sessions/app";
+import { generateSessionToken, SESSION_COOKIE_EXPIRES } from "@server/auth/sessions/app";
 import { SESSION_COOKIE_EXPIRES as RESOURCE_SESSION_COOKIE_EXPIRES } from "@server/auth/sessions/resource";
 import config from "@server/lib/config";
 import { response } from "@server/lib";

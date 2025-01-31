@@ -1,12 +1,11 @@
 import { Router } from "express";
 import * as gerbil from "@server/routers/gerbil";
 import * as traefik from "@server/routers/traefik";
+import * as resource from "./resource";
+import * as badger from "./badger";
 import * as auth from "@server/routers/auth";
 import HttpCode from "@server/types/HttpCode";
 import { verifyResourceAccess, verifySessionUserMiddleware } from "@server/middlewares";
-import { getExchangeToken } from "./resource/getExchangeToken";
-import { verifyResourceSession } from "./badger";
-import { exchangeSession } from "./badger/exchangeSession";
 
 // Root routes
 const internalRouter = Router();
@@ -26,7 +25,7 @@ internalRouter.post(
     `/resource/:resourceId/get-exchange-token`,
     verifySessionUserMiddleware,
     verifyResourceAccess,
-    getExchangeToken
+    resource.getExchangeToken
 );
 
 // Gerbil routes
@@ -40,7 +39,7 @@ gerbilRouter.post("/receive-bandwidth", gerbil.receiveBandwidth);
 const badgerRouter = Router();
 internalRouter.use("/badger", badgerRouter);
 
-badgerRouter.post("/verify-session", verifyResourceSession);
-badgerRouter.post("/exchange-session", exchangeSession);
+badgerRouter.post("/verify-session", badger.verifyResourceSession);
+badgerRouter.post("/exchange-session", badger.exchangeSession);
 
 export default internalRouter;

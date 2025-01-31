@@ -60,7 +60,6 @@ const configSchema = z.object({
             .transform(stoi)
             .pipe(portSchema),
         internal_hostname: z.string().transform((url) => url.toLowerCase()),
-        secure_cookies: z.boolean(),
         session_cookie_name: z.string(),
         resource_access_token_param: z.string(),
         resource_session_request_param: z.string(),
