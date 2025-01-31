@@ -4,7 +4,7 @@ import path from "path";
 import semver from "semver";
 import { versionMigrations } from "@server/db/schema";
 import { desc } from "drizzle-orm";
-import { __DIRNAME, APP_PATH } from "@server/lib/consts";
+import { __DIRNAME } from "@server/lib/consts";
 import { loadAppVersion } from "@server/lib/loadAppVersion";
 import m1 from "./scripts/1.0.0-beta1";
 import m2 from "./scripts/1.0.0-beta2";
@@ -12,6 +12,7 @@ import m3 from "./scripts/1.0.0-beta3";
 import m4 from "./scripts/1.0.0-beta5";
 import m5 from "./scripts/1.0.0-beta6";
 import m6 from "./scripts/1.0.0-beta9";
+import m7 from "./scripts/1.0.0-beta10";
 
 // THIS CANNOT IMPORT ANYTHING FROM THE SERVER
 // EXCEPT FOR THE DATABASE AND THE SCHEMA
@@ -23,7 +24,8 @@ const migrations = [
     { version: "1.0.0-beta.3", run: m3 },
     { version: "1.0.0-beta.5", run: m4 },
     { version: "1.0.0-beta.6", run: m5 },
-    { version: "1.0.0-beta.9", run: m6 }
+    { version: "1.0.0-beta.9", run: m6 },
+    { version: "1.0.0-beta.10", run: m7 }
     // Add new migrations here as they are created
 ] as const;
 
