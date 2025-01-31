@@ -106,6 +106,7 @@ export const handleRegisterMessage: MessageHandler = async (context) => {
                 eq(targets.enabled, true)
             )
         )
+        .where(eq(resources.siteId, siteId))
         .groupBy(resources.resourceId);
 
     let tcpTargets: string[] = [];
