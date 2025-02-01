@@ -1,0 +1,48 @@
+import { db } from "@server/db";
+import { resources, targets } from "@server/db/schema";
+import { eq } from "drizzle-orm";
+
+let currentBannedPorts: number[] = [];
+
+export async function pickPort(siteId: number): Promise<{
+    internalPort: number;
+    targetIps: string[];
+}> {
+    // Fetch resources for this site
+    const resourcesRes = await db.query.resources.findMany({
+        where: eq(resources.siteId, siteId)
+    });
+
+    // TODO: is this all inefficient?
+    // Fetch targets for all resources of this site
+    let targetIps: string[] = [];
+    let targetInternalPorts: number[] = [];
+    await Promise.all(
+        resourcesRes.map(async (resource) => {
+            const targetsRes = await db.query.targets.findMany({
+                where: eq(targets.resourceId, resource.resourceId)
+            });
+            targetsRes.forEach((target) => {
+                targetIps.push(`${target.ip}/32`);
+                if (target.internalPort) {
+                    targetInternalPorts.push(target.internalPort);
+                }
+            });
+        })
+    );
+
+    let internalPort!: number;
+    // pick a port random port from 40000 to 65535 that is not in use
+    for (let i = 0; i < 1000; i++) {
+        internalPort = Math.floor(Math.random() * 25535) + 40000;
+        if (
+            !targetInternalPorts.includes(internalPort) &&
+            !currentBannedPorts.includes(internalPort)
+        ) {
+            break;
+        }
+    }
+    currentBannedPorts.push(internalPort);
+
+    return { internalPort, targetIps };
+}
