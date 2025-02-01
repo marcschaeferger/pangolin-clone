@@ -19,7 +19,7 @@ import {
     CommandEmpty,
     CommandGroup,
     CommandInput,
-    CommandItem,
+    CommandItem
 } from "@/components/ui/command";
 import { cn } from "@app/lib/cn";
 import {
@@ -144,14 +144,15 @@ export default function GeneralForm() {
     async function onSubmit(data: GeneralFormValues) {
         setSaveLoading(true);
 
-        api.post<AxiosResponse<GetResourceAuthInfoResponse>>(
-            `resource/${resource?.resourceId}`,
-            {
-                name: data.name,
-                subdomain: data.subdomain
-                // siteId: data.siteId,
-            }
-        )
+        const res = await api
+            .post<AxiosResponse<GetResourceAuthInfoResponse>>(
+                `resource/${resource?.resourceId}`,
+                {
+                    name: data.name,
+                    subdomain: data.subdomain
+                    // siteId: data.siteId,
+                }
+            )
             .catch((e) => {
                 toast({
                     variant: "destructive",
@@ -161,26 +162,26 @@ export default function GeneralForm() {
                         "An error occurred while updating the resource"
                     )
                 });
-            })
-            .then(() => {
-                toast({
-                    title: "Resource updated",
-                    description: "The resource has been updated successfully"
-                });
+            });
 
-                updateResource({ name: data.name, subdomain: data.subdomain });
+        if (res && res.status === 200) {
+            toast({
+                title: "Resource updated",
+                description: "The resource has been updated successfully"
+            });
 
-                router.refresh();
-            })
-            .finally(() => setSaveLoading(false));
+            updateResource({ name: data.name, subdomain: data.subdomain });
+        }
+        setSaveLoading(false);
     }
 
     async function onTransfer(data: TransferFormValues) {
         setTransferLoading(true);
 
-        api.post(`resource/${resource?.resourceId}/transfer`, {
-            siteId: data.siteId
-        })
+        const res = await api
+            .post(`resource/${resource?.resourceId}/transfer`, {
+                siteId: data.siteId
+            })
             .catch((e) => {
                 toast({
                     variant: "destructive",
@@ -190,16 +191,16 @@ export default function GeneralForm() {
                         "An error occurred while transferring the resource"
                     )
                 });
-            })
-            .then(() => {
-                toast({
-                    title: "Resource transferred",
-                    description:
-                        "The resource has been transferred successfully"
-                });
-                router.refresh();
-            })
-            .finally(() => setTransferLoading(false));
+            });
+
+        if (res && res.status === 200) {
+            toast({
+                title: "Resource transferred",
+                description: "The resource has been transferred successfully"
+            });
+            router.refresh();
+        }
+        setTransferLoading(false);
     }
 
     return (

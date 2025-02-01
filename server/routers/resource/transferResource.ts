@@ -1,13 +1,16 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { resources } from "@server/db/schema";
+import { newts, resources, sites, targets } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
+import { addPeer } from "../gerbil/peers";
+import { addTargets, removeTargets } from "../newt/targets";
+import { getAllowedIps } from "../target/helpers";
 
 const transferResourceParamsSchema = z
     .object({
@@ -53,6 +56,60 @@ export async function transferResource(
         const { resourceId } = parsedParams.data;
         const { siteId } = parsedBody.data;
 
+        const [oldResource] = await db
+            .select()
+            .from(resources)
+            .where(eq(resources.resourceId, resourceId))
+            .limit(1);
+
+        if (!oldResource) {
+            return next(
+                createHttpError(
+                    HttpCode.NOT_FOUND,
+                    `Resource with ID ${resourceId} not found`
+                )
+            );
+        }
+
+        if (oldResource.siteId === siteId) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    `Resource is already assigned to site with ID ${siteId}`
+                )
+            );
+        }
+
+        const [newSite] = await db
+            .select()
+            .from(sites)
+            .where(eq(sites.siteId, siteId))
+            .limit(1);
+
+        if (!newSite) {
+            return next(
+                createHttpError(
+                    HttpCode.NOT_FOUND,
+                    `Site with ID ${siteId} not found`
+                )
+            );
+        }
+
+        const [oldSite] = await db
+            .select()
+            .from(sites)
+            .where(eq(sites.siteId, oldResource.siteId))
+            .limit(1);
+
+        if (!oldSite) {
+            return next(
+                createHttpError(
+                    HttpCode.NOT_FOUND,
+                    `Site with ID ${oldResource.siteId} not found`
+                )
+            );
+        }
+
         const [updatedResource] = await db
             .update(resources)
             .set({ siteId })
@@ -66,6 +123,57 @@ export async function transferResource(
                     `Resource with ID ${resourceId} not found`
                 )
             );
+        }
+
+        const resourceTargets = await db
+            .select()
+            .from(targets)
+            .where(eq(targets.resourceId, resourceId));
+
+        if (resourceTargets.length > 0) {
+            ////// REMOVE THE TARGETS FROM THE OLD SITE //////
+            if (oldSite.pubKey) {
+                if (oldSite.type == "wireguard") {
+                    await addPeer(oldSite.exitNodeId!, {
+                        publicKey: oldSite.pubKey,
+                        allowedIps: await getAllowedIps(oldSite.siteId)
+                    });
+                } else if (oldSite.type == "newt") {
+                    const [newt] = await db
+                        .select()
+                        .from(newts)
+                        .where(eq(newts.siteId, oldSite.siteId))
+                        .limit(1);
+
+                    removeTargets(
+                        newt.newtId,
+                        resourceTargets,
+                        updatedResource.protocol
+                    );
+                }
+            }
+
+            ////// ADD THE TARGETS TO THE NEW SITE //////
+            if (newSite.pubKey) {
+                if (newSite.type == "wireguard") {
+                    await addPeer(newSite.exitNodeId!, {
+                        publicKey: newSite.pubKey,
+                        allowedIps: await getAllowedIps(newSite.siteId)
+                    });
+                } else if (newSite.type == "newt") {
+                    const [newt] = await db
+                        .select()
+                        .from(newts)
+                        .where(eq(newts.siteId, newSite.siteId))
+                        .limit(1);
+
+                    addTargets(
+                        newt.newtId,
+                        resourceTargets,
+                        updatedResource.protocol
+                    );
+                }
+            }
         }
 
         return response(res, {

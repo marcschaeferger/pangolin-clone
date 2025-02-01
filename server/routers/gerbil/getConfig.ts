@@ -11,6 +11,7 @@ import config from "@server/lib/config";
 import { getUniqueExitNodeEndpointName } from '@server/db/names';
 import { findNextAvailableCidr } from "@server/lib/ip";
 import { fromError } from 'zod-validation-error';
+import { getAllowedIps } from '../target/helpers';
 // Define Zod schema for request validation
 const getConfigSchema = z.object({
     publicKey: z.string(),
@@ -83,22 +84,9 @@ export async function getConfig(req: Request, res: Response, next: NextFunction)
         });
 
         const peers = await Promise.all(sitesRes.map(async (site) => {
-            // Fetch resources for this site
-            const resourcesRes = await db.query.resources.findMany({
-                where: eq(resources.siteId, site.siteId),
-            });
-
-            // Fetch targets for all resources of this site
-            const targetIps = await Promise.all(resourcesRes.map(async (resource) => {
-                const targetsRes = await db.query.targets.findMany({
-                    where: eq(targets.resourceId, resource.resourceId),
-                });
-                return targetsRes.map(target => `${target.ip}/32`);
-            }));
-
             return {
                 publicKey: site.pubKey,
-                allowedIps: targetIps.flat(),
+                allowedIps: await getAllowedIps(site.siteId)
             };
         }));
 

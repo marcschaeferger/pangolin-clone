@@ -1,11 +1,11 @@
 import { Target } from "@server/db/schema";
 import { sendToClient } from "../ws";
 
-export async function addTargets(
+export function addTargets(
     newtId: string,
     targets: Target[],
     protocol: string
-): Promise<void> {
+) {
     //create a list of udp and tcp targets
     const payloadTargets = targets.map((target) => {
         return `${target.internalPort ? target.internalPort + ":" : ""}${
@@ -22,11 +22,11 @@ export async function addTargets(
     sendToClient(newtId, payload);
 }
 
-export async function removeTargets(
+export function removeTargets(
     newtId: string,
     targets: Target[],
     protocol: string
-): Promise<void> {
+) {
     //create a list of udp and tcp targets
     const payloadTargets = targets.map((target) => {
         return `${target.internalPort ? target.internalPort + ":" : ""}${

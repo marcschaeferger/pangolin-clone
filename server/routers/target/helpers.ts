@@ -46,3 +46,21 @@ export async function pickPort(siteId: number): Promise<{
 
     return { internalPort, targetIps };
 }
+
+export async function getAllowedIps(siteId: number) {
+    // TODO: is this all inefficient?
+    const resourcesRes = await db.query.resources.findMany({
+        where: eq(resources.siteId, siteId)
+    });
+
+    // Fetch targets for all resources of this site
+    const targetIps = await Promise.all(
+        resourcesRes.map(async (resource) => {
+            const targetsRes = await db.query.targets.findMany({
+                where: eq(targets.resourceId, resource.resourceId)
+            });
+            return targetsRes.map((target) => `${target.ip}/32`);
+        })
+    );
+    return targetIps.flat();
+}
