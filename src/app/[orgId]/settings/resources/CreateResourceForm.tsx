@@ -129,9 +129,7 @@ export default function CreateResourceForm({
 
     const [sites, setSites] = useState<ListSitesResponse["sites"]>([]);
     const [domainSuffix, setDomainSuffix] = useState<string>(org.org.domain);
-
     const [showSnippets, setShowSnippets] = useState(false);
-
     const [resourceId, setResourceId] = useState<number | null>(null);
 
     const form = useForm<CreateResourceFormValues>({
@@ -144,10 +142,19 @@ export default function CreateResourceForm({
         }
     });
 
+    function reset() {
+        form.reset();
+        setSites([]);
+        setShowSnippets(false);
+        setResourceId(null);
+    }
+
     useEffect(() => {
         if (!open) {
             return;
         }
+
+        reset();
 
         const fetchSites = async () => {
             const res = await api.get<AxiosResponse<ListSitesResponse>>(
