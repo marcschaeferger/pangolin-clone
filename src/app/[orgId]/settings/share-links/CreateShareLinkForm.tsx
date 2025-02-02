@@ -320,7 +320,7 @@ export default function CreateShareLinkForm({
                                                                             ) => (
                                                                                 <CommandItem
                                                                                     value={
-                                                                                        r.resourceId.toString()
+                                                                                        `${r.name}:${r.resourceId}`
                                                                                     }
                                                                                     key={
                                                                                         r.resourceId
