@@ -10,6 +10,7 @@ import logger from "@server/logger";
 import { addPeer } from "../gerbil/peers";
 import { fromError } from "zod-validation-error";
 import { removeTargets } from "../newt/targets";
+import { getAllowedIps } from "./helpers";
 
 const deleteTargetSchema = z
     .object({
@@ -80,25 +81,9 @@ export async function deleteTarget(
 
         if (site.pubKey) {
             if (site.type == "wireguard") {
-                // TODO: is this all inefficient?
-                // Fetch resources for this site
-                const resourcesRes = await db.query.resources.findMany({
-                    where: eq(resources.siteId, site.siteId)
-                });
-
-                // Fetch targets for all resources of this site
-                const targetIps = await Promise.all(
-                    resourcesRes.map(async (resource) => {
-                        const targetsRes = await db.query.targets.findMany({
-                            where: eq(targets.resourceId, resource.resourceId)
-                        });
-                        return targetsRes.map((target) => `${target.ip}/32`);
-                    })
-                );
-
                 await addPeer(site.exitNodeId!, {
                     publicKey: site.pubKey,
-                    allowedIps: targetIps.flat()
+                    allowedIps: await getAllowedIps(site.siteId)
                 });
             } else if (site.type == "newt") {
                 // get the newt on the site by querying the newt table for siteId
