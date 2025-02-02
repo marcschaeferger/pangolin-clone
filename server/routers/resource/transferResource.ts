@@ -75,7 +75,7 @@ export async function transferResource(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    `Resource is already assigned to site with ID ${siteId}`
+                    `Resource is already assigned to this site`
                 )
             );
         }

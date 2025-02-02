@@ -396,7 +396,7 @@ export default function GeneralForm() {
                                                                 (site) => (
                                                                     <CommandItem
                                                                         value={
-                                                                            site.name
+                                                                            `${site.name}:${site.siteId}`
                                                                         }
                                                                         key={
                                                                             site.siteId
@@ -431,8 +431,7 @@ export default function GeneralForm() {
                                                 </PopoverContent>
                                             </Popover>
                                             <FormDescription>
-                                                Select the site you want to
-                                                transfer this resource to
+                                                Select the new site to transfer this resource to.
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>
