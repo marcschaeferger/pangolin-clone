@@ -9,6 +9,7 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { subdomainSchema } from "@server/schemas/subdomainSchema";
+import config from "@server/lib/config";
 
 const updateResourceParamsSchema = z
     .object({
@@ -32,7 +33,29 @@ const updateResourceBodySchema = z
     .strict()
     .refine((data) => Object.keys(data).length > 0, {
         message: "At least one field must be provided for update"
-    });
+    })
+    .refine(
+        (data) => {
+            if (!config.getRawConfig().flags?.allow_raw_resources) {
+                if (data.proxyPort !== undefined) {
+                    return false;
+                }
+            }
+            return true;
+        },
+        { message: "Cannot update proxyPort" }
+    )
+    .refine(
+        (data) => {
+            if (data.proxyPort === 443 || data.proxyPort === 80) {
+                return false;
+            }
+            return true;
+        },
+        {
+            message: "Port 80 and 443 are reserved for http and https resources"
+        }
+    );
 
 export async function updateResource(
     req: Request,
@@ -92,15 +115,6 @@ export async function updateResource(
                         eq(resources.proxyPort, proxyPort!)
                     )
                 );
-
-            if (proxyPort === 443 || proxyPort === 80) {
-                return next(
-                    createHttpError(
-                        HttpCode.BAD_REQUEST,
-                        "Port 80 and 443 are reserved for https resources"
-                    )
-                );
-            }
 
             if (
                 existingResource.length > 0 &&

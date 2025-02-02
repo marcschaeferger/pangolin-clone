@@ -18,6 +18,7 @@ import stoi from "@server/lib/stoi";
 import { fromError } from "zod-validation-error";
 import logger from "@server/logger";
 import { subdomainSchema } from "@server/schemas/subdomainSchema";
+import config from "@server/lib/config";
 
 const createResourceParamsSchema = z
     .object({
@@ -62,6 +63,30 @@ const createResourceSchema = z
         {
             message: "Invalid subdomain",
             path: ["subdomain"]
+        }
+    )
+    .refine(
+        (data) => {
+            if (!config.getRawConfig().flags?.allow_raw_resources) {
+                if (data.proxyPort !== undefined) {
+                    return false;
+                }
+            }
+            return true;
+        },
+        {
+            message: "Cannot update proxyPort"
+        }
+    )
+    .refine(
+        (data) => {
+            if (data.proxyPort === 443 || data.proxyPort === 80) {
+                return false;
+            }
+            return true;
+        },
+        {
+            message: "Port 80 and 443 are reserved for http and https resources"
         }
     );
 
@@ -132,15 +157,6 @@ export async function createResource(
                         eq(resources.proxyPort, proxyPort!)
                     )
                 );
-
-            if (proxyPort === 443 || proxyPort === 80) {
-                return next(
-                    createHttpError(
-                        HttpCode.BAD_REQUEST,
-                        "Port 80 and 443 are reserved for https resources"
-                    )
-                );
-            }
 
             if (existingResource.length > 0) {
                 return next(
