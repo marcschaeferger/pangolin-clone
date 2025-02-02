@@ -3,8 +3,7 @@ import db, { exists } from "@server/db";
 import path from "path";
 import semver from "semver";
 import { versionMigrations } from "@server/db/schema";
-import { __DIRNAME } from "@server/lib/consts";
-import { loadAppVersion } from "@server/lib/loadAppVersion";
+import { __DIRNAME, APP_VERSION } from "@server/lib/consts";
 import { SqliteError } from "better-sqlite3";
 import m1 from "./scripts/1.0.0-beta1";
 import m2 from "./scripts/1.0.0-beta2";
@@ -34,10 +33,7 @@ await runMigrations();
 
 export async function runMigrations() {
     try {
-        const appVersion = loadAppVersion();
-        if (!appVersion) {
-            throw new Error("APP_VERSION is not set in the environment");
-        }
+        const appVersion = APP_VERSION;
 
         if (exists) {
             await executeScripts();

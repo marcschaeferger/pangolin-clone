@@ -6,6 +6,7 @@ import { fromError } from "zod-validation-error";
 import {
     __DIRNAME,
     APP_PATH,
+    APP_VERSION,
     configFilePath1,
     configFilePath2
 } from "@server/lib/consts";
@@ -239,11 +240,7 @@ export class Config {
             throw new Error(`Invalid configuration file: ${errors}`);
         }
 
-        const appVersion = loadAppVersion();
-        if (!appVersion) {
-            throw new Error("Could not load the application version");
-        }
-        process.env.APP_VERSION = appVersion;
+        process.env.APP_VERSION = APP_VERSION;
 
         process.env.NEXT_PORT = parsedConfig.data.server.next_port.toString();
         process.env.SERVER_EXTERNAL_PORT =
