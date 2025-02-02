@@ -133,15 +133,6 @@ export async function createResource(
                     )
                 );
 
-            if (existingResource.length > 0) {
-                return next(
-                    createHttpError(
-                        HttpCode.CONFLICT,
-                        "Resource with that protocol and port already exists"
-                    )
-                );
-            }
-        } else {
             if (proxyPort === 443 || proxyPort === 80) {
                 return next(
                     createHttpError(
@@ -151,6 +142,15 @@ export async function createResource(
                 );
             }
 
+            if (existingResource.length > 0) {
+                return next(
+                    createHttpError(
+                        HttpCode.CONFLICT,
+                        "Resource with that protocol and port already exists"
+                    )
+                );
+            }
+        } else {
             // make sure the full domain is unique
             const existingResource = await db
                 .select()
