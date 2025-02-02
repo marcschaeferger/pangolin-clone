@@ -10,7 +10,7 @@ import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { addPeer } from "../gerbil/peers";
 import { addTargets } from "../newt/targets";
-import { pickPort } from "./ports";
+import { pickPort } from "./helpers";
 
 // Regular expressions for validation
 const DOMAIN_REGEX =

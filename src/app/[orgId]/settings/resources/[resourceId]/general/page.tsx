@@ -14,6 +14,19 @@ import {
     FormMessage
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem
+} from "@/components/ui/command";
+import { cn } from "@app/lib/cn";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger
+} from "@/components/ui/popover";
 import { useResourceContext } from "@app/hooks/useResourceContext";
 import { ListSitesResponse } from "@server/routers/site";
 import { useEffect, useState } from "react";
@@ -37,6 +50,7 @@ import CustomDomainInput from "../CustomDomainInput";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { subdomainSchema } from "@server/schemas/subdomainSchema";
+import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 
 const GeneralFormSchema = z
     .object({
@@ -75,7 +89,12 @@ const GeneralFormSchema = z
         }
     );
 
+const TransferFormSchema = z.object({
+    siteId: z.number()
+});
+
 type GeneralFormValues = z.infer<typeof GeneralFormSchema>;
+type TransferFormValues = z.infer<typeof TransferFormSchema>;
 
 export default function GeneralForm() {
     const params = useParams();
@@ -91,6 +110,8 @@ export default function GeneralForm() {
     const [sites, setSites] = useState<ListSitesResponse["sites"]>([]);
     const [saveLoading, setSaveLoading] = useState(false);
     const [domainSuffix, setDomainSuffix] = useState(org.org.domain);
+    const [transferLoading, setTransferLoading] = useState(false);
+    const [open, setOpen] = useState(false);
 
     const form = useForm<GeneralFormValues>({
         resolver: zodResolver(GeneralFormSchema),
@@ -101,6 +122,13 @@ export default function GeneralForm() {
             http: resource.http
         },
         mode: "onChange"
+    });
+
+    const transferForm = useForm<TransferFormValues>({
+        resolver: zodResolver(TransferFormSchema),
+        defaultValues: {
+            siteId: resource.siteId ? Number(resource.siteId) : undefined
+        }
     });
 
     useEffect(() => {
@@ -116,14 +144,15 @@ export default function GeneralForm() {
     async function onSubmit(data: GeneralFormValues) {
         setSaveLoading(true);
 
-        api.post<AxiosResponse<GetResourceAuthInfoResponse>>(
-            `resource/${resource?.resourceId}`,
-            {
-                name: data.name,
-                subdomain: data.subdomain
-                // siteId: data.siteId,
-            }
-        )
+        const res = await api
+            .post<AxiosResponse<GetResourceAuthInfoResponse>>(
+                `resource/${resource?.resourceId}`,
+                {
+                    name: data.name,
+                    subdomain: data.subdomain
+                    // siteId: data.siteId,
+                }
+            )
             .catch((e) => {
                 toast({
                     variant: "destructive",
@@ -133,18 +162,45 @@ export default function GeneralForm() {
                         "An error occurred while updating the resource"
                     )
                 });
+            });
+
+        if (res && res.status === 200) {
+            toast({
+                title: "Resource updated",
+                description: "The resource has been updated successfully"
+            });
+
+            updateResource({ name: data.name, subdomain: data.subdomain });
+        }
+        setSaveLoading(false);
+    }
+
+    async function onTransfer(data: TransferFormValues) {
+        setTransferLoading(true);
+
+        const res = await api
+            .post(`resource/${resource?.resourceId}/transfer`, {
+                siteId: data.siteId
             })
-            .then(() => {
+            .catch((e) => {
                 toast({
-                    title: "Resource updated",
-                    description: "The resource has been updated successfully"
+                    variant: "destructive",
+                    title: "Failed to transfer resource",
+                    description: formatAxiosError(
+                        e,
+                        "An error occurred while transferring the resource"
+                    )
                 });
+            });
 
-                updateResource({ name: data.name, subdomain: data.subdomain });
-
-                router.refresh();
-            })
-            .finally(() => setSaveLoading(false));
+        if (res && res.status === 200) {
+            toast({
+                title: "Resource transferred",
+                description: "The resource has been transferred successfully"
+            });
+            router.refresh();
+        }
+        setTransferLoading(false);
     }
 
     return (
@@ -270,6 +326,131 @@ export default function GeneralForm() {
                         form="general-settings-form"
                     >
                         Save Settings
+                    </Button>
+                </SettingsSectionFooter>
+            </SettingsSection>
+
+            <SettingsSection>
+                <SettingsSectionHeader>
+                    <SettingsSectionTitle>
+                        Transfer Resource
+                    </SettingsSectionTitle>
+                    <SettingsSectionDescription>
+                        Transfer this resource to a different site
+                    </SettingsSectionDescription>
+                </SettingsSectionHeader>
+
+                <SettingsSectionBody>
+                    <SettingsSectionForm>
+                        <Form {...transferForm}>
+                            <form
+                                onSubmit={transferForm.handleSubmit(onTransfer)}
+                                className="space-y-4"
+                                id="transfer-form"
+                            >
+                                <FormField
+                                    control={transferForm.control}
+                                    name="siteId"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col">
+                                            <FormLabel>
+                                                Destination Site
+                                            </FormLabel>
+                                            <Popover
+                                                open={open}
+                                                onOpenChange={setOpen}
+                                            >
+                                                <PopoverTrigger asChild>
+                                                    <FormControl>
+                                                        <Button
+                                                            variant="outline"
+                                                            role="combobox"
+                                                            className={cn(
+                                                                "w-full justify-between",
+                                                                !field.value &&
+                                                                    "text-muted-foreground"
+                                                            )}
+                                                        >
+                                                            {field.value
+                                                                ? sites.find(
+                                                                      (site) =>
+                                                                          site.siteId ===
+                                                                          field.value
+                                                                  )?.name
+                                                                : "Select site"}
+                                                            <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                        </Button>
+                                                    </FormControl>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-full p-0">
+                                                    <Command>
+                                                        <CommandInput
+                                                            placeholder="Search sites..."
+                                                            className="h-9"
+                                                        />
+                                                        <CommandEmpty>
+                                                            No sites found.
+                                                        </CommandEmpty>
+                                                        <CommandGroup>
+                                                            {sites.map(
+                                                                (site) => (
+                                                                    <CommandItem
+                                                                        value={
+                                                                            `${site.name}:${site.siteId}`
+                                                                        }
+                                                                        key={
+                                                                            site.siteId
+                                                                        }
+                                                                        onSelect={() => {
+                                                                            transferForm.setValue(
+                                                                                "siteId",
+                                                                                site.siteId
+                                                                            );
+                                                                            setOpen(
+                                                                                false
+                                                                            );
+                                                                        }}
+                                                                    >
+                                                                        {
+                                                                            site.name
+                                                                        }
+                                                                        <CheckIcon
+                                                                            className={cn(
+                                                                                "ml-auto h-4 w-4",
+                                                                                site.siteId ===
+                                                                                    field.value
+                                                                                    ? "opacity-100"
+                                                                                    : "opacity-0"
+                                                                            )}
+                                                                        />
+                                                                    </CommandItem>
+                                                                )
+                                                            )}
+                                                        </CommandGroup>
+                                                    </Command>
+                                                </PopoverContent>
+                                            </Popover>
+                                            <FormDescription>
+                                                Select the new site to transfer this resource to.
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </form>
+                        </Form>
+                    </SettingsSectionForm>
+                </SettingsSectionBody>
+
+                <SettingsSectionFooter>
+                    <Button
+                        type="submit"
+                        loading={transferLoading}
+                        disabled={transferLoading}
+                        form="transfer-form"
+                        variant="destructive"
+                    >
+                        Transfer Resource
                     </Button>
                 </SettingsSectionFooter>
             </SettingsSection>
