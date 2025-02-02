@@ -145,14 +145,11 @@ export default function GeneralForm() {
         setSaveLoading(true);
 
         const res = await api
-            .post<AxiosResponse<GetResourceAuthInfoResponse>>(
-                `resource/${resource?.resourceId}`,
-                {
-                    name: data.name,
-                    subdomain: data.subdomain
-                    // siteId: data.siteId,
-                }
-            )
+            .post(`resource/${resource?.resourceId}`, {
+                name: data.name,
+                subdomain: data.subdomain,
+                proxyPort: data.proxyPort
+            })
             .catch((e) => {
                 toast({
                     variant: "destructive",
@@ -170,7 +167,11 @@ export default function GeneralForm() {
                 description: "The resource has been updated successfully"
             });
 
-            updateResource({ name: data.name, subdomain: data.subdomain });
+            updateResource({
+                name: data.name,
+                subdomain: data.subdomain,
+                proxyPort: data.proxyPort
+            });
         }
         setSaveLoading(false);
     }
@@ -395,9 +396,7 @@ export default function GeneralForm() {
                                                             {sites.map(
                                                                 (site) => (
                                                                     <CommandItem
-                                                                        value={
-                                                                            `${site.name}:${site.siteId}`
-                                                                        }
+                                                                        value={`${site.name}:${site.siteId}`}
                                                                         key={
                                                                             site.siteId
                                                                         }
@@ -431,7 +430,8 @@ export default function GeneralForm() {
                                                 </PopoverContent>
                                             </Popover>
                                             <FormDescription>
-                                                Select the new site to transfer this resource to.
+                                                Select the new site to transfer
+                                                this resource to.
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>

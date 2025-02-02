@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
 import { orgs, resources, sites } from "@server/db/schema";
-import { eq, or } from "drizzle-orm";
+import { eq, or, and } from "drizzle-orm";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
@@ -63,13 +63,16 @@ export async function updateResource(
         const { resourceId } = parsedParams.data;
         const updateData = parsedBody.data;
 
-        const resource = await db
+        const [result] = await db
             .select()
             .from(resources)
             .where(eq(resources.resourceId, resourceId))
             .leftJoin(orgs, eq(resources.orgId, orgs.orgId));
 
-        if (resource.length === 0) {
+        const resource = result.resources;
+        const org = result.orgs;
+
+        if (!resource || !org) {
             return next(
                 createHttpError(
                     HttpCode.NOT_FOUND,
@@ -78,7 +81,41 @@ export async function updateResource(
             );
         }
 
-        if (!resource[0].orgs?.domain) {
+        if (updateData.proxyPort) {
+            const proxyPort = updateData.proxyPort;
+            const existingResource = await db
+                .select()
+                .from(resources)
+                .where(
+                    and(
+                        eq(resources.protocol, resource.protocol),
+                        eq(resources.proxyPort, proxyPort!)
+                    )
+                );
+
+            if (proxyPort === 443 || proxyPort === 80) {
+                return next(
+                    createHttpError(
+                        HttpCode.BAD_REQUEST,
+                        "Port 80 and 443 are reserved for https resources"
+                    )
+                );
+            }
+
+            if (
+                existingResource.length > 0 &&
+                existingResource[0].resourceId !== resourceId
+            ) {
+                return next(
+                    createHttpError(
+                        HttpCode.CONFLICT,
+                        "Resource with that protocol and port already exists"
+                    )
+                );
+            }
+        }
+
+        if (!org?.domain) {
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
@@ -88,7 +125,7 @@ export async function updateResource(
         }
 
         const fullDomain = updateData.subdomain
-            ? `${updateData.subdomain}.${resource[0].orgs.domain}`
+            ? `${updateData.subdomain}.${org.domain}`
             : undefined;
 
         const updatePayload = {
@@ -109,10 +146,6 @@ export async function updateResource(
                     `Resource with ID ${resourceId} not found`
                 )
             );
-        }
-
-        if (resource[0].resources.ssl !== updatedResource[0].ssl) {
-            // invalidate all sessions?
         }
 
         return response(res, {
