@@ -38,7 +38,7 @@ export type ResourceRow = {
     domain: string;
     site: string;
     siteId: string;
-    hasAuth: boolean;
+    authState: string;
     http: boolean;
     protocol: string;
     proxyPort: number | null;
@@ -165,9 +165,7 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
             header: "Protocol",
             cell: ({ row }) => {
                 const resourceRow = row.original;
-                return (
-                    <span>{resourceRow.protocol.toUpperCase()}</span>
-                );
+                return <span>{resourceRow.protocol.toUpperCase()}</span>;
             }
         },
         {
@@ -177,17 +175,23 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                 const resourceRow = row.original;
                 return (
                     <div>
-                    {!resourceRow.http ? (
-                                            <CopyToClipboard text={resourceRow.proxyPort!.toString()} isLink={false} />
-                    ) : (
-                    <CopyToClipboard text={resourceRow.domain} isLink={true} />
-                    )}
+                        {!resourceRow.http ? (
+                            <CopyToClipboard
+                                text={resourceRow.proxyPort!.toString()}
+                                isLink={false}
+                            />
+                        ) : (
+                            <CopyToClipboard
+                                text={resourceRow.domain}
+                                isLink={true}
+                            />
+                        )}
                     </div>
                 );
             }
         },
         {
-            accessorKey: "hasAuth",
+            accessorKey: "authState",
             header: ({ column }) => {
                 return (
                     <Button
@@ -205,23 +209,19 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                 const resourceRow = row.original;
                 return (
                     <div>
-                        
-
-                        {!resourceRow.http ? (
+                        {resourceRow.authState === "protected" ? (
+                            <span className="text-green-500 flex items-center space-x-2">
+                                <ShieldCheck className="w-4 h-4" />
+                                <span>Protected</span>
+                            </span>
+                        ) : resourceRow.authState === "not_protected" ? (
+                            <span className="text-yellow-500 flex items-center space-x-2">
+                                <ShieldOff className="w-4 h-4" />
+                                <span>Not Protected</span>
+                            </span>
+                        ) : (
                             <span>--</span>
-                        ) : 
-                            resourceRow.hasAuth ? (
-                                <span className="text-green-500 flex items-center space-x-2">
-                                    <ShieldCheck className="w-4 h-4" />
-                                    <span>Protected</span>
-                                </span>
-                            ) : (
-                                <span className="text-yellow-500 flex items-center space-x-2">
-                                    <ShieldOff className="w-4 h-4" />
-                                    <span>Not Protected</span>
-                                </span>
-                            )
-                        }
+                        )}
                     </div>
                 );
             }
