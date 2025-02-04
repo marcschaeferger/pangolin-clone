@@ -6,8 +6,10 @@ export function pullEnv(): Env {
             nextPort: process.env.NEXT_PORT as string,
             externalPort: process.env.SERVER_EXTERNAL_PORT as string,
             sessionCookieName: process.env.SESSION_COOKIE_NAME as string,
-            resourceAccessTokenParam: process.env.RESOURCE_ACCESS_TOKEN_PARAM as string,
-            resourceSessionRequestParam: process.env.RESOURCE_SESSION_REQUEST_PARAM as string
+            resourceAccessTokenParam: process.env
+                .RESOURCE_ACCESS_TOKEN_PARAM as string,
+            resourceSessionRequestParam: process.env
+                .RESOURCE_SESSION_REQUEST_PARAM as string
         },
         app: {
             environment: process.env.ENVIRONMENT as string,
@@ -29,6 +31,10 @@ export function pullEnv(): Env {
                     : false,
             allowRawResources:
                 process.env.FLAGS_ALLOW_RAW_RESOURCES === "true" ? true : false,
+            allowBaseDomainResources:
+                process.env.FLAGS_ALLOW_BASE_DOMAIN_RESOURCES === "true"
+                    ? true
+                    : false
         }
     };
 }

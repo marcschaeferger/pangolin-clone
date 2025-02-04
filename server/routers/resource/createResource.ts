@@ -34,7 +34,8 @@ const createResourceSchema = z
         siteId: z.number(),
         http: z.boolean(),
         protocol: z.string(),
-        proxyPort: z.number().optional()
+        proxyPort: z.number().optional(),
+        isBaseDomain: z.boolean().optional()
     })
     .refine(
         (data) => {
@@ -55,7 +56,7 @@ const createResourceSchema = z
     )
     .refine(
         (data) => {
-            if (data.http) {
+            if (data.http && !data.isBaseDomain) {
                 return subdomainSchema.safeParse(data.subdomain).success;
             }
             return true;
@@ -75,7 +76,7 @@ const createResourceSchema = z
             return true;
         },
         {
-            message: "Cannot update proxyPort"
+            message: "Proxy port cannot be set"
         }
     )
     .refine(
@@ -87,6 +88,19 @@ const createResourceSchema = z
         },
         {
             message: "Port 80 and 443 are reserved for http and https resources"
+        }
+    )
+    .refine(
+        (data) => {
+            if (!config.getRawConfig().flags?.allow_base_domain_resources) {
+                if (data.isBaseDomain) {
+                    return false;
+                }
+            }
+            return true;
+        },
+        {
+            message: "Base domain resources are not allowed"
         }
     );
 
@@ -108,7 +122,7 @@ export async function createResource(
             );
         }
 
-        let { name, subdomain, protocol, proxyPort, http } = parsedBody.data;
+        let { name, subdomain, protocol, proxyPort, http, isBaseDomain } = parsedBody.data;
 
         // Validate request params
         const parsedParams = createResourceParamsSchema.safeParse(req.params);
@@ -145,7 +159,13 @@ export async function createResource(
             );
         }
 
-        const fullDomain = `${subdomain}.${org[0].domain}`;
+        let fullDomain = "";
+        if (isBaseDomain) {
+            fullDomain = org[0].domain;
+        } else {
+            fullDomain = `${subdomain}.${org[0].domain}`;
+        }
+
         // if http is false check to see if there is already a resource with the same port and protocol
         if (!http) {
             const existingResource = await db
@@ -195,7 +215,8 @@ export async function createResource(
                     http,
                     protocol,
                     proxyPort,
-                    ssl: true
+                    ssl: true,
+                    isBaseDomain
                 })
                 .returning();
 

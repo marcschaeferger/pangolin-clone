@@ -2,11 +2,7 @@
 
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-    InfoIcon,
-    ShieldCheck,
-    ShieldOff
-} from "lucide-react";
+import { InfoIcon, ShieldCheck, ShieldOff } from "lucide-react";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { useResourceContext } from "@app/hooks/useResourceContext";
 import { Separator } from "@app/components/ui/separator";
@@ -26,9 +22,12 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
     const { org } = useOrgContext();
     const { resource, authInfo } = useResourceContext();
 
-    const fullUrl = `${resource.ssl ? "https" : "http"}://${
-        resource.subdomain
-    }.${org.org.domain}`;
+    let fullUrl = `${resource.ssl ? "https" : "http"}://`;
+    if (resource.isBaseDomain) {
+        fullUrl = fullUrl + org.org.domain;
+    } else {
+        fullUrl = fullUrl + `${resource.subdomain}.${org.org.domain}`;
+    }
 
     return (
         <Alert>
@@ -82,7 +81,9 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
                             <InfoSection>
                                 <InfoSectionTitle>Protocol</InfoSectionTitle>
                                 <InfoSectionContent>
-                                    <span>{resource.protocol.toUpperCase()}</span>
+                                    <span>
+                                        {resource.protocol.toUpperCase()}
+                                    </span>
                                 </InfoSectionContent>
                             </InfoSection>
                             <Separator orientation="vertical" />

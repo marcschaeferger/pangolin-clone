@@ -28,7 +28,8 @@ const updateResourceBodySchema = z
         sso: z.boolean().optional(),
         blockAccess: z.boolean().optional(),
         proxyPort: z.number().int().min(1).max(65535).optional(),
-        emailWhitelistEnabled: z.boolean().optional()
+        emailWhitelistEnabled: z.boolean().optional(),
+        isBaseDomain: z.boolean().optional()
     })
     .strict()
     .refine((data) => Object.keys(data).length > 0, {
@@ -54,6 +55,19 @@ const updateResourceBodySchema = z
         },
         {
             message: "Port 80 and 443 are reserved for http and https resources"
+        }
+    )
+    .refine(
+        (data) => {
+            if (!config.getRawConfig().flags?.allow_base_domain_resources) {
+                if (data.isBaseDomain) {
+                    return false;
+                }
+            }
+            return true;
+        },
+        {
+            message: "Base domain resources are not allowed"
         }
     );
 
@@ -104,6 +118,29 @@ export async function updateResource(
             );
         }
 
+        if (updateData.subdomain) {
+            if (!resource.http) {
+                return next(
+                    createHttpError(
+                        HttpCode.BAD_REQUEST,
+                        "Cannot update subdomain for non-http resource"
+                    )
+                );
+            }
+
+            const valid = subdomainSchema.safeParse(
+                updateData.subdomain
+            ).success;
+            if (!valid) {
+                return next(
+                    createHttpError(
+                        HttpCode.BAD_REQUEST,
+                        "Invalid subdomain provided"
+                    )
+                );
+            }
+        }
+
         if (updateData.proxyPort) {
             const proxyPort = updateData.proxyPort;
             const existingResource = await db
@@ -138,14 +175,31 @@ export async function updateResource(
             );
         }
 
-        const fullDomain = updateData.subdomain
-            ? `${updateData.subdomain}.${org.domain}`
-            : undefined;
+        let fullDomain = "";
+        if (updateData.isBaseDomain) {
+            fullDomain = org.domain;
+        } else {
+            fullDomain = `${updateData.subdomain}.${org.domain}`;
+        }
 
         const updatePayload = {
             ...updateData,
             ...(fullDomain && { fullDomain })
         };
+
+        const [existingDomain] = await db
+            .select()
+            .from(resources)
+            .where(eq(resources.fullDomain, fullDomain));
+
+        if (existingDomain && existingDomain.resourceId !== resourceId) {
+            return next(
+                createHttpError(
+                    HttpCode.CONFLICT,
+                    "Resource with that domain already exists"
+                )
+            );
+        }
 
         const updatedResource = await db
             .update(resources)
