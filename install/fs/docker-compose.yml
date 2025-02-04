@@ -36,7 +36,7 @@ services:
 {{end}}
 
   traefik:
-    image: traefik:v3.1
+    image: traefik:v3.3.3
     container_name: traefik
     restart: unless-stopped
 {{if .InstallGerbil}}
