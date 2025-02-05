@@ -2,6 +2,7 @@ export type Env = {
     app: {
         environment: string;
         version: string;
+        dashboardUrl: string;
     },
     server: {
         externalPort: string;

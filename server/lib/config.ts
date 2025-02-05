@@ -274,6 +274,7 @@ export class Config {
             ?.allow_base_domain_resources
             ? "true"
             : "false";
+        process.env.DASHBOARD_URL = parsedConfig.data.app.dashboard_url;
 
         this.rawConfig = parsedConfig.data;
     }

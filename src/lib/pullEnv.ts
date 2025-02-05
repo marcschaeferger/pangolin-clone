@@ -13,7 +13,8 @@ export function pullEnv(): Env {
         },
         app: {
             environment: process.env.ENVIRONMENT as string,
-            version: process.env.APP_VERSION as string
+            version: process.env.APP_VERSION as string,
+            dashboardUrl: process.env.DASHBOARD_URL as string,
         },
         email: {
             emailEnabled: process.env.EMAIL_ENABLED === "true" ? true : false
