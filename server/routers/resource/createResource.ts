@@ -79,17 +79,17 @@ const createResourceSchema = z
             message: "Proxy port cannot be set"
         }
     )
-    .refine(
-        (data) => {
-            if (data.proxyPort === 443 || data.proxyPort === 80) {
-                return false;
-            }
-            return true;
-        },
-        {
-            message: "Port 80 and 443 are reserved for http and https resources"
-        }
-    )
+    // .refine(
+    //     (data) => {
+    //         if (data.proxyPort === 443 || data.proxyPort === 80) {
+    //             return false;
+    //         }
+    //         return true;
+    //     },
+    //     {
+    //         message: "Port 80 and 443 are reserved for http and https resources"
+    //     }
+    // )
     .refine(
         (data) => {
             if (!config.getRawConfig().flags?.allow_base_domain_resources) {
