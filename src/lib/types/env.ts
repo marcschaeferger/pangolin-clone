@@ -2,6 +2,7 @@ export type Env = {
     app: {
         environment: string;
         version: string;
+        dashboardUrl: string;
     },
     server: {
         externalPort: string;
@@ -18,5 +19,6 @@ export type Env = {
         disableUserCreateOrg: boolean;
         emailVerificationRequired: boolean;
         allowRawResources: boolean;
+        allowBaseDomainResources: boolean;
     }
 };

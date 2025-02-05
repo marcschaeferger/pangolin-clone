@@ -1,3 +1,23 @@
+## Authentication Site
+
+
+| EN                                                       | PL                                                           | Notes      |
+| -------------------------------------------------------- | ------------------------------------------------------------ | ---------- |
+| Powered by [Pangolin](https://github.com/fosrl/pangolin) | Zasilane przez [Pangolin](https://github.com/fosrl/pangolin) |            |
+| Authentication Required                                  | Wymagane uwierzytelnienie                                    |            |
+| Choose your preferred method to access {resource}        | Wybierz preferowaną metodę dostępu do {resource}             |            |
+| PIN                                                      | PIN                                                          |            |
+| User                                                     | Zaloguj                                                      |            |
+| 6-digit PIN Code                                         | 6-cyfrowy kod PIN                                            | pin login  |
+| Login in with PIN                                        | Zaloguj się PIN’em                                           | pin login  |
+| Email                                                    | Email                                                        | user login |
+| Enter your email                                         | Wprowadź swój email                                          | user login |
+| Password                                                 | Hasło                                                        | user login |
+| Enter your password                                      | Wprowadź swoje hasło                                         | user login |
+| Forgot your password?                                    | Zapomniałeś hasła?                                           | user login |
+| Log in                                                   | Zaloguj                                                      | user login |
+
+
 ## Login site
 
 | EN                    | PL                             | Notes       |

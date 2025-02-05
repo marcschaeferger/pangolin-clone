@@ -6,7 +6,7 @@
 [![Discord](https://img.shields.io/discord/1325658630518865980?logo=discord&style=flat-square)](https://discord.gg/HCJR8Xhme4)
 [![Youtube](https://img.shields.io/badge/YouTube-red?logo=youtube&logoColor=white&style=flat-square)](https://www.youtube.com/@fossorial-app)
 
-Pangolin is a self-hosted tunneled reverse proxy management server with identity and access management, designed to securely expose private resources through use with the Traefik reverse proxy and WireGuard tunnel clients like Newt. With Pangolin, you retain full control over your infrastructure while providing a user-friendly and feature-rich solution for managing proxies, authentication, and access, and simplifying complex network setups, all with a clean and simple UI.
+Pangolin is a self-hosted tunneled reverse proxy management server with identity and access control, designed to securely expose private resources through use with the Traefik reverse proxy and WireGuard tunnel clients like Newt. With Pangolin, you retain full control over your infrastructure while providing a user-friendly and feature-rich solution for managing proxies, authentication, and access, and simplifying complex network setups, all with a clean and simple UI.
 
 ### Installation and Documentation
 
@@ -128,6 +128,10 @@ Pangolin was inspired by several existing projects and concepts:
 
 -   **Authentik and Authelia**:  
     These projects inspired Pangolin’s centralized authentication system for proxies, enabling robust user and role management.
+
+## Project Development / Roadmap
+
+Pangolin is under active development, and we are continuously adding new features and improvements. View the [project board](https://github.com/orgs/fosrl/projects/1) for more detailed info.
 
 ## Licensing
 

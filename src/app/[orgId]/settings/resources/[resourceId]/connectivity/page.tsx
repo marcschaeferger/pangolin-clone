@@ -132,9 +132,8 @@ export default function ReverseProxyTargets(props: {
         defaultValues: {
             ip: "",
             method: resource.http ? "http" : null,
-            port: resource.http ? 80 : resource.proxyPort || 1234
             // protocol: "TCP",
-        }
+        } as z.infer<typeof addTargetSchema>
     });
 
     useEffect(() => {

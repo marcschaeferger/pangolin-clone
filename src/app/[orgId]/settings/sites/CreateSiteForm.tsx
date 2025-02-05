@@ -75,6 +75,7 @@ export default function CreateSiteForm({
     const { toast } = useToast();
 
     const api = createApiClient(useEnvContext());
+    const { env } = useEnvContext();
 
     const [isLoading, setIsLoading] = useState(false);
     const [isChecked, setIsChecked] = useState(false);
@@ -234,13 +235,7 @@ Endpoint = ${siteDefaults.endpoint}:${siteDefaults.listenPort}
 PersistentKeepalive = 5`
             : "";
 
-    // am I at http or https?
-    let proto = "https:";
-    // if (typeof window !== "undefined") {
-    //     proto = window.location.protocol;
-    // }
-
-    const newtConfig = `newt --id ${siteDefaults?.newtId} --secret ${siteDefaults?.newtSecret} --endpoint ${proto}//${siteDefaults?.endpoint}`;
+    const newtConfig = `newt --id ${siteDefaults?.newtId} --secret ${siteDefaults?.newtSecret} --endpoint ${env.app.dashboardUrl}`;
 
     return (
         <div className="space-y-4">

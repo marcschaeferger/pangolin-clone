@@ -11,7 +11,7 @@ import { isIpInCidr } from "@server/lib/ip";
 import { fromError } from "zod-validation-error";
 import { addTargets } from "../newt/targets";
 import { eq } from "drizzle-orm";
-import { pickPort } from "./ports";
+import { pickPort } from "./helpers";
 
 // Regular expressions for validation
 const DOMAIN_REGEX =

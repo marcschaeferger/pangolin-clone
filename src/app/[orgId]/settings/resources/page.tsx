@@ -56,11 +56,14 @@ export default async function ResourcesPage(props: ResourcesPageProps) {
             protocol: resource.protocol,
             proxyPort: resource.proxyPort,
             http: resource.http,
-            hasAuth:
-                resource.sso ||
-                resource.pincodeId !== null ||
-                resource.pincodeId !== null ||
-                resource.whitelist
+            authState: !resource.http
+                ? "none"
+                : resource.sso ||
+                    resource.pincodeId !== null ||
+                    resource.pincodeId !== null ||
+                    resource.whitelist
+                  ? "protected"
+                  : "not_protected"
         };
     });
 

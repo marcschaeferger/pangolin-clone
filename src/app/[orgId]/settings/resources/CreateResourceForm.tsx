@@ -63,6 +63,8 @@ import { subdomainSchema } from "@server/schemas/subdomainSchema";
 import Link from "next/link";
 import { SquareArrowOutUpRight } from "lucide-react";
 import CopyTextBox from "@app/components/CopyTextBox";
+import { RadioGroup, RadioGroupItem } from "@app/components/ui/radio-group";
+import { Label } from "@app/components/ui/label";
 
 const createResourceFormSchema = z
     .object({
@@ -71,7 +73,8 @@ const createResourceFormSchema = z
         siteId: z.number(),
         http: z.boolean(),
         protocol: z.string(),
-        proxyPort: z.number().optional()
+        proxyPort: z.number().optional(),
+        isBaseDomain: z.boolean().optional()
     })
     .refine(
         (data) => {
@@ -92,7 +95,7 @@ const createResourceFormSchema = z
     )
     .refine(
         (data) => {
-            if (data.http) {
+            if (data.http && !data.isBaseDomain) {
                 return subdomainSchema.safeParse(data.subdomain).success;
             }
             return true;
@@ -129,25 +132,35 @@ export default function CreateResourceForm({
 
     const [sites, setSites] = useState<ListSitesResponse["sites"]>([]);
     const [domainSuffix, setDomainSuffix] = useState<string>(org.org.domain);
-
     const [showSnippets, setShowSnippets] = useState(false);
-
     const [resourceId, setResourceId] = useState<number | null>(null);
+    const [domainType, setDomainType] = useState<"subdomain" | "basedomain">(
+        "subdomain"
+    );
 
     const form = useForm<CreateResourceFormValues>({
         resolver: zodResolver(createResourceFormSchema),
         defaultValues: {
             subdomain: "",
-            name: "My Resource",
+            name: "",
             http: true,
             protocol: "tcp"
         }
     });
 
+    function reset() {
+        form.reset();
+        setSites([]);
+        setShowSnippets(false);
+        setResourceId(null);
+    }
+
     useEffect(() => {
         if (!open) {
             return;
         }
+
+        reset();
 
         const fetchSites = async () => {
             const res = await api.get<AxiosResponse<ListSitesResponse>>(
@@ -173,7 +186,8 @@ export default function CreateResourceForm({
                     http: data.http,
                     protocol: data.protocol,
                     proxyPort: data.http ? undefined : data.proxyPort,
-                    siteId: data.siteId
+                    siteId: data.siteId,
+                    isBaseDomain: data.isBaseDomain
                 }
             )
             .catch((e) => {
@@ -239,7 +253,7 @@ export default function CreateResourceForm({
                                                 <FormLabel>Name</FormLabel>
                                                 <FormControl>
                                                     <Input
-                                                        placeholder="Your name"
+                                                        placeholder="Resource name"
                                                         {...field}
                                                     />
                                                 </FormControl>
@@ -284,33 +298,89 @@ export default function CreateResourceForm({
                                         />
                                     )}
 
+                                    {form.watch("http") &&
+                                        env.flags.allowBaseDomainResources && (
+                                            <div>
+                                                <RadioGroup
+                                                    className="flex space-x-4"
+                                                    defaultValue={domainType}
+                                                    onValueChange={(val) => {
+                                                        setDomainType(
+                                                            val as any
+                                                        );
+                                                        form.setValue(
+                                                            "isBaseDomain",
+                                                            val === "basedomain"
+                                                        );
+                                                    }}
+                                                >
+                                                    <div className="flex items-center space-x-2">
+                                                        <RadioGroupItem
+                                                            value="subdomain"
+                                                            id="r1"
+                                                        />
+                                                        <Label htmlFor="r1">
+                                                            Subdomain
+                                                        </Label>
+                                                    </div>
+                                                    <div className="flex items-center space-x-2">
+                                                        <RadioGroupItem
+                                                            value="basedomain"
+                                                            id="r2"
+                                                        />
+                                                        <Label htmlFor="r2">
+                                                            Base Domain
+                                                        </Label>
+                                                    </div>
+                                                </RadioGroup>
+                                            </div>
+                                        )}
+
                                     {form.watch("http") && (
                                         <FormField
                                             control={form.control}
                                             name="subdomain"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>
-                                                        Subdomain
-                                                    </FormLabel>
-                                                    <FormControl>
-                                                        <CustomDomainInput
-                                                            value={
-                                                                field.value ??
-                                                                ""
-                                                            }
-                                                            domainSuffix={
-                                                                domainSuffix
-                                                            }
-                                                            placeholder="Enter subdomain"
-                                                            onChange={(value) =>
-                                                                form.setValue(
-                                                                    "subdomain",
+                                                    {!env.flags
+                                                        .allowBaseDomainResources && (
+                                                        <FormLabel>
+                                                            Subdomain
+                                                        </FormLabel>
+                                                    )}
+                                                    {domainType ===
+                                                    "subdomain" ? (
+                                                        <FormControl>
+                                                            <CustomDomainInput
+                                                                value={
+                                                                    field.value ??
+                                                                    ""
+                                                                }
+                                                                domainSuffix={
+                                                                    domainSuffix
+                                                                }
+                                                                placeholder="Subdomain"
+                                                                onChange={(
                                                                     value
-                                                                )
-                                                            }
-                                                        />
-                                                    </FormControl>
+                                                                ) =>
+                                                                    form.setValue(
+                                                                        "subdomain",
+                                                                        value
+                                                                    )
+                                                                }
+                                                            />
+                                                        </FormControl>
+                                                    ) : (
+                                                        <FormControl>
+                                                            <Input
+                                                                value={
+                                                                    domainSuffix
+                                                                }
+                                                                readOnly
+                                                                disabled
+                                                            />
+                                                        </FormControl>
+                                                    )}
                                                     <FormDescription>
                                                         This is the fully
                                                         qualified domain name
@@ -464,9 +534,7 @@ export default function CreateResourceForm({
                                                                             site
                                                                         ) => (
                                                                             <CommandItem
-                                                                                value={
-                                                                                    site.niceId
-                                                                                }
+                                                                                value={`${site.siteId}:${site.name}:${site.niceId}`}
                                                                                 key={
                                                                                     site.siteId
                                                                                 }
@@ -560,21 +628,25 @@ export default function CreateResourceForm({
                         )}
                     </CredenzaBody>
                     <CredenzaFooter>
-                        {!showSnippets && <Button
-                            type="submit"
-                            form="create-resource-form"
-                            loading={loading}
-                            disabled={loading}
-                        >
-                            Create Resource
-                        </Button>}
+                        {!showSnippets && (
+                            <Button
+                                type="submit"
+                                form="create-resource-form"
+                                loading={loading}
+                                disabled={loading}
+                            >
+                                Create Resource
+                            </Button>
+                        )}
 
-                        {showSnippets && <Button
-                            loading={loading}
-                            onClick={() => goToResource()}
-                        >
-                            Go to Resource
-                        </Button>}
+                        {showSnippets && (
+                            <Button
+                                loading={loading}
+                                onClick={() => goToResource()}
+                            >
+                                Go to Resource
+                            </Button>
+                        )}
 
                         <CredenzaClose asChild>
                             <Button variant="outline">Close</Button>

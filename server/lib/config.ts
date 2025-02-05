@@ -6,10 +6,10 @@ import { fromError } from "zod-validation-error";
 import {
     __DIRNAME,
     APP_PATH,
+    APP_VERSION,
     configFilePath1,
     configFilePath2
 } from "@server/lib/consts";
-import { loadAppVersion } from "@server/lib/loadAppVersion";
 import { passwordSchema } from "@server/auth/passwordSchema";
 import stoi from "./stoi";
 
@@ -151,7 +151,8 @@ const configSchema = z.object({
             require_email_verification: z.boolean().optional(),
             disable_signup_without_invite: z.boolean().optional(),
             disable_user_create_org: z.boolean().optional(),
-            allow_raw_resources: z.boolean().optional()
+            allow_raw_resources: z.boolean().optional(),
+            allow_base_domain_resources: z.boolean().optional()
         })
         .optional()
 });
@@ -239,11 +240,7 @@ export class Config {
             throw new Error(`Invalid configuration file: ${errors}`);
         }
 
-        const appVersion = loadAppVersion();
-        if (!appVersion) {
-            throw new Error("Could not load the application version");
-        }
-        process.env.APP_VERSION = appVersion;
+        process.env.APP_VERSION = APP_VERSION;
 
         process.env.NEXT_PORT = parsedConfig.data.server.next_port.toString();
         process.env.SERVER_EXTERNAL_PORT =
@@ -255,9 +252,9 @@ export class Config {
             ? "true"
             : "false";
         process.env.FLAGS_ALLOW_RAW_RESOURCES = parsedConfig.data.flags
-        ?.allow_raw_resources
-        ? "true"
-        : "false";
+            ?.allow_raw_resources
+            ? "true"
+            : "false";
         process.env.SESSION_COOKIE_NAME =
             parsedConfig.data.server.session_cookie_name;
         process.env.EMAIL_ENABLED = parsedConfig.data.email ? "true" : "false";
@@ -273,6 +270,11 @@ export class Config {
             parsedConfig.data.server.resource_access_token_param;
         process.env.RESOURCE_SESSION_REQUEST_PARAM =
             parsedConfig.data.server.resource_session_request_param;
+        process.env.FLAGS_ALLOW_BASE_DOMAIN_RESOURCES = parsedConfig.data.flags
+            ?.allow_base_domain_resources
+            ? "true"
+            : "false";
+        process.env.DASHBOARD_URL = parsedConfig.data.app.dashboard_url;
 
         this.rawConfig = parsedConfig.data;
     }

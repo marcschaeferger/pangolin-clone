@@ -23,7 +23,12 @@ export async function copyInConfig() {
         const allResources = await trx.select().from(resources);
 
         for (const resource of allResources) {
-            const fullDomain = `${resource.subdomain}.${domain}`;
+            let fullDomain = "";
+            if (resource.isBaseDomain) {
+                fullDomain = domain;
+            } else {
+                fullDomain = `${resource.subdomain}.${domain}`;
+            }
             await trx
                 .update(resources)
                 .set({ fullDomain })

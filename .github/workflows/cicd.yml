@@ -35,13 +35,8 @@ jobs:
             - name: Update version in package.json
               run: |
                   TAG=${{ env.TAG }}
-                  if [ -f package.json ]; then
-                    jq --arg version "$TAG" '.version = $version' package.json > package.tmp.json && mv package.tmp.json package.json
-                    echo "Updated package.json with version $TAG"
-                  else
-                    echo "package.json not found"
-                  fi
-                  cat package.json
+                  sed -i "s/export const APP_VERSION = \".*\";/export const APP_VERSION = \"$TAG\";/" server/lib/consts.ts
+                  cat server/lib/
 
             - name: Pull latest Gerbil version
               id: get-gerbil-tag

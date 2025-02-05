@@ -1,6 +1,8 @@
 import path from "path";
 import { fileURLToPath } from "url";
-import { existsSync } from "fs";
+
+// This is a placeholder value replaced by the build process
+export const APP_VERSION = "1.0.0-beta.12";
 
 export const __FILENAME = fileURLToPath(import.meta.url);
 export const __DIRNAME = path.dirname(__FILENAME);

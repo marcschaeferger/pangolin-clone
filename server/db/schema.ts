@@ -53,7 +53,8 @@ export const resources = sqliteTable("resources", {
     proxyPort: integer("proxyPort"),
     emailWhitelistEnabled: integer("emailWhitelistEnabled", { mode: "boolean" })
         .notNull()
-        .default(false)
+        .default(false),
+    isBaseDomain: integer("isBaseDomain", { mode: "boolean" })
 });
 
 export const targets = sqliteTable("targets", {

@@ -2,13 +2,14 @@ import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
 import { orgs, resources, sites } from "@server/db/schema";
-import { eq, or } from "drizzle-orm";
+import { eq, or, and } from "drizzle-orm";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { subdomainSchema } from "@server/schemas/subdomainSchema";
+import config from "@server/lib/config";
 
 const updateResourceParamsSchema = z
     .object({
@@ -27,12 +28,48 @@ const updateResourceBodySchema = z
         sso: z.boolean().optional(),
         blockAccess: z.boolean().optional(),
         proxyPort: z.number().int().min(1).max(65535).optional(),
-        emailWhitelistEnabled: z.boolean().optional()
+        emailWhitelistEnabled: z.boolean().optional(),
+        isBaseDomain: z.boolean().optional()
     })
     .strict()
     .refine((data) => Object.keys(data).length > 0, {
         message: "At least one field must be provided for update"
-    });
+    })
+    .refine(
+        (data) => {
+            if (!config.getRawConfig().flags?.allow_raw_resources) {
+                if (data.proxyPort !== undefined) {
+                    return false;
+                }
+            }
+            return true;
+        },
+        { message: "Cannot update proxyPort" }
+    )
+    // .refine(
+    //     (data) => {
+    //         if (data.proxyPort === 443 || data.proxyPort === 80) {
+    //             return false;
+    //         }
+    //         return true;
+    //     },
+    //     {
+    //         message: "Port 80 and 443 are reserved for http and https resources"
+    //     }
+    // )
+    .refine(
+        (data) => {
+            if (!config.getRawConfig().flags?.allow_base_domain_resources) {
+                if (data.isBaseDomain) {
+                    return false;
+                }
+            }
+            return true;
+        },
+        {
+            message: "Base domain resources are not allowed"
+        }
+    );
 
 export async function updateResource(
     req: Request,
@@ -63,13 +100,16 @@ export async function updateResource(
         const { resourceId } = parsedParams.data;
         const updateData = parsedBody.data;
 
-        const resource = await db
+        const [result] = await db
             .select()
             .from(resources)
             .where(eq(resources.resourceId, resourceId))
             .leftJoin(orgs, eq(resources.orgId, orgs.orgId));
 
-        if (resource.length === 0) {
+        const resource = result.resources;
+        const org = result.orgs;
+
+        if (!resource || !org) {
             return next(
                 createHttpError(
                     HttpCode.NOT_FOUND,
@@ -78,7 +118,55 @@ export async function updateResource(
             );
         }
 
-        if (!resource[0].orgs?.domain) {
+        if (updateData.subdomain) {
+            if (!resource.http) {
+                return next(
+                    createHttpError(
+                        HttpCode.BAD_REQUEST,
+                        "Cannot update subdomain for non-http resource"
+                    )
+                );
+            }
+
+            const valid = subdomainSchema.safeParse(
+                updateData.subdomain
+            ).success;
+            if (!valid) {
+                return next(
+                    createHttpError(
+                        HttpCode.BAD_REQUEST,
+                        "Invalid subdomain provided"
+                    )
+                );
+            }
+        }
+
+        if (updateData.proxyPort) {
+            const proxyPort = updateData.proxyPort;
+            const existingResource = await db
+                .select()
+                .from(resources)
+                .where(
+                    and(
+                        eq(resources.protocol, resource.protocol),
+                        eq(resources.proxyPort, proxyPort!)
+                    )
+                );
+
+            if (
+                existingResource.length > 0 &&
+                existingResource[0].resourceId !== resourceId
+            ) {
+                return next(
+                    createHttpError(
+                        HttpCode.CONFLICT,
+                        "Resource with that protocol and port already exists"
+                    )
+                );
+            }
+        }
+
+        if (!org?.domain) {
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
@@ -87,14 +175,31 @@ export async function updateResource(
             );
         }
 
-        const fullDomain = updateData.subdomain
-            ? `${updateData.subdomain}.${resource[0].orgs.domain}`
-            : undefined;
+        let fullDomain = "";
+        if (updateData.isBaseDomain) {
+            fullDomain = org.domain;
+        } else {
+            fullDomain = `${updateData.subdomain}.${org.domain}`;
+        }
 
         const updatePayload = {
             ...updateData,
             ...(fullDomain && { fullDomain })
         };
+
+        const [existingDomain] = await db
+            .select()
+            .from(resources)
+            .where(eq(resources.fullDomain, fullDomain));
+
+        if (existingDomain && existingDomain.resourceId !== resourceId) {
+            return next(
+                createHttpError(
+                    HttpCode.CONFLICT,
+                    "Resource with that domain already exists"
+                )
+            );
+        }
 
         const updatedResource = await db
             .update(resources)
@@ -109,10 +214,6 @@ export async function updateResource(
                     `Resource with ID ${resourceId} not found`
                 )
             );
-        }
-
-        if (resource[0].resources.ssl !== updatedResource[0].ssl) {
-            // invalidate all sessions?
         }
 
         return response(res, {

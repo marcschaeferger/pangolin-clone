@@ -25,6 +25,7 @@ export async function traefikConfigProvider(
                 http: resources.http,
                 proxyPort: resources.proxyPort,
                 protocol: resources.protocol,
+                isBaseDomain: resources.isBaseDomain,
                 // Site fields
                 site: {
                     siteId: sites.siteId,
@@ -110,11 +111,11 @@ export async function traefikConfigProvider(
 
             const routerName = `${resource.resourceId}-router`;
             const serviceName = `${resource.resourceId}-service`;
-            const fullDomain = `${resource.subdomain}.${org.domain}`;
+            const fullDomain = `${resource.fullDomain}`;
 
             if (resource.http) {
                 // HTTP configuration remains the same
-                if (!resource.subdomain) {
+                if (!resource.subdomain && !resource.isBaseDomain) {
                     continue;
                 }
 
@@ -147,6 +148,8 @@ export async function traefikConfigProvider(
                           }
                         : {})
                 };
+
+                logger.debug(config.getRawConfig().traefik.prefer_wildcard_cert)
 
                 const additionalMiddlewares =
                     config.getRawConfig().traefik.additional_middlewares || [];
