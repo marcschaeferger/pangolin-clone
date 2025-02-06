@@ -27,6 +27,8 @@ import { verifyUserHasAction } from "../middlewares/verifyUserHasAction";
 import { ActionsEnum } from "@server/auth/actions";
 import { verifyUserIsOrgOwner } from "../middlewares/verifyUserIsOrgOwner";
 import { createNewt, getToken } from "./newt";
+import rateLimit from "express-rate-limit";
+import createHttpError from "http-errors";
 
 // Root routes
 export const unauthenticated = Router();
@@ -452,22 +454,61 @@ authRouter.post(
 );
 authRouter.post("/2fa/disable", verifySessionUserMiddleware, auth.disable2fa);
 authRouter.post("/verify-email", verifySessionMiddleware, auth.verifyEmail);
+
 authRouter.post(
     "/verify-email/request",
     verifySessionMiddleware,
+    rateLimit({
+        windowMs: 15 * 60 * 1000,
+        max: 3,
+        keyGenerator: (req) => `requestEmailVerificationCode:${req.body.email}`,
+        handler: (req, res, next) => {
+            const message = `You can only request an email verification code ${3} times every ${15} minutes. Please try again later.`;
+            return next(createHttpError(HttpCode.TOO_MANY_REQUESTS, message));
+        }
+    }),
     auth.requestEmailVerificationCode
 );
+
 // authRouter.post(
 //     "/change-password",
 //     verifySessionUserMiddleware,
 //     auth.changePassword
 // );
-authRouter.post("/reset-password/request", auth.requestPasswordReset);
+
+authRouter.post(
+    "/reset-password/request",
+    rateLimit({
+        windowMs: 15 * 60 * 1000,
+        max: 3,
+        keyGenerator: (req) => `requestPasswordReset:${req.body.email}`,
+        handler: (req, res, next) => {
+            const message = `You can only request a password reset ${3} times every ${15} minutes. Please try again later.`;
+            return next(createHttpError(HttpCode.TOO_MANY_REQUESTS, message));
+        }
+    }),
+    auth.requestPasswordReset
+);
+
 authRouter.post("/reset-password/", auth.resetPassword);
 
 authRouter.post("/resource/:resourceId/password", resource.authWithPassword);
 authRouter.post("/resource/:resourceId/pincode", resource.authWithPincode);
-authRouter.post("/resource/:resourceId/whitelist", resource.authWithWhitelist);
+
+authRouter.post(
+    "/resource/:resourceId/whitelist",
+    rateLimit({
+        windowMs: 15 * 60 * 1000,
+        max: 10,
+        keyGenerator: (req) => `authWithWhitelist:${req.body.email}`,
+        handler: (req, res, next) => {
+            const message = `You can only request an email OTP ${10} times every ${15} minutes. Please try again later.`;
+            return next(createHttpError(HttpCode.TOO_MANY_REQUESTS, message));
+        }
+    }),
+    resource.authWithWhitelist
+);
+
 authRouter.post(
     "/resource/:resourceId/access-token",
     resource.authWithAccessToken
