@@ -49,11 +49,11 @@ export function RolesDataTable<TData, TValue>({
         getSortedRowModel: getSortedRowModel(),
         onColumnFiltersChange: setColumnFilters,
         getFilteredRowModel: getFilteredRowModel(),
-        state: {
+        initialState: {
             sorting,
             columnFilters,
             pagination: {
-                pageSize: 100,
+                pageSize: 20,
                 pageIndex: 0,
             },
         },

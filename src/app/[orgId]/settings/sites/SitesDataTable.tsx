@@ -50,7 +50,7 @@ export function SitesDataTable<TData, TValue>({
         getSortedRowModel: getSortedRowModel(),
         onColumnFiltersChange: setColumnFilters,
         getFilteredRowModel: getFilteredRowModel(),
-        state: {
+        initialState: {
             sorting,
             columnFilters,
             pagination: {
