@@ -6,6 +6,8 @@ import { fromError } from "zod-validation-error";
 import { response } from "@server/lib/response";
 import db from "@server/db";
 import {
+    BadgerRule,
+    badgerRules,
     ResourceAccessToken,
     ResourcePassword,
     resourcePassword,
@@ -28,6 +30,7 @@ import logger from "@server/logger";
 import { verifyResourceAccessToken } from "@server/auth/verifyResourceAccessToken";
 import NodeCache from "node-cache";
 import { generateSessionToken } from "@server/auth/sessions/app";
+import { isIpInCidr } from "@server/lib/ip";
 
 // We'll see if this speeds anything up
 const cache = new NodeCache({
@@ -79,6 +82,7 @@ export async function verifyResourceSession(
             host,
             originalRequestURL,
             requestIp,
+            path,
             accessToken: token
         } = parsedBody.data;
 
@@ -143,6 +147,15 @@ export async function verifyResourceSession(
             !resource.emailWhitelistEnabled
         ) {
             logger.debug("Resource allowed because no auth");
+            return allowed(res);
+        }
+
+        // check the rules
+        if (
+            resource.applyRules &&
+            (await checkRules(resource.resourceId, clientIp, path))
+        ) {
+            logger.debug("Resource allowed because rules are satisfied");
             return allowed(res);
         }
 
@@ -434,6 +447,44 @@ async function isUserAllowedToAccessResource(
 
     if (userResourceAccess.length > 0) {
         return true;
+    }
+
+    return false;
+}
+
+async function checkRules(
+    resourceId: number,
+    clientIp: string | undefined,
+    path: string | undefined
+): Promise<boolean> {
+    const ruleCacheKey = `rules:${resourceId}`;
+
+    let rules: BadgerRule[] | undefined = cache.get(ruleCacheKey);
+
+    if (!rules) {
+        rules = await db
+            .select()
+            .from(badgerRules)
+            .where(eq(badgerRules.resourceId, resourceId));
+
+        cache.set(ruleCacheKey, rules);
+    }
+
+    if (rules.length === 0) {
+        logger.debug("No rules found for resource", resourceId);
+        return false;
+    }
+
+    for (const rule of rules) {
+        if (clientIp && rule.match == "IP" && isIpInCidr(clientIp, rule.value)) {
+            return rule.action == "ACCEPT"; 
+        } else if (path && rule.match == "PATH") {
+            // rule.value is a regex, match on the path and see if it matches
+            const re = new RegExp(rule.value);
+            if (re.test(path)) {
+                return rule.action == "ACCEPT";
+            }
+        }
     }
 
     return false;
