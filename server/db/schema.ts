@@ -54,7 +54,8 @@ export const resources = sqliteTable("resources", {
     emailWhitelistEnabled: integer("emailWhitelistEnabled", { mode: "boolean" })
         .notNull()
         .default(false),
-    isBaseDomain: integer("isBaseDomain", { mode: "boolean" })
+    isBaseDomain: integer("isBaseDomain", { mode: "boolean" }),
+    applyRules: integer("applyRules", { mode: "boolean" }).notNull().default(false)
 });
 
 export const targets = sqliteTable("targets", {
