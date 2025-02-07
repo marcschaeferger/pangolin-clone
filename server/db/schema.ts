@@ -371,6 +371,16 @@ export const versionMigrations = sqliteTable("versionMigrations", {
     executedAt: integer("executedAt").notNull()
 });
 
+export const badgerRules = sqliteTable("badgerRules", {
+    ruleId: integer("ruleId").primaryKey({ autoIncrement: true }),
+    resourceId: integer("resourceId")
+        .notNull()
+        .references(() => resources.resourceId, { onDelete: "cascade" }),
+    action: text("action").notNull(), // ACCEPT, DROP
+    match: text("match").notNull(), // CIDR, PATH
+    value: text("value").notNull()
+});
+
 export type Org = InferSelectModel<typeof orgs>;
 export type User = InferSelectModel<typeof users>;
 export type Site = InferSelectModel<typeof sites>;
