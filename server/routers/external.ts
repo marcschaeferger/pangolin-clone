@@ -188,7 +188,7 @@ authenticated.get(
 );
 
 authenticated.put(
-    "/resource/:resourceId/:ruleId",
+    "/resource/:resourceId/rule",
     verifyResourceAccess,
     verifyUserHasAction(ActionsEnum.createResourceRule),
     resource.createResourceRule
@@ -200,14 +200,13 @@ authenticated.get(
     resource.listResourceRules
 );
 authenticated.post(
-    "/resource/:resourceId/:ruleId",
+    "/resource/:resourceId/rule/:ruleId",
     verifyResourceAccess,
     verifyUserHasAction(ActionsEnum.updateResourceRule),
     resource.updateResourceRule
 );
-
 authenticated.delete(
-    "/resource/:resourceId/:ruleId",
+    "/resource/:resourceId/rule/:ruleId",
     verifyResourceAccess,
     verifyUserHasAction(ActionsEnum.deleteResourceRule),
     resource.deleteResourceRule

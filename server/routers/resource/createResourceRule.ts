@@ -11,10 +11,18 @@ import { fromError } from "zod-validation-error";
 
 const createResourceRuleSchema = z
     .object({
-        resourceId: z.number().int().positive(),
         action: z.enum(["ACCEPT", "DROP"]),
         match: z.enum(["CIDR", "PATH"]),
         value: z.string().min(1)
+    })
+    .strict();
+
+const createResourceRuleParamsSchema = z
+    .object({
+        resourceId: z
+            .string()
+            .transform(Number)
+            .pipe(z.number().int().positive())
     })
     .strict();
 
@@ -34,7 +42,21 @@ export async function createResourceRule(
             );
         }
 
-        const { resourceId, action, match, value } = parsedBody.data;
+        const { action, match, value } = parsedBody.data;
+
+        const parsedParams = createResourceRuleParamsSchema.safeParse(
+            req.params
+        );
+        if (!parsedParams.success) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    fromError(parsedParams.error).toString()
+                )
+            );
+        }
+
+        const { resourceId } = parsedParams.data;
 
         // Verify that the referenced resource exists
         const [resource] = await db

@@ -14,6 +14,10 @@ const deleteResourceRuleSchema = z
         ruleId: z
             .string()
             .transform(Number)
+            .pipe(z.number().int().positive()),
+        resourceId: z
+            .string()
+            .transform(Number)
             .pipe(z.number().int().positive())
     })
     .strict();
