@@ -21,3 +21,4 @@ export * from "./getExchangeToken";
 export * from "./createResourceRule";
 export * from "./deleteResourceRule";
 export * from "./listResourceRules";
+export * from "./updateResourceRule";

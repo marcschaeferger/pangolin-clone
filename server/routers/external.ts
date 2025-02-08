@@ -199,6 +199,13 @@ authenticated.get(
     verifyUserHasAction(ActionsEnum.listResourceRules),
     resource.listResourceRules
 );
+authenticated.post(
+    "/resource/:resourceId/:ruleId",
+    verifyResourceAccess,
+    verifyUserHasAction(ActionsEnum.updateResourceRule),
+    resource.updateResourceRule
+);
+
 authenticated.delete(
     "/resource/:resourceId/:ruleId",
     verifyResourceAccess,
