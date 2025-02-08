@@ -195,7 +195,7 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
                             Two-Factor Authentication
                         </h3>
                         <p className="text-sm text-muted-foreground">
-                            Enter the code from your authenticator app.
+                            Enter the code from your authenticator app or one of your single-use backup codes.
                         </p>
                     </div>
                     <Form {...mfaForm}>
