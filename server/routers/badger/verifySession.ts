@@ -480,7 +480,7 @@ async function checkRules(
             return rule.action == "ACCEPT"; 
         } else if (path && rule.match == "PATH") {
             // rule.value is a regex, match on the path and see if it matches
-            const re = new RegExp(rule.value);
+            const re = urlGlobToRegex(rule.value);
             if (re.test(path)) {
                 return rule.action == "ACCEPT";
             }
@@ -489,3 +489,19 @@ async function checkRules(
 
     return false;
 }
+
+function urlGlobToRegex(pattern: string): RegExp {  
+    // Remove leading slash if present (we'll add it to the regex pattern)
+    pattern = pattern.startsWith('/') ? pattern.slice(1) : pattern;
+  
+    // Escape special regex characters except *
+    const escapedPattern = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
+  
+    // Replace * with regex pattern for any valid URL segment characters
+    const regexPattern = escapedPattern.replace(/\*/g, '[a-zA-Z0-9_-]+');
+  
+    // Create the final pattern that:
+    // 1. Optionally matches leading slash
+    // 2. Matches the entire string
+    return new RegExp(`^/?${regexPattern}$`);
+  }
