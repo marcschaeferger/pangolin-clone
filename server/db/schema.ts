@@ -372,7 +372,7 @@ export const versionMigrations = sqliteTable("versionMigrations", {
     executedAt: integer("executedAt").notNull()
 });
 
-export const badgerRules = sqliteTable("badgerRules", {
+export const resourceRules = sqliteTable("resourceRules", {
     ruleId: integer("ruleId").primaryKey({ autoIncrement: true }),
     resourceId: integer("resourceId")
         .notNull()
@@ -414,4 +414,4 @@ export type ResourceOtp = InferSelectModel<typeof resourceOtp>;
 export type ResourceAccessToken = InferSelectModel<typeof resourceAccessToken>;
 export type ResourceWhitelist = InferSelectModel<typeof resourceWhitelist>;
 export type VersionMigration = InferSelectModel<typeof versionMigrations>;
-export type BadgerRule = InferSelectModel<typeof badgerRules>;
+export type ResourceRule = InferSelectModel<typeof resourceRules>;

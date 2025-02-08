@@ -6,8 +6,7 @@ import { fromError } from "zod-validation-error";
 import { response } from "@server/lib/response";
 import db from "@server/db";
 import {
-    BadgerRule,
-    badgerRules,
+    resourceRules,
     ResourceAccessToken,
     ResourcePassword,
     resourcePassword,
@@ -16,7 +15,8 @@ import {
     resources,
     sessions,
     userOrgs,
-    users
+    users,
+    ResourceRule
 } from "@server/db/schema";
 import { and, eq } from "drizzle-orm";
 import config from "@server/lib/config";
@@ -459,13 +459,13 @@ async function checkRules(
 ): Promise<boolean> {
     const ruleCacheKey = `rules:${resourceId}`;
 
-    let rules: BadgerRule[] | undefined = cache.get(ruleCacheKey);
+    let rules: ResourceRule[] | undefined = cache.get(ruleCacheKey);
 
     if (!rules) {
         rules = await db
             .select()
-            .from(badgerRules)
-            .where(eq(badgerRules.resourceId, resourceId));
+            .from(resourceRules)
+            .where(eq(resourceRules.resourceId, resourceId));
 
         cache.set(ruleCacheKey, rules);
     }

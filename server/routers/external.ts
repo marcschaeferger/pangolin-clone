@@ -186,6 +186,26 @@ authenticated.get(
     verifyUserHasAction(ActionsEnum.listTargets),
     target.listTargets
 );
+
+authenticated.put(
+    "/resource/:resourceId/:ruleId",
+    verifyResourceAccess,
+    verifyUserHasAction(ActionsEnum.createResourceRule),
+    resource.createResourceRule
+);
+authenticated.get(
+    "/resource/:resourceId/rules",
+    verifyResourceAccess,
+    verifyUserHasAction(ActionsEnum.listResourceRules),
+    resource.listResourceRules
+);
+authenticated.delete(
+    "/resource/:resourceId/:ruleId",
+    verifyResourceAccess,
+    verifyUserHasAction(ActionsEnum.deleteResourceRule),
+    resource.deleteResourceRule
+);
+
 authenticated.get(
     "/target/:targetId",
     verifyTargetAccess,
@@ -204,6 +224,7 @@ authenticated.delete(
     verifyUserHasAction(ActionsEnum.deleteTarget),
     target.deleteTarget
 );
+
 
 authenticated.put(
     "/org/:orgId/role",
