@@ -732,6 +732,9 @@ export default function ResourceAuthenticationPage() {
                                                             }}
                                                         />
                                                     </FormControl>
+                                                    <FormDescription>
+                                                        Press enter to add an email after typing it in the input field.
+                                                    </FormDescription>
                                                 </FormItem>
                                             )}
                                         />
