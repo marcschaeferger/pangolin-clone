@@ -488,7 +488,7 @@ async function checkRules(
     for (const rule of rules) {
         if (
             clientIp &&
-            rule.match == "IP" &&
+            rule.match == "CIDR" &&
             isIpInCidr(clientIp, rule.value)
         ) {
             return rule.action as "ACCEPT" | "DROP";
