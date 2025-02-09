@@ -12,6 +12,9 @@ build-arm:
 build-x86:
 	docker buildx build --platform linux/amd64 -t fosrl/pangolin:latest .
 
+auth-ecr:
+	aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/g5j5p7x0
+
 build-x86-ecr:
 	docker buildx build --platform linux/amd64 -t 216989133116.dkr.ecr.us-east-1.amazonaws.com/pangolin:latest --push .
 
