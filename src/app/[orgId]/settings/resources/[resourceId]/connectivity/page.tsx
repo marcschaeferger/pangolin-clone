@@ -131,7 +131,7 @@ export default function ReverseProxyTargets(props: {
         resolver: zodResolver(addTargetSchema),
         defaultValues: {
             ip: "",
-            method: resource.http ? "http" : null,
+            method: resource.http ? "http" : null
             // protocol: "TCP",
         } as z.infer<typeof addTargetSchema>
     });
@@ -316,17 +316,31 @@ export default function ReverseProxyTargets(props: {
     }
 
     async function saveSsl(val: boolean) {
-        const res = await api.post(`/resource/${params.resourceId}`, {
-            ssl: val
-        });
+        const res = await api
+            .post(`/resource/${params.resourceId}`, {
+                ssl: val
+            })
+            .catch((err) => {
+                console.error(err);
+                toast({
+                    variant: "destructive",
+                    title: "Failed to update SSL configuration",
+                    description: formatAxiosError(
+                        err,
+                        "An error occurred while updating the SSL configuration"
+                    )
+                });
+            });
 
-        setSslEnabled(val);
-        updateResource({ ssl: val });
+        if (res && res.status === 200) {
+            setSslEnabled(val);
+            updateResource({ ssl: val });
 
-        toast({
-            title: "SSL Configuration",
-            description: "SSL configuration updated successfully"
-        });
+            toast({
+                title: "SSL Configuration",
+                description: "SSL configuration updated successfully"
+            });
+        }
     }
 
     const columns: ColumnDef<LocalTarget>[] = [
@@ -652,7 +666,8 @@ export default function ReverseProxyTargets(props: {
                         </Table>
                     </TableContainer>
                     <p className="text-sm text-muted-foreground">
-                        Adding more than one target above will enable load balancing.
+                        Adding more than one target above will enable load
+                        balancing.
                     </p>
                 </SettingsSectionBody>
                 <SettingsSectionFooter>

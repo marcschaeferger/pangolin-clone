@@ -56,6 +56,7 @@ import {
     SettingsSectionFooter
 } from "@app/components/Settings";
 import { ListResourceRulesResponse } from "@server/routers/resource/listResourceRules";
+import { SwitchInput } from "@app/components/SwitchInput";
 
 // Schema for rule validation
 const addRuleSchema = z.object({
@@ -74,12 +75,13 @@ export default function ResourceRules(props: {
 }) {
     const params = use(props.params);
     const { toast } = useToast();
-    const { resource } = useResourceContext();
+    const { resource, updateResource } = useResourceContext();
     const api = createApiClient(useEnvContext());
     const [rules, setRules] = useState<LocalRule[]>([]);
     const [rulesToRemove, setRulesToRemove] = useState<number[]>([]);
     const [loading, setLoading] = useState(false);
     const [pageLoading, setPageLoading] = useState(true);
+    const [rulesEnabled, setRulesEnabled] = useState(resource.applyRules);
 
     const addRuleForm = useForm({
         resolver: zodResolver(addRuleSchema),
@@ -180,6 +182,34 @@ export default function ResourceRules(props: {
         );
     }
 
+    async function saveApplyRules(val: boolean) {
+        const res = await api
+            .post(`/resource/${params.resourceId}`, {
+                applyRules: val
+            })
+            .catch((err) => {
+                console.error(err);
+                toast({
+                    variant: "destructive",
+                    title: "Failed to update rules",
+                    description: formatAxiosError(
+                        err,
+                        "An error occurred while updating rules"
+                    )
+                });
+            });
+
+        if (res && res.status === 200) {
+            setRulesEnabled(val);
+            updateResource({ applyRules: val });
+
+            toast({
+                title: "Enable Rules",
+                description: "Rule evaluation has been updated"
+            });
+        }
+    }
+
     async function saveRules() {
         try {
             setLoading(true);
@@ -199,7 +229,10 @@ export default function ResourceRules(props: {
                     setLoading(false);
                     return;
                 }
-                if (rule.match === "PATH" && !isValidUrlGlobPattern(rule.value)) {
+                if (
+                    rule.match === "PATH" &&
+                    !isValidUrlGlobPattern(rule.value)
+                ) {
                     toast({
                         variant: "destructive",
                         title: "Invalid URL path",
@@ -336,6 +369,25 @@ export default function ResourceRules(props: {
         <SettingsContainer>
             <SettingsSection>
                 <SettingsSectionHeader>
+                    <SettingsSectionTitle>Enable Rules</SettingsSectionTitle>
+                    <SettingsSectionDescription>
+                        Enable or disable rule evaluation for this resource
+                    </SettingsSectionDescription>
+                </SettingsSectionHeader>
+                <SettingsSectionBody>
+                    <SwitchInput
+                        id="rules-toggle"
+                        label="Enable Rules"
+                        defaultChecked={resource.applyRules}
+                        onCheckedChange={async (val) => {
+                            await saveApplyRules(val);
+                        }}
+                    />
+                </SettingsSectionBody>
+            </SettingsSection>
+
+            <SettingsSection>
+                <SettingsSectionHeader>
                     <SettingsSectionTitle>
                         Resource Rules Configuration
                     </SettingsSectionTitle>
@@ -400,9 +452,11 @@ export default function ResourceRules(props: {
                                                         <SelectItem value="CIDR">
                                                             CIDR
                                                         </SelectItem>
-                                                        <SelectItem value="PATH">
-                                                            PATH
-                                                        </SelectItem>
+                                                        {resource.http && (
+                                                            <SelectItem value="PATH">
+                                                                PATH
+                                                            </SelectItem>
+                                                        )}
                                                     </SelectContent>
                                                 </Select>
                                             </FormControl>
@@ -421,14 +475,21 @@ export default function ResourceRules(props: {
                                             </FormControl>
                                             <FormMessage />
                                             <FormDescription>
-                                                Enter CIDR or path value based
-                                                on match type
+                                                Enter CIDR{" "}
+                                                {resource.http
+                                                    ? "or path value"
+                                                    : ""}{" "}
+                                                based on match type
                                             </FormDescription>
                                         </FormItem>
                                     )}
                                 />
                             </div>
-                            <Button type="submit" variant="outline">
+                            <Button
+                                type="submit"
+                                variant="outline"
+                                disabled={loading || !rulesEnabled}
+                            >
                                 Add Rule
                             </Button>
                         </form>
@@ -518,35 +579,35 @@ function isValidCIDR(cidr: string): boolean {
 
 function isValidUrlGlobPattern(pattern: string): boolean {
     // Remove leading slash if present
-    pattern = pattern.startsWith('/') ? pattern.slice(1) : pattern;
-    
+    pattern = pattern.startsWith("/") ? pattern.slice(1) : pattern;
+
     // Empty string is not valid
     if (!pattern) {
-      return false;
+        return false;
     }
-  
+
     // Split path into segments
-    const segments = pattern.split('/');
-    
+    const segments = pattern.split("/");
+
     // Check each segment
     for (let i = 0; i < segments.length; i++) {
-      const segment = segments[i];
-      
-      // Empty segments are not allowed (double slashes)
-      if (!segment && i !== segments.length - 1) {
-        return false;
-      }
-      
-      // If segment contains *, it must be exactly *
-      if (segment.includes('*') && segment !== '*') {
-        return false;
-      }
-      
-      // Check for invalid characters
-      if (!/^[a-zA-Z0-9_*-]*$/.test(segment)) {
-        return false;
-      }
+        const segment = segments[i];
+
+        // Empty segments are not allowed (double slashes)
+        if (!segment && i !== segments.length - 1) {
+            return false;
+        }
+
+        // If segment contains *, it must be exactly *
+        if (segment.includes("*") && segment !== "*") {
+            return false;
+        }
+
+        // Check for invalid characters
+        if (!/^[a-zA-Z0-9_*-]*$/.test(segment)) {
+            return false;
+        }
     }
-    
+
     return true;
-  }
+}
