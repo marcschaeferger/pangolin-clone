@@ -529,8 +529,8 @@ async function checkRules(
 }
 
 function urlGlobToRegex(pattern: string): RegExp {
-    // Remove leading slash if present (we'll add it to the regex pattern)
-    pattern = pattern.startsWith("/") ? pattern.slice(1) : pattern;
+    // Trim any leading or trailing slashes
+    pattern = pattern.replace(/^\/+|\/+$/g, "");
 
     // Escape special regex characters except *
     const escapedPattern = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
@@ -540,6 +540,7 @@ function urlGlobToRegex(pattern: string): RegExp {
 
     // Create the final pattern that:
     // 1. Optionally matches leading slash
-    // 2. Matches the entire string
-    return new RegExp(`^/?${regexPattern}$`);
+    // 2. Matches the pattern
+    // 3. Optionally matches trailing slash
+    return new RegExp(`^/?${regexPattern}/?$`);
 }
