@@ -491,13 +491,13 @@ async function checkRules(
     for (const rule of rules) {
         if (
             (clientIp &&
-            rule.match == "CIDR" &&
-            isIpInCidr(clientIp, rule.value) &&
-            rule.action === "DROP") ||
+                rule.match == "CIDR" &&
+                isIpInCidr(clientIp, rule.value) &&
+                rule.action === "DROP") ||
             (path &&
-            rule.match == "PATH" &&
-            urlGlobToRegex(rule.value).test(path) &&
-            rule.action === "DROP")
+                rule.match == "PATH" &&
+                urlGlobToRegex(rule.value).test(path) &&
+                rule.action === "DROP")
         ) {
             return "DROP";
         }
@@ -511,14 +511,14 @@ async function checkRules(
     if (hasAcceptRule) {
         for (const rule of rules) {
             if (rule.action !== "ACCEPT") continue;
-            
+
             if (
                 (clientIp &&
-                rule.match == "CIDR" &&
-                isIpInCidr(clientIp, rule.value)) ||
+                    rule.match == "CIDR" &&
+                    isIpInCidr(clientIp, rule.value)) ||
                 (path &&
-                rule.match == "PATH" &&
-                urlGlobToRegex(rule.value).test(path))
+                    rule.match == "PATH" &&
+                    urlGlobToRegex(rule.value).test(path))
             ) {
                 return "ACCEPT";
             }
