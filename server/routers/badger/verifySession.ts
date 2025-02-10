@@ -485,18 +485,42 @@ async function checkRules(
         return;
     }
 
+    let hasAcceptRule = false;
+
+    // First pass: look for DROP rules
     for (const rule of rules) {
         if (
-            clientIp &&
+            (clientIp &&
             rule.match == "CIDR" &&
-            isIpInCidr(clientIp, rule.value)
+            isIpInCidr(clientIp, rule.value) &&
+            rule.action === "DROP") ||
+            (path &&
+            rule.match == "PATH" &&
+            urlGlobToRegex(rule.value).test(path) &&
+            rule.action === "DROP")
         ) {
-            return rule.action as "ACCEPT" | "DROP";
-        } else if (path && rule.match == "PATH") {
-            // rule.value is a regex, match on the path and see if it matches
-            const re = urlGlobToRegex(rule.value);
-            if (re.test(path)) {
-                return rule.action as "ACCEPT" | "DROP";
+            return "DROP";
+        }
+        // Track if we see any ACCEPT rules for the second pass
+        if (rule.action === "ACCEPT") {
+            hasAcceptRule = true;
+        }
+    }
+
+    // Second pass: only check ACCEPT rules if we found one and didn't find a DROP
+    if (hasAcceptRule) {
+        for (const rule of rules) {
+            if (rule.action !== "ACCEPT") continue;
+            
+            if (
+                (clientIp &&
+                rule.match == "CIDR" &&
+                isIpInCidr(clientIp, rule.value)) ||
+                (path &&
+                rule.match == "PATH" &&
+                urlGlobToRegex(rule.value).test(path))
+            ) {
+                return "ACCEPT";
             }
         }
     }
