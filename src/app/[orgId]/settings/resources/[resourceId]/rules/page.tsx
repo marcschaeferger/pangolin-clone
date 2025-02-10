@@ -57,6 +57,15 @@ import {
 } from "@app/components/Settings";
 import { ListResourceRulesResponse } from "@server/routers/resource/listResourceRules";
 import { SwitchInput } from "@app/components/SwitchInput";
+import { Alert, AlertDescription, AlertTitle } from "@app/components/ui/alert";
+import { Check, Info, InfoIcon, X } from "lucide-react";
+import {
+    InfoSection,
+    InfoSections,
+    InfoSectionTitle
+} from "@app/components/InfoSection";
+import { Separator } from "@app/components/ui/separator";
+import { InfoPopup } from "@app/components/ui/info-popup";
 
 // Schema for rule validation
 const addRuleSchema = z.object({
@@ -69,6 +78,11 @@ type LocalRule = ArrayElement<ListResourceRulesResponse["rules"]> & {
     new?: boolean;
     updated?: boolean;
 };
+
+enum RuleAction {
+    ACCEPT = "Always Allow",
+    DROP = "Always Deny"
+}
 
 export default function ResourceRules(props: {
     params: Promise<{ resourceId: number }>;
@@ -296,8 +310,10 @@ export default function ResourceRules(props: {
                         {row.original.action}
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="ACCEPT">ACCEPT</SelectItem>
-                        <SelectItem value="DROP">DROP</SelectItem>
+                        <SelectItem value="ACCEPT">
+                            {RuleAction.ACCEPT}
+                        </SelectItem>
+                        <SelectItem value="DROP">{RuleAction.DROP}</SelectItem>
                     </SelectContent>
                 </Select>
             )
@@ -367,6 +383,56 @@ export default function ResourceRules(props: {
 
     return (
         <SettingsContainer>
+            <Alert>
+                <InfoIcon className="h-4 w-4" />
+                <AlertTitle className="font-semibold">About Rules</AlertTitle>
+                <AlertDescription className="mt-4">
+                    <p className="mb-4">
+                        Rules allow you to control access to your resource based
+                        on a set of criteria. You can create rules to allow or
+                        deny access based on IP address or URL path. Deny rules
+                        take precedence over allow rules. If a request matches
+                        both an allow and a deny rule, the deny rule will be
+                        applied.
+                    </p>
+                    <InfoSections>
+                        <InfoSection>
+                            <InfoSectionTitle>Actions</InfoSectionTitle>
+                            <ul className="text-sm text-muted-foreground space-y-1">
+                                <li className="flex items-center gap-2">
+                                    <Check className="text-green-500 w-4 h-4" />
+                                    Always Allow: Bypass all authentication
+                                    methods
+                                </li>
+                                <li className="flex items-center gap-2">
+                                    <X className="text-red-500 w-4 h-4" />
+                                    Always Deny: Block all requests; no
+                                    authentication can be attempted
+                                </li>
+                            </ul>
+                        </InfoSection>
+                        <Separator orientation="vertical" />
+                        <InfoSection>
+                            <InfoSectionTitle>
+                                Matching Criteria
+                            </InfoSectionTitle>
+                            <ul className="text-sm text-muted-foreground space-y-1">
+                                <li className="flex items-center gap-2">
+                                    Match a specific IP address
+                                </li>
+                                <li className="flex items-center gap-2">
+                                    Match a range of IP addresses in CIDR
+                                    notation
+                                </li>
+                                <li className="flex items-center gap-2">
+                                    Match a URL path or pattern
+                                </li>
+                            </ul>
+                        </InfoSection>
+                    </InfoSections>
+                </AlertDescription>
+            </Alert>
+
             <SettingsSection>
                 <SettingsSectionHeader>
                     <SettingsSectionTitle>Enable Rules</SettingsSectionTitle>
@@ -420,10 +486,10 @@ export default function ResourceRules(props: {
                                                     </SelectTrigger>
                                                     <SelectContent>
                                                         <SelectItem value="ACCEPT">
-                                                            ACCEPT
+                                                            {RuleAction.ACCEPT}
                                                         </SelectItem>
                                                         <SelectItem value="DROP">
-                                                            DROP
+                                                            {RuleAction.DROP}
                                                         </SelectItem>
                                                     </SelectContent>
                                                 </Select>
@@ -469,18 +535,20 @@ export default function ResourceRules(props: {
                                     name="value"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Value</FormLabel>
+                                            <InfoPopup
+                                                text="Value"
+                                                info={
+                                                    addRuleForm.watch(
+                                                        "match"
+                                                    ) === "CIDR"
+                                                        ? "Enter an address in CIDR format (e.g., 103.21.244.0/22)"
+                                                        : "Enter a URL path or pattern (e.g., /api/v1/todos or /api/v1/*)"
+                                                }
+                                            />
                                             <FormControl>
                                                 <Input {...field} />
                                             </FormControl>
                                             <FormMessage />
-                                            <FormDescription>
-                                                Enter CIDR{" "}
-                                                {resource.http
-                                                    ? "or path value"
-                                                    : ""}{" "}
-                                                based on match type
-                                            </FormDescription>
                                         </FormItem>
                                     )}
                                 />
