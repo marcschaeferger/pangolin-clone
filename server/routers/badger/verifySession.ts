@@ -485,18 +485,42 @@ async function checkRules(
         return;
     }
 
+    let hasAcceptRule = false;
+
+    // First pass: look for DROP rules
     for (const rule of rules) {
         if (
-            clientIp &&
-            rule.match == "CIDR" &&
-            isIpInCidr(clientIp, rule.value)
+            (clientIp &&
+                rule.match == "CIDR" &&
+                isIpInCidr(clientIp, rule.value) &&
+                rule.action === "DROP") ||
+            (path &&
+                rule.match == "PATH" &&
+                urlGlobToRegex(rule.value).test(path) &&
+                rule.action === "DROP")
         ) {
-            return rule.action as "ACCEPT" | "DROP";
-        } else if (path && rule.match == "PATH") {
-            // rule.value is a regex, match on the path and see if it matches
-            const re = urlGlobToRegex(rule.value);
-            if (re.test(path)) {
-                return rule.action as "ACCEPT" | "DROP";
+            return "DROP";
+        }
+        // Track if we see any ACCEPT rules for the second pass
+        if (rule.action === "ACCEPT") {
+            hasAcceptRule = true;
+        }
+    }
+
+    // Second pass: only check ACCEPT rules if we found one and didn't find a DROP
+    if (hasAcceptRule) {
+        for (const rule of rules) {
+            if (rule.action !== "ACCEPT") continue;
+
+            if (
+                (clientIp &&
+                    rule.match == "CIDR" &&
+                    isIpInCidr(clientIp, rule.value)) ||
+                (path &&
+                    rule.match == "PATH" &&
+                    urlGlobToRegex(rule.value).test(path))
+            ) {
+                return "ACCEPT";
             }
         }
     }
@@ -505,8 +529,8 @@ async function checkRules(
 }
 
 function urlGlobToRegex(pattern: string): RegExp {
-    // Remove leading slash if present (we'll add it to the regex pattern)
-    pattern = pattern.startsWith("/") ? pattern.slice(1) : pattern;
+    // Trim any leading or trailing slashes
+    pattern = pattern.replace(/^\/+|\/+$/g, "");
 
     // Escape special regex characters except *
     const escapedPattern = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
@@ -516,6 +540,7 @@ function urlGlobToRegex(pattern: string): RegExp {
 
     // Create the final pattern that:
     // 1. Optionally matches leading slash
-    // 2. Matches the entire string
-    return new RegExp(`^/?${regexPattern}$`);
+    // 2. Matches the pattern
+    // 3. Optionally matches trailing slash
+    return new RegExp(`^/?${regexPattern}/?$`);
 }
