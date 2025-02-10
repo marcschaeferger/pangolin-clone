@@ -269,7 +269,7 @@ export default function ReverseProxyTargets(props: {
                     >(`/resource/${params.resourceId}/target`, data);
                     target.targetId = res.data.data.targetId;
                 } else if (target.updated) {
-                    const res = await api.post(
+                    await api.post(
                         `/target/${target.targetId}`,
                         data
                     );
@@ -290,7 +290,7 @@ export default function ReverseProxyTargets(props: {
             for (const targetId of targetsToRemove) {
                 await api.delete(`/target/${targetId}`);
                 setTargets(
-                    targets.filter((target) => target.targetId !== targetId)
+                    targets.filter((t) => t.targetId !== targetId)
                 );
             }
 

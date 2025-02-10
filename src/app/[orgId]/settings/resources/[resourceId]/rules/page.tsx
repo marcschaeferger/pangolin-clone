@@ -243,30 +243,42 @@ export default function ResourceRules(props: {
                 }
 
                 if (rule.new) {
-                    await api.put(`/resource/${params.resourceId}/rule`, data);
+                    const res = await api.put(`/resource/${params.resourceId}/rule`, data);
+                    rule.ruleId = res.data.data.ruleId;
                 } else if (rule.updated) {
                     await api.post(
                         `/resource/${params.resourceId}/rule/${rule.ruleId}`,
                         data
                     );
                 }
+
+                setRules([
+                    ...rules.map((r) => {
+                        let res = {
+                            ...r,
+                            new: false,
+                            updated: false
+                        };
+                        return res;
+                    })
+                ]);
             }
 
             for (const ruleId of rulesToRemove) {
                 await api.delete(
                     `/resource/${params.resourceId}/rule/${ruleId}`
                 );
+                setRules(
+                    rules.filter((r) => r.ruleId !== ruleId)
+                );
             }
-
-            setRules(
-                rules.map((rule) => ({ ...rule, new: false, updated: false }))
-            );
-            setRulesToRemove([]);
 
             toast({
                 title: "Rules updated",
                 description: "Rules updated successfully"
             });
+
+            setRulesToRemove([]);
         } catch (err) {
             console.error(err);
             toast({
