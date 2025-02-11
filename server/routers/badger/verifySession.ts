@@ -6,6 +6,7 @@ import { fromError } from "zod-validation-error";
 import { response } from "@server/lib/response";
 import db from "@server/db";
 import {
+    resourceRules,
     ResourceAccessToken,
     ResourcePassword,
     resourcePassword,
@@ -14,7 +15,8 @@ import {
     resources,
     sessions,
     userOrgs,
-    users
+    users,
+    ResourceRule
 } from "@server/db/schema";
 import { and, eq } from "drizzle-orm";
 import config from "@server/lib/config";
@@ -28,6 +30,7 @@ import logger from "@server/logger";
 import { verifyResourceAccessToken } from "@server/auth/verifyResourceAccessToken";
 import NodeCache from "node-cache";
 import { generateSessionToken } from "@server/auth/sessions/app";
+import { isIpInCidr } from "@server/lib/ip";
 
 // We'll see if this speeds anything up
 const cache = new NodeCache({
@@ -79,6 +82,7 @@ export async function verifyResourceSession(
             host,
             originalRequestURL,
             requestIp,
+            path,
             accessToken: token
         } = parsedBody.data;
 
@@ -144,6 +148,25 @@ export async function verifyResourceSession(
         ) {
             logger.debug("Resource allowed because no auth");
             return allowed(res);
+        }
+
+        // check the rules
+        if (resource.applyRules) {
+            const action = await checkRules(
+                resource.resourceId,
+                clientIp,
+                path
+            );
+
+            if (action == "ACCEPT") {
+                logger.debug("Resource allowed by rule");
+                return allowed(res);
+            } else if (action == "DROP") {
+                logger.debug("Resource denied by rule");
+                return notAllowed(res);
+            }
+
+            // otherwise its undefined and we pass
         }
 
         const redirectUrl = `${config.getRawConfig().app.dashboard_url}/auth/resource/${encodeURIComponent(resource.resourceId)}?redirect=${encodeURIComponent(originalRequestURL)}`;
@@ -437,4 +460,94 @@ async function isUserAllowedToAccessResource(
     }
 
     return false;
+}
+
+async function checkRules(
+    resourceId: number,
+    clientIp: string | undefined,
+    path: string | undefined
+): Promise<"ACCEPT" | "DROP" | undefined> {
+    const ruleCacheKey = `rules:${resourceId}`;
+
+    let rules: ResourceRule[] | undefined = cache.get(ruleCacheKey);
+
+    if (!rules) {
+        rules = await db
+            .select()
+            .from(resourceRules)
+            .where(eq(resourceRules.resourceId, resourceId));
+
+        cache.set(ruleCacheKey, rules);
+    }
+
+    if (rules.length === 0) {
+        logger.debug("No rules found for resource", resourceId);
+        return;
+    }
+
+    let hasAcceptRule = false;
+
+    // First pass: look for DROP rules
+    for (const rule of rules) {
+        if (
+            (clientIp &&
+                rule.match == "CIDR" &&
+                isIpInCidr(clientIp, rule.value) &&
+                rule.action === "DROP") ||
+            (clientIp &&
+                rule.match == "IP" &&
+                clientIp == rule.value &&
+                rule.action === "DROP") ||
+            (path &&
+                rule.match == "PATH" &&
+                urlGlobToRegex(rule.value).test(path) &&
+                rule.action === "DROP")
+        ) {
+            return "DROP";
+        }
+        // Track if we see any ACCEPT rules for the second pass
+        if (rule.action === "ACCEPT") {
+            hasAcceptRule = true;
+        }
+    }
+
+    // Second pass: only check ACCEPT rules if we found one and didn't find a DROP
+    if (hasAcceptRule) {
+        for (const rule of rules) {
+            if (rule.action !== "ACCEPT") continue;
+
+            if (
+                (clientIp &&
+                    rule.match == "CIDR" &&
+                    isIpInCidr(clientIp, rule.value)) ||
+                (clientIp &&
+                    rule.match == "IP" &&
+                    clientIp == rule.value) ||
+                (path &&
+                    rule.match == "PATH" &&
+                    urlGlobToRegex(rule.value).test(path))
+            ) {
+                return "ACCEPT";
+            }
+        }
+    }
+
+    return;
+}
+
+function urlGlobToRegex(pattern: string): RegExp {
+    // Trim any leading or trailing slashes
+    pattern = pattern.replace(/^\/+|\/+$/g, "");
+
+    // Escape special regex characters except *
+    const escapedPattern = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
+
+    // Replace * with regex pattern for any valid URL segment characters
+    const regexPattern = escapedPattern.replace(/\*/g, "[a-zA-Z0-9_-]+");
+
+    // Create the final pattern that:
+    // 1. Optionally matches leading slash
+    // 2. Matches the pattern
+    // 3. Optionally matches trailing slash
+    return new RegExp(`^/?${regexPattern}/?$`);
 }

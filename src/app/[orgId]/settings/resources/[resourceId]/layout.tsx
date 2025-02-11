@@ -99,6 +99,11 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
             href: `/{orgId}/settings/resources/{resourceId}/authentication`
             // icon: <Shield className="w-4 h-4" />,
         });
+        sidebarNavItems.push({
+            title: "Rules",
+            href: `/{orgId}/settings/resources/{resourceId}/rules`
+            // icon: <Shield className="w-4 h-4" />,
+        });
     }
 
     return (
