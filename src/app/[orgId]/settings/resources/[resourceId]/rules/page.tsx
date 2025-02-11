@@ -352,10 +352,8 @@ export default function ResourceRules(props: {
                         updateRule(row.original.ruleId, { action: value })
                     }
                 >
-                    <SelectTrigger className="min-w-[100px]">
-                        {row.original.action === "ACCEPT"
-                            ? RuleAction.ACCEPT
-                            : RuleAction.DROP}
+                    <SelectTrigger className="min-w-[150px]">
+                        <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="ACCEPT">
@@ -376,12 +374,8 @@ export default function ResourceRules(props: {
                         updateRule(row.original.ruleId, { match: value })
                     }
                 >
-                    <SelectTrigger className="min-w-[100px]">
-                        {row.original.match === "IP"
-                            ? RuleMatch.IP
-                            : row.original.match === "CIDR"
-                              ? RuleMatch.CIDR
-                              : RuleMatch.PATH}
+                    <SelectTrigger className="min-w-[125px]">
+                        <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="IP">{RuleMatch.IP}</SelectItem>
@@ -436,7 +430,7 @@ export default function ResourceRules(props: {
 
     return (
         <SettingsContainer>
-            <Alert>
+            <Alert className="hidden md:block">
                 <InfoIcon className="h-4 w-4" />
                 <AlertTitle className="font-semibold">About Rules</AlertTitle>
                 <AlertDescription className="mt-4">
