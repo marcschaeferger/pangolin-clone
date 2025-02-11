@@ -51,13 +51,17 @@ export enum ActionsEnum {
     // removeUserAction = "removeUserAction",
     // removeUserSite = "removeUserSite",
     getOrgUser = "getOrgUser",
-    "setResourcePassword" = "setResourcePassword",
-    "setResourcePincode" = "setResourcePincode",
-    "setResourceWhitelist" = "setResourceWhitelist",
-    "getResourceWhitelist" = "getResourceWhitelist",
-    "generateAccessToken" = "generateAccessToken",
-    "deleteAcessToken" = "deleteAcessToken",
-    "listAccessTokens" = "listAccessTokens"
+    setResourcePassword = "setResourcePassword",
+    setResourcePincode = "setResourcePincode",
+    setResourceWhitelist = "setResourceWhitelist",
+    getResourceWhitelist = "getResourceWhitelist",
+    generateAccessToken = "generateAccessToken",
+    deleteAcessToken = "deleteAcessToken",
+    listAccessTokens = "listAccessTokens",
+    createResourceRule = "createResourceRule",
+    deleteResourceRule = "deleteResourceRule",
+    listResourceRules = "listResourceRules",
+    updateResourceRule = "updateResourceRule",
 }
 
 export async function checkUserActionPermission(

@@ -14,6 +14,7 @@ import m5 from "./scripts/1.0.0-beta6";
 import m6 from "./scripts/1.0.0-beta9";
 import m7 from "./scripts/1.0.0-beta10";
 import m8 from "./scripts/1.0.0-beta12";
+import m13 from "./scripts/1.0.0-beta13";
 
 // THIS CANNOT IMPORT ANYTHING FROM THE SERVER
 // EXCEPT FOR THE DATABASE AND THE SCHEMA
@@ -27,7 +28,8 @@ const migrations = [
     { version: "1.0.0-beta.6", run: m5 },
     { version: "1.0.0-beta.9", run: m6 },
     { version: "1.0.0-beta.10", run: m7 },
-    { version: "1.0.0-beta.12", run: m8 }
+    { version: "1.0.0-beta.12", run: m8 },
+    { version: "1.0.0-beta.13", run: m13 }
     // Add new migrations here as they are created
 ] as const;
 

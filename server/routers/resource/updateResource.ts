@@ -29,7 +29,8 @@ const updateResourceBodySchema = z
         blockAccess: z.boolean().optional(),
         proxyPort: z.number().int().min(1).max(65535).optional(),
         emailWhitelistEnabled: z.boolean().optional(),
-        isBaseDomain: z.boolean().optional()
+        isBaseDomain: z.boolean().optional(),
+        applyRules: z.boolean().optional(),
     })
     .strict()
     .refine((data) => Object.keys(data).length > 0, {
