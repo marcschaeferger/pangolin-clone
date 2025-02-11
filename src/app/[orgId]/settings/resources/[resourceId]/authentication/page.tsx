@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ListRolesResponse } from "@server/routers/role";
-import { useToast } from "@app/hooks/useToast";
+import { toast } from "@app/hooks/useToast";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { useResourceContext } from "@app/hooks/useResourceContext";
 import { AxiosResponse } from "axios";
@@ -75,7 +75,6 @@ const whitelistSchema = z.object({
 });
 
 export default function ResourceAuthenticationPage() {
-    const { toast } = useToast();
     const { org } = useOrgContext();
     const { resource, updateResource, authInfo, updateAuthInfo } =
         useResourceContext();

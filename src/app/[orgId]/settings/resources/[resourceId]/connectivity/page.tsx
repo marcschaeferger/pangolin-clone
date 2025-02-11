@@ -45,7 +45,7 @@ import {
     TableHeader,
     TableRow
 } from "@app/components/ui/table";
-import { useToast } from "@app/hooks/useToast";
+import { toast } from "@app/hooks/useToast";
 import { useResourceContext } from "@app/hooks/useResourceContext";
 import { ArrayElement } from "@server/types/ArrayElement";
 import { formatAxiosError } from "@app/lib/api/formatAxiosError";
@@ -113,7 +113,6 @@ export default function ReverseProxyTargets(props: {
 }) {
     const params = use(props.params);
 
-    const { toast } = useToast();
     const { resource, updateResource } = useResourceContext();
 
     const api = createApiClient(useEnvContext());

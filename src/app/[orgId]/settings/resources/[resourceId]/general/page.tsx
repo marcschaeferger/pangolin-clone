@@ -34,7 +34,7 @@ import { AxiosResponse } from "axios";
 import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { GetResourceAuthInfoResponse } from "@server/routers/resource";
-import { useToast } from "@app/hooks/useToast";
+import { toast } from "@app/hooks/useToast";
 import {
     SettingsContainer,
     SettingsSection,
@@ -102,7 +102,6 @@ type TransferFormValues = z.infer<typeof TransferFormSchema>;
 
 export default function GeneralForm() {
     const params = useParams();
-    const { toast } = useToast();
     const { resource, updateResource } = useResourceContext();
     const { org } = useOrgContext();
     const router = useRouter();

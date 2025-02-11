@@ -12,7 +12,7 @@ import {
     DropdownMenuTrigger
 } from "@app/components/ui/dropdown-menu";
 import { useEnvContext } from "@app/hooks/useEnvContext";
-import { useToast } from "@app/hooks/useToast";
+import { toast } from "@app/hooks/useToast";
 import { formatAxiosError } from "@app/lib/api";;
 import { Laptop, LogOut, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -23,7 +23,6 @@ import Disable2FaForm from "./Disable2FaForm";
 import Enable2FaForm from "./Enable2FaForm";
 
 export default function ProfileIcon() {
-    const { toast } = useToast();
     const { setTheme, theme } = useTheme();
     const { env } = useEnvContext();
     const api = createApiClient({ env });

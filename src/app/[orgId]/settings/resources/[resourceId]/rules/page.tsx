@@ -16,7 +16,6 @@ import { z } from "zod";
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -40,7 +39,7 @@ import {
     TableHeader,
     TableRow
 } from "@app/components/ui/table";
-import { useToast } from "@app/hooks/useToast";
+import { toast } from "@app/hooks/useToast";
 import { useResourceContext } from "@app/hooks/useResourceContext";
 import { ArrayElement } from "@server/types/ArrayElement";
 import { formatAxiosError } from "@app/lib/api/formatAxiosError";
@@ -58,7 +57,7 @@ import {
 import { ListResourceRulesResponse } from "@server/routers/resource/listResourceRules";
 import { SwitchInput } from "@app/components/SwitchInput";
 import { Alert, AlertDescription, AlertTitle } from "@app/components/ui/alert";
-import { Check, Info, InfoIcon, X } from "lucide-react";
+import { Check, InfoIcon, X } from "lucide-react";
 import {
     InfoSection,
     InfoSections,
@@ -84,11 +83,16 @@ enum RuleAction {
     DROP = "Always Deny"
 }
 
+enum RuleMatch {
+    IP = "IP",
+    CIDR = "IP Range",
+    PATH = "Path"
+}
+
 export default function ResourceRules(props: {
     params: Promise<{ resourceId: number }>;
 }) {
     const params = use(props.params);
-    const { toast } = useToast();
     const { resource, updateResource } = useResourceContext();
     const api = createApiClient(useEnvContext());
     const [rules, setRules] = useState<LocalRule[]>([]);
@@ -233,6 +237,17 @@ export default function ResourceRules(props: {
         }
     }
 
+    function getValueHelpText(type: string) {
+        switch (type) {
+            case "CIDR":
+                return "Enter an address in CIDR format (e.g., 103.21.244.0/22)";
+            case "IP":
+                return "Enter an IP address (e.g., 103.21.244.12)";
+            case "PATH":
+                return "Enter a URL path or pattern (e.g., /api/v1/todos or /api/v1/*)";
+        }
+    }
+
     async function saveRules() {
         try {
             setLoading(true);
@@ -275,7 +290,10 @@ export default function ResourceRules(props: {
                 }
 
                 if (rule.new) {
-                    const res = await api.put(`/resource/${params.resourceId}/rule`, data);
+                    const res = await api.put(
+                        `/resource/${params.resourceId}/rule`,
+                        data
+                    );
                     rule.ruleId = res.data.data.ruleId;
                 } else if (rule.updated) {
                     await api.post(
@@ -300,9 +318,7 @@ export default function ResourceRules(props: {
                 await api.delete(
                     `/resource/${params.resourceId}/rule/${ruleId}`
                 );
-                setRules(
-                    rules.filter((r) => r.ruleId !== ruleId)
-                );
+                setRules(rules.filter((r) => r.ruleId !== ruleId));
             }
 
             toast({
@@ -337,7 +353,9 @@ export default function ResourceRules(props: {
                     }
                 >
                     <SelectTrigger className="min-w-[100px]">
-                        {row.original.action}
+                        {row.original.action === "ACCEPT"
+                            ? RuleAction.ACCEPT
+                            : RuleAction.DROP}
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="ACCEPT">
@@ -359,12 +377,16 @@ export default function ResourceRules(props: {
                     }
                 >
                     <SelectTrigger className="min-w-[100px]">
-                        {row.original.match}
+                        {row.original.match === "IP"
+                            ? RuleMatch.IP
+                            : row.original.match === "CIDR"
+                              ? RuleMatch.CIDR
+                              : RuleMatch.PATH}
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="IP">IP</SelectItem>
-                        <SelectItem value="CIDR">IP Range</SelectItem>
-                        <SelectItem value="PATH">PATH</SelectItem>
+                        <SelectItem value="IP">{RuleMatch.IP}</SelectItem>
+                        <SelectItem value="CIDR">{RuleMatch.CIDR}</SelectItem>
+                        <SelectItem value="PATH">{RuleMatch.PATH}</SelectItem>
                     </SelectContent>
                 </Select>
             )
@@ -547,14 +569,14 @@ export default function ResourceRules(props: {
                                                     </SelectTrigger>
                                                     <SelectContent>
                                                         <SelectItem value="IP">
-                                                           IP 
+                                                            {RuleMatch.IP}
                                                         </SelectItem>
                                                         <SelectItem value="CIDR">
-                                                           IP Range 
+                                                            {RuleMatch.CIDR}
                                                         </SelectItem>
                                                         {resource.http && (
                                                             <SelectItem value="PATH">
-                                                                PATH
+                                                                {RuleMatch.PATH}
                                                             </SelectItem>
                                                         )}
                                                     </SelectContent>
@@ -572,11 +594,11 @@ export default function ResourceRules(props: {
                                             <InfoPopup
                                                 text="Value"
                                                 info={
-                                                    addRuleForm.watch(
-                                                        "match"
-                                                    ) === "CIDR"
-                                                        ? "Enter an address in CIDR format (e.g., 103.21.244.0/22)"
-                                                        : "Enter a URL path or pattern (e.g., /api/v1/todos or /api/v1/*)"
+                                                    getValueHelpText(
+                                                        addRuleForm.watch(
+                                                            "match"
+                                                        )
+                                                    ) || ""
                                                 }
                                             />
                                             <FormControl>
@@ -590,7 +612,7 @@ export default function ResourceRules(props: {
                             <Button
                                 type="submit"
                                 variant="outline"
-                                disabled={loading || !rulesEnabled}
+                                disabled={!rulesEnabled}
                             >
                                 Add Rule
                             </Button>

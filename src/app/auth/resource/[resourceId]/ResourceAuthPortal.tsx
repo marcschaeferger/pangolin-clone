@@ -48,7 +48,7 @@ import {
 import ResourceAccessDenied from "./ResourceAccessDenied";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
-import { useToast } from "@app/hooks/useToast";
+import { toast } from "@app/hooks/useToast";
 import Link from "next/link";
 
 const pinSchema = z.object({
@@ -91,7 +91,6 @@ type ResourceAuthPortalProps = {
 
 export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
     const router = useRouter();
-    const { toast } = useToast();
 
     const getNumMethods = () => {
         let colLength = 0;

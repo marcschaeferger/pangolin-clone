@@ -28,7 +28,7 @@ import {
     CredenzaHeader,
     CredenzaTitle
 } from "@app/components/Credenza";
-import { useToast } from "@app/hooks/useToast";
+import { toast } from "@app/hooks/useToast";
 import { formatAxiosError } from "@app/lib/api";;
 import { useUserContext } from "@app/hooks/useUserContext";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "./ui/input-otp";
@@ -49,8 +49,6 @@ export default function Disable2FaForm({ open, setOpen }: Disable2FaProps) {
     const [loading, setLoading] = useState(false);
 
     const [step, setStep] = useState<"password" | "success">("password");
-
-    const { toast } = useToast();
 
     const { user, updateUser } = useUserContext();
 

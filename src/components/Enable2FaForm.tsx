@@ -35,7 +35,7 @@ import {
     CredenzaHeader,
     CredenzaTitle
 } from "@app/components/Credenza";
-import { useToast } from "@app/hooks/useToast";
+import { toast } from "@app/hooks/useToast";
 import { formatAxiosError } from "@app/lib/api";;
 import CopyTextBox from "@app/components/CopyTextBox";
 import { QRCodeCanvas, QRCodeSVG } from "qrcode.react";
@@ -63,8 +63,6 @@ export default function Enable2FaForm({ open, setOpen }: Enable2FaProps) {
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
     const [backupCodes, setBackupCodes] = useState<string[]>([]);
-
-    const { toast } = useToast();
 
     const { user, updateUser } = useUserContext();
 
