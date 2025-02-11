@@ -12,7 +12,7 @@ import { fromError } from "zod-validation-error";
 const createResourceRuleSchema = z
     .object({
         action: z.enum(["ACCEPT", "DROP"]),
-        match: z.enum(["CIDR", "PATH"]),
+        match: z.enum(["CIDR", "IP", "PATH"]),
         value: z.string().min(1)
     })
     .strict();

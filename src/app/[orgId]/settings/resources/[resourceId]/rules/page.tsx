@@ -101,7 +101,7 @@ export default function ResourceRules(props: {
         resolver: zodResolver(addRuleSchema),
         defaultValues: {
             action: "ACCEPT",
-            match: "CIDR",
+            match: "IP",
             value: ""
         }
     });
@@ -163,6 +163,15 @@ export default function ResourceRules(props: {
                 variant: "destructive",
                 title: "Invalid URL path",
                 description: "Please enter a valid URL path value"
+            });
+            setLoading(false);
+            return;
+        }
+        if (data.match === "IP" && !isValidIP(data.value)) {
+            toast({
+                variant: "destructive",
+                title: "Invalid IP",
+                description: "Please enter a valid IP address"
             });
             setLoading(false);
             return;
@@ -255,6 +264,15 @@ export default function ResourceRules(props: {
                     setLoading(false);
                     return;
                 }
+                if (rule.match === "IP" && !isValidIP(rule.value)) {
+                    toast({
+                        variant: "destructive",
+                        title: "Invalid IP",
+                        description: "Please enter a valid IP address"
+                    });
+                    setLoading(false);
+                    return;
+                }
 
                 if (rule.new) {
                     const res = await api.put(`/resource/${params.resourceId}/rule`, data);
@@ -336,7 +354,7 @@ export default function ResourceRules(props: {
             cell: ({ row }) => (
                 <Select
                     defaultValue={row.original.match}
-                    onValueChange={(value: "CIDR" | "PATH") =>
+                    onValueChange={(value: "CIDR" | "IP" | "PATH") =>
                         updateRule(row.original.ruleId, { match: value })
                     }
                 >
@@ -344,7 +362,8 @@ export default function ResourceRules(props: {
                         {row.original.match}
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="CIDR">CIDR</SelectItem>
+                        <SelectItem value="IP">IP</SelectItem>
+                        <SelectItem value="CIDR">IP Range</SelectItem>
                         <SelectItem value="PATH">PATH</SelectItem>
                     </SelectContent>
                 </Select>
@@ -527,8 +546,11 @@ export default function ResourceRules(props: {
                                                         <SelectValue />
                                                     </SelectTrigger>
                                                     <SelectContent>
+                                                        <SelectItem value="IP">
+                                                           IP 
+                                                        </SelectItem>
                                                         <SelectItem value="CIDR">
-                                                            CIDR
+                                                           IP Range 
                                                         </SelectItem>
                                                         {resource.http && (
                                                             <SelectItem value="PATH">
@@ -650,6 +672,21 @@ function isValidCIDR(cidr: string): boolean {
     // Validate IP address part
     const ipPart = cidr.split("/")[0];
     const octets = ipPart.split(".");
+
+    return octets.every((octet) => {
+        const num = parseInt(octet, 10);
+        return num >= 0 && num <= 255;
+    });
+}
+
+function isValidIP(ip: string): boolean {
+    const ipPattern = /^([0-9]{1,3}\.){3}[0-9]{1,3}$/;
+
+    if (!ipPattern.test(ip)) {
+        return false;
+    }
+
+    const octets = ip.split(".");
 
     return octets.every((octet) => {
         const num = parseInt(octet, 10);

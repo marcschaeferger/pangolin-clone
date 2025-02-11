@@ -494,6 +494,10 @@ async function checkRules(
                 rule.match == "CIDR" &&
                 isIpInCidr(clientIp, rule.value) &&
                 rule.action === "DROP") ||
+            (clientIp &&
+                rule.match == "IP" &&
+                clientIp == rule.value &&
+                rule.action === "DROP") ||
             (path &&
                 rule.match == "PATH" &&
                 urlGlobToRegex(rule.value).test(path) &&
@@ -516,6 +520,9 @@ async function checkRules(
                 (clientIp &&
                     rule.match == "CIDR" &&
                     isIpInCidr(clientIp, rule.value)) ||
+                (clientIp &&
+                    rule.match == "IP" &&
+                    clientIp == rule.value) ||
                 (path &&
                     rule.match == "PATH" &&
                     urlGlobToRegex(rule.value).test(path))
