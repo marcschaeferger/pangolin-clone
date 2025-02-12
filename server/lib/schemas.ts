@@ -8,3 +8,4 @@ export const subdomainSchema = z
     )
     .min(1, "Subdomain must be at least 1 character long")
     .transform((val) => val.toLowerCase());
+

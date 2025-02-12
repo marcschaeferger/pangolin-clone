@@ -59,7 +59,7 @@ import {
     SelectTrigger,
     SelectValue
 } from "@app/components/ui/select";
-import { subdomainSchema } from "@server/schemas/subdomainSchema";
+import { subdomainSchema } from "@server/lib/schemas";
 import Link from "next/link";
 import { SquareArrowOutUpRight } from "lucide-react";
 import CopyTextBox from "@app/components/CopyTextBox";

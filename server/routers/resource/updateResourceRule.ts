@@ -8,14 +8,16 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
+import {
+    isValidCIDR,
+    isValidIP,
+    isValidUrlGlobPattern
+} from "@server/lib/validators";
 
 // Define Zod schema for request parameters validation
 const updateResourceRuleParamsSchema = z
     .object({
-        ruleId: z
-            .string()
-            .transform(Number)
-            .pipe(z.number().int().positive()),
+        ruleId: z.string().transform(Number).pipe(z.number().int().positive()),
         resourceId: z
             .string()
             .transform(Number)
@@ -28,7 +30,9 @@ const updateResourceRuleSchema = z
     .object({
         action: z.enum(["ACCEPT", "DROP"]).optional(),
         match: z.enum(["CIDR", "IP", "PATH"]).optional(),
-        value: z.string().min(1).optional()
+        value: z.string().min(1).optional(),
+        priority: z.number().int(),
+        enabled: z.boolean().optional()
     })
     .strict()
     .refine((data) => Object.keys(data).length > 0, {
@@ -42,7 +46,9 @@ export async function updateResourceRule(
 ): Promise<any> {
     try {
         // Validate path parameters
-        const parsedParams = updateResourceRuleParamsSchema.safeParse(req.params);
+        const parsedParams = updateResourceRuleParamsSchema.safeParse(
+            req.params
+        );
         if (!parsedParams.success) {
             return next(
                 createHttpError(
@@ -82,6 +88,15 @@ export async function updateResourceRule(
             );
         }
 
+        if (!resource.http) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    "Cannot create rule for non-http resource"
+                )
+            );
+        }
+
         // Verify that the rule exists and belongs to the specified resource
         const [existingRule] = await db
             .select()
@@ -105,6 +120,40 @@ export async function updateResourceRule(
                     `Resource rule ${ruleId} does not belong to resource ${resourceId}`
                 )
             );
+        }
+
+        const match = updateData.match || existingRule.match;
+        const { value } = updateData;
+
+        if (value !== undefined) {
+            if (match === "CIDR") {
+                if (!isValidCIDR(value)) {
+                    return next(
+                        createHttpError(
+                            HttpCode.BAD_REQUEST,
+                            "Invalid CIDR provided"
+                        )
+                    );
+                }
+            } else if (match === "IP") {
+                if (!isValidIP(value)) {
+                    return next(
+                        createHttpError(
+                            HttpCode.BAD_REQUEST,
+                            "Invalid IP provided"
+                        )
+                    );
+                }
+            } else if (match === "PATH") {
+                if (!isValidUrlGlobPattern(value)) {
+                    return next(
+                        createHttpError(
+                            HttpCode.BAD_REQUEST,
+                            "Invalid URL glob pattern provided"
+                        )
+                    );
+                }
+            }
         }
 
         // Update the rule

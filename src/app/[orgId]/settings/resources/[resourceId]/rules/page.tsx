@@ -57,7 +57,7 @@ import {
 import { ListResourceRulesResponse } from "@server/routers/resource/listResourceRules";
 import { SwitchInput } from "@app/components/SwitchInput";
 import { Alert, AlertDescription, AlertTitle } from "@app/components/ui/alert";
-import { Check, InfoIcon, X } from "lucide-react";
+import { ArrowUpDown, Check, InfoIcon, X } from "lucide-react";
 import {
     InfoSection,
     InfoSections,
@@ -65,12 +65,19 @@ import {
 } from "@app/components/InfoSection";
 import { Separator } from "@app/components/ui/separator";
 import { InfoPopup } from "@app/components/ui/info-popup";
+import {
+    isValidCIDR,
+    isValidIP,
+    isValidUrlGlobPattern
+} from "@server/lib/validators";
+import { Switch } from "@app/components/ui/switch";
 
 // Schema for rule validation
 const addRuleSchema = z.object({
     action: z.string(),
     match: z.string(),
-    value: z.string()
+    value: z.string(),
+    priority: z.coerce.number().int().optional()
 });
 
 type LocalRule = ArrayElement<ListResourceRulesResponse["rules"]> & {
@@ -181,11 +188,23 @@ export default function ResourceRules(props: {
             return;
         }
 
+        // find the highest priority and add one
+        let priority = data.priority;
+        if (priority === undefined) {
+            priority = rules.reduce(
+                (acc, rule) => (rule.priority > acc ? rule.priority : acc),
+                0
+            );
+            priority++;
+        }
+
         const newRule: LocalRule = {
             ...data,
             ruleId: new Date().getTime(),
             new: true,
-            resourceId: resource.resourceId
+            resourceId: resource.resourceId,
+            priority,
+            enabled: true
         };
 
         setRules([...rules, newRule]);
@@ -255,7 +274,9 @@ export default function ResourceRules(props: {
                 const data = {
                     action: rule.action,
                     match: rule.match,
-                    value: rule.value
+                    value: rule.value,
+                    priority: rule.priority,
+                    enabled: rule.enabled
                 };
 
                 if (rule.match === "CIDR" && !isValidCIDR(rule.value)) {
@@ -284,6 +305,28 @@ export default function ResourceRules(props: {
                         variant: "destructive",
                         title: "Invalid IP",
                         description: "Please enter a valid IP address"
+                    });
+                    setLoading(false);
+                    return;
+                }
+
+                if (rule.priority === undefined) {
+                    toast({
+                        variant: "destructive",
+                        title: "Invalid Priority",
+                        description: "Please enter a valid priority"
+                    });
+                    setLoading(false);
+                    return;
+                }
+
+                // make sure no duplicate priorities
+                const priorities = rules.map((r) => r.priority);
+                if (priorities.length !== new Set(priorities).size) {
+                    toast({
+                        variant: "destructive",
+                        title: "Duplicate Priorities",
+                        description: "Please enter unique priorities"
                     });
                     setLoading(false);
                     return;
@@ -343,6 +386,50 @@ export default function ResourceRules(props: {
 
     const columns: ColumnDef<LocalRule>[] = [
         {
+            accessorKey: "priority",
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() =>
+                            column.toggleSorting(column.getIsSorted() === "asc")
+                        }
+                    >
+                        Priority
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                );
+            },
+            cell: ({ row }) => (
+                <Input
+                    defaultValue={row.original.priority}
+                    className="w-[75px]"
+                    type="number"
+                    onBlur={(e) => {
+                        const parsed = z.coerce
+                            .number()
+                            .int()
+                            .optional()
+                            .safeParse(e.target.value);
+
+                        if (!parsed.data) {
+                            toast({
+                                variant: "destructive",
+                                title: "Invalid IP",
+                                description: "Please enter a valid priority"
+                            });
+                            setLoading(false);
+                            return;
+                        }
+
+                        updateRule(row.original.ruleId, {
+                            priority: parsed.data
+                        });
+                    }}
+                />
+            )
+        },
+        {
             accessorKey: "action",
             header: "Action",
             cell: ({ row }) => (
@@ -401,6 +488,18 @@ export default function ResourceRules(props: {
             )
         },
         {
+            accessorKey: "enabled",
+            header: "Enabled",
+            cell: ({ row }) => (
+                <Switch
+                    defaultChecked={row.original.enabled}
+                    onCheckedChange={(val) =>
+                        updateRule(row.original.ruleId, { enabled: val })
+                    }
+                />
+            )
+        },
+        {
             id: "actions",
             cell: ({ row }) => (
                 <div className="flex items-center justify-end space-x-2">
@@ -434,14 +533,14 @@ export default function ResourceRules(props: {
                 <InfoIcon className="h-4 w-4" />
                 <AlertTitle className="font-semibold">About Rules</AlertTitle>
                 <AlertDescription className="mt-4">
-                    <p className="mb-4">
-                        Rules allow you to control access to your resource based
-                        on a set of criteria. You can create rules to allow or
-                        deny access based on IP address or URL path. Deny rules
-                        take precedence over allow rules. If a request matches
-                        both an allow and a deny rule, the deny rule will be
-                        applied.
-                    </p>
+                    <div className="space-y-1 mb-4">
+                        <p>
+                            Rules allow you to control access to your resource
+                            based on a set of criteria. You can create rules to
+                            allow or deny access based on IP address or URL
+                            path.
+                        </p>
+                    </div>
                     <InfoSections>
                         <InfoSection>
                             <InfoSectionTitle>Actions</InfoSectionTitle>
@@ -661,6 +760,9 @@ export default function ResourceRules(props: {
                             </TableBody>
                         </Table>
                     </TableContainer>
+                    <p className="text-sm text-muted-foreground">
+                        Rules are evaluated by priority in ascending order.
+                    </p>
                 </SettingsSectionBody>
                 <SettingsSectionFooter>
                     <Button
@@ -674,73 +776,4 @@ export default function ResourceRules(props: {
             </SettingsSection>
         </SettingsContainer>
     );
-}
-
-function isValidCIDR(cidr: string): boolean {
-    // Match CIDR pattern (e.g., "192.168.0.0/24")
-    const cidrPattern =
-        /^([0-9]{1,3}\.){3}[0-9]{1,3}\/([0-9]|[1-2][0-9]|3[0-2])$/;
-
-    if (!cidrPattern.test(cidr)) {
-        return false;
-    }
-
-    // Validate IP address part
-    const ipPart = cidr.split("/")[0];
-    const octets = ipPart.split(".");
-
-    return octets.every((octet) => {
-        const num = parseInt(octet, 10);
-        return num >= 0 && num <= 255;
-    });
-}
-
-function isValidIP(ip: string): boolean {
-    const ipPattern = /^([0-9]{1,3}\.){3}[0-9]{1,3}$/;
-
-    if (!ipPattern.test(ip)) {
-        return false;
-    }
-
-    const octets = ip.split(".");
-
-    return octets.every((octet) => {
-        const num = parseInt(octet, 10);
-        return num >= 0 && num <= 255;
-    });
-}
-
-function isValidUrlGlobPattern(pattern: string): boolean {
-    // Remove leading slash if present
-    pattern = pattern.startsWith("/") ? pattern.slice(1) : pattern;
-
-    // Empty string is not valid
-    if (!pattern) {
-        return false;
-    }
-
-    // Split path into segments
-    const segments = pattern.split("/");
-
-    // Check each segment
-    for (let i = 0; i < segments.length; i++) {
-        const segment = segments[i];
-
-        // Empty segments are not allowed (double slashes)
-        if (!segment && i !== segments.length - 1) {
-            return false;
-        }
-
-        // If segment contains *, it must be exactly *
-        if (segment.includes("*") && segment !== "*") {
-            return false;
-        }
-
-        // Check for invalid characters
-        if (!/^[a-zA-Z0-9_*-]*$/.test(segment)) {
-            return false;
-        }
-    }
-
-    return true;
 }

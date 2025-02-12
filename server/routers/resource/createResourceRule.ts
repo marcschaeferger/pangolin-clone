@@ -8,12 +8,19 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
+import {
+    isValidCIDR,
+    isValidIP,
+    isValidUrlGlobPattern
+} from "@server/lib/validators";
 
 const createResourceRuleSchema = z
     .object({
         action: z.enum(["ACCEPT", "DROP"]),
         match: z.enum(["CIDR", "IP", "PATH"]),
-        value: z.string().min(1)
+        value: z.string().min(1),
+        priority: z.number().int(),
+        enabled: z.boolean().optional()
     })
     .strict();
 
@@ -42,7 +49,7 @@ export async function createResourceRule(
             );
         }
 
-        const { action, match, value } = parsedBody.data;
+        const { action, match, value, priority, enabled } = parsedBody.data;
 
         const parsedParams = createResourceRuleParamsSchema.safeParse(
             req.params
@@ -74,6 +81,41 @@ export async function createResourceRule(
             );
         }
 
+        if (!resource.http) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    "Cannot create rule for non-http resource"
+                )
+            );
+        }
+
+        if (match === "CIDR") {
+            if (!isValidCIDR(value)) {
+                return next(
+                    createHttpError(
+                        HttpCode.BAD_REQUEST,
+                        "Invalid CIDR provided"
+                    )
+                );
+            }
+        } else if (match === "IP") {
+            if (!isValidIP(value)) {
+                return next(
+                    createHttpError(HttpCode.BAD_REQUEST, "Invalid IP provided")
+                );
+            }
+        } else if (match === "PATH") {
+            if (!isValidUrlGlobPattern(value)) {
+                return next(
+                    createHttpError(
+                        HttpCode.BAD_REQUEST,
+                        "Invalid URL glob pattern provided"
+                    )
+                );
+            }
+        }
+
         // Create the new resource rule
         const [newRule] = await db
             .insert(resourceRules)
@@ -81,7 +123,9 @@ export async function createResourceRule(
                 resourceId,
                 action,
                 match,
-                value
+                value,
+                priority,
+                enabled
             })
             .returning();
 

@@ -8,8 +8,8 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
-import { subdomainSchema } from "@server/schemas/subdomainSchema";
 import config from "@server/lib/config";
+import { subdomainSchema } from "@server/lib/schemas";
 
 const updateResourceParamsSchema = z
     .object({

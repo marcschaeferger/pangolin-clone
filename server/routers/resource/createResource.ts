@@ -17,7 +17,7 @@ import { eq, and } from "drizzle-orm";
 import stoi from "@server/lib/stoi";
 import { fromError } from "zod-validation-error";
 import logger from "@server/logger";
-import { subdomainSchema } from "@server/schemas/subdomainSchema";
+import { subdomainSchema } from "@server/lib/schemas";
 import config from "@server/lib/config";
 
 const createResourceParamsSchema = z

@@ -9,6 +9,8 @@ export default async function migration() {
             trx.run(sql`CREATE TABLE resourceRules (
                 ruleId integer PRIMARY KEY AUTOINCREMENT NOT NULL,
                 resourceId integer NOT NULL,
+                priority integer NOT NULL,
+                enabled integer DEFAULT true NOT NULL,
                 action text NOT NULL,
                 match text NOT NULL,
                 value text NOT NULL,
