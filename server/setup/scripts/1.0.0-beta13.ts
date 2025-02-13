@@ -1,8 +1,10 @@
 import db from "@server/db";
 import { sql } from "drizzle-orm";
 
+const version = "1.0.0-beta.13";
+
 export default async function migration() {
-    console.log("Running setup script 1.0.0-beta.13...");
+    console.log(`Running setup script ${version}...`);
 
     try {
         db.transaction((trx) => {
@@ -27,5 +29,5 @@ export default async function migration() {
         throw e;
     }
 
-    console.log("Done.");
+    console.log(`${version} migration complete`);
 }
