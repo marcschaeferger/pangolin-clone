@@ -1,4 +1,5 @@
-# Pangolin
+<div align="center">
+    <h2 align="center"><a href="https://fossorial.io"><img alt="pangolin" src="public/logo//word_mark.png" width="400" /></a></h2>
 
 [![Documentation](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://docs.fossorial.io/)
 [![Docker](https://img.shields.io/docker/pulls/fosrl/pangolin?style=flat-square)](https://hub.docker.com/r/fosrl/pangolin)
@@ -6,19 +7,23 @@
 [![Discord](https://img.shields.io/discord/1325658630518865980?logo=discord&style=flat-square)](https://discord.gg/HCJR8Xhme4)
 [![Youtube](https://img.shields.io/badge/YouTube-red?logo=youtube&logoColor=white&style=flat-square)](https://www.youtube.com/@fossorial-app)
 
-Pangolin is a self-hosted tunneled reverse proxy management server with identity and access control, designed to securely expose private resources through use with the Traefik reverse proxy and WireGuard tunnel clients like Newt. With Pangolin, you retain full control over your infrastructure while providing a user-friendly and feature-rich solution for managing proxies, authentication, and access, and simplifying complex network setups, all with a clean and simple UI.
+</div>
 
-### Installation and Documentation
+<div align="center">
+  <h5>
+      <a href="https://docs.fossorial.io/Getting%20Started/quick-install">
+        Install Guide
+      </a>
+      <span> | </span>
+      <a href="https://docs.fossorial.io">
+        Full Documentation
+      </a>
+  </h5>
+</div>
 
--   [Installation Instructions](https://docs.fossorial.io/Getting%20Started/quick-install)
--   [Full Documentation](https://docs.fossorial.io)
+<h3 align="center">Tunneled Mesh Reverse Proxy Server with Access Control</h3>
 
-### Authors and Maintainers
-
-- [Milo Schwartz](https://github.com/miloschwartz)
-- [Owen Schwartz](https://github.com/oschwartz10612)
-
-## Preview
+Pangolin is a self-hosted tunneled reverse proxy management server with identity and access control, designed to securely expose private resources on distributed networks. With Pangolin, you retain full control over your infrastructure while providing a user-friendly and feature-rich solution for managing proxies, authentication, and access, while simplifying complex network setups.
 
 <img src="public/screenshots/sites.png" alt="Preview"/>
 
@@ -28,7 +33,7 @@ _Sites page of Pangolin dashboard (dark mode) showing multiple tunnels connected
 
 ### Reverse Proxy Through WireGuard Tunnel
 
--   Expose private resources on your network **without opening ports**.
+-   Expose private resources on your network **without opening ports** (firewall punching).
 -   Secure and easy to configure site-to-site connectivity via a custom **user space WireGuard client**, [Newt](https://github.com/fosrl/newt).
 -   Built-in support for any WireGuard client.
 -   Automated **SSL certificates** (https) via [LetsEncrypt](https://letsencrypt.org/).
@@ -37,6 +42,7 @@ _Sites page of Pangolin dashboard (dark mode) showing multiple tunnels connected
 ### Identity & Access Management
 
 -   Centralized authentication system using platform SSO. **Users will only have to manage one login.**
+-   **Rules based access control for resources.**
 -   Totp with backup codes for two-factor authentication.
 -   Create organizations, each with multiple sites, users, and roles.
 -   **Role-based access control** to manage resource access permissions.
@@ -62,12 +68,10 @@ _Sites page of Pangolin dashboard (dark mode) showing multiple tunnels connected
 
 ### Modular Design
 
--   Extend functionality with existing [Traefik](https://github.com/traefik/traefik) plugins, such as [Fail2Ban](https://plugins.traefik.io/plugins/628c9ebcffc0cd18356a979f/fail2-ban) or [CrowdSec](https://plugins.traefik.io/plugins/6335346ca4caa9ddeffda116/crowdsec-bouncer-traefik-plugin), which integrate seamlessly.
+-   Extend functionality with existing [Traefik](https://github.com/traefik/traefik) plugins, such as [Fail2Ban](https://plugins.traefik.io/plugins/628c9ebcffc0cd18356a979f/fail2-ban) or [CrowdSec](https://plugins.traefik.io/plugins/6335346ca4caa9ddeffda116/crowdsec-bouncer-traefik-plugin).
 -   Attach as many sites to the central server as you wish.
 
 ## Screenshots
-
-Pangolin has a straightforward and simple dashboard UI:
 
 <div align="center">
   <table>
@@ -94,22 +98,23 @@ Pangolin has a straightforward and simple dashboard UI:
   </table>
 </div>
 
-## Workflow Example
-
-### Deployment and Usage Example
+## Deployment and Usage Example
 
 1. **Deploy the Central Server**:
 
-    - Deploy the Docker Compose stack containing Pangolin, Gerbil, and Traefik onto a VPS hosted on a cloud platform like Amazon EC2, DigitalOcean Droplet, or similar. There are many cheap VPS hosting options available to suit your needs.
+    - Deploy the Docker Compose stack onto a VPS hosted on a cloud platform like Amazon EC2, DigitalOcean Droplet, or similar. There are many cheap VPS hosting options available to suit your needs.
 
 2. **Domain Configuration**:
 
     - Point your domain name to the VPS and configure Pangolin with your preferred settings.
 
 3. **Connect Private Sites**:
+
     - Install Newt or use another WireGuard client on private sites.
     - Automatically establish a connection from these sites to the central server.
+
 4. **Configure Users & Roles**
+
     - Define organizations and invite users.
     - Implement user- or role-based permissions to control resource access.
 
