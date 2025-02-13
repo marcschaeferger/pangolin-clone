@@ -1,33 +1,38 @@
-import HttpCode from "@server/types/HttpCode";
-import { NextFunction, Request, Response } from "express";
-import createHttpError from "http-errors";
-import { z } from "zod";
-import { fromError } from "zod-validation-error";
-import { response } from "@server/lib/response";
-import db from "@server/db";
-import {
-    ResourceAccessToken,
-    ResourcePassword,
-    resourcePassword,
-    ResourcePincode,
-    resourcePincode,
-    resources,
-    sessions,
-    userOrgs,
-    users
-} from "@server/db/schema";
-import { and, eq } from "drizzle-orm";
-import config from "@server/lib/config";
+import { generateSessionToken } from "@server/auth/sessions/app";
 import {
     createResourceSession,
     serializeResourceSessionCookie,
     validateResourceSessionToken
 } from "@server/auth/sessions/resource";
-import { Resource, roleResources, userResources } from "@server/db/schema";
-import logger from "@server/logger";
 import { verifyResourceAccessToken } from "@server/auth/verifyResourceAccessToken";
+import db from "@server/db";
+import {
+    Resource,
+    ResourceAccessToken,
+    ResourcePassword,
+    resourcePassword,
+    ResourcePincode,
+    resourcePincode,
+    ResourceRule,
+    resourceRules,
+    resources,
+    roleResources,
+    sessions,
+    userOrgs,
+    userResources,
+    users
+} from "@server/db/schema";
+import config from "@server/lib/config";
+import { isIpInCidr } from "@server/lib/ip";
+import { response } from "@server/lib/response";
+import logger from "@server/logger";
+import HttpCode from "@server/types/HttpCode";
+import { and, eq } from "drizzle-orm";
+import { NextFunction, Request, Response } from "express";
+import createHttpError from "http-errors";
 import NodeCache from "node-cache";
-import { generateSessionToken } from "@server/auth/sessions/app";
+import { z } from "zod";
+import { fromError } from "zod-validation-error";
 
 // We'll see if this speeds anything up
 const cache = new NodeCache({
@@ -79,6 +84,7 @@ export async function verifyResourceSession(
             host,
             originalRequestURL,
             requestIp,
+            path,
             accessToken: token
         } = parsedBody.data;
 
@@ -146,18 +152,35 @@ export async function verifyResourceSession(
             return allowed(res);
         }
 
-        const redirectUrl = `${config.getRawConfig().app.dashboard_url}/auth/resource/${encodeURIComponent(resource.resourceId)}?redirect=${encodeURIComponent(originalRequestURL)}`;
+        // check the rules
+        if (resource.applyRules) {
+            const action = await checkRules(
+                resource.resourceId,
+                clientIp,
+                path
+            );
+
+            if (action == "ACCEPT") {
+                logger.debug("Resource allowed by rule");
+                return allowed(res);
+            } else if (action == "DROP") {
+                logger.debug("Resource denied by rule");
+                return notAllowed(res);
+            }
+
+            // otherwise its undefined and we pass
+        }
+
+        const redirectUrl = `${config.getRawConfig().app.dashboard_url}/auth/resource/${encodeURIComponent(
+            resource.resourceId
+        )}?redirect=${encodeURIComponent(originalRequestURL)}`;
 
         // check for access token
         let validAccessToken: ResourceAccessToken | undefined;
         if (token) {
             const [accessTokenId, accessToken] = token.split(".");
             const { valid, error, tokenItem } = await verifyResourceAccessToken(
-                {
-                    resource,
-                    accessTokenId,
-                    accessToken
-                }
+                { resource, accessTokenId, accessToken }
             );
 
             if (error) {
@@ -167,7 +190,9 @@ export async function verifyResourceSession(
             if (!valid) {
                 if (config.getRawConfig().app.log_failed_attempts) {
                     logger.info(
-                        `Resource access token is invalid. Resource ID: ${resource.resourceId}. IP: ${clientIp}.`
+                        `Resource access token is invalid. Resource ID: ${
+                            resource.resourceId
+                        }. IP: ${clientIp}.`
                     );
                 }
             }
@@ -188,7 +213,9 @@ export async function verifyResourceSession(
         if (!sessions) {
             if (config.getRawConfig().app.log_failed_attempts) {
                 logger.info(
-                    `Missing resource sessions. Resource ID: ${resource.resourceId}. IP: ${clientIp}.`
+                    `Missing resource sessions. Resource ID: ${
+                        resource.resourceId
+                    }. IP: ${clientIp}.`
                 );
             }
             return notAllowed(res);
@@ -196,7 +223,9 @@ export async function verifyResourceSession(
 
         const resourceSessionToken =
             sessions[
-                `${config.getRawConfig().server.session_cookie_name}${resource.ssl ? "_s" : ""}`
+                `${config.getRawConfig().server.session_cookie_name}${
+                    resource.ssl ? "_s" : ""
+                }`
             ];
 
         if (resourceSessionToken) {
@@ -219,7 +248,9 @@ export async function verifyResourceSession(
                 );
                 if (config.getRawConfig().app.log_failed_attempts) {
                     logger.info(
-                        `Resource session is an exchange token. Resource ID: ${resource.resourceId}. IP: ${clientIp}.`
+                        `Resource session is an exchange token. Resource ID: ${
+                            resource.resourceId
+                        }. IP: ${clientIp}.`
                     );
                 }
                 return notAllowed(res);
@@ -258,7 +289,9 @@ export async function verifyResourceSession(
                 }
 
                 if (resourceSession.userSessionId && sso) {
-                    const userAccessCacheKey = `userAccess:${resourceSession.userSessionId}:${resource.resourceId}`;
+                    const userAccessCacheKey = `userAccess:${
+                        resourceSession.userSessionId
+                    }:${resource.resourceId}`;
 
                     let isAllowed: boolean | undefined =
                         cache.get(userAccessCacheKey);
@@ -282,8 +315,8 @@ export async function verifyResourceSession(
             }
         }
 
-        // At this point we have checked all sessions, but since the access token is valid, we should allow access
-        // and create a new session.
+        // At this point we have checked all sessions, but since the access token is
+        // valid, we should allow access and create a new session.
         if (validAccessToken) {
             return await createAccessTokenSession(
                 res,
@@ -296,7 +329,9 @@ export async function verifyResourceSession(
 
         if (config.getRawConfig().app.log_failed_attempts) {
             logger.info(
-                `Resource access not allowed. Resource ID: ${resource.resourceId}. IP: ${clientIp}.`
+                `Resource access not allowed. Resource ID: ${
+                    resource.resourceId
+                }. IP: ${clientIp}.`
             );
         }
         return notAllowed(res, redirectUrl);
@@ -437,4 +472,148 @@ async function isUserAllowedToAccessResource(
     }
 
     return false;
+}
+
+async function checkRules(
+    resourceId: number,
+    clientIp: string | undefined,
+    path: string | undefined
+): Promise<"ACCEPT" | "DROP" | undefined> {
+    const ruleCacheKey = `rules:${resourceId}`;
+
+    let rules: ResourceRule[] | undefined = cache.get(ruleCacheKey);
+
+    if (!rules) {
+        rules = await db
+            .select()
+            .from(resourceRules)
+            .where(eq(resourceRules.resourceId, resourceId));
+
+        cache.set(ruleCacheKey, rules);
+    }
+
+    if (rules.length === 0) {
+        logger.debug("No rules found for resource", resourceId);
+        return;
+    }
+
+    // sort rules by priority in ascending order
+    rules = rules.sort((a, b) => a.priority - b.priority);
+
+    for (const rule of rules) {
+        if (!rule.enabled) {
+            continue;
+        }
+
+        if (
+            clientIp &&
+            rule.match == "CIDR" &&
+            isIpInCidr(clientIp, rule.value)
+        ) {
+            return rule.action as any;
+        } else if (clientIp && rule.match == "IP" && clientIp == rule.value) {
+            return rule.action as any;
+        } else if (
+            path &&
+            rule.match == "PATH" &&
+            isPathAllowed(rule.value, path)
+        ) {
+            return rule.action as any;
+        }
+    }
+
+    return;
+}
+
+function isPathAllowed(pattern: string, path: string): boolean {
+    logger.debug(`\nMatching path "${path}" against pattern "${pattern}"`);
+
+    // Normalize and split paths into segments
+    const normalize = (p: string) => p.split("/").filter(Boolean);
+    const patternParts = normalize(pattern);
+    const pathParts = normalize(path);
+
+    logger.debug(`Normalized pattern parts: [${patternParts.join(", ")}]`);
+    logger.debug(`Normalized path parts: [${pathParts.join(", ")}]`);
+
+    // Recursive function to try different wildcard matches
+    function matchSegments(patternIndex: number, pathIndex: number): boolean {
+        const indent = "  ".repeat(pathIndex); // Indent based on recursion depth
+        const currentPatternPart = patternParts[patternIndex];
+        const currentPathPart = pathParts[pathIndex];
+
+        logger.debug(
+            `${indent}Checking patternIndex=${patternIndex} (${currentPatternPart || "END"}) vs pathIndex=${pathIndex} (${currentPathPart || "END"})`
+        );
+
+        // If we've consumed all pattern parts, we should have consumed all path parts
+        if (patternIndex >= patternParts.length) {
+            const result = pathIndex >= pathParts.length;
+            logger.debug(
+                `${indent}Reached end of pattern, remaining path: ${pathParts.slice(pathIndex).join("/")} -> ${result}`
+            );
+            return result;
+        }
+
+        // If we've consumed all path parts but still have pattern parts
+        if (pathIndex >= pathParts.length) {
+            // The only way this can match is if all remaining pattern parts are wildcards
+            const remainingPattern = patternParts.slice(patternIndex);
+            const result = remainingPattern.every((p) => p === "*");
+            logger.debug(
+                `${indent}Reached end of path, remaining pattern: ${remainingPattern.join("/")} -> ${result}`
+            );
+            return result;
+        }
+
+        // For wildcards, try consuming different numbers of path segments
+        if (currentPatternPart === "*") {
+            logger.debug(
+                `${indent}Found wildcard at pattern index ${patternIndex}`
+            );
+
+            // Try consuming 0 segments (skip the wildcard)
+            logger.debug(
+                `${indent}Trying to skip wildcard (consume 0 segments)`
+            );
+            if (matchSegments(patternIndex + 1, pathIndex)) {
+                logger.debug(
+                    `${indent}Successfully matched by skipping wildcard`
+                );
+                return true;
+            }
+
+            // Try consuming current segment and recursively try rest
+            logger.debug(
+                `${indent}Trying to consume segment "${currentPathPart}" for wildcard`
+            );
+            if (matchSegments(patternIndex, pathIndex + 1)) {
+                logger.debug(
+                    `${indent}Successfully matched by consuming segment for wildcard`
+                );
+                return true;
+            }
+
+            logger.debug(`${indent}Failed to match wildcard`);
+            return false;
+        }
+
+        // For regular segments, they must match exactly
+        if (currentPatternPart !== currentPathPart) {
+            logger.debug(
+                `${indent}Segment mismatch: "${currentPatternPart}" != "${currentPathPart}"`
+            );
+            return false;
+        }
+
+        logger.debug(
+            `${indent}Segments match: "${currentPatternPart}" = "${currentPathPart}"`
+        );
+        // Move to next segments in both pattern and path
+        return matchSegments(patternIndex + 1, pathIndex + 1);
+    }
+
+    const result = matchSegments(0, 0);
+    logger.debug(`Final result: ${result}`);
+    return result;
 }

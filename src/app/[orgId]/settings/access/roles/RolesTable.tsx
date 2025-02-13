@@ -12,7 +12,7 @@ import { ArrowUpDown, Crown, MoreHorizontal } from "lucide-react";
 import { useState } from "react";
 import ConfirmDeleteDialog from "@app/components/ConfirmDeleteDialog";
 import { useOrgContext } from "@app/hooks/useOrgContext";
-import { useToast } from "@app/hooks/useToast";
+import { toast } from "@app/hooks/useToast";
 import { RolesDataTable } from "./RolesDataTable";
 import { Role } from "@server/db/schema";
 import CreateRoleForm from "./CreateRoleForm";
@@ -37,7 +37,6 @@ export default function UsersTable({ roles: r }: RolesTableProps) {
     const api = createApiClient(useEnvContext());
 
     const { org } = useOrgContext();
-    const { toast } = useToast();
 
     const columns: ColumnDef<RoleRow>[] = [
         {

@@ -16,7 +16,7 @@ import {
     SelectTrigger,
     SelectValue
 } from "@app/components/ui/select";
-import { useToast } from "@app/hooks/useToast";
+import { toast } from "@app/hooks/useToast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { InviteUserResponse } from "@server/routers/user";
 import { AxiosResponse } from "axios";
@@ -47,7 +47,6 @@ const formSchema = z.object({
 });
 
 export default function AccessControlsPage() {
-    const { toast } = useToast();
     const { orgUser: user } = userOrgUserContext();
 
     const api = createApiClient(useEnvContext());

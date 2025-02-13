@@ -10,7 +10,7 @@ import {
     FormMessage,
 } from "@app/components/ui/form";
 import { Input } from "@app/components/ui/input";
-import { useToast } from "@app/hooks/useToast";
+import { toast } from "@app/hooks/useToast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AxiosResponse } from "axios";
 import { useState } from "react";
@@ -48,7 +48,6 @@ export default function CreateRoleForm({
     setOpen,
     afterCreate,
 }: CreateRoleFormProps) {
-    const { toast } = useToast();
     const { org } = useOrgContext();
 
     const [loading, setLoading] = useState(false);

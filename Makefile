@@ -12,9 +12,6 @@ build-arm:
 build-x86:
 	docker buildx build --platform linux/amd64 -t fosrl/pangolin:latest .
 
-build-x86-ecr:
-	docker buildx build --platform linux/amd64 -t 216989133116.dkr.ecr.us-east-1.amazonaws.com/pangolin:latest --push .
-
 build:
 	docker build -t fosrl/pangolin:latest .
 

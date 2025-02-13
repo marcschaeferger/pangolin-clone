@@ -42,7 +42,7 @@ export const ResourcesSplashCard = () => {
                         Resources
                     </h3>
                     <p className="text-sm">
-                        Resources are proxies to applications running on your private network. Create a resource for any HTTP or HTTPS app on your private network.
+                        Resources are proxies to applications running on your private network. Create a resource for any HTTP/HTTPS or raw TCP/UDP service on your private network.
                         Each resource must be connected to a site to enable private, secure connectivity through an encrypted WireGuard tunnel.
                     </p>
                     <ul className="text-sm text-muted-foreground space-y-2">

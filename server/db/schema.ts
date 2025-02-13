@@ -54,7 +54,8 @@ export const resources = sqliteTable("resources", {
     emailWhitelistEnabled: integer("emailWhitelistEnabled", { mode: "boolean" })
         .notNull()
         .default(false),
-    isBaseDomain: integer("isBaseDomain", { mode: "boolean" })
+    isBaseDomain: integer("isBaseDomain", { mode: "boolean" }),
+    applyRules: integer("applyRules", { mode: "boolean" }).notNull().default(false)
 });
 
 export const targets = sqliteTable("targets", {
@@ -371,6 +372,18 @@ export const versionMigrations = sqliteTable("versionMigrations", {
     executedAt: integer("executedAt").notNull()
 });
 
+export const resourceRules = sqliteTable("resourceRules", {
+    ruleId: integer("ruleId").primaryKey({ autoIncrement: true }),
+    resourceId: integer("resourceId")
+        .notNull()
+        .references(() => resources.resourceId, { onDelete: "cascade" }),
+    enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
+    priority: integer("priority").notNull(),
+    action: text("action").notNull(), // ACCEPT, DROP
+    match: text("match").notNull(), // CIDR, PATH, IP
+    value: text("value").notNull()
+});
+
 export type Org = InferSelectModel<typeof orgs>;
 export type User = InferSelectModel<typeof users>;
 export type Site = InferSelectModel<typeof sites>;
@@ -403,3 +416,4 @@ export type ResourceOtp = InferSelectModel<typeof resourceOtp>;
 export type ResourceAccessToken = InferSelectModel<typeof resourceAccessToken>;
 export type ResourceWhitelist = InferSelectModel<typeof resourceWhitelist>;
 export type VersionMigration = InferSelectModel<typeof versionMigrations>;
+export type ResourceRule = InferSelectModel<typeof resourceRules>;

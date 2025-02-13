@@ -11,7 +11,7 @@ import {
     FormMessage
 } from "@app/components/ui/form";
 import { Input } from "@app/components/ui/input";
-import { useToast } from "@app/hooks/useToast";
+import { toast } from "@app/hooks/useToast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -59,7 +59,7 @@ import {
     SelectTrigger,
     SelectValue
 } from "@app/components/ui/select";
-import { subdomainSchema } from "@server/schemas/subdomainSchema";
+import { subdomainSchema } from "@server/lib/schemas";
 import Link from "next/link";
 import { SquareArrowOutUpRight } from "lucide-react";
 import CopyTextBox from "@app/components/CopyTextBox";
@@ -117,8 +117,6 @@ export default function CreateResourceForm({
     open,
     setOpen
 }: CreateResourceFormProps) {
-    const { toast } = useToast();
-
     const api = createApiClient(useEnvContext());
 
     const [loading, setLoading] = useState(false);

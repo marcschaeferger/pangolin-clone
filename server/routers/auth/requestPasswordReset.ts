@@ -8,10 +8,8 @@ import { db } from "@server/db";
 import { passwordResetTokens, users } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import { alphabet, generateRandomString, sha256 } from "oslo/crypto";
-import { encodeHex } from "oslo/encoding";
 import { createDate } from "oslo";
 import logger from "@server/logger";
-import { generateIdFromEntropySize } from "@server/auth/sessions/app";
 import { TimeSpan } from "oslo";
 import config from "@server/lib/config";
 import { sendEmail } from "@server/emails";
@@ -85,7 +83,9 @@ export async function requestPasswordReset(
         const url = `${config.getRawConfig().app.dashboard_url}/auth/reset-password?email=${email}&token=${token}`;
 
         if (!config.getRawConfig().email) {
-            logger.info(`Password reset requested for ${email}. Token: ${token}.`);
+            logger.info(
+                `Password reset requested for ${email}. Token: ${token}.`
+            );
         }
 
         await sendEmail(

@@ -50,13 +50,15 @@ export function ShareLinksDataTable<TData, TValue>({
         getSortedRowModel: getSortedRowModel(),
         onColumnFiltersChange: setColumnFilters,
         getFilteredRowModel: getFilteredRowModel(),
-        state: {
-            sorting,
-            columnFilters,
+        initialState: {
             pagination: {
-                pageSize: 100,
+                pageSize: 20,
                 pageIndex: 0
             }
+        },
+        state: {
+            sorting,
+            columnFilters
         }
     });
 

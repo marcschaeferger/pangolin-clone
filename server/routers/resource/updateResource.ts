@@ -8,8 +8,8 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
-import { subdomainSchema } from "@server/schemas/subdomainSchema";
 import config from "@server/lib/config";
+import { subdomainSchema } from "@server/lib/schemas";
 
 const updateResourceParamsSchema = z
     .object({
@@ -29,7 +29,8 @@ const updateResourceBodySchema = z
         blockAccess: z.boolean().optional(),
         proxyPort: z.number().int().min(1).max(65535).optional(),
         emailWhitelistEnabled: z.boolean().optional(),
-        isBaseDomain: z.boolean().optional()
+        isBaseDomain: z.boolean().optional(),
+        applyRules: z.boolean().optional(),
     })
     .strict()
     .refine((data) => Object.keys(data).length > 0, {
@@ -175,10 +176,10 @@ export async function updateResource(
             );
         }
 
-        let fullDomain = "";
+        let fullDomain: string | undefined;
         if (updateData.isBaseDomain) {
             fullDomain = org.domain;
-        } else {
+        } else if (updateData.subdomain) {
             fullDomain = `${updateData.subdomain}.${org.domain}`;
         }
 
@@ -187,18 +188,24 @@ export async function updateResource(
             ...(fullDomain && { fullDomain })
         };
 
-        const [existingDomain] = await db
-            .select()
-            .from(resources)
-            .where(eq(resources.fullDomain, fullDomain));
+        if (
+            fullDomain &&
+            (updatePayload.subdomain !== undefined ||
+                updatePayload.isBaseDomain !== undefined)
+        ) {
+            const [existingDomain] = await db
+                .select()
+                .from(resources)
+                .where(eq(resources.fullDomain, fullDomain));
 
-        if (existingDomain && existingDomain.resourceId !== resourceId) {
-            return next(
-                createHttpError(
-                    HttpCode.CONFLICT,
-                    "Resource with that domain already exists"
-                )
-            );
+            if (existingDomain && existingDomain.resourceId !== resourceId) {
+                return next(
+                    createHttpError(
+                        HttpCode.CONFLICT,
+                        "Resource with that domain already exists"
+                    )
+                );
+            }
         }
 
         const updatedResource = await db

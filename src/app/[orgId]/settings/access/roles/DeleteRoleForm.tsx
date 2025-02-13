@@ -9,7 +9,7 @@ import {
     FormLabel,
     FormMessage,
 } from "@app/components/ui/form";
-import { useToast } from "@app/hooks/useToast";
+import { toast } from "@app/hooks/useToast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AxiosResponse } from "axios";
 import { useEffect, useState } from "react";
@@ -56,7 +56,6 @@ export default function DeleteRoleForm({
     setOpen,
     afterDelete,
 }: CreateRoleFormProps) {
-    const { toast } = useToast();
     const { org } = useOrgContext();
 
     const [loading, setLoading] = useState(false);

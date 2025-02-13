@@ -149,8 +149,6 @@ export async function traefikConfigProvider(
                         : {})
                 };
 
-                logger.debug(config.getRawConfig().traefik.prefer_wildcard_cert)
-
                 const additionalMiddlewares =
                     config.getRawConfig().traefik.additional_middlewares || [];
 

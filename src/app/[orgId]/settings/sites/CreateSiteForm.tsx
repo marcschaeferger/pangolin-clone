@@ -10,7 +10,7 @@ import {
     FormMessage
 } from "@app/components/ui/form";
 import { Input } from "@app/components/ui/input";
-import { useToast } from "@app/hooks/useToast";
+import { toast } from "@app/hooks/useToast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -38,7 +38,16 @@ import { SiteRow } from "./SitesTable";
 import { AxiosResponse } from "axios";
 import { Button } from "@app/components/ui/button";
 import Link from "next/link";
-import { ArrowUpRight, SquareArrowOutUpRight } from "lucide-react";
+import {
+    ArrowUpRight,
+    ChevronsUpDown,
+    SquareArrowOutUpRight
+} from "lucide-react";
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger
+} from "@app/components/ui/collapsible";
 
 const createSiteFormSchema = z.object({
     name: z
@@ -72,13 +81,13 @@ export default function CreateSiteForm({
     setChecked,
     orgId
 }: CreateSiteFormProps) {
-    const { toast } = useToast();
-
     const api = createApiClient(useEnvContext());
     const { env } = useEnvContext();
 
     const [isLoading, setIsLoading] = useState(false);
     const [isChecked, setIsChecked] = useState(false);
+
+    const [isOpen, setIsOpen] = useState(false);
 
     const [keypair, setKeypair] = useState<{
         publicKey: string;
@@ -184,10 +193,9 @@ export default function CreateSiteForm({
         }
 
         const res = await api
-            .put<AxiosResponse<CreateSiteResponse>>(
-                `/org/${orgId}/site/`,
-                payload
-            )
+            .put<
+                AxiosResponse<CreateSiteResponse>
+            >(`/org/${orgId}/site/`, payload)
             .catch((e) => {
                 toast({
                     variant: "destructive",
@@ -236,6 +244,18 @@ PersistentKeepalive = 5`
             : "";
 
     const newtConfig = `newt --id ${siteDefaults?.newtId} --secret ${siteDefaults?.newtSecret} --endpoint ${env.app.dashboardUrl}`;
+
+    const newtConfigDockerCompose = `services:
+    newt:
+        image: fosrl/newt
+        container_name: newt
+        restart: unless-stopped
+        environment:
+            - PANGOLIN_ENDPOINT=${env.app.dashboardUrl}
+            - NEWT_ID=${siteDefaults?.newtId}
+            - NEWT_SECRET=${siteDefaults?.newtSecret}`;
+
+    const newtConfigDockerRun = `docker run -it fosrl/newt --id ${siteDefaults?.newtId} --secret ${siteDefaults?.newtSecret} --endpoint ${env.app.dashboardUrl}`;
 
     return (
         <div className="space-y-4">
@@ -307,32 +327,6 @@ PersistentKeepalive = 5`
                         )}
                     />
 
-                    <div className="w-full">
-                        {form.watch("method") === "wireguard" && !isLoading ? (
-                            <>
-                                <CopyTextBox text={wgConfig} />
-                                <span className="text-sm text-muted-foreground">
-                                    You will only be able to see the
-                                    configuration once.
-                                </span>
-                            </>
-                        ) : form.watch("method") === "wireguard" &&
-                          isLoading ? (
-                            <p>Loading WireGuard configuration...</p>
-                        ) : form.watch("method") === "newt" ? (
-                            <>
-                                <CopyTextBox
-                                    text={newtConfig}
-                                    wrapText={false}
-                                />
-                                <span className="text-sm text-muted-foreground">
-                                    You will only be able to see the
-                                    configuration once.
-                                </span>
-                            </>
-                        ) : null}
-                    </div>
-
                     {form.watch("method") === "newt" && (
                         <Link
                             className="text-sm text-primary flex items-center gap-1"
@@ -348,6 +342,81 @@ PersistentKeepalive = 5`
                         </Link>
                     )}
 
+                    <div className="w-full">
+                        {form.watch("method") === "wireguard" && !isLoading ? (
+                            <>
+                                <CopyTextBox text={wgConfig} />
+                                <span className="text-sm text-muted-foreground mt-2">
+                                    You will only be able to see the
+                                    configuration once.
+                                </span>
+                            </>
+                        ) : form.watch("method") === "wireguard" &&
+                          isLoading ? (
+                            <p>Loading WireGuard configuration...</p>
+                        ) : form.watch("method") === "newt" ? (
+                            <>
+                                <div className="mb-2">
+                                    <Collapsible
+                                        open={isOpen}
+                                        onOpenChange={setIsOpen}
+                                        className="space-y-2"
+                                    >
+                                        <div className="mx-auto">
+                                            <CopyTextBox
+                                                text={newtConfig}
+                                                wrapText={false}
+                                            />
+                                        </div>
+                                        <div className="flex items-center justify-between space-x-4">
+                                            <CollapsibleTrigger asChild>
+                                                <Button
+                                                    variant="text"
+                                                    size="sm"
+                                                    className="p-0 flex items-center justify-between w-full"
+                                                >
+                                                    <h4 className="text-sm font-semibold">
+                                                        Expand for Docker Deployment
+                                                        Details
+                                                    </h4>
+                                                    <div>
+                                                        <ChevronsUpDown className="h-4 w-4" />
+                                                        <span className="sr-only">
+                                                            Toggle
+                                                        </span>
+                                                    </div>
+                                                </Button>
+                                            </CollapsibleTrigger>
+                                        </div>
+                                        <CollapsibleContent className="space-y-4">
+                                            <div className="space-y-2">
+                                                <b>Docker Compose</b>
+                                                <CopyTextBox
+                                                    text={
+                                                        newtConfigDockerCompose
+                                                    }
+                                                    wrapText={false}
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <b>Docker Run</b>
+
+                                                <CopyTextBox
+                                                    text={newtConfigDockerRun}
+                                                    wrapText={false}
+                                                />
+                                            </div>
+                                        </CollapsibleContent>
+                                    </Collapsible>
+                                </div>
+                                <span className="text-sm text-muted-foreground">
+                                    You will only be able to see the
+                                    configuration once.
+                                </span>
+                            </>
+                        ) : null}
+                    </div>
+
                     {form.watch("method") === "local" && (
                         <Link
                             className="text-sm text-primary flex items-center gap-1"
@@ -355,10 +424,7 @@ PersistentKeepalive = 5`
                             target="_blank"
                             rel="noopener noreferrer"
                         >
-                            <span>
-                                {" "}
-                                Local sites do not tunnel, learn more
-                            </span>
+                            <span> Local sites do not tunnel, learn more</span>
                             <SquareArrowOutUpRight size={14} />
                         </Link>
                     )}
