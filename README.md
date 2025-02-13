@@ -22,8 +22,13 @@
 </div>
 
 <h3 align="center">Tunneled Mesh Reverse Proxy Server with Access Control</h3>
+<div align="center">
 
-Pangolin is a self-hosted tunneled reverse proxy management server with identity and access control, designed to securely expose private resources on distributed networks. With Pangolin, you retain full control over your infrastructure while providing a user-friendly and feature-rich solution for managing proxies, authentication, and access, while simplifying complex network setups.
+_Your own self-hosted zero trust tunnel._
+
+</div>
+
+Pangolin is a self-hosted tunneled reverse proxy server with identity and access control, designed to securely expose private resources on distributed networks. Acting as a central hub, it connects isolated networks — even those behind restrictive firewalls — through encrypted tunnels, enabling easy access to remote services without opening ports.
 
 <img src="public/screenshots/sites.png" alt="Preview"/>
 
@@ -38,12 +43,13 @@ _Sites page of Pangolin dashboard (dark mode) showing multiple tunnels connected
 -   Built-in support for any WireGuard client.
 -   Automated **SSL certificates** (https) via [LetsEncrypt](https://letsencrypt.org/).
 -   Support for HTTP/HTTPS and **raw TCP/UDP services**.
+-   Load balancing.
 
 ### Identity & Access Management
 
 -   Centralized authentication system using platform SSO. **Users will only have to manage one login.**
--   **Rules based access control for resources.**
--   Totp with backup codes for two-factor authentication.
+-   **Define access control rules for IPs, IP ranges, and URL paths per resource.**
+-   TOTP with backup codes for two-factor authentication.
 -   Create organizations, each with multiple sites, users, and roles.
 -   **Role-based access control** to manage resource access permissions.
 -   Additional authentication options include:
@@ -61,9 +67,9 @@ _Sites page of Pangolin dashboard (dark mode) showing multiple tunnels connected
 
 ### Easy Deployment
 
+-   Run on any cloud provider or on-premises.
 -   Docker Compose based setup for simplified deployment.
 -   Future-proof installation script for streamlined setup and feature additions.
--   Run on any VPS.
 -   Use your preferred WireGuard client to connect, or use Newt, our custom user space client for the best experience.
 
 ### Modular Design
@@ -126,17 +132,18 @@ _Sites page of Pangolin dashboard (dark mode) showing multiple tunnels connected
 
 ## Similar Projects and Inspirations
 
-Pangolin was inspired by several existing projects and concepts:
-
--   **Cloudflare Tunnels**:  
+**Cloudflare Tunnels**:  
     A similar approach to proxying private resources securely, but Pangolin is a self-hosted alternative, giving you full control over your infrastructure.
 
--   **Authentik and Authelia**:  
+**Authentik and Authelia**:  
     These projects inspired Pangolin’s centralized authentication system for proxies, enabling robust user and role management.
 
 ## Project Development / Roadmap
 
-Pangolin is under active development, and we are continuously adding new features and improvements. View the [project board](https://github.com/orgs/fosrl/projects/1) for more detailed info.
+> [!NOTE]
+> Pangolin is under heavy development. The roadmap is subject to change as we fix bugs, add new features, and make improvements.
+
+View the [project board](https://github.com/orgs/fosrl/projects/1) for more detailed info.
 
 ## Licensing
 

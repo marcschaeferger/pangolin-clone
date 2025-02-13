@@ -9,7 +9,7 @@ import {
     SortingState,
     getSortedRowModel,
     ColumnFiltersState,
-    getFilteredRowModel,
+    getFilteredRowModel
 } from "@tanstack/react-table";
 
 import {
@@ -19,7 +19,7 @@ import {
     TableContainer,
     TableHead,
     TableHeader,
-    TableRow,
+    TableRow
 } from "@/components/ui/table";
 import { Button } from "@app/components/ui/button";
 import { useState } from "react";
@@ -36,7 +36,7 @@ interface ResourcesDataTableProps<TData, TValue> {
 export function ResourcesDataTable<TData, TValue>({
     addResource,
     columns,
-    data,
+    data
 }: ResourcesDataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -51,13 +51,15 @@ export function ResourcesDataTable<TData, TValue>({
         onColumnFiltersChange: setColumnFilters,
         getFilteredRowModel: getFilteredRowModel(),
         initialState: {
-            sorting,
-            columnFilters,
             pagination: {
                 pageSize: 20,
-                pageIndex: 0,
-            },
+                pageIndex: 0
+            }
         },
+        state: {
+            sorting,
+            columnFilters
+        }
     });
 
     return (
@@ -103,7 +105,7 @@ export function ResourcesDataTable<TData, TValue>({
                                                 : flexRender(
                                                       header.column.columnDef
                                                           .header,
-                                                      header.getContext(),
+                                                      header.getContext()
                                                   )}
                                         </TableHead>
                                     );
@@ -124,7 +126,7 @@ export function ResourcesDataTable<TData, TValue>({
                                         <TableCell key={cell.id}>
                                             {flexRender(
                                                 cell.column.columnDef.cell,
-                                                cell.getContext(),
+                                                cell.getContext()
                                             )}
                                         </TableCell>
                                     ))}
