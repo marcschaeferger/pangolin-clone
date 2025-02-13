@@ -45,6 +45,7 @@ type Config struct {
 	EmailSMTPPass              string
 	EmailNoReply               string
 	InstallGerbil              bool
+	TraefikBouncerKey		  string
 }
 
 func main() {
