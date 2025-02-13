@@ -1,35 +1,11 @@
+import z from "zod";
+
 export function isValidCIDR(cidr: string): boolean {
-    // Match CIDR pattern (e.g., "192.168.0.0/24")
-    const cidrPattern =
-        /^([0-9]{1,3}\.){3}[0-9]{1,3}\/([0-9]|[1-2][0-9]|3[0-2])$/;
-
-    if (!cidrPattern.test(cidr)) {
-        return false;
-    }
-
-    // Validate IP address part
-    const ipPart = cidr.split("/")[0];
-    const octets = ipPart.split(".");
-
-    return octets.every((octet) => {
-        const num = parseInt(octet, 10);
-        return num >= 0 && num <= 255;
-    });
+    return z.string().cidr().safeParse(cidr).success;
 }
 
 export function isValidIP(ip: string): boolean {
-    const ipPattern = /^([0-9]{1,3}\.){3}[0-9]{1,3}$/;
-
-    if (!ipPattern.test(ip)) {
-        return false;
-    }
-
-    const octets = ip.split(".");
-
-    return octets.every((octet) => {
-        const num = parseInt(octet, 10);
-        return num >= 0 && num <= 255;
-    });
+    return z.string().ip().safeParse(ip).success;
 }
 
 export function isValidUrlGlobPattern(pattern: string): boolean {
