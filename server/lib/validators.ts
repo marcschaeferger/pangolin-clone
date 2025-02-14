@@ -35,7 +35,7 @@ export function isValidUrlGlobPattern(pattern: string): boolean {
         }
 
         // Check for invalid characters
-        if (!/^[a-zA-Z0-9_*-]*$/.test(segment)) {
+        if (!/^[a-zA-Z0-9_.*-]*$/.test(segment)) {
             return false;
         }
     }
