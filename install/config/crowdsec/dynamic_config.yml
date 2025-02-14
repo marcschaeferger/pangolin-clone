@@ -56,7 +56,7 @@ http:
   routers:
     # HTTP to HTTPS redirect router
     main-app-router-redirect:
-      rule: "Host(`{{.DomainName}}`)" # Dynamic Domain Name
+      rule: "Host(`{{.DashboardDomain}}`)" # Dynamic Domain Name
       service: next-service
       entryPoints:
         - web
@@ -65,7 +65,7 @@ http:
 
     # Next.js router (handles everything except API and WebSocket paths)
     next-router:
-      rule: "Host(`{{.DomainName}}`) && !PathPrefix(`/api/v1`)" # Dynamic Domain Name
+      rule: "Host(`{{.DashboardDomain}}`) && !PathPrefix(`/api/v1`)" # Dynamic Domain Name
       service: next-service
       entryPoints:
         - websecure
@@ -76,7 +76,7 @@ http:
 
     # API router (handles /api/v1 paths)
     api-router:
-      rule: "Host(`{{.DomainName}}`) && PathPrefix(`/api/v1`)" # Dynamic Domain Name
+      rule: "Host(`{{.DashboardDomain}}`) && PathPrefix(`/api/v1`)" # Dynamic Domain Name
       service: api-service
       entryPoints:
         - websecure
@@ -87,7 +87,7 @@ http:
 
     # WebSocket router
     ws-router:
-      rule: "Host(`{{.DomainName}}`)" # Dynamic Domain Name
+      rule: "Host(`{{.DashboardDomain}}`)" # Dynamic Domain Name
       service: api-service
       entryPoints:
         - websecure
