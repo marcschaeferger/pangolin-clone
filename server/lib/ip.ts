@@ -100,7 +100,7 @@ function bigIntToIp(num: bigint, version: IPVersion): string {
 /**
  * Converts CIDR to IP range
  */
-function cidrToRange(cidr: string): IPRange {
+export function cidrToRange(cidr: string): IPRange {
     const [ip, prefix] = cidr.split('/');
     const version = detectIpVersion(ip);
     const prefixBits = parseInt(prefix);
@@ -132,15 +132,22 @@ export function findNextAvailableCidr(
     blockSize: number,
     startCidr?: string
 ): string | null {
-    if (existingCidrs.length === 0) return null;
+
+    if (!startCidr && existingCidrs.length === 0) {
+        return null;
+    }
+        
+    // If no existing CIDRs, use the IP version from startCidr
+    const version = startCidr 
+        ? detectIpVersion(startCidr.split('/')[0])
+        : 4; // Default to IPv4 if no startCidr provided
     
-    // Determine IP version from first CIDR
-    const version = detectIpVersion(existingCidrs[0].split('/')[0]);
     // Use appropriate default startCidr if none provided
     startCidr = startCidr || (version === 4 ? "0.0.0.0/0" : "::/0");
     
-    // Ensure all CIDRs are same version
-    if (existingCidrs.some(cidr => detectIpVersion(cidr.split('/')[0]) !== version)) {
+    // If there are existing CIDRs, ensure all are same version
+    if (existingCidrs.length > 0 && 
+        existingCidrs.some(cidr => detectIpVersion(cidr.split('/')[0]) !== version)) {
         throw new Error('All CIDRs must be of the same IP version');
     }
 
