@@ -149,8 +149,6 @@ export async function resetPassword(
 
         const passwordHash = await hashPassword(newPassword);
 
-        await invalidateAllSessions(resetRequest[0].userId);
-
         await db.transaction(async (trx) => {
             await trx
                 .update(users)
@@ -162,11 +160,21 @@ export async function resetPassword(
                 .where(eq(passwordResetTokens.email, email));
         });
 
-        await sendEmail(ConfirmPasswordReset({ email }), {
-            from: config.getNoReplyEmail(),
-            to: email,
-            subject: "Password Reset Confirmation"
-        });
+        try {
+            await invalidateAllSessions(resetRequest[0].userId);
+        } catch (e) {
+            logger.error("Failed to invalidate user sessions", e);
+        }
+
+        try {
+            await sendEmail(ConfirmPasswordReset({ email }), {
+                from: config.getNoReplyEmail(),
+                to: email,
+                subject: "Password Reset Confirmation"
+            });
+        } catch (e) {
+            logger.error("Failed to send password reset confirmation email", e);
+        }
 
         return response<ResetPasswordResponse>(res, {
             data: null,
