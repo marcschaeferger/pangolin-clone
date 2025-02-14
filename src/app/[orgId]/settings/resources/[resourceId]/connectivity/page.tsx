@@ -64,6 +64,7 @@ import {
 import { SwitchInput } from "@app/components/SwitchInput";
 import { useSiteContext } from "@app/hooks/useSiteContext";
 import { InfoPopup } from "@app/components/ui/info-popup";
+import { useRouter } from "next/navigation";
 
 // Regular expressions for validation
 const DOMAIN_REGEX =
@@ -125,6 +126,7 @@ export default function ReverseProxyTargets(props: {
     const [loading, setLoading] = useState(false);
 
     const [pageLoading, setPageLoading] = useState(true);
+    const router = useRouter();
 
     const addTargetForm = useForm({
         resolver: zodResolver(addTargetSchema),
@@ -299,6 +301,7 @@ export default function ReverseProxyTargets(props: {
             });
 
             setTargetsToRemove([]);
+            router.refresh();
         } catch (err) {
             console.error(err);
             toast({
@@ -339,6 +342,7 @@ export default function ReverseProxyTargets(props: {
                 title: "SSL Configuration",
                 description: "SSL configuration updated successfully"
             });
+            router.refresh();
         }
     }
 
