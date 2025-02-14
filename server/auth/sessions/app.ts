@@ -11,7 +11,7 @@ import {
     users
 } from "@server/db/schema";
 import db from "@server/db";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import config from "@server/lib/config";
 import type { RandomReader } from "@oslojs/crypto/random";
 import { generateRandomString } from "@oslojs/crypto/random";
@@ -95,12 +95,36 @@ export async function validateSessionToken(
 }
 
 export async function invalidateSession(sessionId: string): Promise<void> {
-    await db.delete(resourceSessions).where(eq(resourceSessions.userSessionId, sessionId));
-    await db.delete(sessions).where(eq(sessions.sessionId, sessionId));
+    try {
+        await db.transaction(async (trx) => {
+            await trx
+            .delete(resourceSessions)
+            .where(eq(resourceSessions.userSessionId, sessionId));
+            await trx.delete(sessions).where(eq(sessions.sessionId, sessionId));
+        });
+    } catch (e) {
+        logger.error("Failed to invalidate session", e);
+    }
 }
 
 export async function invalidateAllSessions(userId: string): Promise<void> {
-    await db.delete(sessions).where(eq(sessions.userId, userId));
+    try {
+        await db.transaction(async (trx) => {
+            const userSessions = await trx
+            .select()
+            .from(sessions)
+            .where(eq(sessions.userId, userId));
+            await trx.delete(resourceSessions).where(
+                inArray(
+                    resourceSessions.userSessionId,
+                    userSessions.map((s) => s.sessionId)
+                )
+            );
+            await trx.delete(sessions).where(eq(sessions.userId, userId));
+        });
+    } catch (e) {
+        logger.error("Failed to all invalidate user sessions", e);
+    }
 }
 
 export function serializeSessionCookie(

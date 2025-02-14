@@ -62,39 +62,11 @@ import {
     SettingsSectionFooter
 } from "@app/components/Settings";
 import { SwitchInput } from "@app/components/SwitchInput";
-import { useSiteContext } from "@app/hooks/useSiteContext";
-import { InfoPopup } from "@app/components/ui/info-popup";
-
-// Regular expressions for validation
-const DOMAIN_REGEX =
-    /^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-const IPV4_REGEX =
-    /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-const IPV6_REGEX = /^(?:[A-F0-9]{1,4}:){7}[A-F0-9]{1,4}$/i;
-
-// Schema for domain names and IP addresses
-const domainSchema = z
-    .string()
-    .min(1, "Domain cannot be empty")
-    .max(255, "Domain name too long")
-    .refine(
-        (value) => {
-            // Check if it's a valid IP address (v4 or v6)
-            if (IPV4_REGEX.test(value) || IPV6_REGEX.test(value)) {
-                return true;
-            }
-
-            // Check if it's a valid domain name
-            return DOMAIN_REGEX.test(value);
-        },
-        {
-            message: "Invalid domain name or IP address format",
-            path: ["domain"]
-        }
-    );
+import { useRouter } from "next/navigation";
+import { isTargetValid } from "@server/lib/validators";
 
 const addTargetSchema = z.object({
-    ip: domainSchema,
+    ip: z.string().refine(isTargetValid),
     method: z.string().nullable(),
     port: z.coerce.number().int().positive()
     // protocol: z.string(),
@@ -125,6 +97,7 @@ export default function ReverseProxyTargets(props: {
     const [loading, setLoading] = useState(false);
 
     const [pageLoading, setPageLoading] = useState(true);
+    const router = useRouter();
 
     const addTargetForm = useForm({
         resolver: zodResolver(addTargetSchema),
@@ -299,6 +272,7 @@ export default function ReverseProxyTargets(props: {
             });
 
             setTargetsToRemove([]);
+            router.refresh();
         } catch (err) {
             console.error(err);
             toast({
@@ -339,6 +313,7 @@ export default function ReverseProxyTargets(props: {
                 title: "SSL Configuration",
                 description: "SSL configuration updated successfully"
             });
+            router.refresh();
         }
     }
 
