@@ -421,6 +421,7 @@ export default function ReverseProxyTargets(props: {
                     <SelectContent>
                         <SelectItem value="http">http</SelectItem>
                         <SelectItem value="https">https</SelectItem>
+                        <SelectItem value="h2c">h2c</SelectItem>
                     </SelectContent>
                 </Select>
             )
@@ -516,6 +517,9 @@ export default function ReverseProxyTargets(props: {
                                                             </SelectItem>
                                                             <SelectItem value="https">
                                                                 https
+                                                            </SelectItem>
+                                                            <SelectItem value="h2c">
+                                                                h2c
                                                             </SelectItem>
                                                         </SelectContent>
                                                     </Select>
