@@ -1,10 +1,24 @@
 import { InferSelectModel } from "drizzle-orm";
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
+export const domains = sqliteTable("domains", {
+    domainId: integer("domainId").primaryKey({ autoIncrement: true }),
+    baseDomain: text("domain").notNull().unique()
+});
+
 export const orgs = sqliteTable("orgs", {
     orgId: text("orgId").primaryKey(),
     name: text("name").notNull(),
     domain: text("domain").notNull()
+});
+
+export const orgDomains = sqliteTable("orgDomains", {
+    orgId: text("orgId")
+        .notNull()
+        .references(() => orgs.orgId, { onDelete: "cascade" }),
+    domainId: integer("domainId")
+        .notNull()
+        .references(() => domains.domainId, { onDelete: "cascade" })
 });
 
 export const sites = sqliteTable("sites", {
@@ -43,6 +57,9 @@ export const resources = sqliteTable("resources", {
     name: text("name").notNull(),
     subdomain: text("subdomain"),
     fullDomain: text("fullDomain"),
+    domainId: integer("domainId").references(() => domains.domainId, {
+        onDelete: "set null"
+    }),
     ssl: integer("ssl", { mode: "boolean" }).notNull().default(false),
     blockAccess: integer("blockAccess", { mode: "boolean" })
         .notNull()
@@ -55,7 +72,9 @@ export const resources = sqliteTable("resources", {
         .notNull()
         .default(false),
     isBaseDomain: integer("isBaseDomain", { mode: "boolean" }),
-    applyRules: integer("applyRules", { mode: "boolean" }).notNull().default(false)
+    applyRules: integer("applyRules", { mode: "boolean" })
+        .notNull()
+        .default(false)
 });
 
 export const targets = sqliteTable("targets", {

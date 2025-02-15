@@ -34,15 +34,27 @@ const configSchema = z.object({
             .transform(getEnvOrYaml("APP_DASHBOARDURL"))
             .pipe(z.string().url())
             .transform((url) => url.toLowerCase()),
-        base_domain: hostnameSchema
-            .optional()
-            .transform(getEnvOrYaml("APP_BASEDOMAIN"))
-            .pipe(hostnameSchema)
-            .transform((url) => url.toLowerCase()),
         log_level: z.enum(["debug", "info", "warn", "error"]),
         save_logs: z.boolean(),
         log_failed_attempts: z.boolean().optional()
     }),
+    domains: z
+        .array(
+            z.object({
+                base_domain: hostnameSchema.transform((url) =>
+                    url.toLowerCase()
+                )
+            })
+        )
+        .refine(
+            (data) => {
+                const baseDomains = data.map((d) => d.base_domain);
+                return new Set(baseDomains).size === baseDomains.length;
+            },
+            {
+                message: "Base domains must be unique"
+            }
+        ),
     server: z.object({
         external_port: portSchema
             .optional()
@@ -281,10 +293,6 @@ export class Config {
 
     public getRawConfig() {
         return this.rawConfig;
-    }
-
-    public getBaseDomain(): string {
-        return this.rawConfig.app.base_domain;
     }
 
     public getNoReplyEmail(): string | undefined {
