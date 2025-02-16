@@ -2,21 +2,23 @@ import { InferSelectModel } from "drizzle-orm";
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
 export const domains = sqliteTable("domains", {
-    domainId: integer("domainId").primaryKey({ autoIncrement: true }),
-    baseDomain: text("domain").notNull().unique()
+    domainId: text("domainId").primaryKey(),
+    baseDomain: text("baseDomain").notNull().unique(),
+    configManaged: integer("configManaged", { mode: "boolean" })
+        .notNull()
+        .default(false)
 });
 
 export const orgs = sqliteTable("orgs", {
     orgId: text("orgId").primaryKey(),
-    name: text("name").notNull(),
-    domain: text("domain").notNull()
+    name: text("name").notNull()
 });
 
 export const orgDomains = sqliteTable("orgDomains", {
     orgId: text("orgId")
         .notNull()
         .references(() => orgs.orgId, { onDelete: "cascade" }),
-    domainId: integer("domainId")
+    domainId: text("domainId")
         .notNull()
         .references(() => domains.domainId, { onDelete: "cascade" })
 });
@@ -57,7 +59,7 @@ export const resources = sqliteTable("resources", {
     name: text("name").notNull(),
     subdomain: text("subdomain"),
     fullDomain: text("fullDomain"),
-    domainId: integer("domainId").references(() => domains.domainId, {
+    domainId: text("domainId").references(() => domains.domainId, {
         onDelete: "set null"
     }),
     ssl: integer("ssl", { mode: "boolean" }).notNull().default(false),

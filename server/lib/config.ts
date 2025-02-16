@@ -38,23 +38,12 @@ const configSchema = z.object({
         save_logs: z.boolean(),
         log_failed_attempts: z.boolean().optional()
     }),
-    domains: z
-        .array(
-            z.object({
-                base_domain: hostnameSchema.transform((url) =>
-                    url.toLowerCase()
-                )
-            })
-        )
-        .refine(
-            (data) => {
-                const baseDomains = data.map((d) => d.base_domain);
-                return new Set(baseDomains).size === baseDomains.length;
-            },
-            {
-                message: "Base domains must be unique"
-            }
-        ),
+    domains: z.record(
+        z.string(),
+        z.object({
+            base_domain: hostnameSchema.transform((url) => url.toLowerCase())
+        })
+    ),
     server: z.object({
         external_port: portSchema
             .optional()
