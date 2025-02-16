@@ -1,0 +1,35 @@
+services:
+  crowdsec:
+    image: crowdsecurity/crowdsec:latest
+    container_name: crowdsec
+    environment:
+      GID: "1000"
+      COLLECTIONS: crowdsecurity/traefik crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules
+      ENROLL_INSTANCE_NAME: "pangolin-crowdsec"
+      PARSERS: crowdsecurity/whitelists
+      ACQUIRE_FILES: "/var/log/traefik/*.log"
+      ENROLL_TAGS: docker
+    healthcheck:
+      test: ["CMD", "cscli", "capi", "status"]
+    depends_on:
+      - gerbil # Wait for gerbil to be healthy
+    labels:
+      - "traefik.enable=false" # Disable traefik for crowdsec
+    volumes:
+      # crowdsec container data
+      - ./config/crowdsec:/etc/crowdsec # crowdsec config
+      - ./config/crowdsec/db:/var/lib/crowdsec/data # crowdsec db
+      # log bind mounts into crowdsec
+      - ./config/crowdsec_logs/auth.log:/var/log/auth.log:ro # auth.log
+      - ./config/crowdsec_logs/syslog:/var/log/syslog:ro # syslog
+      - ./config/crowdsec_logs:/var/log # crowdsec logs
+      - ./config/traefik/logs:/var/log/traefik # traefik logs
+    ports:
+      - 9090:9090 # port mapping for local firewall bouncers
+      - 6060:6060 # metrics endpoint for prometheus
+    expose:
+      - 9090 # http api for bouncers
+      - 6060 # metrics endpoint for prometheus
+      - 7422 # appsec waf endpoint
+    restart: unless-stopped
+    command: -t # Add test config flag to verify configuration

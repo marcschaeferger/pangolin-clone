@@ -80,7 +80,7 @@ entryPoints:
     http:
       tls:
         certResolver: "letsencrypt"
-      middlewares: # CHANGE MADE HERE (BOUNCER ENABLED) !!!
+      middlewares: 
         - crowdsec@file
 
 serversTransport:

@@ -15,17 +15,40 @@ func installCrowdsec(config Config) error {
 		return fmt.Errorf("backup failed: %v", err)
 	}
 
-	if err := AddCrowdSecService("docker-compose.yml"); err != nil {
-		return fmt.Errorf("crowdsec service addition failed: %v", err)
-	}
-
 	if err := createConfigFiles(config); err != nil {
 		fmt.Printf("Error creating config files: %v\n", err)
 		os.Exit(1)
 	}
 
-	// moveFile("config/crowdsec/traefik_config.yml", "config/traefik/traefik_config.yml")
-	moveFile("config/crowdsec/dynamic.yml", "config/traefik/dynamic.yml")
+	if err := copyDockerService("config/crowdsec/docker-compose.yml", "docker-compose.yml", "crowdsec"); err != nil {
+		fmt.Printf("Error copying docker service: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := copyWebsecureEntryPoint("config/crowdsec/traefik_config.yml", "config/traefik/traefik_config.yml"); err != nil {
+		fmt.Printf("Error copying entry points: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := copyEntryPoints("config/traefik/traefik_config.yml", "config/crowdsec/traefik_config.yml"); err != nil {
+		fmt.Printf("Error copying entry points: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := moveFile("config/crowdsec/traefik_config.yml", "config/traefik/traefik_config.yml"); err != nil {
+		fmt.Printf("Error moving file: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := moveFile("config/crowdsec/dynamic_config.yml", "config/traefik/dynamic_config.yml"); err != nil {
+		fmt.Printf("Error moving file: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := os.Remove("config/crowdsec/docker-compose.yml"); err != nil {
+		fmt.Printf("Error removing file: %v\n", err)
+		os.Exit(1)
+	}
 
 	if err := retrieveBouncerKey(config); err != nil {
 		return fmt.Errorf("bouncer key retrieval failed: %v", err)

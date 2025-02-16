@@ -104,113 +104,175 @@ func findPattern(s, pattern string) int {
 	return bytes.Index([]byte(s), []byte(pattern))
 }
 
-type Volume string
-type Port string
-type Expose string
-
-type HealthCheck struct {
-	Test     []string `yaml:"test,omitempty"`
-	Interval string   `yaml:"interval,omitempty"`
-	Timeout  string   `yaml:"timeout,omitempty"`
-	Retries  int      `yaml:"retries,omitempty"`
-}
-
-type DependsOnCondition struct {
-	Condition string `yaml:"condition,omitempty"`
-}
-
-type Service struct {
-	Image         string                        `yaml:"image,omitempty"`
-	ContainerName string                        `yaml:"container_name,omitempty"`
-	Environment   map[string]string             `yaml:"environment,omitempty"`
-	HealthCheck   *HealthCheck                  `yaml:"healthcheck,omitempty"`
-	DependsOn     map[string]DependsOnCondition `yaml:"depends_on,omitempty"`
-	Labels        []string                      `yaml:"labels,omitempty"`
-	Volumes       []Volume                      `yaml:"volumes,omitempty"`
-	Ports         []Port                        `yaml:"ports,omitempty"`
-	Expose        []Expose                      `yaml:"expose,omitempty"`
-	Restart       string                        `yaml:"restart,omitempty"`
-	Command       interface{}                   `yaml:"command,omitempty"`
-	NetworkMode   string                        `yaml:"network_mode,omitempty"`
-	CapAdd        []string                      `yaml:"cap_add,omitempty"`
-}
-
-type Network struct {
-	Driver string `yaml:"driver,omitempty"`
-	Name   string `yaml:"name,omitempty"`
-}
-
-type DockerConfig struct {
-	Version  string             `yaml:"version,omitempty"`
-	Services map[string]Service `yaml:"services"`
-	Networks map[string]Network `yaml:"networks,omitempty"`
-}
-
-func AddCrowdSecService(configPath string) error {
-	// Read existing config
-	data, err := os.ReadFile(configPath)
+func copyEntryPoints(sourceFile, destFile string) error {
+	// Read source file
+	sourceData, err := os.ReadFile(sourceFile)
 	if err != nil {
-		return err
+		return fmt.Errorf("error reading source file: %w", err)
 	}
 
-	// Parse existing config
-	var config DockerConfig
-	if err := yaml.Unmarshal(data, &config); err != nil {
-		return err
-	}
-
-	// Create CrowdSec service
-	crowdsecService := Service{
-		Image:         "crowdsecurity/crowdsec:latest",
-		ContainerName: "crowdsec",
-		Environment: map[string]string{
-			"GID":                  "1000",
-			"COLLECTIONS":          "crowdsecurity/traefik crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules",
-			"ENROLL_INSTANCE_NAME": "pangolin-crowdsec",
-			"PARSERS":              "crowdsecurity/whitelists",
-			"ACQUIRE_FILES":        "/var/log/traefik/*.log",
-			"ENROLL_TAGS":          "docker",
-		},
-		HealthCheck: &HealthCheck{
-			Test: []string{"CMD", "cscli", "capi", "status"},
-		},
-		DependsOn: map[string]DependsOnCondition{
-			"gerbil": {},
-		},
-		Labels: []string{"traefik.enable=false"},
-		Volumes: []Volume{
-			"./config/crowdsec:/etc/crowdsec",
-			"./config/crowdsec/db:/var/lib/crowdsec/data",
-			"./config/crowdsec_logs/auth.log:/var/log/auth.log:ro",
-			"./config/crowdsec_logs/syslog:/var/log/syslog:ro",
-			"./config/crowdsec_logs:/var/log",
-			"./config/traefik/logs:/var/log/traefik",
-		},
-		Ports: []Port{
-			"9090:9090",
-			"6060:6060",
-		},
-		Expose: []Expose{
-			"9090",
-			"6060",
-			"7422",
-		},
-		Restart: "unless-stopped",
-		Command: "-t",
-	}
-
-	// Add CrowdSec service to config
-	if config.Services == nil {
-		config.Services = make(map[string]Service)
-	}
-	config.Services["crowdsec"] = crowdsecService
-
-	// Marshal config with better formatting
-	yamlData, err := yaml.Marshal(&config)
+	// Read destination file
+	destData, err := os.ReadFile(destFile)
 	if err != nil {
-		return err
+		return fmt.Errorf("error reading destination file: %w", err)
 	}
 
-	// Write config back to file
-	return os.WriteFile(configPath, yamlData, 0644)
+	// Parse source YAML
+	var sourceYAML map[string]interface{}
+	if err := yaml.Unmarshal(sourceData, &sourceYAML); err != nil {
+		return fmt.Errorf("error parsing source YAML: %w", err)
+	}
+
+	// Parse destination YAML
+	var destYAML map[string]interface{}
+	if err := yaml.Unmarshal(destData, &destYAML); err != nil {
+		return fmt.Errorf("error parsing destination YAML: %w", err)
+	}
+
+	// Get entryPoints section from source
+	entryPoints, ok := sourceYAML["entryPoints"]
+	if !ok {
+		return fmt.Errorf("entryPoints section not found in source file")
+	}
+
+	// Update entryPoints in destination
+	destYAML["entryPoints"] = entryPoints
+
+	// Marshal updated destination YAML
+	updatedData, err := yaml.Marshal(destYAML)
+	if err != nil {
+		return fmt.Errorf("error marshaling updated YAML: %w", err)
+	}
+
+	// Write updated YAML back to destination file
+	if err := os.WriteFile(destFile, updatedData, 0644); err != nil {
+		return fmt.Errorf("error writing to destination file: %w", err)
+	}
+
+	return nil
+}
+
+func copyWebsecureEntryPoint(sourceFile, destFile string) error {
+	// Read source file
+	sourceData, err := os.ReadFile(sourceFile)
+	if err != nil {
+		return fmt.Errorf("error reading source file: %w", err)
+	}
+
+	// Read destination file
+	destData, err := os.ReadFile(destFile)
+	if err != nil {
+		return fmt.Errorf("error reading destination file: %w", err)
+	}
+
+	// Parse source YAML
+	var sourceYAML map[string]interface{}
+	if err := yaml.Unmarshal(sourceData, &sourceYAML); err != nil {
+		return fmt.Errorf("error parsing source YAML: %w", err)
+	}
+
+	// Parse destination YAML
+	var destYAML map[string]interface{}
+	if err := yaml.Unmarshal(destData, &destYAML); err != nil {
+		return fmt.Errorf("error parsing destination YAML: %w", err)
+	}
+
+	// Get entryPoints section from source
+	entryPoints, ok := sourceYAML["entryPoints"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("entryPoints section not found in source file or has invalid format")
+	}
+
+	// Get websecure configuration
+	websecure, ok := entryPoints["websecure"]
+	if !ok {
+		return fmt.Errorf("websecure entrypoint not found in source file")
+	}
+
+	// Get or create entryPoints section in destination
+	destEntryPoints, ok := destYAML["entryPoints"].(map[string]interface{})
+	if !ok {
+		// If entryPoints section doesn't exist, create it
+		destEntryPoints = make(map[string]interface{})
+		destYAML["entryPoints"] = destEntryPoints
+	}
+
+	// Update websecure in destination
+	destEntryPoints["websecure"] = websecure
+
+	// Marshal updated destination YAML
+	updatedData, err := yaml.Marshal(destYAML)
+	if err != nil {
+		return fmt.Errorf("error marshaling updated YAML: %w", err)
+	}
+
+	// Write updated YAML back to destination file
+	if err := os.WriteFile(destFile, updatedData, 0644); err != nil {
+		return fmt.Errorf("error writing to destination file: %w", err)
+	}
+
+	return nil
+}
+
+func copyDockerService(sourceFile, destFile, serviceName string) error {
+	// Read source file
+	sourceData, err := os.ReadFile(sourceFile)
+	if err != nil {
+		return fmt.Errorf("error reading source file: %w", err)
+	}
+
+	// Read destination file
+	destData, err := os.ReadFile(destFile)
+	if err != nil {
+		return fmt.Errorf("error reading destination file: %w", err)
+	}
+
+	// Parse source Docker Compose YAML
+	var sourceCompose map[string]interface{}
+	if err := yaml.Unmarshal(sourceData, &sourceCompose); err != nil {
+		return fmt.Errorf("error parsing source Docker Compose file: %w", err)
+	}
+
+	// Parse destination Docker Compose YAML
+	var destCompose map[string]interface{}
+	if err := yaml.Unmarshal(destData, &destCompose); err != nil {
+		return fmt.Errorf("error parsing destination Docker Compose file: %w", err)
+	}
+
+	// Get services section from source
+	sourceServices, ok := sourceCompose["services"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("services section not found in source file or has invalid format")
+	}
+
+	// Get the specific service configuration
+	serviceConfig, ok := sourceServices[serviceName]
+	if !ok {
+		return fmt.Errorf("service '%s' not found in source file", serviceName)
+	}
+
+	// Get or create services section in destination
+	destServices, ok := destCompose["services"].(map[string]interface{})
+	if !ok {
+		// If services section doesn't exist, create it
+		destServices = make(map[string]interface{})
+		destCompose["services"] = destServices
+	}
+
+	// Update service in destination
+	destServices[serviceName] = serviceConfig
+
+	// Marshal updated destination YAML
+	// Use yaml.v3 encoder to preserve formatting and comments
+	updatedData, err := yaml.Marshal(destCompose)
+	if err != nil {
+		return fmt.Errorf("error marshaling updated Docker Compose file: %w", err)
+	}
+
+	// Write updated YAML back to destination file
+	if err := os.WriteFile(destFile, updatedData, 0644); err != nil {
+		return fmt.Errorf("error writing to destination file: %w", err)
+	}
+
+	return nil
 }
