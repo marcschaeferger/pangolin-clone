@@ -89,7 +89,10 @@ export async function createOrg(
         let org: Org | null = null;
 
         await db.transaction(async (trx) => {
-            const allDomains = await trx.select().from(domains);
+            const allDomains = await trx
+                .select()
+                .from(domains)
+                .where(eq(domains.configManaged, true));
 
             const newOrg = await trx
                 .insert(orgs)

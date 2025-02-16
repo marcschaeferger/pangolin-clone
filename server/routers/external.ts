@@ -3,6 +3,7 @@ import config from "@server/lib/config";
 import * as site from "./site";
 import * as org from "./org";
 import * as resource from "./resource";
+import * as domain from "./domain";
 import * as target from "./target";
 import * as user from "./user";
 import * as auth from "./auth";
@@ -131,6 +132,13 @@ authenticated.get(
     verifyOrgAccess,
     verifyUserHasAction(ActionsEnum.listResources),
     resource.listResources
+);
+
+authenticated.get(
+    "/org/:orgId/domains",
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.listOrgDomains),
+    domain.listDomains
 );
 
 authenticated.post(
