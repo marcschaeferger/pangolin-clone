@@ -164,7 +164,7 @@ func AddCrowdSecService(configPath string) error {
 		Image:         "crowdsecurity/crowdsec:latest",
 		ContainerName: "crowdsec",
 		Environment: map[string]string{
-			"GID":                  "${GID-1000}",
+			"GID":                  "1000",
 			"COLLECTIONS":          "crowdsecurity/traefik crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules",
 			"ENROLL_INSTANCE_NAME": "pangolin-crowdsec",
 			"PARSERS":              "crowdsecurity/whitelists",

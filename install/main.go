@@ -140,22 +140,24 @@ func readString(reader *bufio.Reader, prompt string, defaultValue string) string
 	return input
 }
 
-func readPassword(prompt string) string {
-	fmt.Print(prompt + ": ")
-
-	// Read password without echo
-	password, err := term.ReadPassword(int(syscall.Stdin))
-	fmt.Println() // Add a newline since ReadPassword doesn't add one
-
-	if err != nil {
-		return ""
-	}
-
-	input := strings.TrimSpace(string(password))
-	if input == "" {
-		return readPassword(prompt)
-	}
-	return input
+func readPassword(prompt string, reader *bufio.Reader) string {
+    if term.IsTerminal(int(syscall.Stdin)) {
+    	fmt.Print(prompt + ": ")
+        // Read password without echo if we're in a terminal
+        password, err := term.ReadPassword(int(syscall.Stdin))
+        fmt.Println() // Add a newline since ReadPassword doesn't add one
+        if err != nil {
+            return ""
+        }
+        input := strings.TrimSpace(string(password))
+        if input == "" {
+            return readPassword(prompt, reader)
+        }
+        return input
+    } else {
+		// Fallback to reading from stdin if not in a terminal
+		return readString(reader, prompt, "")
+    }
 }
 
 func readBool(reader *bufio.Reader, prompt string, defaultValue bool) bool {
@@ -196,8 +198,8 @@ func collectUserInput(reader *bufio.Reader) Config {
 	fmt.Println("\n=== Admin User Configuration ===")
 	config.AdminUserEmail = readString(reader, "Enter admin user email", "admin@"+config.BaseDomain)
 	for {
-		pass1 := readPassword("Create admin user password")
-		pass2 := readPassword("Confirm admin user password")
+		pass1 := readPassword("Create admin user password", reader)
+		pass2 := readPassword("Confirm admin user password", reader)
 
 		if pass1 != pass2 {
 			fmt.Println("Passwords do not match")

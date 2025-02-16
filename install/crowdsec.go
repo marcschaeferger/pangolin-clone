@@ -24,8 +24,8 @@ func installCrowdsec(config Config) error {
 		os.Exit(1)
 	}
 
-	moveFile("config/crowdsec/traefik_config.yaml", "config/traefik/traefik_config.yaml")
-	moveFile("config/crowdsec/dynamic.yaml", "config/traefik/dynamic.yaml")
+	// moveFile("config/crowdsec/traefik_config.yml", "config/traefik/traefik_config.yml")
+	moveFile("config/crowdsec/dynamic.yml", "config/traefik/dynamic.yml")
 
 	if err := retrieveBouncerKey(config); err != nil {
 		return fmt.Errorf("bouncer key retrieval failed: %v", err)
