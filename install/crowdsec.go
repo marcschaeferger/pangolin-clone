@@ -57,25 +57,6 @@ func installCrowdsec(config Config) error {
 	return nil
 }
 
-func backupConfig() error {
-	// Backup docker-compose.yml
-	if _, err := os.Stat("docker-compose.yml"); err == nil {
-		if err := copyFile("docker-compose.yml", "docker-compose.yml.backup"); err != nil {
-			return fmt.Errorf("failed to backup docker-compose.yml: %v", err)
-		}
-	}
-
-	// Backup config directory
-	if _, err := os.Stat("config"); err == nil {
-		cmd := exec.Command("tar", "-czvf", "config.tar.gz", "config")
-		if err := cmd.Run(); err != nil {
-			return fmt.Errorf("failed to backup config directory: %v", err)
-		}
-	}
-
-	return nil
-}
-
 func retrieveBouncerKey(config Config) error {
 	// Start crowdsec container
 	cmd := exec.Command("docker", "compose", "up", "-d", "crowdsec")

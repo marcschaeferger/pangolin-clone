@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"os/exec"
 
 	"gopkg.in/yaml.v3"
 )
@@ -139,7 +140,8 @@ func copyEntryPoints(sourceFile, destFile string) error {
 	destYAML["entryPoints"] = entryPoints
 
 	// Marshal updated destination YAML
-	updatedData, err := yaml.Marshal(destYAML)
+	// updatedData, err := yaml.Marshal(destYAML)
+	updatedData, err := MarshalYAMLWithIndent(destYAML, 2)
 	if err != nil {
 		return fmt.Errorf("error marshaling updated YAML: %w", err)
 	}
@@ -201,7 +203,8 @@ func copyWebsecureEntryPoint(sourceFile, destFile string) error {
 	destEntryPoints["websecure"] = websecure
 
 	// Marshal updated destination YAML
-	updatedData, err := yaml.Marshal(destYAML)
+	// updatedData, err := yaml.Marshal(destYAML)
+	updatedData, err := MarshalYAMLWithIndent(destYAML, 2)
 	if err != nil {
 		return fmt.Errorf("error marshaling updated YAML: %w", err)
 	}
@@ -264,7 +267,8 @@ func copyDockerService(sourceFile, destFile, serviceName string) error {
 
 	// Marshal updated destination YAML
 	// Use yaml.v3 encoder to preserve formatting and comments
-	updatedData, err := yaml.Marshal(destCompose)
+	// updatedData, err := yaml.Marshal(destCompose)
+	updatedData, err := MarshalYAMLWithIndent(destCompose, 2)
 	if err != nil {
 		return fmt.Errorf("error marshaling updated Docker Compose file: %w", err)
 	}
@@ -275,4 +279,37 @@ func copyDockerService(sourceFile, destFile, serviceName string) error {
 	}
 
 	return nil
+}
+
+func backupConfig() error {
+	// Backup docker-compose.yml
+	if _, err := os.Stat("docker-compose.yml"); err == nil {
+		if err := copyFile("docker-compose.yml", "docker-compose.yml.backup"); err != nil {
+			return fmt.Errorf("failed to backup docker-compose.yml: %v", err)
+		}
+	}
+
+	// Backup config directory
+	if _, err := os.Stat("config"); err == nil {
+		cmd := exec.Command("tar", "-czvf", "config.tar.gz", "config")
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("failed to backup config directory: %v", err)
+		}
+	}
+
+	return nil
+}
+
+func MarshalYAMLWithIndent(data interface{}, indent int) ([]byte, error) {
+	buffer := new(bytes.Buffer)
+	encoder := yaml.NewEncoder(buffer)
+	encoder.SetIndent(indent)
+
+	err := encoder.Encode(data)
+	if err != nil {
+		return nil, err
+	}
+
+	defer encoder.Close()
+	return buffer.Bytes(), nil
 }
