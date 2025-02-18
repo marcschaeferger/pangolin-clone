@@ -173,4 +173,4 @@ Examples of how to interact with the API are included in the endpoint descriptio
 - Rate limits may apply to API calls (not specified in the current documentation but should be implemented to prevent abuse).
 - Ensure that sensitive data (like passwords) is transmitted securely over HTTPS.
 
-This documentation provides a foundational overview of the API's public endpoints, request/response formats, usage examples, and any limitations. Be sure to expand upon this as your API evolves or as additional features are added.
+This documentation provides a foundational overview of the API's public endpoints, request/response formats, usage examples, and any limitations. We will expand upon this as our API evolves or as additional features are added.
