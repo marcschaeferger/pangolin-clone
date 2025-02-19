@@ -92,9 +92,9 @@ enum RuleAction {
 }
 
 enum RuleMatch {
+    PATH = "Path",
     IP = "IP",
     CIDR = "IP Range",
-    PATH = "Path"
 }
 
 export default function ResourceRules(props: {
@@ -469,9 +469,9 @@ export default function ResourceRules(props: {
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                        <SelectItem value="PATH">{RuleMatch.PATH}</SelectItem>
                         <SelectItem value="IP">{RuleMatch.IP}</SelectItem>
                         <SelectItem value="CIDR">{RuleMatch.CIDR}</SelectItem>
-                        <SelectItem value="PATH">{RuleMatch.PATH}</SelectItem>
                     </SelectContent>
                 </Select>
             )
@@ -665,17 +665,17 @@ export default function ResourceRules(props: {
                                                         <SelectValue />
                                                     </SelectTrigger>
                                                     <SelectContent>
+                                                        {resource.http && (
+                                                            <SelectItem value="PATH">
+                                                                {RuleMatch.PATH}
+                                                            </SelectItem>
+                                                        )}
                                                         <SelectItem value="IP">
                                                             {RuleMatch.IP}
                                                         </SelectItem>
                                                         <SelectItem value="CIDR">
                                                             {RuleMatch.CIDR}
                                                         </SelectItem>
-                                                        {resource.http && (
-                                                            <SelectItem value="PATH">
-                                                                {RuleMatch.PATH}
-                                                            </SelectItem>
-                                                        )}
                                                     </SelectContent>
                                                 </Select>
                                             </FormControl>
