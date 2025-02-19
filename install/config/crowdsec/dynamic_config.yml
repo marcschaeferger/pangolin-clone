@@ -42,8 +42,8 @@ http:
           crowdsecAppsecHost: crowdsec:7422 # CrowdSec IP address which you noted down later
           crowdsecAppsecFailureBlock: true # Block on failure
           crowdsecAppsecUnreachableBlock: true # Block on unreachable
-          crowdsecLapiKey: "{{.TraefikBouncerKey}}" # CrowdSec API key which you noted down later
-          crowdsecLapiHost: crowdsec:9090 # CrowdSec  
+          crowdsecLapiKey: "PUT_YOUR_BOUNCER_KEY_HERE_OR_IT_WILL_NOT_WORK" # CrowdSec API key which you noted down later
+          crowdsecLapiHost: crowdsec:8080 # CrowdSec  
           crowdsecLapiScheme: http # CrowdSec API scheme
           forwardedHeadersTrustedIPs: # Forwarded headers trusted IPs
             - "0.0.0.0/0" # All IP addresses are trusted for forwarded headers (CHANGE MADE HERE)

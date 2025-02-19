@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -312,4 +313,23 @@ func MarshalYAMLWithIndent(data interface{}, indent int) ([]byte, error) {
 
 	defer encoder.Close()
 	return buffer.Bytes(), nil
+}
+
+func replaceInFile(filepath, oldStr, newStr string) error {
+	// Read the file content
+	content, err := os.ReadFile(filepath)
+	if err != nil {
+		return fmt.Errorf("error reading file: %v", err)
+	}
+
+	// Replace the string
+	newContent := strings.Replace(string(content), oldStr, newStr, -1)
+
+	// Write the modified content back to the file
+	err = os.WriteFile(filepath, []byte(newContent), 0644)
+	if err != nil {
+		return fmt.Errorf("error writing file: %v", err)
+	}
+
+	return nil
 }

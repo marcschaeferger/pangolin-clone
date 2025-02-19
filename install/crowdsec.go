@@ -10,6 +10,11 @@ import (
 )
 
 func installCrowdsec(config Config) error {
+
+	if err := stopContainers(); err != nil {
+		return fmt.Errorf("failed to stop containers: %v", err)
+	}
+
 	// Run installation steps
 	if err := backupConfig(); err != nil {
 		return fmt.Errorf("backup failed: %v", err)
@@ -19,6 +24,10 @@ func installCrowdsec(config Config) error {
 		fmt.Printf("Error creating config files: %v\n", err)
 		os.Exit(1)
 	}
+
+	os.MkdirAll("config/crowdsec/db", 0755)
+	os.MkdirAll("config/crowdsec_logs/syslog", 0755)
+	os.MkdirAll("config/traefik/logs", 0755)
 
 	if err := copyDockerService("config/crowdsec/docker-compose.yml", "docker-compose.yml", "crowdsec"); err != nil {
 		fmt.Printf("Error copying docker service: %v\n", err)
@@ -54,16 +63,22 @@ func installCrowdsec(config Config) error {
 		return fmt.Errorf("bouncer key retrieval failed: %v", err)
 	}
 
+	// if err := startContainers(); err != nil {
+	// 	return fmt.Errorf("failed to start containers: %v", err)
+	// }
+
 	return nil
 }
 
 func retrieveBouncerKey(config Config) error {
+
+	fmt.Println("Retrieving bouncer key. Please be patient...")
+
 	// Start crowdsec container
 	cmd := exec.Command("docker", "compose", "up", "-d", "crowdsec")
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to start crowdsec: %v", err)
 	}
-	defer exec.Command("docker", "compose", "down").Run()
 
 	// verify that the container is running if not keep waiting for 10 more seconds then return an error
 	count := 0
@@ -95,9 +110,18 @@ func retrieveBouncerKey(config Config) error {
 	for _, line := range lines {
 		if strings.Contains(line, "key:") {
 			config.TraefikBouncerKey = strings.TrimSpace(strings.Split(line, ":")[1])
+			fmt.Println("Bouncer key:", config.TraefikBouncerKey)
 			break
 		}
 	}
+
+	// Stop crowdsec container
+	cmd = exec.Command("docker", "compose", "down")
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to stop crowdsec: %v", err)
+	}
+
+	fmt.Println("Bouncer key retrieved successfully.")
 
 	return nil
 }
