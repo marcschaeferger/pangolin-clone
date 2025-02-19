@@ -69,7 +69,7 @@ export async function copyInConfig() {
             if (resource.isBaseDomain) {
                 fullDomain = domain.baseDomain;
             } else {
-                fullDomain = `${resource.subdomain}.${domain}`;
+                fullDomain = `${resource.subdomain}.${domain.baseDomain}`;
             }
 
             await trx

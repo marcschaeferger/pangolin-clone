@@ -33,7 +33,6 @@ import { useEffect, useState } from "react";
 import { AxiosResponse } from "axios";
 import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { GetResourceAuthInfoResponse } from "@server/routers/resource";
 import { toast } from "@app/hooks/useToast";
 import {
     SettingsContainer,
@@ -53,6 +52,14 @@ import { subdomainSchema } from "@server/lib/schemas";
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 import { RadioGroup, RadioGroupItem } from "@app/components/ui/radio-group";
 import { Label } from "@app/components/ui/label";
+import { ListDomainsResponse } from "@server/routers/domain";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@app/components/ui/select";
 
 const GeneralFormSchema = z
     .object({
@@ -60,7 +67,8 @@ const GeneralFormSchema = z
         name: z.string().min(1).max(255),
         proxyPort: z.number().optional(),
         http: z.boolean(),
-        isBaseDomain: z.boolean().optional()
+        isBaseDomain: z.boolean().optional(),
+        domainId: z.string().optional()
     })
     .refine(
         (data) => {
@@ -113,9 +121,11 @@ export default function GeneralForm() {
 
     const [sites, setSites] = useState<ListSitesResponse["sites"]>([]);
     const [saveLoading, setSaveLoading] = useState(false);
-    const [domainSuffix, setDomainSuffix] = useState(org.org.domain);
     const [transferLoading, setTransferLoading] = useState(false);
     const [open, setOpen] = useState(false);
+    const [baseDomains, setBaseDomains] = useState<
+        ListDomainsResponse["domains"]
+    >([]);
 
     const [domainType, setDomainType] = useState<"subdomain" | "basedomain">(
         resource.isBaseDomain ? "basedomain" : "subdomain"
@@ -128,7 +138,8 @@ export default function GeneralForm() {
             subdomain: resource.subdomain ? resource.subdomain : undefined,
             proxyPort: resource.proxyPort ? resource.proxyPort : undefined,
             http: resource.http,
-            isBaseDomain: resource.isBaseDomain ? true : false
+            isBaseDomain: resource.isBaseDomain ? true : false,
+            domainId: resource.domainId || undefined
         },
         mode: "onChange"
     });
@@ -147,6 +158,30 @@ export default function GeneralForm() {
             );
             setSites(res.data.data.sites);
         };
+
+        const fetchDomains = async () => {
+            const res = await api
+                .get<
+                    AxiosResponse<ListDomainsResponse>
+                >(`/org/${orgId}/domains/`)
+                .catch((e) => {
+                    toast({
+                        variant: "destructive",
+                        title: "Error fetching domains",
+                        description: formatAxiosError(
+                            e,
+                            "An error occurred when fetching the domains"
+                        )
+                    });
+                });
+
+            if (res?.status === 200) {
+                const domains = res.data.data.domains;
+                setBaseDomains(domains);
+            }
+        };
+
+        fetchDomains();
         fetchSites();
     }, []);
 
@@ -158,7 +193,8 @@ export default function GeneralForm() {
                 name: data.name,
                 subdomain: data.subdomain,
                 proxyPort: data.proxyPort,
-                isBaseDomain: data.isBaseDomain
+                isBaseDomain: data.isBaseDomain,
+                domainId: data.domainId
             })
             .catch((e) => {
                 toast({
@@ -292,60 +328,134 @@ export default function GeneralForm() {
                                             </div>
                                         )}
 
-                                        <FormField
-                                            control={form.control}
-                                            name="subdomain"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    {!env.flags
-                                                        .allowBaseDomainResources && (
-                                                        <FormLabel>
-                                                            Subdomain
-                                                        </FormLabel>
-                                                    )}
-
-                                                    {domainType ===
-                                                    "subdomain" ? (
-                                                        <FormControl>
-                                                            <CustomDomainInput
-                                                                value={
-                                                                    field.value ||
-                                                                    ""
-                                                                }
-                                                                domainSuffix={
-                                                                    domainSuffix
-                                                                }
-                                                                placeholder="Enter subdomain"
-                                                                onChange={(
-                                                                    value
-                                                                ) =>
-                                                                    form.setValue(
-                                                                        "subdomain",
-                                                                        value
+                                        {domainType === "subdomain" ? (
+                                            <div className="w-fill space-y-2">
+                                                {!env.flags
+                                                    .allowBaseDomainResources && (
+                                                    <FormLabel>
+                                                        Subdomain
+                                                    </FormLabel>
+                                                )}
+                                                <div className="flex">
+                                                    <div className="w-1/2 mr-1">
+                                                        <FormField
+                                                            control={
+                                                                form.control
+                                                            }
+                                                            name="subdomain"
+                                                            render={({
+                                                                field
+                                                            }) => (
+                                                                <FormControl>
+                                                                    <Input
+                                                                        {...field}
+                                                                        className="text-right"
+                                                                    />
+                                                                </FormControl>
+                                                            )}
+                                                        />
+                                                    </div>
+                                                    <div className="w-1/2">
+                                                        <FormField
+                                                            control={
+                                                                form.control
+                                                            }
+                                                            name="domainId"
+                                                            render={({
+                                                                field
+                                                            }) => (
+                                                                <FormItem>
+                                                                    <Select
+                                                                        onValueChange={
+                                                                            field.onChange
+                                                                        }
+                                                                        defaultValue={
+                                                                            field.value ||
+                                                                            baseDomains[0]
+                                                                                ?.domainId
+                                                                        }
+                                                                    >
+                                                                        <FormControl>
+                                                                            <SelectTrigger>
+                                                                                <SelectValue />
+                                                                            </SelectTrigger>
+                                                                        </FormControl>
+                                                                        <SelectContent>
+                                                                            {baseDomains.map(
+                                                                                (
+                                                                                    option
+                                                                                ) => (
+                                                                                    <SelectItem
+                                                                                        key={
+                                                                                            option.domainId
+                                                                                        }
+                                                                                        value={
+                                                                                            option.domainId
+                                                                                        }
+                                                                                    >
+                                                                                        .
+                                                                                        {
+                                                                                            option.baseDomain
+                                                                                        }
+                                                                                    </SelectItem>
+                                                                                )
+                                                                            )}
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <FormField
+                                                control={form.control}
+                                                name="domainId"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <Select
+                                                            onValueChange={
+                                                                field.onChange
+                                                            }
+                                                            defaultValue={
+                                                                field.value ||
+                                                                baseDomains[0]
+                                                                    ?.domainId
+                                                            }
+                                                        >
+                                                            <FormControl>
+                                                                <SelectTrigger>
+                                                                    <SelectValue />
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent>
+                                                                {baseDomains.map(
+                                                                    (
+                                                                        option
+                                                                    ) => (
+                                                                        <SelectItem
+                                                                            key={
+                                                                                option.domainId
+                                                                            }
+                                                                            value={
+                                                                                option.domainId
+                                                                            }
+                                                                        >
+                                                                            {
+                                                                                option.baseDomain
+                                                                            }
+                                                                        </SelectItem>
                                                                     )
-                                                                }
-                                                            />
-                                                        </FormControl>
-                                                    ) : (
-                                                        <FormControl>
-                                                            <Input
-                                                                value={
-                                                                    domainSuffix
-                                                                }
-                                                                readOnly
-                                                                disabled
-                                                            />
-                                                        </FormControl>
-                                                    )}
-                                                    <FormDescription>
-                                                        This is the subdomain
-                                                        that will be used to
-                                                        access the resource.
-                                                    </FormDescription>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
+                                                                )}
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        )}
                                     </>
                                 )}
 
@@ -427,7 +537,7 @@ export default function GeneralForm() {
                                     control={transferForm.control}
                                     name="siteId"
                                     render={({ field }) => (
-                                        <FormItem className="flex flex-col">
+                                        <FormItem>
                                             <FormLabel>
                                                 Destination Site
                                             </FormLabel>

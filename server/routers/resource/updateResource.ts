@@ -45,6 +45,15 @@ const updateHttpResourceBodySchema = z
     })
     .refine(
         (data) => {
+            if (data.subdomain) {
+                return subdomainSchema.safeParse(data.subdomain).success;
+            }
+            return true;
+        },
+        { message: "Invalid subdomain" }
+    )
+    .refine(
+        (data) => {
             if (!config.getRawConfig().flags?.allow_base_domain_resources) {
                 if (data.isBaseDomain) {
                     return false;
@@ -206,7 +215,7 @@ async function updateHttpResource(
     if (updateData.isBaseDomain) {
         fullDomain = domain.baseDomain;
     } else if (subdomain && domain) {
-        fullDomain = `${subdomain}.${domain}`;
+        fullDomain = `${subdomain}.${domain.baseDomain}`;
     }
 
     if (fullDomain) {

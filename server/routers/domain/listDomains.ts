@@ -33,16 +33,17 @@ const listDomainsSchema = z
     .strict();
 
 async function queryDomains(orgId: string, limit: number, offset: number) {
-    return await db
+    const res = await db
         .select({
             domainId: domains.domainId,
             baseDomain: domains.baseDomain
         })
         .from(orgDomains)
         .where(eq(orgDomains.orgId, orgId))
-        .leftJoin(domains, eq(domains.domainId, orgDomains.domainId))
+        .innerJoin(domains, eq(domains.domainId, orgDomains.domainId))
         .limit(limit)
         .offset(offset);
+    return res;
 }
 
 export type ListDomainsResponse = {

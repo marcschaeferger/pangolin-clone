@@ -31,7 +31,7 @@ const createResourceParamsSchema = z
 const createHttpResourceSchema = z
     .object({
         name: z.string().min(1).max(255),
-        subdomain: subdomainSchema.optional(),
+        subdomain: z.string().optional(),
         isBaseDomain: z.boolean().optional(),
         siteId: z.number(),
         http: z.boolean(),
@@ -39,6 +39,15 @@ const createHttpResourceSchema = z
         domainId: z.string()
     })
     .strict()
+    .refine(
+        (data) => {
+            if (data.subdomain) {
+                return subdomainSchema.safeParse(data.subdomain).success;
+            }
+            return true;
+        },
+        { message: "Invalid subdomain" }
+    )
     .refine(
         (data) => {
             if (!config.getRawConfig().flags?.allow_base_domain_resources) {
@@ -199,6 +208,8 @@ async function createHttpResource(
         fullDomain = `${subdomain}.${domain.baseDomain}`;
     }
 
+    logger.debug(`Full domain: ${fullDomain}`);
+
     // make sure the full domain is unique
     const existingResource = await db
         .select()
@@ -221,7 +232,7 @@ async function createHttpResource(
             .insert(resources)
             .values({
                 siteId,
-                fullDomain: http ? fullDomain : null,
+                fullDomain,
                 orgId,
                 name,
                 subdomain,
