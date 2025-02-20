@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"time"
 )
 
 func installCrowdsec(config Config) error {
@@ -59,69 +58,29 @@ func installCrowdsec(config Config) error {
 		os.Exit(1)
 	}
 
-	if err := retrieveBouncerKey(config); err != nil {
-		return fmt.Errorf("bouncer key retrieval failed: %v", err)
+	if err := CheckAndAddTraefikLogVolume("docker-compose.yml"); err != nil {
+		fmt.Printf("Error checking and adding Traefik log volume: %v\n", err)
+		os.Exit(1)
 	}
 
-	// if err := startContainers(); err != nil {
-	// 	return fmt.Errorf("failed to start containers: %v", err)
-	// }
-
-	return nil
-}
-
-func retrieveBouncerKey(config Config) error {
-
-	fmt.Println("Retrieving bouncer key. Please be patient...")
-
-	// Start crowdsec container
-	cmd := exec.Command("docker", "compose", "up", "-d", "crowdsec")
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to start crowdsec: %v", err)
+	if err := startContainers(); err != nil {
+		return fmt.Errorf("failed to start containers: %v", err)
 	}
 
-	// verify that the container is running if not keep waiting for 10 more seconds then return an error
-	count := 0
-	for {
-		cmd := exec.Command("docker", "inspect", "-f", "{{.State.Running}}", "crowdsec")
-		output, err := cmd.Output()
-		if err != nil {
-			return fmt.Errorf("failed to inspect crowdsec container: %v", err)
-		}
-		if strings.TrimSpace(string(output)) == "true" {
-			break
-		}
-		time.Sleep(10 * time.Second)
-		count++
-
-		if count > 4 {
-			return fmt.Errorf("crowdsec container is not running")
-		}
-	}
-
-	// Get bouncer key
-	output, err := exec.Command("docker", "exec", "crowdsec", "cscli", "bouncers", "add", "traefik-bouncer").Output()
+	// get API key
+	apiKey, err := GetCrowdSecAPIKey()
 	if err != nil {
-		return fmt.Errorf("failed to get bouncer key: %v", err)
+		return fmt.Errorf("failed to get API key: %v", err)
+	}
+	config.TraefikBouncerKey = apiKey
+
+	if err := replaceInFile("config/traefik/dynamic_config.yml", "PUT_YOUR_BOUNCER_KEY_HERE_OR_IT_WILL_NOT_WORK", config.TraefikBouncerKey); err != nil {
+		return fmt.Errorf("failed to replace bouncer key: %v", err)
 	}
 
-	// Parse key from output
-	lines := strings.Split(string(output), "\n")
-	for _, line := range lines {
-		if strings.Contains(line, "key:") {
-			config.TraefikBouncerKey = strings.TrimSpace(strings.Split(line, ":")[1])
-			fmt.Println("Bouncer key:", config.TraefikBouncerKey)
-			break
-		}
+	if err := restartContainer("traefik"); err != nil {
+		return fmt.Errorf("failed to restart containers: %v", err)
 	}
-
-	// Stop crowdsec container
-	cmd = exec.Command("docker", "compose", "down")
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to stop crowdsec: %v", err)
-	}
-
-	fmt.Println("Bouncer key retrieved successfully.")
 
 	return nil
 }
@@ -135,4 +94,28 @@ func checkIsCrowdsecInstalledInCompose() bool {
 
 	// Check for crowdsec service
 	return bytes.Contains(content, []byte("crowdsec:"))
+}
+
+func GetCrowdSecAPIKey() (string, error) {
+	// First, ensure the container is running
+	if err := waitForContainer("crowdsec"); err != nil {
+		return "", fmt.Errorf("waiting for container: %w", err)
+	}
+
+	// Execute the command to get the API key
+	cmd := exec.Command("docker", "exec", "crowdsec", "cscli", "bouncers", "add", "traefik-bouncer", "-o", "raw")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+
+	if err := cmd.Run(); err != nil {
+		return "", fmt.Errorf("executing command: %w", err)
+	}
+
+	// Trim any whitespace from the output
+	apiKey := strings.TrimSpace(out.String())
+	if apiKey == "" {
+		return "", fmt.Errorf("empty API key returned")
+	}
+
+	return apiKey, nil
 }

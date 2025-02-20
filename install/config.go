@@ -333,3 +333,61 @@ func replaceInFile(filepath, oldStr, newStr string) error {
 
 	return nil
 }
+
+func CheckAndAddTraefikLogVolume(composePath string) error {
+	// Read the docker-compose.yml file
+	data, err := os.ReadFile(composePath)
+	if err != nil {
+		return fmt.Errorf("error reading compose file: %w", err)
+	}
+
+	// Parse YAML into a generic map
+	var compose map[string]interface{}
+	if err := yaml.Unmarshal(data, &compose); err != nil {
+		return fmt.Errorf("error parsing compose file: %w", err)
+	}
+
+	// Get services section
+	services, ok := compose["services"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("services section not found or invalid")
+	}
+
+	// Get traefik service
+	traefik, ok := services["traefik"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("traefik service not found or invalid")
+	}
+
+	// Check volumes
+	logVolume := "./config/traefik/logs:/var/log/traefik"
+	var volumes []interface{}
+
+	if existingVolumes, ok := traefik["volumes"].([]interface{}); ok {
+		// Check if volume already exists
+		for _, v := range existingVolumes {
+			if v.(string) == logVolume {
+				fmt.Println("Traefik log volume is already configured")
+				return nil
+			}
+		}
+		volumes = existingVolumes
+	}
+
+	// Add new volume
+	volumes = append(volumes, logVolume)
+	traefik["volumes"] = volumes
+
+	// Write updated config back to file
+	newData, err := MarshalYAMLWithIndent(compose, 2)
+	if err != nil {
+		return fmt.Errorf("error marshaling updated compose file: %w", err)
+	}
+
+	if err := os.WriteFile(composePath, newData, 0644); err != nil {
+		return fmt.Errorf("error writing updated compose file: %w", err)
+	}
+
+	fmt.Println("Added traefik log volume and created logs directory")
+	return nil
+}

@@ -4,14 +4,16 @@ import (
 	"bufio"
 	"embed"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
-	"io"
+	"time"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"syscall"
+	"bytes"
 	"text/template"
 	"unicode"
 
@@ -590,6 +592,42 @@ func startContainers() error {
 	return nil
 }
 
+func restartContainer(container string) error {
+	fmt.Printf("Restarting %s container...\n", container)
+
+	// Check which docker compose command is available
+	var useNewStyle bool
+	checkCmd := exec.Command("docker", "compose", "version")
+	if err := checkCmd.Run(); err == nil {
+		useNewStyle = true
+	} else {
+		// Check if docker-compose (old style) is available
+		checkCmd = exec.Command("docker-compose", "version")
+		if err := checkCmd.Run(); err != nil {
+			return fmt.Errorf("neither 'docker compose' nor 'docker-compose' command is available: %v", err)
+		}
+	}
+
+	// Helper function to execute docker compose commands
+	executeCommand := func(args ...string) error {
+		var cmd *exec.Cmd
+		if useNewStyle {
+			cmd = exec.Command("docker", append([]string{"compose"}, args...)...)
+		} else {
+			cmd = exec.Command("docker-compose", args...)
+		}
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		return cmd.Run()
+	}
+
+	if err := executeCommand("-f", "docker-compose.yml", "restart", container); err != nil {
+		return fmt.Errorf("failed to restart %s container: %v", container, err)
+	}
+
+	return nil
+}
+
 func copyFile(src, dst string) error {
 	source, err := os.Open(src)
 	if err != nil {
@@ -613,4 +651,32 @@ func moveFile(src, dst string) error {
 	}
 
 	return os.Remove(src)
+}
+
+func waitForContainer(containerName string) error {
+    maxAttempts := 30
+    retryInterval := time.Second * 2
+
+    for attempt := 0; attempt < maxAttempts; attempt++ {
+        // Check if container is running
+        cmd := exec.Command("docker", "container", "inspect", "-f", "{{.State.Running}}", containerName)
+        var out bytes.Buffer
+        cmd.Stdout = &out
+        
+        if err := cmd.Run(); err != nil {
+            // If the container doesn't exist or there's another error, wait and retry
+            time.Sleep(retryInterval)
+            continue
+        }
+
+        isRunning := strings.TrimSpace(out.String()) == "true"
+        if isRunning {
+            return nil
+        }
+
+        // Container exists but isn't running yet, wait and retry
+        time.Sleep(retryInterval)
+    }
+
+    return fmt.Errorf("container %s did not start within %v seconds", containerName, maxAttempts*int(retryInterval.Seconds()))
 }
