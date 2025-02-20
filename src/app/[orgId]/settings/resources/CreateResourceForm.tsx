@@ -119,6 +119,7 @@ export default function CreateResourceForm({
     open,
     setOpen
 }: CreateResourceFormProps) {
+    const [formKey, setFormKey] = useState(0);
     const api = createApiClient(useEnvContext());
 
     const [loading, setLoading] = useState(false);
@@ -209,6 +210,7 @@ export default function CreateResourceForm({
                 setBaseDomains(domains);
                 if (domains.length) {
                     form.setValue("domainId", domains[0].domainId);
+                    setFormKey((k) => k + 1);
                 }
             }
         };
@@ -229,7 +231,7 @@ export default function CreateResourceForm({
                     protocol: data.protocol,
                     proxyPort: data.http ? undefined : data.proxyPort,
                     siteId: data.siteId,
-                    isBaseDomain: data.isBaseDomain
+                    isBaseDomain: data.http ? undefined : data.isBaseDomain
                 }
             )
             .catch((e) => {
@@ -281,7 +283,7 @@ export default function CreateResourceForm({
                     </CredenzaHeader>
                     <CredenzaBody>
                         {!showSnippets && (
-                            <Form {...form}>
+                            <Form {...form} key={formKey}>
                                 <form
                                     onSubmit={form.handleSubmit(onSubmit)}
                                     className="space-y-4"
@@ -322,7 +324,8 @@ export default function CreateResourceForm({
                                                         <FormDescription>
                                                             Toggle if this is an
                                                             HTTP resource or a
-                                                            raw TCP/UDP resource.
+                                                            raw TCP/UDP
+                                                            resource.
                                                         </FormDescription>
                                                     </div>
                                                     <FormControl>
@@ -381,49 +384,88 @@ export default function CreateResourceForm({
                                     {form.watch("http") && (
                                         <>
                                             {domainType === "subdomain" ? (
-                                                <FormField
-                                                    control={form.control}
-                                                    name="subdomain"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            {!env.flags
-                                                                .allowBaseDomainResources && (
-                                                                <FormLabel>
-                                                                    Subdomain
-                                                                </FormLabel>
-                                                            )}
-                                                            {domainType ===
-                                                                "subdomain" && (
-                                                                <FormControl>
-                                                                    <CustomDomainInput
-                                                                        value={
-                                                                            field.value ??
-                                                                            ""
-                                                                        }
-                                                                        domainOptions={
-                                                                            baseDomains
-                                                                        }
-                                                                        placeholder="Subdomain"
-                                                                        onChange={(
-                                                                            value,
-                                                                            selectedDomainId
-                                                                        ) => {
-                                                                            form.setValue(
-                                                                                "subdomain",
-                                                                                value
-                                                                            );
-                                                                            form.setValue(
-                                                                                "domainId",
-                                                                                selectedDomainId
-                                                                            );
-                                                                        }}
-                                                                    />
-                                                                </FormControl>
-                                                            )}
-                                                            <FormMessage />
-                                                        </FormItem>
+                                                <div className="w-fill space-y-2">
+                                                    {!env.flags
+                                                        .allowBaseDomainResources && (
+                                                        <FormLabel>
+                                                            Subdomain
+                                                        </FormLabel>
                                                     )}
-                                                />
+                                                    <div className="flex">
+                                                        <div className="w-1/2 mr-1">
+                                                            <FormField
+                                                                control={
+                                                                    form.control
+                                                                }
+                                                                name="subdomain"
+                                                                render={({
+                                                                    field
+                                                                }) => (
+                                                                    <FormControl>
+                                                                        <Input
+                                                                            {...field}
+                                                                            className="text-right"
+                                                                            placeholder="Subdomain"
+                                                                        />
+                                                                    </FormControl>
+                                                                )}
+                                                            />
+                                                        </div>
+                                                        <div className="w-1/2">
+                                                            <FormField
+                                                                control={
+                                                                    form.control
+                                                                }
+                                                                name="domainId"
+                                                                render={({
+                                                                    field
+                                                                }) => (
+                                                                    <FormItem>
+                                                                        <Select
+                                                                            onValueChange={
+                                                                                field.onChange
+                                                                            }
+                                                                            value={
+                                                                                field.value
+                                                                            }
+                                                                            defaultValue={
+                                                                                field.value
+                                                                            }
+                                                                        >
+                                                                            <FormControl>
+                                                                                <SelectTrigger>
+                                                                                    <SelectValue />
+                                                                                </SelectTrigger>
+                                                                            </FormControl>
+                                                                            <SelectContent>
+                                                                                {baseDomains.map(
+                                                                                    (
+                                                                                        option
+                                                                                    ) => (
+                                                                                        <SelectItem
+                                                                                            key={
+                                                                                                option.domainId
+                                                                                            }
+                                                                                            value={
+                                                                                                option.domainId
+                                                                                            }
+                                                                                        >
+                                                                                            .
+                                                                                            {
+                                                                                                option.baseDomain
+                                                                                            }
+                                                                                        </SelectItem>
+                                                                                    )
+                                                                                )}
+                                                                            </SelectContent>
+                                                                        </Select>
+                                                                        <FormMessage />
+                                                                    </FormItem>
+                                                                )}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             ) : (
                                                 <FormField
                                                     control={form.control}
@@ -435,9 +477,9 @@ export default function CreateResourceForm({
                                                                     field.onChange
                                                                 }
                                                                 defaultValue={
-                                                                    baseDomains[0]
-                                                                        ?.domainId
+                                                                    field.value
                                                                 }
+                                                                {...field}
                                                             >
                                                                 <FormControl>
                                                                     <SelectTrigger>

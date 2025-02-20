@@ -31,7 +31,10 @@ const createResourceParamsSchema = z
 const createHttpResourceSchema = z
     .object({
         name: z.string().min(1).max(255),
-        subdomain: z.string().optional(),
+        subdomain: z
+            .string()
+            .optional()
+            .transform((val) => val?.toLowerCase()),
         isBaseDomain: z.boolean().optional(),
         siteId: z.number(),
         http: z.boolean(),
@@ -128,7 +131,7 @@ export async function createResource(
             );
         }
 
-        if (!req.body?.http) {
+        if (typeof req.body.http !== "boolean") {
             return next(
                 createHttpError(HttpCode.BAD_REQUEST, "http field is required")
             );
@@ -233,6 +236,7 @@ async function createHttpResource(
             .values({
                 siteId,
                 fullDomain,
+                domainId,
                 orgId,
                 name,
                 subdomain,

@@ -30,7 +30,9 @@ const updateResourceParamsSchema = z
 const updateHttpResourceBodySchema = z
     .object({
         name: z.string().min(1).max(255).optional(),
-        subdomain: subdomainSchema.optional(),
+        subdomain: subdomainSchema
+            .optional()
+            .transform((val) => val?.toLowerCase()),
         ssl: z.boolean().optional(),
         sso: z.boolean().optional(),
         blockAccess: z.boolean().optional(),

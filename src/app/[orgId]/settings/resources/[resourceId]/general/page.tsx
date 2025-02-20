@@ -108,6 +108,7 @@ type GeneralFormValues = z.infer<typeof GeneralFormSchema>;
 type TransferFormValues = z.infer<typeof TransferFormSchema>;
 
 export default function GeneralForm() {
+    const [formKey, setFormKey] = useState(0);
     const params = useParams();
     const { resource, updateResource } = useResourceContext();
     const { org } = useOrgContext();
@@ -178,6 +179,7 @@ export default function GeneralForm() {
             if (res?.status === 200) {
                 const domains = res.data.data.domains;
                 setBaseDomains(domains);
+                setFormKey((key) => key + 1);
             }
         };
 
@@ -191,10 +193,10 @@ export default function GeneralForm() {
         const res = await api
             .post(`resource/${resource?.resourceId}`, {
                 name: data.name,
-                subdomain: data.subdomain,
+                subdomain: data.http ? data.subdomain : undefined,
                 proxyPort: data.proxyPort,
-                isBaseDomain: data.isBaseDomain,
-                domainId: data.domainId
+                isBaseDomain: data.http ? data.isBaseDomain : undefined,
+                domainId: data.http ? data.domainId : undefined
             })
             .catch((e) => {
                 toast({
@@ -219,6 +221,8 @@ export default function GeneralForm() {
                 proxyPort: data.proxyPort,
                 isBaseDomain: data.isBaseDomain
             });
+
+            router.refresh();
         }
         setSaveLoading(false);
     }
@@ -265,7 +269,7 @@ export default function GeneralForm() {
 
                 <SettingsSectionBody>
                     <SettingsSectionForm>
-                        <Form {...form}>
+                        <Form {...form} key={formKey}>
                             <form
                                 onSubmit={form.handleSubmit(onSubmit)}
                                 className="space-y-4"
@@ -350,6 +354,7 @@ export default function GeneralForm() {
                                                                     <Input
                                                                         {...field}
                                                                         className="text-right"
+                                                                        placeholder="Subdomain"
                                                                     />
                                                                 </FormControl>
                                                             )}
@@ -370,9 +375,10 @@ export default function GeneralForm() {
                                                                             field.onChange
                                                                         }
                                                                         defaultValue={
-                                                                            field.value ||
-                                                                            baseDomains[0]
-                                                                                ?.domainId
+                                                                            field.value
+                                                                        }
+                                                                        value={
+                                                                            field.value
                                                                         }
                                                                     >
                                                                         <FormControl>
