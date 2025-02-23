@@ -9,6 +9,13 @@
 
 </div>
 
+<h3 align="center">Tunneled Mesh Reverse Proxy Server with Access Control</h3>
+<div align="center">
+
+_Your own self-hosted zero trust tunnel._
+
+</div>
+
 <div align="center">
   <h5>
       <a href="https://docs.fossorial.io/Getting%20Started/quick-install">
@@ -19,13 +26,6 @@
         Full Documentation
       </a>
   </h5>
-</div>
-
-<h3 align="center">Tunneled Mesh Reverse Proxy Server with Access Control</h3>
-<div align="center">
-
-_Your own self-hosted zero trust tunnel._
-
 </div>
 
 Pangolin is a self-hosted tunneled reverse proxy server with identity and access control, designed to securely expose private resources on distributed networks. Acting as a central hub, it connects isolated networks — even those behind restrictive firewalls — through encrypted tunnels, enabling easy access to remote services without opening ports.
@@ -108,7 +108,11 @@ _Sites page of Pangolin dashboard (dark mode) showing multiple tunnels connected
 
 1. **Deploy the Central Server**:
 
-    - Deploy the Docker Compose stack onto a VPS hosted on a cloud platform like Amazon EC2, DigitalOcean Droplet, or similar. There are many cheap VPS hosting options available to suit your needs.
+   - Deploy the Docker Compose stack onto a VPS hosted on a cloud platform like RackNerd, Amazon EC2, DigitalOcean Droplet, or similar. There are many cheap VPS hosting options available to suit your needs.
+   
+> [!TIP]
+> Many of our users have had a great experience with [RackNerd](https://my.racknerd.com/aff.php?aff=13788). Depending on promotions, you can likely get a **VPS with 1 vCPU, 1GB RAM, and ~20GB SSD for just around $12/year**. That's a great deal!
+> We are part of the [RackNerd](https://my.racknerd.com/aff.php?aff=13788) affiliate program, so if you sign up using [our link](https://my.racknerd.com/aff.php?aff=13788), we receive a small commission which helps us maintain the project and keep it free for everyone.
 
 2. **Domain Configuration**:
 
