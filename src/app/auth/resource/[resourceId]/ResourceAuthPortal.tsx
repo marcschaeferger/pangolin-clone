@@ -263,7 +263,8 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
         }
 
         if (isAllowed) {
-            window.location.href = props.redirect;
+            // window.location.href = props.redirect;
+            router.refresh();
         }
     }
 

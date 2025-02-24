@@ -143,9 +143,18 @@ export async function traefikConfigProvider(
                     wildCard = `*.${domainParts.slice(1).join(".")}`;
                 }
 
+                const configDomain = config.getDomain(resource.domainId);
+
+                if (!configDomain) {
+                    logger.error(
+                        `Failed to get domain from config for resource ${resource.resourceId}`
+                    );
+                    continue;
+                }
+
                 const tls = {
-                    certResolver: config.getRawConfig().traefik.cert_resolver,
-                    ...(config.getRawConfig().traefik.prefer_wildcard_cert
+                    certResolver: configDomain.cert_resolver,
+                    ...(configDomain.prefer_wildcard_cert
                         ? {
                               domains: [
                                   {

@@ -41,7 +41,9 @@ const configSchema = z.object({
     domains: z.record(
         z.string(),
         z.object({
-            base_domain: hostnameSchema.transform((url) => url.toLowerCase())
+            base_domain: hostnameSchema.transform((url) => url.toLowerCase()),
+            cert_resolver: z.string(),
+            prefer_wildcard_cert: z.boolean().optional()
         })
     ),
     server: z.object({
@@ -89,8 +91,6 @@ const configSchema = z.object({
     traefik: z.object({
         http_entrypoint: z.string(),
         https_entrypoint: z.string().optional(),
-        cert_resolver: z.string().optional(),
-        prefer_wildcard_cert: z.boolean().optional(),
         additional_middlewares: z.array(z.string()).optional()
     }),
     gerbil: z.object({
@@ -288,6 +288,10 @@ export class Config {
         return (
             this.rawConfig.email?.no_reply || this.rawConfig.email?.smtp_user
         );
+    }
+
+    public getDomain(domainId: string) {
+        return this.rawConfig.domains[domainId];
     }
 
     private createTraefikConfig() {
