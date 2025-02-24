@@ -106,118 +106,6 @@ func findPattern(s, pattern string) int {
 	return bytes.Index([]byte(s), []byte(pattern))
 }
 
-func copyEntryPoints(sourceFile, destFile string) error {
-	// Read source file
-	sourceData, err := os.ReadFile(sourceFile)
-	if err != nil {
-		return fmt.Errorf("error reading source file: %w", err)
-	}
-
-	// Read destination file
-	destData, err := os.ReadFile(destFile)
-	if err != nil {
-		return fmt.Errorf("error reading destination file: %w", err)
-	}
-
-	// Parse source YAML
-	var sourceYAML map[string]interface{}
-	if err := yaml.Unmarshal(sourceData, &sourceYAML); err != nil {
-		return fmt.Errorf("error parsing source YAML: %w", err)
-	}
-
-	// Parse destination YAML
-	var destYAML map[string]interface{}
-	if err := yaml.Unmarshal(destData, &destYAML); err != nil {
-		return fmt.Errorf("error parsing destination YAML: %w", err)
-	}
-
-	// Get entryPoints section from source
-	entryPoints, ok := sourceYAML["entryPoints"]
-	if !ok {
-		return fmt.Errorf("entryPoints section not found in source file")
-	}
-
-	// Update entryPoints in destination
-	destYAML["entryPoints"] = entryPoints
-
-	// Marshal updated destination YAML
-	// updatedData, err := yaml.Marshal(destYAML)
-	updatedData, err := MarshalYAMLWithIndent(destYAML, 2)
-	if err != nil {
-		return fmt.Errorf("error marshaling updated YAML: %w", err)
-	}
-
-	// Write updated YAML back to destination file
-	if err := os.WriteFile(destFile, updatedData, 0644); err != nil {
-		return fmt.Errorf("error writing to destination file: %w", err)
-	}
-
-	return nil
-}
-
-func copyWebsecureEntryPoint(sourceFile, destFile string) error {
-	// Read source file
-	sourceData, err := os.ReadFile(sourceFile)
-	if err != nil {
-		return fmt.Errorf("error reading source file: %w", err)
-	}
-
-	// Read destination file
-	destData, err := os.ReadFile(destFile)
-	if err != nil {
-		return fmt.Errorf("error reading destination file: %w", err)
-	}
-
-	// Parse source YAML
-	var sourceYAML map[string]interface{}
-	if err := yaml.Unmarshal(sourceData, &sourceYAML); err != nil {
-		return fmt.Errorf("error parsing source YAML: %w", err)
-	}
-
-	// Parse destination YAML
-	var destYAML map[string]interface{}
-	if err := yaml.Unmarshal(destData, &destYAML); err != nil {
-		return fmt.Errorf("error parsing destination YAML: %w", err)
-	}
-
-	// Get entryPoints section from source
-	entryPoints, ok := sourceYAML["entryPoints"].(map[string]interface{})
-	if !ok {
-		return fmt.Errorf("entryPoints section not found in source file or has invalid format")
-	}
-
-	// Get websecure configuration
-	websecure, ok := entryPoints["websecure"]
-	if !ok {
-		return fmt.Errorf("websecure entrypoint not found in source file")
-	}
-
-	// Get or create entryPoints section in destination
-	destEntryPoints, ok := destYAML["entryPoints"].(map[string]interface{})
-	if !ok {
-		// If entryPoints section doesn't exist, create it
-		destEntryPoints = make(map[string]interface{})
-		destYAML["entryPoints"] = destEntryPoints
-	}
-
-	// Update websecure in destination
-	destEntryPoints["websecure"] = websecure
-
-	// Marshal updated destination YAML
-	// updatedData, err := yaml.Marshal(destYAML)
-	updatedData, err := MarshalYAMLWithIndent(destYAML, 2)
-	if err != nil {
-		return fmt.Errorf("error marshaling updated YAML: %w", err)
-	}
-
-	// Write updated YAML back to destination file
-	if err := os.WriteFile(destFile, updatedData, 0644); err != nil {
-		return fmt.Errorf("error writing to destination file: %w", err)
-	}
-
-	return nil
-}
-
 func copyDockerService(sourceFile, destFile, serviceName string) error {
 	// Read source file
 	sourceData, err := os.ReadFile(sourceFile)
@@ -390,4 +278,76 @@ func CheckAndAddTraefikLogVolume(composePath string) error {
 
 	fmt.Println("Added traefik log volume and created logs directory")
 	return nil
+}
+
+// MergeYAML merges two YAML files, where the contents of the second file
+// are merged into the first file. In case of conflicts, values from the
+// second file take precedence.
+func MergeYAML(baseFile, overlayFile string) error {
+	// Read the base YAML file
+	baseContent, err := os.ReadFile(baseFile)
+	if err != nil {
+		return fmt.Errorf("error reading base file: %v", err)
+	}
+
+	// Read the overlay YAML file
+	overlayContent, err := os.ReadFile(overlayFile)
+	if err != nil {
+		return fmt.Errorf("error reading overlay file: %v", err)
+	}
+
+	// Parse base YAML into a map
+	var baseMap map[string]interface{}
+	if err := yaml.Unmarshal(baseContent, &baseMap); err != nil {
+		return fmt.Errorf("error parsing base YAML: %v", err)
+	}
+
+	// Parse overlay YAML into a map
+	var overlayMap map[string]interface{}
+	if err := yaml.Unmarshal(overlayContent, &overlayMap); err != nil {
+		return fmt.Errorf("error parsing overlay YAML: %v", err)
+	}
+
+	// Merge the overlay into the base
+	merged := mergeMap(baseMap, overlayMap)
+
+	// Marshal the merged result back to YAML
+	mergedContent, err := MarshalYAMLWithIndent(merged, 2)
+	if err != nil {
+		return fmt.Errorf("error marshaling merged YAML: %v", err)
+	}
+
+	// Write the merged content back to the base file
+	if err := os.WriteFile(baseFile, mergedContent, 0644); err != nil {
+		return fmt.Errorf("error writing merged YAML: %v", err)
+	}
+
+	return nil
+}
+
+// mergeMap recursively merges two maps
+func mergeMap(base, overlay map[string]interface{}) map[string]interface{} {
+	result := make(map[string]interface{})
+
+	// Copy all key-values from base map
+	for k, v := range base {
+		result[k] = v
+	}
+
+	// Merge overlay values
+	for k, v := range overlay {
+		// If both maps have the same key and both values are maps, merge recursively
+		if baseVal, ok := base[k]; ok {
+			if baseMap, isBaseMap := baseVal.(map[string]interface{}); isBaseMap {
+				if overlayMap, isOverlayMap := v.(map[string]interface{}); isOverlayMap {
+					result[k] = mergeMap(baseMap, overlayMap)
+					continue
+				}
+			}
+		}
+		// Otherwise, overlay value takes precedence
+		result[k] = v
+	}
+
+	return result
 }

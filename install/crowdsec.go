@@ -33,23 +33,23 @@ func installCrowdsec(config Config) error {
 		os.Exit(1)
 	}
 
-	if err := copyWebsecureEntryPoint("config/crowdsec/traefik_config.yml", "config/traefik/traefik_config.yml"); err != nil {
+	if err := MergeYAML("config/traefik/traefik_config.yml", "config/crowdsec/traefik_config.yml"); err != nil {
 		fmt.Printf("Error copying entry points: %v\n", err)
 		os.Exit(1)
 	}
+	// delete the 2nd file
+	if err := os.Remove("config/crowdsec/traefik_config.yml"); err != nil {
+		fmt.Printf("Error removing file: %v\n", err)
+		os.Exit(1)
+	}
 
-	if err := copyEntryPoints("config/traefik/traefik_config.yml", "config/crowdsec/traefik_config.yml"); err != nil {
+	if err := MergeYAML("config/traefik/dynamic_config.yml", "config/crowdsec/dynamic_config.yml"); err != nil {
 		fmt.Printf("Error copying entry points: %v\n", err)
 		os.Exit(1)
 	}
-
-	if err := moveFile("config/crowdsec/traefik_config.yml", "config/traefik/traefik_config.yml"); err != nil {
-		fmt.Printf("Error moving file: %v\n", err)
-		os.Exit(1)
-	}
-
-	if err := moveFile("config/crowdsec/dynamic_config.yml", "config/traefik/dynamic_config.yml"); err != nil {
-		fmt.Printf("Error moving file: %v\n", err)
+	// delete the 2nd file
+	if err := os.Remove("config/crowdsec/dynamic_config.yml"); err != nil {
+		fmt.Printf("Error removing file: %v\n", err)
 		os.Exit(1)
 	}
 
