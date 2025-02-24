@@ -151,7 +151,7 @@ View the [project board](https://github.com/orgs/fosrl/projects/1) for more deta
 
 ## Licensing
 
-Pangolin is dual licensed under the AGPLv3 and the Fossorial Commercial license. For inquiries about commercial licensing, please contact us.
+Pangolin is dual licensed under the AGPLv3 and the Fossorial Commercial license. For inquiries about commercial licensing, please contact us at [numbat@fossorial.io](mailto:numbat@fossorial.io).
 
 ## Contributions
 
