@@ -3,7 +3,7 @@ import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
 export const domains = sqliteTable("domains", {
     domainId: text("domainId").primaryKey(),
-    baseDomain: text("baseDomain").notNull().unique(),
+    baseDomain: text("baseDomain").notNull(),
     configManaged: integer("configManaged", { mode: "boolean" })
         .notNull()
         .default(false)

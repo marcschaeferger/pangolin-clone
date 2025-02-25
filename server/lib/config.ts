@@ -42,7 +42,7 @@ const configSchema = z.object({
         z.string(),
         z.object({
             base_domain: hostnameSchema.transform((url) => url.toLowerCase()),
-            cert_resolver: z.string(),
+            cert_resolver: z.string().optional(),
             prefer_wildcard_cert: z.boolean().optional()
         })
     ),

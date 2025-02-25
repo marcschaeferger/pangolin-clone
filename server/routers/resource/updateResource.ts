@@ -68,6 +68,8 @@ const updateHttpResourceBodySchema = z
         }
     );
 
+export type UpdateResourceResponse = Resource;
+
 const updateRawResourceBodySchema = z
     .object({
         name: z.string().min(1).max(255).optional(),

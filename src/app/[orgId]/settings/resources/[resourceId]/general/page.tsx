@@ -60,6 +60,7 @@ import {
     SelectTrigger,
     SelectValue
 } from "@app/components/ui/select";
+import { UpdateResourceResponse } from "@server/routers/resource";
 
 const GeneralFormSchema = z
     .object({
@@ -191,13 +192,16 @@ export default function GeneralForm() {
         setSaveLoading(true);
 
         const res = await api
-            .post(`resource/${resource?.resourceId}`, {
-                name: data.name,
-                subdomain: data.http ? data.subdomain : undefined,
-                proxyPort: data.proxyPort,
-                isBaseDomain: data.http ? data.isBaseDomain : undefined,
-                domainId: data.http ? data.domainId : undefined
-            })
+            .post<AxiosResponse<UpdateResourceResponse>>(
+                `resource/${resource?.resourceId}`,
+                {
+                    name: data.name,
+                    subdomain: data.http ? data.subdomain : undefined,
+                    proxyPort: data.proxyPort,
+                    isBaseDomain: data.http ? data.isBaseDomain : undefined,
+                    domainId: data.http ? data.domainId : undefined
+                }
+            )
             .catch((e) => {
                 toast({
                     variant: "destructive",
@@ -215,11 +219,14 @@ export default function GeneralForm() {
                 description: "The resource has been updated successfully"
             });
 
+            const resource = res.data.data;
+
             updateResource({
                 name: data.name,
                 subdomain: data.subdomain,
                 proxyPort: data.proxyPort,
-                isBaseDomain: data.isBaseDomain
+                isBaseDomain: data.isBaseDomain,
+                fullDomain: resource.fullDomain
             });
 
             router.refresh();
