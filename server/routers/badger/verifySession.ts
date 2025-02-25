@@ -142,16 +142,6 @@ export async function verifyResourceSession(
             return notAllowed(res);
         }
 
-        if (
-            !resource.sso &&
-            !pincode &&
-            !password &&
-            !resource.emailWhitelistEnabled
-        ) {
-            logger.debug("Resource allowed because no auth");
-            return allowed(res);
-        }
-
         // check the rules
         if (resource.applyRules) {
             const action = await checkRules(
@@ -169,6 +159,16 @@ export async function verifyResourceSession(
             }
 
             // otherwise its undefined and we pass
+        }
+
+        if (
+            !resource.sso &&
+            !pincode &&
+            !password &&
+            !resource.emailWhitelistEnabled
+        ) {
+            logger.debug("Resource allowed because no auth");
+            return allowed(res);
         }
 
         const redirectUrl = `${config.getRawConfig().app.dashboard_url}/auth/resource/${encodeURIComponent(
