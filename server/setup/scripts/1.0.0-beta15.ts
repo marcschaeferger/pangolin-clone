@@ -10,7 +10,25 @@ export default async function migration() {
     console.log(`Running setup script ${version}...`);
 
     try {
-        db.transaction((trx) => {});
+        db.transaction((trx) => {
+            trx.run(sql`CREATE TABLE 'domains' (
+	'domainId' text PRIMARY KEY NOT NULL,
+	'baseDomain' text NOT NULL,
+	'configManaged' integer DEFAULT false NOT NULL
+);`);
+
+            trx.run(sql`CREATE TABLE 'orgDomains' (
+    'orgId' text NOT NULL,
+    'domainId' text NOT NULL,
+    FOREIGN KEY ('orgId') REFERENCES 'orgs'('orgId') ON UPDATE no action ON DELETE cascade,
+    FOREIGN KEY ('domainId') REFERENCES 'domains'('domainId') ON UPDATE no action ON DELETE cascade
+);`);
+
+            trx.run(
+                sql`ALTER TABLE 'resources' ADD 'domainId' text REFERENCES domains(domainId);`
+            );
+            trx.run(sql`ALTER TABLE 'orgs' DROP COLUMN 'domain';`);
+        });
 
         console.log(`Migrated database schema`);
     } catch (e) {
