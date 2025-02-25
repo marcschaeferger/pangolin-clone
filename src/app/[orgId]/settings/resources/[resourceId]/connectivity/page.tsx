@@ -461,7 +461,13 @@ export default function ReverseProxyTargets(props: {
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
-        getFilteredRowModel: getFilteredRowModel()
+        getFilteredRowModel: getFilteredRowModel(),
+        state: {
+            pagination: {
+                pageIndex: 0,
+                pageSize: 1000
+            }
+        }
     });
 
     if (pageLoading) {
