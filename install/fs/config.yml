@@ -1,8 +1,12 @@
 app:
     dashboard_url: "https://{{.DashboardDomain}}"
-    base_domain: "{{.BaseDomain}}"
     log_level: "info"
     save_logs: false
+
+domains:
+    domain1:
+        base_domain: "{{.BaseDomain}}"
+        cert_resolver: "letsencrypt"
 
 server:
     external_port: 3000
