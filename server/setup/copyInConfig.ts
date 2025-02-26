@@ -51,6 +51,32 @@ export async function copyInConfig() {
             }
         }
 
+        const allOrgs = await trx.select().from(orgs);
+
+        const existingOrgDomains = await trx.select().from(orgDomains);
+        const existingOrgDomainSet = new Set(
+            existingOrgDomains.map((od) => `${od.orgId}-${od.domainId}`)
+        );
+
+        const newOrgDomains = [];
+        for (const org of allOrgs) {
+            for (const domain of configDomains) {
+                const key = `${org.orgId}-${domain.domainId}`;
+                if (!existingOrgDomainSet.has(key)) {
+                    newOrgDomains.push({
+                        orgId: org.orgId,
+                        domainId: domain.domainId
+                    });
+                }
+            }
+        }
+
+        if (newOrgDomains.length > 0) {
+            await trx.insert(orgDomains).values(newOrgDomains).execute();
+        }
+    });
+
+    await db.transaction(async (trx) => {
         const allResources = await trx
             .select()
             .from(resources)
@@ -76,30 +102,6 @@ export async function copyInConfig() {
                 .update(resources)
                 .set({ fullDomain })
                 .where(eq(resources.resourceId, resource.resourceId));
-        }
-
-        const allOrgs = await trx.select().from(orgs);
-
-        const existingOrgDomains = await trx.select().from(orgDomains);
-        const existingOrgDomainSet = new Set(
-            existingOrgDomains.map((od) => `${od.orgId}-${od.domainId}`)
-        );
-
-        const newOrgDomains = [];
-        for (const org of allOrgs) {
-            for (const domain of configDomains) {
-                const key = `${org.orgId}-${domain.domainId}`;
-                if (!existingOrgDomainSet.has(key)) {
-                    newOrgDomains.push({
-                        orgId: org.orgId,
-                        domainId: domain.domainId
-                    });
-                }
-            }
-        }
-
-        if (newOrgDomains.length > 0) {
-            await trx.insert(orgDomains).values(newOrgDomains).execute();
         }
     });
 

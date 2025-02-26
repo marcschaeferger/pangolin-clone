@@ -38,14 +38,45 @@ const configSchema = z.object({
         save_logs: z.boolean(),
         log_failed_attempts: z.boolean().optional()
     }),
-    domains: z.record(
-        z.string(),
-        z.object({
-            base_domain: hostnameSchema.transform((url) => url.toLowerCase()),
-            cert_resolver: z.string().optional(),
-            prefer_wildcard_cert: z.boolean().optional()
-        })
-    ),
+    domains: z
+        .record(
+            z.string(),
+            z.object({
+                base_domain: hostnameSchema.transform((url) =>
+                    url.toLowerCase()
+                ),
+                cert_resolver: z.string().optional(),
+                prefer_wildcard_cert: z.boolean().optional()
+            })
+        )
+        .refine(
+            (domains) => {
+                const keys = Object.keys(domains);
+
+                if (keys.length === 0) {
+                    return false;
+                }
+
+                return true;
+            },
+            {
+                message: "At least one domain must be defined"
+            }
+        )
+        .refine(
+            (domains) => {
+                const envBaseDomain = process.env.APP_BASE_DOMAIN;
+
+                if (envBaseDomain) {
+                    return hostnameSchema.safeParse(envBaseDomain).success;
+                }
+
+                return true;
+            },
+            {
+                message: "APP_BASE_DOMAIN must be a valid hostname"
+            }
+        ),
     server: z.object({
         external_port: portSchema
             .optional()
@@ -169,8 +200,6 @@ export class Config {
         }
     }
 
-    public loadEnvironment() {}
-
     public loadConfig() {
         const loadConfig = (configPath: string) => {
             try {
@@ -276,6 +305,17 @@ export class Config {
             ? "true"
             : "false";
         process.env.DASHBOARD_URL = parsedConfig.data.app.dashboard_url;
+
+        if (process.env.APP_BASE_DOMAIN) {
+            console.log(
+                `DEPRECATED! APP_BASE_DOMAIN is deprecated and will be removed in a future release. Use the domains section in the configuration file instead. See https://docs.fossorial.io/Pangolin/Configuration/config for more information.`
+            );
+
+            parsedConfig.data.domains.domain1 = {
+                base_domain: process.env.APP_BASE_DOMAIN,
+                cert_resolver: "letsencrypt"
+            };
+        }
 
         this.rawConfig = parsedConfig.data;
     }
