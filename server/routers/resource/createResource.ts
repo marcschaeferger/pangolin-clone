@@ -1,8 +1,9 @@
-import { SqliteError } from "better-sqlite3";
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
 import {
+    domains,
+    orgDomains,
     orgs,
     Resource,
     resources,
@@ -27,69 +28,29 @@ const createResourceParamsSchema = z
     })
     .strict();
 
-const createResourceSchema = z
+const createHttpResourceSchema = z
     .object({
-        subdomain: z.string().optional(),
         name: z.string().min(1).max(255),
+        subdomain: z
+            .string()
+            .optional()
+            .transform((val) => val?.toLowerCase()),
+        isBaseDomain: z.boolean().optional(),
         siteId: z.number(),
         http: z.boolean(),
         protocol: z.string(),
-        proxyPort: z.number().optional(),
-        isBaseDomain: z.boolean().optional()
+        domainId: z.string()
     })
+    .strict()
     .refine(
         (data) => {
-            if (!data.http) {
-                return z
-                    .number()
-                    .int()
-                    .min(1)
-                    .max(65535)
-                    .safeParse(data.proxyPort).success;
-            }
-            return true;
-        },
-        {
-            message: "Invalid port number",
-            path: ["proxyPort"]
-        }
-    )
-    .refine(
-        (data) => {
-            if (data.http && !data.isBaseDomain) {
+            if (data.subdomain) {
                 return subdomainSchema.safeParse(data.subdomain).success;
             }
             return true;
         },
-        {
-            message: "Invalid subdomain",
-            path: ["subdomain"]
-        }
+        { message: "Invalid subdomain" }
     )
-    .refine(
-        (data) => {
-            if (!config.getRawConfig().flags?.allow_raw_resources) {
-                if (data.proxyPort !== undefined) {
-                    return false;
-                }
-            }
-            return true;
-        },
-        {
-            message: "Proxy port cannot be set"
-        }
-    )
-    // .refine(
-    //     (data) => {
-    //         if (data.proxyPort === 443 || data.proxyPort === 80) {
-    //             return false;
-    //         }
-    //         return true;
-    //     },
-    //     {
-    //         message: "Port 80 and 443 are reserved for http and https resources"
-    //     }
-    // )
     .refine(
         (data) => {
             if (!config.getRawConfig().flags?.allow_base_domain_resources) {
@@ -104,6 +65,29 @@ const createResourceSchema = z
         }
     );
 
+const createRawResourceSchema = z
+    .object({
+        name: z.string().min(1).max(255),
+        siteId: z.number(),
+        http: z.boolean(),
+        protocol: z.string(),
+        proxyPort: z.number().int().min(1).max(65535)
+    })
+    .strict()
+    .refine(
+        (data) => {
+            if (!config.getRawConfig().flags?.allow_raw_resources) {
+                if (data.proxyPort !== undefined) {
+                    return false;
+                }
+            }
+            return true;
+        },
+        {
+            message: "Proxy port cannot be set"
+        }
+    );
+
 export type CreateResourceResponse = Resource;
 
 export async function createResource(
@@ -112,18 +96,6 @@ export async function createResource(
     next: NextFunction
 ): Promise<any> {
     try {
-        const parsedBody = createResourceSchema.safeParse(req.body);
-        if (!parsedBody.success) {
-            return next(
-                createHttpError(
-                    HttpCode.BAD_REQUEST,
-                    fromError(parsedBody.error).toString()
-                )
-            );
-        }
-
-        let { name, subdomain, protocol, proxyPort, http, isBaseDomain } = parsedBody.data;
-
         // Validate request params
         const parsedParams = createResourceParamsSchema.safeParse(req.params);
         if (!parsedParams.success) {
@@ -159,103 +131,271 @@ export async function createResource(
             );
         }
 
-        let fullDomain = "";
-        if (isBaseDomain) {
-            fullDomain = org[0].domain;
-        } else {
-            fullDomain = `${subdomain}.${org[0].domain}`;
+        if (typeof req.body.http !== "boolean") {
+            return next(
+                createHttpError(HttpCode.BAD_REQUEST, "http field is required")
+            );
         }
 
-        // if http is false check to see if there is already a resource with the same port and protocol
-        if (!http) {
-            const existingResource = await db
-                .select()
-                .from(resources)
-                .where(
-                    and(
-                        eq(resources.protocol, protocol),
-                        eq(resources.proxyPort, proxyPort!)
-                    )
-                );
+        const { http } = req.body;
 
-            if (existingResource.length > 0) {
-                return next(
-                    createHttpError(
-                        HttpCode.CONFLICT,
-                        "Resource with that protocol and port already exists"
-                    )
-                );
-            }
+        if (http) {
+            return await createHttpResource(
+                { req, res, next },
+                { siteId, orgId }
+            );
         } else {
-            // make sure the full domain is unique
-            const existingResource = await db
-                .select()
-                .from(resources)
-                .where(eq(resources.fullDomain, fullDomain));
-
-            if (existingResource.length > 0) {
-                return next(
-                    createHttpError(
-                        HttpCode.CONFLICT,
-                        "Resource with that domain already exists"
-                    )
-                );
-            }
+            return await createRawResource(
+                { req, res, next },
+                { siteId, orgId }
+            );
         }
-
-        await db.transaction(async (trx) => {
-            const newResource = await trx
-                .insert(resources)
-                .values({
-                    siteId,
-                    fullDomain: http ? fullDomain : null,
-                    orgId,
-                    name,
-                    subdomain,
-                    http,
-                    protocol,
-                    proxyPort,
-                    ssl: true,
-                    isBaseDomain
-                })
-                .returning();
-
-            const adminRole = await db
-                .select()
-                .from(roles)
-                .where(and(eq(roles.isAdmin, true), eq(roles.orgId, orgId)))
-                .limit(1);
-
-            if (adminRole.length === 0) {
-                return next(
-                    createHttpError(HttpCode.NOT_FOUND, `Admin role not found`)
-                );
-            }
-
-            await trx.insert(roleResources).values({
-                roleId: adminRole[0].roleId,
-                resourceId: newResource[0].resourceId
-            });
-
-            if (req.userOrgRoleId != adminRole[0].roleId) {
-                // make sure the user can access the resource
-                await trx.insert(userResources).values({
-                    userId: req.user?.userId!,
-                    resourceId: newResource[0].resourceId
-                });
-            }
-            response<CreateResourceResponse>(res, {
-                data: newResource[0],
-                success: true,
-                error: false,
-                message: "Resource created successfully",
-                status: HttpCode.CREATED
-            });
-        });
     } catch (error) {
         logger.error(error);
         return next(
             createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
+}
+
+async function createHttpResource(
+    route: {
+        req: Request;
+        res: Response;
+        next: NextFunction;
+    },
+    meta: {
+        siteId: number;
+        orgId: string;
+    }
+) {
+    const { req, res, next } = route;
+    const { siteId, orgId } = meta;
+
+    const parsedBody = createHttpResourceSchema.safeParse(req.body);
+    if (!parsedBody.success) {
+        return next(
+            createHttpError(
+                HttpCode.BAD_REQUEST,
+                fromError(parsedBody.error).toString()
+            )
+        );
+    }
+
+    const { name, subdomain, isBaseDomain, http, protocol, domainId } =
+        parsedBody.data;
+
+    const [orgDomain] = await db
+        .select()
+        .from(orgDomains)
+        .where(
+            and(eq(orgDomains.orgId, orgId), eq(orgDomains.domainId, domainId))
+        )
+        .leftJoin(domains, eq(orgDomains.domainId, domains.domainId));
+
+    if (!orgDomain || !orgDomain.domains) {
+        return next(
+            createHttpError(
+                HttpCode.NOT_FOUND,
+                `Domain with ID ${parsedBody.data.domainId} not found`
+            )
+        );
+    }
+
+    const domain = orgDomain.domains;
+
+    let fullDomain = "";
+    if (isBaseDomain) {
+        fullDomain = domain.baseDomain;
+    } else {
+        fullDomain = `${subdomain}.${domain.baseDomain}`;
+    }
+
+    logger.debug(`Full domain: ${fullDomain}`);
+
+    // make sure the full domain is unique
+    const existingResource = await db
+        .select()
+        .from(resources)
+        .where(eq(resources.fullDomain, fullDomain));
+
+    if (existingResource.length > 0) {
+        return next(
+            createHttpError(
+                HttpCode.CONFLICT,
+                "Resource with that domain already exists"
+            )
+        );
+    }
+
+    let resource: Resource | undefined;
+
+    await db.transaction(async (trx) => {
+        const newResource = await trx
+            .insert(resources)
+            .values({
+                siteId,
+                fullDomain,
+                domainId,
+                orgId,
+                name,
+                subdomain,
+                http,
+                protocol,
+                ssl: true,
+                isBaseDomain
+            })
+            .returning();
+
+        const adminRole = await db
+            .select()
+            .from(roles)
+            .where(and(eq(roles.isAdmin, true), eq(roles.orgId, orgId)))
+            .limit(1);
+
+        if (adminRole.length === 0) {
+            return next(
+                createHttpError(HttpCode.NOT_FOUND, `Admin role not found`)
+            );
+        }
+
+        await trx.insert(roleResources).values({
+            roleId: adminRole[0].roleId,
+            resourceId: newResource[0].resourceId
+        });
+
+        if (req.userOrgRoleId != adminRole[0].roleId) {
+            // make sure the user can access the resource
+            await trx.insert(userResources).values({
+                userId: req.user?.userId!,
+                resourceId: newResource[0].resourceId
+            });
+        }
+
+        resource = newResource[0];
+    });
+
+    if (!resource) {
+        return next(
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "Failed to create resource"
+            )
+        );
+    }
+
+    return response<CreateResourceResponse>(res, {
+        data: resource,
+        success: true,
+        error: false,
+        message: "Http resource created successfully",
+        status: HttpCode.CREATED
+    });
+}
+
+async function createRawResource(
+    route: {
+        req: Request;
+        res: Response;
+        next: NextFunction;
+    },
+    meta: {
+        siteId: number;
+        orgId: string;
+    }
+) {
+    const { req, res, next } = route;
+    const { siteId, orgId } = meta;
+
+    const parsedBody = createRawResourceSchema.safeParse(req.body);
+    if (!parsedBody.success) {
+        return next(
+            createHttpError(
+                HttpCode.BAD_REQUEST,
+                fromError(parsedBody.error).toString()
+            )
+        );
+    }
+
+    const { name, http, protocol, proxyPort } = parsedBody.data;
+
+    // if http is false check to see if there is already a resource with the same port and protocol
+    const existingResource = await db
+        .select()
+        .from(resources)
+        .where(
+            and(
+                eq(resources.protocol, protocol),
+                eq(resources.proxyPort, proxyPort!)
+            )
+        );
+
+    if (existingResource.length > 0) {
+        return next(
+            createHttpError(
+                HttpCode.CONFLICT,
+                "Resource with that protocol and port already exists"
+            )
+        );
+    }
+
+    let resource: Resource | undefined;
+
+    await db.transaction(async (trx) => {
+        const newResource = await trx
+            .insert(resources)
+            .values({
+                siteId,
+                orgId,
+                name,
+                http,
+                protocol,
+                proxyPort
+            })
+            .returning();
+
+        const adminRole = await db
+            .select()
+            .from(roles)
+            .where(and(eq(roles.isAdmin, true), eq(roles.orgId, orgId)))
+            .limit(1);
+
+        if (adminRole.length === 0) {
+            return next(
+                createHttpError(HttpCode.NOT_FOUND, `Admin role not found`)
+            );
+        }
+
+        await trx.insert(roleResources).values({
+            roleId: adminRole[0].roleId,
+            resourceId: newResource[0].resourceId
+        });
+
+        if (req.userOrgRoleId != adminRole[0].roleId) {
+            // make sure the user can access the resource
+            await trx.insert(userResources).values({
+                userId: req.user?.userId!,
+                resourceId: newResource[0].resourceId
+            });
+        }
+
+        resource = newResource[0];
+    });
+
+    if (!resource) {
+        return next(
+            createHttpError(
+                HttpCode.INTERNAL_SERVER_ERROR,
+                "Failed to create resource"
+            )
+        );
+    }
+
+    return response<CreateResourceResponse>(res, {
+        data: resource,
+        success: true,
+        error: false,
+        message: "Non-http resource created successfully",
+        status: HttpCode.CREATED
+    });
 }

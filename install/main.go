@@ -4,13 +4,16 @@ import (
 	"bufio"
 	"embed"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
+	"time"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"syscall"
+	"bytes"
 	"text/template"
 	"unicode"
 
@@ -24,7 +27,7 @@ func loadVersions(config *Config) {
 	config.BadgerVersion = "replaceme"
 }
 
-//go:embed fs/*
+//go:embed config/*
 var configFiles embed.FS
 
 type Config struct {
@@ -45,6 +48,8 @@ type Config struct {
 	EmailSMTPPass              string
 	EmailNoReply               string
 	InstallGerbil              bool
+	TraefikBouncerKey		  string
+	DoCrowdsecInstall		  bool
 }
 
 func main() {
@@ -56,9 +61,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	var config Config
+	config.DoCrowdsecInstall = false
+
 	// check if there is already a config file
 	if _, err := os.Stat("config/config.yml"); err != nil {
-		config := collectUserInput(reader)
+		config = collectUserInput(reader)
 
 		loadVersions(&config)
 
@@ -67,18 +75,53 @@ func main() {
 			os.Exit(1)
 		}
 
+		moveFile("config/docker-compose.yml", "docker-compose.yml")
+
 		if !isDockerInstalled() && runtime.GOOS == "linux" {
 			if readBool(reader, "Docker is not installed. Would you like to install it?", true) {
 				installDocker()
 			}
 		}
+
+		fmt.Println("\n=== Starting installation ===")
+	
+		if isDockerInstalled() {
+			if readBool(reader, "Would you like to install and start the containers?", true) {
+				pullAndStartContainers()
+			}
+		}
 	} else {
-		fmt.Println("Config file already exists... skipping configuration")
+		fmt.Println("Looks like you already installed, so I am going to do the setup...")
 	}
 
-	if isDockerInstalled() {
-		if readBool(reader, "Would you like to install and start the containers?", true) {
-			pullAndStartContainers()
+	if !checkIsCrowdsecInstalledInCompose() {
+		fmt.Println("\n=== Crowdsec Install ===")
+		// check if crowdsec is installed
+		if readBool(reader, "Would you like to install Crowdsec?", true) {
+
+			if config.DashboardDomain == "" {
+				traefikConfig, err := ReadTraefikConfig("config/traefik/traefik_config.yml", "config/traefik/dynamic_config.yml")
+				if err != nil {
+					fmt.Printf("Error reading config: %v\n", err)
+					return
+				}
+				config.DashboardDomain = traefikConfig.DashboardDomain
+				config.LetsEncryptEmail = traefikConfig.LetsEncryptEmail
+				config.BadgerVersion = traefikConfig.BadgerVersion
+				
+				// print the values and check if they are right
+				fmt.Println("Detected values:")
+				fmt.Printf("Dashboard Domain: %s\n", config.DashboardDomain)
+				fmt.Printf("Let's Encrypt Email: %s\n", config.LetsEncryptEmail)
+				fmt.Printf("Badger Version: %s\n", config.BadgerVersion)
+
+				if !readBool(reader, "Are these values correct?", true) {
+					config = collectUserInput(reader)
+				}
+			}
+
+			config.DoCrowdsecInstall = true
+			installCrowdsec(config)
 		}
 	}
 
@@ -99,22 +142,24 @@ func readString(reader *bufio.Reader, prompt string, defaultValue string) string
 	return input
 }
 
-func readPassword(prompt string) string {
-	fmt.Print(prompt + ": ")
-
-	// Read password without echo
-	password, err := term.ReadPassword(int(syscall.Stdin))
-	fmt.Println() // Add a newline since ReadPassword doesn't add one
-
-	if err != nil {
-		return ""
-	}
-
-	input := strings.TrimSpace(string(password))
-	if input == "" {
-		return readPassword(prompt)
-	}
-	return input
+func readPassword(prompt string, reader *bufio.Reader) string {
+    if term.IsTerminal(int(syscall.Stdin)) {
+    	fmt.Print(prompt + ": ")
+        // Read password without echo if we're in a terminal
+        password, err := term.ReadPassword(int(syscall.Stdin))
+        fmt.Println() // Add a newline since ReadPassword doesn't add one
+        if err != nil {
+            return ""
+        }
+        input := strings.TrimSpace(string(password))
+        if input == "" {
+            return readPassword(prompt, reader)
+        }
+        return input
+    } else {
+		// Fallback to reading from stdin if not in a terminal
+		return readString(reader, prompt, "")
+    }
 }
 
 func readBool(reader *bufio.Reader, prompt string, defaultValue bool) bool {
@@ -150,8 +195,8 @@ func collectUserInput(reader *bufio.Reader) Config {
 	fmt.Println("\n=== Admin User Configuration ===")
 	config.AdminUserEmail = readString(reader, "Enter admin user email", "admin@"+config.BaseDomain)
 	for {
-		pass1 := readPassword("Create admin user password")
-		pass2 := readPassword("Confirm admin user password")
+		pass1 := readPassword("Create admin user password", reader)
+		pass2 := readPassword("Confirm admin user password", reader)
 
 		if pass1 != pass2 {
 			fmt.Println("Passwords do not match")
@@ -261,31 +306,33 @@ func createConfigFiles(config Config) error {
 	os.MkdirAll("config/logs", 0755)
 
 	// Walk through all embedded files
-	err := fs.WalkDir(configFiles, "fs", func(path string, d fs.DirEntry, err error) error {
+	err := fs.WalkDir(configFiles, "config", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
 		// Skip the root fs directory itself
-		if path == "fs" {
+		if path == "config" {
 			return nil
 		}
 
-		// Get the relative path by removing the "fs/" prefix
-		relPath := strings.TrimPrefix(path, "fs/")
+		if !config.DoCrowdsecInstall && strings.Contains(path, "crowdsec") {
+			return nil
+		}
+		
+		if config.DoCrowdsecInstall && !strings.Contains(path, "crowdsec") {
+			return nil
+		}
 
         // skip .DS_Store
-        if strings.Contains(relPath, ".DS_Store") {
+        if strings.Contains(path, ".DS_Store") {
             return nil
         }
 
-		// Create the full output path under "config/"
-		outPath := filepath.Join("config", relPath)
-
 		if d.IsDir() {
 			// Create directory
-			if err := os.MkdirAll(outPath, 0755); err != nil {
-				return fmt.Errorf("failed to create directory %s: %v", outPath, err)
+			if err := os.MkdirAll(path, 0755); err != nil {
+				return fmt.Errorf("failed to create directory %s: %v", path, err)
 			}
 			return nil
 		}
@@ -303,14 +350,14 @@ func createConfigFiles(config Config) error {
 		}
 
 		// Ensure parent directory exists
-		if err := os.MkdirAll(filepath.Dir(outPath), 0755); err != nil {
-			return fmt.Errorf("failed to create parent directory for %s: %v", outPath, err)
+		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+			return fmt.Errorf("failed to create parent directory for %s: %v", path, err)
 		}
 
 		// Create output file
-		outFile, err := os.Create(outPath)
+		outFile, err := os.Create(path)
 		if err != nil {
-			return fmt.Errorf("failed to create %s: %v", outPath, err)
+			return fmt.Errorf("failed to create %s: %v", path, err)
 		}
 		defer outFile.Close()
 
@@ -326,29 +373,9 @@ func createConfigFiles(config Config) error {
 		return fmt.Errorf("error walking config files: %v", err)
 	}
 
-	// get the current directory
-	dir, err := os.Getwd()
-	if err != nil {
-		return fmt.Errorf("failed to get current directory: %v", err)
-	}
-
-	sourcePath := filepath.Join(dir, "config/docker-compose.yml")
-	destPath := filepath.Join(dir, "docker-compose.yml")
-
-	// Check if source file exists
-	if _, err := os.Stat(sourcePath); err != nil {
-		return fmt.Errorf("source docker-compose.yml not found: %v", err)
-	}
-
-	// Try to move the file
-	err = os.Rename(sourcePath, destPath)
-	if err != nil {
-		return fmt.Errorf("failed to move docker-compose.yml from %s to %s: %v",
-			sourcePath, destPath, err)
-	}
-
 	return nil
 }
+
 
 func installDocker() error {
 	// Detect Linux distribution
@@ -489,4 +516,167 @@ func pullAndStartContainers() error {
 	}
 
 	return nil
+}
+
+// bring containers down
+func stopContainers() error {
+	fmt.Println("Stopping containers...")
+
+	// Check which docker compose command is available
+	var useNewStyle bool
+	checkCmd := exec.Command("docker", "compose", "version")
+	if err := checkCmd.Run(); err == nil {
+		useNewStyle = true
+	} else {
+		// Check if docker-compose (old style) is available
+		checkCmd = exec.Command("docker-compose", "version")
+		if err := checkCmd.Run(); err != nil {
+			return fmt.Errorf("neither 'docker compose' nor 'docker-compose' command is available: %v", err)
+		}
+	}
+
+	// Helper function to execute docker compose commands
+	executeCommand := func(args ...string) error {
+		var cmd *exec.Cmd
+		if useNewStyle {
+			cmd = exec.Command("docker", append([]string{"compose"}, args...)...)
+		} else {
+			cmd = exec.Command("docker-compose", args...)
+		}
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		return cmd.Run()
+	}
+
+	if err := executeCommand("-f", "docker-compose.yml", "down"); err != nil {
+		return fmt.Errorf("failed to stop containers: %v", err)
+	}
+
+	return nil
+}
+
+// just start containers
+func startContainers() error {
+	fmt.Println("Starting containers...")
+
+	// Check which docker compose command is available
+	var useNewStyle bool
+	checkCmd := exec.Command("docker", "compose", "version")
+	if err := checkCmd.Run(); err == nil {
+		useNewStyle = true
+	} else {
+		// Check if docker-compose (old style) is available
+		checkCmd = exec.Command("docker-compose", "version")
+		if err := checkCmd.Run(); err != nil {
+			return fmt.Errorf("neither 'docker compose' nor 'docker-compose' command is available: %v", err)
+		}
+	}
+
+	// Helper function to execute docker compose commands
+	executeCommand := func(args ...string) error {
+		var cmd *exec.Cmd
+		if useNewStyle {
+			cmd = exec.Command("docker", append([]string{"compose"}, args...)...)
+		} else {
+			cmd = exec.Command("docker-compose", args...)
+		}
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		return cmd.Run()
+	}
+
+	if err := executeCommand("-f", "docker-compose.yml", "up", "-d"); err != nil {
+		return fmt.Errorf("failed to start containers: %v", err)
+	}
+
+	return nil
+}
+
+func restartContainer(container string) error {
+	fmt.Printf("Restarting %s container...\n", container)
+
+	// Check which docker compose command is available
+	var useNewStyle bool
+	checkCmd := exec.Command("docker", "compose", "version")
+	if err := checkCmd.Run(); err == nil {
+		useNewStyle = true
+	} else {
+		// Check if docker-compose (old style) is available
+		checkCmd = exec.Command("docker-compose", "version")
+		if err := checkCmd.Run(); err != nil {
+			return fmt.Errorf("neither 'docker compose' nor 'docker-compose' command is available: %v", err)
+		}
+	}
+
+	// Helper function to execute docker compose commands
+	executeCommand := func(args ...string) error {
+		var cmd *exec.Cmd
+		if useNewStyle {
+			cmd = exec.Command("docker", append([]string{"compose"}, args...)...)
+		} else {
+			cmd = exec.Command("docker-compose", args...)
+		}
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		return cmd.Run()
+	}
+
+	if err := executeCommand("-f", "docker-compose.yml", "restart", container); err != nil {
+		return fmt.Errorf("failed to restart %s container: %v", container, err)
+	}
+
+	return nil
+}
+
+func copyFile(src, dst string) error {
+	source, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer source.Close()
+
+	destination, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer destination.Close()
+
+	_, err = io.Copy(destination, source)
+	return err
+}
+
+func moveFile(src, dst string) error {
+	if err := copyFile(src, dst); err != nil {
+		return err
+	}
+
+	return os.Remove(src)
+}
+
+func waitForContainer(containerName string) error {
+    maxAttempts := 30
+    retryInterval := time.Second * 2
+
+    for attempt := 0; attempt < maxAttempts; attempt++ {
+        // Check if container is running
+        cmd := exec.Command("docker", "container", "inspect", "-f", "{{.State.Running}}", containerName)
+        var out bytes.Buffer
+        cmd.Stdout = &out
+        
+        if err := cmd.Run(); err != nil {
+            // If the container doesn't exist or there's another error, wait and retry
+            time.Sleep(retryInterval)
+            continue
+        }
+
+        isRunning := strings.TrimSpace(out.String()) == "true"
+        if isRunning {
+            return nil
+        }
+
+        // Container exists but isn't running yet, wait and retry
+        time.Sleep(retryInterval)
+    }
+
+    return fmt.Errorf("container %s did not start within %v seconds", containerName, maxAttempts*int(retryInterval.Seconds()))
 }

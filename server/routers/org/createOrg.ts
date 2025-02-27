@@ -2,7 +2,15 @@ import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
 import { eq } from "drizzle-orm";
-import { Org, orgs, roleActions, roles, userOrgs } from "@server/db/schema";
+import {
+    domains,
+    Org,
+    orgDomains,
+    orgs,
+    roleActions,
+    roles,
+    userOrgs
+} from "@server/db/schema";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
@@ -16,7 +24,6 @@ const createOrgSchema = z
     .object({
         orgId: z.string(),
         name: z.string().min(1).max(255)
-        // domain: z.string().min(1).max(255).optional(),
     })
     .strict();
 
@@ -82,14 +89,16 @@ export async function createOrg(
         let org: Org | null = null;
 
         await db.transaction(async (trx) => {
-            const domain = config.getBaseDomain();
+            const allDomains = await trx
+                .select()
+                .from(domains)
+                .where(eq(domains.configManaged, true));
 
             const newOrg = await trx
                 .insert(orgs)
                 .values({
                     orgId,
-                    name,
-                    domain
+                    name
                 })
                 .returning();
 
@@ -108,6 +117,13 @@ export async function createOrg(
                 trx.rollback();
                 return;
             }
+
+            await trx.insert(orgDomains).values(
+                allDomains.map((domain) => ({
+                    orgId: newOrg[0].orgId,
+                    domainId: domain.domainId
+                }))
+            );
 
             await trx.insert(userOrgs).values({
                 userId: req.user!.userId,

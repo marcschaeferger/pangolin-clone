@@ -210,11 +210,11 @@ export default function GeneralPage() {
                                             <FormControl>
                                                 <Input {...field} />
                                             </FormControl>
+                                            <FormMessage />
                                             <FormDescription>
                                                 This is the display name of the
-                                                org
+                                                organization.
                                             </FormDescription>
-                                            <FormMessage />
                                         </FormItem>
                                     )}
                                 />
@@ -238,7 +238,6 @@ export default function GeneralPage() {
             <SettingsSection>
                 <SettingsSectionHeader>
                     <SettingsSectionTitle>
-                        <AlertTriangle className="h-5 w-5" />
                         Danger Zone
                     </SettingsSectionTitle>
                     <SettingsSectionDescription>

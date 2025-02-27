@@ -1,10 +1,26 @@
 import { InferSelectModel } from "drizzle-orm";
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
+export const domains = sqliteTable("domains", {
+    domainId: text("domainId").primaryKey(),
+    baseDomain: text("baseDomain").notNull(),
+    configManaged: integer("configManaged", { mode: "boolean" })
+        .notNull()
+        .default(false)
+});
+
 export const orgs = sqliteTable("orgs", {
     orgId: text("orgId").primaryKey(),
-    name: text("name").notNull(),
-    domain: text("domain").notNull()
+    name: text("name").notNull()
+});
+
+export const orgDomains = sqliteTable("orgDomains", {
+    orgId: text("orgId")
+        .notNull()
+        .references(() => orgs.orgId, { onDelete: "cascade" }),
+    domainId: text("domainId")
+        .notNull()
+        .references(() => domains.domainId, { onDelete: "cascade" })
 });
 
 export const sites = sqliteTable("sites", {
@@ -43,6 +59,9 @@ export const resources = sqliteTable("resources", {
     name: text("name").notNull(),
     subdomain: text("subdomain"),
     fullDomain: text("fullDomain"),
+    domainId: text("domainId").references(() => domains.domainId, {
+        onDelete: "set null"
+    }),
     ssl: integer("ssl", { mode: "boolean" }).notNull().default(false),
     blockAccess: integer("blockAccess", { mode: "boolean" })
         .notNull()
@@ -55,7 +74,9 @@ export const resources = sqliteTable("resources", {
         .notNull()
         .default(false),
     isBaseDomain: integer("isBaseDomain", { mode: "boolean" }),
-    applyRules: integer("applyRules", { mode: "boolean" }).notNull().default(false)
+    applyRules: integer("applyRules", { mode: "boolean" })
+        .notNull()
+        .default(false)
 });
 
 export const targets = sqliteTable("targets", {
@@ -417,3 +438,4 @@ export type ResourceAccessToken = InferSelectModel<typeof resourceAccessToken>;
 export type ResourceWhitelist = InferSelectModel<typeof resourceWhitelist>;
 export type VersionMigration = InferSelectModel<typeof versionMigrations>;
 export type ResourceRule = InferSelectModel<typeof resourceRules>;
+export type Domain = InferSelectModel<typeof domains>;

@@ -145,7 +145,7 @@ export default function SignupForm({
                                 <FormItem>
                                     <FormLabel>Email</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Email" {...field} />
+                                        <Input {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -160,7 +160,6 @@ export default function SignupForm({
                                     <FormControl>
                                         <Input
                                             type="password"
-                                            placeholder="Password"
                                             {...field}
                                         />
                                     </FormControl>
@@ -177,7 +176,6 @@ export default function SignupForm({
                                     <FormControl>
                                         <Input
                                             type="password"
-                                            placeholder="Confirm Password"
                                             {...field}
                                         />
                                     </FormControl>

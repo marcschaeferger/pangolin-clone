@@ -1,9 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { InfoIcon, ShieldCheck, ShieldOff } from "lucide-react";
-import { useOrgContext } from "@app/hooks/useOrgContext";
 import { useResourceContext } from "@app/hooks/useResourceContext";
 import { Separator } from "@app/components/ui/separator";
 import CopyToClipboard from "@app/components/CopyToClipboard";
@@ -17,17 +15,9 @@ import {
 type ResourceInfoBoxType = {};
 
 export default function ResourceInfoBox({}: ResourceInfoBoxType) {
-    const [copied, setCopied] = useState(false);
-
-    const { org } = useOrgContext();
     const { resource, authInfo } = useResourceContext();
 
-    let fullUrl = `${resource.ssl ? "https" : "http"}://`;
-    if (resource.isBaseDomain) {
-        fullUrl = fullUrl + org.org.domain;
-    } else {
-        fullUrl = fullUrl + `${resource.subdomain}.${org.org.domain}`;
-    }
+    let fullUrl = `${resource.ssl ? "https" : "http"}://${resource.fullDomain}`;
 
     return (
         <Alert>
@@ -52,7 +42,7 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
                                             <ShieldCheck className="w-4 h-4 mt-0.5" />
                                             <span>
                                                 This resource is protected with
-                                                at least one auth method.
+                                                at least one authentication method.
                                             </span>
                                         </div>
                                     ) : (

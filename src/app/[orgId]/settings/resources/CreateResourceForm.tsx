@@ -65,10 +65,12 @@ import { SquareArrowOutUpRight } from "lucide-react";
 import CopyTextBox from "@app/components/CopyTextBox";
 import { RadioGroup, RadioGroupItem } from "@app/components/ui/radio-group";
 import { Label } from "@app/components/ui/label";
+import { ListDomainsResponse } from "@server/routers/domain";
 
 const createResourceFormSchema = z
     .object({
         subdomain: z.string().optional(),
+        domainId: z.string().min(1).optional(),
         name: z.string().min(1).max(255),
         siteId: z.number(),
         http: z.boolean(),
@@ -117,6 +119,7 @@ export default function CreateResourceForm({
     open,
     setOpen
 }: CreateResourceFormProps) {
+    const [formKey, setFormKey] = useState(0);
     const api = createApiClient(useEnvContext());
 
     const [loading, setLoading] = useState(false);
@@ -129,7 +132,9 @@ export default function CreateResourceForm({
     const { env } = useEnvContext();
 
     const [sites, setSites] = useState<ListSitesResponse["sites"]>([]);
-    const [domainSuffix, setDomainSuffix] = useState<string>(org.org.domain);
+    const [baseDomains, setBaseDomains] = useState<
+        { domainId: string; baseDomain: string }[]
+    >([]);
     const [showSnippets, setShowSnippets] = useState(false);
     const [resourceId, setResourceId] = useState<number | null>(null);
     const [domainType, setDomainType] = useState<"subdomain" | "basedomain">(
@@ -140,6 +145,7 @@ export default function CreateResourceForm({
         resolver: zodResolver(createResourceFormSchema),
         defaultValues: {
             subdomain: "",
+            domainId: "",
             name: "",
             http: true,
             protocol: "tcp"
@@ -161,17 +167,56 @@ export default function CreateResourceForm({
         reset();
 
         const fetchSites = async () => {
-            const res = await api.get<AxiosResponse<ListSitesResponse>>(
-                `/org/${orgId}/sites/`
-            );
-            setSites(res.data.data.sites);
+            const res = await api
+                .get<AxiosResponse<ListSitesResponse>>(`/org/${orgId}/sites/`)
+                .catch((e) => {
+                    toast({
+                        variant: "destructive",
+                        title: "Error fetching sites",
+                        description: formatAxiosError(
+                            e,
+                            "An error occurred when fetching the sites"
+                        )
+                    });
+                });
 
-            if (res.data.data.sites.length > 0) {
-                form.setValue("siteId", res.data.data.sites[0].siteId);
+            if (res?.status === 200) {
+                setSites(res.data.data.sites);
+
+                if (res.data.data.sites.length > 0) {
+                    form.setValue("siteId", res.data.data.sites[0].siteId);
+                }
+            }
+        };
+
+        const fetchDomains = async () => {
+            const res = await api
+                .get<
+                    AxiosResponse<ListDomainsResponse>
+                >(`/org/${orgId}/domains/`)
+                .catch((e) => {
+                    toast({
+                        variant: "destructive",
+                        title: "Error fetching domains",
+                        description: formatAxiosError(
+                            e,
+                            "An error occurred when fetching the domains"
+                        )
+                    });
+                });
+
+            if (res?.status === 200) {
+                const domains = res.data.data.domains;
+                setBaseDomains(domains);
+                if (domains.length) {
+                    form.setValue("domainId", domains[0].domainId);
+                    setFormKey((k) => k + 1);
+                }
             }
         };
 
         fetchSites();
+        fetchDomains();
     }, [open]);
 
     async function onSubmit(data: CreateResourceFormValues) {
@@ -181,11 +226,12 @@ export default function CreateResourceForm({
                 {
                     name: data.name,
                     subdomain: data.http ? data.subdomain : undefined,
+                    domainId: data.http ? data.domainId : undefined,
                     http: data.http,
                     protocol: data.protocol,
                     proxyPort: data.http ? undefined : data.proxyPort,
                     siteId: data.siteId,
-                    isBaseDomain: data.isBaseDomain
+                    isBaseDomain: data.http ? undefined : data.isBaseDomain
                 }
             )
             .catch((e) => {
@@ -237,34 +283,12 @@ export default function CreateResourceForm({
                     </CredenzaHeader>
                     <CredenzaBody>
                         {!showSnippets && (
-                            <Form {...form}>
+                            <Form {...form} key={formKey}>
                                 <form
                                     onSubmit={form.handleSubmit(onSubmit)}
                                     className="space-y-4"
                                     id="create-resource-form"
                                 >
-                                    <FormField
-                                        control={form.control}
-                                        name="name"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Name</FormLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        placeholder="Resource name"
-                                                        {...field}
-                                                    />
-                                                </FormControl>
-                                                <FormDescription>
-                                                    This is the name that will
-                                                    be displayed for this
-                                                    resource.
-                                                </FormDescription>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-
                                     {!env.flags.allowRawResources || (
                                         <FormField
                                             control={form.control}
@@ -278,7 +302,8 @@ export default function CreateResourceForm({
                                                         <FormDescription>
                                                             Toggle if this is an
                                                             HTTP resource or a
-                                                            raw TCP/UDP resource
+                                                            raw TCP/UDP
+                                                            resource.
                                                         </FormDescription>
                                                     </div>
                                                     <FormControl>
@@ -295,6 +320,24 @@ export default function CreateResourceForm({
                                             )}
                                         />
                                     )}
+
+                                    <FormField
+                                        control={form.control}
+                                        name="name"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Name</FormLabel>
+                                                <FormControl>
+                                                    <Input {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                                <FormDescription>
+                                                    This is display name for the
+                                                    resource.
+                                                </FormDescription>
+                                            </FormItem>
+                                        )}
+                                    />
 
                                     {form.watch("http") &&
                                         env.flags.allowBaseDomainResources && (
@@ -335,60 +378,137 @@ export default function CreateResourceForm({
                                         )}
 
                                     {form.watch("http") && (
-                                        <FormField
-                                            control={form.control}
-                                            name="subdomain"
-                                            render={({ field }) => (
-                                                <FormItem>
+                                        <>
+                                            {domainType === "subdomain" ? (
+                                                <div className="w-fill space-y-2">
                                                     {!env.flags
                                                         .allowBaseDomainResources && (
                                                         <FormLabel>
                                                             Subdomain
                                                         </FormLabel>
                                                     )}
-                                                    {domainType ===
-                                                    "subdomain" ? (
-                                                        <FormControl>
-                                                            <CustomDomainInput
-                                                                value={
-                                                                    field.value ??
-                                                                    ""
+                                                    <div className="flex">
+                                                        <div className="w-full mr-1">
+                                                            <FormField
+                                                                control={
+                                                                    form.control
                                                                 }
-                                                                domainSuffix={
-                                                                    domainSuffix
-                                                                }
-                                                                placeholder="Subdomain"
-                                                                onChange={(
-                                                                    value
-                                                                ) =>
-                                                                    form.setValue(
-                                                                        "subdomain",
-                                                                        value
-                                                                    )
-                                                                }
+                                                                name="subdomain"
+                                                                render={({
+                                                                    field
+                                                                }) => (
+                                                                    <FormControl>
+                                                                        <Input
+                                                                            {...field}
+                                                                            className="text-right"
+                                                                            placeholder="Enter subdomain"
+                                                                        />
+                                                                    </FormControl>
+                                                                )}
                                                             />
-                                                        </FormControl>
-                                                    ) : (
-                                                        <FormControl>
-                                                            <Input
-                                                                value={
-                                                                    domainSuffix
+                                                        </div>
+                                                        <div className="max-w-1/2">
+                                                            <FormField
+                                                                control={
+                                                                    form.control
                                                                 }
-                                                                readOnly
-                                                                disabled
+                                                                name="domainId"
+                                                                render={({
+                                                                    field
+                                                                }) => (
+                                                                    <FormItem>
+                                                                        <Select
+                                                                            onValueChange={
+                                                                                field.onChange
+                                                                            }
+                                                                            value={
+                                                                                field.value
+                                                                            }
+                                                                            defaultValue={
+                                                                                field.value
+                                                                            }
+                                                                        >
+                                                                            <FormControl>
+                                                                                <SelectTrigger>
+                                                                                    <SelectValue />
+                                                                                </SelectTrigger>
+                                                                            </FormControl>
+                                                                            <SelectContent>
+                                                                                {baseDomains.map(
+                                                                                    (
+                                                                                        option
+                                                                                    ) => (
+                                                                                        <SelectItem
+                                                                                            key={
+                                                                                                option.domainId
+                                                                                            }
+                                                                                            value={
+                                                                                                option.domainId
+                                                                                            }
+                                                                                        >
+                                                                                            .
+                                                                                            {
+                                                                                                option.baseDomain
+                                                                                            }
+                                                                                        </SelectItem>
+                                                                                    )
+                                                                                )}
+                                                                            </SelectContent>
+                                                                        </Select>
+                                                                        <FormMessage />
+                                                                    </FormItem>
+                                                                )}
                                                             />
-                                                        </FormControl>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <FormField
+                                                    control={form.control}
+                                                    name="domainId"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <Select
+                                                                onValueChange={
+                                                                    field.onChange
+                                                                }
+                                                                defaultValue={
+                                                                    field.value
+                                                                }
+                                                                {...field}
+                                                            >
+                                                                <FormControl>
+                                                                    <SelectTrigger>
+                                                                        <SelectValue />
+                                                                    </SelectTrigger>
+                                                                </FormControl>
+                                                                <SelectContent>
+                                                                    {baseDomains.map(
+                                                                        (
+                                                                            option
+                                                                        ) => (
+                                                                            <SelectItem
+                                                                                key={
+                                                                                    option.domainId
+                                                                                }
+                                                                                value={
+                                                                                    option.domainId
+                                                                                }
+                                                                            >
+                                                                                {
+                                                                                    option.baseDomain
+                                                                                }
+                                                                            </SelectItem>
+                                                                        )
+                                                                    )}
+                                                                </SelectContent>
+                                                            </Select>
+                                                            <FormMessage />
+                                                        </FormItem>
                                                     )}
-                                                    <FormDescription>
-                                                        This is the fully
-                                                        qualified domain name
-                                                        that will be used to
-                                                        access the resource.
-                                                    </FormDescription>
-                                                    <FormMessage />
-                                                </FormItem>
+                                                />
                                             )}
-                                        />
+                                        </>
                                     )}
 
                                     {!form.watch("http") && (
@@ -436,11 +556,11 @@ export default function CreateResourceForm({
                                                                 </SelectItem>
                                                             </SelectContent>
                                                         </Select>
+                                                        <FormMessage />
                                                         <FormDescription>
                                                             The protocol to use
-                                                            for the resource
+                                                            for the resource.
                                                         </FormDescription>
-                                                        <FormMessage />
                                                     </FormItem>
                                                 )}
                                             />
@@ -455,7 +575,6 @@ export default function CreateResourceForm({
                                                         <FormControl>
                                                             <Input
                                                                 type="number"
-                                                                placeholder="Enter port number"
                                                                 value={
                                                                     field.value ??
                                                                     ""
@@ -474,13 +593,13 @@ export default function CreateResourceForm({
                                                                 }
                                                             />
                                                         </FormControl>
+                                                        <FormMessage />
                                                         <FormDescription>
                                                             The port number to
                                                             proxy requests to
                                                             (required for
-                                                            non-HTTP resources)
+                                                            non-HTTP resources).
                                                         </FormDescription>
-                                                        <FormMessage />
                                                     </FormItem>
                                                 )}
                                             />
@@ -520,7 +639,7 @@ export default function CreateResourceForm({
                                                     </PopoverTrigger>
                                                     <PopoverContent className="p-0">
                                                         <Command>
-                                                            <CommandInput placeholder="Search site..." />
+                                                            <CommandInput placeholder="Search site" />
                                                             <CommandList>
                                                                 <CommandEmpty>
                                                                     No site
@@ -563,11 +682,12 @@ export default function CreateResourceForm({
                                                         </Command>
                                                     </PopoverContent>
                                                 </Popover>
-                                                <FormDescription>
-                                                    This is the site that will
-                                                    be used in the dashboard.
-                                                </FormDescription>
                                                 <FormMessage />
+                                                <FormDescription>
+                                                    This site will provide
+                                                    connectivity to the
+                                                    resource.
+                                                </FormDescription>
                                             </FormItem>
                                         )}
                                     />

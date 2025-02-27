@@ -26,6 +26,7 @@ export async function traefikConfigProvider(
                 proxyPort: resources.proxyPort,
                 protocol: resources.protocol,
                 isBaseDomain: resources.isBaseDomain,
+                domainId: resources.domainId,
                 // Site fields
                 site: {
                     siteId: sites.siteId,
@@ -34,8 +35,7 @@ export async function traefikConfigProvider(
                 },
                 // Org fields
                 org: {
-                    orgId: orgs.orgId,
-                    domain: orgs.domain
+                    orgId: orgs.orgId
                 },
                 // Targets as a subquery
                 targets: sql<string>`json_group_array(json_object(
@@ -105,15 +105,22 @@ export async function traefikConfigProvider(
             const site = resource.site;
             const org = resource.org;
 
-            if (!org.domain) {
-                continue;
-            }
-
             const routerName = `${resource.resourceId}-router`;
             const serviceName = `${resource.resourceId}-service`;
             const fullDomain = `${resource.fullDomain}`;
 
             if (resource.http) {
+                if (!resource.domainId) {
+                    continue;
+                }
+
+                if (!resource.fullDomain) {
+                    logger.error(
+                        `Resource ${resource.resourceId} has no fullDomain`
+                    );
+                    continue;
+                }
+
                 // HTTP configuration remains the same
                 if (!resource.subdomain && !resource.isBaseDomain) {
                     continue;
@@ -136,9 +143,18 @@ export async function traefikConfigProvider(
                     wildCard = `*.${domainParts.slice(1).join(".")}`;
                 }
 
+                const configDomain = config.getDomain(resource.domainId);
+
+                if (!configDomain) {
+                    logger.error(
+                        `Failed to get domain from config for resource ${resource.resourceId}`
+                    );
+                    continue;
+                }
+
                 const tls = {
-                    certResolver: config.getRawConfig().traefik.cert_resolver,
-                    ...(config.getRawConfig().traefik.prefer_wildcard_cert
+                    certResolver: configDomain.cert_resolver,
+                    ...(configDomain.prefer_wildcard_cert
                         ? {
                               domains: [
                                   {

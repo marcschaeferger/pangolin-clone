@@ -263,7 +263,8 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
         }
 
         if (isAllowed) {
-            window.location.href = props.redirect;
+            // window.location.href = props.redirect;
+            router.refresh();
         }
     }
 
@@ -448,7 +449,6 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
                                                             </FormLabel>
                                                             <FormControl>
                                                                 <Input
-                                                                    placeholder="Enter password"
                                                                     type="password"
                                                                     {...field}
                                                                 />
@@ -517,7 +517,6 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
                                                                 </FormLabel>
                                                                 <FormControl>
                                                                     <Input
-                                                                        placeholder="Enter email"
                                                                         type="email"
                                                                         {...field}
                                                                     />
@@ -576,7 +575,6 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
                                                                 </FormLabel>
                                                                 <FormControl>
                                                                     <Input
-                                                                        placeholder="Enter OTP"
                                                                         type="password"
                                                                         {...field}
                                                                     />

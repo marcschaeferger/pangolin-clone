@@ -305,7 +305,7 @@ export default function CreateShareLinkForm({
                                                         </PopoverTrigger>
                                                         <PopoverContent className="p-0">
                                                             <Command>
-                                                                <CommandInput placeholder="Search resources..." />
+                                                                <CommandInput placeholder="Search resources" />
                                                                 <CommandList>
                                                                     <CommandEmpty>
                                                                         No
@@ -374,7 +374,6 @@ export default function CreateShareLinkForm({
                                                     </Label>
                                                     <FormControl>
                                                         <Input
-                                                            placeholder="Enter title"
                                                             {...field}
                                                         />
                                                     </FormControl>
@@ -437,7 +436,6 @@ export default function CreateShareLinkForm({
                                                                 <Input
                                                                     type="number"
                                                                     min={1}
-                                                                    placeholder="Enter duration"
                                                                     {...field}
                                                                 />
                                                             </FormControl>

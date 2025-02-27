@@ -2,27 +2,68 @@
 
 import * as React from "react";
 import { Input } from "@/components/ui/input";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select";
+
+interface DomainOption {
+    baseDomain: string;
+    domainId: string;
+}
 
 interface CustomDomainInputProps {
-    domainSuffix: string;
+    domainOptions: DomainOption[];
+    selectedDomainId?: string;
     placeholder?: string;
     value: string;
-    onChange?: (value: string) => void;
+    onChange?: (value: string, selectedDomainId: string) => void;
 }
 
 export default function CustomDomainInput({
-    domainSuffix,
-    placeholder = "Enter subdomain",
+    domainOptions,
+    selectedDomainId,
+    placeholder = "Subdomain",
     value: defaultValue,
     onChange
 }: CustomDomainInputProps) {
     const [value, setValue] = React.useState(defaultValue);
+    const [selectedDomain, setSelectedDomain] = React.useState<DomainOption>();
 
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    React.useEffect(() => {
+        if (domainOptions.length) {
+            if (selectedDomainId) {
+                const selectedDomainOption = domainOptions.find(
+                    (option) => option.domainId === selectedDomainId
+                );
+                setSelectedDomain(selectedDomainOption || domainOptions[0]);
+            } else {
+                setSelectedDomain(domainOptions[0]);
+            }
+        }
+    }, [domainOptions]);
+
+    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (!selectedDomain) {
+            return;
+        }
         const newValue = event.target.value;
         setValue(newValue);
         if (onChange) {
-            onChange(newValue);
+            onChange(newValue, selectedDomain.domainId);
+        }
+    };
+
+    const handleDomainChange = (domainId: string) => {
+        const newSelectedDomain =
+            domainOptions.find((option) => option.domainId === domainId) ||
+            domainOptions[0];
+        setSelectedDomain(newSelectedDomain);
+        if (onChange) {
+            onChange(value, newSelectedDomain.domainId);
         }
     };
 
@@ -33,12 +74,28 @@ export default function CustomDomainInput({
                     type="text"
                     placeholder={placeholder}
                     value={value}
-                    onChange={handleChange}
-                    className="rounded-r-none w-full"
+                    onChange={handleInputChange}
+                    className="w-1/2 mr-1 text-right"
                 />
-                <div className="max-w-1/2 flex items-center px-3 rounded-r-md border border-l-0 border-input bg-muted text-muted-foreground">
-                    <span className="text-sm truncate">.{domainSuffix}</span>
-                </div>
+                <Select
+                    onValueChange={handleDomainChange}
+                    value={selectedDomain?.domainId}
+                    defaultValue={selectedDomain?.domainId}
+                >
+                    <SelectTrigger className="w-1/2 pr-1">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {domainOptions.map((option) => (
+                            <SelectItem
+                                key={option.domainId}
+                                value={option.domainId}
+                            >
+                                .{option.baseDomain}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
         </div>
     );

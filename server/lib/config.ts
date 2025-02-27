@@ -34,15 +34,49 @@ const configSchema = z.object({
             .transform(getEnvOrYaml("APP_DASHBOARDURL"))
             .pipe(z.string().url())
             .transform((url) => url.toLowerCase()),
-        base_domain: hostnameSchema
-            .optional()
-            .transform(getEnvOrYaml("APP_BASEDOMAIN"))
-            .pipe(hostnameSchema)
-            .transform((url) => url.toLowerCase()),
         log_level: z.enum(["debug", "info", "warn", "error"]),
         save_logs: z.boolean(),
         log_failed_attempts: z.boolean().optional()
     }),
+    domains: z
+        .record(
+            z.string(),
+            z.object({
+                base_domain: hostnameSchema.transform((url) =>
+                    url.toLowerCase()
+                ),
+                cert_resolver: z.string().optional(),
+                prefer_wildcard_cert: z.boolean().optional()
+            })
+        )
+        .refine(
+            (domains) => {
+                const keys = Object.keys(domains);
+
+                if (keys.length === 0) {
+                    return false;
+                }
+
+                return true;
+            },
+            {
+                message: "At least one domain must be defined"
+            }
+        )
+        .refine(
+            (domains) => {
+                const envBaseDomain = process.env.APP_BASE_DOMAIN;
+
+                if (envBaseDomain) {
+                    return hostnameSchema.safeParse(envBaseDomain).success;
+                }
+
+                return true;
+            },
+            {
+                message: "APP_BASE_DOMAIN must be a valid hostname"
+            }
+        ),
     server: z.object({
         external_port: portSchema
             .optional()
@@ -88,8 +122,6 @@ const configSchema = z.object({
     traefik: z.object({
         http_entrypoint: z.string(),
         https_entrypoint: z.string().optional(),
-        cert_resolver: z.string().optional(),
-        prefer_wildcard_cert: z.boolean().optional(),
         additional_middlewares: z.array(z.string()).optional()
     }),
     gerbil: z.object({
@@ -167,8 +199,6 @@ export class Config {
             this.createTraefikConfig();
         }
     }
-
-    public loadEnvironment() {}
 
     public loadConfig() {
         const loadConfig = (configPath: string) => {
@@ -276,6 +306,17 @@ export class Config {
             : "false";
         process.env.DASHBOARD_URL = parsedConfig.data.app.dashboard_url;
 
+        if (process.env.APP_BASE_DOMAIN) {
+            console.log(
+                `DEPRECATED! APP_BASE_DOMAIN is deprecated and will be removed in a future release. Use the domains section in the configuration file instead. See https://docs.fossorial.io/Pangolin/Configuration/config for more information.`
+            );
+
+            parsedConfig.data.domains.domain1 = {
+                base_domain: process.env.APP_BASE_DOMAIN,
+                cert_resolver: "letsencrypt"
+            };
+        }
+
         this.rawConfig = parsedConfig.data;
     }
 
@@ -283,14 +324,14 @@ export class Config {
         return this.rawConfig;
     }
 
-    public getBaseDomain(): string {
-        return this.rawConfig.app.base_domain;
-    }
-
     public getNoReplyEmail(): string | undefined {
         return (
             this.rawConfig.email?.no_reply || this.rawConfig.email?.smtp_user
         );
+    }
+
+    public getDomain(domainId: string) {
+        return this.rawConfig.domains[domainId];
     }
 
     private createTraefikConfig() {

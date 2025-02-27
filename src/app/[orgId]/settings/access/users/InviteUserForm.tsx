@@ -195,7 +195,6 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
                                                     <FormLabel>Email</FormLabel>
                                                     <FormControl>
                                                         <Input
-                                                            placeholder="Enter an email"
                                                             {...field}
                                                         />
                                                     </FormControl>
