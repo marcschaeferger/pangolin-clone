@@ -73,7 +73,6 @@ export default async function UserLayoutProps(props: UserLayoutProps) {
 
                 <SidebarSettings
                     sidebarNavItems={sidebarNavItems}
-                    limitWidth={true}
                 >
                     {children}
                 </SidebarSettings>
