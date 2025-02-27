@@ -36,7 +36,7 @@ jobs:
               run: |
                   TAG=${{ env.TAG }}
                   sed -i "s/export const APP_VERSION = \".*\";/export const APP_VERSION = \"$TAG\";/" server/lib/consts.ts
-                  cat server/lib/
+                  cat server/lib/consts.ts
 
             - name: Pull latest Gerbil version
               id: get-gerbil-tag
