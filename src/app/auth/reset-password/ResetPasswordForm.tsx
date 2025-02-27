@@ -38,7 +38,7 @@ import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "../../../components/ui/alert";
 import { toast } from "@app/hooks/useToast";
 import { useRouter } from "next/navigation";
-import { formatAxiosError } from "@app/lib/api";;
+import { formatAxiosError } from "@app/lib/api";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
@@ -223,16 +223,13 @@ export default function ResetPasswordForm({
                                             <FormItem>
                                                 <FormLabel>Email</FormLabel>
                                                 <FormControl>
-                                                    <Input
-                                                        placeholder="Enter your email"
-                                                        {...field}
-                                                    />
+                                                    <Input {...field} />
                                                 </FormControl>
+                                                <FormMessage />
                                                 <FormDescription>
                                                     We'll send a password reset
                                                     code to this email address.
                                                 </FormDescription>
-                                                <FormMessage />
                                             </FormItem>
                                         )}
                                     />
@@ -255,7 +252,6 @@ export default function ResetPasswordForm({
                                                 <FormLabel>Email</FormLabel>
                                                 <FormControl>
                                                     <Input
-                                                        placeholder="Email"
                                                         {...field}
                                                         disabled
                                                     />
@@ -276,12 +272,15 @@ export default function ResetPasswordForm({
                                                     </FormLabel>
                                                     <FormControl>
                                                         <Input
-                                                            placeholder="Enter reset code sent to your email"
                                                             type="password"
                                                             {...field}
                                                         />
                                                     </FormControl>
                                                     <FormMessage />
+                                                    <FormDescription>
+                                                        Check your email for the
+                                                        reset code.
+                                                    </FormDescription>
                                                 </FormItem>
                                             )}
                                         />
@@ -298,7 +297,6 @@ export default function ResetPasswordForm({
                                                 <FormControl>
                                                     <Input
                                                         type="password"
-                                                        placeholder="Password"
                                                         {...field}
                                                     />
                                                 </FormControl>
@@ -317,7 +315,6 @@ export default function ResetPasswordForm({
                                                 <FormControl>
                                                     <Input
                                                         type="password"
-                                                        placeholder="Confirm Password"
                                                         {...field}
                                                     />
                                                 </FormControl>
@@ -349,7 +346,9 @@ export default function ResetPasswordForm({
                                                         <InputOTP
                                                             maxLength={6}
                                                             {...field}
-                                                            pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
+                                                            pattern={
+                                                                REGEXP_ONLY_DIGITS_AND_CHARS
+                                                            }
                                                         >
                                                             <InputOTPGroup>
                                                                 <InputOTPSlot

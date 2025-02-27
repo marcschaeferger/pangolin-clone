@@ -449,7 +449,6 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
                                                             </FormLabel>
                                                             <FormControl>
                                                                 <Input
-                                                                    placeholder="Enter password"
                                                                     type="password"
                                                                     {...field}
                                                                 />
@@ -518,7 +517,6 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
                                                                 </FormLabel>
                                                                 <FormControl>
                                                                     <Input
-                                                                        placeholder="Enter email"
                                                                         type="email"
                                                                         {...field}
                                                                     />
@@ -577,7 +575,6 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
                                                                 </FormLabel>
                                                                 <FormControl>
                                                                     <Input
-                                                                        placeholder="Enter OTP"
                                                                         type="password"
                                                                         {...field}
                                                                     />

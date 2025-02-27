@@ -145,7 +145,6 @@ export default function VerifyEmailForm({
                                         <FormLabel>Email</FormLabel>
                                         <FormControl>
                                             <Input
-                                                placeholder="Email"
                                                 {...field}
                                                 disabled
                                             />
@@ -196,12 +195,12 @@ export default function VerifyEmailForm({
                                                 </InputOTP>
                                             </div>
                                         </FormControl>
+                                        <FormMessage />
                                         <FormDescription>
                                             We sent a verification code to your
                                             email address. Please enter the code
                                             to verify your email address.
                                         </FormDescription>
-                                        <FormMessage />
                                     </FormItem>
                                 )}
                             />

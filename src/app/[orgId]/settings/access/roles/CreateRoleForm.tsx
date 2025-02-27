@@ -136,7 +136,6 @@ export default function CreateRoleForm({
                                             <FormLabel>Role Name</FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    placeholder="Enter name for the role"
                                                     {...field}
                                                 />
                                             </FormControl>
@@ -152,7 +151,6 @@ export default function CreateRoleForm({
                                             <FormLabel>Description</FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    placeholder="Describe the role"
                                                     {...field}
                                                 />
                                             </FormControl>

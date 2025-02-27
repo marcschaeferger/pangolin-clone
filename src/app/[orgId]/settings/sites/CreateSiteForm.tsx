@@ -272,17 +272,13 @@ PersistentKeepalive = 5`
                             <FormItem>
                                 <FormLabel>Name</FormLabel>
                                 <FormControl>
-                                    <Input
-                                        autoComplete="off"
-                                        placeholder="Site name"
-                                        {...field}
-                                    />
+                                    <Input autoComplete="off" {...field} />
                                 </FormControl>
-                                <FormDescription>
-                                    This is the name that will be displayed for
-                                    this site.
-                                </FormDescription>
                                 <FormMessage />
+                                <FormDescription>
+                                    This is the the display name for the
+                                    site.
+                                </FormDescription>
                             </FormItem>
                         )}
                     />
@@ -319,10 +315,10 @@ PersistentKeepalive = 5`
                                         </SelectContent>
                                     </Select>
                                 </FormControl>
+                                <FormMessage />
                                 <FormDescription>
                                     This is how you will expose connections.
                                 </FormDescription>
-                                <FormMessage />
                             </FormItem>
                         )}
                     />
@@ -354,7 +350,7 @@ PersistentKeepalive = 5`
                         ) : form.watch("method") === "wireguard" &&
                           isLoading ? (
                             <p>Loading WireGuard configuration...</p>
-                        ) : form.watch("method") === "newt" ? (
+                        ) : form.watch("method") === "newt" && siteDefaults ? (
                             <>
                                 <div className="mb-2">
                                     <Collapsible
@@ -376,8 +372,8 @@ PersistentKeepalive = 5`
                                                     className="p-0 flex items-center justify-between w-full"
                                                 >
                                                     <h4 className="text-sm font-semibold">
-                                                        Expand for Docker Deployment
-                                                        Details
+                                                        Expand for Docker
+                                                        Deployment Details
                                                     </h4>
                                                     <div>
                                                         <ChevronsUpDown className="h-4 w-4" />

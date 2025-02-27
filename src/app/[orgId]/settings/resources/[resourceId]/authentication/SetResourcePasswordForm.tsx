@@ -136,17 +136,16 @@ export default function SetResourcePasswordForm({
                                                 <Input
                                                     autoComplete="off"
                                                     type="password"
-                                                    placeholder="Your secure password"
                                                     {...field}
                                                 />
                                             </FormControl>
+                                            <FormMessage />
                                             <FormDescription>
                                                 Users will be able to access
                                                 this resource by entering this
                                                 password. It must be at least 4
                                                 characters long.
                                             </FormDescription>
-                                            <FormMessage />
                                         </FormItem>
                                     )}
                                 />

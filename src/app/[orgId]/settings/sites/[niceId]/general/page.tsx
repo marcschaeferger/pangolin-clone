@@ -33,7 +33,7 @@ import { useEnvContext } from "@app/hooks/useEnvContext";
 import { useState } from "react";
 
 const GeneralFormSchema = z.object({
-    name: z.string()
+    name: z.string().nonempty("Name is required")
 });
 
 type GeneralFormValues = z.infer<typeof GeneralFormSchema>;
@@ -114,11 +114,11 @@ export default function GeneralPage() {
                                             <FormControl>
                                                 <Input {...field} />
                                             </FormControl>
+                                            <FormMessage />
                                             <FormDescription>
                                                 This is the display name of the
-                                                site
+                                                site.
                                             </FormDescription>
-                                            <FormMessage />
                                         </FormItem>
                                     )}
                                 />

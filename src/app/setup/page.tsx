@@ -200,7 +200,6 @@ export default function StepperForm() {
                                                 </FormLabel>
                                                 <FormControl>
                                                     <Input
-                                                        placeholder="Name your new organization"
                                                         type="text"
                                                         {...field}
                                                         onChange={(e) => {
@@ -242,7 +241,6 @@ export default function StepperForm() {
                                                 <FormControl>
                                                     <Input
                                                         type="text"
-                                                        placeholder="Enter unique organization ID"
                                                         {...field}
                                                     />
                                                 </FormControl>

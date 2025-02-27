@@ -167,13 +167,13 @@ export default function SetResourcePincodeForm({
                                                     </InputOTP>
                                                 </div>
                                             </FormControl>
+                                            <FormMessage />
                                             <FormDescription>
                                                 Users will be able to access
                                                 this resource by entering this
                                                 PIN code. It must be at least 6
                                                 digits long.
                                             </FormDescription>
-                                            <FormMessage />
                                         </FormItem>
                                     )}
                                 />

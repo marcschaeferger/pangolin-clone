@@ -289,28 +289,6 @@ export default function CreateResourceForm({
                                     className="space-y-4"
                                     id="create-resource-form"
                                 >
-                                    <FormField
-                                        control={form.control}
-                                        name="name"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Name</FormLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        placeholder="Resource name"
-                                                        {...field}
-                                                    />
-                                                </FormControl>
-                                                <FormDescription>
-                                                    This is the name that will
-                                                    be displayed for this
-                                                    resource.
-                                                </FormDescription>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-
                                     {!env.flags.allowRawResources || (
                                         <FormField
                                             control={form.control}
@@ -342,6 +320,24 @@ export default function CreateResourceForm({
                                             )}
                                         />
                                     )}
+
+                                    <FormField
+                                        control={form.control}
+                                        name="name"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Name</FormLabel>
+                                                <FormControl>
+                                                    <Input {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                                <FormDescription>
+                                                    This is display name for the
+                                                    resource.
+                                                </FormDescription>
+                                            </FormItem>
+                                        )}
+                                    />
 
                                     {form.watch("http") &&
                                         env.flags.allowBaseDomainResources && (
@@ -392,7 +388,7 @@ export default function CreateResourceForm({
                                                         </FormLabel>
                                                     )}
                                                     <div className="flex">
-                                                        <div className="w-1/2 mr-1">
+                                                        <div className="w-full mr-1">
                                                             <FormField
                                                                 control={
                                                                     form.control
@@ -405,13 +401,13 @@ export default function CreateResourceForm({
                                                                         <Input
                                                                             {...field}
                                                                             className="text-right"
-                                                                            placeholder="Subdomain"
+                                                                            placeholder="Enter subdomain"
                                                                         />
                                                                     </FormControl>
                                                                 )}
                                                             />
                                                         </div>
-                                                        <div className="w-1/2">
+                                                        <div className="max-w-1/2">
                                                             <FormField
                                                                 control={
                                                                     form.control
@@ -560,11 +556,11 @@ export default function CreateResourceForm({
                                                                 </SelectItem>
                                                             </SelectContent>
                                                         </Select>
+                                                        <FormMessage />
                                                         <FormDescription>
                                                             The protocol to use
-                                                            for the resource
+                                                            for the resource.
                                                         </FormDescription>
-                                                        <FormMessage />
                                                     </FormItem>
                                                 )}
                                             />
@@ -579,7 +575,6 @@ export default function CreateResourceForm({
                                                         <FormControl>
                                                             <Input
                                                                 type="number"
-                                                                placeholder="Enter port number"
                                                                 value={
                                                                     field.value ??
                                                                     ""
@@ -598,13 +593,13 @@ export default function CreateResourceForm({
                                                                 }
                                                             />
                                                         </FormControl>
+                                                        <FormMessage />
                                                         <FormDescription>
                                                             The port number to
                                                             proxy requests to
                                                             (required for
-                                                            non-HTTP resources)
+                                                            non-HTTP resources).
                                                         </FormDescription>
-                                                        <FormMessage />
                                                     </FormItem>
                                                 )}
                                             />
@@ -644,7 +639,7 @@ export default function CreateResourceForm({
                                                     </PopoverTrigger>
                                                     <PopoverContent className="p-0">
                                                         <Command>
-                                                            <CommandInput placeholder="Search site..." />
+                                                            <CommandInput placeholder="Search site" />
                                                             <CommandList>
                                                                 <CommandEmpty>
                                                                     No site
@@ -687,11 +682,12 @@ export default function CreateResourceForm({
                                                         </Command>
                                                     </PopoverContent>
                                                 </Popover>
-                                                <FormDescription>
-                                                    This is the site that will
-                                                    be used in the dashboard.
-                                                </FormDescription>
                                                 <FormMessage />
+                                                <FormDescription>
+                                                    This site will provide
+                                                    connectivity to the
+                                                    resource.
+                                                </FormDescription>
                                             </FormItem>
                                         )}
                                     />

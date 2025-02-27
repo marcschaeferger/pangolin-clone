@@ -135,7 +135,6 @@ export default function Disable2FaForm({ open, setOpen }: Disable2FaProps) {
                                                 <FormControl>
                                                     <Input
                                                         type="password"
-                                                        placeholder="Enter your password"
                                                         {...field}
                                                     />
                                                 </FormControl>

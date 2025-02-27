@@ -291,11 +291,11 @@ export default function GeneralForm() {
                                             <FormControl>
                                                 <Input {...field} />
                                             </FormControl>
+                                            <FormMessage />
                                             <FormDescription>
                                                 This is the display name of the
                                                 resource.
                                             </FormDescription>
-                                            <FormMessage />
                                         </FormItem>
                                     )}
                                 />
@@ -348,7 +348,7 @@ export default function GeneralForm() {
                                                     </FormLabel>
                                                 )}
                                                 <div className="flex">
-                                                    <div className="w-1/2 mr-1">
+                                                    <div className="w-full mr-1">
                                                         <FormField
                                                             control={
                                                                 form.control
@@ -357,17 +357,20 @@ export default function GeneralForm() {
                                                             render={({
                                                                 field
                                                             }) => (
-                                                                <FormControl>
-                                                                    <Input
-                                                                        {...field}
-                                                                        className="text-right"
-                                                                        placeholder="Subdomain"
-                                                                    />
-                                                                </FormControl>
+                                                                <FormItem>
+                                                                    <FormControl>
+                                                                        <Input
+                                                                            {...field}
+                                                                            className="text-right"
+                                                                            placeholder="Enter subdomain"
+                                                                        />
+                                                                    </FormControl>
+                                                                    <FormMessage />
+                                                                </FormItem>
                                                             )}
                                                         />
                                                     </div>
-                                                    <div className="w-1/2">
+                                                    <div className="max-w-1/2">
                                                         <FormField
                                                             control={
                                                                 form.control
@@ -484,7 +487,6 @@ export default function GeneralForm() {
                                                 <FormControl>
                                                     <Input
                                                         type="number"
-                                                        placeholder="Enter port number"
                                                         value={
                                                             field.value ?? ""
                                                         }
@@ -501,12 +503,12 @@ export default function GeneralForm() {
                                                         }
                                                     />
                                                 </FormControl>
+                                                <FormMessage />
                                                 <FormDescription>
                                                     This is the port that will
                                                     be used to access the
                                                     resource.
                                                 </FormDescription>
-                                                <FormMessage />
                                             </FormItem>
                                         )}
                                     />
@@ -583,7 +585,7 @@ export default function GeneralForm() {
                                                 <PopoverContent className="w-full p-0">
                                                     <Command>
                                                         <CommandInput
-                                                            placeholder="Search sites..."
+                                                            placeholder="Search sites"
                                                             className="h-9"
                                                         />
                                                         <CommandEmpty>
@@ -626,10 +628,6 @@ export default function GeneralForm() {
                                                     </Command>
                                                 </PopoverContent>
                                             </Popover>
-                                            <FormDescription>
-                                                Select the new site to transfer
-                                                this resource to.
-                                            </FormDescription>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -645,7 +643,6 @@ export default function GeneralForm() {
                         loading={transferLoading}
                         disabled={transferLoading}
                         form="transfer-form"
-                        variant="destructive"
                     >
                         Transfer Resource
                     </Button>

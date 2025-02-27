@@ -147,7 +147,6 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
                                     <FormLabel>Email</FormLabel>
                                     <FormControl>
                                         <Input
-                                            placeholder="Enter your email"
                                             {...field}
                                         />
                                     </FormControl>
@@ -166,7 +165,6 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
                                         <FormControl>
                                             <Input
                                                 type="password"
-                                                placeholder="Enter your password"
                                                 {...field}
                                             />
                                         </FormControl>

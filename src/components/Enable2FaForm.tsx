@@ -200,7 +200,6 @@ export default function Enable2FaForm({ open, setOpen }: Enable2FaProps) {
                                                 <FormControl>
                                                     <Input
                                                         type="password"
-                                                        placeholder="Enter your password"
                                                         {...field}
                                                     />
                                                 </FormControl>
@@ -246,7 +245,6 @@ export default function Enable2FaForm({ open, setOpen }: Enable2FaProps) {
                                                     <FormControl>
                                                         <Input
                                                             type="code"
-                                                            placeholder="Enter the 6-digit code from your authenticator app"
                                                             {...field}
                                                         />
                                                     </FormControl>

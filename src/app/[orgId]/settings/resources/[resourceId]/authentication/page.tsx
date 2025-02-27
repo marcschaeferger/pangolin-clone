@@ -15,7 +15,7 @@ import {
 } from "@server/routers/resource";
 import { Button } from "@app/components/ui/button";
 import { set, z } from "zod";
-import { Tag } from "emblor";
+// import { Tag } from "emblor";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -27,7 +27,7 @@ import {
     FormLabel,
     FormMessage
 } from "@app/components/ui/form";
-import { TagInput } from "emblor";
+// import { TagInput } from "emblor";
 // import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { ListUsersResponse } from "@server/routers/user";
 import { Switch } from "@app/components/ui/switch";
@@ -49,6 +49,7 @@ import {
 } from "@app/components/Settings";
 import { SwitchInput } from "@app/components/SwitchInput";
 import { InfoPopup } from "@app/components/ui/info-popup";
+import { Tag, TagInput } from "@app/components/tags/tag-input";
 
 const UsersRolesFormSchema = z.object({
     roles: z.array(
@@ -429,7 +430,6 @@ export default function ResourceAuthenticationPage() {
                                                 <FormItem className="flex flex-col items-start">
                                                     <FormLabel>Roles</FormLabel>
                                                     <FormControl>
-                                                        {/* @ts-ignore */}
                                                         <TagInput
                                                             {...field}
                                                             activeTagIndex={
@@ -438,7 +438,7 @@ export default function ResourceAuthenticationPage() {
                                                             setActiveTagIndex={
                                                                 setActiveRolesTagIndex
                                                             }
-                                                            placeholder="Enter a role"
+                                                            placeholder="Select a role"
                                                             tags={
                                                                 usersRolesForm.getValues()
                                                                     .roles
@@ -477,13 +477,11 @@ export default function ResourceAuthenticationPage() {
                                                             }}
                                                         />
                                                     </FormControl>
+                                                    <FormMessage />
                                                     <FormDescription>
-                                                        These roles will be able
-                                                        to access this resource.
                                                         Admins can always access
                                                         this resource.
                                                     </FormDescription>
-                                                    <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
@@ -494,7 +492,6 @@ export default function ResourceAuthenticationPage() {
                                                 <FormItem className="flex flex-col items-start">
                                                     <FormLabel>Users</FormLabel>
                                                     <FormControl>
-                                                        {/* @ts-ignore */}
                                                         <TagInput
                                                             {...field}
                                                             activeTagIndex={
@@ -503,7 +500,7 @@ export default function ResourceAuthenticationPage() {
                                                             setActiveTagIndex={
                                                                 setActiveUsersTagIndex
                                                             }
-                                                            placeholder="Enter a user"
+                                                            placeholder="Select a user"
                                                             tags={
                                                                 usersRolesForm.getValues()
                                                                     .users
@@ -542,15 +539,6 @@ export default function ResourceAuthenticationPage() {
                                                             }}
                                                         />
                                                     </FormControl>
-                                                    <FormDescription>
-                                                        Users added here will be
-                                                        able to access this
-                                                        resource. A user will
-                                                        always have access to a
-                                                        resource if they have a
-                                                        role that has access to
-                                                        it.
-                                                    </FormDescription>
                                                     <FormMessage />
                                                 </FormItem>
                                             )}
@@ -732,7 +720,9 @@ export default function ResourceAuthenticationPage() {
                                                         />
                                                     </FormControl>
                                                     <FormDescription>
-                                                        Press enter to add an email after typing it in the input field.
+                                                        Press enter to add an
+                                                        email after typing it in
+                                                        the input field.
                                                     </FormDescription>
                                                 </FormItem>
                                             )}

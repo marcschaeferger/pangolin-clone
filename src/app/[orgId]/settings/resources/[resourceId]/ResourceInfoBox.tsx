@@ -42,7 +42,7 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
                                             <ShieldCheck className="w-4 h-4 mt-0.5" />
                                             <span>
                                                 This resource is protected with
-                                                at least one auth method.
+                                                at least one authentication method.
                                             </span>
                                         </div>
                                     ) : (

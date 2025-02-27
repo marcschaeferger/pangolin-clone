@@ -483,8 +483,7 @@ export default function ReverseProxyTargets(props: {
                             SSL Configuration
                         </SettingsSectionTitle>
                         <SettingsSectionDescription>
-                            Setup SSL to secure your connections with
-                            LetsEncrypt certificates
+                            Setup SSL to secure your connections with Let's Encrypt certificates
                         </SettingsSectionDescription>
                     </SettingsSectionHeader>
                     <SettingsSectionBody>
