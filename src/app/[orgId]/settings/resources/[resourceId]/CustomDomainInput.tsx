@@ -14,7 +14,7 @@ export default function CustomDomainInput({
     domainSuffix,
     placeholder = "Enter subdomain",
     value: defaultValue,
-    onChange,
+    onChange
 }: CustomDomainInputProps) {
     const [value, setValue] = React.useState(defaultValue);
 
@@ -34,10 +34,10 @@ export default function CustomDomainInput({
                     placeholder={placeholder}
                     value={value}
                     onChange={handleChange}
-                    className="rounded-r-none flex-grow"
+                    className="rounded-r-none w-full"
                 />
-                <div className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-input bg-muted text-muted-foreground">
-                    <span className="text-sm">.{domainSuffix}</span>
+                <div className="max-w-1/2 flex items-center px-3 rounded-r-md border border-l-0 border-input bg-muted text-muted-foreground">
+                    <span className="text-sm truncate">.{domainSuffix}</span>
                 </div>
             </div>
         </div>

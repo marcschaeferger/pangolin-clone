@@ -34,7 +34,7 @@ import { AxiosResponse } from "axios";
 import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { GetResourceAuthInfoResponse } from "@server/routers/resource";
-import { useToast } from "@app/hooks/useToast";
+import { toast } from "@app/hooks/useToast";
 import {
     SettingsContainer,
     SettingsSection,
@@ -49,9 +49,8 @@ import { useOrgContext } from "@app/hooks/useOrgContext";
 import CustomDomainInput from "../CustomDomainInput";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
-import { subdomainSchema } from "@server/schemas/subdomainSchema";
+import { subdomainSchema } from "@server/lib/schemas";
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
-import { pullEnv } from "@app/lib/pullEnv";
 import { RadioGroup, RadioGroupItem } from "@app/components/ui/radio-group";
 import { Label } from "@app/components/ui/label";
 
@@ -102,7 +101,6 @@ type TransferFormValues = z.infer<typeof TransferFormSchema>;
 
 export default function GeneralForm() {
     const params = useParams();
-    const { toast } = useToast();
     const { resource, updateResource } = useResourceContext();
     const { org } = useOrgContext();
     const router = useRouter();

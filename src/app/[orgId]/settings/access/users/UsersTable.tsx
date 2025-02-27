@@ -14,7 +14,7 @@ import { useState } from "react";
 import InviteUserForm from "./InviteUserForm";
 import ConfirmDeleteDialog from "@app/components/ConfirmDeleteDialog";
 import { useOrgContext } from "@app/hooks/useOrgContext";
-import { useToast } from "@app/hooks/useToast";
+import { toast } from "@app/hooks/useToast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatAxiosError } from "@app/lib/api";
@@ -47,7 +47,6 @@ export default function UsersTable({ users: u }: UsersTableProps) {
 
     const { user, updateUser } = useUserContext();
     const { org } = useOrgContext();
-    const { toast } = useToast();
 
     const columns: ColumnDef<UserRow>[] = [
         {

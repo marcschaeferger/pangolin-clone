@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ListRolesResponse } from "@server/routers/role";
-import { useToast } from "@app/hooks/useToast";
+import { toast } from "@app/hooks/useToast";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { useResourceContext } from "@app/hooks/useResourceContext";
 import { AxiosResponse } from "axios";
@@ -49,6 +49,7 @@ import {
 } from "@app/components/Settings";
 import { SwitchInput } from "@app/components/SwitchInput";
 import { InfoPopup } from "@app/components/ui/info-popup";
+import { useRouter } from "next/navigation";
 
 const UsersRolesFormSchema = z.object({
     roles: z.array(
@@ -75,7 +76,6 @@ const whitelistSchema = z.object({
 });
 
 export default function ResourceAuthenticationPage() {
-    const { toast } = useToast();
     const { org } = useOrgContext();
     const { resource, updateResource, authInfo, updateAuthInfo } =
         useResourceContext();
@@ -83,6 +83,7 @@ export default function ResourceAuthenticationPage() {
     const { env } = useEnvContext();
 
     const api = createApiClient({ env });
+    const router = useRouter();
 
     const [pageLoading, setPageLoading] = useState(true);
 
@@ -237,6 +238,7 @@ export default function ResourceAuthenticationPage() {
                 title: "Saved successfully",
                 description: "Whitelist settings have been saved"
             });
+            router.refresh();
         } catch (e) {
             console.error(e);
             toast({
@@ -284,6 +286,7 @@ export default function ResourceAuthenticationPage() {
                 title: "Saved successfully",
                 description: "Authentication settings have been saved"
             });
+            router.refresh();
         } catch (e) {
             console.error(e);
             toast({
@@ -315,6 +318,7 @@ export default function ResourceAuthenticationPage() {
                 updateAuthInfo({
                     password: false
                 });
+                router.refresh();
             })
             .catch((e) => {
                 toast({
@@ -345,6 +349,7 @@ export default function ResourceAuthenticationPage() {
                 updateAuthInfo({
                     pincode: false
                 });
+                router.refresh();
             })
             .catch((e) => {
                 toast({

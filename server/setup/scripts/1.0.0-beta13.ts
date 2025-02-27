@@ -1,14 +1,18 @@
 import db from "@server/db";
 import { sql } from "drizzle-orm";
 
+const version = "1.0.0-beta.13";
+
 export default async function migration() {
-    console.log("Running setup script 1.0.0-beta.13...");
+    console.log(`Running setup script ${version}...`);
 
     try {
         db.transaction((trx) => {
             trx.run(sql`CREATE TABLE resourceRules (
                 ruleId integer PRIMARY KEY AUTOINCREMENT NOT NULL,
                 resourceId integer NOT NULL,
+                priority integer NOT NULL,
+                enabled integer DEFAULT true NOT NULL,
                 action text NOT NULL,
                 match text NOT NULL,
                 value text NOT NULL,
@@ -25,5 +29,5 @@ export default async function migration() {
         throw e;
     }
 
-    console.log("Done.");
+    console.log(`${version} migration complete`);
 }

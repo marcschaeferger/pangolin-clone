@@ -36,7 +36,7 @@ import {
 } from "@server/routers/auth";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "../../../components/ui/alert";
-import { useToast } from "@app/hooks/useToast";
+import { toast } from "@app/hooks/useToast";
 import { useRouter } from "next/navigation";
 import { formatAxiosError } from "@app/lib/api";;
 import { createApiClient } from "@app/lib/api";
@@ -95,8 +95,6 @@ export default function ResetPasswordForm({
     }
 
     const [state, setState] = useState<"request" | "reset" | "mfa">(getState());
-
-    const { toast } = useToast();
 
     const api = createApiClient(useEnvContext());
 

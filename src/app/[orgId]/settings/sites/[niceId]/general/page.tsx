@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useSiteContext } from "@app/hooks/useSiteContext";
 import { useForm } from "react-hook-form";
-import { useToast } from "@app/hooks/useToast";
+import { toast } from "@app/hooks/useToast";
 import { useRouter } from "next/navigation";
 import {
     SettingsContainer,
@@ -40,7 +40,6 @@ type GeneralFormValues = z.infer<typeof GeneralFormSchema>;
 
 export default function GeneralPage() {
     const { site, updateSite } = useSiteContext();
-    const { toast } = useToast();
 
     const api = createApiClient(useEnvContext());
 

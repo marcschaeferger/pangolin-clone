@@ -22,7 +22,7 @@ import { AxiosResponse } from "axios";
 import { useState } from "react";
 import CreateSiteForm from "./CreateSiteForm";
 import ConfirmDeleteDialog from "@app/components/ConfirmDeleteDialog";
-import { useToast } from "@app/hooks/useToast";
+import { toast } from "@app/hooks/useToast";
 import { formatAxiosError } from "@app/lib/api";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
@@ -46,8 +46,6 @@ type SitesTableProps = {
 
 export default function SitesTable({ sites, orgId }: SitesTableProps) {
     const router = useRouter();
-
-    const { toast } = useToast();
 
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

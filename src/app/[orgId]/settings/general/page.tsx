@@ -4,7 +4,7 @@ import ConfirmDeleteDialog from "@app/components/ConfirmDeleteDialog";
 import { Button } from "@app/components/ui/button";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { userOrgUserContext } from "@app/hooks/useOrgUserContext";
-import { useToast } from "@app/hooks/useToast";
+import { toast } from "@app/hooks/useToast";
 import { useState } from "react";
 import {
     Form,
@@ -56,7 +56,6 @@ export default function GeneralPage() {
     const { orgUser } = userOrgUserContext();
     const router = useRouter();
     const { org } = useOrgContext();
-    const { toast } = useToast();
     const api = createApiClient(useEnvContext());
 
     const [loadingDelete, setLoadingDelete] = useState(false);

@@ -18,7 +18,7 @@ import {
     SelectTrigger,
     SelectValue
 } from "@app/components/ui/select";
-import { useToast } from "@app/hooks/useToast";
+import { toast } from "@app/hooks/useToast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { InviteUserBody, InviteUserResponse } from "@server/routers/user";
 import { AxiosResponse } from "axios";
@@ -94,7 +94,6 @@ export default function CreateShareLinkForm({
     setOpen,
     onCreated
 }: FormProps) {
-    const { toast } = useToast();
     const { org } = useOrgContext();
 
     const { env } = useEnvContext();

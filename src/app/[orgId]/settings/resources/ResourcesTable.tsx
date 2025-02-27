@@ -26,7 +26,7 @@ import { useState } from "react";
 import ConfirmDeleteDialog from "@app/components/ConfirmDeleteDialog";
 import { set } from "zod";
 import { formatAxiosError } from "@app/lib/api";
-import { useToast } from "@app/hooks/useToast";
+import { toast } from "@app/hooks/useToast";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import CopyToClipboard from "@app/components/CopyToClipboard";
@@ -51,8 +51,6 @@ type ResourcesTableProps = {
 
 export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
     const router = useRouter();
-
-    const { toast } = useToast();
 
     const api = createApiClient(useEnvContext());
 

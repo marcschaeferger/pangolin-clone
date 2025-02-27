@@ -40,12 +40,14 @@ function queryResourceRules(resourceId: number) {
             resourceId: resourceRules.resourceId,
             action: resourceRules.action,
             match: resourceRules.match,
-            value: resourceRules.value
+            value: resourceRules.value,
+            priority: resourceRules.priority,
+            enabled: resourceRules.enabled
         })
         .from(resourceRules)
         .leftJoin(resources, eq(resourceRules.resourceId, resources.resourceId))
         .where(eq(resourceRules.resourceId, resourceId));
-    
+
     return baseQuery;
 }
 
@@ -71,7 +73,9 @@ export async function listResourceRules(
         }
         const { limit, offset } = parsedQuery.data;
 
-        const parsedParams = listResourceRulesParamsSchema.safeParse(req.params);
+        const parsedParams = listResourceRulesParamsSchema.safeParse(
+            req.params
+        );
         if (!parsedParams.success) {
             return next(
                 createHttpError(
@@ -99,15 +103,18 @@ export async function listResourceRules(
         }
 
         const baseQuery = queryResourceRules(resourceId);
-        
+
         let countQuery = db
             .select({ count: sql<number>`cast(count(*) as integer)` })
             .from(resourceRules)
             .where(eq(resourceRules.resourceId, resourceId));
 
-        const rulesList = await baseQuery.limit(limit).offset(offset);
+        let rulesList = await baseQuery.limit(limit).offset(offset);
         const totalCountResult = await countQuery;
         const totalCount = totalCountResult[0].count;
+
+        // sort rules list by the priority in ascending order
+        rulesList = rulesList.sort((a, b) => a.priority - b.priority);
 
         return response<ListResourceRulesResponse>(res, {
             data: {

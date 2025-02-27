@@ -1,3 +1,4 @@
+name: pangolin
 services:
   pangolin:
     image: fosrl/pangolin:{{.PangolinVersion}}
