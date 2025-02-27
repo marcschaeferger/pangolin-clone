@@ -64,7 +64,7 @@ jobs:
             - name: Build installer
               working-directory: install
               run: |
-                  make release
+                  make go-build-release 
 
             - name: Upload artifacts from /install/bin
               uses: actions/upload-artifact@v4
