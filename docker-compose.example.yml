@@ -1,5 +1,4 @@
-version: "3.7"
-
+name: pangolin
 services:
   pangolin:
     image: fosrl/pangolin:latest
@@ -32,7 +31,6 @@ services:
       - SYS_MODULE
     ports:
       - 51820:51820/udp
-      - 8080:8080 # Port for traefik because of the network_mode
       - 443:443 # Port for traefik because of the network_mode
       - 80:80 # Port for traefik because of the network_mode
 
@@ -47,8 +45,8 @@ services:
     command:
       - --configFile=/etc/traefik/traefik_config.yml
     volumes:
-      - ./traefik:/etc/traefik:ro # Volume to store the Traefik configuration
-      - ./letsencrypt:/letsencrypt # Volume to store the Let's Encrypt certificates
+      - ./config/traefik:/etc/traefik:ro # Volume to store the Traefik configuration
+      - ./config/letsencrypt:/letsencrypt # Volume to store the Let's Encrypt certificates
 
 networks:
   default:

@@ -90,7 +90,15 @@ export async function verifyResourceSession(
 
         const clientIp = requestIp?.split(":")[0];
 
-        const resourceCacheKey = `resource:${host}`;
+        let cleanHost = host;
+        // if the host ends with :443 or :80 remove it
+        if (cleanHost.endsWith(":443")) {
+            cleanHost = cleanHost.slice(0, -4);
+        } else if (cleanHost.endsWith(":80")) {
+            cleanHost = cleanHost.slice(0, -3);
+        }
+
+        const resourceCacheKey = `resource:${cleanHost}`;
         let resourceData:
             | {
                   resource: Resource | null;
@@ -111,11 +119,11 @@ export async function verifyResourceSession(
                     resourcePassword,
                     eq(resourcePassword.resourceId, resources.resourceId)
                 )
-                .where(eq(resources.fullDomain, host))
+                .where(eq(resources.fullDomain, cleanHost))
                 .limit(1);
 
             if (!result) {
-                logger.debug("Resource not found", host);
+                logger.debug("Resource not found", cleanHost);
                 return notAllowed(res);
             }
 
@@ -131,7 +139,7 @@ export async function verifyResourceSession(
         const { resource, pincode, password } = resourceData;
 
         if (!resource) {
-            logger.debug("Resource not found", host);
+            logger.debug("Resource not found", cleanHost);
             return notAllowed(res);
         }
 

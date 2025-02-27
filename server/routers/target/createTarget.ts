@@ -12,34 +12,7 @@ import { fromError } from "zod-validation-error";
 import { addTargets } from "../newt/targets";
 import { eq } from "drizzle-orm";
 import { pickPort } from "./helpers";
-
-// Regular expressions for validation
-const DOMAIN_REGEX =
-    /^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-const IPV4_REGEX =
-    /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-const IPV6_REGEX = /^(?:[A-F0-9]{1,4}:){7}[A-F0-9]{1,4}$/i;
-
-// Schema for domain names and IP addresses
-const domainSchema = z
-    .string()
-    .min(1, "Domain cannot be empty")
-    .max(255, "Domain name too long")
-    .refine(
-        (value) => {
-            // Check if it's a valid IP address (v4 or v6)
-            if (IPV4_REGEX.test(value) || IPV6_REGEX.test(value)) {
-                return true;
-            }
-
-            // Check if it's a valid domain name
-            return DOMAIN_REGEX.test(value);
-        },
-        {
-            message: "Invalid domain name or IP address format",
-            path: ["domain"]
-        }
-    );
+import { isTargetValid } from "@server/lib/validators";
 
 const createTargetParamsSchema = z
     .object({
@@ -52,7 +25,7 @@ const createTargetParamsSchema = z
 
 const createTargetSchema = z
     .object({
-        ip: domainSchema,
+        ip: z.string().refine(isTargetValid),
         method: z.string().optional().nullable(),
         port: z.number().int().min(1).max(65535),
         enabled: z.boolean().default(true)

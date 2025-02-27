@@ -8,14 +8,12 @@ import { useResourceContext } from "@app/hooks/useResourceContext";
 import { AxiosResponse } from "axios";
 import { formatAxiosError } from "@app/lib/api";
 import {
-    GetResourceAuthInfoResponse,
     GetResourceWhitelistResponse,
     ListResourceRolesResponse,
     ListResourceUsersResponse
 } from "@server/routers/resource";
 import { Button } from "@app/components/ui/button";
 import { set, z } from "zod";
-// import { Tag } from "emblor";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -27,12 +25,8 @@ import {
     FormLabel,
     FormMessage
 } from "@app/components/ui/form";
-// import { TagInput } from "emblor";
-// import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { ListUsersResponse } from "@server/routers/user";
-import { Switch } from "@app/components/ui/switch";
-import { Label } from "@app/components/ui/label";
-import { Binary, Key, ShieldCheck } from "lucide-react";
+import { Binary, Key } from "lucide-react";
 import SetResourcePasswordForm from "./SetResourcePasswordForm";
 import SetResourcePincodeForm from "./SetResourcePincodeForm";
 import { createApiClient } from "@app/lib/api";
@@ -44,12 +38,12 @@ import {
     SettingsSectionHeader,
     SettingsSectionDescription,
     SettingsSectionBody,
-    SettingsSectionForm,
     SettingsSectionFooter
 } from "@app/components/Settings";
 import { SwitchInput } from "@app/components/SwitchInput";
 import { InfoPopup } from "@app/components/ui/info-popup";
 import { Tag, TagInput } from "@app/components/tags/tag-input";
+import { useRouter } from "next/navigation";
 
 const UsersRolesFormSchema = z.object({
     roles: z.array(
@@ -83,6 +77,7 @@ export default function ResourceAuthenticationPage() {
     const { env } = useEnvContext();
 
     const api = createApiClient({ env });
+    const router = useRouter();
 
     const [pageLoading, setPageLoading] = useState(true);
 
@@ -237,6 +232,7 @@ export default function ResourceAuthenticationPage() {
                 title: "Saved successfully",
                 description: "Whitelist settings have been saved"
             });
+            router.refresh();
         } catch (e) {
             console.error(e);
             toast({
@@ -284,6 +280,7 @@ export default function ResourceAuthenticationPage() {
                 title: "Saved successfully",
                 description: "Authentication settings have been saved"
             });
+            router.refresh();
         } catch (e) {
             console.error(e);
             toast({
@@ -315,6 +312,7 @@ export default function ResourceAuthenticationPage() {
                 updateAuthInfo({
                     password: false
                 });
+                router.refresh();
             })
             .catch((e) => {
                 toast({
@@ -345,6 +343,7 @@ export default function ResourceAuthenticationPage() {
                 updateAuthInfo({
                     pincode: false
                 });
+                router.refresh();
             })
             .catch((e) => {
                 toast({

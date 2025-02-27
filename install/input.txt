@@ -1,0 +1,12 @@
+example.com
+pangolin.example.com
+admin@example.com
+yes
+admin@example.com
+Password123!
+Password123!
+yes
+no
+no
+no
+yes

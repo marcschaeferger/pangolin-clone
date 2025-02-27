@@ -71,6 +71,7 @@ import {
     isValidUrlGlobPattern
 } from "@server/lib/validators";
 import { Switch } from "@app/components/ui/switch";
+import { useRouter } from "next/navigation";
 
 // Schema for rule validation
 const addRuleSchema = z.object({
@@ -91,9 +92,9 @@ enum RuleAction {
 }
 
 enum RuleMatch {
+    PATH = "Path",
     IP = "IP",
     CIDR = "IP Range",
-    PATH = "Path"
 }
 
 export default function ResourceRules(props: {
@@ -107,6 +108,7 @@ export default function ResourceRules(props: {
     const [loading, setLoading] = useState(false);
     const [pageLoading, setPageLoading] = useState(true);
     const [rulesEnabled, setRulesEnabled] = useState(resource.applyRules);
+    const router = useRouter();
 
     const addRuleForm = useForm({
         resolver: zodResolver(addRuleSchema),
@@ -253,6 +255,7 @@ export default function ResourceRules(props: {
                 title: "Enable Rules",
                 description: "Rule evaluation has been updated"
             });
+            router.refresh();
         }
     }
 
@@ -370,6 +373,7 @@ export default function ResourceRules(props: {
             });
 
             setRulesToRemove([]);
+            router.refresh();
         } catch (err) {
             console.error(err);
             toast({
@@ -465,9 +469,9 @@ export default function ResourceRules(props: {
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                        <SelectItem value="PATH">{RuleMatch.PATH}</SelectItem>
                         <SelectItem value="IP">{RuleMatch.IP}</SelectItem>
                         <SelectItem value="CIDR">{RuleMatch.CIDR}</SelectItem>
-                        <SelectItem value="PATH">{RuleMatch.PATH}</SelectItem>
                     </SelectContent>
                 </Select>
             )
@@ -596,7 +600,7 @@ export default function ResourceRules(props: {
                     <SwitchInput
                         id="rules-toggle"
                         label="Enable Rules"
-                        defaultChecked={resource.applyRules}
+                        defaultChecked={rulesEnabled}
                         onCheckedChange={async (val) => {
                             await saveApplyRules(val);
                         }}
@@ -667,17 +671,17 @@ export default function ResourceRules(props: {
                                                         <SelectValue />
                                                     </SelectTrigger>
                                                     <SelectContent>
+                                                        {resource.http && (
+                                                            <SelectItem value="PATH">
+                                                                {RuleMatch.PATH}
+                                                            </SelectItem>
+                                                        )}
                                                         <SelectItem value="IP">
                                                             {RuleMatch.IP}
                                                         </SelectItem>
                                                         <SelectItem value="CIDR">
                                                             {RuleMatch.CIDR}
                                                         </SelectItem>
-                                                        {resource.http && (
-                                                            <SelectItem value="PATH">
-                                                                {RuleMatch.PATH}
-                                                            </SelectItem>
-                                                        )}
                                                     </SelectContent>
                                                 </Select>
                                             </FormControl>
