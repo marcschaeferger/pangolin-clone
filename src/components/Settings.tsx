@@ -7,7 +7,7 @@ export function SettingsSection({ children }: { children: React.ReactNode }) {
 }
 
 export function SettingsSectionHeader({ children }: { children: React.ReactNode }) {
-    return <div className="space-y-0.5 pb-8">{children}</div>
+    return <div className="space-y-0.5 pb-6">{children}</div>
 }
 
 export function SettingsSectionForm({ children }: { children: React.ReactNode }) {

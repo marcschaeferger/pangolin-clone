@@ -8,7 +8,7 @@ import {
     FormField,
     FormItem,
     FormLabel,
-    FormMessage,
+    FormMessage
 } from "@app/components/ui/form";
 import { Input } from "@app/components/ui/input";
 import { toast } from "@app/hooks/useToast";
@@ -24,22 +24,22 @@ import {
     CredenzaDescription,
     CredenzaFooter,
     CredenzaHeader,
-    CredenzaTitle,
+    CredenzaTitle
 } from "@app/components/Credenza";
-import { formatAxiosError } from "@app/lib/api";;
+import { formatAxiosError } from "@app/lib/api";
 import { AxiosResponse } from "axios";
 import { Resource } from "@server/db/schema";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 
 const setPasswordFormSchema = z.object({
-    password: z.string().min(4).max(100),
+    password: z.string().min(4).max(100)
 });
 
 type SetPasswordFormValues = z.infer<typeof setPasswordFormSchema>;
 
 const defaultValues: Partial<SetPasswordFormValues> = {
-    password: "",
+    password: ""
 };
 
 type SetPasswordFormProps = {
@@ -53,7 +53,7 @@ export default function SetResourcePasswordForm({
     open,
     setOpen,
     resourceId,
-    onSetPassword,
+    onSetPassword
 }: SetPasswordFormProps) {
     const api = createApiClient(useEnvContext());
 
@@ -61,7 +61,7 @@ export default function SetResourcePasswordForm({
 
     const form = useForm<SetPasswordFormValues>({
         resolver: zodResolver(setPasswordFormSchema),
-        defaultValues,
+        defaultValues
     });
 
     useEffect(() => {
@@ -76,7 +76,7 @@ export default function SetResourcePasswordForm({
         setLoading(true);
 
         api.post<AxiosResponse<Resource>>(`/resource/${resourceId}/password`, {
-            password: data.password,
+            password: data.password
         })
             .catch((e) => {
                 toast({
@@ -85,14 +85,14 @@ export default function SetResourcePasswordForm({
                     description: formatAxiosError(
                         e,
                         "An error occurred while setting the resource password"
-                    ),
+                    )
                 });
             })
             .then(() => {
                 toast({
                     title: "Resource password set",
                     description:
-                        "The resource password has been set successfully",
+                        "The resource password has been set successfully"
                 });
 
                 if (onSetPassword) {
@@ -153,6 +153,9 @@ export default function SetResourcePasswordForm({
                         </Form>
                     </CredenzaBody>
                     <CredenzaFooter>
+                        <CredenzaClose asChild>
+                            <Button variant="outline">Close</Button>
+                        </CredenzaClose>
                         <Button
                             type="submit"
                             form="set-password-form"
@@ -161,9 +164,6 @@ export default function SetResourcePasswordForm({
                         >
                             Enable Password Protection
                         </Button>
-                        <CredenzaClose asChild>
-                            <Button variant="outline">Close</Button>
-                        </CredenzaClose>
                     </CredenzaFooter>
                 </CredenzaContent>
             </Credenza>

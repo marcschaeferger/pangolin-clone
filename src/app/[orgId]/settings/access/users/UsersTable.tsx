@@ -185,7 +185,7 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                             <Link
                                 href={`/${org?.org.orgId}/settings/access/users/${userRow.id}`}
                             >
-                                <Button variant={"outline"} className="ml-2">
+                                <Button variant={"outlinePrimary"} className="ml-2">
                                     Manage
                                     <ArrowRight className="ml-2 w-4 h-4" />
                                 </Button>

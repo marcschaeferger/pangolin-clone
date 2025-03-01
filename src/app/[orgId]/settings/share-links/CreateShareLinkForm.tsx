@@ -152,13 +152,15 @@ export default function CreateShareLinkForm({
 
             if (res?.status === 200) {
                 setResources(
-                    res.data.data.resources.filter((r) => {
-                        return r.http;
-                    }).map((r) => ({
-                        resourceId: r.resourceId,
-                        name: r.name,
-                        resourceUrl: `${r.ssl ? "https://" : "http://"}${r.fullDomain}/`
-                    }))
+                    res.data.data.resources
+                        .filter((r) => {
+                            return r.http;
+                        })
+                        .map((r) => ({
+                            resourceId: r.resourceId,
+                            name: r.name,
+                            resourceUrl: `${r.ssl ? "https://" : "http://"}${r.fullDomain}/`
+                        }))
                 );
             }
         }
@@ -274,7 +276,7 @@ export default function CreateShareLinkForm({
                                             name="resourceId"
                                             render={({ field }) => (
                                                 <FormItem className="flex flex-col">
-                                                    <FormLabel className="mb-2">
+                                                    <FormLabel>
                                                         Resource
                                                     </FormLabel>
                                                     <Popover>
@@ -318,9 +320,7 @@ export default function CreateShareLinkForm({
                                                                                 r
                                                                             ) => (
                                                                                 <CommandItem
-                                                                                    value={
-                                                                                        `${r.name}:${r.resourceId}`
-                                                                                    }
+                                                                                    value={`${r.name}:${r.resourceId}`}
                                                                                     key={
                                                                                         r.resourceId
                                                                                     }
@@ -369,13 +369,11 @@ export default function CreateShareLinkForm({
                                             name="title"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <Label>
+                                                    <FormLabel>
                                                         Title (optional)
-                                                    </Label>
+                                                    </FormLabel>
                                                     <FormControl>
-                                                        <Input
-                                                            {...field}
-                                                        />
+                                                        <Input {...field} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -383,66 +381,68 @@ export default function CreateShareLinkForm({
                                         />
 
                                         <div className="space-y-4">
-                                            <Label>Expire In</Label>
-                                            <div className="grid grid-cols-2 gap-4 mt-2">
-                                                <FormField
-                                                    control={form.control}
-                                                    name="timeUnit"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <Select
-                                                                onValueChange={
-                                                                    field.onChange
-                                                                }
-                                                                defaultValue={field.value.toString()}
-                                                            >
-                                                                <FormControl>
-                                                                    <SelectTrigger>
-                                                                        <SelectValue placeholder="Select duration" />
-                                                                    </SelectTrigger>
-                                                                </FormControl>
-                                                                <SelectContent>
-                                                                    {timeUnits.map(
-                                                                        (
-                                                                            option
-                                                                        ) => (
-                                                                            <SelectItem
-                                                                                key={
-                                                                                    option.unit
-                                                                                }
-                                                                                value={
-                                                                                    option.unit
-                                                                                }
-                                                                            >
-                                                                                {
-                                                                                    option.name
-                                                                                }
-                                                                            </SelectItem>
-                                                                        )
-                                                                    )}
-                                                                </SelectContent>
-                                                            </Select>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
+                                            <div className="space-y-2">
+                                                <FormLabel>Expire In</FormLabel>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <FormField
+                                                        control={form.control}
+                                                        name="timeUnit"
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                                <Select
+                                                                    onValueChange={
+                                                                        field.onChange
+                                                                    }
+                                                                    defaultValue={field.value.toString()}
+                                                                >
+                                                                    <FormControl>
+                                                                        <SelectTrigger>
+                                                                            <SelectValue placeholder="Select duration" />
+                                                                        </SelectTrigger>
+                                                                    </FormControl>
+                                                                    <SelectContent>
+                                                                        {timeUnits.map(
+                                                                            (
+                                                                                option
+                                                                            ) => (
+                                                                                <SelectItem
+                                                                                    key={
+                                                                                        option.unit
+                                                                                    }
+                                                                                    value={
+                                                                                        option.unit
+                                                                                    }
+                                                                                >
+                                                                                    {
+                                                                                        option.name
+                                                                                    }
+                                                                                </SelectItem>
+                                                                            )
+                                                                        )}
+                                                                    </SelectContent>
+                                                                </Select>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
 
-                                                <FormField
-                                                    control={form.control}
-                                                    name="timeValue"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormControl>
-                                                                <Input
-                                                                    type="number"
-                                                                    min={1}
-                                                                    {...field}
-                                                                />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
+                                                    <FormField
+                                                        control={form.control}
+                                                        name="timeValue"
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormControl>
+                                                                    <Input
+                                                                        type="number"
+                                                                        min={1}
+                                                                        {...field}
+                                                                    />
+                                                                </FormControl>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+                                                </div>
                                             </div>
 
                                             <div className="flex items-center space-x-2">
@@ -552,6 +552,9 @@ export default function CreateShareLinkForm({
                         </div>
                     </CredenzaBody>
                     <CredenzaFooter>
+                        <CredenzaClose asChild>
+                            <Button variant="outline">Close</Button>
+                        </CredenzaClose>
                         <Button
                             type="button"
                             onClick={form.handleSubmit(onSubmit)}
@@ -560,9 +563,6 @@ export default function CreateShareLinkForm({
                         >
                             Create Link
                         </Button>
-                        <CredenzaClose asChild>
-                            <Button variant="outline">Close</Button>
-                        </CredenzaClose>
                     </CredenzaFooter>
                 </CredenzaContent>
             </Credenza>

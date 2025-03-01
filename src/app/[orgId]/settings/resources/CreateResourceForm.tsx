@@ -66,6 +66,7 @@ import CopyTextBox from "@app/components/CopyTextBox";
 import { RadioGroup, RadioGroupItem } from "@app/components/ui/radio-group";
 import { Label } from "@app/components/ui/label";
 import { ListDomainsResponse } from "@server/routers/domain";
+import LoaderPlaceholder from "@app/components/PlaceHolderLoader";
 
 const createResourceFormSchema = z
     .object({
@@ -140,6 +141,7 @@ export default function CreateResourceForm({
     const [domainType, setDomainType] = useState<"subdomain" | "basedomain">(
         "subdomain"
     );
+    const [loadingPage, setLoadingPage] = useState(true);
 
     const form = useForm<CreateResourceFormValues>({
         resolver: zodResolver(createResourceFormSchema),
@@ -215,8 +217,16 @@ export default function CreateResourceForm({
             }
         };
 
-        fetchSites();
-        fetchDomains();
+        const load = async () => {
+            setLoadingPage(true);
+
+            await fetchSites();
+            await fetchDomains();
+
+            setLoadingPage(false);
+        };
+
+        load();
     }, [open]);
 
     async function onSubmit(data: CreateResourceFormValues) {
@@ -282,236 +292,482 @@ export default function CreateResourceForm({
                         </CredenzaDescription>
                     </CredenzaHeader>
                     <CredenzaBody>
-                        {!showSnippets && (
-                            <Form {...form} key={formKey}>
-                                <form
-                                    onSubmit={form.handleSubmit(onSubmit)}
-                                    className="space-y-4"
-                                    id="create-resource-form"
-                                >
-                                    {!env.flags.allowRawResources || (
-                                        <FormField
-                                            control={form.control}
-                                            name="http"
-                                            render={({ field }) => (
-                                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                                    <div className="space-y-0.5">
-                                                        <FormLabel className="text-base">
-                                                            HTTP Resource
-                                                        </FormLabel>
-                                                        <FormDescription>
-                                                            Toggle if this is an
-                                                            HTTP resource or a
-                                                            raw TCP/UDP
-                                                            resource.
-                                                        </FormDescription>
-                                                    </div>
-                                                    <FormControl>
-                                                        <Switch
-                                                            checked={
-                                                                field.value
-                                                            }
-                                                            onCheckedChange={
-                                                                field.onChange
-                                                            }
-                                                        />
-                                                    </FormControl>
-                                                </FormItem>
+                        {loadingPage ? (
+                            <LoaderPlaceholder height="500px" />
+                        ) : (
+                            <div>
+                                {!showSnippets && (
+                                    <Form {...form} key={formKey}>
+                                        <form
+                                            onSubmit={form.handleSubmit(
+                                                onSubmit
                                             )}
-                                        />
-                                    )}
-
-                                    <FormField
-                                        control={form.control}
-                                        name="name"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Name</FormLabel>
-                                                <FormControl>
-                                                    <Input {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                                <FormDescription>
-                                                    This is display name for the
-                                                    resource.
-                                                </FormDescription>
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    {form.watch("http") &&
-                                        env.flags.allowBaseDomainResources && (
-                                            <div>
-                                                <RadioGroup
-                                                    className="flex space-x-4"
-                                                    defaultValue={domainType}
-                                                    onValueChange={(val) => {
-                                                        setDomainType(
-                                                            val as any
-                                                        );
-                                                        form.setValue(
-                                                            "isBaseDomain",
-                                                            val === "basedomain"
-                                                        );
-                                                    }}
-                                                >
-                                                    <div className="flex items-center space-x-2">
-                                                        <RadioGroupItem
-                                                            value="subdomain"
-                                                            id="r1"
-                                                        />
-                                                        <Label htmlFor="r1">
-                                                            Subdomain
-                                                        </Label>
-                                                    </div>
-                                                    <div className="flex items-center space-x-2">
-                                                        <RadioGroupItem
-                                                            value="basedomain"
-                                                            id="r2"
-                                                        />
-                                                        <Label htmlFor="r2">
-                                                            Base Domain
-                                                        </Label>
-                                                    </div>
-                                                </RadioGroup>
-                                            </div>
-                                        )}
-
-                                    {form.watch("http") && (
-                                        <>
-                                            {domainType === "subdomain" ? (
-                                                <div className="w-fill space-y-2">
-                                                    {!env.flags
-                                                        .allowBaseDomainResources && (
-                                                        <FormLabel>
-                                                            Subdomain
-                                                        </FormLabel>
-                                                    )}
-                                                    <div className="flex">
-                                                        <div className="w-full mr-1">
-                                                            <FormField
-                                                                control={
-                                                                    form.control
-                                                                }
-                                                                name="subdomain"
-                                                                render={({
-                                                                    field
-                                                                }) => (
-                                                                    <FormControl>
-                                                                        <Input
-                                                                            {...field}
-                                                                            className="text-right"
-                                                                            placeholder="Enter subdomain"
-                                                                        />
-                                                                    </FormControl>
-                                                                )}
-                                                            />
-                                                        </div>
-                                                        <div className="max-w-1/2">
-                                                            <FormField
-                                                                control={
-                                                                    form.control
-                                                                }
-                                                                name="domainId"
-                                                                render={({
-                                                                    field
-                                                                }) => (
-                                                                    <FormItem>
-                                                                        <Select
-                                                                            onValueChange={
-                                                                                field.onChange
-                                                                            }
-                                                                            value={
-                                                                                field.value
-                                                                            }
-                                                                            defaultValue={
-                                                                                field.value
-                                                                            }
-                                                                        >
-                                                                            <FormControl>
-                                                                                <SelectTrigger>
-                                                                                    <SelectValue />
-                                                                                </SelectTrigger>
-                                                                            </FormControl>
-                                                                            <SelectContent>
-                                                                                {baseDomains.map(
-                                                                                    (
-                                                                                        option
-                                                                                    ) => (
-                                                                                        <SelectItem
-                                                                                            key={
-                                                                                                option.domainId
-                                                                                            }
-                                                                                            value={
-                                                                                                option.domainId
-                                                                                            }
-                                                                                        >
-                                                                                            .
-                                                                                            {
-                                                                                                option.baseDomain
-                                                                                            }
-                                                                                        </SelectItem>
-                                                                                    )
-                                                                                )}
-                                                                            </SelectContent>
-                                                                        </Select>
-                                                                        <FormMessage />
-                                                                    </FormItem>
-                                                                )}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ) : (
+                                            className="space-y-4"
+                                            id="create-resource-form"
+                                        >
+                                            {!env.flags.allowRawResources || (
                                                 <FormField
                                                     control={form.control}
-                                                    name="domainId"
+                                                    name="http"
                                                     render={({ field }) => (
-                                                        <FormItem>
-                                                            <Select
-                                                                onValueChange={
-                                                                    field.onChange
-                                                                }
-                                                                defaultValue={
-                                                                    field.value
-                                                                }
-                                                                {...field}
-                                                            >
-                                                                <FormControl>
-                                                                    <SelectTrigger>
-                                                                        <SelectValue />
-                                                                    </SelectTrigger>
-                                                                </FormControl>
-                                                                <SelectContent>
-                                                                    {baseDomains.map(
-                                                                        (
-                                                                            option
-                                                                        ) => (
-                                                                            <SelectItem
-                                                                                key={
-                                                                                    option.domainId
-                                                                                }
-                                                                                value={
-                                                                                    option.domainId
-                                                                                }
-                                                                            >
-                                                                                {
-                                                                                    option.baseDomain
-                                                                                }
-                                                                            </SelectItem>
-                                                                        )
-                                                                    )}
-                                                                </SelectContent>
-                                                            </Select>
-                                                            <FormMessage />
+                                                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                                                            <div className="space-y-0.5">
+                                                                <FormLabel className="text-base">
+                                                                    HTTP
+                                                                    Resource
+                                                                </FormLabel>
+                                                                <FormDescription>
+                                                                    Toggle if
+                                                                    this is an
+                                                                    HTTP
+                                                                    resource or
+                                                                    a raw
+                                                                    TCP/UDP
+                                                                    resource.
+                                                                </FormDescription>
+                                                            </div>
+                                                            <FormControl>
+                                                                <Switch
+                                                                    checked={
+                                                                        field.value
+                                                                    }
+                                                                    onCheckedChange={
+                                                                        field.onChange
+                                                                    }
+                                                                />
+                                                            </FormControl>
                                                         </FormItem>
                                                     )}
                                                 />
                                             )}
-                                        </>
-                                    )}
 
-                                    {!form.watch("http") && (
+                                            {!form.watch("http") && (
+                                                <Link
+                                                    className="text-sm text-primary flex items-center gap-1"
+                                                    href="https://docs.fossorial.io/Getting%20Started/tcp-udp"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    <span>
+                                                        Learn how to configure
+                                                        TCP/UDP resources
+                                                    </span>
+                                                    <SquareArrowOutUpRight
+                                                        size={14}
+                                                    />
+                                                </Link>
+                                            )}
+
+                                            <FormField
+                                                control={form.control}
+                                                name="name"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>
+                                                            Name
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <Input {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            {form.watch("http") &&
+                                                env.flags
+                                                    .allowBaseDomainResources && (
+                                                    <FormField
+                                                        control={form.control}
+                                                        name="isBaseDomain"
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormLabel>
+                                                                    Domain Type
+                                                                </FormLabel>
+                                                                <Select
+                                                                    value={
+                                                                        domainType
+                                                                    }
+                                                                    onValueChange={(
+                                                                        val
+                                                                    ) =>
+                                                                        setDomainType(
+                                                                            val ===
+                                                                                "basedomain"
+                                                                                ? "basedomain"
+                                                                                : "subdomain"
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <FormControl>
+                                                                        <SelectTrigger>
+                                                                            <SelectValue />
+                                                                        </SelectTrigger>
+                                                                    </FormControl>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="subdomain">
+                                                                            Subdomain
+                                                                        </SelectItem>
+                                                                        <SelectItem value="basedomain">
+                                                                            Base
+                                                                            Domain
+                                                                        </SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+                                                )}
+
+                                            {form.watch("http") && (
+                                                <>
+                                                    {domainType ===
+                                                    "subdomain" ? (
+                                                        <div className="w-fill space-y-2">
+                                                            <FormLabel>
+                                                                Subdomain
+                                                            </FormLabel>
+                                                            <div className="flex">
+                                                                <div className="w-1/2 mr-1">
+                                                                    <FormField
+                                                                        control={
+                                                                            form.control
+                                                                        }
+                                                                        name="subdomain"
+                                                                        render={({
+                                                                            field
+                                                                        }) => (
+                                                                            <FormItem>
+                                                                                <FormControl>
+                                                                                    <Input
+                                                                                        {...field}
+                                                                                    />
+                                                                                </FormControl>
+                                                                                <FormMessage />
+                                                                            </FormItem>
+                                                                        )}
+                                                                    />
+                                                                </div>
+                                                                <div className="w-1/2">
+                                                                    <FormField
+                                                                        control={
+                                                                            form.control
+                                                                        }
+                                                                        name="domainId"
+                                                                        render={({
+                                                                            field
+                                                                        }) => (
+                                                                            <FormItem>
+                                                                                <Select
+                                                                                    onValueChange={
+                                                                                        field.onChange
+                                                                                    }
+                                                                                    value={
+                                                                                        field.value
+                                                                                    }
+                                                                                    defaultValue={
+                                                                                        field.value
+                                                                                    }
+                                                                                >
+                                                                                    <FormControl>
+                                                                                        <SelectTrigger>
+                                                                                            <SelectValue />
+                                                                                        </SelectTrigger>
+                                                                                    </FormControl>
+                                                                                    <SelectContent>
+                                                                                        {baseDomains.map(
+                                                                                            (
+                                                                                                option
+                                                                                            ) => (
+                                                                                                <SelectItem
+                                                                                                    key={
+                                                                                                        option.domainId
+                                                                                                    }
+                                                                                                    value={
+                                                                                                        option.domainId
+                                                                                                    }
+                                                                                                >
+                                                                                                    .
+                                                                                                    {
+                                                                                                        option.baseDomain
+                                                                                                    }
+                                                                                                </SelectItem>
+                                                                                            )
+                                                                                        )}
+                                                                                    </SelectContent>
+                                                                                </Select>
+                                                                                <FormMessage />
+                                                                            </FormItem>
+                                                                        )}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <FormField
+                                                            control={
+                                                                form.control
+                                                            }
+                                                            name="domainId"
+                                                            render={({
+                                                                field
+                                                            }) => (
+                                                                <FormItem>
+                                                                    <FormLabel>
+                                                                        Base
+                                                                        Domain
+                                                                    </FormLabel>
+                                                                    <Select
+                                                                        onValueChange={
+                                                                            field.onChange
+                                                                        }
+                                                                        defaultValue={
+                                                                            field.value
+                                                                        }
+                                                                        {...field}
+                                                                    >
+                                                                        <FormControl>
+                                                                            <SelectTrigger>
+                                                                                <SelectValue />
+                                                                            </SelectTrigger>
+                                                                        </FormControl>
+                                                                        <SelectContent>
+                                                                            {baseDomains.map(
+                                                                                (
+                                                                                    option
+                                                                                ) => (
+                                                                                    <SelectItem
+                                                                                        key={
+                                                                                            option.domainId
+                                                                                        }
+                                                                                        value={
+                                                                                            option.domainId
+                                                                                        }
+                                                                                    >
+                                                                                        {
+                                                                                            option.baseDomain
+                                                                                        }
+                                                                                    </SelectItem>
+                                                                                )
+                                                                            )}
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
+                                                    )}
+                                                </>
+                                            )}
+
+                                            {!form.watch("http") && (
+                                                <>
+                                                    <FormField
+                                                        control={form.control}
+                                                        name="protocol"
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormLabel>
+                                                                    Protocol
+                                                                </FormLabel>
+                                                                <Select
+                                                                    value={
+                                                                        field.value
+                                                                    }
+                                                                    onValueChange={
+                                                                        field.onChange
+                                                                    }
+                                                                >
+                                                                    <FormControl>
+                                                                        <SelectTrigger>
+                                                                            <SelectValue placeholder="Select a protocol" />
+                                                                        </SelectTrigger>
+                                                                    </FormControl>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="tcp">
+                                                                            TCP
+                                                                        </SelectItem>
+                                                                        <SelectItem value="udp">
+                                                                            UDP
+                                                                        </SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+                                                    <FormField
+                                                        control={form.control}
+                                                        name="proxyPort"
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormLabel>
+                                                                    Port Number
+                                                                </FormLabel>
+                                                                <FormControl>
+                                                                    <Input
+                                                                        type="number"
+                                                                        value={
+                                                                            field.value ??
+                                                                            ""
+                                                                        }
+                                                                        onChange={(
+                                                                            e
+                                                                        ) =>
+                                                                            field.onChange(
+                                                                                e
+                                                                                    .target
+                                                                                    .value
+                                                                                    ? parseInt(
+                                                                                          e
+                                                                                              .target
+                                                                                              .value
+                                                                                      )
+                                                                                    : null
+                                                                            )
+                                                                        }
+                                                                    />
+                                                                </FormControl>
+                                                                <FormMessage />
+                                                                <FormDescription>
+                                                                    The external
+                                                                    port number
+                                                                    to proxy
+                                                                    requests.
+                                                                </FormDescription>
+                                                            </FormItem>
+                                                        )}
+                                                    />
+                                                </>
+                                            )}
+
+                                            <FormField
+                                                control={form.control}
+                                                name="siteId"
+                                                render={({ field }) => (
+                                                    <FormItem className="flex flex-col">
+                                                        <FormLabel>
+                                                            Site
+                                                        </FormLabel>
+                                                        <Popover>
+                                                            <PopoverTrigger
+                                                                asChild
+                                                            >
+                                                                <FormControl>
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        role="combobox"
+                                                                        className={cn(
+                                                                            "justify-between",
+                                                                            !field.value &&
+                                                                                "text-muted-foreground"
+                                                                        )}
+                                                                    >
+                                                                        {field.value
+                                                                            ? sites.find(
+                                                                                  (
+                                                                                      site
+                                                                                  ) =>
+                                                                                      site.siteId ===
+                                                                                      field.value
+                                                                              )
+                                                                                  ?.name
+                                                                            : "Select site"}
+                                                                        <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                                    </Button>
+                                                                </FormControl>
+                                                            </PopoverTrigger>
+                                                            <PopoverContent className="p-0">
+                                                                <Command>
+                                                                    <CommandInput placeholder="Search site" />
+                                                                    <CommandList>
+                                                                        <CommandEmpty>
+                                                                            No
+                                                                            site
+                                                                            found.
+                                                                        </CommandEmpty>
+                                                                        <CommandGroup>
+                                                                            {sites.map(
+                                                                                (
+                                                                                    site
+                                                                                ) => (
+                                                                                    <CommandItem
+                                                                                        value={`${site.siteId}:${site.name}:${site.niceId}`}
+                                                                                        key={
+                                                                                            site.siteId
+                                                                                        }
+                                                                                        onSelect={() => {
+                                                                                            form.setValue(
+                                                                                                "siteId",
+                                                                                                site.siteId
+                                                                                            );
+                                                                                        }}
+                                                                                    >
+                                                                                        <CheckIcon
+                                                                                            className={cn(
+                                                                                                "mr-2 h-4 w-4",
+                                                                                                site.siteId ===
+                                                                                                    field.value
+                                                                                                    ? "opacity-100"
+                                                                                                    : "opacity-0"
+                                                                                            )}
+                                                                                        />
+                                                                                        {
+                                                                                            site.name
+                                                                                        }
+                                                                                    </CommandItem>
+                                                                                )
+                                                                            )}
+                                                                        </CommandGroup>
+                                                                    </CommandList>
+                                                                </Command>
+                                                            </PopoverContent>
+                                                        </Popover>
+                                                        <FormMessage />
+                                                        <FormDescription>
+                                                            This site will
+                                                            provide connectivity
+                                                            to the resource.
+                                                        </FormDescription>
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </form>
+                                    </Form>
+                                )}
+
+                                {showSnippets && (
+                                    <div>
+                                        <div className="flex items-start space-x-4 mb-6 last:mb-0">
+                                            <div className="flex-grow">
+                                                <h3 className="text-lg font-semibold mb-3">
+                                                    Traefik: Add Entrypoints
+                                                </h3>
+                                                <CopyTextBox
+                                                    text={`entryPoints:
+  ${form.getValues("protocol")}-${form.getValues("proxyPort")}:
+    address: ":${form.getValues("proxyPort")}/${form.getValues("protocol")}"`}
+                                                    wrapText={false}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-start space-x-4 mb-6 last:mb-0">
+                                            <div className="flex-grow">
+                                                <h3 className="text-lg font-semibold mb-3">
+                                                    Gerbil: Expose Ports in
+                                                    Docker Compose
+                                                </h3>
+                                                <CopyTextBox
+                                                    text={`ports:
+  - ${form.getValues("proxyPort")}:${form.getValues("proxyPort")}${form.getValues("protocol") === "tcp" ? "" : "/" + form.getValues("protocol")}`}
+                                                    wrapText={false}
+                                                />
+                                            </div>
+                                        </div>
+
                                         <Link
                                             className="text-sm text-primary flex items-center gap-1"
                                             href="https://docs.fossorial.io/Getting%20Started/tcp-udp"
@@ -519,233 +775,20 @@ export default function CreateResourceForm({
                                             rel="noopener noreferrer"
                                         >
                                             <span>
-                                                Learn how to configure TCP/UDP
-                                                resources
+                                                Make sure to follow the full
+                                                guide
                                             </span>
                                             <SquareArrowOutUpRight size={14} />
                                         </Link>
-                                    )}
-
-                                    {!form.watch("http") && (
-                                        <>
-                                            <FormField
-                                                control={form.control}
-                                                name="protocol"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>
-                                                            Protocol
-                                                        </FormLabel>
-                                                        <Select
-                                                            value={field.value}
-                                                            onValueChange={
-                                                                field.onChange
-                                                            }
-                                                        >
-                                                            <FormControl>
-                                                                <SelectTrigger>
-                                                                    <SelectValue placeholder="Select a protocol" />
-                                                                </SelectTrigger>
-                                                            </FormControl>
-                                                            <SelectContent>
-                                                                <SelectItem value="tcp">
-                                                                    TCP
-                                                                </SelectItem>
-                                                                <SelectItem value="udp">
-                                                                    UDP
-                                                                </SelectItem>
-                                                            </SelectContent>
-                                                        </Select>
-                                                        <FormMessage />
-                                                        <FormDescription>
-                                                            The protocol to use
-                                                            for the resource.
-                                                        </FormDescription>
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={form.control}
-                                                name="proxyPort"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>
-                                                            Port Number
-                                                        </FormLabel>
-                                                        <FormControl>
-                                                            <Input
-                                                                type="number"
-                                                                value={
-                                                                    field.value ??
-                                                                    ""
-                                                                }
-                                                                onChange={(e) =>
-                                                                    field.onChange(
-                                                                        e.target
-                                                                            .value
-                                                                            ? parseInt(
-                                                                                  e
-                                                                                      .target
-                                                                                      .value
-                                                                              )
-                                                                            : null
-                                                                    )
-                                                                }
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                        <FormDescription>
-                                                            The port number to
-                                                            proxy requests to
-                                                            (required for
-                                                            non-HTTP resources).
-                                                        </FormDescription>
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </>
-                                    )}
-
-                                    <FormField
-                                        control={form.control}
-                                        name="siteId"
-                                        render={({ field }) => (
-                                            <FormItem className="flex flex-col">
-                                                <FormLabel>Site</FormLabel>
-                                                <Popover>
-                                                    <PopoverTrigger asChild>
-                                                        <FormControl>
-                                                            <Button
-                                                                variant="outline"
-                                                                role="combobox"
-                                                                className={cn(
-                                                                    "justify-between",
-                                                                    !field.value &&
-                                                                        "text-muted-foreground"
-                                                                )}
-                                                            >
-                                                                {field.value
-                                                                    ? sites.find(
-                                                                          (
-                                                                              site
-                                                                          ) =>
-                                                                              site.siteId ===
-                                                                              field.value
-                                                                      )?.name
-                                                                    : "Select site"}
-                                                                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                                            </Button>
-                                                        </FormControl>
-                                                    </PopoverTrigger>
-                                                    <PopoverContent className="p-0">
-                                                        <Command>
-                                                            <CommandInput placeholder="Search site" />
-                                                            <CommandList>
-                                                                <CommandEmpty>
-                                                                    No site
-                                                                    found.
-                                                                </CommandEmpty>
-                                                                <CommandGroup>
-                                                                    {sites.map(
-                                                                        (
-                                                                            site
-                                                                        ) => (
-                                                                            <CommandItem
-                                                                                value={`${site.siteId}:${site.name}:${site.niceId}`}
-                                                                                key={
-                                                                                    site.siteId
-                                                                                }
-                                                                                onSelect={() => {
-                                                                                    form.setValue(
-                                                                                        "siteId",
-                                                                                        site.siteId
-                                                                                    );
-                                                                                }}
-                                                                            >
-                                                                                <CheckIcon
-                                                                                    className={cn(
-                                                                                        "mr-2 h-4 w-4",
-                                                                                        site.siteId ===
-                                                                                            field.value
-                                                                                            ? "opacity-100"
-                                                                                            : "opacity-0"
-                                                                                    )}
-                                                                                />
-                                                                                {
-                                                                                    site.name
-                                                                                }
-                                                                            </CommandItem>
-                                                                        )
-                                                                    )}
-                                                                </CommandGroup>
-                                                            </CommandList>
-                                                        </Command>
-                                                    </PopoverContent>
-                                                </Popover>
-                                                <FormMessage />
-                                                <FormDescription>
-                                                    This site will provide
-                                                    connectivity to the
-                                                    resource.
-                                                </FormDescription>
-                                            </FormItem>
-                                        )}
-                                    />
-                                </form>
-                            </Form>
-                        )}
-
-                        {showSnippets && (
-                            <div>
-                                <div className="flex items-start space-x-4 mb-6 last:mb-0">
-                                    <div className="flex-shrink-0 w-8 h-8 bg-muted text-primary-foreground rounded-full flex items-center justify-center font-bold">
-                                        1
                                     </div>
-                                    <div className="flex-grow">
-                                        <h3 className="text-lg font-semibold mb-3">
-                                            Traefik: Add Entrypoints
-                                        </h3>
-                                        <CopyTextBox
-                                            text={`entryPoints:
-  ${form.getValues("protocol")}-${form.getValues("proxyPort")}:
-    address: ":${form.getValues("proxyPort")}/${form.getValues("protocol")}"`}
-                                            wrapText={false}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start space-x-4 mb-6 last:mb-0">
-                                    <div className="flex-shrink-0 w-8 h-8 bg-muted text-primary-foreground rounded-full flex items-center justify-center font-bold">
-                                        2
-                                    </div>
-                                    <div className="flex-grow">
-                                        <h3 className="text-lg font-semibold mb-3">
-                                            Gerbil: Expose Ports in Docker
-                                            Compose
-                                        </h3>
-                                        <CopyTextBox
-                                            text={`ports:
-  - ${form.getValues("proxyPort")}:${form.getValues("proxyPort")}${form.getValues("protocol") === "tcp" ? "" : "/" + form.getValues("protocol")}`}
-                                            wrapText={false}
-                                        />
-                                    </div>
-                                </div>
-
-                                <Link
-                                    className="text-sm text-primary flex items-center gap-1"
-                                    href="https://docs.fossorial.io/Getting%20Started/tcp-udp"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    <span>
-                                        Make sure to follow the full guide
-                                    </span>
-                                    <SquareArrowOutUpRight size={14} />
-                                </Link>
+                                )}
                             </div>
                         )}
                     </CredenzaBody>
                     <CredenzaFooter>
+                        <CredenzaClose asChild>
+                            <Button variant="outline">Close</Button>
+                        </CredenzaClose>
                         {!showSnippets && (
                             <Button
                                 type="submit"
@@ -765,10 +808,6 @@ export default function CreateResourceForm({
                                 Go to Resource
                             </Button>
                         )}
-
-                        <CredenzaClose asChild>
-                            <Button variant="outline">Close</Button>
-                        </CredenzaClose>
                     </CredenzaFooter>
                 </CredenzaContent>
             </Credenza>

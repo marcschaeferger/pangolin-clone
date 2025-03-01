@@ -129,6 +129,7 @@ export default function GeneralForm() {
         ListDomainsResponse["domains"]
     >([]);
 
+    const [loadingPage, setLoadingPage] = useState(true);
     const [domainType, setDomainType] = useState<"subdomain" | "basedomain">(
         resource.isBaseDomain ? "basedomain" : "subdomain"
     );
@@ -184,8 +185,14 @@ export default function GeneralForm() {
             }
         };
 
-        fetchDomains();
-        fetchSites();
+        const load = async () => {
+            await fetchDomains();
+            await fetchSites();
+
+            setLoadingPage(false);
+        };
+
+        load();
     }, []);
 
     async function onSubmit(data: GeneralFormValues) {
@@ -263,391 +270,399 @@ export default function GeneralForm() {
     }
 
     return (
-        <SettingsContainer>
-            <SettingsSection>
-                <SettingsSectionHeader>
-                    <SettingsSectionTitle>
-                        General Settings
-                    </SettingsSectionTitle>
-                    <SettingsSectionDescription>
-                        Configure the general settings for this resource
-                    </SettingsSectionDescription>
-                </SettingsSectionHeader>
+        !loadingPage && (
+            <SettingsContainer>
+                <SettingsSection>
+                    <SettingsSectionHeader>
+                        <SettingsSectionTitle>
+                            General Settings
+                        </SettingsSectionTitle>
+                        <SettingsSectionDescription>
+                            Configure the general settings for this resource
+                        </SettingsSectionDescription>
+                    </SettingsSectionHeader>
 
-                <SettingsSectionBody>
-                    <SettingsSectionForm>
-                        <Form {...form} key={formKey}>
-                            <form
-                                onSubmit={form.handleSubmit(onSubmit)}
-                                className="space-y-4"
-                                id="general-settings-form"
-                            >
-                                <FormField
-                                    control={form.control}
-                                    name="name"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Name</FormLabel>
-                                            <FormControl>
-                                                <Input {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                            <FormDescription>
-                                                This is the display name of the
-                                                resource.
-                                            </FormDescription>
-                                        </FormItem>
-                                    )}
-                                />
-
-                                {resource.http && (
-                                    <>
-                                        {env.flags.allowBaseDomainResources && (
-                                            <div>
-                                                <RadioGroup
-                                                    className="flex space-x-4"
-                                                    defaultValue={domainType}
-                                                    onValueChange={(val) => {
-                                                        setDomainType(
-                                                            val as any
-                                                        );
-                                                        form.setValue(
-                                                            "isBaseDomain",
-                                                            val === "basedomain"
-                                                        );
-                                                    }}
-                                                >
-                                                    <div className="flex items-center space-x-2">
-                                                        <RadioGroupItem
-                                                            value="subdomain"
-                                                            id="r1"
-                                                        />
-                                                        <Label htmlFor="r1">
-                                                            Subdomain
-                                                        </Label>
-                                                    </div>
-                                                    <div className="flex items-center space-x-2">
-                                                        <RadioGroupItem
-                                                            value="basedomain"
-                                                            id="r2"
-                                                        />
-                                                        <Label htmlFor="r2">
-                                                            Base Domain
-                                                        </Label>
-                                                    </div>
-                                                </RadioGroup>
-                                            </div>
-                                        )}
-
-                                        {domainType === "subdomain" ? (
-                                            <div className="w-fill space-y-2">
-                                                {!env.flags
-                                                    .allowBaseDomainResources && (
-                                                    <FormLabel>
-                                                        Subdomain
-                                                    </FormLabel>
-                                                )}
-                                                <div className="flex">
-                                                    <div className="w-full mr-1">
-                                                        <FormField
-                                                            control={
-                                                                form.control
-                                                            }
-                                                            name="subdomain"
-                                                            render={({
-                                                                field
-                                                            }) => (
-                                                                <FormItem>
-                                                                    <FormControl>
-                                                                        <Input
-                                                                            {...field}
-                                                                            className="text-right"
-                                                                            placeholder="Enter subdomain"
-                                                                        />
-                                                                    </FormControl>
-                                                                    <FormMessage />
-                                                                </FormItem>
-                                                            )}
-                                                        />
-                                                    </div>
-                                                    <div className="max-w-1/2">
-                                                        <FormField
-                                                            control={
-                                                                form.control
-                                                            }
-                                                            name="domainId"
-                                                            render={({
-                                                                field
-                                                            }) => (
-                                                                <FormItem>
-                                                                    <Select
-                                                                        onValueChange={
-                                                                            field.onChange
-                                                                        }
-                                                                        defaultValue={
-                                                                            field.value
-                                                                        }
-                                                                        value={
-                                                                            field.value
-                                                                        }
-                                                                    >
-                                                                        <FormControl>
-                                                                            <SelectTrigger>
-                                                                                <SelectValue />
-                                                                            </SelectTrigger>
-                                                                        </FormControl>
-                                                                        <SelectContent>
-                                                                            {baseDomains.map(
-                                                                                (
-                                                                                    option
-                                                                                ) => (
-                                                                                    <SelectItem
-                                                                                        key={
-                                                                                            option.domainId
-                                                                                        }
-                                                                                        value={
-                                                                                            option.domainId
-                                                                                        }
-                                                                                    >
-                                                                                        .
-                                                                                        {
-                                                                                            option.baseDomain
-                                                                                        }
-                                                                                    </SelectItem>
-                                                                                )
-                                                                            )}
-                                                                        </SelectContent>
-                                                                    </Select>
-                                                                    <FormMessage />
-                                                                </FormItem>
-                                                            )}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <FormField
-                                                control={form.control}
-                                                name="domainId"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <Select
-                                                            onValueChange={
-                                                                field.onChange
-                                                            }
-                                                            defaultValue={
-                                                                field.value ||
-                                                                baseDomains[0]
-                                                                    ?.domainId
-                                                            }
-                                                        >
-                                                            <FormControl>
-                                                                <SelectTrigger>
-                                                                    <SelectValue />
-                                                                </SelectTrigger>
-                                                            </FormControl>
-                                                            <SelectContent>
-                                                                {baseDomains.map(
-                                                                    (
-                                                                        option
-                                                                    ) => (
-                                                                        <SelectItem
-                                                                            key={
-                                                                                option.domainId
-                                                                            }
-                                                                            value={
-                                                                                option.domainId
-                                                                            }
-                                                                        >
-                                                                            {
-                                                                                option.baseDomain
-                                                                            }
-                                                                        </SelectItem>
-                                                                    )
-                                                                )}
-                                                            </SelectContent>
-                                                        </Select>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        )}
-                                    </>
-                                )}
-
-                                {!resource.http && (
+                    <SettingsSectionBody>
+                        <SettingsSectionForm>
+                            <Form {...form} key={formKey}>
+                                <form
+                                    onSubmit={form.handleSubmit(onSubmit)}
+                                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                                    id="general-settings-form"
+                                >
                                     <FormField
                                         control={form.control}
-                                        name="proxyPort"
+                                        name="name"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>
-                                                    Port Number
-                                                </FormLabel>
+                                                <FormLabel>Name</FormLabel>
                                                 <FormControl>
-                                                    <Input
-                                                        type="number"
-                                                        value={
-                                                            field.value ?? ""
-                                                        }
-                                                        onChange={(e) =>
-                                                            field.onChange(
-                                                                e.target.value
-                                                                    ? parseInt(
-                                                                          e
-                                                                              .target
-                                                                              .value
-                                                                      )
-                                                                    : null
-                                                            )
-                                                        }
-                                                    />
+                                                    <Input {...field} />
                                                 </FormControl>
                                                 <FormMessage />
-                                                <FormDescription>
-                                                    This is the port that will
-                                                    be used to access the
-                                                    resource.
-                                                </FormDescription>
                                             </FormItem>
                                         )}
                                     />
-                                )}
-                            </form>
-                        </Form>
-                    </SettingsSectionForm>
-                </SettingsSectionBody>
 
-                <SettingsSectionFooter>
-                    <Button
-                        type="submit"
-                        loading={saveLoading}
-                        disabled={saveLoading}
-                        form="general-settings-form"
-                    >
-                        Save Settings
-                    </Button>
-                </SettingsSectionFooter>
-            </SettingsSection>
+                                    {resource.http && (
+                                        <>
+                                            {env.flags
+                                                .allowBaseDomainResources && (
+                                                <FormField
+                                                    control={form.control}
+                                                    name="isBaseDomain"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>
+                                                                Domain Type
+                                                            </FormLabel>
+                                                            <Select
+                                                                value={
+                                                                    domainType
+                                                                }
+                                                                onValueChange={(
+                                                                    val
+                                                                ) =>
+                                                                    setDomainType(
+                                                                        val ===
+                                                                            "basedomain"
+                                                                            ? "basedomain"
+                                                                            : "subdomain"
+                                                                    )
+                                                                }
+                                                            >
+                                                                <FormControl>
+                                                                    <SelectTrigger>
+                                                                        <SelectValue />
+                                                                    </SelectTrigger>
+                                                                </FormControl>
+                                                                <SelectContent>
+                                                                    <SelectItem value="subdomain">
+                                                                        Subdomain
+                                                                    </SelectItem>
+                                                                    <SelectItem value="basedomain">
+                                                                        Base
+                                                                        Domain
+                                                                    </SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            )}
 
-            <SettingsSection>
-                <SettingsSectionHeader>
-                    <SettingsSectionTitle>
-                        Transfer Resource
-                    </SettingsSectionTitle>
-                    <SettingsSectionDescription>
-                        Transfer this resource to a different site
-                    </SettingsSectionDescription>
-                </SettingsSectionHeader>
-
-                <SettingsSectionBody>
-                    <SettingsSectionForm>
-                        <Form {...transferForm}>
-                            <form
-                                onSubmit={transferForm.handleSubmit(onTransfer)}
-                                className="space-y-4"
-                                id="transfer-form"
-                            >
-                                <FormField
-                                    control={transferForm.control}
-                                    name="siteId"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>
-                                                Destination Site
-                                            </FormLabel>
-                                            <Popover
-                                                open={open}
-                                                onOpenChange={setOpen}
-                                            >
-                                                <PopoverTrigger asChild>
-                                                    <FormControl>
-                                                        <Button
-                                                            variant="outline"
-                                                            role="combobox"
-                                                            className={cn(
-                                                                "w-full justify-between",
-                                                                !field.value &&
-                                                                    "text-muted-foreground"
-                                                            )}
-                                                        >
-                                                            {field.value
-                                                                ? sites.find(
-                                                                      (site) =>
-                                                                          site.siteId ===
-                                                                          field.value
-                                                                  )?.name
-                                                                : "Select site"}
-                                                            <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                                        </Button>
-                                                    </FormControl>
-                                                </PopoverTrigger>
-                                                <PopoverContent className="w-full p-0">
-                                                    <Command>
-                                                        <CommandInput
-                                                            placeholder="Search sites"
-                                                            className="h-9"
-                                                        />
-                                                        <CommandEmpty>
-                                                            No sites found.
-                                                        </CommandEmpty>
-                                                        <CommandGroup>
-                                                            {sites.map(
-                                                                (site) => (
-                                                                    <CommandItem
-                                                                        value={`${site.name}:${site.siteId}`}
-                                                                        key={
-                                                                            site.siteId
-                                                                        }
-                                                                        onSelect={() => {
-                                                                            transferForm.setValue(
-                                                                                "siteId",
-                                                                                site.siteId
-                                                                            );
-                                                                            setOpen(
-                                                                                false
-                                                                            );
-                                                                        }}
-                                                                    >
-                                                                        {
-                                                                            site.name
-                                                                        }
-                                                                        <CheckIcon
-                                                                            className={cn(
-                                                                                "ml-auto h-4 w-4",
-                                                                                site.siteId ===
+                                            <div className="col-span-2">
+                                                {domainType === "subdomain" ? (
+                                                    <div className="w-fill space-y-2">
+                                                        <FormLabel>
+                                                            Subdomain
+                                                        </FormLabel>
+                                                        <div className="flex">
+                                                            <div className="w-1/2 mr-1">
+                                                                <FormField
+                                                                    control={
+                                                                        form.control
+                                                                    }
+                                                                    name="subdomain"
+                                                                    render={({
+                                                                        field
+                                                                    }) => (
+                                                                        <FormItem>
+                                                                            <FormControl>
+                                                                                <Input
+                                                                                    {...field}
+                                                                                />
+                                                                            </FormControl>
+                                                                            <FormMessage />
+                                                                        </FormItem>
+                                                                    )}
+                                                                />
+                                                            </div>
+                                                            <div className="w-1/2">
+                                                                <FormField
+                                                                    control={
+                                                                        form.control
+                                                                    }
+                                                                    name="domainId"
+                                                                    render={({
+                                                                        field
+                                                                    }) => (
+                                                                        <FormItem>
+                                                                            <Select
+                                                                                onValueChange={
+                                                                                    field.onChange
+                                                                                }
+                                                                                defaultValue={
                                                                                     field.value
-                                                                                    ? "opacity-100"
-                                                                                    : "opacity-0"
-                                                                            )}
-                                                                        />
-                                                                    </CommandItem>
-                                                                )
-                                                            )}
-                                                        </CommandGroup>
-                                                    </Command>
-                                                </PopoverContent>
-                                            </Popover>
-                                            <FormMessage />
-                                        </FormItem>
+                                                                                }
+                                                                                value={
+                                                                                    field.value
+                                                                                }
+                                                                            >
+                                                                                <FormControl>
+                                                                                    <SelectTrigger>
+                                                                                        <SelectValue />
+                                                                                    </SelectTrigger>
+                                                                                </FormControl>
+                                                                                <SelectContent>
+                                                                                    {baseDomains.map(
+                                                                                        (
+                                                                                            option
+                                                                                        ) => (
+                                                                                            <SelectItem
+                                                                                                key={
+                                                                                                    option.domainId
+                                                                                                }
+                                                                                                value={
+                                                                                                    option.domainId
+                                                                                                }
+                                                                                            >
+                                                                                                .
+                                                                                                {
+                                                                                                    option.baseDomain
+                                                                                                }
+                                                                                            </SelectItem>
+                                                                                        )
+                                                                                    )}
+                                                                                </SelectContent>
+                                                                            </Select>
+                                                                            <FormMessage />
+                                                                        </FormItem>
+                                                                    )}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <FormField
+                                                        control={form.control}
+                                                        name="domainId"
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormLabel>
+                                                                    Base Domain
+                                                                </FormLabel>
+                                                                <Select
+                                                                    onValueChange={
+                                                                        field.onChange
+                                                                    }
+                                                                    defaultValue={
+                                                                        field.value ||
+                                                                        baseDomains[0]
+                                                                            ?.domainId
+                                                                    }
+                                                                >
+                                                                    <FormControl>
+                                                                        <SelectTrigger>
+                                                                            <SelectValue />
+                                                                        </SelectTrigger>
+                                                                    </FormControl>
+                                                                    <SelectContent>
+                                                                        {baseDomains.map(
+                                                                            (
+                                                                                option
+                                                                            ) => (
+                                                                                <SelectItem
+                                                                                    key={
+                                                                                        option.domainId
+                                                                                    }
+                                                                                    value={
+                                                                                        option.domainId
+                                                                                    }
+                                                                                >
+                                                                                    {
+                                                                                        option.baseDomain
+                                                                                    }
+                                                                                </SelectItem>
+                                                                            )
+                                                                        )}
+                                                                    </SelectContent>
+                                                                </Select>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+                                                )}
+                                            </div>
+                                        </>
                                     )}
-                                />
-                            </form>
-                        </Form>
-                    </SettingsSectionForm>
-                </SettingsSectionBody>
 
-                <SettingsSectionFooter>
-                    <Button
-                        type="submit"
-                        loading={transferLoading}
-                        disabled={transferLoading}
-                        form="transfer-form"
-                    >
-                        Transfer Resource
-                    </Button>
-                </SettingsSectionFooter>
-            </SettingsSection>
-        </SettingsContainer>
+                                    {!resource.http && (
+                                        <FormField
+                                            control={form.control}
+                                            name="proxyPort"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        Port Number
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            type="number"
+                                                            value={
+                                                                field.value ??
+                                                                ""
+                                                            }
+                                                            onChange={(e) =>
+                                                                field.onChange(
+                                                                    e.target
+                                                                        .value
+                                                                        ? parseInt(
+                                                                              e
+                                                                                  .target
+                                                                                  .value
+                                                                          )
+                                                                        : null
+                                                                )
+                                                            }
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    )}
+                                </form>
+                            </Form>
+                        </SettingsSectionForm>
+                    </SettingsSectionBody>
+
+                    <SettingsSectionFooter>
+                        <Button
+                            type="submit"
+                            loading={saveLoading}
+                            disabled={saveLoading}
+                            form="general-settings-form"
+                        >
+                            Save Settings
+                        </Button>
+                    </SettingsSectionFooter>
+                </SettingsSection>
+
+                <SettingsSection>
+                    <SettingsSectionHeader>
+                        <SettingsSectionTitle>
+                            Transfer Resource
+                        </SettingsSectionTitle>
+                        <SettingsSectionDescription>
+                            Transfer this resource to a different site
+                        </SettingsSectionDescription>
+                    </SettingsSectionHeader>
+
+                    <SettingsSectionBody>
+                        <SettingsSectionForm>
+                            <Form {...transferForm}>
+                                <form
+                                    onSubmit={transferForm.handleSubmit(
+                                        onTransfer
+                                    )}
+                                    className="space-y-4"
+                                    id="transfer-form"
+                                >
+                                    <FormField
+                                        control={transferForm.control}
+                                        name="siteId"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>
+                                                    Destination Site
+                                                </FormLabel>
+                                                <Popover
+                                                    open={open}
+                                                    onOpenChange={setOpen}
+                                                >
+                                                    <PopoverTrigger asChild>
+                                                        <FormControl>
+                                                            <Button
+                                                                variant="outline"
+                                                                role="combobox"
+                                                                className={cn(
+                                                                    "w-full justify-between",
+                                                                    !field.value &&
+                                                                        "text-muted-foreground"
+                                                                )}
+                                                            >
+                                                                {field.value
+                                                                    ? sites.find(
+                                                                          (
+                                                                              site
+                                                                          ) =>
+                                                                              site.siteId ===
+                                                                              field.value
+                                                                      )?.name
+                                                                    : "Select site"}
+                                                                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                            </Button>
+                                                        </FormControl>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-full p-0">
+                                                        <Command>
+                                                            <CommandInput
+                                                                placeholder="Search sites"
+                                                                className="h-9"
+                                                            />
+                                                            <CommandEmpty>
+                                                                No sites found.
+                                                            </CommandEmpty>
+                                                            <CommandGroup>
+                                                                {sites.map(
+                                                                    (site) => (
+                                                                        <CommandItem
+                                                                            value={`${site.name}:${site.siteId}`}
+                                                                            key={
+                                                                                site.siteId
+                                                                            }
+                                                                            onSelect={() => {
+                                                                                transferForm.setValue(
+                                                                                    "siteId",
+                                                                                    site.siteId
+                                                                                );
+                                                                                setOpen(
+                                                                                    false
+                                                                                );
+                                                                            }}
+                                                                        >
+                                                                            {
+                                                                                site.name
+                                                                            }
+                                                                            <CheckIcon
+                                                                                className={cn(
+                                                                                    "ml-auto h-4 w-4",
+                                                                                    site.siteId ===
+                                                                                        field.value
+                                                                                        ? "opacity-100"
+                                                                                        : "opacity-0"
+                                                                                )}
+                                                                            />
+                                                                        </CommandItem>
+                                                                    )
+                                                                )}
+                                                            </CommandGroup>
+                                                        </Command>
+                                                    </PopoverContent>
+                                                </Popover>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </form>
+                            </Form>
+                        </SettingsSectionForm>
+                    </SettingsSectionBody>
+
+                    <SettingsSectionFooter>
+                        <Button
+                            type="submit"
+                            loading={transferLoading}
+                            disabled={transferLoading}
+                            form="transfer-form"
+                        >
+                            Transfer Resource
+                        </Button>
+                    </SettingsSectionFooter>
+                </SettingsSection>
+            </SettingsContainer>
+        )
     );
 }

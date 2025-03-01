@@ -29,10 +29,8 @@ import {
     CredenzaTitle
 } from "@app/components/Credenza";
 import { toast } from "@app/hooks/useToast";
-import { formatAxiosError } from "@app/lib/api";;
+import { formatAxiosError } from "@app/lib/api";
 import { useUserContext } from "@app/hooks/useUserContext";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "./ui/input-otp";
-import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
 import { CheckCircle2 } from "lucide-react";
 
 const disableSchema = z.object({
@@ -152,36 +150,7 @@ export default function Disable2FaForm({ open, setOpen }: Disable2FaProps) {
                                                     Authenticator Code
                                                 </FormLabel>
                                                 <FormControl>
-                                                    <InputOTP
-                                                        maxLength={6}
-                                                        {...field}
-                                                        pattern={
-                                                            REGEXP_ONLY_DIGITS_AND_CHARS
-                                                        }
-                                                    >
-                                                        <InputOTPGroup>
-                                                            <InputOTPSlot
-                                                                index={0}
-                                                            />
-                                                            <InputOTPSlot
-                                                                index={1}
-                                                            />
-                                                            <InputOTPSlot
-                                                                index={2}
-                                                            />
-                                                        </InputOTPGroup>
-                                                        <InputOTPGroup>
-                                                            <InputOTPSlot
-                                                                index={3}
-                                                            />
-                                                            <InputOTPSlot
-                                                                index={4}
-                                                            />
-                                                            <InputOTPSlot
-                                                                index={5}
-                                                            />
-                                                        </InputOTPGroup>
-                                                    </InputOTP>
+                                                    <Input {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -210,6 +179,9 @@ export default function Disable2FaForm({ open, setOpen }: Disable2FaProps) {
                     )}
                 </CredenzaBody>
                 <CredenzaFooter>
+                    <CredenzaClose asChild>
+                        <Button variant="outline">Close</Button>
+                    </CredenzaClose>
                     {step === "password" && (
                         <Button
                             type="submit"
@@ -220,9 +192,6 @@ export default function Disable2FaForm({ open, setOpen }: Disable2FaProps) {
                             Disable 2FA
                         </Button>
                     )}
-                    <CredenzaClose asChild>
-                        <Button variant="outline">Close</Button>
-                    </CredenzaClose>
                 </CredenzaFooter>
             </CredenzaContent>
         </Credenza>

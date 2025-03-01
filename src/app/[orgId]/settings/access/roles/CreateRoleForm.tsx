@@ -7,7 +7,7 @@ import {
     FormField,
     FormItem,
     FormLabel,
-    FormMessage,
+    FormMessage
 } from "@app/components/ui/form";
 import { Input } from "@app/components/ui/input";
 import { toast } from "@app/hooks/useToast";
@@ -24,11 +24,11 @@ import {
     CredenzaDescription,
     CredenzaFooter,
     CredenzaHeader,
-    CredenzaTitle,
+    CredenzaTitle
 } from "@app/components/Credenza";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { CreateRoleBody, CreateRoleResponse } from "@server/routers/role";
-import { formatAxiosError } from "@app/lib/api";;
+import { formatAxiosError } from "@app/lib/api";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 
@@ -40,13 +40,13 @@ type CreateRoleFormProps = {
 
 const formSchema = z.object({
     name: z.string({ message: "Name is required" }).max(32),
-    description: z.string().max(255).optional(),
+    description: z.string().max(255).optional()
 });
 
 export default function CreateRoleForm({
     open,
     setOpen,
-    afterCreate,
+    afterCreate
 }: CreateRoleFormProps) {
     const { org } = useOrgContext();
 
@@ -58,8 +58,8 @@ export default function CreateRoleForm({
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: "",
-            description: "",
-        },
+            description: ""
+        }
     });
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -70,7 +70,7 @@ export default function CreateRoleForm({
                 `/org/${org?.org.orgId}/role`,
                 {
                     name: values.name,
-                    description: values.description,
+                    description: values.description
                 } as CreateRoleBody
             )
             .catch((e) => {
@@ -80,7 +80,7 @@ export default function CreateRoleForm({
                     description: formatAxiosError(
                         e,
                         "An error occurred while creating the role."
-                    ),
+                    )
                 });
             });
 
@@ -88,7 +88,7 @@ export default function CreateRoleForm({
             toast({
                 variant: "default",
                 title: "Role created",
-                description: "The role has been successfully created.",
+                description: "The role has been successfully created."
             });
 
             if (open) {
@@ -135,9 +135,7 @@ export default function CreateRoleForm({
                                         <FormItem>
                                             <FormLabel>Role Name</FormLabel>
                                             <FormControl>
-                                                <Input
-                                                    {...field}
-                                                />
+                                                <Input {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -150,9 +148,7 @@ export default function CreateRoleForm({
                                         <FormItem>
                                             <FormLabel>Description</FormLabel>
                                             <FormControl>
-                                                <Input
-                                                    {...field}
-                                                />
+                                                <Input {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -162,6 +158,9 @@ export default function CreateRoleForm({
                         </Form>
                     </CredenzaBody>
                     <CredenzaFooter>
+                        <CredenzaClose asChild>
+                            <Button variant="outline">Close</Button>
+                        </CredenzaClose>
                         <Button
                             type="submit"
                             form="create-role-form"
@@ -170,9 +169,6 @@ export default function CreateRoleForm({
                         >
                             Create Role
                         </Button>
-                        <CredenzaClose asChild>
-                            <Button variant="outline">Close</Button>
-                        </CredenzaClose>
                     </CredenzaFooter>
                 </CredenzaContent>
             </Credenza>

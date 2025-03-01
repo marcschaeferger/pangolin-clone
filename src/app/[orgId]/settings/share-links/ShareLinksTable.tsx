@@ -273,7 +273,21 @@ export default function ShareLinksTable({
                 }
                 return "Never";
             }
+        },
+                {
+            id: "delete",
+            cell: ({ row }) => (
+                <div className="flex items-center justify-end space-x-2">
+                    <Button
+                        variant="outlinePrimary"
+                        onClick={() => deleteSharelink(row.original.accessTokenId)}
+                    >
+                        Delete
+                    </Button>
+                </div>
+            )
         }
+
     ];
 
     return (

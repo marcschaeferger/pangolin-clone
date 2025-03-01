@@ -94,7 +94,7 @@ enum RuleAction {
 enum RuleMatch {
     PATH = "Path",
     IP = "IP",
-    CIDR = "IP Range",
+    CIDR = "IP Range"
 }
 
 export default function ResourceRules(props: {
@@ -623,7 +623,7 @@ export default function ResourceRules(props: {
                             onSubmit={addRuleForm.handleSubmit(addRule)}
                             className="space-y-4"
                         >
-                            <div className="grid grid-cols-3 gap-4">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-end">
                                 <FormField
                                     control={addRuleForm.control}
                                     name="action"
@@ -711,14 +711,14 @@ export default function ResourceRules(props: {
                                         </FormItem>
                                     )}
                                 />
+                                <Button
+                                    type="submit"
+                                    variant="outlinePrimary"
+                                    disabled={!rulesEnabled}
+                                >
+                                    Add Rule
+                                </Button>
                             </div>
-                            <Button
-                                type="submit"
-                                variant="outline"
-                                disabled={!rulesEnabled}
-                            >
-                                Add Rule
-                            </Button>
                         </form>
                     </Form>
                     <TableContainer>
