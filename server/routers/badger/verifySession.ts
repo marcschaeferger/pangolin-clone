@@ -384,7 +384,7 @@ async function createAccessTokenSession(
     tokenItem: ResourceAccessToken
 ) {
     const token = generateSessionToken();
-    await createResourceSession({
+    const sess = await createResourceSession({
         resourceId: resource.resourceId,
         token,
         accessTokenId: tokenItem.accessTokenId,
@@ -397,7 +397,8 @@ async function createAccessTokenSession(
         cookieName,
         resource.fullDomain!,
         token,
-        !resource.ssl
+        !resource.ssl,
+        new Date(sess.expiresAt)
     );
     res.appendHeader("Set-Cookie", cookie);
     logger.debug("Access token is valid, creating new session");

@@ -608,7 +608,6 @@ export default function GeneralForm() {
                                                         <Command>
                                                             <CommandInput
                                                                 placeholder="Search sites"
-                                                                className="h-9"
                                                             />
                                                             <CommandEmpty>
                                                                 No sites found.
