@@ -149,6 +149,7 @@ export default function CreateSiteForm({
                         setSiteDefaults(res.data.data);
                     }
                 });
+            await new Promise((resolve) => setTimeout(resolve, 200));
 
             setLoadingPage(false);
         };
@@ -270,7 +271,7 @@ PersistentKeepalive = 5`
     const newtConfigDockerRun = `docker run -it fosrl/newt --id ${siteDefaults?.newtId} --secret ${siteDefaults?.newtSecret} --endpoint ${env.app.dashboardUrl}`;
 
     return loadingPage ? (
-        <LoaderPlaceholder height="300px"/>
+        <LoaderPlaceholder height="300px" />
     ) : (
         <div className="space-y-4">
             <Form {...form}>
@@ -344,7 +345,6 @@ PersistentKeepalive = 5`
                             rel="noopener noreferrer"
                         >
                             <span>
-                                {" "}
                                 Learn how to install Newt on your system
                             </span>
                             <SquareArrowOutUpRight size={14} />
@@ -371,12 +371,16 @@ PersistentKeepalive = 5`
                                         onOpenChange={setIsOpen}
                                         className="space-y-2"
                                     >
-                                        <div className="mx-auto">
+                                        <div className="mx-auto mb-2">
                                             <CopyTextBox
                                                 text={newtConfig}
                                                 wrapText={false}
                                             />
                                         </div>
+                                        <span className="text-sm text-muted-foreground">
+                                            You will only be able to see the
+                                            configuration once.
+                                        </span>
                                         <div className="flex items-center justify-between space-x-4">
                                             <CollapsibleTrigger asChild>
                                                 <Button
@@ -418,10 +422,6 @@ PersistentKeepalive = 5`
                                         </CollapsibleContent>
                                     </Collapsible>
                                 </div>
-                                <span className="text-sm text-muted-foreground">
-                                    You will only be able to see the
-                                    configuration once.
-                                </span>
                             </>
                         ) : null}
                     </div>

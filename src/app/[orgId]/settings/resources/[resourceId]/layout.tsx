@@ -130,7 +130,7 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
             <OrgProvider org={org}>
                 <ResourceProvider resource={resource} authInfo={authInfo}>
                     <SidebarSettings sidebarNavItems={sidebarNavItems}>
-                        <div className="mb-8">
+                        <div className="mb-4">
                             <ResourceInfoBox />
                         </div>
                         {children}

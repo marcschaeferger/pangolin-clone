@@ -322,14 +322,21 @@ export default function GeneralForm() {
                                                                 }
                                                                 onValueChange={(
                                                                     val
-                                                                ) =>
+                                                                ) => {
                                                                     setDomainType(
                                                                         val ===
                                                                             "basedomain"
                                                                             ? "basedomain"
                                                                             : "subdomain"
-                                                                    )
-                                                                }
+                                                                    );
+                                                                    form.setValue(
+                                                                        "isBaseDomain",
+                                                                        val ===
+                                                                            "basedomain"
+                                                                            ? true
+                                                                            : false
+                                                                    );
+                                                                }}
                                                             >
                                                                 <FormControl>
                                                                     <SelectTrigger>
@@ -359,7 +366,7 @@ export default function GeneralForm() {
                                                             Subdomain
                                                         </FormLabel>
                                                         <div className="flex">
-                                                            <div className="w-1/2 mr-1">
+                                                            <div className="w-1/2">
                                                                 <FormField
                                                                     control={
                                                                         form.control
@@ -372,6 +379,7 @@ export default function GeneralForm() {
                                                                             <FormControl>
                                                                                 <Input
                                                                                     {...field}
+                                                                                    className="border-r-0 rounded-r-none"
                                                                                 />
                                                                             </FormControl>
                                                                             <FormMessage />
@@ -401,7 +409,7 @@ export default function GeneralForm() {
                                                                                 }
                                                                             >
                                                                                 <FormControl>
-                                                                                    <SelectTrigger>
+                                                                                    <SelectTrigger className="rounded-l-none">
                                                                                         <SelectValue />
                                                                                     </SelectTrigger>
                                                                                 </FormControl>

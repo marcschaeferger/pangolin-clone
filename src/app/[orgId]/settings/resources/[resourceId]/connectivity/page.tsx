@@ -486,7 +486,7 @@ export default function ReverseProxyTargets(props: {
                             onSubmit={addTargetForm.handleSubmit(addTarget)}
                             className="space-y-4"
                         >
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-end">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-start">
                                 {resource.http && (
                                     <FormField
                                         control={addTargetForm.control}
@@ -562,7 +562,7 @@ export default function ReverseProxyTargets(props: {
                                         </FormItem>
                                     )}
                                 />
-                                <Button type="submit" variant="outlinePrimary">
+                                <Button type="submit" variant="outlinePrimary" className="mt-8">
                                     Add Target
                                 </Button>
                             </div>

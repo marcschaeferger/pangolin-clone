@@ -19,7 +19,7 @@ export function SettingsSectionTitle({ children }: { children: React.ReactNode }
 }
 
 export function SettingsSectionDescription({ children }: { children: React.ReactNode }) {
-    return <p className="text-muted-foreground">{children}</p>
+    return <p className="text-muted-foreground text-sm">{children}</p>
 }
 
 export function SettingsSectionBody({ children }: { children: React.ReactNode }) {

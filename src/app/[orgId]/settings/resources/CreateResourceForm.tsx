@@ -67,6 +67,7 @@ import { RadioGroup, RadioGroupItem } from "@app/components/ui/radio-group";
 import { Label } from "@app/components/ui/label";
 import { ListDomainsResponse } from "@server/routers/domain";
 import LoaderPlaceholder from "@app/components/PlaceHolderLoader";
+import { StrategySelect } from "@app/components/StrategySelect";
 
 const createResourceFormSchema = z
     .object({
@@ -222,6 +223,7 @@ export default function CreateResourceForm({
 
             await fetchSites();
             await fetchDomains();
+            await new Promise((r) => setTimeout(r, 200));
 
             setLoadingPage(false);
         };
@@ -241,7 +243,7 @@ export default function CreateResourceForm({
                     protocol: data.protocol,
                     proxyPort: data.http ? undefined : data.proxyPort,
                     siteId: data.siteId,
-                    isBaseDomain: data.http ? undefined : data.isBaseDomain
+                    isBaseDomain: data.http ? data.isBaseDomain : undefined
                 }
             )
             .catch((e) => {
@@ -263,6 +265,7 @@ export default function CreateResourceForm({
                 goToResource(id);
             } else {
                 setShowSnippets(true);
+                router.refresh();
             }
         }
     }
@@ -271,6 +274,21 @@ export default function CreateResourceForm({
         // navigate to the resource page
         router.push(`/${orgId}/settings/resources/${id || resourceId}`);
     }
+
+    const launchOptions = [
+        {
+            id: "http",
+            title: "HTTPS Resource",
+            description:
+                "Proxy requests to your app over HTTPS using a subdomain or base domain."
+        },
+        {
+            id: "raw",
+            title: "Raw TCP/UDP Resource",
+            description:
+                "Proxy requests to your app over TCP/UDP using a port number."
+        }
+    ];
 
     return (
         <>
@@ -293,7 +311,7 @@ export default function CreateResourceForm({
                     </CredenzaHeader>
                     <CredenzaBody>
                         {loadingPage ? (
-                            <LoaderPlaceholder height="500px" />
+                            <LoaderPlaceholder height="300px" />
                         ) : (
                             <div>
                                 {!showSnippets && (
@@ -305,59 +323,6 @@ export default function CreateResourceForm({
                                             className="space-y-4"
                                             id="create-resource-form"
                                         >
-                                            {!env.flags.allowRawResources || (
-                                                <FormField
-                                                    control={form.control}
-                                                    name="http"
-                                                    render={({ field }) => (
-                                                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                                            <div className="space-y-0.5">
-                                                                <FormLabel className="text-base">
-                                                                    HTTP
-                                                                    Resource
-                                                                </FormLabel>
-                                                                <FormDescription>
-                                                                    Toggle if
-                                                                    this is an
-                                                                    HTTP
-                                                                    resource or
-                                                                    a raw
-                                                                    TCP/UDP
-                                                                    resource.
-                                                                </FormDescription>
-                                                            </div>
-                                                            <FormControl>
-                                                                <Switch
-                                                                    checked={
-                                                                        field.value
-                                                                    }
-                                                                    onCheckedChange={
-                                                                        field.onChange
-                                                                    }
-                                                                />
-                                                            </FormControl>
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            )}
-
-                                            {!form.watch("http") && (
-                                                <Link
-                                                    className="text-sm text-primary flex items-center gap-1"
-                                                    href="https://docs.fossorial.io/Getting%20Started/tcp-udp"
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                >
-                                                    <span>
-                                                        Learn how to configure
-                                                        TCP/UDP resources
-                                                    </span>
-                                                    <SquareArrowOutUpRight
-                                                        size={14}
-                                                    />
-                                                </Link>
-                                            )}
-
                                             <FormField
                                                 control={form.control}
                                                 name="name"
@@ -373,6 +338,121 @@ export default function CreateResourceForm({
                                                     </FormItem>
                                                 )}
                                             />
+
+                                            <FormField
+                                                control={form.control}
+                                                name="siteId"
+                                                render={({ field }) => (
+                                                    <FormItem className="flex flex-col">
+                                                        <FormLabel>
+                                                            Site
+                                                        </FormLabel>
+                                                        <Popover>
+                                                            <PopoverTrigger
+                                                                asChild
+                                                            >
+                                                                <FormControl>
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        role="combobox"
+                                                                        className={cn(
+                                                                            "justify-between",
+                                                                            !field.value &&
+                                                                                "text-muted-foreground"
+                                                                        )}
+                                                                    >
+                                                                        {field.value
+                                                                            ? sites.find(
+                                                                                  (
+                                                                                      site
+                                                                                  ) =>
+                                                                                      site.siteId ===
+                                                                                      field.value
+                                                                              )
+                                                                                  ?.name
+                                                                            : "Select site"}
+                                                                        <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                                    </Button>
+                                                                </FormControl>
+                                                            </PopoverTrigger>
+                                                            <PopoverContent className="p-0">
+                                                                <Command>
+                                                                    <CommandInput placeholder="Search site" />
+                                                                    <CommandList>
+                                                                        <CommandEmpty>
+                                                                            No
+                                                                            site
+                                                                            found.
+                                                                        </CommandEmpty>
+                                                                        <CommandGroup>
+                                                                            {sites.map(
+                                                                                (
+                                                                                    site
+                                                                                ) => (
+                                                                                    <CommandItem
+                                                                                        value={`${site.siteId}:${site.name}:${site.niceId}`}
+                                                                                        key={
+                                                                                            site.siteId
+                                                                                        }
+                                                                                        onSelect={() => {
+                                                                                            form.setValue(
+                                                                                                "siteId",
+                                                                                                site.siteId
+                                                                                            );
+                                                                                        }}
+                                                                                    >
+                                                                                        <CheckIcon
+                                                                                            className={cn(
+                                                                                                "mr-2 h-4 w-4",
+                                                                                                site.siteId ===
+                                                                                                    field.value
+                                                                                                    ? "opacity-100"
+                                                                                                    : "opacity-0"
+                                                                                            )}
+                                                                                        />
+                                                                                        {
+                                                                                            site.name
+                                                                                        }
+                                                                                    </CommandItem>
+                                                                                )
+                                                                            )}
+                                                                        </CommandGroup>
+                                                                    </CommandList>
+                                                                </Command>
+                                                            </PopoverContent>
+                                                        </Popover>
+                                                        <FormMessage />
+                                                        <FormDescription>
+                                                            This site will
+                                                            provide connectivity
+                                                            to the resource.
+                                                        </FormDescription>
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            {!env.flags.allowRawResources || (
+                                                <div className="space-y-2">
+                                                    <FormLabel>
+                                                        Resource Type
+                                                    </FormLabel>
+                                                    <StrategySelect
+                                                        options={launchOptions}
+                                                        defaultValue="http"
+                                                        onChange={(value) =>
+                                                            form.setValue(
+                                                                "http",
+                                                                value === "http"
+                                                            )
+                                                        }
+                                                    />
+                                                    <FormDescription>
+                                                        You cannot change the
+                                                        type of resource after
+                                                        creation.
+                                                    </FormDescription>
+                                                </div>
+                                            )}
 
                                             {form.watch("http") &&
                                                 env.flags
@@ -391,14 +471,19 @@ export default function CreateResourceForm({
                                                                     }
                                                                     onValueChange={(
                                                                         val
-                                                                    ) =>
+                                                                    ) => {
                                                                         setDomainType(
                                                                             val ===
                                                                                 "basedomain"
                                                                                 ? "basedomain"
                                                                                 : "subdomain"
-                                                                        )
-                                                                    }
+                                                                        );
+                                                                        form.setValue(
+                                                                            "isBaseDomain",
+                                                                            val ===
+                                                                                "basedomain"
+                                                                        );
+                                                                    }}
                                                                 >
                                                                     <FormControl>
                                                                         <SelectTrigger>
@@ -430,7 +515,7 @@ export default function CreateResourceForm({
                                                                 Subdomain
                                                             </FormLabel>
                                                             <div className="flex">
-                                                                <div className="w-1/2 mr-1">
+                                                                <div className="w-1/2">
                                                                     <FormField
                                                                         control={
                                                                             form.control
@@ -443,6 +528,7 @@ export default function CreateResourceForm({
                                                                                 <FormControl>
                                                                                     <Input
                                                                                         {...field}
+                                                                                        className="border-r-0 rounded-r-none"
                                                                                     />
                                                                                 </FormControl>
                                                                                 <FormMessage />
@@ -472,7 +558,7 @@ export default function CreateResourceForm({
                                                                                     }
                                                                                 >
                                                                                     <FormControl>
-                                                                                        <SelectTrigger>
+                                                                                        <SelectTrigger className="rounded-l-none">
                                                                                             <SelectValue />
                                                                                         </SelectTrigger>
                                                                                     </FormControl>
@@ -642,98 +728,6 @@ export default function CreateResourceForm({
                                                     />
                                                 </>
                                             )}
-
-                                            <FormField
-                                                control={form.control}
-                                                name="siteId"
-                                                render={({ field }) => (
-                                                    <FormItem className="flex flex-col">
-                                                        <FormLabel>
-                                                            Site
-                                                        </FormLabel>
-                                                        <Popover>
-                                                            <PopoverTrigger
-                                                                asChild
-                                                            >
-                                                                <FormControl>
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        role="combobox"
-                                                                        className={cn(
-                                                                            "justify-between",
-                                                                            !field.value &&
-                                                                                "text-muted-foreground"
-                                                                        )}
-                                                                    >
-                                                                        {field.value
-                                                                            ? sites.find(
-                                                                                  (
-                                                                                      site
-                                                                                  ) =>
-                                                                                      site.siteId ===
-                                                                                      field.value
-                                                                              )
-                                                                                  ?.name
-                                                                            : "Select site"}
-                                                                        <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                                                    </Button>
-                                                                </FormControl>
-                                                            </PopoverTrigger>
-                                                            <PopoverContent className="p-0">
-                                                                <Command>
-                                                                    <CommandInput placeholder="Search site" />
-                                                                    <CommandList>
-                                                                        <CommandEmpty>
-                                                                            No
-                                                                            site
-                                                                            found.
-                                                                        </CommandEmpty>
-                                                                        <CommandGroup>
-                                                                            {sites.map(
-                                                                                (
-                                                                                    site
-                                                                                ) => (
-                                                                                    <CommandItem
-                                                                                        value={`${site.siteId}:${site.name}:${site.niceId}`}
-                                                                                        key={
-                                                                                            site.siteId
-                                                                                        }
-                                                                                        onSelect={() => {
-                                                                                            form.setValue(
-                                                                                                "siteId",
-                                                                                                site.siteId
-                                                                                            );
-                                                                                        }}
-                                                                                    >
-                                                                                        <CheckIcon
-                                                                                            className={cn(
-                                                                                                "mr-2 h-4 w-4",
-                                                                                                site.siteId ===
-                                                                                                    field.value
-                                                                                                    ? "opacity-100"
-                                                                                                    : "opacity-0"
-                                                                                            )}
-                                                                                        />
-                                                                                        {
-                                                                                            site.name
-                                                                                        }
-                                                                                    </CommandItem>
-                                                                                )
-                                                                            )}
-                                                                        </CommandGroup>
-                                                                    </CommandList>
-                                                                </Command>
-                                                            </PopoverContent>
-                                                        </Popover>
-                                                        <FormMessage />
-                                                        <FormDescription>
-                                                            This site will
-                                                            provide connectivity
-                                                            to the resource.
-                                                        </FormDescription>
-                                                    </FormItem>
-                                                )}
-                                            />
                                         </form>
                                     </Form>
                                 )}
@@ -775,8 +769,8 @@ export default function CreateResourceForm({
                                             rel="noopener noreferrer"
                                         >
                                             <span>
-                                                Make sure to follow the full
-                                                guide
+                                                Learn how to configure TCP/UDP
+                                                resources
                                             </span>
                                             <SquareArrowOutUpRight size={14} />
                                         </Link>

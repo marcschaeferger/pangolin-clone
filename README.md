@@ -25,6 +25,10 @@ _Your own self-hosted zero trust tunnel._
       <a href="https://docs.fossorial.io">
         Full Documentation
       </a>
+      <span> | </span>
+      <a href="mailto:numbat@fossorial.io">
+        Contact Us
+      </a>
   </h5>
 </div>
 
@@ -68,41 +72,17 @@ _Sites page of Pangolin dashboard (dark mode) showing multiple tunnels connected
 ### Easy Deployment
 
 -   Run on any cloud provider or on-premises.
--   Docker Compose based setup for simplified deployment.
+-   **Docker Compose based setup** for simplified deployment.
 -   Future-proof installation script for streamlined setup and feature additions.
--   Use your preferred WireGuard client to connect, or use Newt, our custom user space client for the best experience.
+-   Use any WireGuard client to connect, or use **Newt, our custom user space client** for the best experience.
 
 ### Modular Design
 
--   Extend functionality with existing [Traefik](https://github.com/traefik/traefik) plugins, such as [Fail2Ban](https://plugins.traefik.io/plugins/628c9ebcffc0cd18356a979f/fail2-ban) or [CrowdSec](https://plugins.traefik.io/plugins/6335346ca4caa9ddeffda116/crowdsec-bouncer-traefik-plugin).
+-   Extend functionality with existing [Traefik](https://github.com/traefik/traefik) plugins, such as [CrowdSec](https://plugins.traefik.io/plugins/6335346ca4caa9ddeffda116/crowdsec-bouncer-traefik-plugin) and [Geoblock](github.com/PascalMinder/geoblock).
+    - **Automatically install and configure Crowdsec via Pangolin's installer script.**
 -   Attach as many sites to the central server as you wish.
 
-## Screenshots
-
-<div align="center">
-  <table>
-  <tr>
-      <td align="center"><img src="public/screenshots/sites.png" alt="Sites Example" width="200"/></td>
-      <td align="center"><img src="public/screenshots/users.png" alt="Users Example" width="200"/></td>
-      <td align="center"><img src="public/screenshots/share-link.png" alt="Share Link Example" width="200"/></td>
-    </tr>
-    <tr>
-      <td align="center"><b>Sites</b></td>
-      <td align="center"><b>Users</b></td>
-      <td align="center"><b>Share Link</b></td>
-    </tr>
-    <tr>
-      <td align="center"><img src="public/screenshots/auth.png" alt="Authentication Example" width="200"/></td>
-      <td align="center"><img src="public/screenshots/connectivity.png" alt="Connectivity Example" width="200"/></td>
-      <td align="center"></td>
-    </tr>
-    <tr>
-      <td align="center"><b>Authentication</b></td>
-      <td align="center"><b>Connectivity</b></td>
-      <td align="center"><b></b></td>
-    </tr>
-  </table>
-</div>
+<img src="public/screenshots/collage.png" alt="Collage"/>
 
 ## Deployment and Usage Example
 
@@ -112,7 +92,7 @@ _Sites page of Pangolin dashboard (dark mode) showing multiple tunnels connected
    
 > [!TIP]
 > Many of our users have had a great experience with [RackNerd](https://my.racknerd.com/aff.php?aff=13788). Depending on promotions, you can likely get a **VPS with 1 vCPU, 1GB RAM, and ~20GB SSD for just around $12/year**. That's a great deal!
-> We are part of the [RackNerd](https://my.racknerd.com/aff.php?aff=13788) affiliate program, so if you sign up using [our link](https://my.racknerd.com/aff.php?aff=13788), we receive a small commission which helps us maintain the project and keep it free for everyone.
+> We are part of the [RackNerd](https://my.racknerd.com/aff.php?aff=13788) affiliate program, so if you purchase through [our link](https://my.racknerd.com/aff.php?aff=13788), we receive a small commission which helps us maintain the project and keep it free for everyone.
 
 2. **Domain Configuration**:
 
@@ -123,16 +103,21 @@ _Sites page of Pangolin dashboard (dark mode) showing multiple tunnels connected
     - Install Newt or use another WireGuard client on private sites.
     - Automatically establish a connection from these sites to the central server.
 
-4. **Configure Users & Roles**
+4. **Expose Resources**:
 
-    - Define organizations and invite users.
-    - Implement user- or role-based permissions to control resource access.
+    - Add resources to the central server and configure access control rules.
+    - Access these resources securely from anywhere.
 
 **Use Case Example - Bypassing Port Restrictions in Home Lab**:  
  Imagine private sites where the ISP restricts port forwarding. By connecting these sites to Pangolin via WireGuard, you can securely expose HTTP and HTTPS resources on the private network without any networking complexity.
 
 **Use Case Example - IoT Networks**:  
  IoT networks are often fragmented and difficult to manage. By deploying Pangolin on a central server, you can connect all your IoT sites via Newt or another WireGuard client. This creates a simple, secure, and centralized way to access IoT resources without the need for intricate networking setups.
+
+
+<img src="public/screenshots/resources.png" alt="Resources"/>
+
+_Resources page of Pangolin dashboard (dark mode) showing HTTPS and TCP resources with access control rules._
 
 ## Similar Projects and Inspirations
 
