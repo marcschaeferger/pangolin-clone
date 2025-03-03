@@ -160,7 +160,7 @@ const configSchema = z.object({
             smtp_user: z.string().optional(),
             smtp_pass: z.string().optional(),
             smtp_secure: z.boolean().optional(),
-            smtp_tls_reject_unathorized: z.boolean().optional(),
+            smtp_tls_reject_unauthorized: z.boolean().optional(),
             no_reply: z.string().email().optional()
         })
         .optional(),

@@ -24,9 +24,9 @@ function createEmailClient() {
         }
     } as SMTPTransport.Options;
 
-    if (emailConfig.smtp_tls_reject_unathorized !== undefined) {
+    if (emailConfig.smtp_tls_reject_unauthorized !== undefined) {
         settings.tls = {
-            rejectUnauthorized: emailConfig.smtp_tls_reject_unathorized
+            rejectUnauthorized: emailConfig.smtp_tls_reject_unauthorized
         };
     }
 
