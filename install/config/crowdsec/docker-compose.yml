@@ -22,10 +22,5 @@ services:
       - ./config/crowdsec_logs/syslog:/var/log/syslog:ro # syslog
       - ./config/crowdsec_logs:/var/log # crowdsec logs
       - ./config/traefik/logs:/var/log/traefik # traefik logs
-    ports:
-      - 6060:6060 # metrics endpoint for prometheus
-    expose:
-      - 6060 # metrics endpoint for prometheus
-      - 7422 # appsec waf endpoint
     restart: unless-stopped
     command: -t # Add test config flag to verify configuration
