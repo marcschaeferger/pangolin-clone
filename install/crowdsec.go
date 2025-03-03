@@ -82,6 +82,11 @@ func installCrowdsec(config Config) error {
 		return fmt.Errorf("failed to restart containers: %v", err)
 	}
 
+	if checkIfTextInFile("config/traefik/dynamic_config.yml", "PUT_YOUR_BOUNCER_KEY_HERE_OR_IT_WILL_NOT_WORK") {
+		fmt.Println("Failed to replace bouncer key! Please retrieve the key and replace it in the config/traefik/dynamic_config.yml file using the following command:")
+		fmt.Println("	docker exec crowdsec cscli bouncers add traefik-bouncer")
+	}
+
 	return nil
 }
 
@@ -118,4 +123,15 @@ func GetCrowdSecAPIKey() (string, error) {
 	}
 
 	return apiKey, nil
+}
+
+func checkIfTextInFile(file, text string) bool {
+	// Read file
+	content, err := os.ReadFile(file)
+	if err != nil {
+		return false
+	}
+
+	// Check for text
+	return bytes.Contains(content, []byte(text))
 }
