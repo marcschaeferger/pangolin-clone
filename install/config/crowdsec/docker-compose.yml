@@ -11,8 +11,6 @@ services:
       ENROLL_TAGS: docker
     healthcheck:
       test: ["CMD", "cscli", "capi", "status"]
-    depends_on:
-      - gerbil # Wait for gerbil to be healthy
     labels:
       - "traefik.enable=false" # Disable traefik for crowdsec
     volumes:
@@ -25,10 +23,8 @@ services:
       - ./config/crowdsec_logs:/var/log # crowdsec logs
       - ./config/traefik/logs:/var/log/traefik # traefik logs
     ports:
-      - 9090:9090 # port mapping for local firewall bouncers
       - 6060:6060 # metrics endpoint for prometheus
     expose:
-      - 9090 # http api for bouncers
       - 6060 # metrics endpoint for prometheus
       - 7422 # appsec waf endpoint
     restart: unless-stopped
