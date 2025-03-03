@@ -38,7 +38,8 @@ import {
     SettingsSectionHeader,
     SettingsSectionDescription,
     SettingsSectionBody,
-    SettingsSectionFooter
+    SettingsSectionFooter,
+    SettingsSectionForm
 } from "@app/components/Settings";
 import { SwitchInput } from "@app/components/SwitchInput";
 import { InfoPopup } from "@app/components/ui/info-popup";
@@ -438,6 +439,7 @@ export default function ResourceAuthenticationPage() {
                                                                 setActiveRolesTagIndex
                                                             }
                                                             placeholder="Select a role"
+                                                            size="sm"
                                                             tags={
                                                                 usersRolesForm.getValues()
                                                                     .roles
@@ -466,14 +468,6 @@ export default function ResourceAuthenticationPage() {
                                                                 true
                                                             }
                                                             sortTags={true}
-                                                            styleClasses={{
-                                                                tag: {
-                                                                    body: "bg-muted hover:bg-accent text-foreground py-2 px-3 rounded-full"
-                                                                },
-                                                                input: "text-base md:text-sm border-none bg-transparent text-inherit placeholder:text-inherit shadow-none",
-                                                                inlineTagsContainer:
-                                                                    "bg-transparent p-2"
-                                                            }}
                                                         />
                                                     </FormControl>
                                                     <FormMessage />
@@ -504,6 +498,7 @@ export default function ResourceAuthenticationPage() {
                                                                 usersRolesForm.getValues()
                                                                     .users
                                                             }
+                                                            size="sm"
                                                             setTags={(
                                                                 newUsers
                                                             ) => {
@@ -528,14 +523,6 @@ export default function ResourceAuthenticationPage() {
                                                                 true
                                                             }
                                                             sortTags={true}
-                                                            styleClasses={{
-                                                                tag: {
-                                                                    body: "bg-muted hover:bg-accent text-foreground py-2 px-3 rounded-full"
-                                                                },
-                                                                input: "text-base md:text-sm border-none bg-transparent text-inherit placeholder:text-inherit shadow-none",
-                                                                inlineTagsContainer:
-                                                                    "bg-transparent p-2"
-                                                            }}
                                                         />
                                                     </FormControl>
                                                     <FormMessage />
@@ -582,7 +569,7 @@ export default function ResourceAuthenticationPage() {
                                 </span>
                             </div>
                             <Button
-                                variant="outline"
+                                variant="outlinePrimary"
                                 onClick={
                                     authInfo.password
                                         ? removeResourcePassword
@@ -608,7 +595,7 @@ export default function ResourceAuthenticationPage() {
                                 </span>
                             </div>
                             <Button
-                                variant="outline"
+                                variant="outlinePrimary"
                                 onClick={
                                     authInfo.pincode
                                         ? removeResourcePincode
@@ -664,6 +651,7 @@ export default function ResourceAuthenticationPage() {
                                                             activeTagIndex={
                                                                 activeEmailTagIndex
                                                             }
+                                                            size={"sm"}
                                                             validateTag={(
                                                                 tag
                                                             ) => {
@@ -708,14 +696,6 @@ export default function ResourceAuthenticationPage() {
                                                                 false
                                                             }
                                                             sortTags={true}
-                                                            styleClasses={{
-                                                                tag: {
-                                                                    body: "bg-muted hover:bg-accent text-foreground py-2 px-3 rounded-full"
-                                                                },
-                                                                input: "text-base md:text-sm border-none bg-transparent text-inherit placeholder:text-inherit shadow-none",
-                                                                inlineTagsContainer:
-                                                                    "bg-transparent p-2"
-                                                            }}
                                                         />
                                                     </FormControl>
                                                     <FormDescription>

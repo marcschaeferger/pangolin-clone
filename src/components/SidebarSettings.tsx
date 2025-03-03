@@ -26,7 +26,7 @@ export function SidebarSettings({
                 <aside className="lg:w-1/5">
                     <SidebarNav items={sidebarNavItems} disabled={disabled} />
                 </aside>
-                <div className={`flex-1 ${limitWidth ? "lg:max-w-2xl" : ""}`}>
+                <div className={`flex-1 ${limitWidth ? "lg:max-w-2xl" : ""} space-y-6`}>
                     {children}
                 </div>
             </div>

@@ -64,7 +64,7 @@ export default async function UserLayoutProps(props: UserLayoutProps) {
                     </Breadcrumb>
                 </div>
 
-                <div className="space-y-0.5 select-none mb-6">
+                <div className="space-y-0.5 mb-6">
                     <h2 className="text-2xl font-bold tracking-tight">
                         User {user?.email}
                     </h2>
@@ -73,7 +73,6 @@ export default async function UserLayoutProps(props: UserLayoutProps) {
 
                 <SidebarSettings
                     sidebarNavItems={sidebarNavItems}
-                    limitWidth={true}
                 >
                     {children}
                 </SidebarSettings>

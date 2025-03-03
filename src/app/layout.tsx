@@ -37,11 +37,11 @@ export default async function RootLayout({
                 >
                     <EnvProvider env={pullEnv()}>
                         {/* Main content */}
-                        <div className="flex-grow">{children}</div>
+                        <div className="flex-grow pb-3 md:pb-0">{children}</div>
 
                         {/* Footer */}
-                        <footer className="w-full mt-12 py-3 mb-6 px-4">
-                            <div className="container mx-auto flex flex-wrap justify-center items-center h-3 space-x-4 text-sm text-neutral-400 dark:text-neutral-600 select-none">
+                        <footer className="hidden md:block w-full mt-12 py-3 mb-6 px-4">
+                            <div className="container mx-auto flex flex-wrap justify-center items-center h-3 space-x-4 text-sm text-neutral-400 dark:text-neutral-600">
                                 <div className="flex items-center space-x-2 whitespace-nowrap">
                                     <span>Pangolin</span>
                                 </div>

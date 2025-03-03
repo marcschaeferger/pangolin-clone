@@ -160,6 +160,7 @@ const configSchema = z.object({
             smtp_user: z.string().optional(),
             smtp_pass: z.string().optional(),
             smtp_secure: z.boolean().optional(),
+            smtp_tls_reject_unathorized: z.boolean().optional(),
             no_reply: z.string().email().optional()
         })
         .optional(),
@@ -184,7 +185,8 @@ const configSchema = z.object({
             disable_signup_without_invite: z.boolean().optional(),
             disable_user_create_org: z.boolean().optional(),
             allow_raw_resources: z.boolean().optional(),
-            allow_base_domain_resources: z.boolean().optional()
+            allow_base_domain_resources: z.boolean().optional(),
+            allow_local_sites: z.boolean().optional()
         })
         .optional()
 });

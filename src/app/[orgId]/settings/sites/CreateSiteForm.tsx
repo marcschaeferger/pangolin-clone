@@ -41,6 +41,7 @@ import Link from "next/link";
 import {
     ArrowUpRight,
     ChevronsUpDown,
+    Loader2,
     SquareArrowOutUpRight
 } from "lucide-react";
 import {
@@ -48,6 +49,7 @@ import {
     CollapsibleContent,
     CollapsibleTrigger
 } from "@app/components/ui/collapsible";
+import LoaderPlaceholder from "@app/components/PlaceHolderLoader";
 
 const createSiteFormSchema = z.object({
     name: z
@@ -97,6 +99,8 @@ export default function CreateSiteForm({
     const [siteDefaults, setSiteDefaults] =
         useState<PickSiteDefaultsResponse | null>(null);
 
+    const [loadingPage, setLoadingPage] = useState(true);
+
     const handleCheckboxChange = (checked: boolean) => {
         // setChecked?.(checked);
         setIsChecked(checked);
@@ -121,27 +125,36 @@ export default function CreateSiteForm({
     useEffect(() => {
         if (!open) return;
 
-        // reset all values
-        setLoading?.(false);
-        setIsLoading(false);
-        form.reset();
-        setChecked?.(false);
-        setKeypair(null);
-        setSiteDefaults(null);
+        const load = async () => {
+            setLoadingPage(true);
+            // reset all values
+            setLoading?.(false);
+            setIsLoading(false);
+            form.reset();
+            setChecked?.(false);
+            setKeypair(null);
+            setSiteDefaults(null);
 
-        const generatedKeypair = generateKeypair();
-        setKeypair(generatedKeypair);
+            const generatedKeypair = generateKeypair();
+            setKeypair(generatedKeypair);
 
-        api.get(`/org/${orgId}/pick-site-defaults`)
-            .catch((e) => {
-                // update the default value of the form to be local method
-                form.setValue("method", "local");
-            })
-            .then((res) => {
-                if (res && res.status === 200) {
-                    setSiteDefaults(res.data.data);
-                }
-            });
+            await api
+                .get(`/org/${orgId}/pick-site-defaults`)
+                .catch((e) => {
+                    // update the default value of the form to be local method
+                    form.setValue("method", "local");
+                })
+                .then((res) => {
+                    if (res && res.status === 200) {
+                        setSiteDefaults(res.data.data);
+                    }
+                });
+            await new Promise((resolve) => setTimeout(resolve, 200));
+
+            setLoadingPage(false);
+        };
+
+        load();
     }, [open]);
 
     async function onSubmit(data: CreateSiteFormValues) {
@@ -257,7 +270,9 @@ PersistentKeepalive = 5`
 
     const newtConfigDockerRun = `docker run -it fosrl/newt --id ${siteDefaults?.newtId} --secret ${siteDefaults?.newtSecret} --endpoint ${env.app.dashboardUrl}`;
 
-    return (
+    return loadingPage ? (
+        <LoaderPlaceholder height="300px" />
+    ) : (
         <div className="space-y-4">
             <Form {...form}>
                 <form
@@ -276,8 +291,7 @@ PersistentKeepalive = 5`
                                 </FormControl>
                                 <FormMessage />
                                 <FormDescription>
-                                    This is the the display name for the
-                                    site.
+                                    This is the the display name for the site.
                                 </FormDescription>
                             </FormItem>
                         )}
@@ -331,7 +345,6 @@ PersistentKeepalive = 5`
                             rel="noopener noreferrer"
                         >
                             <span>
-                                {" "}
                                 Learn how to install Newt on your system
                             </span>
                             <SquareArrowOutUpRight size={14} />
@@ -358,12 +371,16 @@ PersistentKeepalive = 5`
                                         onOpenChange={setIsOpen}
                                         className="space-y-2"
                                     >
-                                        <div className="mx-auto">
+                                        <div className="mx-auto mb-2">
                                             <CopyTextBox
                                                 text={newtConfig}
                                                 wrapText={false}
                                             />
                                         </div>
+                                        <span className="text-sm text-muted-foreground">
+                                            You will only be able to see the
+                                            configuration once.
+                                        </span>
                                         <div className="flex items-center justify-between space-x-4">
                                             <CollapsibleTrigger asChild>
                                                 <Button
@@ -405,10 +422,6 @@ PersistentKeepalive = 5`
                                         </CollapsibleContent>
                                     </Collapsible>
                                 </div>
-                                <span className="text-sm text-muted-foreground">
-                                    You will only be able to see the
-                                    configuration once.
-                                </span>
                             </>
                         ) : null}
                     </div>

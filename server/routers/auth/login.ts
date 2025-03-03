@@ -137,9 +137,13 @@ export async function login(
         }
 
         const token = generateSessionToken();
-        await createSession(token, existingUser.userId);
+        const sess = await createSession(token, existingUser.userId);
         const isSecure = req.protocol === "https";
-        const cookie = serializeSessionCookie(token, isSecure);
+        const cookie = serializeSessionCookie(
+            token,
+            isSecure,
+            new Date(sess.expiresAt)
+        );
 
         res.appendHeader("Set-Cookie", cookie);
 

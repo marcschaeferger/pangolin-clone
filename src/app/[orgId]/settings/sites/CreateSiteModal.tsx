@@ -58,6 +58,9 @@ export default function CreateSiteFormModal({
                         </div>
                     </CredenzaBody>
                     <CredenzaFooter>
+                        <CredenzaClose asChild>
+                            <Button variant="outline">Close</Button>
+                        </CredenzaClose>
                         <Button
                             type="submit"
                             form="create-site-form"
@@ -69,9 +72,6 @@ export default function CreateSiteFormModal({
                         >
                             Create Site
                         </Button>
-                        <CredenzaClose asChild>
-                            <Button variant="outline">Close</Button>
-                        </CredenzaClose>
                     </CredenzaFooter>
                 </CredenzaContent>
             </Credenza>

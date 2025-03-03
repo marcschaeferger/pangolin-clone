@@ -7,7 +7,7 @@ import {
     FormField,
     FormItem,
     FormLabel,
-    FormMessage,
+    FormMessage
 } from "@app/components/ui/form";
 import { toast } from "@app/hooks/useToast";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,7 +23,7 @@ import {
     CredenzaDescription,
     CredenzaFooter,
     CredenzaHeader,
-    CredenzaTitle,
+    CredenzaTitle
 } from "@app/components/Credenza";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { ListRolesResponse } from "@server/routers/role";
@@ -32,10 +32,10 @@ import {
     SelectContent,
     SelectItem,
     SelectTrigger,
-    SelectValue,
+    SelectValue
 } from "@app/components/ui/select";
 import { RoleRow } from "./RolesTable";
-import { formatAxiosError } from "@app/lib/api";;
+import { formatAxiosError } from "@app/lib/api";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 
@@ -47,14 +47,14 @@ type CreateRoleFormProps = {
 };
 
 const formSchema = z.object({
-    newRoleId: z.string({ message: "New role is required" }),
+    newRoleId: z.string({ message: "New role is required" })
 });
 
 export default function DeleteRoleForm({
     open,
     roleToDelete,
     setOpen,
-    afterDelete,
+    afterDelete
 }: CreateRoleFormProps) {
     const { org } = useOrgContext();
 
@@ -66,9 +66,9 @@ export default function DeleteRoleForm({
     useEffect(() => {
         async function fetchRoles() {
             const res = await api
-                .get<AxiosResponse<ListRolesResponse>>(
-                    `/org/${org?.org.orgId}/roles`
-                )
+                .get<
+                    AxiosResponse<ListRolesResponse>
+                >(`/org/${org?.org.orgId}/roles`)
                 .catch((e) => {
                     console.error(e);
                     toast({
@@ -77,7 +77,7 @@ export default function DeleteRoleForm({
                         description: formatAxiosError(
                             e,
                             "An error occurred while fetching the roles"
-                        ),
+                        )
                     });
                 });
 
@@ -96,8 +96,8 @@ export default function DeleteRoleForm({
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            newRoleId: "",
-        },
+            newRoleId: ""
+        }
     });
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -106,8 +106,8 @@ export default function DeleteRoleForm({
         const res = await api
             .delete(`/role/${roleToDelete.roleId}`, {
                 data: {
-                    roleId: values.newRoleId,
-                },
+                    roleId: values.newRoleId
+                }
             })
             .catch((e) => {
                 toast({
@@ -116,7 +116,7 @@ export default function DeleteRoleForm({
                     description: formatAxiosError(
                         e,
                         "An error occurred while removing the role."
-                    ),
+                    )
                 });
             });
 
@@ -124,7 +124,7 @@ export default function DeleteRoleForm({
             toast({
                 variant: "default",
                 title: "Role removed",
-                description: "The role has been successfully removed.",
+                description: "The role has been successfully removed."
             });
 
             if (open) {
@@ -214,6 +214,9 @@ export default function DeleteRoleForm({
                         </div>
                     </CredenzaBody>
                     <CredenzaFooter>
+                        <CredenzaClose asChild>
+                            <Button variant="outline">Close</Button>
+                        </CredenzaClose>
                         <Button
                             type="submit"
                             form="remove-role-form"
@@ -222,9 +225,6 @@ export default function DeleteRoleForm({
                         >
                             Remove Role
                         </Button>
-                        <CredenzaClose asChild>
-                            <Button variant="outline">Close</Button>
-                        </CredenzaClose>
                     </CredenzaFooter>
                 </CredenzaContent>
             </Credenza>

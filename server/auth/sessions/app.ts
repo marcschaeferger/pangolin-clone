@@ -129,18 +129,19 @@ export async function invalidateAllSessions(userId: string): Promise<void> {
 
 export function serializeSessionCookie(
     token: string,
-    isSecure: boolean
+    isSecure: boolean,
+    expiresAt: Date
 ): string {
     if (isSecure) {
-        return `${SESSION_COOKIE_NAME}=${token}; HttpOnly; SameSite=Strict; Max-Age=${SESSION_COOKIE_EXPIRES / 1000}; Path=/; Secure; Domain=${COOKIE_DOMAIN}`;
+        return `${SESSION_COOKIE_NAME}=${token}; HttpOnly; SameSite=Lax; Expires=${expiresAt.toUTCString()}; Path=/; Secure; Domain=${COOKIE_DOMAIN}`;
     } else {
-        return `${SESSION_COOKIE_NAME}=${token}; HttpOnly; SameSite=Lax; Max-Age=${SESSION_COOKIE_EXPIRES}; Path=/;`;
+        return `${SESSION_COOKIE_NAME}=${token}; HttpOnly; SameSite=Lax; Expires=${expiresAt.toUTCString()}; Path=/;`;
     }
 }
 
 export function createBlankSessionTokenCookie(isSecure: boolean): string {
     if (isSecure) {
-        return `${SESSION_COOKIE_NAME}=; HttpOnly; SameSite=Strict; Max-Age=0; Path=/; Secure; Domain=${COOKIE_DOMAIN}`;
+        return `${SESSION_COOKIE_NAME}=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/; Secure; Domain=${COOKIE_DOMAIN}`;
     } else {
         return `${SESSION_COOKIE_NAME}=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/;`;
     }

@@ -39,6 +39,7 @@ import {
 import {
     Table,
     TableBody,
+    TableCaption,
     TableCell,
     TableContainer,
     TableHead,
@@ -241,10 +242,7 @@ export default function ReverseProxyTargets(props: {
                     >(`/resource/${params.resourceId}/target`, data);
                     target.targetId = res.data.data.targetId;
                 } else if (target.updated) {
-                    await api.post(
-                        `/target/${target.targetId}`,
-                        data
-                    );
+                    await api.post(`/target/${target.targetId}`, data);
                 }
 
                 setTargets([
@@ -261,9 +259,7 @@ export default function ReverseProxyTargets(props: {
 
             for (const targetId of targetsToRemove) {
                 await api.delete(`/target/${targetId}`);
-                setTargets(
-                    targets.filter((t) => t.targetId !== targetId)
-                );
+                setTargets(targets.filter((t) => t.targetId !== targetId));
             }
 
             toast({
@@ -459,7 +455,8 @@ export default function ReverseProxyTargets(props: {
                             SSL Configuration
                         </SettingsSectionTitle>
                         <SettingsSectionDescription>
-                            Setup SSL to secure your connections with Let's Encrypt certificates
+                            Setup SSL to secure your connections with Let's
+                            Encrypt certificates
                         </SettingsSectionDescription>
                     </SettingsSectionHeader>
                     <SettingsSectionBody>
@@ -490,7 +487,7 @@ export default function ReverseProxyTargets(props: {
                             onSubmit={addTargetForm.handleSubmit(addTarget)}
                             className="space-y-4"
                         >
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-start">
                                 {resource.http && (
                                     <FormField
                                         control={addTargetForm.control}
@@ -545,18 +542,6 @@ export default function ReverseProxyTargets(props: {
                                                 <Input id="ip" {...field} />
                                             </FormControl>
                                             <FormMessage />
-                                            {site?.type === "newt" ? (
-                                                <FormDescription>
-                                                    This is the IP or hostname
-                                                    of the target service on
-                                                    your network.
-                                                </FormDescription>
-                                            ) : site?.type === "wireguard" ? (
-                                                <FormDescription>
-                                                    This is the IP of the
-                                                    WireGuard peer.
-                                                </FormDescription>
-                                            ) : null}
                                         </FormItem>
                                     )}
                                 />
@@ -575,83 +560,68 @@ export default function ReverseProxyTargets(props: {
                                                 />
                                             </FormControl>
                                             <FormMessage />
-                                            {site?.type === "newt" ? (
-                                                <FormDescription>
-                                                    This is the port of the
-                                                    target service on your
-                                                    network.
-                                                </FormDescription>
-                                            ) : site?.type === "wireguard" ? (
-                                                <FormDescription>
-                                                    This is the port exposed on
-                                                    an address on the WireGuard
-                                                    network.
-                                                </FormDescription>
-                                            ) : null}
                                         </FormItem>
                                     )}
                                 />
+                                <Button
+                                    type="submit"
+                                    variant="outlinePrimary"
+                                    className="mt-8"
+                                >
+                                    Add Target
+                                </Button>
                             </div>
-                            <Button type="submit" variant="outline">
-                                Add Target
-                            </Button>
                         </form>
                     </Form>
 
-                    <TableContainer>
-                        <Table>
-                            <TableHeader>
-                                {table.getHeaderGroups().map((headerGroup) => (
-                                    <TableRow key={headerGroup.id}>
-                                        {headerGroup.headers.map((header) => (
-                                            <TableHead key={header.id}>
-                                                {header.isPlaceholder
-                                                    ? null
-                                                    : flexRender(
-                                                          header.column
-                                                              .columnDef.header,
-                                                          header.getContext()
-                                                      )}
-                                            </TableHead>
+                    <Table>
+                        <TableHeader>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <TableRow key={headerGroup.id}>
+                                    {headerGroup.headers.map((header) => (
+                                        <TableHead key={header.id}>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                      header.column.columnDef
+                                                          .header,
+                                                      header.getContext()
+                                                  )}
+                                        </TableHead>
+                                    ))}
+                                </TableRow>
+                            ))}
+                        </TableHeader>
+                        <TableBody>
+                            {table.getRowModel().rows?.length ? (
+                                table.getRowModel().rows.map((row) => (
+                                    <TableRow key={row.id}>
+                                        {row.getVisibleCells().map((cell) => (
+                                            <TableCell key={cell.id}>
+                                                {flexRender(
+                                                    cell.column.columnDef.cell,
+                                                    cell.getContext()
+                                                )}
+                                            </TableCell>
                                         ))}
                                     </TableRow>
-                                ))}
-                            </TableHeader>
-                            <TableBody>
-                                {table.getRowModel().rows?.length ? (
-                                    table.getRowModel().rows.map((row) => (
-                                        <TableRow key={row.id}>
-                                            {row
-                                                .getVisibleCells()
-                                                .map((cell) => (
-                                                    <TableCell key={cell.id}>
-                                                        {flexRender(
-                                                            cell.column
-                                                                .columnDef.cell,
-                                                            cell.getContext()
-                                                        )}
-                                                    </TableCell>
-                                                ))}
-                                        </TableRow>
-                                    ))
-                                ) : (
-                                    <TableRow>
-                                        <TableCell
-                                            colSpan={columns.length}
-                                            className="h-24 text-center"
-                                        >
-                                            No targets. Add a target using the
-                                            form.
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                    <p className="text-sm text-muted-foreground">
-                        Adding more than one target above will enable load
-                        balancing.
-                    </p>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell
+                                        colSpan={columns.length}
+                                        className="h-24 text-center"
+                                    >
+                                        No targets. Add a target using the form.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                        <TableCaption>
+                            Adding more than one target above will enable load
+                            balancing.
+                        </TableCaption>
+                    </Table>
                 </SettingsSectionBody>
                 <SettingsSectionFooter>
                     <Button

@@ -102,6 +102,8 @@ export async function exchangeSession(
 
         const token = generateSessionToken();
 
+        let expiresAt: number | null = null;
+
         if (requestSession.userSessionId) {
             const [res] = await db
                 .select()
@@ -118,6 +120,7 @@ export async function exchangeSession(
                     expiresAt: res.expiresAt,
                     sessionLength: SESSION_COOKIE_EXPIRES
                 });
+                expiresAt = res.expiresAt;
             }
         } else if (requestSession.accessTokenId) {
             const [res] = await db
@@ -140,8 +143,12 @@ export async function exchangeSession(
                     expiresAt: res.expiresAt,
                     sessionLength: res.sessionLength
                 });
+                expiresAt = res.expiresAt;
             }
         } else {
+            const expires = new Date(
+                    Date.now() + SESSION_COOKIE_EXPIRES
+                ).getTime();
             await createResourceSession({
                 token,
                 resourceId: resource.resourceId,
@@ -152,11 +159,10 @@ export async function exchangeSession(
                 whitelistId: requestSession.whitelistId,
                 accessTokenId: requestSession.accessTokenId,
                 doNotExtend: false,
-                expiresAt: new Date(
-                    Date.now() + SESSION_COOKIE_EXPIRES
-                ).getTime(),
+                expiresAt: expires,
                 sessionLength: RESOURCE_SESSION_COOKIE_EXPIRES
             });
+            expiresAt = expires;
         }
 
         const cookieName = `${config.getRawConfig().server.session_cookie_name}`;
@@ -164,7 +170,8 @@ export async function exchangeSession(
             cookieName,
             resource.fullDomain!,
             token,
-            !resource.ssl
+            !resource.ssl,
+            expiresAt ? new Date(expiresAt) : undefined
         );
 
         logger.debug(JSON.stringify("Exchange cookie: " + cookie));

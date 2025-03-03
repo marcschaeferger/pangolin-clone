@@ -37,7 +37,7 @@ import {
 } from "@app/components/Credenza";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { ListRolesResponse } from "@server/routers/role";
-import { formatAxiosError } from "@app/lib/api";;
+import { formatAxiosError } from "@app/lib/api";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { Checkbox } from "@app/components/ui/checkbox";
@@ -194,9 +194,7 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
                                                 <FormItem>
                                                     <FormLabel>Email</FormLabel>
                                                     <FormControl>
-                                                        <Input
-                                                            {...field}
-                                                        />
+                                                        <Input {...field} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -340,6 +338,9 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
                         </div>
                     </CredenzaBody>
                     <CredenzaFooter>
+                        <CredenzaClose asChild>
+                            <Button variant="outline">Close</Button>
+                        </CredenzaClose>
                         <Button
                             type="submit"
                             form="invite-user-form"
@@ -348,9 +349,6 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
                         >
                             Create Invitation
                         </Button>
-                        <CredenzaClose asChild>
-                            <Button variant="outline">Close</Button>
-                        </CredenzaClose>
                     </CredenzaFooter>
                 </CredenzaContent>
             </Credenza>
