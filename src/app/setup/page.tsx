@@ -112,7 +112,7 @@ export default function StepperForm() {
         <>
             <Card>
                 <CardHeader>
-                    <CardTitle>Setup New Organization</CardTitle>
+                    <CardTitle>New Organization</CardTitle>
                     <CardDescription>
                         Create your organization, site, and resources
                     </CardDescription>

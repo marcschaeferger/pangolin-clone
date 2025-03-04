@@ -408,7 +408,7 @@ export default function ResourceAuthenticationPage() {
                         <SwitchInput
                             id="sso-toggle"
                             label="Use Platform SSO"
-                            description="Existing users will only have to login once for all resources that have this enabled."
+                            description="Existing users will only have to log in once for all resources that have this enabled."
                             defaultChecked={resource.sso}
                             onCheckedChange={(val) => setSsoEnabled(val)}
                         />
