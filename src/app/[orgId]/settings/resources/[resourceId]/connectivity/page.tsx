@@ -455,7 +455,7 @@ export default function ReverseProxyTargets(props: {
                             SSL Configuration
                         </SettingsSectionTitle>
                         <SettingsSectionDescription>
-                            Setup SSL to secure your connections with certificates
+                            Set up SSL to secure your connections with certificates
                         </SettingsSectionDescription>
                     </SettingsSectionHeader>
                     <SettingsSectionBody>
@@ -477,7 +477,7 @@ export default function ReverseProxyTargets(props: {
                         Target Configuration
                     </SettingsSectionTitle>
                     <SettingsSectionDescription>
-                        Setup targets to route traffic to your services
+                        Set up targets to route traffic to your services
                     </SettingsSectionDescription>
                 </SettingsSectionHeader>
                 <SettingsSectionBody>
