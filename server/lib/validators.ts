@@ -56,7 +56,7 @@ export function isValidUrlGlobPattern(pattern: string): boolean {
             // - unreserved (A-Z a-z 0-9 - . _ ~)
             // - sub-delims (! $ & ' ( ) * + , ; =)
             // - @ : for compatibility with some systems
-            if (!/^[A-Za-z0-9\-._~!$&'()*+,;=@:]$/.test(char)) {
+            if (!/^[A-Za-z0-9\-._~!$&'()*+,;#=@:]$/.test(char)) {
                 return false;
             }
         }
