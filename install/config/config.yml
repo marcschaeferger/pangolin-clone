@@ -1,3 +1,6 @@
+# To see all available options, please visit the docs:
+# https://docs.fossorial.io/Pangolin/Configuration/config
+
 app:
     dashboard_url: "https://{{.DashboardDomain}}"
     log_level: "info"
@@ -26,7 +29,6 @@ traefik:
     cert_resolver: "letsencrypt"
     http_entrypoint: "web"
     https_entrypoint: "websecure"
-    prefer_wildcard_cert: false
 
 gerbil:
     start_port: 51820

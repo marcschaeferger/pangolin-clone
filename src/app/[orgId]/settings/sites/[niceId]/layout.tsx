@@ -68,9 +68,7 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
 
             <SiteProvider site={site}>
                 <SidebarSettings sidebarNavItems={sidebarNavItems}>
-                    <div className="mb-8">
-                        <SiteInfoCard />
-                    </div>
+                    <SiteInfoCard />
                     {children}
                 </SidebarSettings>
             </SiteProvider>

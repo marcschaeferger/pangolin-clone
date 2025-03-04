@@ -1,5 +1,5 @@
 export function SettingsContainer({ children }: { children: React.ReactNode }) {
-    return <div className="space-y-4">{children}</div>
+    return <div className="space-y-6">{children}</div>
 }
 
 export function SettingsSection({ children }: { children: React.ReactNode }) {
@@ -7,7 +7,7 @@ export function SettingsSection({ children }: { children: React.ReactNode }) {
 }
 
 export function SettingsSectionHeader({ children }: { children: React.ReactNode }) {
-    return <div className="space-y-0.5 pb-8">{children}</div>
+    return <div className="space-y-0.5 pb-6">{children}</div>
 }
 
 export function SettingsSectionForm({ children }: { children: React.ReactNode }) {
@@ -19,7 +19,7 @@ export function SettingsSectionTitle({ children }: { children: React.ReactNode }
 }
 
 export function SettingsSectionDescription({ children }: { children: React.ReactNode }) {
-    return <p className="text-muted-foreground">{children}</p>
+    return <p className="text-muted-foreground text-sm">{children}</p>
 }
 
 export function SettingsSectionBody({ children }: { children: React.ReactNode }) {

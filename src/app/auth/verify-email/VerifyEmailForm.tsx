@@ -198,8 +198,7 @@ export default function VerifyEmailForm({
                                         <FormMessage />
                                         <FormDescription>
                                             We sent a verification code to your
-                                            email address. Please enter the code
-                                            to verify your email address.
+                                            email address.
                                         </FormDescription>
                                     </FormItem>
                                 )}

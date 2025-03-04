@@ -7,7 +7,7 @@ import {
     FormField,
     FormItem,
     FormLabel,
-    FormMessage,
+    FormMessage
 } from "@app/components/ui/form";
 import { Input } from "@app/components/ui/input";
 import {
@@ -15,14 +15,14 @@ import {
     SelectContent,
     SelectItem,
     SelectTrigger,
-    SelectValue,
+    SelectValue
 } from "@app/components/ui/select";
 import { useToast } from "@app/hooks/useToast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
     InviteUserBody,
     InviteUserResponse,
-    ListUsersResponse,
+    ListUsersResponse
 } from "@server/routers/user";
 import { AxiosResponse } from "axios";
 import React, { useState } from "react";
@@ -37,7 +37,7 @@ import {
     CredenzaDescription,
     CredenzaFooter,
     CredenzaHeader,
-    CredenzaTitle,
+    CredenzaTitle
 } from "@app/components/Credenza";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { Description } from "@radix-ui/react-toast";
@@ -61,7 +61,7 @@ export default function InviteUserForm({
     title,
     onConfirm,
     buttonText,
-    dialog,
+    dialog
 }: InviteUserFormProps) {
     const [loading, setLoading] = useState(false);
 
@@ -69,15 +69,15 @@ export default function InviteUserForm({
 
     const formSchema = z.object({
         string: z.string().refine((val) => val === string, {
-            message: "Invalid confirmation",
-        }),
+            message: "Invalid confirmation"
+        })
     });
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            string: "",
-        },
+            string: ""
+        }
     });
 
     function reset() {
@@ -128,6 +128,9 @@ export default function InviteUserForm({
                         </Form>
                     </CredenzaBody>
                     <CredenzaFooter>
+                        <CredenzaClose asChild>
+                            <Button variant="outline">Close</Button>
+                        </CredenzaClose>
                         <Button
                             type="submit"
                             form="confirm-delete-form"
@@ -136,9 +139,6 @@ export default function InviteUserForm({
                         >
                             {buttonText}
                         </Button>
-                        <CredenzaClose asChild>
-                            <Button variant="outline">Close</Button>
-                        </CredenzaClose>
                     </CredenzaFooter>
                 </CredenzaContent>
             </Credenza>

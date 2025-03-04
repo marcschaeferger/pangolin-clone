@@ -14,12 +14,12 @@ import { passwordSchema } from "@server/auth/passwordSchema";
 import stoi from "./stoi";
 
 const portSchema = z.number().positive().gt(0).lte(65535);
-const hostnameSchema = z
-    .string()
-    .regex(
-        /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)+([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$/
-    )
-    .or(z.literal("localhost"));
+// const hostnameSchema = z
+//     .string()
+//     .regex(
+//         /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)+([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$/
+//     )
+//     .or(z.literal("localhost"));
 
 const getEnvOrYaml = (envVar: string) => (valFromYaml: any) => {
     return process.env[envVar] ?? valFromYaml;
@@ -42,9 +42,10 @@ const configSchema = z.object({
         .record(
             z.string(),
             z.object({
-                base_domain: hostnameSchema.transform((url) =>
-                    url.toLowerCase()
-                ),
+                base_domain: z
+                    .string()
+                    .nonempty("base_domain must not be empty")
+                    .transform((url) => url.toLowerCase()),
                 cert_resolver: z.string().optional(),
                 prefer_wildcard_cert: z.boolean().optional()
             })
@@ -68,7 +69,7 @@ const configSchema = z.object({
                 const envBaseDomain = process.env.APP_BASE_DOMAIN;
 
                 if (envBaseDomain) {
-                    return hostnameSchema.safeParse(envBaseDomain).success;
+                    return z.string().nonempty().safeParse(envBaseDomain).success;
                 }
 
                 return true;
@@ -160,6 +161,7 @@ const configSchema = z.object({
             smtp_user: z.string().optional(),
             smtp_pass: z.string().optional(),
             smtp_secure: z.boolean().optional(),
+            smtp_tls_reject_unauthorized: z.boolean().optional(),
             no_reply: z.string().email().optional()
         })
         .optional(),
@@ -184,7 +186,8 @@ const configSchema = z.object({
             disable_signup_without_invite: z.boolean().optional(),
             disable_user_create_org: z.boolean().optional(),
             allow_raw_resources: z.boolean().optional(),
-            allow_base_domain_resources: z.boolean().optional()
+            allow_base_domain_resources: z.boolean().optional(),
+            allow_local_sites: z.boolean().optional()
         })
         .optional()
 });

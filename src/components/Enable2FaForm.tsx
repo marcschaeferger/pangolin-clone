@@ -36,7 +36,7 @@ import {
     CredenzaTitle
 } from "@app/components/Credenza";
 import { toast } from "@app/hooks/useToast";
-import { formatAxiosError } from "@app/lib/api";;
+import { formatAxiosError } from "@app/lib/api";
 import CopyTextBox from "@app/components/CopyTextBox";
 import { QRCodeCanvas, QRCodeSVG } from "qrcode.react";
 import { useUserContext } from "@app/hooks/useUserContext";
@@ -222,7 +222,10 @@ export default function Enable2FaForm({ open, setOpen }: Enable2FaProps) {
                                 <QRCodeCanvas value={secretUri} size={200} />
                             </div>
                             <div className="max-w-md mx-auto">
-                                <CopyTextBox text={secretUri} wrapText={false} />
+                                <CopyTextBox
+                                    text={secretUri}
+                                    wrapText={false}
+                                />
                             </div>
 
                             <Form {...confirmForm}>
@@ -279,6 +282,9 @@ export default function Enable2FaForm({ open, setOpen }: Enable2FaProps) {
                     )}
                 </CredenzaBody>
                 <CredenzaFooter>
+                    <CredenzaClose asChild>
+                        <Button variant="outline">Close</Button>
+                    </CredenzaClose>
                     {(step === 1 || step === 2) && (
                         <Button
                             type="button"
@@ -295,9 +301,6 @@ export default function Enable2FaForm({ open, setOpen }: Enable2FaProps) {
                             Submit
                         </Button>
                     )}
-                    <CredenzaClose asChild>
-                        <Button variant="outline">Close</Button>
-                    </CredenzaClose>
                 </CredenzaFooter>
             </CredenzaContent>
         </Credenza>

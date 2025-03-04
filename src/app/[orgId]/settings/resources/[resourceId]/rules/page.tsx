@@ -33,6 +33,7 @@ import {
 import {
     Table,
     TableBody,
+    TableCaption,
     TableCell,
     TableContainer,
     TableHead,
@@ -94,7 +95,7 @@ enum RuleAction {
 enum RuleMatch {
     PATH = "Path",
     IP = "IP",
-    CIDR = "IP Range",
+    CIDR = "IP Range"
 }
 
 export default function ResourceRules(props: {
@@ -623,7 +624,7 @@ export default function ResourceRules(props: {
                             onSubmit={addRuleForm.handleSubmit(addRule)}
                             className="space-y-4"
                         >
-                            <div className="grid grid-cols-3 gap-4">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-end">
                                 <FormField
                                     control={addRuleForm.control}
                                     name="action"
@@ -711,68 +712,63 @@ export default function ResourceRules(props: {
                                         </FormItem>
                                     )}
                                 />
+                                <Button
+                                    type="submit"
+                                    variant="outlinePrimary"
+                                    disabled={!rulesEnabled}
+                                >
+                                    Add Rule
+                                </Button>
                             </div>
-                            <Button
-                                type="submit"
-                                variant="outline"
-                                disabled={!rulesEnabled}
-                            >
-                                Add Rule
-                            </Button>
                         </form>
                     </Form>
-                    <TableContainer>
-                        <Table>
-                            <TableHeader>
-                                {table.getHeaderGroups().map((headerGroup) => (
-                                    <TableRow key={headerGroup.id}>
-                                        {headerGroup.headers.map((header) => (
-                                            <TableHead key={header.id}>
-                                                {header.isPlaceholder
-                                                    ? null
-                                                    : flexRender(
-                                                          header.column
-                                                              .columnDef.header,
-                                                          header.getContext()
-                                                      )}
-                                            </TableHead>
+                    <Table>
+                        <TableHeader>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <TableRow key={headerGroup.id}>
+                                    {headerGroup.headers.map((header) => (
+                                        <TableHead key={header.id}>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                      header.column.columnDef
+                                                          .header,
+                                                      header.getContext()
+                                                  )}
+                                        </TableHead>
+                                    ))}
+                                </TableRow>
+                            ))}
+                        </TableHeader>
+                        <TableBody>
+                            {table.getRowModel().rows?.length ? (
+                                table.getRowModel().rows.map((row) => (
+                                    <TableRow key={row.id}>
+                                        {row.getVisibleCells().map((cell) => (
+                                            <TableCell key={cell.id}>
+                                                {flexRender(
+                                                    cell.column.columnDef.cell,
+                                                    cell.getContext()
+                                                )}
+                                            </TableCell>
                                         ))}
                                     </TableRow>
-                                ))}
-                            </TableHeader>
-                            <TableBody>
-                                {table.getRowModel().rows?.length ? (
-                                    table.getRowModel().rows.map((row) => (
-                                        <TableRow key={row.id}>
-                                            {row
-                                                .getVisibleCells()
-                                                .map((cell) => (
-                                                    <TableCell key={cell.id}>
-                                                        {flexRender(
-                                                            cell.column
-                                                                .columnDef.cell,
-                                                            cell.getContext()
-                                                        )}
-                                                    </TableCell>
-                                                ))}
-                                        </TableRow>
-                                    ))
-                                ) : (
-                                    <TableRow>
-                                        <TableCell
-                                            colSpan={columns.length}
-                                            className="h-24 text-center"
-                                        >
-                                            No rules. Add a rule using the form.
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                    <p className="text-sm text-muted-foreground">
-                        Rules are evaluated by priority in ascending order.
-                    </p>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell
+                                        colSpan={columns.length}
+                                        className="h-24 text-center"
+                                    >
+                                        No rules. Add a rule using the form.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                        <TableCaption>
+                            Rules are evaluated by priority in ascending order.
+                        </TableCaption>
+                    </Table>
                 </SettingsSectionBody>
                 <SettingsSectionFooter>
                     <Button

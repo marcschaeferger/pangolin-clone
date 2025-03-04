@@ -22,7 +22,7 @@ export const tagVariants = cva(
                     "bg-destructive border-destructive text-destructive-foreground hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-50"
             },
             size: {
-                sm: "text-xs h-7",
+                sm: "text-xs h-6",
                 md: "text-sm h-8",
                 lg: "text-base h-9",
                 xl: "text-lg h-10"
@@ -67,7 +67,7 @@ export const tagVariants = cva(
             variant: "default",
             size: "md",
             shape: "default",
-            borderStyle: "default",
+            borderStyle: "none",
             interaction: "nonClickable",
             animation: "fadeIn",
             textStyle: "normal"
@@ -144,7 +144,7 @@ export const Tag: React.FC<TagProps> = ({
                 }}
                 disabled={disabled}
                 className={cn(
-                    `py-1 px-3 h-full hover:bg-transparent`,
+                    `p-1 h-full hover:bg-transparent`,
                     tagClasses?.closeButton
                 )}
             >

@@ -8,7 +8,7 @@ import {
     FormField,
     FormItem,
     FormLabel,
-    FormMessage,
+    FormMessage
 } from "@app/components/ui/form";
 import { Input } from "@app/components/ui/input";
 import { toast } from "@app/hooks/useToast";
@@ -24,27 +24,27 @@ import {
     CredenzaDescription,
     CredenzaFooter,
     CredenzaHeader,
-    CredenzaTitle,
+    CredenzaTitle
 } from "@app/components/Credenza";
-import { formatAxiosError } from "@app/lib/api";;
+import { formatAxiosError } from "@app/lib/api";
 import { AxiosResponse } from "axios";
 import { Resource } from "@server/db/schema";
 import {
     InputOTP,
     InputOTPGroup,
-    InputOTPSlot,
+    InputOTPSlot
 } from "@app/components/ui/input-otp";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 
 const setPincodeFormSchema = z.object({
-    pincode: z.string().length(6),
+    pincode: z.string().length(6)
 });
 
 type SetPincodeFormValues = z.infer<typeof setPincodeFormSchema>;
 
 const defaultValues: Partial<SetPincodeFormValues> = {
-    pincode: "",
+    pincode: ""
 };
 
 type SetPincodeFormProps = {
@@ -58,7 +58,7 @@ export default function SetResourcePincodeForm({
     open,
     setOpen,
     resourceId,
-    onSetPincode,
+    onSetPincode
 }: SetPincodeFormProps) {
     const [loading, setLoading] = useState(false);
 
@@ -66,7 +66,7 @@ export default function SetResourcePincodeForm({
 
     const form = useForm<SetPincodeFormValues>({
         resolver: zodResolver(setPincodeFormSchema),
-        defaultValues,
+        defaultValues
     });
 
     useEffect(() => {
@@ -81,7 +81,7 @@ export default function SetResourcePincodeForm({
         setLoading(true);
 
         api.post<AxiosResponse<Resource>>(`/resource/${resourceId}/pincode`, {
-            pincode: data.pincode,
+            pincode: data.pincode
         })
             .catch((e) => {
                 toast({
@@ -89,15 +89,15 @@ export default function SetResourcePincodeForm({
                     title: "Error setting resource PIN code",
                     description: formatAxiosError(
                         e,
-                        "An error occurred while setting the resource PIN code",
-                    ),
+                        "An error occurred while setting the resource PIN code"
+                    )
                 });
             })
             .then(() => {
                 toast({
                     title: "Resource PIN code set",
                     description:
-                        "The resource pincode has been set successfully",
+                        "The resource pincode has been set successfully"
                 });
 
                 if (onSetPincode) {
@@ -181,6 +181,9 @@ export default function SetResourcePincodeForm({
                         </Form>
                     </CredenzaBody>
                     <CredenzaFooter>
+                        <CredenzaClose asChild>
+                            <Button variant="outline">Close</Button>
+                        </CredenzaClose>
                         <Button
                             type="submit"
                             form="set-pincode-form"
@@ -189,9 +192,6 @@ export default function SetResourcePincodeForm({
                         >
                             Enable PIN Code Protection
                         </Button>
-                        <CredenzaClose asChild>
-                            <Button variant="outline">Close</Button>
-                        </CredenzaClose>
                     </CredenzaFooter>
                 </CredenzaContent>
             </Credenza>
