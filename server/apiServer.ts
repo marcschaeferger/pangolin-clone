@@ -13,6 +13,7 @@ import { router as wsRouter, handleWSUpgrade } from "@server/routers/ws";
 import { logIncomingMiddleware } from "./middlewares/logIncoming";
 import { csrfProtectionMiddleware } from "./middlewares/csrfProtection";
 import helmet from "helmet";
+import crowdsecRouter from './routers/crowdsec';
 
 const dev = process.env.ENVIRONMENT !== "prod";
 const externalPort = config.getRawConfig().server.external_port;
@@ -76,6 +77,9 @@ export function createApiServer() {
     // Error handling
     apiServer.use(notFoundMiddleware);
     apiServer.use(errorHandlerMiddleware);
+
+    // register your routers
+    apiServer.use('/api/crowdsec', crowdsecRouter);
 
     // Create HTTP server
     const httpServer = apiServer.listen(externalPort, (err?: any) => {

@@ -174,6 +174,7 @@ export default function GeneralPage() {
                         </p>
                         <p>
                             To confirm, type the name of the organization below.
+                            <b>{org?.org.name}?</b>
                         </p>
                     </div>
                 }

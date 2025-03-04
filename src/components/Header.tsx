@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useUserContext } from "@app/hooks/useUserContext";
 import ProfileIcon from "./ProfileIcon";
+import { CrowdSecStatusIndicator } from './CrowdSecStatusIndicator';
 
 type HeaderProps = {
     orgId?: string;
@@ -61,6 +62,7 @@ export function Header({ orgId, orgs }: HeaderProps) {
                             >
                                 Support
                             </a>
+                            <CrowdSecStatusIndicator />
                         </div>
                     </div>
 

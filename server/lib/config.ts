@@ -406,4 +406,10 @@ export class Config {
 
 export const config = new Config();
 
+// Addiing CrowdSec configuration as a property
+config.crowdsec = {
+    apiUrl: process.env.CROWDSEC_API_URL || 'http://crowdsec:8080',
+    apiKey: process.env.CROWDSEC_API_KEY || '',
+  };
+
 export default config;
