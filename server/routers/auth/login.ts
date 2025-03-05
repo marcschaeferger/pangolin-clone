@@ -78,7 +78,7 @@ export async function login(
             }
             return next(
                 createHttpError(
-                    HttpCode.BAD_REQUEST,
+                    HttpCode.UNAUTHORIZED,
                     "Username or password is incorrect"
                 )
             );
@@ -98,7 +98,7 @@ export async function login(
             }
             return next(
                 createHttpError(
-                    HttpCode.BAD_REQUEST,
+                    HttpCode.UNAUTHORIZED,
                     "Username or password is incorrect"
                 )
             );
@@ -129,7 +129,7 @@ export async function login(
                 }
                 return next(
                     createHttpError(
-                        HttpCode.BAD_REQUEST,
+                        HttpCode.UNAUTHORIZED,
                         "The two-factor code you entered is incorrect"
                     )
                 );
