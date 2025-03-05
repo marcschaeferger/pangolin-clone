@@ -182,7 +182,7 @@ export default function ResetPasswordForm({
                 return;
             }
 
-            setSuccessMessage("Password reset successfully! Back to login...");
+            setSuccessMessage("Password reset successfully! Back to log in...");
 
             setTimeout(() => {
                 if (redirect) {

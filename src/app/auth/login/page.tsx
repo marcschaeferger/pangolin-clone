@@ -41,7 +41,7 @@ export default async function Page(props: {
                             Looks like you've been invited!
                         </h2>
                         <p className="text-center">
-                            To accept the invite, you must login or create an
+                            To accept the invite, you must log in or create an
                             account.
                         </p>
                     </div>
