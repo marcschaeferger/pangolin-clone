@@ -7,7 +7,7 @@ import {
     Target,
     targets
 } from "@server/db/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, inArray } from "drizzle-orm";
 import { addPeer, deletePeer } from "../gerbil/peers";
 import logger from "@server/logger";
 
@@ -75,68 +75,84 @@ export const handleRegisterMessage: MessageHandler = async (context) => {
         allowedIps: [site.subnet]
     });
 
-    const allResources = await db
-        .select({
-            // Resource fields
-            resourceId: resources.resourceId,
-            subdomain: resources.subdomain,
-            fullDomain: resources.fullDomain,
-            ssl: resources.ssl,
-            blockAccess: resources.blockAccess,
-            sso: resources.sso,
-            emailWhitelistEnabled: resources.emailWhitelistEnabled,
-            http: resources.http,
-            proxyPort: resources.proxyPort,
-            protocol: resources.protocol,
-            // Targets as a subquery
-            targets: sql<string>`json_group_array(json_object(
-          'targetId', ${targets.targetId},
-          'ip', ${targets.ip},
-          'method', ${targets.method},
-          'port', ${targets.port},
-          'internalPort', ${targets.internalPort},
-          'enabled', ${targets.enabled}
-        ))`.as("targets")
-        })
-        .from(resources)
-        .leftJoin(
-            targets,
-            and(
-                eq(targets.resourceId, resources.resourceId),
-                eq(targets.enabled, true)
+    // Improved version
+    const allResources = await db.transaction(async (tx) => {
+        // First get all resources for the site
+        const resourcesList = await tx
+            .select({
+                resourceId: resources.resourceId,
+                subdomain: resources.subdomain,
+                fullDomain: resources.fullDomain,
+                ssl: resources.ssl,
+                blockAccess: resources.blockAccess,
+                sso: resources.sso,
+                emailWhitelistEnabled: resources.emailWhitelistEnabled,
+                http: resources.http,
+                proxyPort: resources.proxyPort,
+                protocol: resources.protocol
+            })
+            .from(resources)
+            .where(eq(resources.siteId, siteId));
+
+        // Get all enabled targets for these resources in a single query
+        const resourceIds = resourcesList.map((r) => r.resourceId);
+        const allTargets =
+            resourceIds.length > 0
+                ? await tx
+                      .select({
+                          resourceId: targets.resourceId,
+                          targetId: targets.targetId,
+                          ip: targets.ip,
+                          method: targets.method,
+                          port: targets.port,
+                          internalPort: targets.internalPort,
+                          enabled: targets.enabled
+                      })
+                      .from(targets)
+                      .where(
+                          and(
+                              inArray(targets.resourceId, resourceIds),
+                              eq(targets.enabled, true)
+                          )
+                      )
+                : [];
+
+        // Combine the data in JS instead of using SQL for the JSON
+        return resourcesList.map((resource) => ({
+            ...resource,
+            targets: allTargets.filter(
+                (target) => target.resourceId === resource.resourceId
             )
-        )
-        .where(eq(resources.siteId, siteId))
-        .groupBy(resources.resourceId);
+        }));
+    });
 
-    let tcpTargets: string[] = [];
-    let udpTargets: string[] = [];
+    const { tcpTargets, udpTargets } = allResources.reduce(
+        (acc, resource) => {
+            // Skip resources with no targets
+            if (!resource.targets?.length) return acc;
 
-    for (const resource of allResources) {
-        const targets = JSON.parse(resource.targets);
-        if (!targets || targets.length === 0) {
-            continue;
-        }
-        if (resource.protocol === "tcp") {
-            tcpTargets = tcpTargets.concat(
-                targets.map(
+            // Format valid targets into strings
+            const formattedTargets = resource.targets
+                .filter(
                     (target: Target) =>
-                        `${
-                            target.internalPort ? target.internalPort + ":" : ""
-                        }${target.ip}:${target.port}`
+                        target?.internalPort && target?.ip && target?.port
                 )
-            );
-        } else {
-            udpTargets = tcpTargets.concat(
-                targets.map(
+                .map(
                     (target: Target) =>
-                        `${
-                            target.internalPort ? target.internalPort + ":" : ""
-                        }${target.ip}:${target.port}`
-                )
-            );
-        }
-    }
+                        `${target.internalPort}:${target.ip}:${target.port}`
+                );
+
+            // Add to the appropriate protocol array
+            if (resource.protocol === "tcp") {
+                acc.tcpTargets.push(...formattedTargets);
+            } else {
+                acc.udpTargets.push(...formattedTargets);
+            }
+
+            return acc;
+        },
+        { tcpTargets: [] as string[], udpTargets: [] as string[] }
+    );
 
     return {
         message: {
