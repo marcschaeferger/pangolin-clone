@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import db from "@server/db";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import logger from "@server/logger";
 import HttpCode from "@server/types/HttpCode";
 import config from "@server/lib/config";
@@ -12,52 +12,79 @@ export async function traefikConfigProvider(
     res: Response
 ): Promise<any> {
     try {
-        const allResources = await db
-            .select({
-                // Resource fields
-                resourceId: resources.resourceId,
-                subdomain: resources.subdomain,
-                fullDomain: resources.fullDomain,
-                ssl: resources.ssl,
-                blockAccess: resources.blockAccess,
-                sso: resources.sso,
-                emailWhitelistEnabled: resources.emailWhitelistEnabled,
-                http: resources.http,
-                proxyPort: resources.proxyPort,
-                protocol: resources.protocol,
-                isBaseDomain: resources.isBaseDomain,
-                domainId: resources.domainId,
-                // Site fields
-                site: {
-                    siteId: sites.siteId,
-                    type: sites.type,
-                    subnet: sites.subnet
-                },
-                // Org fields
-                org: {
-                    orgId: orgs.orgId
-                },
-                // Targets as a subquery
-                targets: sql<string>`json_group_array(json_object(
-          'targetId', ${targets.targetId},
-          'ip', ${targets.ip},
-          'method', ${targets.method},
-          'port', ${targets.port},
-          'internalPort', ${targets.internalPort},
-          'enabled', ${targets.enabled}
-        ))`.as("targets")
-            })
-            .from(resources)
-            .innerJoin(sites, eq(sites.siteId, resources.siteId))
-            .innerJoin(orgs, eq(resources.orgId, orgs.orgId))
-            .leftJoin(
-                targets,
-                and(
-                    eq(targets.resourceId, resources.resourceId),
-                    eq(targets.enabled, true)
-                )
-            )
-            .groupBy(resources.resourceId);
+        // Get all resources with related data
+        const allResources = await db.transaction(async (tx) => {
+            // First query to get resources with site and org info
+            const resourcesWithRelations = await tx
+                .select({
+                    // Resource fields
+                    resourceId: resources.resourceId,
+                    subdomain: resources.subdomain,
+                    fullDomain: resources.fullDomain,
+                    ssl: resources.ssl,
+                    blockAccess: resources.blockAccess,
+                    sso: resources.sso,
+                    emailWhitelistEnabled: resources.emailWhitelistEnabled,
+                    http: resources.http,
+                    proxyPort: resources.proxyPort,
+                    protocol: resources.protocol,
+                    isBaseDomain: resources.isBaseDomain,
+                    domainId: resources.domainId,
+                    // Site fields
+                    site: {
+                        siteId: sites.siteId,
+                        type: sites.type,
+                        subnet: sites.subnet
+                    },
+                    // Org fields
+                    org: {
+                        orgId: orgs.orgId
+                    }
+                })
+                .from(resources)
+                .innerJoin(sites, eq(sites.siteId, resources.siteId))
+                .innerJoin(orgs, eq(resources.orgId, orgs.orgId));
+
+            // Get all resource IDs from the first query
+            const resourceIds = resourcesWithRelations.map((r) => r.resourceId);
+
+            // Second query to get all enabled targets for these resources
+            const allTargets =
+                resourceIds.length > 0
+                    ? await tx
+                          .select({
+                              resourceId: targets.resourceId,
+                              targetId: targets.targetId,
+                              ip: targets.ip,
+                              method: targets.method,
+                              port: targets.port,
+                              internalPort: targets.internalPort,
+                              enabled: targets.enabled
+                          })
+                          .from(targets)
+                          .where(
+                              and(
+                                  inArray(targets.resourceId, resourceIds),
+                                  eq(targets.enabled, true)
+                              )
+                          )
+                    : [];
+
+            // Create a map for fast target lookup by resourceId
+            const targetsMap = allTargets.reduce((map, target) => {
+                if (!map.has(target.resourceId)) {
+                    map.set(target.resourceId, []);
+                }
+                map.get(target.resourceId).push(target);
+                return map;
+            }, new Map());
+
+            // Combine the data
+            return resourcesWithRelations.map((resource) => ({
+                ...resource,
+                targets: targetsMap.get(resource.resourceId) || []
+            }));
+        });
 
         if (!allResources.length) {
             return res.status(HttpCode.OK).json({});
@@ -101,7 +128,7 @@ export async function traefikConfigProvider(
         };
 
         for (const resource of allResources) {
-            const targets = JSON.parse(resource.targets);
+            const targets = resource.targets as Target[];
             const site = resource.site;
             const org = resource.org;
 
