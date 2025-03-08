@@ -18,7 +18,7 @@ export async function clearStaleData() {
             .delete(sessions)
             .where(lt(sessions.expiresAt, new Date().getTime()));
     } catch (e) {
-        logger.error("Error clearing expired sessions:", e);
+        logger.warn("Error clearing expired sessions:", e);
     }
 
     try {
@@ -26,7 +26,7 @@ export async function clearStaleData() {
             .delete(newtSessions)
             .where(lt(newtSessions.expiresAt, new Date().getTime()));
     } catch (e) {
-        logger.error("Error clearing expired newtSessions:", e);
+        logger.warn("Error clearing expired newtSessions:", e);
     }
 
     try {
@@ -34,7 +34,7 @@ export async function clearStaleData() {
             .delete(emailVerificationCodes)
             .where(lt(emailVerificationCodes.expiresAt, new Date().getTime()));
     } catch (e) {
-        logger.error("Error clearing expired emailVerificationCodes:", e);
+        logger.warn("Error clearing expired emailVerificationCodes:", e);
     }
 
     try {
@@ -42,7 +42,7 @@ export async function clearStaleData() {
             .delete(passwordResetTokens)
             .where(lt(passwordResetTokens.expiresAt, new Date().getTime()));
     } catch (e) {
-        logger.error("Error clearing expired passwordResetTokens:", e);
+        logger.warn("Error clearing expired passwordResetTokens:", e);
     }
 
     try {
@@ -50,7 +50,7 @@ export async function clearStaleData() {
             .delete(userInvites)
             .where(lt(userInvites.expiresAt, new Date().getTime()));
     } catch (e) {
-        logger.error("Error clearing expired userInvites:", e);
+        logger.warn("Error clearing expired userInvites:", e);
     }
 
     try {
@@ -58,7 +58,7 @@ export async function clearStaleData() {
             .delete(resourceAccessToken)
             .where(lt(resourceAccessToken.expiresAt, new Date().getTime()));
     } catch (e) {
-        logger.error("Error clearing expired resourceAccessToken:", e);
+        logger.warn("Error clearing expired resourceAccessToken:", e);
     }
 
     try {
@@ -66,7 +66,7 @@ export async function clearStaleData() {
             .delete(resourceSessions)
             .where(lt(resourceSessions.expiresAt, new Date().getTime()));
     } catch (e) {
-        logger.error("Error clearing expired resourceSessions:", e);
+        logger.warn("Error clearing expired resourceSessions:", e);
     }
 
     try {
@@ -74,6 +74,6 @@ export async function clearStaleData() {
             .delete(resourceOtp)
             .where(lt(resourceOtp.expiresAt, new Date().getTime()));
     } catch (e) {
-        logger.error("Error clearing expired resourceOtp:", e);
+        logger.warn("Error clearing expired resourceOtp:", e);
     }
 }

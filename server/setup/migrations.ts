@@ -40,9 +40,6 @@ const migrations = [
 await run();
 
 async function run() {
-    // backup the database
-    backupDb();
-
     // run the migrations
     await runMigrations();
 }
@@ -127,6 +124,9 @@ async function executeScripts() {
             console.log(`Running migration ${migration.version}`);
 
             try {
+                // Backup the database before running the migration
+                backupDb();
+
                 await migration.run();
 
                 // Update version in database
