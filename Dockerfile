@@ -26,8 +26,6 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/init ./dist/init
 
-COPY config/traefik/traefik_config.example.yml ./dist/traefik_config.example.yml
-COPY config/traefik/dynamic_config.example.yml ./dist/dynamic_config.example.yml
 COPY server/db/names.json ./dist/names.json
 
 COPY public ./public
