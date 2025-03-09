@@ -107,7 +107,12 @@ export default function CreateShareLinkForm({
     const [isOpen, setIsOpen] = useState(false);
 
     const [resources, setResources] = useState<
-        { resourceId: number; name: string; resourceUrl: string }[]
+        {
+            resourceId: number;
+            name: string;
+            resourceUrl: string;
+            siteName: string | null;
+        }[]
     >([]);
 
     const timeUnits = [
@@ -159,7 +164,8 @@ export default function CreateShareLinkForm({
                         .map((r) => ({
                             resourceId: r.resourceId,
                             name: r.name,
-                            resourceUrl: `${r.ssl ? "https://" : "http://"}${r.fullDomain}/`
+                            resourceUrl: `${r.ssl ? "https://" : "http://"}${r.fullDomain}/`,
+                            siteName: r.siteName
                         }))
                 );
             }
@@ -231,17 +237,26 @@ export default function CreateShareLinkForm({
                 token.accessToken
             );
             setDirectLink(directLink);
+
+            const resource = resources.find((r) => r.resourceId === values.resourceId);
+
             onCreated?.({
                 accessTokenId: token.accessTokenId,
                 resourceId: token.resourceId,
                 resourceName: values.resourceName,
                 title: token.title,
                 createdAt: token.createdAt,
-                expiresAt: token.expiresAt
+                expiresAt: token.expiresAt,
+                siteName: resource?.siteName || null,
             });
         }
 
         setLoading(false);
+    }
+
+    function getSelectedResourceName(id: number) {
+        const resource = resources.find((r) => r.resourceId === id);
+        return `${resource?.name} ${resource?.siteName ? `(${resource.siteName})` : ""}`;
     }
 
     return (
@@ -292,14 +307,9 @@ export default function CreateShareLinkForm({
                                                                     )}
                                                                 >
                                                                     {field.value
-                                                                        ? resources.find(
-                                                                              (
-                                                                                  r
-                                                                              ) =>
-                                                                                  r.resourceId ===
-                                                                                  field.value
+                                                                        ? getSelectedResourceName(
+                                                                              field.value
                                                                           )
-                                                                              ?.name
                                                                         : "Select resource"}
                                                                     <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                                                 </Button>
@@ -348,9 +358,7 @@ export default function CreateShareLinkForm({
                                                                                                 : "opacity-0"
                                                                                         )}
                                                                                     />
-                                                                                    {
-                                                                                        r.name
-                                                                                    }
+                                                                                    {`${r.name} ${r.siteName ? `(${r.siteName})` : ""}`}
                                                                                 </CommandItem>
                                                                             )
                                                                         )}

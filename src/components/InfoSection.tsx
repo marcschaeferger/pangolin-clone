@@ -1,8 +1,16 @@
 "use client";
 
-export function InfoSections({ children }: { children: React.ReactNode }) {
+export function InfoSections({
+    children,
+    cols
+}: {
+    children: React.ReactNode;
+    cols?: number;
+}) {
     return (
-        <div className="grid grid-cols-1 md:gap-4 gap-2 md:grid-cols-[1fr_auto_1fr] md:items-start">
+        <div
+            className={`grid md:grid-cols-${cols || 1} md:gap-4 gap-2 md:items-start grid-cols-1`}
+        >
             {children}
         </div>
     );
@@ -22,10 +30,4 @@ export function InfoSectionContent({
     children: React.ReactNode;
 }) {
     return <div className="break-words">{children}</div>;
-}
-
-export function Divider() {
-    return (
-        <div className="hidden md:block border-l border-gray-300 h-auto mx-4"></div>
-    );
 }
