@@ -215,8 +215,13 @@ async function updateHttpResource(
         .from(domains)
         .where(eq(domains.domainId, domainId));
 
+    const isBaseDomain =
+        updateData.isBaseDomain !== undefined
+            ? updateData.isBaseDomain
+            : resource.isBaseDomain;
+
     let fullDomain: string | null = null;
-    if (updateData.isBaseDomain) {
+    if (isBaseDomain) {
         fullDomain = domain.baseDomain;
     } else if (subdomain && domain) {
         fullDomain = `${subdomain}.${domain.baseDomain}`;

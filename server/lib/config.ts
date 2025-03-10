@@ -181,6 +181,11 @@ export class Config {
         } else if (fs.existsSync(configFilePath2)) {
             environment = loadConfig(configFilePath2);
         }
+
+        if (process.env.APP_BASE_DOMAIN) {
+            console.log("You're using deprecated environment variables. Transition to the configuration file. https://docs.fossorial.io/");
+        }
+
         if (!environment) {
             throw new Error(
                 "No configuration file found. Please create one. https://docs.fossorial.io/"
