@@ -552,7 +552,7 @@ export default function ResourceRules(props: {
                             path.
                         </p>
                     </div>
-                    <InfoSections>
+                    <InfoSections cols={2}>
                         <InfoSection>
                             <InfoSectionTitle>Actions</InfoSectionTitle>
                             <ul className="text-sm text-muted-foreground space-y-1">
@@ -568,7 +568,6 @@ export default function ResourceRules(props: {
                                 </li>
                             </ul>
                         </InfoSection>
-                        <Separator orientation="vertical" />
                         <InfoSection>
                             <InfoSectionTitle>
                                 Matching Criteria
