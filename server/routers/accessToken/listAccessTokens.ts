@@ -5,7 +5,8 @@ import {
     resources,
     userResources,
     roleResources,
-    resourceAccessToken
+    resourceAccessToken,
+    sites
 } from "@server/db/schema";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
@@ -59,7 +60,8 @@ function queryAccessTokens(
         title: resourceAccessToken.title,
         description: resourceAccessToken.description,
         createdAt: resourceAccessToken.createdAt,
-        resourceName: resources.name
+        resourceName: resources.name,
+        siteName: sites.name
     };
 
     if (orgId) {
@@ -69,6 +71,10 @@ function queryAccessTokens(
             .leftJoin(
                 resources,
                 eq(resourceAccessToken.resourceId, resources.resourceId)
+            )
+            .leftJoin(
+                sites,
+                eq(resources.resourceId, sites.siteId)
             )
             .where(
                 and(
@@ -90,6 +96,10 @@ function queryAccessTokens(
             .leftJoin(
                 resources,
                 eq(resourceAccessToken.resourceId, resources.resourceId)
+            )
+            .leftJoin(
+                sites,
+                eq(resources.resourceId, sites.siteId)
             )
             .where(
                 and(

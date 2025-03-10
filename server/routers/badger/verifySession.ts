@@ -534,7 +534,7 @@ async function checkRules(
     return;
 }
 
-function isPathAllowed(pattern: string, path: string): boolean {
+export function isPathAllowed(pattern: string, path: string): boolean {
     logger.debug(`\nMatching path "${path}" against pattern "${pattern}"`);
 
     // Normalize and split paths into segments
@@ -575,7 +575,7 @@ function isPathAllowed(pattern: string, path: string): boolean {
             return result;
         }
 
-        // For wildcards, try consuming different numbers of path segments
+        // For full segment wildcards, try consuming different numbers of path segments
         if (currentPatternPart === "*") {
             logger.debug(
                 `${indent}Found wildcard at pattern index ${patternIndex}`
@@ -604,6 +604,32 @@ function isPathAllowed(pattern: string, path: string): boolean {
             }
 
             logger.debug(`${indent}Failed to match wildcard`);
+            return false;
+        }
+
+        // Check for in-segment wildcard (e.g., "prefix*" or "prefix*suffix")
+        if (currentPatternPart.includes("*")) {
+            logger.debug(
+                `${indent}Found in-segment wildcard in "${currentPatternPart}"`
+            );
+            
+            // Convert the pattern segment to a regex pattern
+            const regexPattern = currentPatternPart
+                .replace(/\*/g, ".*") // Replace * with .* for regex wildcard
+                .replace(/\?/g, "."); // Replace ? with . for single character wildcard if needed
+            
+            const regex = new RegExp(`^${regexPattern}$`);
+            
+            if (regex.test(currentPathPart)) {
+                logger.debug(
+                    `${indent}Segment with wildcard matches: "${currentPatternPart}" matches "${currentPathPart}"`
+                );
+                return matchSegments(patternIndex + 1, pathIndex + 1);
+            }
+            
+            logger.debug(
+                `${indent}Segment with wildcard mismatch: "${currentPatternPart}" doesn't match "${currentPathPart}"`
+            );
             return false;
         }
 

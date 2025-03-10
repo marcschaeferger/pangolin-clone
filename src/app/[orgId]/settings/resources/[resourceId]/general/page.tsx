@@ -265,6 +265,12 @@ export default function GeneralForm() {
                 description: "The resource has been transferred successfully"
             });
             router.refresh();
+
+            updateResource({
+                siteName:
+                    sites.find((site) => site.siteId === data.siteId)?.name ||
+                    ""
+            });
         }
         setTransferLoading(false);
     }
@@ -606,9 +612,7 @@ export default function GeneralForm() {
                                                     </PopoverTrigger>
                                                     <PopoverContent className="w-full p-0">
                                                         <Command>
-                                                            <CommandInput
-                                                                placeholder="Search sites"
-                                                            />
+                                                            <CommandInput placeholder="Search sites" />
                                                             <CommandEmpty>
                                                                 No sites found.
                                                             </CommandEmpty>

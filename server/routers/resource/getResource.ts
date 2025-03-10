@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { Resource, resources } from "@server/db/schema";
+import { Resource, resources, sites } from "@server/db/schema";
 import { eq } from "drizzle-orm";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
@@ -18,7 +18,9 @@ const getResourceSchema = z
     })
     .strict();
 
-export type GetResourceResponse = Resource;
+export type GetResourceResponse = Resource & {
+    siteName: string;
+};
 
 export async function getResource(
     req: Request,
@@ -38,13 +40,17 @@ export async function getResource(
 
         const { resourceId } = parsedParams.data;
 
-        const resource = await db
+        const [resp] = await db
             .select()
             .from(resources)
             .where(eq(resources.resourceId, resourceId))
+            .leftJoin(sites, eq(sites.siteId, resources.siteId))
             .limit(1);
 
-        if (resource.length === 0) {
+        const resource = resp.resources;
+        const site = resp.sites;
+
+        if (!resource) {
             return next(
                 createHttpError(
                     HttpCode.NOT_FOUND,
@@ -54,7 +60,10 @@ export async function getResource(
         }
 
         return response(res, {
-            data: resource[0],
+            data: {
+                ...resource,
+                siteName: site?.name
+            },
             success: true,
             error: false,
             message: "Resource retrieved successfully",

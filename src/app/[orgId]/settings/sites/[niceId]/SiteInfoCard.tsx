@@ -3,7 +3,6 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
 import { useSiteContext } from "@app/hooks/useSiteContext";
-import { Separator } from "@app/components/ui/separator";
 import {
     InfoSection,
     InfoSectionContent,
@@ -33,7 +32,7 @@ export default function SiteInfoCard({}: SiteInfoCardProps) {
             <InfoIcon className="h-4 w-4" />
             <AlertTitle className="font-semibold">Site Information</AlertTitle>
             <AlertDescription className="mt-4">
-                <InfoSections>
+                <InfoSections cols={2}>
                     {(site.type == "newt" || site.type == "wireguard") && (
                         <>
                             <InfoSection>
@@ -52,8 +51,6 @@ export default function SiteInfoCard({}: SiteInfoCardProps) {
                                     )}
                                 </InfoSectionContent>
                             </InfoSection>
-
-                            <Separator orientation="vertical" />
                         </>
                     )}
                     <InfoSection>

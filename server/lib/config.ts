@@ -1,11 +1,9 @@
 import fs from "fs";
 import yaml from "js-yaml";
-import path from "path";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
 import {
     __DIRNAME,
-    APP_PATH,
     APP_VERSION,
     configFilePath1,
     configFilePath2
@@ -14,12 +12,6 @@ import { passwordSchema } from "@server/auth/passwordSchema";
 import stoi from "./stoi";
 
 const portSchema = z.number().positive().gt(0).lte(65535);
-// const hostnameSchema = z
-//     .string()
-//     .regex(
-//         /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)+([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$/
-//     )
-//     .or(z.literal("localhost"));
 
 const getEnvOrYaml = (envVar: string) => (valFromYaml: any) => {
     return process.env[envVar] ?? valFromYaml;
@@ -31,7 +23,6 @@ const configSchema = z.object({
             .string()
             .url()
             .optional()
-            .transform(getEnvOrYaml("APP_DASHBOARDURL"))
             .pipe(z.string().url())
             .transform((url) => url.toLowerCase()),
         log_level: z.enum(["debug", "info", "warn", "error"]),
@@ -63,37 +54,11 @@ const configSchema = z.object({
             {
                 message: "At least one domain must be defined"
             }
-        )
-        .refine(
-            (domains) => {
-                const envBaseDomain = process.env.APP_BASE_DOMAIN;
-
-                if (envBaseDomain) {
-                    return z.string().nonempty().safeParse(envBaseDomain).success;
-                }
-
-                return true;
-            },
-            {
-                message: "APP_BASE_DOMAIN must be a valid hostname"
-            }
         ),
     server: z.object({
-        external_port: portSchema
-            .optional()
-            .transform(getEnvOrYaml("SERVER_EXTERNALPORT"))
-            .transform(stoi)
-            .pipe(portSchema),
-        internal_port: portSchema
-            .optional()
-            .transform(getEnvOrYaml("SERVER_INTERNALPORT"))
-            .transform(stoi)
-            .pipe(portSchema),
-        next_port: portSchema
-            .optional()
-            .transform(getEnvOrYaml("SERVER_NEXTPORT"))
-            .transform(stoi)
-            .pipe(portSchema),
+        external_port: portSchema.optional().transform(stoi).pipe(portSchema),
+        internal_port: portSchema.optional().transform(stoi).pipe(portSchema),
+        next_port: portSchema.optional().transform(stoi).pipe(portSchema),
         internal_hostname: z.string().transform((url) => url.toLowerCase()),
         session_cookie_name: z.string(),
         resource_access_token_param: z.string(),
@@ -126,15 +91,10 @@ const configSchema = z.object({
         additional_middlewares: z.array(z.string()).optional()
     }),
     gerbil: z.object({
-        start_port: portSchema
-            .optional()
-            .transform(getEnvOrYaml("GERBIL_STARTPORT"))
-            .transform(stoi)
-            .pipe(portSchema),
+        start_port: portSchema.optional().transform(stoi).pipe(portSchema),
         base_endpoint: z
             .string()
             .optional()
-            .transform(getEnvOrYaml("GERBIL_BASEENDPOINT"))
             .pipe(z.string())
             .transform((url) => url.toLowerCase()),
         use_subdomain: z.boolean(),
@@ -197,10 +157,6 @@ export class Config {
 
     constructor() {
         this.loadConfig();
-
-        if (process.env.GENERATE_TRAEFIK_CONFIG === "true") {
-            this.createTraefikConfig();
-        }
     }
 
     public loadConfig() {
@@ -225,45 +181,15 @@ export class Config {
         } else if (fs.existsSync(configFilePath2)) {
             environment = loadConfig(configFilePath2);
         }
-        if (!environment) {
-            const exampleConfigPath = path.join(
-                __DIRNAME,
-                "config.example.yml"
-            );
-            if (fs.existsSync(exampleConfigPath)) {
-                try {
-                    const exampleConfigContent = fs.readFileSync(
-                        exampleConfigPath,
-                        "utf8"
-                    );
-                    fs.writeFileSync(
-                        configFilePath1,
-                        exampleConfigContent,
-                        "utf8"
-                    );
-                    environment = loadConfig(configFilePath1);
-                } catch (error) {
-                    console.log(
-                        "See the docs for information about what to include in the configuration file: https://docs.fossorial.io/Pangolin/Configuration/config"
-                    );
-                    if (error instanceof Error) {
-                        throw new Error(
-                            `Error creating configuration file from example: ${
-                                error.message
-                            }`
-                        );
-                    }
-                    throw error;
-                }
-            } else {
-                throw new Error(
-                    "No configuration file found and no example configuration available"
-                );
-            }
+
+        if (process.env.APP_BASE_DOMAIN) {
+            console.log("You're using deprecated environment variables. Transition to the configuration file. https://docs.fossorial.io/");
         }
 
         if (!environment) {
-            throw new Error("No configuration file found");
+            throw new Error(
+                "No configuration file found. Please create one. https://docs.fossorial.io/"
+            );
         }
 
         const parsedConfig = configSchema.safeParse(environment);
@@ -309,17 +235,6 @@ export class Config {
             : "false";
         process.env.DASHBOARD_URL = parsedConfig.data.app.dashboard_url;
 
-        if (process.env.APP_BASE_DOMAIN) {
-            console.log(
-                `DEPRECATED! APP_BASE_DOMAIN is deprecated and will be removed in a future release. Use the domains section in the configuration file instead. See https://docs.fossorial.io/Pangolin/Configuration/config for more information.`
-            );
-
-            parsedConfig.data.domains.domain1 = {
-                base_domain: process.env.APP_BASE_DOMAIN,
-                cert_resolver: "letsencrypt"
-            };
-        }
-
         this.rawConfig = parsedConfig.data;
     }
 
@@ -335,72 +250,6 @@ export class Config {
 
     public getDomain(domainId: string) {
         return this.rawConfig.domains[domainId];
-    }
-
-    private createTraefikConfig() {
-        try {
-            // check if traefik_config.yml and dynamic_config.yml exists in APP_PATH/traefik
-            const defaultTraefikConfigPath = path.join(
-                __DIRNAME,
-                "traefik_config.example.yml"
-            );
-            const defaultDynamicConfigPath = path.join(
-                __DIRNAME,
-                "dynamic_config.example.yml"
-            );
-
-            const traefikPath = path.join(APP_PATH, "traefik");
-            if (!fs.existsSync(traefikPath)) {
-                return;
-            }
-
-            // load default configs
-            let traefikConfig = fs.readFileSync(
-                defaultTraefikConfigPath,
-                "utf8"
-            );
-            let dynamicConfig = fs.readFileSync(
-                defaultDynamicConfigPath,
-                "utf8"
-            );
-
-            traefikConfig = traefikConfig
-                .split("{{.LetsEncryptEmail}}")
-                .join(this.rawConfig.users.server_admin.email);
-            traefikConfig = traefikConfig
-                .split("{{.INTERNAL_PORT}}")
-                .join(this.rawConfig.server.internal_port.toString());
-
-            dynamicConfig = dynamicConfig
-                .split("{{.DashboardDomain}}")
-                .join(new URL(this.rawConfig.app.dashboard_url).hostname);
-            dynamicConfig = dynamicConfig
-                .split("{{.NEXT_PORT}}")
-                .join(this.rawConfig.server.next_port.toString());
-            dynamicConfig = dynamicConfig
-                .split("{{.EXTERNAL_PORT}}")
-                .join(this.rawConfig.server.external_port.toString());
-
-            // write thiese to the traefik directory
-            const traefikConfigPath = path.join(
-                traefikPath,
-                "traefik_config.yml"
-            );
-            const dynamicConfigPath = path.join(
-                traefikPath,
-                "dynamic_config.yml"
-            );
-
-            fs.writeFileSync(traefikConfigPath, traefikConfig, "utf8");
-            fs.writeFileSync(dynamicConfigPath, dynamicConfig, "utf8");
-
-            console.log("Traefik configuration files created");
-        } catch (e) {
-            console.log(
-                "Failed to generate the Traefik configuration files. Please create them manually."
-            );
-            console.error(e);
-        }
     }
 }
 

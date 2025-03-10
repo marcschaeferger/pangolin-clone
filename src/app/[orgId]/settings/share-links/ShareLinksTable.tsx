@@ -41,6 +41,7 @@ export type ShareLinkRow = {
     title: string | null;
     createdAt: number;
     expiresAt: number | null;
+    siteName: string | null;
 };
 
 type ShareLinksTableProps = {
@@ -145,7 +146,8 @@ export default function ShareLinksTable({
                 return (
                     <Link href={`/${orgId}/settings/resources/${r.resourceId}`}>
                         <Button variant="outline">
-                            {r.resourceName}
+                            {r.resourceName}{" "}
+                            {r.siteName ? `(${r.siteName})` : ""}
                             <ArrowUpRight className="ml-2 h-4 w-4" />
                         </Button>
                     </Link>
@@ -274,20 +276,21 @@ export default function ShareLinksTable({
                 return "Never";
             }
         },
-                {
+        {
             id: "delete",
             cell: ({ row }) => (
                 <div className="flex items-center justify-end space-x-2">
                     <Button
                         variant="outlinePrimary"
-                        onClick={() => deleteSharelink(row.original.accessTokenId)}
+                        onClick={() =>
+                            deleteSharelink(row.original.accessTokenId)
+                        }
                     >
                         Delete
                     </Button>
                 </div>
             )
         }
-
     ];
 
     return (

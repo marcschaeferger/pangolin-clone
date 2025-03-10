@@ -23,7 +23,6 @@ next-env.d.ts
 .machinelogs*.json
 *-audit.json
 migrations
-package-lock.json
 tsconfig.tsbuildinfo
 config/config.yml
 dist

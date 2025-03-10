@@ -22,7 +22,6 @@ next-env.d.ts
 *.log
 .machinelogs*.json
 *-audit.json
-package-lock.json
 install/
 bruno/
 LICENSE

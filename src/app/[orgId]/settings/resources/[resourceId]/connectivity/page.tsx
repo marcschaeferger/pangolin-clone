@@ -104,8 +104,8 @@ export default function ReverseProxyTargets(props: {
         resolver: zodResolver(addTargetSchema),
         defaultValues: {
             ip: "",
-            method: resource.http ? "http" : null
-            // protocol: "TCP",
+            method: resource.http ? "http" : null,
+            port: "" as any as number
         } as z.infer<typeof addTargetSchema>
     });
 
@@ -200,7 +200,11 @@ export default function ReverseProxyTargets(props: {
         };
 
         setTargets([...targets, newTarget]);
-        addTargetForm.reset();
+        addTargetForm.reset({
+            ip: "",
+            method: resource.http ? "http" : null,
+            port: "" as any as number
+        });
     }
 
     const removeTarget = (targetId: number) => {

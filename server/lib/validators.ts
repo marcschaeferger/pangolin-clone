@@ -29,11 +29,6 @@ export function isValidUrlGlobPattern(pattern: string): boolean {
             return false;
         }
 
-        // If segment contains *, it must be exactly *
-        if (segment.includes("*") && segment !== "*") {
-            return false;
-        }
-
         // Check each character in the segment
         for (let j = 0; j < segment.length; j++) {
             const char = segment[j];
