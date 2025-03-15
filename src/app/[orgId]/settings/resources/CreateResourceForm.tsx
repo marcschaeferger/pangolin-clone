@@ -764,7 +764,7 @@ export default function CreateResourceForm({
 
                                         <Link
                                             className="text-sm text-primary flex items-center gap-1"
-                                            href="https://docs.fossorial.io/Getting%20Started/tcp-udp"
+                                            href="https://docs.fossorial.io/Pangolin/tcp-udp"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                         >
