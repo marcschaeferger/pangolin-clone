@@ -110,23 +110,19 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
 
     return (
         <>
-            <div className="w-full bg-card sm:px-0 px-3 fixed top-0 z-10">
-                <div className="border-b">
-                    <div className="container mx-auto flex flex-col content-between">
-                        <div className="my-4">
-                            <UserProvider user={user}>
-                                <Header orgId={params.orgId} orgs={orgs} />
-                            </UserProvider>
-                        </div>
-                        <TopbarNav items={topNavItems} orgId={params.orgId} />
+            <div className="w-full bg-card sm:px-0 fixed top-0 z-10 border-b">
+                <div className="container mx-auto flex flex-col content-between">
+                    <div className="my-4 px-3">
+                        <UserProvider user={user}>
+                            <Header orgId={params.orgId} orgs={orgs} />
+                        </UserProvider>
                     </div>
+                    <TopbarNav items={topNavItems} orgId={params.orgId} />
                 </div>
             </div>
 
             <div className="container mx-auto sm:px-0 px-3 pt-[155px]">
-                <div className="container mx-auto sm:px-0 px-3">
-                    {children}
-                </div>
+                {children}
             </div>
         </>
     );

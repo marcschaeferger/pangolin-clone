@@ -1,13 +1,13 @@
 type SettingsSectionTitleProps = {
     title: string | React.ReactNode;
-    description: string | React.ReactNode;
+    description?: string | React.ReactNode;
     size?: "2xl" | "1xl";
 };
 
 export default function SettingsSectionTitle({
     title,
     description,
-    size,
+    size
 }: SettingsSectionTitleProps) {
     return (
         <div
@@ -20,7 +20,9 @@ export default function SettingsSectionTitle({
             >
                 {title}
             </h2>
-            <p className="text-muted-foreground">{description}</p>
+            {description && (
+                <p className="text-muted-foreground">{description}</p>
+            )}
         </div>
     );
 }

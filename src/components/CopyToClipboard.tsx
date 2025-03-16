@@ -20,18 +20,32 @@ const CopyToClipboard = ({ text, isLink }: CopyToClipboardProps) => {
     };
 
     return (
-        <div className="flex items-center">
+        <div className="flex items-center space-x-2 max-w-full">
             {isLink ? (
                 <Link
                     href={text}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:underline mr-2"
+                    className="truncate hover:underline"
+                    style={{ maxWidth: "100%" }} // Ensures truncation works within parent
+                    title={text} // Shows full text on hover
                 >
                     {text}
                 </Link>
             ) : (
-                <span className="mr-2">{text}</span>
+                <span
+                    className="truncate"
+                    style={{
+                        maxWidth: "100%",
+                        display: "block",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis"
+                    }}
+                    title={text} // Full text tooltip
+                >
+                    {text}
+                </span>
             )}
             <button
                 type="button"

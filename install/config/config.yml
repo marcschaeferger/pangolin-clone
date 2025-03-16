@@ -41,7 +41,7 @@ gerbil:
 rate_limits:
     global:
         window_minutes: 1
-        max_requests: 100
+        max_requests: 500
 {{if .EnableEmail}}
 email:
     smtp_host: "{{.EmailSMTPHost}}"

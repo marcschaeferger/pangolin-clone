@@ -4,7 +4,11 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Copy, Check } from "lucide-react";
 
-export default function CopyTextBox({ text = "", wrapText = false }) {
+export default function CopyTextBox({
+    text = "",
+    wrapText = false,
+    outline = true
+}) {
     const [isCopied, setIsCopied] = useState(false);
     const textRef = useRef<HTMLPreElement>(null);
 
@@ -23,7 +27,9 @@ export default function CopyTextBox({ text = "", wrapText = false }) {
     };
 
     return (
-        <div className="relative w-full border rounded-md bg-card">
+        <div
+            className={`relative w-full border rounded-md ${!outline ? "bg-muted" : "bg-card"}`}
+        >
             <pre
                 ref={textRef}
                 className={`p-4 pr-16 text-sm w-full ${

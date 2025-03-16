@@ -6,7 +6,7 @@ import { ThemeProvider } from "@app/providers/ThemeProvider";
 import EnvProvider from "@app/providers/EnvProvider";
 import { Separator } from "@app/components/ui/separator";
 import { pullEnv } from "@app/lib/pullEnv";
-import { BookOpenText } from "lucide-react";
+import { BookOpenText, ExternalLink } from "lucide-react";
 import Image from "next/image";
 
 export const metadata: Metadata = {
@@ -46,9 +46,16 @@ export default async function RootLayout({
                                     <span>Pangolin</span>
                                 </div>
                                 <Separator orientation="vertical" />
-                                <div className="whitespace-nowrap">
-                                    Built by Fossorial
-                                </div>
+                                <a
+                                    href="https://fossorial.io/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label="Built by Fossorial"
+                                    className="flex items-center space-x-3 whitespace-nowrap"
+                                >
+                                    <span>Fossorial</span>
+                                    <ExternalLink className="w-3 h-3" />
+                                </a>
                                 <Separator orientation="vertical" />
                                 <a
                                     href="https://github.com/fosrl/pangolin"

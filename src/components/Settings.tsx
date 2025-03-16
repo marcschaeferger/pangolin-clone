@@ -3,11 +3,11 @@ export function SettingsContainer({ children }: { children: React.ReactNode }) {
 }
 
 export function SettingsSection({ children }: { children: React.ReactNode }) {
-    return <div className="border rounded-md bg-card p-4">{children}</div>
+    return <div className="border rounded-lg bg-card p-5">{children}</div>
 }
 
 export function SettingsSectionHeader({ children }: { children: React.ReactNode }) {
-    return <div className="space-y-0.5 pb-6">{children}</div>
+    return <div className="text-lg space-y-0.5 pb-6">{children}</div>
 }
 
 export function SettingsSectionForm({ children }: { children: React.ReactNode }) {

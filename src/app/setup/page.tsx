@@ -96,7 +96,8 @@ export default function StepperForm() {
             });
 
             if (res && res.status === 201) {
-                setCurrentStep("site");
+                // setCurrentStep("site");
+                router.push(`/${values.orgId}/settings/sites/create`);
             }
         } catch (e) {
             console.error(e);
@@ -289,42 +290,6 @@ export default function StepperForm() {
                                     </div>
                                 </form>
                             </Form>
-                        )}
-
-                        {currentStep === "site" && (
-                            <div>
-                                <CreateSiteForm
-                                    setLoading={(val) => setLoading(val)}
-                                    setChecked={(val) => setIsChecked(val)}
-                                    orgId={orgForm.getValues().orgId}
-                                    onCreate={() => {
-                                        router.push(
-                                            `/${orgForm.getValues().orgId}/settings/resources`
-                                        );
-                                    }}
-                                />
-                                <div className="flex justify-between mt-6">
-                                    <Button
-                                        type="submit"
-                                        variant="outline"
-                                        onClick={() => {
-                                            router.push(
-                                                `/${orgForm.getValues().orgId}/settings/sites`
-                                            );
-                                        }}
-                                    >
-                                        Skip for now
-                                    </Button>
-                                    <Button
-                                        type="submit"
-                                        form="create-site-form"
-                                        loading={loading}
-                                        disabled={loading || !isChecked}
-                                    >
-                                        Create Site
-                                    </Button>
-                                </div>
-                            </div>
                         )}
                     </section>
                 </CardContent>

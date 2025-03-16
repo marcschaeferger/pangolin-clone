@@ -331,7 +331,7 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                 columns={columns}
                 data={rows}
                 addSite={() => {
-                    setIsCreateModalOpen(true);
+                    router.push(`/${orgId}/settings/sites/create`);
                 }}
             />
         </>
