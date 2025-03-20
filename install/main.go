@@ -2,19 +2,19 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"embed"
 	"fmt"
 	"io"
 	"io/fs"
 	"os"
-	"time"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"syscall"
-	"bytes"
 	"text/template"
+	"time"
 	"unicode"
 
 	"golang.org/x/term"
@@ -48,8 +48,8 @@ type Config struct {
 	EmailSMTPPass              string
 	EmailNoReply               string
 	InstallGerbil              bool
-	TraefikBouncerKey		  string
-	DoCrowdsecInstall		  bool
+	TraefikBouncerKey          string
+	DoCrowdsecInstall          bool
 }
 
 func main() {
@@ -84,7 +84,7 @@ func main() {
 		}
 
 		fmt.Println("\n=== Starting installation ===")
-	
+
 		if isDockerInstalled() {
 			if readBool(reader, "Would you like to install and start the containers?", true) {
 				pullAndStartContainers()
@@ -95,33 +95,35 @@ func main() {
 	}
 
 	if !checkIsCrowdsecInstalledInCompose() {
-		fmt.Println("\n=== Crowdsec Install ===")
+		fmt.Println("\n=== CrowdSec Install ===")
 		// check if crowdsec is installed
-		if readBool(reader, "Would you like to install Crowdsec?", true) {
+		if readBool(reader, "Would you like to install CrowdSec?", false) {
+			fmt.Println("This installer constitutes a minimal viable CrowdSec deployment. CrowdSec will add extra complexity to your Pangolin installation and may not work to the best of its abilities out of the box. Users are expected to implement configuration adjustments on their own to achieve the best security posture. Consult the CrowdSec documentation for detailed configuration instructions.")
+			if readBool(reader, "Are you willing to manage CrowdSec?", true) {
+				if config.DashboardDomain == "" {
+					traefikConfig, err := ReadTraefikConfig("config/traefik/traefik_config.yml", "config/traefik/dynamic_config.yml")
+					if err != nil {
+						fmt.Printf("Error reading config: %v\n", err)
+						return
+					}
+					config.DashboardDomain = traefikConfig.DashboardDomain
+					config.LetsEncryptEmail = traefikConfig.LetsEncryptEmail
+					config.BadgerVersion = traefikConfig.BadgerVersion
 
-			if config.DashboardDomain == "" {
-				traefikConfig, err := ReadTraefikConfig("config/traefik/traefik_config.yml", "config/traefik/dynamic_config.yml")
-				if err != nil {
-					fmt.Printf("Error reading config: %v\n", err)
-					return
-				}
-				config.DashboardDomain = traefikConfig.DashboardDomain
-				config.LetsEncryptEmail = traefikConfig.LetsEncryptEmail
-				config.BadgerVersion = traefikConfig.BadgerVersion
-				
-				// print the values and check if they are right
-				fmt.Println("Detected values:")
-				fmt.Printf("Dashboard Domain: %s\n", config.DashboardDomain)
-				fmt.Printf("Let's Encrypt Email: %s\n", config.LetsEncryptEmail)
-				fmt.Printf("Badger Version: %s\n", config.BadgerVersion)
+					// print the values and check if they are right
+					fmt.Println("Detected values:")
+					fmt.Printf("Dashboard Domain: %s\n", config.DashboardDomain)
+					fmt.Printf("Let's Encrypt Email: %s\n", config.LetsEncryptEmail)
+					fmt.Printf("Badger Version: %s\n", config.BadgerVersion)
 
-				if !readBool(reader, "Are these values correct?", true) {
-					config = collectUserInput(reader)
+					if !readBool(reader, "Are these values correct?", true) {
+						config = collectUserInput(reader)
+					}
 				}
+
+				config.DoCrowdsecInstall = true
+				installCrowdsec(config)
 			}
-
-			config.DoCrowdsecInstall = true
-			installCrowdsec(config)
 		}
 	}
 
@@ -143,23 +145,23 @@ func readString(reader *bufio.Reader, prompt string, defaultValue string) string
 }
 
 func readPassword(prompt string, reader *bufio.Reader) string {
-    if term.IsTerminal(int(syscall.Stdin)) {
-    	fmt.Print(prompt + ": ")
-        // Read password without echo if we're in a terminal
-        password, err := term.ReadPassword(int(syscall.Stdin))
-        fmt.Println() // Add a newline since ReadPassword doesn't add one
-        if err != nil {
-            return ""
-        }
-        input := strings.TrimSpace(string(password))
-        if input == "" {
-            return readPassword(prompt, reader)
-        }
-        return input
-    } else {
+	if term.IsTerminal(int(syscall.Stdin)) {
+		fmt.Print(prompt + ": ")
+		// Read password without echo if we're in a terminal
+		password, err := term.ReadPassword(int(syscall.Stdin))
+		fmt.Println() // Add a newline since ReadPassword doesn't add one
+		if err != nil {
+			return ""
+		}
+		input := strings.TrimSpace(string(password))
+		if input == "" {
+			return readPassword(prompt, reader)
+		}
+		return input
+	} else {
 		// Fallback to reading from stdin if not in a terminal
 		return readString(reader, prompt, "")
-    }
+	}
 }
 
 func readBool(reader *bufio.Reader, prompt string, defaultValue bool) bool {
@@ -319,15 +321,15 @@ func createConfigFiles(config Config) error {
 		if !config.DoCrowdsecInstall && strings.Contains(path, "crowdsec") {
 			return nil
 		}
-		
+
 		if config.DoCrowdsecInstall && !strings.Contains(path, "crowdsec") {
 			return nil
 		}
 
-        // skip .DS_Store
-        if strings.Contains(path, ".DS_Store") {
-            return nil
-        }
+		// skip .DS_Store
+		if strings.Contains(path, ".DS_Store") {
+			return nil
+		}
 
 		if d.IsDir() {
 			// Create directory
@@ -375,7 +377,6 @@ func createConfigFiles(config Config) error {
 
 	return nil
 }
-
 
 func installDocker() error {
 	// Detect Linux distribution
@@ -654,29 +655,29 @@ func moveFile(src, dst string) error {
 }
 
 func waitForContainer(containerName string) error {
-    maxAttempts := 30
-    retryInterval := time.Second * 2
+	maxAttempts := 30
+	retryInterval := time.Second * 2
 
-    for attempt := 0; attempt < maxAttempts; attempt++ {
-        // Check if container is running
-        cmd := exec.Command("docker", "container", "inspect", "-f", "{{.State.Running}}", containerName)
-        var out bytes.Buffer
-        cmd.Stdout = &out
-        
-        if err := cmd.Run(); err != nil {
-            // If the container doesn't exist or there's another error, wait and retry
-            time.Sleep(retryInterval)
-            continue
-        }
+	for attempt := 0; attempt < maxAttempts; attempt++ {
+		// Check if container is running
+		cmd := exec.Command("docker", "container", "inspect", "-f", "{{.State.Running}}", containerName)
+		var out bytes.Buffer
+		cmd.Stdout = &out
 
-        isRunning := strings.TrimSpace(out.String()) == "true"
-        if isRunning {
-            return nil
-        }
+		if err := cmd.Run(); err != nil {
+			// If the container doesn't exist or there's another error, wait and retry
+			time.Sleep(retryInterval)
+			continue
+		}
 
-        // Container exists but isn't running yet, wait and retry
-        time.Sleep(retryInterval)
-    }
+		isRunning := strings.TrimSpace(out.String()) == "true"
+		if isRunning {
+			return nil
+		}
 
-    return fmt.Errorf("container %s did not start within %v seconds", containerName, maxAttempts*int(retryInterval.Seconds()))
+		// Container exists but isn't running yet, wait and retry
+		time.Sleep(retryInterval)
+	}
+
+	return fmt.Errorf("container %s did not start within %v seconds", containerName, maxAttempts*int(retryInterval.Seconds()))
 }
