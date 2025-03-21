@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { userOrgs, userResources, users, userSites } from "@server/db/schema";
+import { userOrgs, users } from "@server/db/schema";
 import { and, eq } from "drizzle-orm";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
@@ -11,12 +11,11 @@ import { fromError } from "zod-validation-error";
 
 const removeUserSchema = z
     .object({
-        userId: z.string(),
-        orgId: z.string()
+        userId: z.string()
     })
     .strict();
 
-export async function removeUserOrg(
+export async function adminRemoveUser(
     req: Request,
     res: Response,
     next: NextFunction
@@ -32,7 +31,7 @@ export async function removeUserOrg(
             );
         }
 
-        const { userId, orgId } = parsedParams.data;
+        const { userId } = parsedParams.data;
 
         // get the user first
         const user = await db
@@ -44,34 +43,13 @@ export async function removeUserOrg(
             return next(createHttpError(HttpCode.NOT_FOUND, "User not found"));
         }
 
-        if (user[0].isOwner) {
-            return next(
-                createHttpError(
-                    HttpCode.BAD_REQUEST,
-                    "Cannot remove owner from org"
-                )
-            );
-        }
-
-        await db.transaction(async (trx) => {
-            await trx
-                .delete(userOrgs)
-                .where(
-                    and(eq(userOrgs.userId, userId), eq(userOrgs.orgId, orgId))
-                );
-
-            await trx
-                .delete(userResources)
-                .where(eq(userResources.userId, userId));
-
-            await trx.delete(userSites).where(eq(userSites.userId, userId));
-        });
+        await db.delete(users).where(eq(users.userId, userId));
 
         return response(res, {
             data: null,
             success: true,
             error: false,
-            message: "User removed from org successfully",
+            message: "User removed successfully",
             status: HttpCode.OK
         });
     } catch (error) {

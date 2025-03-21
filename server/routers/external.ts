@@ -23,7 +23,8 @@ import {
     verifyRoleAccess,
     verifySetResourceUsers,
     verifyUserAccess,
-    getUserOrgs
+    getUserOrgs,
+    verifyUserIsServerAdmin
 } from "@server/middlewares";
 import { verifyUserHasAction } from "../middlewares/verifyUserHasAction";
 import { ActionsEnum } from "@server/auth/actions";
@@ -417,6 +418,13 @@ unauthenticated.get("/resource/:resourceId/auth", resource.getResourceAuthInfo);
 // );
 
 unauthenticated.get("/user", verifySessionMiddleware, user.getUser);
+
+authenticated.get("/users", verifyUserIsServerAdmin, user.adminListUsers);
+authenticated.delete(
+    "/user/:userId",
+    verifyUserIsServerAdmin,
+    user.adminRemoveUser
+);
 
 authenticated.get("/org/:orgId/user/:userId", verifyOrgAccess, user.getOrgUser);
 authenticated.get(
