@@ -12,6 +12,8 @@ import { passwordSchema } from "@server/auth/passwordSchema";
 import stoi from "./stoi";
 import db from "@server/db";
 import { SupporterKey, supporterKey } from "@server/db/schema";
+import { suppressDeprecationWarnings } from "moment";
+import { eq } from "drizzle-orm";
 
 const portSchema = z.number().positive().gt(0).lte(65535);
 
@@ -243,16 +245,13 @@ export class Config {
             : "false";
         process.env.DASHBOARD_URL = parsedConfig.data.app.dashboard_url;
 
-        try {
-            this.checkSupporterKey();
-        } catch (error) {
-            console.error("Error checking supporter key:", error);
-        }
-
-        if (this.supporterData) {
-            process.env.SUPPORTER_DATA = JSON.stringify(this.supporterData);
-            console.log("Thank you for being a supporter of Pangolin!");
-        }
+        this.checkSupporterKey()
+            .then(() => {
+                console.log("Supporter key checked");
+            })
+            .catch((error) => {
+                console.error("Error checking supporter key:", error);
+            });
 
         this.rawConfig = parsedConfig.data;
     }
@@ -331,20 +330,19 @@ export class Config {
 
         this.supporterData = {
             ...key,
+            tier: data.data.tier,
             valid: true
         };
 
         // update the supporter key in the database
-        await db.transaction(async (trx) => {
-            await trx.delete(supporterKey);
-            await trx.insert(supporterKey).values({
-                githubUsername,
-                key: licenseKey,
+        await db
+            .update(supporterKey)
+            .set({
                 tier: data.data.tier || null,
                 phrase: data.data.cutePhrase || null,
                 valid: true
-            });
-        });
+            })
+            .where(eq(supporterKey.keyId, key.keyId));
     }
 
     public getSupporterData() {
