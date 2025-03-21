@@ -2,6 +2,7 @@ import { createContext } from "react";
 
 export type SupporterStatus = {
     visible: boolean;
+    tier?: string;
 };
 
 type SupporterStatusContextType = {

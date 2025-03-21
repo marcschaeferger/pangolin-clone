@@ -32,12 +32,13 @@ export default async function RootLayout({
 
     let supporterData = {
         visible: true
-    };
+    } as any;
 
     const res = await priv.get<
         AxiosResponse<IsSupporterKeyVisibleResponse>
     >("supporter-key/visible");
     supporterData.visible = res.data.data.visible;
+    supporterData.tier = res.data.data.tier;
 
     const version = env.app.version;
 

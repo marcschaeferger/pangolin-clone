@@ -218,7 +218,9 @@ export default function SupporterStatus() {
                                 </CardFooter>
                             </Card>
 
-                            <Card>
+                            <Card
+                                className={`${supporterStatus?.tier === "Limited Supporter" ? "opacity-50" : ""}`}
+                            >
                                 <CardHeader>
                                     <CardTitle>Limited Supporter</CardTitle>
                                 </CardHeader>
@@ -246,14 +248,29 @@ export default function SupporterStatus() {
                                     </ul>
                                 </CardContent>
                                 <CardFooter>
-                                    <Link
-                                        href="https://www.google.com"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="w-full"
-                                    >
-                                        <Button className="w-full">Buy</Button>
-                                    </Link>
+                                    {supporterStatus?.tier !==
+                                    "Limited Supporter" ? (
+                                        <Link
+                                            href="https://www.google.com"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full"
+                                        >
+                                            <Button className="w-full">
+                                                Buy
+                                            </Button>
+                                        </Link>
+                                    ) : (
+                                        <Button
+                                            className="w-full"
+                                            disabled={
+                                                supporterStatus?.tier ===
+                                                "Limited Supporter"
+                                            }
+                                        >
+                                            Buy
+                                        </Button>
+                                    )}
                                 </CardFooter>
                             </Card>
                         </div>

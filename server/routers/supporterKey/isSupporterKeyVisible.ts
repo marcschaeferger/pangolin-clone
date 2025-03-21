@@ -10,6 +10,7 @@ import { users } from "@server/db/schema";
 
 export type IsSupporterKeyVisibleResponse = {
     visible: boolean;
+    tier?: string;
 };
 
 const USER_LIMIT = 5;
@@ -29,16 +30,17 @@ export async function isSupporterKeyVisible(
             const [numUsers] = await db.select({ count: count() }).from(users);
 
             if (numUsers.count > USER_LIMIT) {
+                logger.debug(
+                    `User count ${numUsers.count} exceeds limit ${USER_LIMIT}`
+                );
                 visible = true;
             }
         }
 
-        logger.debug(`Supporter key visible: ${visible}`);
-        logger.debug(JSON.stringify(key));
-
         return sendResponse<IsSupporterKeyVisibleResponse>(res, {
             data: {
-                visible
+                visible,
+                tier: key?.tier || undefined
             },
             success: true,
             error: false,
