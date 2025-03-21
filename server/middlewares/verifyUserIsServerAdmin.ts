@@ -14,7 +14,7 @@ export async function verifyUserIsServerAdmin(
             createHttpError(HttpCode.UNAUTHORIZED, "User not authenticated")
         );
     }
-    
+
     try {
         if (!req.user?.serverAdmin) {
             return next(
@@ -24,7 +24,7 @@ export async function verifyUserIsServerAdmin(
                 )
             );
         }
-        
+
         return next();
     } catch (e) {
         return next(

@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { userOrgs, users } from "@server/db/schema";
-import { and, eq } from "drizzle-orm";
+import { users } from "@server/db/schema";
+import { eq } from "drizzle-orm";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
@@ -36,11 +36,20 @@ export async function adminRemoveUser(
         // get the user first
         const user = await db
             .select()
-            .from(userOrgs)
-            .where(eq(userOrgs.userId, userId));
+            .from(users)
+            .where(eq(users.userId, userId));
 
         if (!user || user.length === 0) {
             return next(createHttpError(HttpCode.NOT_FOUND, "User not found"));
+        }
+
+        if (user[0].serverAdmin) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    "Cannot remove server admin"
+                )
+            );
         }
 
         await db.delete(users).where(eq(users.userId, userId));

@@ -245,13 +245,9 @@ export class Config {
             : "false";
         process.env.DASHBOARD_URL = parsedConfig.data.app.dashboard_url;
 
-        this.checkSupporterKey()
-            .then(() => {
-                console.log("Supporter key checked");
-            })
-            .catch((error) => {
-                console.error("Error checking supporter key:", error);
-            });
+        this.checkSupporterKey().catch((error) => {
+            console.error("Error checking supporter key:", error);
+        });
 
         this.rawConfig = parsedConfig.data;
     }

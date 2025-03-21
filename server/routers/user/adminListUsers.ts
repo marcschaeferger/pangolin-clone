@@ -31,6 +31,7 @@ async function queryUsers(limit: number, offset: number) {
             id: users.userId,
             email: users.email,
             dateCreated: users.dateCreated,
+            serverAdmin: users.serverAdmin
         })
         .from(users)
         .where(eq(users.serverAdmin, false))
@@ -60,10 +61,7 @@ export async function adminListUsers(
         }
         const { limit, offset } = parsedQuery.data;
 
-        const allUsers = await queryUsers(
-            limit,
-            offset
-        );
+        const allUsers = await queryUsers(limit, offset);
 
         const [{ count }] = await db
             .select({ count: sql<number>`count(*)` })
