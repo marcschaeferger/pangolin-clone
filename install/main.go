@@ -99,7 +99,7 @@ func main() {
 		// check if crowdsec is installed
 		if readBool(reader, "Would you like to install CrowdSec?", false) {
 			fmt.Println("This installer constitutes a minimal viable CrowdSec deployment. CrowdSec will add extra complexity to your Pangolin installation and may not work to the best of its abilities out of the box. Users are expected to implement configuration adjustments on their own to achieve the best security posture. Consult the CrowdSec documentation for detailed configuration instructions.")
-			if readBool(reader, "Are you willing to manage CrowdSec?", true) {
+			if readBool(reader, "Are you willing to manage CrowdSec?", false) {
 				if config.DashboardDomain == "" {
 					traefikConfig, err := ReadTraefikConfig("config/traefik/traefik_config.yml", "config/traefik/dynamic_config.yml")
 					if err != nil {
