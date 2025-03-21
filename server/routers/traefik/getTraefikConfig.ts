@@ -170,6 +170,10 @@ export async function traefikConfigProvider(
                     wildCard = `*.${domainParts.slice(1).join(".")}`;
                 }
 
+                if (resource.isBaseDomain) {
+                    wildCard = resource.fullDomain;
+                }
+
                 const configDomain = config.getDomain(resource.domainId);
 
                 if (!configDomain) {

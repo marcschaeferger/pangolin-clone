@@ -18,6 +18,8 @@ export const metadata: Metadata = {
     description: ""
 };
 
+export const dynamic = 'force-dynamic';
+
 // const font = Figtree({ subsets: ["latin"] });
 const font = Inter({ subsets: ["latin"] });
 
