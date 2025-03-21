@@ -405,6 +405,15 @@ export const resourceRules = sqliteTable("resourceRules", {
     value: text("value").notNull()
 });
 
+export const supporterKey = sqliteTable("supporterKey", {
+    keyId: integer("keyId").primaryKey({ autoIncrement: true }),
+    key: text("key").notNull(),
+    githubUsername: text("githubUsername").notNull(),
+    phrase: text("phrase"),
+    tier: text("tier"),
+    valid: integer("valid", { mode: "boolean" }).notNull().default(false)
+});
+
 export type Org = InferSelectModel<typeof orgs>;
 export type User = InferSelectModel<typeof users>;
 export type Site = InferSelectModel<typeof sites>;
@@ -439,3 +448,4 @@ export type ResourceWhitelist = InferSelectModel<typeof resourceWhitelist>;
 export type VersionMigration = InferSelectModel<typeof versionMigrations>;
 export type ResourceRule = InferSelectModel<typeof resourceRules>;
 export type Domain = InferSelectModel<typeof domains>;
+export type SupporterKey = InferSelectModel<typeof supporterKey>;

@@ -23,14 +23,7 @@ import {
     FormLabel,
     FormMessage
 } from "@/components/ui/form";
-import {
-    LockIcon,
-    Binary,
-    Key,
-    User,
-    Send,
-    AtSign
-} from "lucide-react";
+import { LockIcon, Binary, Key, User, Send, AtSign } from "lucide-react";
 import {
     InputOTP,
     InputOTPGroup,
@@ -50,6 +43,7 @@ import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { toast } from "@app/hooks/useToast";
 import Link from "next/link";
+import { useSupporterStatusContext } from "@app/hooks/useSupporterStatusContext";
 
 const pinSchema = z.object({
     pin: z
@@ -114,6 +108,8 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
     const { env } = useEnvContext();
 
     const api = createApiClient({ env });
+
+    const { supporterStatus } = useSupporterStatusContext();
 
     function getDefaultSelectedMethod() {
         if (props.methods.sso) {
@@ -194,7 +190,10 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
 
                 const session = res.data.data.session;
                 if (session) {
-                    window.location.href = appendRequestToken(props.redirect, session);
+                    window.location.href = appendRequestToken(
+                        props.redirect,
+                        session
+                    );
                 }
             })
             .catch((e) => {
@@ -216,7 +215,10 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
                 setPincodeError(null);
                 const session = res.data.data.session;
                 if (session) {
-                    window.location.href = appendRequestToken(props.redirect, session);
+                    window.location.href = appendRequestToken(
+                        props.redirect,
+                        session
+                    );
                 }
             })
             .catch((e) => {
@@ -241,7 +243,10 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
                 setPasswordError(null);
                 const session = res.data.data.session;
                 if (session) {
-                    window.location.href = appendRequestToken(props.redirect, session);
+                    window.location.href = appendRequestToken(
+                        props.redirect,
+                        session
+                    );
                 }
             })
             .catch((e) => {
@@ -621,6 +626,15 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
                             </Tabs>
                         </CardContent>
                     </Card>
+                    {supporterStatus?.visible && (
+                        <div className="text-center mt-2">
+                            <span className="text-sm text-muted-foreground opacity-50">
+                                Server is running without a supporter key.
+                                <br />
+                                Consider supporting the project!
+                            </span>
+                        </div>
+                    )}
                 </div>
             ) : (
                 <ResourceAccessDenied />

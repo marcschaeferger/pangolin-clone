@@ -8,6 +8,7 @@ import * as target from "./target";
 import * as user from "./user";
 import * as auth from "./auth";
 import * as role from "./role";
+import * as supporterKey from "./supporterKey";
 import * as accessToken from "./accessToken";
 import HttpCode from "@server/types/HttpCode";
 import {
@@ -239,7 +240,6 @@ authenticated.delete(
     target.deleteTarget
 );
 
-
 authenticated.put(
     "/org/:orgId/role",
     verifyOrgAccess,
@@ -381,6 +381,9 @@ authenticated.get(
 );
 
 authenticated.get(`/org/:orgId/overview`, verifyOrgAccess, org.getOrgOverview);
+
+authenticated.post(`/supporter-key/validate`, supporterKey.validateSupporterKey);
+authenticated.post(`/supporter-key/hide`, supporterKey.hideSupporterKey);
 
 unauthenticated.get("/resource/:resourceId/auth", resource.getResourceAuthInfo);
 

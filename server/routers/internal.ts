@@ -4,8 +4,12 @@ import * as traefik from "@server/routers/traefik";
 import * as resource from "./resource";
 import * as badger from "./badger";
 import * as auth from "@server/routers/auth";
+import * as supporterKey from "@server/routers/supporterKey";
 import HttpCode from "@server/types/HttpCode";
-import { verifyResourceAccess, verifySessionUserMiddleware } from "@server/middlewares";
+import {
+    verifyResourceAccess,
+    verifySessionUserMiddleware
+} from "@server/middlewares";
 
 // Root routes
 const internalRouter = Router();
@@ -26,6 +30,11 @@ internalRouter.post(
     verifySessionUserMiddleware,
     verifyResourceAccess,
     resource.getExchangeToken
+);
+
+internalRouter.get(
+    `/supporter-key/visible`,
+    supporterKey.isSupporterKeyVisible
 );
 
 // Gerbil routes
