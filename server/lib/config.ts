@@ -245,9 +245,7 @@ export class Config {
             : "false";
         process.env.DASHBOARD_URL = parsedConfig.data.app.dashboard_url;
 
-        this.checkSupporterKey().catch((error) => {
-            console.error("Error checking supporter key:", error);
-        });
+        this.checkSupporterKey();
 
         this.rawConfig = parsedConfig.data;
     }
@@ -295,43 +293,44 @@ export class Config {
 
         const { key: licenseKey, githubUsername } = key;
 
-        const response = await fetch(
-            "https://api.dev.fossorial.io/api/v1/license/validate",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    licenseKey,
-                    githubUsername
-                })
+        try {
+            const response = await fetch(
+                "https://api.dev.fossorial.io/api/v1/license/validate",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        licenseKey,
+                        githubUsername
+                    })
+                }
+            );
+
+            if (!response.ok) {
+                this.supporterData = key;
+                return;
             }
-        );
 
-        if (!response.ok) {
-            this.supporterData = key;
-            return;
-        }
+            const data = await response.json();
 
-        const data = await response.json();
+            if (!data.data.valid) {
+                this.supporterData = {
+                    ...key,
+                    valid: false
+                };
+                return;
+            }
 
-        if (!data.data.valid) {
             this.supporterData = {
                 ...key,
-                valid: false
+                tier: data.data.tier,
+                valid: true
             };
-            return;
-        }
 
-        this.supporterData = {
-            ...key,
-            tier: data.data.tier,
-            valid: true
-        };
-
-        // update the supporter key in the database
-        await db
+            // update the supporter key in the database
+            await db
             .update(supporterKey)
             .set({
                 tier: data.data.tier || null,
@@ -339,6 +338,10 @@ export class Config {
                 valid: true
             })
             .where(eq(supporterKey.keyId, key.keyId));
+        } catch (e) {
+            this.supporterData = key;
+            console.error("Failed to validate supporter key", e);
+        }
     }
 
     public getSupporterData() {
