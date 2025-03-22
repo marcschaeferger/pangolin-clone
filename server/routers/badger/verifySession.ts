@@ -229,12 +229,10 @@ export async function verifyResourceSession(
             return notAllowed(res);
         }
 
-        const resourceSessionToken =
-            sessions[
-                `${config.getRawConfig().server.session_cookie_name}${
-                    resource.ssl ? "_s" : ""
-                }`
-            ];
+        const resourceSessionToken = extractResourceSessionToken(
+            sessions,
+            resource.ssl
+        );
 
         if (resourceSessionToken) {
             const sessionCacheKey = `session:${resourceSessionToken}`;
@@ -352,6 +350,50 @@ export async function verifyResourceSession(
             )
         );
     }
+}
+
+function extractResourceSessionToken(
+    sessions: Record<string, string>,
+    ssl: boolean
+) {
+    const prefix = `${config.getRawConfig().server.session_cookie_name}${
+        ssl ? "_s" : ""
+    }`;
+
+    const all: { cookieName: string; token: string; priority: number }[] =
+        [];
+
+    for (const [key, value] of Object.entries(sessions)) {
+        const parts = key.split(".");
+        const timestamp = parts[parts.length - 1];
+
+        // check if string is only numbers
+        if (!/^\d+$/.test(timestamp)) {
+            continue;
+        }
+
+        // cookie name is the key without the timestamp
+        const cookieName = key.slice(0, -timestamp.length - 1);
+
+        if (cookieName === prefix) {
+            all.push({
+                cookieName,
+                token: value,
+                priority: parseInt(timestamp)
+            });
+        }
+    }
+
+    // sort by priority in desc order
+    all.sort((a, b) => b.priority - a.priority);
+
+    const latest = all[0];
+
+    if (!latest) {
+        return;
+    }
+
+    return latest.token;
 }
 
 function notAllowed(res: Response, redirectUrl?: string) {
@@ -612,21 +654,21 @@ export function isPathAllowed(pattern: string, path: string): boolean {
             logger.debug(
                 `${indent}Found in-segment wildcard in "${currentPatternPart}"`
             );
-            
+
             // Convert the pattern segment to a regex pattern
             const regexPattern = currentPatternPart
                 .replace(/\*/g, ".*") // Replace * with .* for regex wildcard
                 .replace(/\?/g, "."); // Replace ? with . for single character wildcard if needed
-            
+
             const regex = new RegExp(`^${regexPattern}$`);
-            
+
             if (regex.test(currentPathPart)) {
                 logger.debug(
                     `${indent}Segment with wildcard matches: "${currentPatternPart}" matches "${currentPathPart}"`
                 );
                 return matchSegments(patternIndex + 1, pathIndex + 1);
             }
-            
+
             logger.debug(
                 `${indent}Segment with wildcard mismatch: "${currentPatternPart}" doesn't match "${currentPathPart}"`
             );

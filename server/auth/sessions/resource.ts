@@ -170,16 +170,17 @@ export function serializeResourceSessionCookie(
     isHttp: boolean = false,
     expiresAt?: Date
 ): string {
+    const now = new Date().getTime();
     if (!isHttp) {
         if (expiresAt === undefined) {
-            return `${cookieName}_s=${token}; HttpOnly; SameSite=Lax; Path=/; Secure; Domain=${"." + domain}`;
+            return `${cookieName}_s.${now}=${token}; HttpOnly; SameSite=Lax; Path=/; Secure; Domain=${"." + domain}`;
         }
-        return `${cookieName}_s=${token}; HttpOnly; SameSite=Lax; Expires=${expiresAt.toUTCString()}; Path=/; Secure; Domain=${"." + domain}`;
+        return `${cookieName}_s.${now}=${token}; HttpOnly; SameSite=Lax; Expires=${expiresAt.toUTCString()}; Path=/; Secure; Domain=${"." + domain}`;
     } else {
         if (expiresAt === undefined) {
-            return `${cookieName}=${token}; HttpOnly; SameSite=Lax; Path=/; Domain=${"." + domain}`;
+            return `${cookieName}.${now}=${token}; HttpOnly; SameSite=Lax; Path=/; Domain=${"." + domain}`;
         }
-        return `${cookieName}=${token}; HttpOnly; SameSite=Lax; Expires=${expiresAt.toUTCString()}; Path=/; Domain=${"." + domain}`;
+        return `${cookieName}.${now}=${token}; HttpOnly; SameSite=Lax; Expires=${expiresAt.toUTCString()}; Path=/; Domain=${"." + domain}`;
     }
 }
 
