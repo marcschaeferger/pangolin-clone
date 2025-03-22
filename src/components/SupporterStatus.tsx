@@ -208,7 +208,7 @@ export default function SupporterStatus() {
                                 </CardContent>
                                 <CardFooter>
                                     <Link
-                                        href="https://www.google.com"
+                                        href="https://github.com/sponsors/fosrl/sponsorships?tier_id=474929"
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="w-full"
@@ -251,7 +251,7 @@ export default function SupporterStatus() {
                                     {supporterStatus?.tier !==
                                     "Limited Supporter" ? (
                                         <Link
-                                            href="https://www.google.com"
+                                            href="https://github.com/sponsors/fosrl/sponsorships?tier_id=463100"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="w-full"
