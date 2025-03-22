@@ -18,12 +18,12 @@ _Your own self-hosted zero trust tunnel._
 
 <div align="center">
   <h5>
-      <a href="https://docs.fossorial.io/Getting%20Started/quick-install">
-        Install Guide
+      <a href="https://fossorial.io">
+        Website
       </a>
       <span> | </span>
-      <a href="https://docs.fossorial.io">
-        Full Documentation
+      <a href="https://docs.fossorial.io/Getting%20Started/quick-install">
+        Install Guide
       </a>
       <span> | </span>
       <a href="mailto:numbat@fossorial.io">
@@ -136,7 +136,7 @@ View the [project board](https://github.com/orgs/fosrl/projects/1) for more deta
 
 ## Licensing
 
-Pangolin is dual licensed under the AGPLv3 and the Fossorial Commercial license. For inquiries about commercial licensing, please contact us at [numbat@fossorial.io](mailto:numbat@fossorial.io).
+Pangolin is dual licensed under the AGPL-3 and the Fossorial Commercial license. To see our commercial offerings, please see our [website](https://fossorial.io) for details. For inquiries about commercial licensing, please contact us at [numbat@fossorial.io](mailto:numbat@fossorial.io).
 
 ## Contributions
 
