@@ -167,7 +167,7 @@ export default function SupporterStatus() {
                             </Link>{" "}
                             and redeem it here.{" "}
                             <Link
-                                href="https://supporters.dev.fossorial.io/"
+                                href="https://docs.fossorial.io/supporter-program"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="underline"
