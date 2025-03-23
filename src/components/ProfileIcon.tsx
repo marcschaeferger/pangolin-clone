@@ -13,7 +13,7 @@ import {
 } from "@app/components/ui/dropdown-menu";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { toast } from "@app/hooks/useToast";
-import { formatAxiosError } from "@app/lib/api";;
+import { formatAxiosError } from "@app/lib/api";
 import { Laptop, LogOut, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
@@ -21,6 +21,7 @@ import { useState } from "react";
 import { useUserContext } from "@app/hooks/useUserContext";
 import Disable2FaForm from "./Disable2FaForm";
 import Enable2FaForm from "./Enable2FaForm";
+import SupporterStatus from "./SupporterStatus";
 
 export default function ProfileIcon() {
     const { setTheme, theme } = useTheme();
@@ -152,6 +153,9 @@ export default function ProfileIcon() {
                 <span className="truncate max-w-full font-medium min-w-0 mr-1">
                     {user.email}
                 </span>
+                <div className="hidden md:block">
+                    <SupporterStatus />
+                </div>
             </div>
         </>
     );
