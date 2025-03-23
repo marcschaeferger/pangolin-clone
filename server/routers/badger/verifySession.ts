@@ -21,7 +21,7 @@ import {
     userOrgs,
     userResources,
     users
-} from "@server/db/schema";
+} from "@server/db/schemas";
 import config from "@server/lib/config";
 import { isIpInCidr } from "@server/lib/ip";
 import { response } from "@server/lib/response";

@@ -4,7 +4,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import logger from "@server/logger";
 import HttpCode from "@server/types/HttpCode";
 import config from "@server/lib/config";
-import { orgs, resources, sites, Target, targets } from "@server/db/schema";
+import { orgs, resources, sites, Target, targets } from "@server/db/schemas";
 import { sql } from "drizzle-orm";
 
 export async function traefikConfigProvider(

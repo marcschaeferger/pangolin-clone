@@ -2,7 +2,7 @@ import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import db, { exists } from "@server/db";
 import path from "path";
 import semver from "semver";
-import { versionMigrations } from "@server/db/schema";
+import { versionMigrations } from "@server/db/schemas";
 import { __DIRNAME, APP_PATH, APP_VERSION } from "@server/lib/consts";
 import { SqliteError } from "better-sqlite3";
 import fs from "fs";

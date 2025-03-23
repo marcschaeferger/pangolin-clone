@@ -46,7 +46,7 @@ import {
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import CustomDomainInput from "./[resourceId]/CustomDomainInput";
 import { AxiosResponse } from "axios";
-import { Resource } from "@server/db/schema";
+import { Resource } from "@server/db/schemas";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";

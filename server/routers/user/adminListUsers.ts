@@ -6,7 +6,7 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import { sql, eq } from "drizzle-orm";
 import logger from "@server/logger";
-import { users } from "@server/db/schema";
+import { users } from "@server/db/schemas";
 
 const listUsersSchema = z
     .object({

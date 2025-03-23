@@ -1,6 +1,6 @@
 import { ActionsEnum } from "@server/auth/actions";
 import { db } from "@server/db";
-import { actions, roles, roleActions } from "../db/schema";
+import { actions, roles, roleActions } from "../db/schemas/schema";
 import { eq, inArray } from "drizzle-orm";
 import logger from "@server/logger";
 

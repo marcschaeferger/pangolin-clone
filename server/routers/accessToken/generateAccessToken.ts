@@ -9,7 +9,7 @@ import {
     ResourceAccessToken,
     resourceAccessToken,
     resources
-} from "@server/db/schema";
+} from "@server/db/schemas";
 import HttpCode from "@server/types/HttpCode";
 import response from "@server/lib/response";
 import { eq } from "drizzle-orm";

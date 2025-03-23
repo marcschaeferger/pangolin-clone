@@ -1,6 +1,6 @@
 import { encodeHexLowerCase } from "@oslojs/encoding";
 import { sha256 } from "@oslojs/crypto/sha2";
-import { resourceSessions, ResourceSession } from "@server/db/schema";
+import { resourceSessions, ResourceSession } from "@server/db/schemas";
 import db from "@server/db";
 import { eq, and } from "drizzle-orm";
 import config from "@server/lib/config";

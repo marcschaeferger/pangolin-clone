@@ -3,7 +3,7 @@ import db from "@server/db";
 import { hash } from "@node-rs/argon2";
 import HttpCode from "@server/types/HttpCode";
 import { z } from "zod";
-import { newts } from "@server/db/schema";
+import { newts } from "@server/db/schemas";
 import createHttpError from "http-errors";
 import response from "@server/lib/response";
 import { SqliteError } from "better-sqlite3";

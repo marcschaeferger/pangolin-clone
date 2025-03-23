@@ -3,7 +3,7 @@ import {
     Resource,
     ResourceAccessToken,
     resourceAccessToken,
-} from "@server/db/schema";
+} from "@server/db/schemas";
 import { and, eq } from "drizzle-orm";
 import { isWithinExpirationDate } from "oslo";
 import { verifyPassword } from "./password";

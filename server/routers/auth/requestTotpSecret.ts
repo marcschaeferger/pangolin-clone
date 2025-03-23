@@ -6,7 +6,7 @@ import { encodeHex } from "oslo/encoding";
 import HttpCode from "@server/types/HttpCode";
 import { response } from "@server/lib";
 import { db } from "@server/db";
-import { User, users } from "@server/db/schema";
+import { User, users } from "@server/db/schemas";
 import { eq } from "drizzle-orm";
 import { createTOTPKeyURI } from "oslo/otp";
 import logger from "@server/logger";

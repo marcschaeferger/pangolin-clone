@@ -6,7 +6,7 @@ import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { response as sendResponse } from "@server/lib";
 import { suppressDeprecationWarnings } from "moment";
-import { supporterKey } from "@server/db/schema";
+import { supporterKey } from "@server/db/schemas";
 import db from "@server/db";
 import { eq } from "drizzle-orm";
 import config from "@server/lib/config";

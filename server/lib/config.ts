@@ -11,7 +11,7 @@ import {
 import { passwordSchema } from "@server/auth/passwordSchema";
 import stoi from "./stoi";
 import db from "@server/db";
-import { SupporterKey, supporterKey } from "@server/db/schema";
+import { SupporterKey, supporterKey } from "@server/db/schemas";
 import { suppressDeprecationWarnings } from "moment";
 import { eq } from "drizzle-orm";
 

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { resourcePincode } from "@server/db/schema";
+import { resourcePincode } from "@server/db/schemas";
 import { eq } from "drizzle-orm";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
