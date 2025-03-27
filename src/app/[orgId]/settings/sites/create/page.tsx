@@ -532,7 +532,7 @@ PersistentKeepalive = 5`;
                                                         </FormControl>
                                                         <FormMessage />
                                                         <FormDescription>
-                                                            This is the the
+                                                            This is the
                                                             display name for the
                                                             site.
                                                         </FormDescription>
