@@ -27,7 +27,7 @@ const createOrgSchema = z
     })
     .strict();
 
-const MAX_ORGS = 5;
+// const MAX_ORGS = 5;
 
 export async function createOrg(
     req: Request,

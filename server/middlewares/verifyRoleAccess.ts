@@ -44,6 +44,8 @@ export async function verifyRoleAccess(
             );
         }
 
+        const orgIds = new Set(rolesData.map((role) => role.orgId));
+
         // Check user access to each role's organization
         for (const role of rolesData) {
             const userOrgRole = await db
@@ -69,7 +71,16 @@ export async function verifyRoleAccess(
             req.userOrgId = role.orgId;
         }
 
-        const orgId = req.userOrgId;
+        if (orgIds.size > 1) {
+            return next(
+                createHttpError(
+                    HttpCode.FORBIDDEN,
+                    "Roles must belong to the same organization"
+                )
+            );
+        }
+
+        const orgId = orgIds.values().next().value;
 
         if (!orgId) {
             return next(
@@ -105,3 +116,4 @@ export async function verifyRoleAccess(
         );
     }
 }
+
