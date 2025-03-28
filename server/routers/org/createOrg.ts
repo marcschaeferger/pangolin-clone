@@ -57,15 +57,15 @@ export async function createOrg(
             );
         }
 
-        const userOrgIds = req.userOrgIds;
-        if (userOrgIds && userOrgIds.length > MAX_ORGS) {
-            return next(
-                createHttpError(
-                    HttpCode.FORBIDDEN,
-                    `Maximum number of organizations reached.`
-                )
-            );
-        }
+        // const userOrgIds = req.userOrgIds;
+        // if (userOrgIds && userOrgIds.length > MAX_ORGS) {
+        //     return next(
+        //         createHttpError(
+        //             HttpCode.FORBIDDEN,
+        //             `Maximum number of organizations reached.`
+        //         )
+        //     );
+        // }
 
         const { orgId, name } = parsedBody.data;
 
