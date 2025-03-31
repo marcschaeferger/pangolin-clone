@@ -80,15 +80,15 @@ export async function listDomains(
 
         const { orgId } = parsedParams.data;
 
-        const domains = await queryDomains(orgId.toString(), limit, offset);
+        const domainsList = await queryDomains(orgId.toString(), limit, offset);
 
         const [{ count }] = await db
             .select({ count: sql<number>`count(*)` })
-            .from(users);
+            .from(domains);
 
         return response<ListDomainsResponse>(res, {
             data: {
-                domains,
+                domains: domainsList,
                 pagination: {
                     total: count,
                     limit,
