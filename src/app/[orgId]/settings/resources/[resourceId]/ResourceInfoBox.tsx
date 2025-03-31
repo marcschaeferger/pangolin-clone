@@ -12,6 +12,7 @@ import {
     InfoSectionTitle
 } from "@app/components/InfoSection";
 import Link from "next/link";
+import { Switch } from "@app/components/ui/switch";
 
 type ResourceInfoBoxType = {};
 
@@ -27,7 +28,7 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
                 Resource Information
             </AlertTitle>
             <AlertDescription className="mt-4">
-                <InfoSections cols={3}>
+                <InfoSections cols={4}>
                     {resource.http ? (
                         <>
                             <InfoSection>
@@ -88,6 +89,12 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
                             </InfoSection>
                         </>
                     )}
+                    <InfoSection>
+                        <InfoSectionTitle>Visibilty</InfoSectionTitle>
+                        <InfoSectionContent>
+                            <span>{resource.enabled ? "Enabled" : "Disabled"}</span>
+                        </InfoSectionContent>
+                    </InfoSection>
                 </InfoSections>
             </AlertDescription>
         </Alert>

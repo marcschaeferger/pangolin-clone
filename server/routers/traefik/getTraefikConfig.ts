@@ -39,7 +39,8 @@ export async function traefikConfigProvider(
                     // Org fields
                     org: {
                         orgId: orgs.orgId
-                    }
+                    },
+                    enabled: resources.enabled
                 })
                 .from(resources)
                 .innerJoin(sites, eq(sites.siteId, resources.siteId))
@@ -135,6 +136,10 @@ export async function traefikConfigProvider(
             const routerName = `${resource.resourceId}-router`;
             const serviceName = `${resource.resourceId}-service`;
             const fullDomain = `${resource.fullDomain}`;
+
+            if (!resource.enabled) {
+                continue;
+            }
 
             if (resource.http) {
                 if (!resource.domainId) {

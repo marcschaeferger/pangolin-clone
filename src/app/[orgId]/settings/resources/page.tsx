@@ -63,7 +63,8 @@ export default async function ResourcesPage(props: ResourcesPageProps) {
                     resource.pincodeId !== null ||
                     resource.whitelist
                   ? "protected"
-                  : "not_protected"
+                  : "not_protected",
+            enabled: resource.enabled
         };
     });
 

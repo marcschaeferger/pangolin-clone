@@ -66,7 +66,8 @@ function queryResources(
                 whitelist: resources.emailWhitelistEnabled,
                 http: resources.http,
                 protocol: resources.protocol,
-                proxyPort: resources.proxyPort
+                proxyPort: resources.proxyPort,
+                enabled: resources.enabled
             })
             .from(resources)
             .leftJoin(sites, eq(resources.siteId, sites.siteId))
@@ -99,7 +100,8 @@ function queryResources(
                 whitelist: resources.emailWhitelistEnabled,
                 http: resources.http,
                 protocol: resources.protocol,
-                proxyPort: resources.proxyPort
+                proxyPort: resources.proxyPort,
+                enabled: resources.enabled
             })
             .from(resources)
             .leftJoin(sites, eq(resources.siteId, sites.siteId))

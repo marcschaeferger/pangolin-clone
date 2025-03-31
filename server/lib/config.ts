@@ -163,6 +163,8 @@ export class Config {
 
     supporterHiddenUntil: number | null = null;
 
+    isDev: boolean = process.env.ENVIRONMENT !== "prod";
+
     constructor() {
         this.loadConfig();
     }
@@ -245,7 +247,9 @@ export class Config {
             : "false";
         process.env.DASHBOARD_URL = parsedConfig.data.app.dashboard_url;
 
-        this.checkSupporterKey();
+        if (!this.isDev) {
+            this.checkSupporterKey();
+        }
 
         this.rawConfig = parsedConfig.data;
     }
