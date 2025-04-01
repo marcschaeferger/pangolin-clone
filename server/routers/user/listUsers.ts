@@ -7,6 +7,7 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import { sql } from "drizzle-orm";
 import logger from "@server/logger";
+import { fromZodError } from "zod-validation-error";
 
 const listUsersParamsSchema = z
     .object({
@@ -67,7 +68,7 @@ export async function listUsers(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedQuery.error.errors.map((e) => e.message).join(", ")
+                    fromZodError(parsedQuery.error)
                 )
             );
         }
@@ -78,7 +79,7 @@ export async function listUsers(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedParams.error.errors.map((e) => e.message).join(", ")
+                    fromZodError(parsedParams.error)
                 )
             );
         }

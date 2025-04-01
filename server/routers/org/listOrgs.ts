@@ -7,6 +7,7 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import { sql, inArray } from "drizzle-orm";
 import logger from "@server/logger";
+import { fromZodError } from "zod-validation-error";
 
 const listOrgsSchema = z.object({
     limit: z
@@ -39,7 +40,7 @@ export async function listOrgs(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedQuery.error.errors.map((e) => e.message).join(", ")
+                    fromZodError(parsedQuery.error)
                 )
             );
         }

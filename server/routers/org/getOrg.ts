@@ -7,6 +7,7 @@ import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
+import { fromZodError } from "zod-validation-error";
 
 const getOrgSchema = z
     .object({
@@ -29,7 +30,7 @@ export async function getOrg(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedParams.error.errors.map((e) => e.message).join(", ")
+                    fromZodError(parsedParams.error)
                 )
             );
         }

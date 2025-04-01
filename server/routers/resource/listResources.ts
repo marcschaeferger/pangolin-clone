@@ -15,6 +15,7 @@ import createHttpError from "http-errors";
 import { sql, eq, or, inArray, and, count } from "drizzle-orm";
 import logger from "@server/logger";
 import stoi from "@server/lib/stoi";
+import { fromZodError } from "zod-validation-error";
 
 const listResourcesParamsSchema = z
     .object({
@@ -138,7 +139,7 @@ export async function listResources(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedQuery.error.errors.map((e) => e.message).join(", ")
+                    fromZodError(parsedQuery.error)
                 )
             );
         }
@@ -149,7 +150,7 @@ export async function listResources(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedParams.error.errors.map((e) => e.message).join(", ")
+                    fromZodError(parsedParams.error)
                 )
             );
         }
