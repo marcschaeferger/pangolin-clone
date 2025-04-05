@@ -224,21 +224,18 @@ export default function CreateShareLinkForm({
 
         if (res && res.data.data.accessTokenId) {
             const token = res.data.data;
-            const link = constructShareLink(
-                values.resourceId,
-                token.accessTokenId,
-                token.accessToken
-            );
+            const link = constructShareLink(token.accessToken);
             setLink(link);
             const directLink = constructDirectShareLink(
                 env.server.resourceAccessTokenParam,
                 values.resourceUrl,
-                token.accessTokenId,
                 token.accessToken
             );
             setDirectLink(directLink);
 
-            const resource = resources.find((r) => r.resourceId === values.resourceId);
+            const resource = resources.find(
+                (r) => r.resourceId === values.resourceId
+            );
 
             onCreated?.({
                 accessTokenId: token.accessTokenId,
@@ -247,7 +244,7 @@ export default function CreateShareLinkForm({
                 title: token.title,
                 createdAt: token.createdAt,
                 expiresAt: token.expiresAt,
-                siteName: resource?.siteName || null,
+                siteName: resource?.siteName || null
             });
         }
 

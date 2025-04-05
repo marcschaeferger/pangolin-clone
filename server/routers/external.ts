@@ -566,3 +566,8 @@ authRouter.post(
     "/resource/:resourceId/access-token",
     resource.authWithAccessToken
 );
+
+authRouter.post(
+    "/access-token",
+    resource.authWithAccessToken
+);

@@ -20,6 +20,8 @@ import { fromError } from "zod-validation-error";
 import logger from "@server/logger";
 import { createDate, TimeSpan } from "oslo";
 import { hashPassword } from "@server/auth/password";
+import { encodeHexLowerCase } from "@oslojs/encoding";
+import { sha256 } from "@oslojs/crypto/sha2";
 
 export const generateAccessTokenBodySchema = z
     .object({
@@ -90,11 +92,13 @@ export async function generateAccessToken(
             ? createDate(new TimeSpan(validForSeconds, "s")).getTime()
             : undefined;
 
-        const token = generateIdFromEntropySize(25);
+        const token = generateIdFromEntropySize(12);
 
-        const tokenHash = await hashPassword(token);
+        const tokenHash = encodeHexLowerCase(
+            sha256(new TextEncoder().encode(token))
+        );
 
-        const id = generateId(15);
+        const id = generateId(8);
         const [result] = await db
             .insert(resourceAccessToken)
             .values({
