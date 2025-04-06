@@ -13,10 +13,12 @@ import { sha256 } from "@oslojs/crypto/sha2";
 
 export async function verifyResourceAccessToken({
     accessToken,
-    accessTokenId
+    accessTokenId,
+    resourceId
 }: {
     accessToken: string;
     accessTokenId?: string;
+    resourceId?: number; // IF THIS IS NOT SET, THE TOKEN IS VALID FOR ALL RESOURCES
 }): Promise<{
     valid: boolean;
     error?: string;
@@ -97,6 +99,13 @@ export async function verifyResourceAccessToken({
         return {
             valid: false,
             error: "Access token has expired"
+        };
+    }
+
+    if (resourceId && resource.resourceId !== resourceId) {
+        return {
+            valid: false,
+            error: "Resource ID does not match"
         };
     }
 

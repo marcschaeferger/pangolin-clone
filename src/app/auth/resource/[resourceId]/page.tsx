@@ -123,7 +123,6 @@ export default async function ResourceAuthPage(props: {
                 <AccessToken
                     token={searchParams.token}
                     resourceId={params.resourceId}
-                    redirectUrl={redirectUrl}
                 />
             </div>
         );

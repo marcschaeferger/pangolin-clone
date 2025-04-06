@@ -17,13 +17,11 @@ import { useEffect, useState } from "react";
 type AccessTokenProps = {
     token: string;
     resourceId?: number;
-    redirectUrl?: string;
 };
 
 export default function AccessToken({
     token,
-    resourceId,
-    redirectUrl
+    resourceId
 }: AccessTokenProps) {
     const [loading, setLoading] = useState(true);
     const [isValid, setIsValid] = useState(false);
@@ -96,7 +94,7 @@ export default function AccessToken({
                 if (res.data.data.session) {
                     setIsValid(true);
                     window.location.href = appendRequestToken(
-                        redirectUrl!,
+                        res.data.data.redirectUrl!,
                         res.data.data.session
                     );
                 }

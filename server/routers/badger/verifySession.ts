@@ -209,7 +209,8 @@ export async function verifyResourceSession(
             const { valid, error, tokenItem } = await verifyResourceAccessToken(
                 {
                     accessToken,
-                    accessTokenId
+                    accessTokenId,
+                    resourceId: resource.resourceId
                 }
             );
 
@@ -244,7 +245,8 @@ export async function verifyResourceSession(
             const { valid, error, tokenItem } = await verifyResourceAccessToken(
                 {
                     accessToken,
-                    accessTokenId
+                    accessTokenId,
+                    resourceId: resource.resourceId
                 }
             );
 
