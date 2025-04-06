@@ -2,7 +2,7 @@ import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import db, { exists } from "@server/db";
 import path from "path";
 import semver from "semver";
-import { versionMigrations } from "@server/db/schema";
+import { versionMigrations } from "@server/db/schemas";
 import { __DIRNAME, APP_PATH, APP_VERSION } from "@server/lib/consts";
 import { SqliteError } from "better-sqlite3";
 import fs from "fs";
@@ -18,6 +18,7 @@ import m13 from "./scripts/1.0.0-beta13";
 import m15 from "./scripts/1.0.0-beta15";
 import m16 from "./scripts/1.0.0";
 import m17 from "./scripts/1.1.0";
+import m18 from "./scripts/1.2.0";
 
 // THIS CANNOT IMPORT ANYTHING FROM THE SERVER
 // EXCEPT FOR THE DATABASE AND THE SCHEMA
@@ -35,7 +36,8 @@ const migrations = [
     { version: "1.0.0-beta.13", run: m13 },
     { version: "1.0.0-beta.15", run: m15 },
     { version: "1.0.0", run: m16 },
-    { version: "1.1.0", run: m17 }
+    { version: "1.1.0", run: m17 },
+    { version: "1.2.0", run: m18 }
     // Add new migrations here as they are created
 ] as const;
 

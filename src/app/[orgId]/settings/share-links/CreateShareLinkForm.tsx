@@ -4,7 +4,6 @@ import { Button } from "@app/components/ui/button";
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -20,7 +19,6 @@ import {
 } from "@app/components/ui/select";
 import { toast } from "@app/hooks/useToast";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { InviteUserBody, InviteUserResponse } from "@server/routers/user";
 import { AxiosResponse } from "axios";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -37,7 +35,6 @@ import {
     CredenzaTitle
 } from "@app/components/Credenza";
 import { useOrgContext } from "@app/hooks/useOrgContext";
-import { ListRolesResponse } from "@server/routers/role";
 import { formatAxiosError } from "@app/lib/api";
 import { cn } from "@app/lib/cn";
 import { createApiClient } from "@app/lib/api";
@@ -58,12 +55,9 @@ import {
     CommandList
 } from "@app/components/ui/command";
 import { CheckIcon, ChevronsUpDown } from "lucide-react";
-import { register } from "module";
-import { Label } from "@app/components/ui/label";
 import { Checkbox } from "@app/components/ui/checkbox";
 import { GenerateAccessTokenResponse } from "@server/routers/accessToken";
 import {
-    constructDirectShareLink,
     constructShareLink
 } from "@app/lib/shareLinks";
 import { ShareLinkRow } from "./ShareLinksTable";
@@ -73,6 +67,7 @@ import {
     CollapsibleContent,
     CollapsibleTrigger
 } from "@app/components/ui/collapsible";
+import AccessTokenSection from "./AccessTokenUsage";
 
 type FormProps = {
     open: boolean;
@@ -100,7 +95,8 @@ export default function CreateShareLinkForm({
     const api = createApiClient({ env });
 
     const [link, setLink] = useState<string | null>(null);
-    const [directLink, setDirectLink] = useState<string | null>(null);
+    const [accessTokenId, setAccessTokenId] = useState<string | null>(null);
+    const [accessToken, setAccessToken] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [neverExpire, setNeverExpire] = useState(false);
 
@@ -224,21 +220,15 @@ export default function CreateShareLinkForm({
 
         if (res && res.data.data.accessTokenId) {
             const token = res.data.data;
-            const link = constructShareLink(
-                values.resourceId,
-                token.accessTokenId,
-                token.accessToken
-            );
+            const link = constructShareLink(token.accessToken);
             setLink(link);
-            const directLink = constructDirectShareLink(
-                env.server.resourceAccessTokenParam,
-                values.resourceUrl,
-                token.accessTokenId,
-                token.accessToken
-            );
-            setDirectLink(directLink);
 
-            const resource = resources.find((r) => r.resourceId === values.resourceId);
+            setAccessToken(token.accessToken);
+            setAccessTokenId(token.accessTokenId);
+
+            const resource = resources.find(
+                (r) => r.resourceId === values.resourceId
+            );
 
             onCreated?.({
                 accessTokenId: token.accessTokenId,
@@ -247,7 +237,7 @@ export default function CreateShareLinkForm({
                 title: token.title,
                 createdAt: token.createdAt,
                 expiresAt: token.expiresAt,
-                siteName: resource?.siteName || null,
+                siteName: resource?.siteName || null
             });
         }
 
@@ -518,8 +508,7 @@ export default function CreateShareLinkForm({
                                                     className="p-0 flex items-center justify-between w-full"
                                                 >
                                                     <h4 className="text-sm font-semibold">
-                                                        See alternative share
-                                                        links
+                                                        See Access Token Usage
                                                     </h4>
                                                     <div>
                                                         <ChevronsUpDown className="h-4 w-4" />
@@ -531,26 +520,21 @@ export default function CreateShareLinkForm({
                                             </CollapsibleTrigger>
                                         </div>
                                         <CollapsibleContent className="space-y-2">
-                                            {directLink && (
+                                            {accessTokenId && accessToken && (
                                                 <div className="space-y-2">
                                                     <div className="mx-auto">
-                                                        <CopyTextBox
-                                                            text={directLink}
-                                                            wrapText={false}
+                                                        <AccessTokenSection
+                                                            tokenId={
+                                                                accessTokenId
+                                                            }
+                                                            token={accessToken}
+                                                            resourceUrl={
+                                                                form.getValues(
+                                                                    "resourceUrl"
+                                                                )
+                                                            }
                                                         />
                                                     </div>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        This link does not
-                                                        require visiting in a
-                                                        browser to complete the
-                                                        redirect. It contains
-                                                        the access token
-                                                        directly in the URL,
-                                                        which can be useful for
-                                                        sharing with clients
-                                                        that do not support
-                                                        redirects.
-                                                    </p>
                                                 </div>
                                             )}
                                         </CollapsibleContent>

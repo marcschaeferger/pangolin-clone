@@ -532,7 +532,7 @@ PersistentKeepalive = 5`;
                                                         </FormControl>
                                                         <FormMessage />
                                                         <FormDescription>
-                                                            This is the the
+                                                            This is the
                                                             display name for the
                                                             site.
                                                         </FormDescription>
@@ -617,7 +617,7 @@ PersistentKeepalive = 5`;
                                             </InfoSection>
                                         </InfoSections>
 
-                                        <Alert variant="default" className="">
+                                        <Alert variant="neutral" className="">
                                             <InfoIcon className="h-4 w-4" />
                                             <AlertTitle className="font-semibold">
                                                 Save Your Credentials
@@ -777,7 +777,7 @@ PersistentKeepalive = 5`;
                                 <SettingsSectionBody>
                                     <CopyTextBox text={wgConfig} />
 
-                                    <Alert variant="default">
+                                    <Alert variant="neutral">
                                         <InfoIcon className="h-4 w-4" />
                                         <AlertTitle className="font-semibold">
                                             Save Your Credentials

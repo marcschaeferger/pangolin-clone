@@ -8,13 +8,14 @@ import {
     roleResources,
     resourcePassword,
     resourcePincode
-} from "@server/db/schema";
+} from "@server/db/schemas";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import { sql, eq, or, inArray, and, count } from "drizzle-orm";
 import logger from "@server/logger";
 import stoi from "@server/lib/stoi";
+import { fromZodError } from "zod-validation-error";
 
 const listResourcesParamsSchema = z
     .object({
@@ -66,7 +67,8 @@ function queryResources(
                 whitelist: resources.emailWhitelistEnabled,
                 http: resources.http,
                 protocol: resources.protocol,
-                proxyPort: resources.proxyPort
+                proxyPort: resources.proxyPort,
+                enabled: resources.enabled
             })
             .from(resources)
             .leftJoin(sites, eq(resources.siteId, sites.siteId))
@@ -99,7 +101,8 @@ function queryResources(
                 whitelist: resources.emailWhitelistEnabled,
                 http: resources.http,
                 protocol: resources.protocol,
-                proxyPort: resources.proxyPort
+                proxyPort: resources.proxyPort,
+                enabled: resources.enabled
             })
             .from(resources)
             .leftJoin(sites, eq(resources.siteId, sites.siteId))
@@ -136,7 +139,7 @@ export async function listResources(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedQuery.error.errors.map((e) => e.message).join(", ")
+                    fromZodError(parsedQuery.error)
                 )
             );
         }
@@ -147,7 +150,7 @@ export async function listResources(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedParams.error.errors.map((e) => e.message).join(", ")
+                    fromZodError(parsedParams.error)
                 )
             );
         }

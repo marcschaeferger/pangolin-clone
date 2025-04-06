@@ -4,10 +4,10 @@ import path from "path";
 
 export default defineConfig({
     dialect: "sqlite",
-    schema: path.join("server", "db", "schema.ts"),
+    schema: path.join("server", "db", "schemas"),
     out: path.join("server", "migrations"),
     verbose: true,
     dbCredentials: {
-        url: path.join(APP_PATH, "db", "db.sqlite"),
-    },
+        url: path.join(APP_PATH, "db", "db.sqlite")
+    }
 });

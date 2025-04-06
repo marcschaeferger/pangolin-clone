@@ -1,5 +1,5 @@
 import { db } from "@server/db";
-import { orgs, roleSites, sites, userSites } from "@server/db/schema";
+import { orgs, roleSites, sites, userSites } from "@server/db/schemas";
 import logger from "@server/logger";
 import HttpCode from "@server/types/HttpCode";
 import response from "@server/lib/response";

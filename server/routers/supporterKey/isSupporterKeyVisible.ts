@@ -6,7 +6,7 @@ import { response as sendResponse } from "@server/lib";
 import config from "@server/lib/config";
 import db from "@server/db";
 import { count } from "drizzle-orm";
-import { users } from "@server/db/schema";
+import { users } from "@server/db/schemas";
 
 export type IsSupporterKeyVisibleResponse = {
     visible: boolean;

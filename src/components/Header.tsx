@@ -43,13 +43,7 @@ export function Header({ orgId, orgs }: HeaderProps) {
     return (
         <>
             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <ProfileIcon />
-
-                    <div className="hidden md:block">
-                        <SupporterStatus />
-                    </div>
-                </div>
+                <ProfileIcon />
 
                 <div className="flex items-center">
                     <div className="hidden md:block">

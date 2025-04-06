@@ -76,7 +76,8 @@ export const resources = sqliteTable("resources", {
     isBaseDomain: integer("isBaseDomain", { mode: "boolean" }),
     applyRules: integer("applyRules", { mode: "boolean" })
         .notNull()
-        .default(false)
+        .default(false),
+    enabled: integer("enabled", { mode: "boolean" }).notNull().default(true)
 });
 
 export const targets = sqliteTable("targets", {

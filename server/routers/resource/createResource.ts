@@ -10,7 +10,7 @@ import {
     roleResources,
     roles,
     userResources
-} from "@server/db/schema";
+} from "@server/db/schemas";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";

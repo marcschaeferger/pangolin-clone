@@ -1,12 +1,13 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { Org, orgs } from "@server/db/schema";
+import { Org, orgs } from "@server/db/schemas";
 import { eq } from "drizzle-orm";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
+import { fromZodError } from "zod-validation-error";
 
 const getOrgSchema = z
     .object({
@@ -29,7 +30,7 @@ export async function getOrg(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedParams.error.errors.map((e) => e.message).join(", ")
+                    fromZodError(parsedParams.error)
                 )
             );
         }

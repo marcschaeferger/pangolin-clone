@@ -5,7 +5,7 @@ import {
     resourceOtp,
     resources,
     resourceWhitelist
-} from "@server/db/schema";
+} from "@server/db/schemas";
 import HttpCode from "@server/types/HttpCode";
 import response from "@server/lib/response";
 import { eq, and } from "drizzle-orm";

@@ -5,22 +5,44 @@ import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
 import { Check } from "lucide-react";
 
 import { cn } from "@app/lib/cn";
+import { cva, type VariantProps } from "class-variance-authority";
+
+// Define checkbox variants
+const checkboxVariants = cva(
+    "peer h-4 w-4 shrink-0 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+    {
+        variants: {
+            variant: {
+                outlinePrimary:
+                    "border-2 rounded-sm border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
+                outline:
+                    "border-2 rounded-sm border-input data-[state=checked]:bg-muted data-[state=checked]:text-accent-foreground",
+                outlinePrimarySquare:
+                    "border-2 rounded-[20%] border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
+                outlineSquare:
+                    "border-2 rounded-[20%] border-input data-[state=checked]:bg-muted data-[state=checked]:text-accent-foreground"
+            }
+        },
+        defaultVariants: {
+            variant: "outlinePrimary"
+        }
+    }
+);
+
+interface CheckboxProps
+    extends React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>,
+        VariantProps<typeof checkboxVariants> {}
 
 const Checkbox = React.forwardRef<
     React.ElementRef<typeof CheckboxPrimitive.Root>,
-    React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>
->(({ className, ...props }, ref) => (
+    CheckboxProps
+>(({ className, variant, ...props }, ref) => (
     <CheckboxPrimitive.Root
         ref={ref}
-        className={cn(
-            "peer h-4 w-4 shrink-0 rounded-sm border-2 border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
-            className
-        )}
+        className={cn(checkboxVariants({ variant }), className)}
         {...props}
     >
-        <CheckboxPrimitive.Indicator
-            className={cn("flex items-center justify-center text-current")}
-        >
+        <CheckboxPrimitive.Indicator className="flex items-center justify-center text-current">
             <Check className="h-4 w-4" />
         </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>

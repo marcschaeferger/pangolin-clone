@@ -9,7 +9,7 @@ import {
     sessions,
     User,
     users
-} from "@server/db/schema";
+} from "@server/db/schemas";
 import db from "@server/db";
 import { eq, inArray } from "drizzle-orm";
 import config from "@server/lib/config";

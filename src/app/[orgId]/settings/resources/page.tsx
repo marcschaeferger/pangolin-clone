@@ -60,10 +60,11 @@ export default async function ResourcesPage(props: ResourcesPageProps) {
                 ? "none"
                 : resource.sso ||
                     resource.pincodeId !== null ||
-                    resource.pincodeId !== null ||
+                    resource.passwordId !== null ||
                     resource.whitelist
                   ? "protected"
-                  : "not_protected"
+                  : "not_protected",
+            enabled: resource.enabled
         };
     });
 

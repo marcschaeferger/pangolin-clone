@@ -1,5 +1,5 @@
 import { db } from "@server/db";
-import { resources, targets } from "@server/db/schema";
+import { resources, targets } from "@server/db/schemas";
 import { eq } from "drizzle-orm";
 
 let currentBannedPorts: number[] = [];

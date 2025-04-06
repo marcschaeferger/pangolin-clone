@@ -14,7 +14,7 @@ import { logIncomingMiddleware } from "./middlewares/logIncoming";
 import { csrfProtectionMiddleware } from "./middlewares/csrfProtection";
 import helmet from "helmet";
 
-const dev = process.env.ENVIRONMENT !== "prod";
+const dev = config.isDev;
 const externalPort = config.getRawConfig().server.external_port;
 
 export function createApiServer() {
