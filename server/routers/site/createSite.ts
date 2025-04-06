@@ -13,35 +13,54 @@ import { fromError } from "zod-validation-error";
 import { hash } from "@node-rs/argon2";
 import { newts } from "@server/db/schemas";
 import moment from "moment";
-import { hashPassword } from "@server/auth/password";
+import { bearerAuth, OpenAPITags, registry } from "@server/openApi";
 
 const createSiteParamsSchema = z
     .object({
-        orgId: z.string()
+        orgId: z.string().openapi({})
     })
     .strict();
 
 const createSiteSchema = z
     .object({
-        name: z.string().min(1).max(255),
-        exitNodeId: z.number().int().positive().optional(),
+        name: z.string().min(1).max(255).openapi({}),
+        exitNodeId: z.number().int().positive().optional().openapi({}),
         // subdomain: z
         //     .string()
         //     .min(1)
         //     .max(255)
         //     .transform((val) => val.toLowerCase())
         //     .optional(),
-        pubKey: z.string().optional(),
-        subnet: z.string().optional(),
-        newtId: z.string().optional(),
-        secret: z.string().optional(),
-        type: z.string()
+        pubKey: z.string().optional().openapi({}),
+        subnet: z.string().optional().openapi({}),
+        newtId: z.string().optional().openapi({}),
+        secret: z.string().optional().openapi({}),
+        type: z.enum(["newt", "wireguard", "local"]).openapi({})
     })
     .strict();
 
 export type CreateSiteBody = z.infer<typeof createSiteSchema>;
 
 export type CreateSiteResponse = Site;
+
+registry.registerPath({
+    method: "put",
+    path: "/org/{orgId}/site",
+    description: "Create a new site",
+    security: [{ [bearerAuth.name]: [] }],
+    tags: [OpenAPITags.Site, OpenAPITags.Org],
+    request: {
+        params: createSiteParamsSchema,
+        body: {
+            content: {
+                "application/json": {
+                    schema: createSiteSchema
+                }
+            }
+        }
+    },
+    responses: {}
+});
 
 export async function createSite(
     req: Request,
