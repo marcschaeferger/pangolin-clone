@@ -1,8 +1,11 @@
 import db from "@server/db";
-import { configFilePath1, configFilePath2 } from "@server/lib/consts";
+import { APP_PATH, configFilePath1, configFilePath2 } from "@server/lib/consts";
 import { sql } from "drizzle-orm";
 import fs from "fs";
 import yaml from "js-yaml";
+import path from "path";
+import { z } from "zod";
+import { fromZodError } from "zod-validation-error";
 
 const version = "1.2.0";
 
@@ -49,7 +52,7 @@ export default async function migration() {
         }
 
         rawConfig.server.resource_access_token_headers = {
-            id: "P-Access-Token-ID",
+            id: "P-Access-Token-Id",
             token: "P-Access-Token"
         };
 
@@ -61,6 +64,49 @@ export default async function migration() {
     } catch (e) {
         console.log(
             `Unable to add new config option: resource_access_token_headers. Please add it manually. https://docs.fossorial.io/Pangolin/Configuration/config`
+        );
+        console.error(e);
+    }
+
+    try {
+        const traefikPath = path.join(
+            APP_PATH,
+            "traefik",
+            "traefik_config.yml"
+        );
+
+        const schema = z.object({
+            experimental: z.object({
+                plugins: z.object({
+                    badger: z.object({
+                        moduleName: z.string(),
+                        version: z.string()
+                    })
+                })
+            })
+        });
+
+        const traefikFileContents = fs.readFileSync(traefikPath, "utf8");
+        const traefikConfig = yaml.load(traefikFileContents) as any;
+
+        const parsedConfig = schema.safeParse(traefikConfig);
+
+        if (!parsedConfig.success) {
+            throw new Error(fromZodError(parsedConfig.error).toString());
+        }
+
+        traefikConfig.experimental.plugins.badger.version = "v1.1.0";
+
+        const updatedTraefikYaml = yaml.dump(traefikConfig);
+
+        fs.writeFileSync(traefikPath, updatedTraefikYaml, "utf8");
+
+        console.log(
+            "Updated the version of Badger in your Traefik configuration to v1.1.0"
+        );
+    } catch (e) {
+        console.log(
+            "We were unable to update the version of Badger in your Traefik configuration. Please update it manually. Check the release notes for this version for more information."
         );
         console.error(e);
     }

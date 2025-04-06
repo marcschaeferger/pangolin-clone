@@ -92,7 +92,7 @@ export async function generateAccessToken(
             ? createDate(new TimeSpan(validForSeconds, "s")).getTime()
             : undefined;
 
-        const token = generateIdFromEntropySize(12);
+        const token = generateIdFromEntropySize(16);
 
         const tokenHash = encodeHexLowerCase(
             sha256(new TextEncoder().encode(token))
