@@ -473,11 +473,11 @@ authenticated.delete(
 //     role.removeRoleAction
 // );
 
-authenticated.put(
-    "/newt",
-    verifyUserHasAction(ActionsEnum.createNewt),
-    createNewt
-);
+// authenticated.put(
+//     "/newt",
+//     verifyUserHasAction(ActionsEnum.createNewt),
+//     createNewt
+// );
 
 // Auth routes
 export const authRouter = Router();
