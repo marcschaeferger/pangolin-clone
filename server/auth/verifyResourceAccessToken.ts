@@ -11,10 +11,12 @@ import { verifyPassword } from "./password";
 import { encodeHexLowerCase } from "@oslojs/encoding";
 import { sha256 } from "@oslojs/crypto/sha2";
 
-export async function verifyResourceAccessTokenSHA256({
-    accessToken
+export async function verifyResourceAccessToken({
+    accessToken,
+    accessTokenId
 }: {
     accessToken: string;
+    accessTokenId?: string;
 }): Promise<{
     valid: boolean;
     error?: string;
@@ -25,17 +27,61 @@ export async function verifyResourceAccessTokenSHA256({
         sha256(new TextEncoder().encode(accessToken))
     );
 
-    const [res] = await db
-        .select()
-        .from(resourceAccessToken)
-        .where(and(eq(resourceAccessToken.tokenHash, accessTokenHash)))
-        .innerJoin(
-            resources,
-            eq(resourceAccessToken.resourceId, resources.resourceId)
-        );
+    let tokenItem: ResourceAccessToken | undefined;
+    let resource: Resource | undefined;
 
-    const tokenItem = res?.resourceAccessToken;
-    const resource = res?.resources;
+    if (!accessTokenId) {
+        const [res] = await db
+            .select()
+            .from(resourceAccessToken)
+            .where(and(eq(resourceAccessToken.tokenHash, accessTokenHash)))
+            .innerJoin(
+                resources,
+                eq(resourceAccessToken.resourceId, resources.resourceId)
+            );
+
+        tokenItem = res?.resourceAccessToken;
+        resource = res?.resources;
+    } else {
+        const [res] = await db
+            .select()
+            .from(resourceAccessToken)
+            .where(and(eq(resourceAccessToken.accessTokenId, accessTokenId)))
+            .innerJoin(
+                resources,
+                eq(resourceAccessToken.resourceId, resources.resourceId)
+            );
+
+        if (res && res.resourceAccessToken) {
+            if (res.resourceAccessToken.tokenHash?.startsWith("$argon")) {
+                const validCode = await verifyPassword(
+                    accessToken,
+                    res.resourceAccessToken.tokenHash
+                );
+
+                if (!validCode) {
+                    return {
+                        valid: false,
+                        error: "Invalid access token"
+                    };
+                }
+            } else {
+                const tokenHash = encodeHexLowerCase(
+                    sha256(new TextEncoder().encode(accessToken))
+                );
+
+                if (res.resourceAccessToken.tokenHash !== tokenHash) {
+                    return {
+                        valid: false,
+                        error: "Invalid access token"
+                    };
+                }
+            }
+        }
+
+        tokenItem = res?.resourceAccessToken;
+        resource = res?.resources;
+    }
 
     if (!tokenItem || !resource) {
         return {
@@ -58,63 +104,5 @@ export async function verifyResourceAccessTokenSHA256({
         valid: true,
         tokenItem,
         resource
-    };
-}
-
-export async function verifyResourceAccessToken({
-    resource,
-    accessTokenId,
-    accessToken
-}: {
-    resource: Resource;
-    accessTokenId: string;
-    accessToken: string;
-}): Promise<{
-    valid: boolean;
-    error?: string;
-    tokenItem?: ResourceAccessToken;
-}> {
-    const [result] = await db
-        .select()
-        .from(resourceAccessToken)
-        .where(
-            and(
-                eq(resourceAccessToken.resourceId, resource.resourceId),
-                eq(resourceAccessToken.accessTokenId, accessTokenId)
-            )
-        )
-        .limit(1);
-
-    const tokenItem = result;
-
-    if (!tokenItem) {
-        return {
-            valid: false,
-            error: "Access token does not exist for resource"
-        };
-    }
-
-    const validCode = await verifyPassword(accessToken, tokenItem.tokenHash);
-
-    if (!validCode) {
-        return {
-            valid: false,
-            error: "Invalid access token"
-        };
-    }
-
-    if (
-        tokenItem.expiresAt &&
-        !isWithinExpirationDate(new Date(tokenItem.expiresAt))
-    ) {
-        return {
-            valid: false,
-            error: "Access token has expired"
-        };
-    }
-
-    return {
-        valid: true,
-        tokenItem
     };
 }

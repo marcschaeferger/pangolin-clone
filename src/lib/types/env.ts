@@ -3,22 +3,24 @@ export type Env = {
         environment: string;
         version: string;
         dashboardUrl: string;
-    },
+    };
     server: {
         externalPort: string;
         nextPort: string;
         sessionCookieName: string;
         resourceAccessTokenParam: string;
         resourceSessionRequestParam: string;
-    },
+        resourceAccessTokenHeadersId: string;
+        resourceAccessTokenHeadersToken: string;
+    };
     email: {
         emailEnabled: boolean;
-    },
+    };
     flags: {
         disableSignupWithoutInvite: boolean;
         disableUserCreateOrg: boolean;
         emailVerificationRequired: boolean;
         allowRawResources: boolean;
         allowBaseDomainResources: boolean;
-    }
+    };
 };

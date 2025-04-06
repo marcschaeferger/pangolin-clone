@@ -11,8 +11,7 @@ import { fromError } from "zod-validation-error";
 import { createResourceSession } from "@server/auth/sessions/resource";
 import logger from "@server/logger";
 import {
-    verifyResourceAccessToken,
-    verifyResourceAccessTokenSHA256
+    verifyResourceAccessToken
 } from "@server/auth/verifyResourceAccessToken";
 import config from "@server/lib/config";
 import stoi from "@server/lib/stoi";
@@ -98,7 +97,6 @@ export async function authWithAccessToken(
             }
 
             const res = await verifyResourceAccessToken({
-                resource: foundResource,
                 accessTokenId,
                 accessToken
             });
@@ -108,7 +106,7 @@ export async function authWithAccessToken(
             error = res.error;
             resource = foundResource;
         } else {
-            const res = await verifyResourceAccessTokenSHA256({
+            const res = await verifyResourceAccessToken({
                 accessToken
             });
 

@@ -66,6 +66,10 @@ const configSchema = z.object({
         internal_hostname: z.string().transform((url) => url.toLowerCase()),
         session_cookie_name: z.string(),
         resource_access_token_param: z.string(),
+        resource_access_token_headers: z.object({
+            id: z.string(),
+            token: z.string()
+        }),
         resource_session_request_param: z.string(),
         dashboard_session_length_hours: z
             .number()
@@ -239,6 +243,10 @@ export class Config {
             : "false";
         process.env.RESOURCE_ACCESS_TOKEN_PARAM =
             parsedConfig.data.server.resource_access_token_param;
+        process.env.RESOURCE_ACCESS_TOKEN_HEADERS_ID =
+            parsedConfig.data.server.resource_access_token_headers.id;
+        process.env.RESOURCE_ACCESS_TOKEN_HEADERS_TOKEN =
+            parsedConfig.data.server.resource_access_token_headers.token;
         process.env.RESOURCE_SESSION_REQUEST_PARAM =
             parsedConfig.data.server.resource_session_request_param;
         process.env.FLAGS_ALLOW_BASE_DOMAIN_RESOURCES = parsedConfig.data.flags
@@ -335,13 +343,13 @@ export class Config {
 
             // update the supporter key in the database
             await db
-            .update(supporterKey)
-            .set({
-                tier: data.data.tier || null,
-                phrase: data.data.cutePhrase || null,
-                valid: true
-            })
-            .where(eq(supporterKey.keyId, key.keyId));
+                .update(supporterKey)
+                .set({
+                    tier: data.data.tier || null,
+                    phrase: data.data.cutePhrase || null,
+                    valid: true
+                })
+                .where(eq(supporterKey.keyId, key.keyId));
         } catch (e) {
             this.supporterData = key;
             console.error("Failed to validate supporter key", e);
