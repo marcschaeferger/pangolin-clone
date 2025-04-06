@@ -383,7 +383,10 @@ authenticated.get(
 
 authenticated.get(`/org/:orgId/overview`, verifyOrgAccess, org.getOrgOverview);
 
-authenticated.post(`/supporter-key/validate`, supporterKey.validateSupporterKey);
+authenticated.post(
+    `/supporter-key/validate`,
+    supporterKey.validateSupporterKey
+);
 authenticated.post(`/supporter-key/hide`, supporterKey.hideSupporterKey);
 
 unauthenticated.get("/resource/:resourceId/auth", resource.getResourceAuthInfo);
@@ -470,7 +473,11 @@ authenticated.delete(
 //     role.removeRoleAction
 // );
 
-authenticated.put("/newt", createNewt);
+// authenticated.put(
+//     "/newt",
+//     verifyUserHasAction(ActionsEnum.createNewt),
+//     createNewt
+// );
 
 // Auth routes
 export const authRouter = Router();
@@ -557,5 +564,10 @@ authRouter.post(
 
 authRouter.post(
     "/resource/:resourceId/access-token",
+    resource.authWithAccessToken
+);
+
+authRouter.post(
+    "/access-token",
     resource.authWithAccessToken
 );

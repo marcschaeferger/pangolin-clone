@@ -6,7 +6,7 @@ import {
     sites,
     Target,
     targets
-} from "@server/db/schema";
+} from "@server/db/schemas";
 import { eq, and, sql, inArray } from "drizzle-orm";
 import { addPeer, deletePeer } from "../gerbil/peers";
 import logger from "@server/logger";

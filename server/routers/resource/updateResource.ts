@@ -8,7 +8,7 @@ import {
     orgs,
     Resource,
     resources
-} from "@server/db/schema";
+} from "@server/db/schemas";
 import { eq, and } from "drizzle-orm";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
@@ -39,7 +39,8 @@ const updateHttpResourceBodySchema = z
         emailWhitelistEnabled: z.boolean().optional(),
         isBaseDomain: z.boolean().optional(),
         applyRules: z.boolean().optional(),
-        domainId: z.string().optional()
+        domainId: z.string().optional(),
+        enabled: z.boolean().optional()
     })
     .strict()
     .refine((data) => Object.keys(data).length > 0, {
@@ -73,7 +74,8 @@ export type UpdateResourceResponse = Resource;
 const updateRawResourceBodySchema = z
     .object({
         name: z.string().min(1).max(255).optional(),
-        proxyPort: z.number().int().min(1).max(65535).optional()
+        proxyPort: z.number().int().min(1).max(65535).optional(),
+        enabled: z.boolean().optional()
     })
     .strict()
     .refine((data) => Object.keys(data).length > 0, {

@@ -4,7 +4,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import logger from "@server/logger";
 import HttpCode from "@server/types/HttpCode";
 import config from "@server/lib/config";
-import { orgs, resources, sites, Target, targets } from "@server/db/schema";
+import { orgs, resources, sites, Target, targets } from "@server/db/schemas";
 import { sql } from "drizzle-orm";
 
 export async function traefikConfigProvider(
@@ -39,7 +39,8 @@ export async function traefikConfigProvider(
                     // Org fields
                     org: {
                         orgId: orgs.orgId
-                    }
+                    },
+                    enabled: resources.enabled
                 })
                 .from(resources)
                 .innerJoin(sites, eq(sites.siteId, resources.siteId))
@@ -109,9 +110,12 @@ export async function traefikConfigProvider(
                                 userSessionCookieName:
                                     config.getRawConfig().server
                                         .session_cookie_name,
+
+                                // deprecated
                                 accessTokenQueryParam:
                                     config.getRawConfig().server
                                         .resource_access_token_param,
+
                                 resourceSessionRequestParam:
                                     config.getRawConfig().server
                                         .resource_session_request_param
@@ -135,6 +139,10 @@ export async function traefikConfigProvider(
             const routerName = `${resource.resourceId}-router`;
             const serviceName = `${resource.resourceId}-service`;
             const fullDomain = `${resource.fullDomain}`;
+
+            if (!resource.enabled) {
+                continue;
+            }
 
             if (resource.http) {
                 if (!resource.domainId) {

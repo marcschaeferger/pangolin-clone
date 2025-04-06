@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { sites, resources, targets, exitNodes } from '@server/db/schema';
+import { sites, resources, targets, exitNodes } from '@server/db/schemas';
 import { db } from '@server/db';
 import { eq } from 'drizzle-orm';
 import response from "@server/lib/response";

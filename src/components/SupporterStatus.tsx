@@ -176,82 +176,39 @@ export default function SupporterStatus() {
                             </Link>
                         </p>
 
-                        <p>Please select the option that best suits you.</p>
-
-                        <div className="grid md:grid-cols-2 grid-cols-1 gap-8">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Full Supporter</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-4xl mb-6">$95</p>
-                                    <ul className="space-y-3">
-                                        <li className="flex items-center gap-2">
-                                            <Check className="h-6 w-6 text-green-500" />
-                                            <span className="text-muted-foreground">
-                                                For the whole server
-                                            </span>
-                                        </li>
-                                        <li className="flex items-center gap-2">
-                                            <Check className="h-6 w-6 text-green-500" />
-                                            <span className="text-muted-foreground">
-                                                Lifetime purchase
-                                            </span>
-                                        </li>
-                                        <li className="flex items-center gap-2">
-                                            <Check className="h-6 w-6 text-green-500" />
-                                            <span className="text-muted-foreground">
-                                                Supporter status
-                                            </span>
-                                        </li>
-                                    </ul>
-                                </CardContent>
-                                <CardFooter>
-                                    <Link
-                                        href="https://github.com/sponsors/fosrl/sponsorships?tier_id=474929"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="w-full"
-                                    >
-                                        <Button className="w-full">Buy</Button>
-                                    </Link>
-                                </CardFooter>
-                            </Card>
-
-                            <Card
-                                className={`${supporterStatus?.tier === "Limited Supporter" ? "opacity-50" : ""}`}
-                            >
-                                <CardHeader>
-                                    <CardTitle>Limited Supporter</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-4xl mb-6">$25</p>
-                                    <ul className="space-y-3">
-                                        <li className="flex items-center gap-2">
-                                            <Check className="h-6 w-6 text-green-500" />
-                                            <span className="text-muted-foreground">
-                                                For 5 or less users
-                                            </span>
-                                        </li>
-                                        <li className="flex items-center gap-2">
-                                            <Check className="h-6 w-6 text-green-500" />
-                                            <span className="text-muted-foreground">
-                                                Lifetime purchase
-                                            </span>
-                                        </li>
-                                        <li className="flex items-center gap-2">
-                                            <Check className="h-6 w-6 text-green-500" />
-                                            <span className="text-muted-foreground">
-                                                Supporter status
-                                            </span>
-                                        </li>
-                                    </ul>
-                                </CardContent>
-                                <CardFooter>
-                                    {supporterStatus?.tier !==
-                                    "Limited Supporter" ? (
+                        <div className="py-6">
+                            <p className="mb-3 text-center">Please select the option that best suits you.</p>
+                            <div className="grid md:grid-cols-2 grid-cols-1 gap-8">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Full Supporter</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <p className="text-4xl mb-6">$95</p>
+                                        <ul className="space-y-3">
+                                            <li className="flex items-center gap-2">
+                                                <Check className="h-6 w-6 text-green-500" />
+                                                <span className="text-muted-foreground">
+                                                    For the whole server
+                                                </span>
+                                            </li>
+                                            <li className="flex items-center gap-2">
+                                                <Check className="h-6 w-6 text-green-500" />
+                                                <span className="text-muted-foreground">
+                                                    Lifetime purchase
+                                                </span>
+                                            </li>
+                                            <li className="flex items-center gap-2">
+                                                <Check className="h-6 w-6 text-green-500" />
+                                                <span className="text-muted-foreground">
+                                                    Supporter status
+                                                </span>
+                                            </li>
+                                        </ul>
+                                    </CardContent>
+                                    <CardFooter>
                                         <Link
-                                            href="https://github.com/sponsors/fosrl/sponsorships?tier_id=463100"
+                                            href="https://github.com/sponsors/fosrl/sponsorships?tier_id=474929"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="w-full"
@@ -260,22 +217,68 @@ export default function SupporterStatus() {
                                                 Buy
                                             </Button>
                                         </Link>
-                                    ) : (
-                                        <Button
-                                            className="w-full"
-                                            disabled={
-                                                supporterStatus?.tier ===
-                                                "Limited Supporter"
-                                            }
-                                        >
-                                            Buy
-                                        </Button>
-                                    )}
-                                </CardFooter>
-                            </Card>
+                                    </CardFooter>
+                                </Card>
+
+                                <Card
+                                    className={`${supporterStatus?.tier === "Limited Supporter" ? "opacity-50" : ""}`}
+                                >
+                                    <CardHeader>
+                                        <CardTitle>Limited Supporter</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <p className="text-4xl mb-6">$25</p>
+                                        <ul className="space-y-3">
+                                            <li className="flex items-center gap-2">
+                                                <Check className="h-6 w-6 text-green-500" />
+                                                <span className="text-muted-foreground">
+                                                    For 5 or less users
+                                                </span>
+                                            </li>
+                                            <li className="flex items-center gap-2">
+                                                <Check className="h-6 w-6 text-green-500" />
+                                                <span className="text-muted-foreground">
+                                                    Lifetime purchase
+                                                </span>
+                                            </li>
+                                            <li className="flex items-center gap-2">
+                                                <Check className="h-6 w-6 text-green-500" />
+                                                <span className="text-muted-foreground">
+                                                    Supporter status
+                                                </span>
+                                            </li>
+                                        </ul>
+                                    </CardContent>
+                                    <CardFooter>
+                                        {supporterStatus?.tier !==
+                                        "Limited Supporter" ? (
+                                            <Link
+                                                href="https://github.com/sponsors/fosrl/sponsorships?tier_id=463100"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="w-full"
+                                            >
+                                                <Button className="w-full">
+                                                    Buy
+                                                </Button>
+                                            </Link>
+                                        ) : (
+                                            <Button
+                                                className="w-full"
+                                                disabled={
+                                                    supporterStatus?.tier ===
+                                                    "Limited Supporter"
+                                                }
+                                            >
+                                                Buy
+                                            </Button>
+                                        )}
+                                    </CardFooter>
+                                </Card>
+                            </div>
                         </div>
 
-                        <div className="w-full pt-6 space-y-2">
+                        <div className="w-full space-y-2">
                             <Button
                                 className="w-full"
                                 variant="outlinePrimary"

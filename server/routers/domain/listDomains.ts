@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { domains, orgDomains, users } from "@server/db/schema";
+import { domains, orgDomains, users } from "@server/db/schemas";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
@@ -80,15 +80,15 @@ export async function listDomains(
 
         const { orgId } = parsedParams.data;
 
-        const domains = await queryDomains(orgId.toString(), limit, offset);
+        const domainsList = await queryDomains(orgId.toString(), limit, offset);
 
         const [{ count }] = await db
             .select({ count: sql<number>`count(*)` })
-            .from(users);
+            .from(domains);
 
         return response<ListDomainsResponse>(res, {
             data: {
-                domains,
+                domains: domainsList,
                 pagination: {
                     total: count,
                     limit,

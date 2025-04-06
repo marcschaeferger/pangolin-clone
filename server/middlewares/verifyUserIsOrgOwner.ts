@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { db } from "@server/db";
-import { userOrgs } from "@server/db/schema";
+import { userOrgs } from "@server/db/schemas";
 import { and, eq } from "drizzle-orm";
 import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
@@ -55,7 +55,7 @@ export async function verifyUserIsOrgOwner(
                 )
             );
         }
-        
+
         return next();
     } catch (e) {
         return next(

@@ -4,7 +4,7 @@ import HttpCode from "@server/types/HttpCode";
 import { fromError } from "zod-validation-error";
 import { z } from "zod";
 import { db } from "@server/db";
-import { User, users } from "@server/db/schema";
+import { User, users } from "@server/db/schemas";
 import { eq } from "drizzle-orm";
 import { response } from "@server/lib";
 import { verifyPassword } from "@server/auth/password";

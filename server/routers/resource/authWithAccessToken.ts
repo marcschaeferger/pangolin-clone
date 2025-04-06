@@ -1,6 +1,6 @@
 import { generateSessionToken } from "@server/auth/sessions/app";
 import db from "@server/db";
-import { resources } from "@server/db/schema";
+import { Resource, resources } from "@server/db/schemas";
 import HttpCode from "@server/types/HttpCode";
 import response from "@server/lib/response";
 import { eq } from "drizzle-orm";
@@ -10,13 +10,16 @@ import { z } from "zod";
 import { fromError } from "zod-validation-error";
 import { createResourceSession } from "@server/auth/sessions/resource";
 import logger from "@server/logger";
-import { verifyResourceAccessToken } from "@server/auth/verifyResourceAccessToken";
+import {
+    verifyResourceAccessToken
+} from "@server/auth/verifyResourceAccessToken";
 import config from "@server/lib/config";
+import stoi from "@server/lib/stoi";
 
 const authWithAccessTokenBodySchema = z
     .object({
         accessToken: z.string(),
-        accessTokenId: z.string()
+        accessTokenId: z.string().optional()
     })
     .strict();
 
@@ -24,13 +27,15 @@ const authWithAccessTokenParamsSchema = z
     .object({
         resourceId: z
             .string()
-            .transform(Number)
-            .pipe(z.number().int().positive())
+            .optional()
+            .transform(stoi)
+            .pipe(z.number().int().positive().optional())
     })
     .strict();
 
 export type AuthWithAccessTokenResponse = {
     session?: string;
+    redirectUrl?: string | null;
 };
 
 export async function authWithAccessToken(
@@ -64,23 +69,61 @@ export async function authWithAccessToken(
     const { accessToken, accessTokenId } = parsedBody.data;
 
     try {
-        const [resource] = await db
-            .select()
-            .from(resources)
-            .where(eq(resources.resourceId, resourceId))
-            .limit(1);
+        let valid;
+        let tokenItem;
+        let error;
+        let resource: Resource | undefined;
 
-        if (!resource) {
-            return next(
-                createHttpError(HttpCode.NOT_FOUND, "Resource not found")
-            );
+        if (accessTokenId) {
+            if (!resourceId) {
+                return next(
+                    createHttpError(
+                        HttpCode.BAD_REQUEST,
+                        "Resource ID is required"
+                    )
+                );
+            }
+
+            const [foundResource] = await db
+                .select()
+                .from(resources)
+                .where(eq(resources.resourceId, resourceId))
+                .limit(1);
+
+            if (!foundResource) {
+                return next(
+                    createHttpError(HttpCode.NOT_FOUND, "Resource not found")
+                );
+            }
+
+            const res = await verifyResourceAccessToken({
+                accessTokenId,
+                accessToken
+            });
+
+            valid = res.valid;
+            tokenItem = res.tokenItem;
+            error = res.error;
+            resource = foundResource;
+        } else {
+            const res = await verifyResourceAccessToken({
+                accessToken
+            });
+
+            valid = res.valid;
+            tokenItem = res.tokenItem;
+            error = res.error;
+            resource = res.resource;
         }
 
-        const { valid, error, tokenItem } = await verifyResourceAccessToken({
-            resource,
-            accessTokenId,
-            accessToken
-        });
+        if (!tokenItem || !resource) {
+            return next(
+                createHttpError(
+                    HttpCode.UNAUTHORIZED,
+                    "Access token does not exist for resource"
+                )
+            );
+        }
 
         if (!valid) {
             if (config.getRawConfig().app.log_failed_attempts) {
@@ -96,18 +139,9 @@ export async function authWithAccessToken(
             );
         }
 
-        if (!tokenItem || !resource) {
-            return next(
-                createHttpError(
-                    HttpCode.UNAUTHORIZED,
-                    "Access token does not exist for resource"
-                )
-            );
-        }
-
         const token = generateSessionToken();
         await createResourceSession({
-            resourceId,
+            resourceId: resource.resourceId,
             token,
             accessTokenId: tokenItem.accessTokenId,
             isRequestToken: true,
@@ -118,7 +152,8 @@ export async function authWithAccessToken(
 
         return response<AuthWithAccessTokenResponse>(res, {
             data: {
-                session: token
+                session: token,
+                redirectUrl: `${resource.ssl ? "https" : "http"}://${resource.fullDomain}`
             },
             success: true,
             error: false,

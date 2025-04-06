@@ -6,7 +6,8 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import { sql, eq } from "drizzle-orm";
 import logger from "@server/logger";
-import { users } from "@server/db/schema";
+import { users } from "@server/db/schemas";
+import { fromZodError } from "zod-validation-error";
 
 const listUsersSchema = z
     .object({
@@ -55,7 +56,7 @@ export async function adminListUsers(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    parsedQuery.error.errors.map((e) => e.message).join(", ")
+                    fromZodError(parsedQuery.error)
                 )
             );
         }

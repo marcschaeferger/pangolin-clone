@@ -10,7 +10,7 @@ import {
     roleActions,
     roles,
     userOrgs
-} from "@server/db/schema";
+} from "@server/db/schemas";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
@@ -27,7 +27,7 @@ const createOrgSchema = z
     })
     .strict();
 
-const MAX_ORGS = 5;
+// const MAX_ORGS = 5;
 
 export async function createOrg(
     req: Request,
@@ -57,15 +57,15 @@ export async function createOrg(
             );
         }
 
-        const userOrgIds = req.userOrgIds;
-        if (userOrgIds && userOrgIds.length > MAX_ORGS) {
-            return next(
-                createHttpError(
-                    HttpCode.FORBIDDEN,
-                    `Maximum number of organizations reached.`
-                )
-            );
-        }
+        // const userOrgIds = req.userOrgIds;
+        // if (userOrgIds && userOrgIds.length > MAX_ORGS) {
+        //     return next(
+        //         createHttpError(
+        //             HttpCode.FORBIDDEN,
+        //             `Maximum number of organizations reached.`
+        //         )
+        //     );
+        // }
 
         const { orgId, name } = parsedBody.data;
 

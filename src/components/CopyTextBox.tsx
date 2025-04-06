@@ -28,11 +28,11 @@ export default function CopyTextBox({
 
     return (
         <div
-            className={`relative w-full border rounded-md ${!outline ? "bg-muted" : "bg-card"}`}
+            className={`relative w-full border-2 rounded-md ${!outline ? "bg-muted" : "bg-card"}`}
         >
             <pre
                 ref={textRef}
-                className={`p-4 pr-16 text-sm w-full ${
+                className={`p-2 pr-16 text-sm w-full ${
                     wrapText
                         ? "whitespace-pre-wrap break-words"
                         : "overflow-x-auto"
@@ -41,10 +41,10 @@ export default function CopyTextBox({
                 <code className="block w-full">{text}</code>
             </pre>
             <Button
-                variant="outline"
-                size="icon"
+                variant="ghost"
+                size="sm"
                 type="button"
-                className="absolute top-1 right-1 z-10 bg-card"
+                className="absolute top-0.5 right-0 z-10 bg-card"
                 onClick={copyToClipboard}
                 aria-label="Copy to clipboard"
             >

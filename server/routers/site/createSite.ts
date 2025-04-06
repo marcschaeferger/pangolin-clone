@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { roles, userSites, sites, roleSites, Site } from "@server/db/schema";
+import { roles, userSites, sites, roleSites, Site } from "@server/db/schemas";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
@@ -11,7 +11,7 @@ import { getUniqueSiteName } from "@server/db/names";
 import { addPeer } from "../gerbil/peers";
 import { fromError } from "zod-validation-error";
 import { hash } from "@node-rs/argon2";
-import { newts } from "@server/db/schema";
+import { newts } from "@server/db/schemas";
 import moment from "moment";
 import { hashPassword } from "@server/auth/password";
 

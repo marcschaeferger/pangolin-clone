@@ -3,7 +3,7 @@ import { configFilePath1, configFilePath2 } from "@server/lib/consts";
 import fs from "fs";
 import yaml from "js-yaml";
 import { sql } from "drizzle-orm";
-import { domains, orgDomains, resources } from "@server/db/schema";
+import { domains, orgDomains, resources } from "@server/db/schemas";
 
 const version = "1.0.0-beta.15";
 

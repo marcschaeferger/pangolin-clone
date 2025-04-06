@@ -1,5 +1,5 @@
 import { db } from "@server/db";
-import { domains, exitNodes, orgDomains, orgs, resources } from "../db/schema";
+import { domains, exitNodes, orgDomains, orgs, resources } from "../db/schemas/schema";
 import config from "@server/lib/config";
 import { eq, ne } from "drizzle-orm";
 import logger from "@server/logger";
