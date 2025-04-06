@@ -18,6 +18,9 @@ server:
     internal_hostname: "pangolin"
     session_cookie_name: "p_session_token"
     resource_access_token_param: "p_token"
+    resource_access_token_headers:
+        id: "P-Access-Token-Id"
+        token: "P-Access-Token"
     resource_session_request_param: "p_session_request"
 
 traefik:
@@ -35,7 +38,7 @@ gerbil:
 rate_limits:
     global:
         window_minutes: 1
-        max_requests: 100
+        max_requests: 500
 
 users:
     server_admin:
