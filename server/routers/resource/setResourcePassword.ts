@@ -10,6 +10,7 @@ import { hash } from "@node-rs/argon2";
 import { response } from "@server/lib";
 import logger from "@server/logger";
 import { hashPassword } from "@server/auth/password";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const setResourceAuthMethodsParamsSchema = z.object({
     resourceId: z.string().transform(Number).pipe(z.number().int().positive())
@@ -20,6 +21,25 @@ const setResourceAuthMethodsBodySchema = z
         password: z.string().min(4).max(100).nullable()
     })
     .strict();
+
+registry.registerPath({
+    method: "post",
+    path: "/resource/{resourceId}/password",
+    description:
+        "Set the password for a resource. Setting the password to null will remove it.",
+    tags: [OpenAPITags.Resource],
+    request: {
+        params: setResourceAuthMethodsParamsSchema,
+        body: {
+            content: {
+                "application/json": {
+                    schema: setResourceAuthMethodsBodySchema
+                }
+            }
+        }
+    },
+    responses: {}
+});
 
 export async function setResourcePassword(
     req: Request,

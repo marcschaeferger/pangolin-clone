@@ -17,6 +17,8 @@ import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import config from "@server/lib/config";
 import { subdomainSchema } from "@server/lib/schemas";
+import { registry } from "@server/openApi";
+import { OpenAPITags } from "@server/openApi";
 
 const updateResourceParamsSchema = z
     .object({
@@ -92,6 +94,26 @@ const updateRawResourceBodySchema = z
         },
         { message: "Cannot update proxyPort" }
     );
+
+registry.registerPath({
+    method: "post",
+    path: "/resource/{resourceId}",
+    description: "Update a resource.",
+    tags: [OpenAPITags.Resource],
+    request: {
+        params: updateResourceParamsSchema,
+        body: {
+            content: {
+                "application/json": {
+                    schema: updateHttpResourceBodySchema.and(
+                        updateRawResourceBodySchema
+                    )
+                }
+            }
+        }
+    },
+    responses: {}
+});
 
 export async function updateResource(
     req: Request,

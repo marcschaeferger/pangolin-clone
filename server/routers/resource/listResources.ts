@@ -16,6 +16,7 @@ import { sql, eq, or, inArray, and, count } from "drizzle-orm";
 import logger from "@server/logger";
 import stoi from "@server/lib/stoi";
 import { fromZodError } from "zod-validation-error";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const listResourcesParamsSchema = z
     .object({
@@ -127,6 +128,34 @@ export type ListResourcesResponse = {
     resources: NonNullable<Awaited<ReturnType<typeof queryResources>>>;
     pagination: { total: number; limit: number; offset: number };
 };
+
+registry.registerPath({
+    method: "get",
+    path: "/site/{siteId}/resources",
+    description: "List resources for a site.",
+    tags: [OpenAPITags.Site, OpenAPITags.Resource],
+    request: {
+        params: z.object({
+            siteId: z.number()
+        }),
+        query: listResourcesSchema
+    },
+    responses: {}
+});
+
+registry.registerPath({
+    method: "get",
+    path: "/org/{orgId}/resources",
+    description: "List resources for an organization.",
+    tags: [OpenAPITags.Org, OpenAPITags.Resource],
+    request: {
+        params: z.object({
+            orgId: z.string()
+        }),
+        query: listResourcesSchema
+    },
+    responses: {}
+});
 
 export async function listResources(
     req: Request,

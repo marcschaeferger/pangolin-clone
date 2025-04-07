@@ -8,6 +8,7 @@ import { NextFunction, Request, Response } from "express";
 import createHttpError from "http-errors";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const listSitesParamsSchema = z
     .object({
@@ -58,6 +59,18 @@ export type ListSitesResponse = {
     sites: Awaited<ReturnType<typeof querySites>>;
     pagination: { total: number; limit: number; offset: number };
 };
+
+registry.registerPath({
+    method: "get",
+    path: "/org/{orgId}/sites",
+    description: "List all sites in an organization",
+    tags: [OpenAPITags.Org, OpenAPITags.Site],
+    request: {
+        params: listSitesParamsSchema,
+        query: listSitesSchema
+    },
+    responses: {}
+});
 
 export async function listSites(
     req: Request,

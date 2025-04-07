@@ -14,6 +14,7 @@ import { hashPassword } from "@server/auth/password";
 import { fromError } from "zod-validation-error";
 import { sendEmail } from "@server/emails";
 import SendInviteLink from "@server/emails/templates/SendInviteLink";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const inviteUserParamsSchema = z
     .object({
@@ -41,6 +42,24 @@ export type InviteUserResponse = {
 };
 
 const inviteTracker: Record<string, { timestamps: number[] }> = {};
+
+registry.registerPath({
+    method: "post",
+    path: "/org/{orgId}/create-invite",
+    description: "Invite a user to join an organization.",
+    tags: [OpenAPITags.Org],
+    request: {
+        params: inviteUserParamsSchema,
+        body: {
+            content: {
+                "application/json": {
+                    schema: inviteUserBodySchema
+                }
+            }
+        }
+    },
+    responses: {}
+});
 
 export async function inviteUser(
     req: Request,

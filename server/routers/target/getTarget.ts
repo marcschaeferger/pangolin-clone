@@ -8,12 +8,24 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const getTargetSchema = z
     .object({
         targetId: z.string().transform(Number).pipe(z.number().int().positive())
     })
     .strict();
+
+registry.registerPath({
+    method: "get",
+    path: "/target/{targetId}",
+    description: "Get a target.",
+    tags: [OpenAPITags.Target],
+    request: {
+        params: getTargetSchema
+    },
+    responses: {}
+});
 
 export async function getTarget(
     req: Request,

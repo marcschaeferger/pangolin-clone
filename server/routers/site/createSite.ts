@@ -13,29 +13,30 @@ import { fromError } from "zod-validation-error";
 import { hash } from "@node-rs/argon2";
 import { newts } from "@server/db/schemas";
 import moment from "moment";
-import { bearerAuth, OpenAPITags, registry } from "@server/openApi";
+import { OpenAPITags, registry } from "@server/openApi";
+import { hashPassword } from "@server/auth/password";
 
 const createSiteParamsSchema = z
     .object({
-        orgId: z.string().openapi({})
+        orgId: z.string()
     })
     .strict();
 
 const createSiteSchema = z
     .object({
-        name: z.string().min(1).max(255).openapi({}),
-        exitNodeId: z.number().int().positive().optional().openapi({}),
+        name: z.string().min(1).max(255),
+        exitNodeId: z.number().int().positive().optional(),
         // subdomain: z
         //     .string()
         //     .min(1)
         //     .max(255)
         //     .transform((val) => val.toLowerCase())
         //     .optional(),
-        pubKey: z.string().optional().openapi({}),
-        subnet: z.string().optional().openapi({}),
-        newtId: z.string().optional().openapi({}),
-        secret: z.string().optional().openapi({}),
-        type: z.enum(["newt", "wireguard", "local"]).openapi({})
+        pubKey: z.string().optional(),
+        subnet: z.string().optional(),
+        newtId: z.string().optional(),
+        secret: z.string().optional(),
+        type: z.enum(["newt", "wireguard", "local"])
     })
     .strict();
 
@@ -46,8 +47,7 @@ export type CreateSiteResponse = Site;
 registry.registerPath({
     method: "put",
     path: "/org/{orgId}/site",
-    description: "Create a new site",
-    security: [{ [bearerAuth.name]: [] }],
+    description: "Create a new site.",
     tags: [OpenAPITags.Site, OpenAPITags.Org],
     request: {
         params: createSiteParamsSchema,

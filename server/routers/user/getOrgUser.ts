@@ -9,6 +9,7 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
+import { OpenAPITags, registry } from "@server/openApi";
 
 async function queryUser(orgId: string, userId: string) {
     const [user] = await db
@@ -39,6 +40,17 @@ const getOrgUserParamsSchema = z
         orgId: z.string()
     })
     .strict();
+
+registry.registerPath({
+    method: "get",
+    path: "/org/{orgId}/user/{userId}",
+    description: "Get a user in an organization.",
+    tags: [OpenAPITags.Org, OpenAPITags.User],
+    request: {
+        params: getOrgUserParamsSchema
+    },
+    responses: {}
+});
 
 export async function getOrgUser(
     req: Request,

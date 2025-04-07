@@ -8,6 +8,7 @@ import createHttpError from "http-errors";
 import { sql } from "drizzle-orm";
 import logger from "@server/logger";
 import { fromZodError } from "zod-validation-error";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const listUsersParamsSchema = z
     .object({
@@ -56,6 +57,18 @@ export type ListUsersResponse = {
     users: NonNullable<Awaited<ReturnType<typeof queryUsers>>>;
     pagination: { total: number; limit: number; offset: number };
 };
+
+registry.registerPath({
+    method: "get",
+    path: "/org/{orgId}/users",
+    description: "List users in an organization.",
+    tags: [OpenAPITags.Org, OpenAPITags.User],
+    request: {
+        params: listUsersParamsSchema,
+        query: listUsersSchema
+    },
+    responses: {}
+});
 
 export async function listUsers(
     req: Request,

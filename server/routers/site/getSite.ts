@@ -9,6 +9,7 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import stoi from "@server/lib/stoi";
 import { fromError } from "zod-validation-error";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const getSiteSchema = z
     .object({
@@ -42,6 +43,34 @@ async function query(siteId?: number, niceId?: string, orgId?: string) {
 }
 
 export type GetSiteResponse = NonNullable<Awaited<ReturnType<typeof query>>>;
+
+registry.registerPath({
+    method: "get",
+    path: "/org/{orgId}/site/{niceId}",
+    description:
+        "Get a site by orgId and niceId. NiceId is a readable ID for the site and unique on a per org basis.",
+    tags: [OpenAPITags.Org, OpenAPITags.Site],
+    request: {
+        params: z.object({
+            orgId: z.string(),
+            niceId: z.string()
+        })
+    },
+    responses: {}
+});
+
+registry.registerPath({
+    method: "get",
+    path: "/site/{siteId}",
+    description: "Get a site by siteId.",
+    tags: [OpenAPITags.Site],
+    request: {
+        params: z.object({
+            siteId: z.number()
+        })
+    },
+    responses: {}
+});
 
 export async function getSite(
     req: Request,

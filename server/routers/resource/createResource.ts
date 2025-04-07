@@ -20,6 +20,7 @@ import { fromError } from "zod-validation-error";
 import logger from "@server/logger";
 import { subdomainSchema } from "@server/lib/schemas";
 import config from "@server/lib/config";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const createResourceParamsSchema = z
     .object({
@@ -89,6 +90,26 @@ const createRawResourceSchema = z
     );
 
 export type CreateResourceResponse = Resource;
+
+registry.registerPath({
+    method: "put",
+    path: "/org/{orgId}/site/{siteId}/resource",
+    description: "Create a resource.",
+    tags: [OpenAPITags.Org, OpenAPITags.Resource],
+    request: {
+        params: createResourceParamsSchema,
+        body: {
+            content: {
+                "application/json": {
+                    schema: createHttpResourceSchema.or(
+                        createRawResourceSchema
+                    )
+                }
+            }
+        }
+    },
+    responses: {}
+});
 
 export async function createResource(
     req: Request,

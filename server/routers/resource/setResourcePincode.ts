@@ -11,9 +11,10 @@ import { response } from "@server/lib";
 import stoi from "@server/lib/stoi";
 import logger from "@server/logger";
 import { hashPassword } from "@server/auth/password";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const setResourceAuthMethodsParamsSchema = z.object({
-    resourceId: z.string().transform(Number).pipe(z.number().int().positive()),
+    resourceId: z.string().transform(Number).pipe(z.number().int().positive())
 });
 
 const setResourceAuthMethodsBodySchema = z
@@ -21,25 +22,44 @@ const setResourceAuthMethodsBodySchema = z
         pincode: z
             .string()
             .regex(/^\d{6}$/)
-            .or(z.null()),
+            .or(z.null())
     })
     .strict();
+
+registry.registerPath({
+    method: "post",
+    path: "/resource/{resourceId}/pincode",
+    description:
+        "Set the PIN code for a resource. Setting the PIN code to null will remove it.",
+    tags: [OpenAPITags.Resource],
+    request: {
+        params: setResourceAuthMethodsParamsSchema,
+        body: {
+            content: {
+                "application/json": {
+                    schema: setResourceAuthMethodsBodySchema
+                }
+            }
+        }
+    },
+    responses: {}
+});
 
 export async function setResourcePincode(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
 ): Promise<any> {
     try {
         const parsedParams = setResourceAuthMethodsParamsSchema.safeParse(
-            req.params,
+            req.params
         );
         if (!parsedParams.success) {
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    fromError(parsedParams.error).toString(),
-                ),
+                    fromError(parsedParams.error).toString()
+                )
             );
         }
 
@@ -48,8 +68,8 @@ export async function setResourcePincode(
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    fromError(parsedBody.error).toString(),
-                ),
+                    fromError(parsedBody.error).toString()
+                )
             );
         }
 
@@ -75,15 +95,12 @@ export async function setResourcePincode(
             success: true,
             error: false,
             message: "Resource PIN code set successfully",
-            status: HttpCode.CREATED,
+            status: HttpCode.CREATED
         });
     } catch (error) {
         logger.error(error);
         return next(
-            createHttpError(
-                HttpCode.INTERNAL_SERVER_ERROR,
-                "An error occurred",
-            ),
+            createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
 }

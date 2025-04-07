@@ -13,6 +13,7 @@ import {
     isValidIP,
     isValidUrlGlobPattern
 } from "@server/lib/validators";
+import { OpenAPITags, registry } from "@server/openApi";
 
 // Define Zod schema for request parameters validation
 const updateResourceRuleParamsSchema = z
@@ -38,6 +39,24 @@ const updateResourceRuleSchema = z
     .refine((data) => Object.keys(data).length > 0, {
         message: "At least one field must be provided for update"
     });
+
+registry.registerPath({
+    method: "post",
+    path: "/resource/{resourceId}/rule/{ruleId}",
+    description: "Update a resource rule.",
+    tags: [OpenAPITags.Resource, OpenAPITags.Rule],
+    request: {
+        params: updateResourceRuleParamsSchema,
+        body: {
+            content: {
+                "application/json": {
+                    schema: updateResourceRuleSchema
+                }
+            }
+        }
+    },
+    responses: {}
+});
 
 export async function updateResourceRule(
     req: Request,

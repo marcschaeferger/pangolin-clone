@@ -8,6 +8,7 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromZodError } from "zod-validation-error";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const getOrgSchema = z
     .object({
@@ -18,6 +19,17 @@ const getOrgSchema = z
 export type GetOrgResponse = {
     org: Org;
 };
+
+registry.registerPath({
+    method: "get",
+    path: "/org/{orgId}",
+    description: "Get an organization",
+    tags: [OpenAPITags.Org],
+    request: {
+        params: getOrgSchema
+    },
+    responses: {}
+});
 
 export async function getOrg(
     req: Request,

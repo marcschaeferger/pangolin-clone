@@ -11,6 +11,7 @@ import { fromError } from "zod-validation-error";
 import { addPeer } from "../gerbil/peers";
 import { addTargets, removeTargets } from "../newt/targets";
 import { getAllowedIps } from "../target/helpers";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const transferResourceParamsSchema = z
     .object({
@@ -26,6 +27,25 @@ const transferResourceBodySchema = z
         siteId: z.number().int().positive()
     })
     .strict();
+
+registry.registerPath({
+    method: "post",
+    path: "/resource/{resourceId}/transfer",
+    description:
+        "Transfer a resource to a different site. This will also transfer the targets associated with the resource.",
+    tags: [OpenAPITags.Resource],
+    request: {
+        params: transferResourceParamsSchema,
+        body: {
+            content: {
+                "application/json": {
+                    schema: transferResourceBodySchema
+                }
+            }
+        }
+    },
+    responses: {}
+});
 
 export async function transferResource(
     req: Request,

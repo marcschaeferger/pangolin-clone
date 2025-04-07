@@ -22,6 +22,7 @@ import { createDate, TimeSpan } from "oslo";
 import { hashPassword } from "@server/auth/password";
 import { encodeHexLowerCase } from "@oslojs/encoding";
 import { sha256 } from "@oslojs/crypto/sha2";
+import { OpenAPITags, registry } from "@server/openApi";
 
 export const generateAccessTokenBodySchema = z
     .object({
@@ -44,6 +45,24 @@ export type GenerateAccessTokenResponse = Omit<
     ResourceAccessToken,
     "tokenHash"
 > & { accessToken: string };
+
+registry.registerPath({
+    method: "post",
+    path: "/resource/{resourceId}/access-token",
+    description: "Generate a new access token for a resource.",
+    tags: [OpenAPITags.Resource, OpenAPITags.AccessToken],
+    request: {
+        params: generateAccssTokenParamsSchema,
+        body: {
+            content: {
+                "application/json": {
+                    schema: generateAccessTokenBodySchema
+                }
+            }
+        }
+    },
+    responses: {}
+});
 
 export async function generateAccessToken(
     req: Request,

@@ -19,6 +19,7 @@ import { createAdminRole } from "@server/setup/ensureActions";
 import config from "@server/lib/config";
 import { fromError } from "zod-validation-error";
 import { defaultRoleAllowedActions } from "../role";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const createOrgSchema = z
     .object({
@@ -28,6 +29,23 @@ const createOrgSchema = z
     .strict();
 
 // const MAX_ORGS = 5;
+
+registry.registerPath({
+    method: "put",
+    path: "/org",
+    description: "Create a new organization",
+    tags: [OpenAPITags.Org],
+    request: {
+        body: {
+            content: {
+                "application/json": {
+                    schema: createOrgSchema
+                }
+            }
+        }
+    },
+    responses: {}
+});
 
 export async function createOrg(
     req: Request,
