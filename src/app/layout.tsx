@@ -113,6 +113,15 @@ export default async function RootLayout({
                                         </>
                                     )}
                                 </div>
+                                {supporterData?.tier && (
+                                <div className="mt-4 text-center">
+                                    <div className="relative inline-block px-3 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-md shadow-sm max-w-screen-sm mx-auto">
+                                        <h2 className="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600">
+                                            Thank you for supporting Pangolin as a {supporterData.tier}!
+                                        </h2>
+                                    </div>
+                                </div>
+                            )}
                             </footer>
                         </SupportStatusProvider>
                     </EnvProvider>
