@@ -1,6 +1,6 @@
 import { generateSessionToken } from "@server/auth/sessions/app";
 import db from "@server/db";
-import { newts } from "@server/db/schema";
+import { newts } from "@server/db/schemas";
 import HttpCode from "@server/types/HttpCode";
 import response from "@server/lib/response";
 import { eq } from "drizzle-orm";

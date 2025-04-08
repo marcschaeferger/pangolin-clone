@@ -118,14 +118,11 @@ export default async function ResourceAuthPage(props: {
     }
 
     if (searchParams.token) {
-        const [accessTokenId, accessToken] = searchParams.token.split(".");
         return (
             <div className="w-full max-w-md">
                 <AccessToken
-                    accessToken={accessToken}
-                    accessTokenId={accessTokenId}
+                    token={searchParams.token}
                     resourceId={params.resourceId}
-                    redirectUrl={redirectUrl}
                 />
             </div>
         );

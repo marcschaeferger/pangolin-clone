@@ -8,7 +8,7 @@ import {
     targets,
     userInvites,
     users
-} from "@server/db/schema";
+} from "@server/db/schemas";
 import { APP_PATH, configFilePath1, configFilePath2 } from "@server/lib/consts";
 import { eq, sql } from "drizzle-orm";
 import fs from "fs";

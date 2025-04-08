@@ -3,7 +3,7 @@ import { Server as HttpServer } from "http";
 import { WebSocket, WebSocketServer } from "ws";
 import { IncomingMessage } from "http";
 import { Socket } from "net";
-import { Newt, newts, NewtSession } from "@server/db/schema";
+import { Newt, newts, NewtSession } from "@server/db/schemas";
 import { eq } from "drizzle-orm";
 import db from "@server/db";
 import { validateNewtSessionToken } from "@server/auth/sessions/newt";

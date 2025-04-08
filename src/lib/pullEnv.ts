@@ -9,12 +9,16 @@ export function pullEnv(): Env {
             resourceAccessTokenParam: process.env
                 .RESOURCE_ACCESS_TOKEN_PARAM as string,
             resourceSessionRequestParam: process.env
-                .RESOURCE_SESSION_REQUEST_PARAM as string
+                .RESOURCE_SESSION_REQUEST_PARAM as string,
+            resourceAccessTokenHeadersId: process.env
+                .RESOURCE_ACCESS_TOKEN_HEADERS_ID as string,
+            resourceAccessTokenHeadersToken: process.env
+                .RESOURCE_ACCESS_TOKEN_HEADERS_TOKEN as string
         },
         app: {
             environment: process.env.ENVIRONMENT as string,
             version: process.env.APP_VERSION as string,
-            dashboardUrl: process.env.DASHBOARD_URL as string,
+            dashboardUrl: process.env.DASHBOARD_URL as string
         },
         email: {
             emailEnabled: process.env.EMAIL_ENABLED === "true" ? true : false

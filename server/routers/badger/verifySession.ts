@@ -21,7 +21,7 @@ import {
     userOrgs,
     userResources,
     users
-} from "@server/db/schema";
+} from "@server/db/schemas";
 import config from "@server/lib/config";
 import { isIpInCidr } from "@server/lib/ip";
 import { response } from "@server/lib/response";
@@ -41,12 +41,13 @@ const cache = new NodeCache({
 
 const verifyResourceSessionSchema = z.object({
     sessions: z.record(z.string()).optional(),
+    headers: z.record(z.string()).optional(),
+    query: z.record(z.string()).optional(),
     originalRequestURL: z.string().url(),
     scheme: z.string(),
     host: z.string(),
     path: z.string(),
     method: z.string(),
-    accessToken: z.string().optional(),
     tls: z.boolean(),
     requestIp: z.string().optional()
 });
@@ -85,7 +86,8 @@ export async function verifyResourceSession(
             originalRequestURL,
             requestIp,
             path,
-            accessToken: token
+            headers,
+            query
         } = parsedBody.data;
 
         const clientIp = requestIp?.split(":")[0];
@@ -183,12 +185,33 @@ export async function verifyResourceSession(
             resource.resourceId
         )}?redirect=${encodeURIComponent(originalRequestURL)}`;
 
-        // check for access token
-        let validAccessToken: ResourceAccessToken | undefined;
-        if (token) {
-            const [accessTokenId, accessToken] = token.split(".");
+        // check for access token in headers
+        if (
+            headers &&
+            headers[
+                config.getRawConfig().server.resource_access_token_headers.id
+            ] &&
+            headers[
+                config.getRawConfig().server.resource_access_token_headers.token
+            ]
+        ) {
+            const accessTokenId =
+                headers[
+                    config.getRawConfig().server.resource_access_token_headers
+                        .id
+                ];
+            const accessToken =
+                headers[
+                    config.getRawConfig().server.resource_access_token_headers
+                        .token
+                ];
+
             const { valid, error, tokenItem } = await verifyResourceAccessToken(
-                { resource, accessTokenId, accessToken }
+                {
+                    accessToken,
+                    accessTokenId,
+                    resourceId: resource.resourceId
+                }
             );
 
             if (error) {
@@ -206,15 +229,43 @@ export async function verifyResourceSession(
             }
 
             if (valid && tokenItem) {
-                validAccessToken = tokenItem;
+                return allowed(res);
+            }
+        }
 
-                if (!sessions) {
-                    return await createAccessTokenSession(
-                        res,
-                        resource,
-                        tokenItem
+        if (
+            query &&
+            query[config.getRawConfig().server.resource_access_token_param]
+        ) {
+            const token =
+                query[config.getRawConfig().server.resource_access_token_param];
+
+            const [accessTokenId, accessToken] = token.split(".");
+
+            const { valid, error, tokenItem } = await verifyResourceAccessToken(
+                {
+                    accessToken,
+                    accessTokenId,
+                    resourceId: resource.resourceId
+                }
+            );
+
+            if (error) {
+                logger.debug("Access token invalid: " + error);
+            }
+
+            if (!valid) {
+                if (config.getRawConfig().app.log_failed_attempts) {
+                    logger.info(
+                        `Resource access token is invalid. Resource ID: ${
+                            resource.resourceId
+                        }. IP: ${clientIp}.`
                     );
                 }
+            }
+
+            if (valid && tokenItem) {
+                return allowed(res);
             }
         }
 
@@ -321,16 +372,6 @@ export async function verifyResourceSession(
             }
         }
 
-        // At this point we have checked all sessions, but since the access token is
-        // valid, we should allow access and create a new session.
-        if (validAccessToken) {
-            return await createAccessTokenSession(
-                res,
-                resource,
-                validAccessToken
-            );
-        }
-
         logger.debug("No more auth to check, resource not allowed");
 
         if (config.getRawConfig().app.log_failed_attempts) {
@@ -360,8 +401,7 @@ function extractResourceSessionToken(
         ssl ? "_s" : ""
     }`;
 
-    const all: { cookieName: string; token: string; priority: number }[] =
-        [];
+    const all: { cookieName: string; token: string; priority: number }[] = [];
 
     for (const [key, value] of Object.entries(sessions)) {
         const parts = key.split(".");

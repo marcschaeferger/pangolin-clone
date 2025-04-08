@@ -39,6 +39,7 @@ export function RolesDataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+    const [globalFilter, setGlobalFilter] = useState<any>([]);
 
     const table = useReactTable({
         data,
@@ -49,6 +50,7 @@ export function RolesDataTable<TData, TValue>({
         getSortedRowModel: getSortedRowModel(),
         onColumnFiltersChange: setColumnFilters,
         getFilteredRowModel: getFilteredRowModel(),
+        onGlobalFilterChange: setGlobalFilter,
         initialState: {
             pagination: {
                 pageSize: 20,
@@ -57,7 +59,8 @@ export function RolesDataTable<TData, TValue>({
         },
         state: {
             sorting,
-            columnFilters
+            columnFilters,
+            globalFilter
         }
     });
 
@@ -67,15 +70,9 @@ export function RolesDataTable<TData, TValue>({
                 <div className="flex items-center max-w-sm mr-2 w-full relative">
                     <Input
                         placeholder="Search roles"
-                        value={
-                            (table
-                                .getColumn("name")
-                                ?.getFilterValue() as string) ?? ""
-                        }
-                        onChange={(event) =>
-                            table
-                                .getColumn("name")
-                                ?.setFilterValue(event.target.value)
+                        value={globalFilter ?? ""}
+                        onChange={(e) =>
+                            table.setGlobalFilter(String(e.target.value))
                         }
                         className="w-full pl-8"
                     />

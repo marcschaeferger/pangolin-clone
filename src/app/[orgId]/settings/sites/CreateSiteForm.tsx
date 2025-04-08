@@ -291,7 +291,7 @@ PersistentKeepalive = 5`
                                 </FormControl>
                                 <FormMessage />
                                 <FormDescription>
-                                    This is the the display name for the site.
+                                    This is the display name for the site.
                                 </FormDescription>
                             </FormItem>
                         )}

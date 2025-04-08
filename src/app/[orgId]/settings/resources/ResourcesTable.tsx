@@ -30,6 +30,9 @@ import { toast } from "@app/hooks/useToast";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import CopyToClipboard from "@app/components/CopyToClipboard";
+import { Switch } from "@app/components/ui/switch";
+import { AxiosResponse } from "axios";
+import { UpdateResourceResponse } from "@server/routers/resource";
 
 export type ResourceRow = {
     id: number;
@@ -42,6 +45,7 @@ export type ResourceRow = {
     http: boolean;
     protocol: string;
     proxyPort: number | null;
+    enabled: boolean;
 };
 
 type ResourcesTableProps = {
@@ -74,6 +78,26 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                 setIsDeleteModalOpen(false);
             });
     };
+
+    async function toggleResourceEnabled(val: boolean, resourceId: number) {
+        const res = await api
+            .post<AxiosResponse<UpdateResourceResponse>>(
+                `resource/${resourceId}`,
+                {
+                    enabled: val
+                }
+            )
+            .catch((e) => {
+                toast({
+                    variant: "destructive",
+                    title: "Failed to toggle resource",
+                    description: formatAxiosError(
+                        e,
+                        "An error occurred while updating the resource"
+                    )
+                });
+            });
+    }
 
     const columns: ColumnDef<ResourceRow>[] = [
         {
@@ -223,6 +247,18 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                     </div>
                 );
             }
+        },
+        {
+            accessorKey: "enabled",
+            header: "Enabled",
+            cell: ({ row }) => (
+                <Switch
+                    defaultChecked={row.original.enabled}
+                    onCheckedChange={(val) =>
+                        toggleResourceEnabled(val, row.original.id)
+                    }
+                />
+            )
         },
         {
             id: "actions",

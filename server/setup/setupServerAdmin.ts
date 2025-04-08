@@ -2,7 +2,7 @@ import { generateId, invalidateAllSessions } from "@server/auth/sessions/app";
 import { hashPassword, verifyPassword } from "@server/auth/password";
 import config from "@server/lib/config";
 import db from "@server/db";
-import { users } from "@server/db/schema";
+import { users } from "@server/db/schemas";
 import logger from "@server/logger";
 import { eq } from "drizzle-orm";
 import moment from "moment";
@@ -29,7 +29,7 @@ export async function setupServerAdmin() {
             const [existing] = await trx
                 .select()
                 .from(users)
-                .where(eq(users.email, email));
+                .where(eq(users.serverAdmin, true));
 
             if (existing) {
                 const passwordChanged = !(await verifyPassword(
@@ -46,41 +46,33 @@ export async function setupServerAdmin() {
                     // this isn't using the transaction, but it's probably fine
                     await invalidateAllSessions(existing.userId);
 
-                    logger.info(`Server admin (${email}) password updated`);
+                    logger.info(`Server admin password updated`);
                 }
 
-                if (existing.serverAdmin) {
-                    logger.info(`Server admin (${email}) already exists`)
-                    return;
+                if (existing.email !== email) {
+                    await trx
+                        .update(users)
+                        .set({ email })
+                        .where(eq(users.userId, existing.userId));
+
+                    logger.info(`Server admin email updated`);
                 }
+            } else {
+                const userId = generateId(15);
 
                 await trx.update(users).set({ serverAdmin: false });
 
-                await trx
-                    .update(users)
-                    .set({
-                        serverAdmin: true
-                    })
-                    .where(eq(users.email, email));
+                await db.insert(users).values({
+                    userId: userId,
+                    email: email,
+                    passwordHash,
+                    dateCreated: moment().toISOString(),
+                    serverAdmin: true,
+                    emailVerified: true
+                });
 
-                logger.info(`Server admin (${email}) set`);
-                return;
+                logger.info(`Server admin created`);
             }
-
-            const userId = generateId(15);
-
-            await trx.update(users).set({ serverAdmin: false });
-
-            await db.insert(users).values({
-                userId: userId,
-                email: email,
-                passwordHash,
-                dateCreated: moment().toISOString(),
-                serverAdmin: true,
-                emailVerified: true
-            });
-
-            logger.info(`Server admin (${email}) created`);
         } catch (e) {
             logger.error(e);
             trx.rollback();

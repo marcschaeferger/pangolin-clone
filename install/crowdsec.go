@@ -25,7 +25,7 @@ func installCrowdsec(config Config) error {
 	}
 
 	os.MkdirAll("config/crowdsec/db", 0755)
-	os.MkdirAll("config/crowdsec_logs/syslog", 0755)
+	os.MkdirAll("config/crowdsec/acquis.d", 0755)
 	os.MkdirAll("config/traefik/logs", 0755)
 
 	if err := copyDockerService("config/crowdsec/docker-compose.yml", "docker-compose.yml", "crowdsec"); err != nil {

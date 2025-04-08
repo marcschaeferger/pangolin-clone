@@ -15,17 +15,13 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 type AccessTokenProps = {
-    accessTokenId: string | undefined;
-    accessToken: string | undefined;
-    resourceId: number;
-    redirectUrl: string;
+    token: string;
+    resourceId?: number;
 };
 
 export default function AccessToken({
-    accessTokenId,
-    accessToken,
-    resourceId,
-    redirectUrl
+    token,
+    resourceId
 }: AccessTokenProps) {
     const [loading, setLoading] = useState(true);
     const [isValid, setIsValid] = useState(false);
@@ -43,9 +39,47 @@ export default function AccessToken({
     }
 
     useEffect(() => {
-        if (!accessTokenId || !accessToken) {
+        if (!token) {
             setLoading(false);
             return;
+        }
+
+        let accessTokenId = "";
+        let accessToken = "";
+
+        const parts = token.split(".");
+
+        if (parts.length === 2) {
+            accessTokenId = parts[0];
+            accessToken = parts[1];
+        } else if (parts.length === 1) {
+            accessToken = parts[0];
+        } else {
+            setLoading(false);
+            return;
+        }
+
+        async function checkSHA256() {
+            try {
+                const res = await api.post<
+                    AxiosResponse<AuthWithAccessTokenResponse>
+                >(`/auth/access-token`, {
+                    accessToken,
+                    accessTokenId
+                });
+
+                if (res.data.data.session) {
+                    setIsValid(true);
+                    window.location.href = appendRequestToken(
+                        res.data.data.redirectUrl!,
+                        res.data.data.session
+                    );
+                }
+            } catch (e) {
+                console.error("Error checking access token", e);
+            } finally {
+                setLoading(false);
+            }
         }
 
         async function check() {
@@ -60,7 +94,7 @@ export default function AccessToken({
                 if (res.data.data.session) {
                     setIsValid(true);
                     window.location.href = appendRequestToken(
-                        redirectUrl,
+                        res.data.data.redirectUrl!,
                         res.data.data.session
                     );
                 }
@@ -71,8 +105,13 @@ export default function AccessToken({
             }
         }
 
-        check();
-    }, [accessTokenId, accessToken]);
+        if (!accessTokenId) {
+            // no access token id so check the sha256
+            checkSHA256();
+        } else {
+            check();
+        }
+    }, [token]);
 
     function renderTitle() {
         if (isValid) {

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { DrizzleError, eq } from "drizzle-orm";
-import { sites, resources, targets, exitNodes } from "@server/db/schema";
+import { sites, resources, targets, exitNodes } from "@server/db/schemas";
 import db from "@server/db";
 import logger from "@server/logger";
 import createHttpError from "http-errors";
