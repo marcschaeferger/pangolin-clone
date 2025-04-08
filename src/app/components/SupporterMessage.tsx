@@ -38,7 +38,7 @@ export default function SupporterMessage({ tier }: { tier: string }) {
                 <path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.782 1.4 8.168L12 18.896l-7.334 3.864 1.4-8.168L.132 9.21l8.2-1.192z" />
             </svg>
             {/* Popover */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 -top-10 hidden group-hover:block bg-white/10 backdrop-blur-md text-primary text-sm rounded-md shadow-lg px-4 py-2">
+            <div className="absolute left-1/2 transform -translate-x-1/2 -top-10 hidden group-hover:block bg-white/10 text-primary text-sm rounded-md shadow-lg px-4 py-2 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
                 Thank you for supporting Pangolin as a {tier}!
             </div>
         </div>
