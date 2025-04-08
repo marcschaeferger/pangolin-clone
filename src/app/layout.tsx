@@ -12,13 +12,14 @@ import SupportStatusProvider from "@app/providers/SupporterStatusProvider";
 import { createApiClient, internal, priv } from "@app/lib/api";
 import { AxiosResponse } from "axios";
 import { IsSupporterKeyVisibleResponse } from "@server/routers/supporterKey";
+import SupporterMessage from "./components/SupporterMessage";
 
 export const metadata: Metadata = {
     title: `Dashboard - Pangolin`,
     description: ""
 };
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 // const font = Figtree({ subsets: ["latin"] });
 const font = Inter({ subsets: ["latin"] });
@@ -34,9 +35,9 @@ export default async function RootLayout({
         visible: true
     } as any;
 
-    const res = await priv.get<
-        AxiosResponse<IsSupporterKeyVisibleResponse>
-    >("supporter-key/visible");
+    const res = await priv.get<AxiosResponse<IsSupporterKeyVisibleResponse>>(
+        "supporter-key/visible"
+    );
     supporterData.visible = res.data.data.visible;
     supporterData.tier = res.data.data.tier;
 
@@ -61,9 +62,15 @@ export default async function RootLayout({
                             {/* Footer */}
                             <footer className="hidden md:block w-full mt-12 py-3 mb-6 px-4">
                                 <div className="container mx-auto flex flex-wrap justify-center items-center h-3 space-x-4 text-sm text-neutral-400 dark:text-neutral-600">
-                                    <div className="flex items-center space-x-2 whitespace-nowrap">
-                                        <span>Pangolin</span>
-                                    </div>
+                                    {supporterData?.tier ? (
+                                        <SupporterMessage
+                                            tier={supporterData.tier}
+                                        />
+                                    ) : (
+                                        <div className="flex items-center space-x-2 whitespace-nowrap">
+                                            <span>Pangolin</span>
+                                        </div>
+                                    )}
                                     <Separator orientation="vertical" />
                                     <a
                                         href="https://fossorial.io/"
