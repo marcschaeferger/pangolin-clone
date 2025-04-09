@@ -157,13 +157,6 @@ authenticated.delete(
     user.removeInvitation
 );
 
-authenticated.get(
-    "/org/:orgId/users",
-    verifyOrgAccess,
-    verifyUserHasAction(ActionsEnum.listUsers),
-    user.listUsers
-);
-
 authenticated.post(
     "/org/:orgId/create-invite",
     verifyOrgAccess,
