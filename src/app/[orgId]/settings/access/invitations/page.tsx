@@ -28,16 +28,20 @@ export default async function InvitationsPage(props: InvitationsPageProps) {
         roleId: string;
         roleName?: string;
     }[] = [];
+    let hasInvitations = false;
+
     const res = await internal
         .get<
             AxiosResponse<{
                 invitations: typeof invitations;
+                pagination: { total: number };
             }>
         >(`/org/${params.orgId}/invitations`, await authCookieHeader())
         .catch((e) => {});
 
     if (res && res.status === 200) {
         invitations = res.data.data.invitations;
+        hasInvitations = res.data.data.pagination.total > 0;
     }
 
     let org: GetOrgResponse | null = null;
@@ -61,13 +65,13 @@ export default async function InvitationsPage(props: InvitationsPageProps) {
             id: invite.inviteId,
             email: invite.email,
             expiresAt: new Date(Number(invite.expiresAt)).toISOString(),
-            role: invite.roleName || "Unknown Role" // Use roleName if available
+            role: invite.roleName || "Unknown Role"
         };
     });
 
     return (
         <>
-            <AccessPageHeaderAndNav>
+            <AccessPageHeaderAndNav hasInvitations={hasInvitations}>
                 <UserProvider user={user!}>
                     <OrgProvider org={org}>
                         <InvitationsTable invitations={invitationRows} />

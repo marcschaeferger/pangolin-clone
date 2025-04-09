@@ -23,6 +23,8 @@ export default async function UsersPage(props: UsersPageProps) {
     const user = await getUser();
 
     let users: ListUsersResponse["users"] = [];
+    let hasInvitations = false;
+
     const res = await internal
         .get<
             AxiosResponse<ListUsersResponse>
@@ -31,6 +33,21 @@ export default async function UsersPage(props: UsersPageProps) {
 
     if (res && res.status === 200) {
         users = res.data.data.users;
+    }
+
+    const invitationsRes = await internal
+        .get<
+            AxiosResponse<{
+                pagination: { total: number };
+            }>
+        >(
+            `/org/${params.orgId}/invitations?limit=1&offset=0`,
+            await authCookieHeader()
+        )
+        .catch((e) => {});
+
+    if (invitationsRes && invitationsRes.status === 200) {
+        hasInvitations = invitationsRes.data.data.pagination.total > 0;
     }
 
     let org: GetOrgResponse | null = null;
@@ -61,7 +78,7 @@ export default async function UsersPage(props: UsersPageProps) {
 
     return (
         <>
-            <AccessPageHeaderAndNav>
+            <AccessPageHeaderAndNav hasInvitations={hasInvitations}>
                 <UserProvider user={user!}>
                     <OrgProvider org={org}>
                         <UsersTable users={userRows} />

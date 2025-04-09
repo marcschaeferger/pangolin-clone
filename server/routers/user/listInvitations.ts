@@ -72,7 +72,6 @@ export async function listInvitations(
     next: NextFunction
 ): Promise<any> {
     try {
-        // Validate query parameters
         const parsedQuery = listInvitationsQuerySchema.safeParse(req.query);
         if (!parsedQuery.success) {
             return next(
@@ -84,7 +83,6 @@ export async function listInvitations(
         }
         const { limit, offset } = parsedQuery.data;
 
-        // Validate path parameters
         const parsedParams = listInvitationsParamsSchema.safeParse(req.params);
         if (!parsedParams.success) {
             return next(
@@ -96,16 +94,13 @@ export async function listInvitations(
         }
         const { orgId } = parsedParams.data;
 
-        // Query invitations
         const invitations = await queryInvitations(orgId, limit, offset);
 
-        // Get total count of invitations
         const [{ count }] = await db
             .select({ count: sql<number>`count(*)` })
             .from(userInvites)
             .where(sql`${userInvites.orgId} = ${orgId}`);
 
-        // Return response
         return response<ListInvitationsResponse>(res, {
             data: {
                 invitations,

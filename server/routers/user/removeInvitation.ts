@@ -22,7 +22,6 @@ export async function removeInvitation(
     next: NextFunction
 ): Promise<any> {
     try {
-        // Validate path parameters
         const parsedParams = removeInvitationParamsSchema.safeParse(req.params);
         if (!parsedParams.success) {
             return next(
@@ -35,7 +34,6 @@ export async function removeInvitation(
 
         const { orgId, inviteId } = parsedParams.data;
 
-        // Delete the invitation from the database
         const deletedInvitation = await db
             .delete(userInvites)
             .where(
@@ -46,7 +44,6 @@ export async function removeInvitation(
             )
             .returning();
 
-        // If no rows were deleted, the invitation was not found
         if (deletedInvitation.length === 0) {
             return next(
                 createHttpError(
@@ -56,7 +53,6 @@ export async function removeInvitation(
             );
         }
 
-        // Return success response
         return response(res, {
             data: null,
             success: true,

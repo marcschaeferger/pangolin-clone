@@ -20,7 +20,7 @@ import { useEnvContext } from "@app/hooks/useEnvContext";
 export type InvitationRow = {
     id: string;
     email: string;
-    expiresAt: string; // ISO string or timestamp
+    expiresAt: string;
     role: string;
 };
 

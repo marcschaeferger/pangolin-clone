@@ -10,15 +10,18 @@ import {
     SelectContent,
     SelectItem,
     SelectTrigger,
-    SelectValue,
+    SelectValue
 } from "@/components/ui/select";
 
+interface SidebarNavItem {
+    href: string;
+    title: string;
+    icon?: React.ReactNode;
+    children?: SidebarNavItem[];
+}
+
 interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
-    items: {
-        href: string;
-        title: string;
-        icon?: React.ReactNode;
-    }[];
+    items: SidebarNavItem[];
     disabled?: boolean;
 }
 
@@ -35,7 +38,8 @@ export function SidebarNav({
     const resourceId = params.resourceId as string;
     const userId = params.userId as string;
 
-    const [selectedValue, setSelectedValue] = React.useState<string>(getSelectedValue());
+    const [selectedValue, setSelectedValue] =
+        React.useState<string>(getSelectedValue());
 
     useEffect(() => {
         setSelectedValue(getSelectedValue());
@@ -60,6 +64,43 @@ export function SidebarNav({
             .replace("{niceId}", niceId)
             .replace("{resourceId}", resourceId)
             .replace("{userId}", userId);
+    }
+
+    function renderItems(items: SidebarNavItem[]) {
+        return items.map((item) => (
+            <div key={hydrateHref(item.href)}>
+                <Link
+                    href={hydrateHref(item.href)}
+                    className={cn(
+                        buttonVariants({ variant: "ghost" }),
+                        pathname === hydrateHref(item.href) &&
+                            !pathname.includes("create")
+                            ? "bg-accent hover:bg-accent dark:bg-border dark:hover:bg-border"
+                            : "hover:bg-transparent hover:underline",
+                        "justify-start",
+                        disabled && "cursor-not-allowed"
+                    )}
+                    onClick={disabled ? (e) => e.preventDefault() : undefined}
+                    tabIndex={disabled ? -1 : undefined}
+                    aria-disabled={disabled}
+                >
+                    {item.icon ? (
+                        <div className="flex items-center space-x-2">
+                            {item.icon}
+                            <span>{item.title}</span>
+                        </div>
+                    ) : (
+                        item.title
+                    )}
+                </Link>
+                {item.children && (
+                    <div className="ml-4 space-y-2">
+                        {renderItems(item.children)}{" "}
+                        {/* Recursively render children */}
+                    </div>
+                )}
+            </div>
+        ));
     }
 
     return (
@@ -94,35 +135,7 @@ export function SidebarNav({
                 )}
                 {...props}
             >
-                {items.map((item) => (
-                    <Link
-                        key={hydrateHref(item.href)}
-                        href={hydrateHref(item.href)}
-                        className={cn(
-                            buttonVariants({ variant: "ghost" }),
-                            pathname === hydrateHref(item.href) &&
-                                !pathname.includes("create")
-                                ? "bg-accent hover:bg-accent dark:bg-border dark:hover:bg-border"
-                                : "hover:bg-transparent hover:underline",
-                            "justify-start",
-                            disabled && "cursor-not-allowed"
-                        )}
-                        onClick={
-                            disabled ? (e) => e.preventDefault() : undefined
-                        }
-                        tabIndex={disabled ? -1 : undefined}
-                        aria-disabled={disabled}
-                    >
-                        {item.icon ? (
-                            <div className="flex items-center space-x-2">
-                                {item.icon}
-                                <span>{item.title}</span>
-                            </div>
-                        ) : (
-                            item.title
-                        )}
-                    </Link>
-                ))}
+                {renderItems(items)}
             </nav>
         </div>
     );

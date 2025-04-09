@@ -5,19 +5,25 @@ import { SidebarSettings } from "@app/components/SidebarSettings";
 
 type AccessPageHeaderAndNavProps = {
     children: React.ReactNode;
+    hasInvitations: boolean;
 };
 
 export default function AccessPageHeaderAndNav({
-    children
+    children,
+    hasInvitations
 }: AccessPageHeaderAndNavProps) {
     const sidebarNavItems = [
         {
             title: "Users",
-            href: `/{orgId}/settings/access/users`
-        },
-        {
-            title: "Invitations",
-            href: `/{orgId}/settings/access/invitations`
+            href: `/{orgId}/settings/access/users`,
+            children: hasInvitations
+                ? [
+                      {
+                          title: "• Invitations",
+                          href: `/{orgId}/settings/access/invitations`
+                      }
+                  ]
+                : []
         },
         {
             title: "Roles",
@@ -29,8 +35,7 @@ export default function AccessPageHeaderAndNav({
         <>
             <SettingsSectionTitle
                 title="Manage Users & Roles"
-                description="Invite users and add them to roles to manage access to your
-            organization"
+                description="Invite users and add them to roles to manage access to your organization"
             />
 
             <SidebarSettings sidebarNavItems={sidebarNavItems}>
