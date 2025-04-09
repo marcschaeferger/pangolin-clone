@@ -16,7 +16,7 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import config from "@server/lib/config";
-import { subdomainSchema } from "@server/lib/schemas";
+import { subdomainSchema, tlsNameSchema } from "@server/lib/schemas";
 
 const updateResourceParamsSchema = z
     .object({
@@ -40,7 +40,8 @@ const updateHttpResourceBodySchema = z
         isBaseDomain: z.boolean().optional(),
         applyRules: z.boolean().optional(),
         domainId: z.string().optional(),
-        enabled: z.boolean().optional()
+        enabled: z.boolean().optional(),
+        tlsServerName: z.string().optional()
     })
     .strict()
     .refine((data) => Object.keys(data).length > 0, {
@@ -67,6 +68,15 @@ const updateHttpResourceBodySchema = z
         {
             message: "Base domain resources are not allowed"
         }
+    )
+    .refine(
+        (data) => {
+            if (data.tlsServerName) {
+                return tlsNameSchema.safeParse(data.tlsServerName).success;
+            }
+            return true;
+        },
+        { message: "Invalid TLS Server Name. Use domain name format, or save empty to remove the TLS Server Name." }
     );
 
 export type UpdateResourceResponse = Resource;

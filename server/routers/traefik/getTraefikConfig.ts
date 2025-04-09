@@ -40,7 +40,8 @@ export async function traefikConfigProvider(
                     org: {
                         orgId: orgs.orgId
                     },
-                    enabled: resources.enabled
+                    enabled: resources.enabled,
+                    tlsServerName: resources.tlsServerName
                 })
                 .from(resources)
                 .innerJoin(sites, eq(sites.siteId, resources.siteId))
@@ -139,6 +140,7 @@ export async function traefikConfigProvider(
             const routerName = `${resource.resourceId}-router`;
             const serviceName = `${resource.resourceId}-service`;
             const fullDomain = `${resource.fullDomain}`;
+            const transportName = `${resource.resourceId}-transport`;
 
             if (!resource.enabled) {
                 continue;
@@ -278,6 +280,21 @@ export async function traefikConfigProvider(
                             })
                     }
                 };
+
+                // Add the serversTransport if TLS server name is provided
+                if (resource.tlsServerName) {
+                    if (!config_output.http.serversTransports) {
+                        config_output.http.serversTransports = {};
+                    }
+                    config_output.http.serversTransports![transportName] = {
+                        serverName: resource.tlsServerName,
+                        //unfortunately the following needs to be set. traefik doesn't merge the default serverTransport settings 
+                        // if defined in the static config and here. if not set, self-signed certs won't work
+                        insecureSkipVerify: true
+                    };
+                    config_output.http.services![serviceName].loadBalancer.serversTransport = transportName;
+                }
+
             } else {
                 // Non-HTTP (TCP/UDP) configuration
                 const protocol = resource.protocol.toLowerCase();

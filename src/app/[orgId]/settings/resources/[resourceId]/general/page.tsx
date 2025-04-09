@@ -48,7 +48,7 @@ import { useOrgContext } from "@app/hooks/useOrgContext";
 import CustomDomainInput from "../CustomDomainInput";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
-import { subdomainSchema } from "@server/lib/schemas";
+import { subdomainSchema, tlsNameSchema } from "@server/lib/schemas";
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 import { RadioGroup, RadioGroupItem } from "@app/components/ui/radio-group";
 import { Label } from "@app/components/ui/label";
@@ -73,7 +73,8 @@ const GeneralFormSchema = z
         proxyPort: z.number().optional(),
         http: z.boolean(),
         isBaseDomain: z.boolean().optional(),
-        domainId: z.string().optional()
+        domainId: z.string().optional(),
+        tlsServerName: z.string().optional() 
     })
     .refine(
         (data) => {
@@ -102,6 +103,18 @@ const GeneralFormSchema = z
         {
             message: "Invalid subdomain",
             path: ["subdomain"]
+        }
+    )
+    .refine(
+        (data) => {
+            if (data.tlsServerName) {
+                return tlsNameSchema.safeParse(data.tlsServerName).success;
+            }
+            return true;
+        },
+        { 
+            message: "Invalid TLS Server Name. Use domain name format, or save empty to remove the TLS Server Name.",
+            path: ["tlsServerName"]
         }
     );
 
@@ -146,7 +159,8 @@ export default function GeneralForm() {
             proxyPort: resource.proxyPort ? resource.proxyPort : undefined,
             http: resource.http,
             isBaseDomain: resource.isBaseDomain ? true : false,
-            domainId: resource.domainId || undefined
+            domainId: resource.domainId || undefined,
+            tlsServerName: resource.http ? resource.tlsServerName || "" : undefined
         },
         mode: "onChange"
     });
@@ -210,7 +224,8 @@ export default function GeneralForm() {
                     subdomain: data.http ? data.subdomain : undefined,
                     proxyPort: data.proxyPort,
                     isBaseDomain: data.http ? data.isBaseDomain : undefined,
-                    domainId: data.http ? data.domainId : undefined
+                    domainId: data.http ? data.domainId : undefined,
+                    tlsServerName: data.http ? data.tlsServerName : undefined
                 }
             )
             .catch((e) => {
@@ -237,7 +252,8 @@ export default function GeneralForm() {
                 subdomain: data.subdomain,
                 proxyPort: data.proxyPort,
                 isBaseDomain: data.isBaseDomain,
-                fullDomain: resource.fullDomain
+                fullDomain: resource.fullDomain,
+                tlsServerName: data.tlsServerName
             });
 
             router.refresh();
@@ -545,7 +561,27 @@ export default function GeneralForm() {
                                                         )}
                                                     />
                                                 )}
+                                                {/* New TLS Server Name Field */}
                                             </div>
+                                            <div className="w-fill space-y-2">
+                                                    <FormLabel>
+                                                        TLS Server Name
+                                                    </FormLabel>
+                                                    <FormField
+                                                        control={form.control}
+                                                        name="tlsServerName"
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormControl>
+                                                                    <Input
+                                                                        {...field}
+                                                                    />
+                                                                </FormControl>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+                                                </div>
                                         </>
                                     )}
 
