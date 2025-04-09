@@ -32,6 +32,8 @@ export enum ActionsEnum {
     listRoles = "listRoles",
     updateRole = "updateRole",
     inviteUser = "inviteUser",
+    listInvitations = "listInvitations",
+    removeInvitation = "removeInvitation",
     removeUser = "removeUser",
     listUsers = "listUsers",
     listSiteRoles = "listSiteRoles",
@@ -63,7 +65,7 @@ export enum ActionsEnum {
     listResourceRules = "listResourceRules",
     updateResourceRule = "updateResourceRule",
     listOrgDomains = "listOrgDomains",
-    createNewt = "createNewt",
+    createNewt = "createNewt"
 }
 
 export async function checkUserActionPermission(

@@ -143,6 +143,27 @@ authenticated.get(
     domain.listDomains
 );
 
+authenticated.get(
+    "/org/:orgId/invitations",
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.listInvitations),
+    user.listInvitations
+);
+
+authenticated.delete(
+    "/org/:orgId/invitations/:inviteId",
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.removeInvitation),
+    user.removeInvitation
+);
+
+authenticated.get(
+    "/org/:orgId/users",
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.listUsers),
+    user.listUsers
+);
+
 authenticated.post(
     "/org/:orgId/create-invite",
     verifyOrgAccess,
@@ -567,7 +588,4 @@ authRouter.post(
     resource.authWithAccessToken
 );
 
-authRouter.post(
-    "/access-token",
-    resource.authWithAccessToken
-);
+authRouter.post("/access-token", resource.authWithAccessToken);

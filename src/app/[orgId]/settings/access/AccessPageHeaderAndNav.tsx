@@ -8,17 +8,21 @@ type AccessPageHeaderAndNavProps = {
 };
 
 export default function AccessPageHeaderAndNav({
-    children,
+    children
 }: AccessPageHeaderAndNavProps) {
     const sidebarNavItems = [
         {
             title: "Users",
-            href: `/{orgId}/settings/access/users`,
+            href: `/{orgId}/settings/access/users`
+        },
+        {
+            title: "Invitations",
+            href: `/{orgId}/settings/access/invitations`
         },
         {
             title: "Roles",
-            href: `/{orgId}/settings/access/roles`,
-        },
+            href: `/{orgId}/settings/access/roles`
+        }
     ];
 
     return (
