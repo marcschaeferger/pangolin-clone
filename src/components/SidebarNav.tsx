@@ -55,8 +55,25 @@ export function SidebarNav({
     };
 
     function getSelectedValue() {
-        const item = items.find((item) => hydrateHref(item.href) === pathname);
-        return hydrateHref(item?.href || "");
+        let foundHref = "";
+        for (const item of items) {
+            const hydratedHref = hydrateHref(item.href);
+            if (hydratedHref === pathname) {
+                foundHref = hydratedHref;
+                break;
+            }
+            if (item.children) {
+                for (const child of item.children) {
+                    const hydratedChildHref = hydrateHref(child.href);
+                    if (hydratedChildHref === pathname) {
+                        foundHref = hydratedChildHref;
+                        break;
+                    }
+                }
+            }
+            if (foundHref) break;
+        }
+        return foundHref;
     }
 
     function hydrateHref(val: string): string {
@@ -151,14 +168,44 @@ export function SidebarNav({
                         <SelectValue placeholder="Select an option" />
                     </SelectTrigger>
                     <SelectContent>
-                        {items.map((item) => (
-                            <SelectItem
-                                key={hydrateHref(item.href)}
-                                value={hydrateHref(item.href)}
-                            >
-                                {item.title}
-                            </SelectItem>
-                        ))}
+                        {items.flatMap((item) => {
+                            const topLevelItem = (
+                                <SelectItem
+                                    key={hydrateHref(item.href)}
+                                    value={hydrateHref(item.href)}
+                                >
+                                    {item.icon ? (
+                                        <div className="flex items-center space-x-2">
+                                            {item.icon}
+                                            <span>{item.title}</span>
+                                        </div>
+                                    ) : (
+                                        item.title
+                                    )}
+                                </SelectItem>
+                            );
+                            const childItems =
+                                item.children?.map((child) => (
+                                    <SelectItem
+                                        key={hydrateHref(child.href)}
+                                        value={hydrateHref(child.href)}
+                                        className="pl-8"
+                                    >
+                                        <div className="flex items-center space-x-2">
+                                            <CornerDownRight className="h-4 w-4 text-gray-500" />
+                                            {child.icon ? (
+                                                <>
+                                                    {child.icon}
+                                                    <span>{child.title}</span>
+                                                </>
+                                            ) : (
+                                                <span>{child.title}</span>
+                                            )}
+                                        </div>
+                                    </SelectItem>
+                                )) || [];
+                            return [topLevelItem, ...childItems];
+                        })}
                     </SelectContent>
                 </Select>
             </div>
