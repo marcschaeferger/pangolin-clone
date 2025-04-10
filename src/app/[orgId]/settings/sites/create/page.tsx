@@ -25,27 +25,18 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@app/components/ui/input";
-import { Terminal, InfoIcon } from "lucide-react";
+import { InfoIcon, Terminal } from "lucide-react";
 import { Button } from "@app/components/ui/button";
 import CopyTextBox from "@app/components/CopyTextBox";
 import CopyToClipboard from "@app/components/CopyToClipboard";
-import {
-    InfoSection,
-    InfoSectionContent,
-    InfoSections,
-    InfoSectionTitle
-} from "@app/components/InfoSection";
-import { FaWindows, FaApple, FaFreebsd, FaDocker } from "react-icons/fa";
+import { InfoSection, InfoSectionContent, InfoSections, InfoSectionTitle } from "@app/components/InfoSection";
+import { FaApple, FaCubes, FaDocker, FaFreebsd, FaWindows } from "react-icons/fa";
 import { Checkbox } from "@app/components/ui/checkbox";
 import { Alert, AlertDescription, AlertTitle } from "@app/components/ui/alert";
 import { generateKeypair } from "../[niceId]/wireguardConfig";
 import { createApiClient, formatAxiosError } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
-import {
-    CreateSiteBody,
-    CreateSiteResponse,
-    PickSiteDefaultsResponse
-} from "@server/routers/site";
+import { CreateSiteBody, CreateSiteResponse, PickSiteDefaultsResponse } from "@server/routers/site";
 import { toast } from "@app/hooks/useToast";
 import { AxiosResponse } from "axios";
 import { useParams, useRouter } from "next/navigation";
@@ -91,7 +82,19 @@ type Commands = {
     linux: Record<string, string[]>;
     windows: Record<string, string[]>;
     docker: Record<string, string[]>;
+    podman: Record<string, string[]>;
 };
+
+const platforms = [
+    "linux",
+    "docker",
+    "podman",
+    "mac",
+    "windows",
+    "freebsd"
+] as const;
+
+type Platform = typeof platforms[number];
 
 export default function Page() {
     const { env } = useEnvContext();
@@ -123,7 +126,7 @@ export default function Page() {
 
     const [loadingPage, setLoadingPage] = useState(true);
 
-    const [platform, setPlatform] = useState("linux");
+    const [platform, setPlatform] = useState<Platform>("linux");
     const [architecture, setArchitecture] = useState("amd64");
     const [commands, setCommands] = useState<Commands | null>(null);
 
@@ -231,6 +234,29 @@ PersistentKeepalive = 5`;
                 "Docker Run": [
                     `docker run -it fosrl/newt --id ${id} --secret ${secret} --endpoint ${endpoint}`
                 ]
+            },
+            podman: {
+                "Podman Quadlet": [
+                    `[Unit]
+Description=Newt container
+
+[Container]
+ContainerName=newt
+Image=docker.io/fosrl/newt
+Environment=PANGOLIN_ENDPOINT=${endpoint}
+Environment=NEWT_ID=${id}
+Environment=NEWT_SECRET=${secret}
+# Secret=newt-secret,type=env,target=NEWT_SECRET
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target`
+                ],
+                "Podman Run": [
+                    `podman run -it docker.io/fosrl/newt --id ${id} --secret ${secret} --endpoint ${endpoint}`
+                ]
             }
         };
         setCommands(commands);
@@ -246,6 +272,8 @@ PersistentKeepalive = 5`;
                 return ["x64"];
             case "docker":
                 return ["Docker Compose", "Docker Run"];
+            case "podman":
+                return ["Podman Quadlet", "Podman Run"];
             case "freebsd":
                 return ["amd64", "arm64"];
             default:
@@ -261,6 +289,8 @@ PersistentKeepalive = 5`;
                 return "macOS";
             case "docker":
                 return "Docker";
+            case "podman":
+                return "Podman";
             case "freebsd":
                 return "FreeBSD";
             default:
@@ -277,7 +307,7 @@ PersistentKeepalive = 5`;
 
         if (!platformCommands) {
             // get first key
-            const firstPlatform = Object.keys(commands)[0];
+            const firstPlatform = Object.keys(commands)[0] as Platform;
             platformCommands = commands[firstPlatform as keyof Commands];
 
             setPlatform(firstPlatform);
@@ -303,6 +333,8 @@ PersistentKeepalive = 5`;
                 return <FaApple className="h-4 w-4 mr-2" />;
             case "docker":
                 return <FaDocker className="h-4 w-4 mr-2" />;
+            case "podman":
+                return <FaCubes className="h-4 w-4 mr-2" />;
             case "freebsd":
                 return <FaFreebsd className="h-4 w-4 mr-2" />;
             default:
@@ -689,13 +721,7 @@ PersistentKeepalive = 5`;
                                                 Operating System
                                             </p>
                                             <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-                                                {[
-                                                    "linux",
-                                                    "docker",
-                                                    "mac",
-                                                    "windows",
-                                                    "freebsd"
-                                                ].map((os) => (
+                                                {platforms.map((os) => (
                                                     <Button
                                                         key={os}
                                                         variant={
@@ -717,7 +743,7 @@ PersistentKeepalive = 5`;
 
                                         <div>
                                             <p className="font-bold mb-3">
-                                                {platform === "docker"
+                                                {["docker", "podman"].includes(platform)
                                                     ? "Method"
                                                     : "Architecture"}
                                             </p>
