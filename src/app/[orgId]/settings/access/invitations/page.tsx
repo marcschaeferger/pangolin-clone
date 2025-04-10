@@ -25,7 +25,7 @@ export default async function InvitationsPage(props: InvitationsPageProps) {
         inviteId: string;
         email: string;
         expiresAt: string;
-        roleId: string;
+        roleId: number;
         roleName?: string;
     }[] = [];
     let hasInvitations = false;
@@ -65,7 +65,8 @@ export default async function InvitationsPage(props: InvitationsPageProps) {
             id: invite.inviteId,
             email: invite.email,
             expiresAt: new Date(Number(invite.expiresAt)).toISOString(),
-            role: invite.roleName || "Unknown Role"
+            role: invite.roleName || "Unknown Role",
+            roleId: invite.roleId
         };
     });
 

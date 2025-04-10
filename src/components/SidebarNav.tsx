@@ -12,6 +12,7 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select";
+import { CornerDownRight } from "lucide-react";
 
 interface SidebarNavItem {
     href: string;
@@ -95,8 +96,42 @@ export function SidebarNav({
                 </Link>
                 {item.children && (
                     <div className="ml-4 space-y-2">
-                        {renderItems(item.children)}{" "}
-                        {/* Recursively render children */}
+                        {item.children.map((child) => (
+                            <div
+                                key={hydrateHref(child.href)}
+                                className="flex items-center space-x-2"
+                            >
+                                <CornerDownRight className="h-4 w-4 text-gray-500" />
+                                <Link
+                                    href={hydrateHref(child.href)}
+                                    className={cn(
+                                        buttonVariants({ variant: "ghost" }),
+                                        pathname === hydrateHref(child.href) &&
+                                            !pathname.includes("create")
+                                            ? "bg-accent hover:bg-accent dark:bg-border dark:hover:bg-border"
+                                            : "hover:bg-transparent hover:underline",
+                                        "justify-start",
+                                        disabled && "cursor-not-allowed"
+                                    )}
+                                    onClick={
+                                        disabled
+                                            ? (e) => e.preventDefault()
+                                            : undefined
+                                    }
+                                    tabIndex={disabled ? -1 : undefined}
+                                    aria-disabled={disabled}
+                                >
+                                    {child.icon ? (
+                                        <div className="flex items-center space-x-2">
+                                            {child.icon}
+                                            <span>{child.title}</span>
+                                        </div>
+                                    ) : (
+                                        child.title
+                                    )}
+                                </Link>
+                            </div>
+                        ))}
                     </div>
                 )}
             </div>

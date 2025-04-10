@@ -19,7 +19,7 @@ export default function AccessPageHeaderAndNav({
             children: hasInvitations
                 ? [
                       {
-                          title: "• Invitations",
+                          title: "Invitations",
                           href: `/{orgId}/settings/access/invitations`
                       }
                   ]

@@ -12,6 +12,7 @@ import { MoreHorizontal } from "lucide-react";
 import { InvitationsDataTable } from "./InvitationsDataTable";
 import { useState } from "react";
 import ConfirmDeleteDialog from "@app/components/ConfirmDeleteDialog";
+import RegenerateInvitationForm from "./RegenerateInvitationForm";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { toast } from "@app/hooks/useToast";
 import { createApiClient } from "@app/lib/api";
@@ -22,6 +23,7 @@ export type InvitationRow = {
     email: string;
     expiresAt: string;
     role: string;
+    roleId: number;
 };
 
 type InvitationsTableProps = {
@@ -33,11 +35,11 @@ export default function InvitationsTable({
 }: InvitationsTableProps) {
     const [invitations, setInvitations] = useState<InvitationRow[]>(i);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isRegenerateModalOpen, setIsRegenerateModalOpen] = useState(false);
     const [selectedInvitation, setSelectedInvitation] =
         useState<InvitationRow | null>(null);
 
     const api = createApiClient(useEnvContext());
-
     const { org } = useOrgContext();
 
     const columns: ColumnDef<InvitationRow>[] = [
@@ -54,6 +56,14 @@ export default function InvitationsTable({
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                                onClick={() => {
+                                    setIsRegenerateModalOpen(true);
+                                    setSelectedInvitation(invitation);
+                                }}
+                            >
+                                <span>Regenerate Invitation</span>
+                            </DropdownMenuItem>
                             <DropdownMenuItem
                                 onClick={() => {
                                     setIsDeleteModalOpen(true);
@@ -153,6 +163,20 @@ export default function InvitationsTable({
                 onConfirm={removeInvitation}
                 string={selectedInvitation?.email ?? ""}
                 title="Remove Invitation"
+            />
+            <RegenerateInvitationForm
+                open={isRegenerateModalOpen}
+                setOpen={setIsRegenerateModalOpen}
+                invitation={selectedInvitation}
+                onRegenerate={(updatedInvitation) => {
+                    setInvitations((prev) =>
+                        prev.map((inv) =>
+                            inv.id === updatedInvitation.id
+                                ? updatedInvitation
+                                : inv
+                        )
+                    );
+                }}
             />
 
             <InvitationsDataTable columns={columns} data={invitations} />
