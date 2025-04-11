@@ -8,6 +8,7 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { and, eq } from "drizzle-orm";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const setResourceWhitelistBodySchema = z
     .object({
@@ -36,6 +37,25 @@ const setResourceWhitelistParamsSchema = z
             .pipe(z.number().int().positive())
     })
     .strict();
+
+registry.registerPath({
+    method: "post",
+    path: "/resource/{resourceId}/whitelist",
+    description:
+        "Set email whitelist for a resource. This will replace all existing emails.",
+    tags: [OpenAPITags.Resource],
+    request: {
+        params: setResourceWhitelistParamsSchema,
+        body: {
+            content: {
+                "application/json": {
+                    schema: setResourceWhitelistBodySchema
+                }
+            }
+        }
+    },
+    responses: {}
+});
 
 export async function setResourceWhitelist(
     req: Request,

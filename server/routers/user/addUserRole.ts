@@ -9,6 +9,7 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import stoi from "@server/lib/stoi";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const addUserRoleParamsSchema = z
     .object({
@@ -18,6 +19,17 @@ const addUserRoleParamsSchema = z
     .strict();
 
 export type AddUserRoleResponse = z.infer<typeof addUserRoleParamsSchema>;
+
+registry.registerPath({
+    method: "post",
+    path: "/role/{roleId}/add/{userId}",
+    description: "Add a role to a user.",
+    tags: [OpenAPITags.Role, OpenAPITags.User],
+    request: {
+        params: addUserRoleParamsSchema
+    },
+    responses: {}
+});
 
 export async function addUserRole(
     req: Request,

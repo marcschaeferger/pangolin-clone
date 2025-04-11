@@ -8,6 +8,7 @@ import createHttpError from "http-errors";
 import { sql, inArray } from "drizzle-orm";
 import logger from "@server/logger";
 import { fromZodError } from "zod-validation-error";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const listOrgsSchema = z.object({
     limit: z
@@ -21,7 +22,18 @@ const listOrgsSchema = z.object({
         .optional()
         .default("0")
         .transform(Number)
-        .pipe(z.number().int().nonnegative()),
+        .pipe(z.number().int().nonnegative())
+});
+
+registry.registerPath({
+    method: "get",
+    path: "/orgs",
+    description: "List all organizations in the system",
+    tags: [OpenAPITags.Org],
+    request: {
+        query: listOrgsSchema
+    },
+    responses: {}
 });
 
 export type ListOrgsResponse = {
@@ -57,13 +69,13 @@ export async function listOrgs(
                     pagination: {
                         total: 0,
                         limit,
-                        offset,
-                    },
+                        offset
+                    }
                 },
                 success: true,
                 error: false,
                 message: "No organizations found for the user",
-                status: HttpCode.OK,
+                status: HttpCode.OK
             });
         }
 
@@ -86,13 +98,13 @@ export async function listOrgs(
                 pagination: {
                     total: totalCount,
                     limit,
-                    offset,
-                },
+                    offset
+                }
             },
             success: true,
             error: false,
             message: "Organizations retrieved successfully",
-            status: HttpCode.OK,
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

@@ -47,6 +47,7 @@ import {
     CardTitle
 } from "./ui/card";
 import { Check, ExternalLink } from "lucide-react";
+import confetti from "canvas-confetti";
 
 const formSchema = z.object({
     githubUsername: z
@@ -100,12 +101,57 @@ export default function SupporterStatus() {
                 return;
             }
 
+            // Trigger the toast
             toast({
                 variant: "default",
                 title: "Valid Key",
                 description:
                     "Your supporter key has been validated. Thank you for your support!"
             });
+
+            // Fireworks-style confetti
+            const duration = 5 * 1000; // 5 seconds
+            const animationEnd = Date.now() + duration;
+            const defaults = {
+                startVelocity: 30,
+                spread: 360,
+                ticks: 60,
+                zIndex: 0,
+                colors: ["#FFA500", "#FF4500", "#FFD700"] // Orange hues
+            };
+
+            function randomInRange(min: number, max: number) {
+                return Math.random() * (max - min) + min;
+            }
+
+            const interval = setInterval(() => {
+                const timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    return;
+                }
+
+                const particleCount = 50 * (timeLeft / duration);
+
+                // Launch confetti from two random horizontal positions
+                confetti({
+                    ...defaults,
+                    particleCount,
+                    origin: {
+                        x: randomInRange(0.1, 0.3),
+                        y: Math.random() - 0.2
+                    }
+                });
+                confetti({
+                    ...defaults,
+                    particleCount,
+                    origin: {
+                        x: randomInRange(0.7, 0.9),
+                        y: Math.random() - 0.2
+                    }
+                });
+            }, 250);
 
             setPurchaseOptionsOpen(false);
             setKeyOpen(false);
@@ -177,7 +223,9 @@ export default function SupporterStatus() {
                         </p>
 
                         <div className="py-6">
-                            <p className="mb-3 text-center">Please select the option that best suits you.</p>
+                            <p className="mb-3 text-center">
+                                Please select the option that best suits you.
+                            </p>
                             <div className="grid md:grid-cols-2 grid-cols-1 gap-8">
                                 <Card>
                                     <CardHeader>

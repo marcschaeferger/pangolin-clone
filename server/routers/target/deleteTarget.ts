@@ -11,12 +11,24 @@ import { addPeer } from "../gerbil/peers";
 import { fromError } from "zod-validation-error";
 import { removeTargets } from "../newt/targets";
 import { getAllowedIps } from "./helpers";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const deleteTargetSchema = z
     .object({
         targetId: z.string().transform(Number).pipe(z.number().int().positive())
     })
     .strict();
+
+registry.registerPath({
+    method: "delete",
+    path: "/target/{targetId}",
+    description: "Delete a target.",
+    tags: [OpenAPITags.Target],
+    request: {
+        params: deleteTargetSchema
+    },
+    responses: {}
+});
 
 export async function deleteTarget(
     req: Request,

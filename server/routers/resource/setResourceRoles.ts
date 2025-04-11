@@ -8,6 +8,7 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { eq, and, ne } from "drizzle-orm";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const setResourceRolesBodySchema = z
     .object({
@@ -23,6 +24,25 @@ const setResourceRolesParamsSchema = z
             .pipe(z.number().int().positive())
     })
     .strict();
+
+registry.registerPath({
+    method: "post",
+    path: "/resource/{resourceId}/roles",
+    description:
+        "Set roles for a resource. This will replace all existing roles.",
+    tags: [OpenAPITags.Resource, OpenAPITags.Role],
+    request: {
+        params: setResourceRolesParamsSchema,
+        body: {
+            content: {
+                "application/json": {
+                    schema: setResourceRolesBodySchema
+                }
+            }
+        }
+    },
+    responses: {}
+});
 
 export async function setResourceRoles(
     req: Request,

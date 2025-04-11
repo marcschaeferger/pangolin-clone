@@ -8,6 +8,7 @@ import createHttpError from "http-errors";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
 import logger from "@server/logger";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const listTargetsParamsSchema = z
     .object({
@@ -55,6 +56,18 @@ export type ListTargetsResponse = {
     targets: Awaited<ReturnType<typeof queryTargets>>;
     pagination: { total: number; limit: number; offset: number };
 };
+
+registry.registerPath({
+    method: "get",
+    path: "/resource/{resourceId}/targets",
+    description: "List targets for a resource.",
+    tags: [OpenAPITags.Resource, OpenAPITags.Target],
+    request: {
+        params: listTargetsParamsSchema,
+        query: listTargetsSchema
+    },
+    responses: {}
+});
 
 export async function listTargets(
     req: Request,

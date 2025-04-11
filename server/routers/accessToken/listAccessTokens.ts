@@ -15,6 +15,7 @@ import { sql, eq, or, inArray, and, count, isNull, lt, gt } from "drizzle-orm";
 import logger from "@server/logger";
 import stoi from "@server/lib/stoi";
 import { fromZodError } from "zod-validation-error";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const listAccessTokensParamsSchema = z
     .object({
@@ -73,10 +74,7 @@ function queryAccessTokens(
                 resources,
                 eq(resourceAccessToken.resourceId, resources.resourceId)
             )
-            .leftJoin(
-                sites,
-                eq(resources.resourceId, sites.siteId)
-            )
+            .leftJoin(sites, eq(resources.resourceId, sites.siteId))
             .where(
                 and(
                     inArray(
@@ -98,10 +96,7 @@ function queryAccessTokens(
                 resources,
                 eq(resourceAccessToken.resourceId, resources.resourceId)
             )
-            .leftJoin(
-                sites,
-                eq(resources.resourceId, sites.siteId)
-            )
+            .leftJoin(sites, eq(resources.resourceId, sites.siteId))
             .where(
                 and(
                     inArray(
@@ -122,6 +117,34 @@ export type ListAccessTokensResponse = {
     accessTokens: NonNullable<Awaited<ReturnType<typeof queryAccessTokens>>>;
     pagination: { total: number; limit: number; offset: number };
 };
+
+registry.registerPath({
+    method: "get",
+    path: "/org/{orgId}/access-tokens",
+    description: "List all access tokens in an organization.",
+    tags: [OpenAPITags.Org, OpenAPITags.AccessToken],
+    request: {
+        params: z.object({
+            orgId: z.string()
+        }),
+        query: listAccessTokensSchema
+    },
+    responses: {}
+});
+
+registry.registerPath({
+    method: "get",
+    path: "/resource/{resourceId}/access-tokens",
+    description: "List all access tokens in an organization.",
+    tags: [OpenAPITags.Resource, OpenAPITags.AccessToken],
+    request: {
+        params: z.object({
+            resourceId: z.number()
+        }),
+        query: listAccessTokensSchema
+    },
+    responses: {}
+});
 
 export async function listAccessTokens(
     req: Request,

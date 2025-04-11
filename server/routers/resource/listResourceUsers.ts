@@ -8,6 +8,7 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const listResourceUsersSchema = z
     .object({
@@ -32,6 +33,17 @@ async function queryUsers(resourceId: number) {
 export type ListResourceUsersResponse = {
     users: NonNullable<Awaited<ReturnType<typeof queryUsers>>>;
 };
+
+registry.registerPath({
+    method: "get",
+    path: "/resource/{resourceId}/users",
+    description: "List all users for a resource.",
+    tags: [OpenAPITags.Resource, OpenAPITags.User],
+    request: {
+        params: listResourceUsersSchema
+    },
+    responses: {}
+});
 
 export async function listResourceUsers(
     req: Request,

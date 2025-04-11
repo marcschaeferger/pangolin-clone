@@ -8,6 +8,7 @@ import createHttpError from "http-errors";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
 import logger from "@server/logger";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const listResourceRulesParamsSchema = z
     .object({
@@ -55,6 +56,18 @@ export type ListResourceRulesResponse = {
     rules: Awaited<ReturnType<typeof queryResourceRules>>;
     pagination: { total: number; limit: number; offset: number };
 };
+
+registry.registerPath({
+    method: "get",
+    path: "/resource/{resourceId}/rules",
+    description: "List rules for a resource.",
+    tags: [OpenAPITags.Resource, OpenAPITags.Rule],
+    request: {
+        params: listResourceRulesParamsSchema,
+        query: listResourceRulesSchema
+    },
+    responses: {}
+});
 
 export async function listResourceRules(
     req: Request,

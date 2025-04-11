@@ -13,6 +13,7 @@ import { fromError } from "zod-validation-error";
 import { hash } from "@node-rs/argon2";
 import { newts } from "@server/db/schemas";
 import moment from "moment";
+import { OpenAPITags, registry } from "@server/openApi";
 import { hashPassword } from "@server/auth/password";
 
 const createSiteParamsSchema = z
@@ -35,13 +36,31 @@ const createSiteSchema = z
         subnet: z.string().optional(),
         newtId: z.string().optional(),
         secret: z.string().optional(),
-        type: z.string()
+        type: z.enum(["newt", "wireguard", "local"])
     })
     .strict();
 
 export type CreateSiteBody = z.infer<typeof createSiteSchema>;
 
 export type CreateSiteResponse = Site;
+
+registry.registerPath({
+    method: "put",
+    path: "/org/{orgId}/site",
+    description: "Create a new site.",
+    tags: [OpenAPITags.Site, OpenAPITags.Org],
+    request: {
+        params: createSiteParamsSchema,
+        body: {
+            content: {
+                "application/json": {
+                    schema: createSiteSchema
+                }
+            }
+        }
+    },
+    responses: {}
+});
 
 export async function createSite(
     req: Request,

@@ -8,6 +8,7 @@ import createHttpError from "http-errors";
 import { eq, sql } from "drizzle-orm";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const listDomainsParamsSchema = z
     .object({
@@ -50,6 +51,20 @@ export type ListDomainsResponse = {
     domains: NonNullable<Awaited<ReturnType<typeof queryDomains>>>;
     pagination: { total: number; limit: number; offset: number };
 };
+
+registry.registerPath({
+    method: "get",
+    path: "/org/{orgId}/domains",
+    description: "List all domains for a organization.",
+    tags: [OpenAPITags.Org],
+    request: {
+        params: z.object({
+            orgId: z.string()
+        }),
+        query: listDomainsSchema
+    },
+    responses: {}
+});
 
 export async function listDomains(
     req: Request,

@@ -53,13 +53,11 @@ const createSiteFormSchema = z
     .object({
         name: z
             .string()
-            .min(2, {
-                message: "Name must be at least 2 characters."
-            })
+            .min(2, { message: "Name must be at least 2 characters." })
             .max(30, {
                 message: "Name must not be longer than 30 characters."
             }),
-        method: z.string(),
+        method: z.enum(["newt", "wireguard", "local"]),
         copied: z.boolean()
     })
     .refine(
@@ -76,6 +74,15 @@ const createSiteFormSchema = z
     );
 
 type CreateSiteFormValues = z.infer<typeof createSiteFormSchema>;
+
+type SiteType = "newt" | "wireguard" | "local";
+
+interface TunnelTypeOption {
+    id: SiteType;
+    title: string;
+    description: string;
+    disabled?: boolean;
+}
 
 type Commands = {
     mac: Record<string, string[]>;
@@ -102,7 +109,9 @@ export default function Page() {
     const { orgId } = useParams();
     const router = useRouter();
 
-    const [tunnelTypes, setTunnelTypes] = useState<any>([
+    const [tunnelTypes, setTunnelTypes] = useState<
+        ReadonlyArray<TunnelTypeOption>
+    >([
         {
             id: "newt",
             title: "Newt Tunnel (Recommended)",
@@ -342,22 +351,15 @@ WantedBy=default.target`
         }
     };
 
-    const form = useForm({
+    const form = useForm<CreateSiteFormValues>({
         resolver: zodResolver(createSiteFormSchema),
-        defaultValues: {
-            name: "",
-            copied: false,
-            method: "newt"
-        }
+        defaultValues: { name: "", copied: false, method: "newt" }
     });
 
     async function onSubmit(data: CreateSiteFormValues) {
         setCreateLoading(true);
 
-        let payload: CreateSiteBody = {
-            name: data.name,
-            type: data.method
-        };
+        let payload: CreateSiteBody = { name: data.name, type: data.method };
 
         if (data.method == "wireguard") {
             if (!siteDefaults || !wgConfig) {
@@ -486,10 +488,7 @@ WantedBy=default.target`
 
                         setTunnelTypes((prev: any) => {
                             return prev.map((item: any) => {
-                                return {
-                                    ...item,
-                                    disabled: false
-                                };
+                                return { ...item, disabled: false };
                             });
                         });
                     }
@@ -564,9 +563,8 @@ WantedBy=default.target`
                                                         </FormControl>
                                                         <FormMessage />
                                                         <FormDescription>
-                                                            This is the
-                                                            display name for the
-                                                            site.
+                                                            This is the display
+                                                            name for the site.
                                                         </FormDescription>
                                                     </FormItem>
                                                 )}
@@ -590,12 +588,10 @@ WantedBy=default.target`
                             <SettingsSectionBody>
                                 <StrategySelect
                                     options={tunnelTypes}
-                                    defaultValue={
-                                        form.getValues("method") as string
-                                    }
-                                    onChange={(value) =>
-                                        form.setValue("method", value)
-                                    }
+                                    defaultValue={form.getValues("method")}
+                                    onChange={(value) => {
+                                        form.setValue("method", value);
+                                    }}
                                     cols={3}
                                 />
                             </SettingsSectionBody>

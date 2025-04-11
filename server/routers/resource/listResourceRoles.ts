@@ -8,6 +8,7 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const listResourceRolesSchema = z
     .object({
@@ -34,6 +35,17 @@ async function query(resourceId: number) {
 export type ListResourceRolesResponse = {
     roles: NonNullable<Awaited<ReturnType<typeof query>>>;
 };
+
+registry.registerPath({
+    method: "get",
+    path: "/resource/{resourceId}/roles",
+    description: "List all roles for a resource.",
+    tags: [OpenAPITags.Resource, OpenAPITags.Role],
+    request: {
+        params: listResourceRolesSchema
+    },
+    responses: {}
+});
 
 export async function listResourceRoles(
     req: Request,
