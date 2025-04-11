@@ -16,9 +16,9 @@ jobs:
     steps:
       - uses: actions/stale@v9
         with:
-          days-before-stale: 30
+          days-before-stale: 14
           days-before-close: 14
-          stale-issue-message: 'This issue has been automatically marked as stale due to 30 days of inactivity. It will be closed in 14 days if no further activity occurs.'
+          stale-issue-message: 'This issue has been automatically marked as stale due to 14 days of inactivity. It will be closed in 14 days if no further activity occurs.'
           close-issue-message: 'This issue has been automatically closed due to inactivity. If you believe this is still relevant, please open a new issue with up-to-date information.'
           stale-issue-label: 'stale'
           
