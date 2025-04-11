@@ -1,7 +1,7 @@
 import db from "@server/db";
 import { sql } from "drizzle-orm";
 
-const version = "1.1.0";
+const version = "1.3.0";
 
 export default async function migration() {
     console.log(`Running setup script ${version}...`);
@@ -9,7 +9,7 @@ export default async function migration() {
     try {
         db.transaction((trx) => {
             trx.run(
-                sql`ALTER TABLE 'resources' ADD 'tlsServerName' integer DEFAULT '' NOT NULL;`
+                sql`ALTER TABLE 'resources' ADD 'tlsServerName' text DEFAULT '' NOT NULL;`
             );
         });
 

@@ -16,7 +16,8 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import config from "@server/lib/config";
-import { subdomainSchema, tlsNameSchema } from "@server/lib/schemas";
+import { tlsNameSchema } from "@server/lib/schemas";
+import { subdomainSchema } from "@server/lib/schemas";
 
 const updateResourceParamsSchema = z
     .object({

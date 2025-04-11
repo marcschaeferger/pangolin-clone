@@ -565,7 +565,7 @@ export default function GeneralForm() {
                                             </div>
                                             <div className="w-fill space-y-2">
                                                     <FormLabel>
-                                                        TLS Server Name
+                                                        TLS Server Name (optional)
                                                     </FormLabel>
                                                     <FormField
                                                         control={form.control}
