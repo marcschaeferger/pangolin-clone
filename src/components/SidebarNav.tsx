@@ -90,6 +90,7 @@ export function SidebarNav({
                 <Link
                     href={hydrateHref(item.href)}
                     className={cn(
+                        "w-full",
                         buttonVariants({ variant: "ghost" }),
                         pathname === hydrateHref(item.href) &&
                             !pathname.includes("create")
@@ -118,10 +119,10 @@ export function SidebarNav({
                                 key={hydrateHref(child.href)}
                                 className="flex items-center space-x-2"
                             >
-                                <CornerDownRight className="h-4 w-4 text-gray-500" />
                                 <Link
                                     href={hydrateHref(child.href)}
                                     className={cn(
+                                        "w-full",
                                         buttonVariants({ variant: "ghost" }),
                                         pathname === hydrateHref(child.href) &&
                                             !pathname.includes("create")
@@ -138,6 +139,7 @@ export function SidebarNav({
                                     tabIndex={disabled ? -1 : undefined}
                                     aria-disabled={disabled}
                                 >
+                                    <CornerDownRight className="h-4 w-4 text-gray-500 mr-2" />
                                     {child.icon ? (
                                         <div className="flex items-center space-x-2">
                                             {child.icon}
