@@ -490,7 +490,7 @@ const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
                             <div className="w-full">
                                 <div
                                     className={cn(
-                                        `flex flex-row flex-wrap items-center gap-1.5 p-1.5 w-full rounded-md border-2 border-input bg-background text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-transparent`,
+                                        `flex flex-row flex-wrap items-center gap-1.5 p-1.5 w-full rounded-md border-2 border-input bg-background text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-transparent`,
                                         styleClasses?.inlineTagsContainer
                                     )}
                                 >
@@ -644,7 +644,7 @@ const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
                                 ) : (
                                     <div
                                         className={cn(
-                                            `flex flex-row flex-wrap items-center p-1.5 gap-1.5 h-fit w-full bg-transparent text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50`,
+                                            `flex flex-row flex-wrap items-center p-1.5 gap-1.5 h-fit w-full bg-transparent text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50`,
                                             styleClasses?.inlineTagsContainer
                                         )}
                                     >

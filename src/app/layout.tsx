@@ -55,7 +55,7 @@ export default async function RootLayout({
                     <EnvProvider env={pullEnv()}>
                         <SupportStatusProvider supporterStatus={supporterData}>
                             {/* Main content */}
-                            <div className="flex-grow pb-3 md:pb-0">
+                            <div className="grow pb-3 md:pb-0">
                                 {children}
                             </div>
 

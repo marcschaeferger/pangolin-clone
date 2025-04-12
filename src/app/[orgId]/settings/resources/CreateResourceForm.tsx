@@ -735,7 +735,7 @@ export default function CreateResourceForm({
                                 {showSnippets && (
                                     <div>
                                         <div className="flex items-start space-x-4 mb-6 last:mb-0">
-                                            <div className="flex-grow">
+                                            <div className="grow">
                                                 <h3 className="text-lg font-semibold mb-3">
                                                     Traefik: Add Entrypoints
                                                 </h3>
@@ -749,7 +749,7 @@ export default function CreateResourceForm({
                                         </div>
 
                                         <div className="flex items-start space-x-4 mb-6 last:mb-0">
-                                            <div className="flex-grow">
+                                            <div className="grow">
                                                 <h3 className="text-lg font-semibold mb-3">
                                                     Gerbil: Expose Ports in
                                                     Docker Compose
