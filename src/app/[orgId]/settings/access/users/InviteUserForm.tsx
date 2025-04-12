@@ -55,17 +55,13 @@ const formSchema = z.object({
 
 export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
     const { org } = useOrgContext();
-
     const { env } = useEnvContext();
-
     const api = createApiClient({ env });
 
     const [inviteLink, setInviteLink] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [expiresInDays, setExpiresInDays] = useState(1);
-
     const [roles, setRoles] = useState<{ roleId: number; name: string }[]>([]);
-
     const [sendEmail, setSendEmail] = useState(env.email.emailEnabled);
 
     const validFor = [
@@ -86,6 +82,15 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
             roleId: ""
         }
     });
+
+    useEffect(() => {
+        if (open) {
+            setSendEmail(env.email.emailEnabled);
+            form.reset();
+            setInviteLink(null);
+            setExpiresInDays(1);
+        }
+    }, [open, env.email.emailEnabled, form]);
 
     useEffect(() => {
         if (!open) {
@@ -111,10 +116,6 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
 
             if (res?.status === 200) {
                 setRoles(res.data.data.roles);
-                // form.setValue(
-                //     "roleId",
-                //     res.data.data.roles[0].roleId.toString()
-                // );
             }
         }
 
@@ -135,14 +136,23 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
                 } as InviteUserBody
             )
             .catch((e) => {
-                toast({
-                    variant: "destructive",
-                    title: "Failed to invite user",
-                    description: formatAxiosError(
-                        e,
-                        "An error occurred while inviting the user"
-                    )
-                });
+                if (e.response?.status === 409) {
+                    toast({
+                        variant: "destructive",
+                        title: "User Already Exists",
+                        description:
+                            "This user is already a member of the organization."
+                    });
+                } else {
+                    toast({
+                        variant: "destructive",
+                        title: "Failed to invite user",
+                        description: formatAxiosError(
+                            e,
+                            "An error occurred while inviting the user"
+                        )
+                    });
+                }
             });
 
         if (res && res.status === 200) {
@@ -165,10 +175,12 @@ export default function InviteUserForm({ open, setOpen }: InviteUserFormProps) {
                 open={open}
                 onOpenChange={(val) => {
                     setOpen(val);
-                    setInviteLink(null);
-                    setLoading(false);
-                    setExpiresInDays(1);
-                    form.reset();
+                    if (!val) {
+                        setInviteLink(null);
+                        setLoading(false);
+                        setExpiresInDays(1);
+                        form.reset();
+                    }
                 }}
             >
                 <CredenzaContent>
