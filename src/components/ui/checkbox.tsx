@@ -33,20 +33,24 @@ interface CheckboxProps
     extends React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>,
         VariantProps<typeof checkboxVariants> {}
 
-const Checkbox = React.forwardRef<
-    React.ElementRef<typeof CheckboxPrimitive.Root>,
-    CheckboxProps
->(({ className, variant, ...props }, ref) => (
-    <CheckboxPrimitive.Root
-        ref={ref}
-        className={cn(checkboxVariants({ variant }), className)}
-        {...props}
-    >
-        <CheckboxPrimitive.Indicator className="flex items-center justify-center text-current">
-            <Check className="h-4 w-4" />
-        </CheckboxPrimitive.Indicator>
-    </CheckboxPrimitive.Root>
-));
+const Checkbox = (
+    {
+        ref,
+        className,
+        variant,
+        ...props
+    }: CheckboxProps & {
+        ref: React.RefObject<React.ElementRef<typeof CheckboxPrimitive.Root>>;
+    }
+) => (<CheckboxPrimitive.Root
+    ref={ref}
+    className={cn(checkboxVariants({ variant }), className)}
+    {...props}
+>
+    <CheckboxPrimitive.Indicator className="flex items-center justify-center text-current">
+        <Check className="h-4 w-4" />
+    </CheckboxPrimitive.Indicator>
+</CheckboxPrimitive.Root>);
 Checkbox.displayName = CheckboxPrimitive.Root.displayName;
 
 interface CheckboxWithLabelProps
@@ -54,10 +58,17 @@ interface CheckboxWithLabelProps
     label: string;
 }
 
-const CheckboxWithLabel = React.forwardRef<
-    React.ElementRef<typeof Checkbox>,
-    CheckboxWithLabelProps
->(({ className, label, id, ...props }, ref) => {
+const CheckboxWithLabel = (
+    {
+        ref,
+        className,
+        label,
+        id,
+        ...props
+    }: CheckboxWithLabelProps & {
+        ref: React.RefObject<React.ElementRef<typeof Checkbox>>;
+    }
+) => {
     return (
         <div className={cn("flex items-center space-x-2", className)}>
             <Checkbox id={id} ref={ref} {...props} />
@@ -69,7 +80,7 @@ const CheckboxWithLabel = React.forwardRef<
             </label>
         </div>
     );
-});
+};
 CheckboxWithLabel.displayName = "CheckboxWithLabel";
 
 export { Checkbox, CheckboxWithLabel };
