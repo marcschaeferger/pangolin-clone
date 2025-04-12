@@ -2,17 +2,16 @@ import { internal } from "@app/lib/api";
 import { AxiosResponse } from "axios";
 import { redirect } from "next/navigation";
 import { authCookieHeader } from "@app/lib/api/cookies";
-import { SidebarSettings } from "@app/components/SidebarSettings";
 import { GetOrgUserResponse } from "@server/routers/user";
 import OrgUserProvider from "@app/providers/OrgUserProvider";
+import { HorizontalTabs } from "@app/components/HorizontalTabs";
 import {
     Breadcrumb,
     BreadcrumbItem,
-    BreadcrumbLink,
     BreadcrumbList,
     BreadcrumbPage,
     BreadcrumbSeparator
-} from "@/components/ui/breadcrumb";
+} from "@app/components/ui/breadcrumb";
 import Link from "next/link";
 import { cache } from "react";
 
@@ -40,7 +39,7 @@ export default async function UserLayoutProps(props: UserLayoutProps) {
         redirect(`/${params.orgId}/settings/sites`);
     }
 
-    const sidebarNavItems = [
+    const navItems = [
         {
             title: "Access Controls",
             href: "/{orgId}/settings/access/users/{userId}/access-controls"
@@ -71,11 +70,9 @@ export default async function UserLayoutProps(props: UserLayoutProps) {
                     <p className="text-muted-foreground">Manage user</p>
                 </div>
 
-                <SidebarSettings
-                    sidebarNavItems={sidebarNavItems}
-                >
+                <HorizontalTabs items={navItems}>
                     {children}
-                </SidebarSettings>
+                </HorizontalTabs>
             </OrgUserProvider>
         </>
     );

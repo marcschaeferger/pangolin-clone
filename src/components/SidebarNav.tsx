@@ -1,17 +1,9 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import Link from "next/link";
-import { useParams, usePathname, useRouter } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { cn } from "@app/lib/cn";
-import { buttonVariants } from "@/components/ui/button";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue
-} from "@/components/ui/select";
 import { CornerDownRight } from "lucide-react";
 
 interface SidebarNavItem {
@@ -39,43 +31,6 @@ export function SidebarNav({
     const resourceId = params.resourceId as string;
     const userId = params.userId as string;
 
-    const [selectedValue, setSelectedValue] =
-        React.useState<string>(getSelectedValue());
-
-    useEffect(() => {
-        setSelectedValue(getSelectedValue());
-    }, [usePathname()]);
-
-    const router = useRouter();
-
-    const handleSelectChange = (value: string) => {
-        if (!disabled) {
-            router.push(value);
-        }
-    };
-
-    function getSelectedValue() {
-        let foundHref = "";
-        for (const item of items) {
-            const hydratedHref = hydrateHref(item.href);
-            if (hydratedHref === pathname) {
-                foundHref = hydratedHref;
-                break;
-            }
-            if (item.children) {
-                for (const child of item.children) {
-                    const hydratedChildHref = hydrateHref(child.href);
-                    if (hydratedChildHref === pathname) {
-                        foundHref = hydratedChildHref;
-                        break;
-                    }
-                }
-            }
-            if (foundHref) break;
-        }
-        return foundHref;
-    }
-
     function hydrateHref(val: string): string {
         return val
             .replace("{orgId}", orgId)
@@ -85,142 +40,72 @@ export function SidebarNav({
     }
 
     function renderItems(items: SidebarNavItem[]) {
-        return items.map((item) => (
-            <div key={hydrateHref(item.href)}>
-                <Link
-                    href={hydrateHref(item.href)}
-                    className={cn(
-                        "w-full",
-                        buttonVariants({ variant: "ghost" }),
-                        pathname === hydrateHref(item.href) &&
-                            !pathname.includes("create")
-                            ? "bg-accent hover:bg-accent dark:bg-border dark:hover:bg-border"
-                            : "hover:bg-transparent hover:underline",
-                        "justify-start",
-                        disabled && "cursor-not-allowed"
-                    )}
-                    onClick={disabled ? (e) => e.preventDefault() : undefined}
-                    tabIndex={disabled ? -1 : undefined}
-                    aria-disabled={disabled}
-                >
-                    {item.icon ? (
-                        <div className="flex items-center space-x-2">
-                            {item.icon}
-                            <span>{item.title}</span>
+        return items.map((item) => {
+            const hydratedHref = hydrateHref(item.href);
+            const isActive = pathname.startsWith(hydratedHref) && !pathname.includes("create");
+
+            return (
+                <div key={hydratedHref}>
+                    <Link
+                        href={hydratedHref}
+                        className={cn(
+                            "flex items-center py-2 px-3 w-full transition-colors",
+                            isActive
+                                ? "text-primary font-medium"
+                                : "text-muted-foreground hover:text-foreground",
+                            disabled && "cursor-not-allowed opacity-60"
+                        )}
+                        onClick={disabled ? (e) => e.preventDefault() : undefined}
+                        tabIndex={disabled ? -1 : undefined}
+                        aria-disabled={disabled}
+                    >
+                        {item.icon && <span className="mr-2">{item.icon}</span>}
+                        {item.title}
+                    </Link>
+                    {item.children && (
+                        <div className="ml-4 space-y-1 mt-1">
+                            {item.children.map((child) => {
+                                const hydratedChildHref = hydrateHref(child.href);
+                                const isChildActive = pathname.startsWith(hydratedChildHref) && !pathname.includes("create");
+
+                                return (
+                                    <Link
+                                        key={hydratedChildHref}
+                                        href={hydratedChildHref}
+                                        className={cn(
+                                            "flex items-center text-sm py-2 px-3 w-full transition-colors",
+                                            isChildActive
+                                                ? "text-primary font-medium"
+                                                : "text-muted-foreground hover:text-foreground",
+                                            disabled && "cursor-not-allowed opacity-60"
+                                        )}
+                                        onClick={disabled ? (e) => e.preventDefault() : undefined}
+                                        tabIndex={disabled ? -1 : undefined}
+                                        aria-disabled={disabled}
+                                    >
+                                        <CornerDownRight className="h-4 w-4 text-muted-foreground/70 mr-2" />
+                                        {child.icon && <span className="mr-2">{child.icon}</span>}
+                                        {child.title}
+                                    </Link>
+                                );
+                            })}
                         </div>
-                    ) : (
-                        item.title
                     )}
-                </Link>
-                {item.children && (
-                    <div className="ml-4 space-y-2">
-                        {item.children.map((child) => (
-                            <div
-                                key={hydrateHref(child.href)}
-                                className="flex items-center space-x-2"
-                            >
-                                <Link
-                                    href={hydrateHref(child.href)}
-                                    className={cn(
-                                        "w-full",
-                                        buttonVariants({ variant: "ghost" }),
-                                        pathname === hydrateHref(child.href) &&
-                                            !pathname.includes("create")
-                                            ? "bg-accent hover:bg-accent dark:bg-border dark:hover:bg-border"
-                                            : "hover:bg-transparent hover:underline",
-                                        "justify-start",
-                                        disabled && "cursor-not-allowed"
-                                    )}
-                                    onClick={
-                                        disabled
-                                            ? (e) => e.preventDefault()
-                                            : undefined
-                                    }
-                                    tabIndex={disabled ? -1 : undefined}
-                                    aria-disabled={disabled}
-                                >
-                                    <CornerDownRight className="h-4 w-4 text-gray-500 mr-2" />
-                                    {child.icon ? (
-                                        <div className="flex items-center space-x-2">
-                                            {child.icon}
-                                            <span>{child.title}</span>
-                                        </div>
-                                    ) : (
-                                        child.title
-                                    )}
-                                </Link>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
-        ));
+                </div>
+            );
+        });
     }
 
     return (
-        <div>
-            <div className="block lg:hidden">
-                <Select
-                    defaultValue={selectedValue}
-                    value={selectedValue}
-                    onValueChange={handleSelectChange}
-                    disabled={disabled}
-                >
-                    <SelectTrigger>
-                        <SelectValue placeholder="Select an option" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {items.flatMap((item) => {
-                            const topLevelItem = (
-                                <SelectItem
-                                    key={hydrateHref(item.href)}
-                                    value={hydrateHref(item.href)}
-                                >
-                                    {item.icon ? (
-                                        <div className="flex items-center space-x-2">
-                                            {item.icon}
-                                            <span>{item.title}</span>
-                                        </div>
-                                    ) : (
-                                        item.title
-                                    )}
-                                </SelectItem>
-                            );
-                            const childItems =
-                                item.children?.map((child) => (
-                                    <SelectItem
-                                        key={hydrateHref(child.href)}
-                                        value={hydrateHref(child.href)}
-                                        className="pl-8"
-                                    >
-                                        <div className="flex items-center space-x-2">
-                                            <CornerDownRight className="h-4 w-4 text-gray-500" />
-                                            {child.icon ? (
-                                                <>
-                                                    {child.icon}
-                                                    <span>{child.title}</span>
-                                                </>
-                                            ) : (
-                                                <span>{child.title}</span>
-                                            )}
-                                        </div>
-                                    </SelectItem>
-                                )) || [];
-                            return [topLevelItem, ...childItems];
-                        })}
-                    </SelectContent>
-                </Select>
-            </div>
-            <nav
-                className={cn(
-                    "hidden lg:flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-3 pr-8",
-                    disabled && "opacity-50 pointer-events-none",
-                    className
-                )}
-                {...props}
-            >
-                {renderItems(items)}
-            </nav>
-        </div>
+        <nav
+            className={cn(
+                "flex flex-col space-y-1",
+                disabled && "pointer-events-none opacity-60",
+                className
+            )}
+            {...props}
+        >
+            {renderItems(items)}
+        </nav>
     );
 }

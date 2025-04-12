@@ -327,7 +327,7 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
             <ResourcesDataTable
                 columns={columns}
                 data={resources}
-                addResource={() => {
+                createResource={() => {
                     setIsCreateModalOpen(true);
                 }}
             />

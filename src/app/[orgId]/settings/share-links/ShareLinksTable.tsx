@@ -306,7 +306,7 @@ export default function ShareLinksTable({
             <ShareLinksDataTable
                 columns={columns}
                 data={rows}
-                addShareLink={() => {
+                createShareLink={() => {
                     setIsCreateModalOpen(true);
                 }}
             />

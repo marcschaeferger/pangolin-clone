@@ -8,6 +8,7 @@ import { ListRolesResponse } from "@server/routers/role";
 import RolesTable, { RoleRow } from "./RolesTable";
 import { SidebarSettings } from "@app/components/SidebarSettings";
 import AccessPageHeaderAndNav from "../AccessPageHeaderAndNav";
+import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 
 type RolesPageProps = {
     params: Promise<{ orgId: string }>;
@@ -64,11 +65,13 @@ export default async function RolesPage(props: RolesPageProps) {
 
     return (
         <>
-            <AccessPageHeaderAndNav hasInvitations={hasInvitations}>
-                <OrgProvider org={org}>
-                    <RolesTable roles={roleRows} />
-                </OrgProvider>
-            </AccessPageHeaderAndNav>
+            <SettingsSectionTitle
+                title="Manage Roles"
+                description="Configure roles to manage access to your organization"
+            />
+            <OrgProvider org={org}>
+                <RolesTable roles={roleRows} />
+            </OrgProvider>
         </>
     );
 }

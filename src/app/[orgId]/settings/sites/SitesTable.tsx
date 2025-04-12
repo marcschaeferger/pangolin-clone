@@ -47,7 +47,6 @@ type SitesTableProps = {
 export default function SitesTable({ sites, orgId }: SitesTableProps) {
     const router = useRouter();
 
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedSite, setSelectedSite] = useState<SiteRow | null>(null);
     const [rows, setRows] = useState<SiteRow[]>(sites);
@@ -281,58 +280,20 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
 
     return (
         <>
-            <CreateSiteFormModal
-                open={isCreateModalOpen}
-                setOpen={setIsCreateModalOpen}
-                onCreate={(val) => {
-                    setRows([val, ...rows]);
-                }}
-                orgId={orgId}
-            />
-
             {selectedSite && (
                 <ConfirmDeleteDialog
                     open={isDeleteModalOpen}
-                    setOpen={(val) => {
-                        setIsDeleteModalOpen(val);
-                        setSelectedSite(null);
-                    }}
-                    dialog={
-                        <div className="space-y-4">
-                            <p>
-                                Are you sure you want to remove the site{" "}
-                                <b>{selectedSite?.name || selectedSite?.id}</b>{" "}
-                                from the organization?
-                            </p>
-
-                            <p>
-                                Once removed, the site will no longer be
-                                accessible.{" "}
-                                <b>
-                                    All resources and targets associated with
-                                    the site will also be removed.
-                                </b>
-                            </p>
-
-                            <p>
-                                To confirm, please type the name of the site
-                                below.
-                            </p>
-                        </div>
-                    }
-                    buttonText="Confirm Delete Site"
-                    onConfirm={async () => deleteSite(selectedSite!.id)}
-                    string={selectedSite.name}
+                    setOpen={setIsDeleteModalOpen}
+                    onConfirm={() => deleteSite(selectedSite.id)}
                     title="Delete Site"
+                    description="Are you sure you want to delete this site? This action cannot be undone."
                 />
             )}
 
             <SitesDataTable
                 columns={columns}
                 data={rows}
-                addSite={() => {
-                    router.push(`/${orgId}/settings/sites/create`);
-                }}
+                createSite={() => router.push(`/${orgId}/settings/sites/create`)}
             />
         </>
     );

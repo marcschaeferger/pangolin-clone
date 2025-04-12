@@ -7,7 +7,7 @@ import {
 import { AxiosResponse } from "axios";
 import { redirect } from "next/navigation";
 import { authCookieHeader } from "@app/lib/api/cookies";
-import { SidebarSettings } from "@app/components/SidebarSettings";
+import { HorizontalTabs } from "@app/components/HorizontalTabs";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { GetOrgResponse } from "@server/routers/org";
 import OrgProvider from "@app/providers/OrgProvider";
@@ -80,29 +80,25 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
         redirect(`/${params.orgId}/settings/resources`);
     }
 
-    const sidebarNavItems = [
+    const navItems = [
         {
             title: "General",
             href: `/{orgId}/settings/resources/{resourceId}/general`
-            // icon: <Settings className="w-4 h-4" />,
         },
         {
             title: "Connectivity",
             href: `/{orgId}/settings/resources/{resourceId}/connectivity`
-            // icon: <Cloud className="w-4 h-4" />,
         }
     ];
 
     if (resource.http) {
-        sidebarNavItems.push({
+        navItems.push({
             title: "Authentication",
             href: `/{orgId}/settings/resources/{resourceId}/authentication`
-            // icon: <Shield className="w-4 h-4" />,
         });
-        sidebarNavItems.push({
+        navItems.push({
             title: "Rules",
             href: `/{orgId}/settings/resources/{resourceId}/rules`
-            // icon: <Shield className="w-4 h-4" />,
         });
     }
 
@@ -129,10 +125,12 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
 
             <OrgProvider org={org}>
                 <ResourceProvider resource={resource} authInfo={authInfo}>
-                    <SidebarSettings sidebarNavItems={sidebarNavItems}>
+                    <div className="space-y-6">
                         <ResourceInfoBox />
-                        {children}
-                    </SidebarSettings>
+                        <HorizontalTabs items={navItems}>
+                            {children}
+                        </HorizontalTabs>
+                    </div>
                 </ResourceProvider>
             </OrgProvider>
         </>
