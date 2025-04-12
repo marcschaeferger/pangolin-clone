@@ -1,11 +1,14 @@
 import { Button } from "@app/components/ui/button";
 import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle
-} from "@app/components/ui/dialog";
+    Credenza,
+    CredenzaBody,
+    CredenzaClose,
+    CredenzaContent,
+    CredenzaDescription,
+    CredenzaFooter,
+    CredenzaHeader,
+    CredenzaTitle
+} from "@app/components/Credenza";
 import { useState, useEffect } from "react";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
@@ -20,6 +23,7 @@ import {
     SelectTrigger,
     SelectValue
 } from "@app/components/ui/select";
+import { Label } from "@app/components/ui/label";
 
 type RegenerateInvitationFormProps = {
     open: boolean;
@@ -153,7 +157,7 @@ export default function RegenerateInvitationForm({
     }
 
     return (
-        <Dialog
+        <Credenza
             open={open}
             onOpenChange={(isOpen) => {
                 setOpen(isOpen);
@@ -162,73 +166,76 @@ export default function RegenerateInvitationForm({
                 }
             }}
         >
-            <DialogContent aria-describedby="regenerate-invite-description">
-                <DialogHeader>
-                    <DialogTitle>Regenerate Invitation</DialogTitle>
-                </DialogHeader>
-                {!inviteLink ? (
-                    <div>
-                        <p>
-                            Are you sure you want to regenerate the invitation
-                            for <b>{invitation?.email}</b>? This will revoke the
-                            previous invitation.
-                        </p>
-                        <div className="flex items-center space-x-2 mt-4">
-                            <Checkbox
-                                id="send-email"
-                                checked={sendEmail}
-                                onCheckedChange={(e) =>
-                                    setSendEmail(e as boolean)
-                                }
-                            />
-                            <label htmlFor="send-email">
-                                Send email notification to the user
-                            </label>
+            <CredenzaContent>
+                <CredenzaHeader>
+                    <CredenzaTitle>Regenerate Invitation</CredenzaTitle>
+                    <CredenzaDescription>
+                        Revoke previous invitation and create a new one
+                    </CredenzaDescription>
+                </CredenzaHeader>
+                <CredenzaBody>
+                    {!inviteLink ? (
+                        <div>
+                            <p>
+                                Are you sure you want to regenerate the
+                                invitation for <b>{invitation?.email}</b>? This
+                                will revoke the previous invitation.
+                            </p>
+                            <div className="flex items-center space-x-2 mt-4">
+                                <Checkbox
+                                    id="send-email"
+                                    checked={sendEmail}
+                                    onCheckedChange={(e) =>
+                                        setSendEmail(e as boolean)
+                                    }
+                                />
+                                <label htmlFor="send-email">
+                                    Send email notification to the user
+                                </label>
+                            </div>
+                            <div className="mt-4 space-y-2">
+                                <Label>
+                                    Validity Period
+                                </Label>
+                                <Select
+                                    value={validHours.toString()}
+                                    onValueChange={(value) =>
+                                        setValidHours(parseInt(value))
+                                    }
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select validity period" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {validForOptions.map((option) => (
+                                            <SelectItem
+                                                key={option.hours}
+                                                value={option.hours.toString()}
+                                            >
+                                                {option.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
-                        <div className="mt-4">
-                            <label className="block text-sm font-medium text-gray-700">
-                                Validity Period
-                            </label>
-                            <Select
-                                value={validHours.toString()}
-                                onValueChange={(value) =>
-                                    setValidHours(parseInt(value))
-                                }
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select validity period" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {validForOptions.map((option) => (
-                                        <SelectItem
-                                            key={option.hours}
-                                            value={option.hours.toString()}
-                                        >
-                                            {option.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                    ) : (
+                        <div className="space-y-4 max-w-md">
+                            <p>
+                                The invitation has been regenerated. The user
+                                must access the link below to accept the
+                                invitation.
+                            </p>
+                            <CopyTextBox text={inviteLink} wrapText={false} />
                         </div>
-                    </div>
-                ) : (
-                    <div className="space-y-4 max-w-md">
-                        <p>
-                            The invitation has been regenerated. The user must
-                            access the link below to accept the invitation.
-                        </p>
-                        <CopyTextBox text={inviteLink} wrapText={false} />
-                    </div>
-                )}
-                <DialogFooter>
+                    )}
+                </CredenzaBody>
+                <CredenzaFooter>
                     {!inviteLink ? (
                         <>
-                            <Button
-                                variant="outline"
-                                onClick={() => setOpen(false)}
-                            >
-                                Cancel
-                            </Button>
+                            <CredenzaClose asChild>
+                                <Button variant="outline">Cancel</Button>
+                            </CredenzaClose>
                             <Button
                                 onClick={handleRegenerate}
                                 loading={loading}
@@ -237,18 +244,12 @@ export default function RegenerateInvitationForm({
                             </Button>
                         </>
                     ) : (
-                        <Button
-                            variant="outline"
-                            onClick={() => {
-                                setOpen(false);
-                                setInviteLink(null);
-                            }}
-                        >
-                            Close
-                        </Button>
+                        <CredenzaClose asChild>
+                            <Button variant="outline">Close</Button>
+                        </CredenzaClose>
                     )}
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+                </CredenzaFooter>
+            </CredenzaContent>
+        </Credenza>
     );
 }
