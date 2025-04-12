@@ -279,8 +279,20 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
         }
     ];
 
+    async function test() {
+        const res = await api
+            .post("/auth/org/home-lab/idp/1/oidc/generate-url")
+            .then((res) => {
+                if (res.data.data.redirectUrl) {
+                    window.location.href = res.data.data.redirectUrl;
+                }
+            });
+    }
+
     return (
         <>
+            <Button onClick={async () => await test()}>Test</Button>
+
             <CreateSiteFormModal
                 open={isCreateModalOpen}
                 setOpen={setIsCreateModalOpen}

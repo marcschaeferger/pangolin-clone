@@ -11,5 +11,6 @@ export enum OpenAPITags {
     Invitation = "Invitation",
     Target = "Target",
     Rule = "Rule",
-    AccessToken = "Access Token"
+    AccessToken = "Access Token",
+    Idp = "Identity Provider"
 }

@@ -10,6 +10,7 @@ import * as auth from "./auth";
 import * as role from "./role";
 import * as supporterKey from "./supporterKey";
 import * as accessToken from "./accessToken";
+import * as idp from "./idp";
 import HttpCode from "@server/types/HttpCode";
 import {
     verifyAccessTokenAccess,
@@ -493,6 +494,13 @@ authenticated.delete(
 //     createNewt
 // );
 
+authenticated.put(
+    "/org/:orgId/idp/oidc",
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.createIdp),
+    idp.createOidcIdp
+)
+
 // Auth routes
 export const authRouter = Router();
 unauthenticated.use("/auth", authRouter);
@@ -581,4 +589,17 @@ authRouter.post(
     resource.authWithAccessToken
 );
 
-authRouter.post("/access-token", resource.authWithAccessToken);
+authRouter.post(
+    "/access-token",
+    resource.authWithAccessToken
+);
+
+authRouter.post(
+    "/org/:orgId/idp/:idpId/oidc/generate-url",
+    idp.generateOidcUrl
+)
+
+authRouter.post(
+    "/org/:orgId/idp/:idpId/oidc/validate-callback",
+    idp.validateOidcCallback
+)

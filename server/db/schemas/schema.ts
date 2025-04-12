@@ -340,6 +340,12 @@ export const resourceSessions = sqliteTable("resourceSessions", {
         .notNull()
         .default(false),
     isRequestToken: integer("isRequestToken", { mode: "boolean" }),
+    idpSessionId: text("idpSessionId").references(
+        () => idpSessions.idpSessionId,
+        {
+            onDelete: "cascade"
+        }
+    ),
     userSessionId: text("userSessionId").references(() => sessions.sessionId, {
         onDelete: "cascade"
     }),
@@ -415,6 +421,77 @@ export const supporterKey = sqliteTable("supporterKey", {
     valid: integer("valid", { mode: "boolean" }).notNull().default(false)
 });
 
+// Identity Providers
+export const idp = sqliteTable("idp", {
+    idpId: integer("idpId").primaryKey({ autoIncrement: true }),
+    type: text("type").notNull()
+});
+
+// Identity Provider OAuth Configuration
+export const idpOidcConfig = sqliteTable("idpOidcConfig", {
+    idpOauthConfigId: integer("idpOauthConfigId").primaryKey({
+        autoIncrement: true
+    }),
+    idpId: integer("idpId")
+        .notNull()
+        .references(() => idp.idpId, { onDelete: "cascade" }),
+    clientId: text("clientId").notNull(),
+    clientSecret: text("clientSecret").notNull(),
+    authUrl: text("authUrl").notNull(),
+    tokenUrl: text("tokenUrl").notNull(),
+    autoProvision: integer("autoProvision", {
+        mode: "boolean"
+    })
+        .notNull()
+        .default(false),
+    identifierPath: text("identifierPath").notNull(),
+    emailPath: text("emailPath"), // by default, this is "email"
+    namePath: text("namePath"), // by default, this is "name"
+    roleMapping: text("roleMapping"),
+    scopes: text("scopes").notNull()
+});
+
+export const idpOrg = sqliteTable("idpOrg", {
+    idpId: integer("idpId")
+        .notNull()
+        .references(() => idp.idpId, { onDelete: "cascade" }),
+    orgId: text("orgId")
+        .notNull()
+        .references(() => orgs.orgId, { onDelete: "cascade" })
+});
+
+// IDP User
+export const idpUser = sqliteTable("idpUser", {
+    idpUserId: text("idpUserId").primaryKey(),
+    identifier: text("identifier").notNull(),
+    idpId: integer("idpId")
+        .notNull()
+        .references(() => idp.idpId, { onDelete: "cascade" }),
+    email: text("email"),
+    name: text("name")
+});
+
+// IDP User Organization Link
+export const idpUserOrg = sqliteTable("idpUserOrg", {
+    idpUserId: text("idpUserId")
+        .notNull()
+        .references(() => idpUser.idpUserId, { onDelete: "cascade" }),
+    orgId: text("orgId")
+        .notNull()
+        .references(() => orgs.orgId, { onDelete: "cascade" }),
+    roleId: integer("roleId")
+        .notNull()
+        .references(() => roles.roleId, { onDelete: "cascade" })
+});
+
+export const idpSessions = sqliteTable("idpSessions", {
+    idpSessionId: text("idpSessionId").primaryKey(),
+    idpUserId: text("idpUserId")
+        .notNull()
+        .references(() => idpUser.idpUserId, { onDelete: "cascade" }),
+    expiresAt: integer("expiresAt").notNull()
+});
+
 export type Org = InferSelectModel<typeof orgs>;
 export type User = InferSelectModel<typeof users>;
 export type Site = InferSelectModel<typeof sites>;
@@ -450,3 +527,8 @@ export type VersionMigration = InferSelectModel<typeof versionMigrations>;
 export type ResourceRule = InferSelectModel<typeof resourceRules>;
 export type Domain = InferSelectModel<typeof domains>;
 export type SupporterKey = InferSelectModel<typeof supporterKey>;
+export type Idp = InferSelectModel<typeof idp>;
+export type IdpUser = InferSelectModel<typeof idpUser>;
+export type IdpOrg = InferSelectModel<typeof idpOrg>;
+export type IdpUserOrg = InferSelectModel<typeof idpUserOrg>;
+export type IdpSession = InferSelectModel<typeof idpSessions>;

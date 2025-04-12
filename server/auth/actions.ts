@@ -65,7 +65,8 @@ export enum ActionsEnum {
     listResourceRules = "listResourceRules",
     updateResourceRule = "updateResourceRule",
     listOrgDomains = "listOrgDomains",
-    createNewt = "createNewt"
+    createNewt = "createNewt",
+    createIdp = "createIdp"
 }
 
 export async function checkUserActionPermission(
