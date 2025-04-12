@@ -17,8 +17,7 @@
             "@server/*": ["../server/*"],
             "@test/*": ["../test/*"],
             "@app/*": ["*"],
-            "@/*": ["./*"],
-            "react": [ "./node_modules/@types/react" ]
+            "@/*": ["./*"]
         },
         "plugins": [
             {

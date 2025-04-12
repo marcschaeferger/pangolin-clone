@@ -18,7 +18,7 @@ export default async function AuthLayout({ children }: AuthLayoutProps) {
     const user = await getUser();
 
     return (
-        <>
+        <div className="h-full flex flex-col">
             {user && (
                 <UserProvider user={user}>
                     <div className="p-3">
@@ -27,9 +27,11 @@ export default async function AuthLayout({ children }: AuthLayoutProps) {
                 </UserProvider>
             )}
 
-            <div className="w-full max-w-md mx-auto p-3 md:mt-32">
-                {children}
+            <div className="flex-1 flex items-center justify-center">
+                <div className="w-full max-w-md p-3">
+                    {children}
+                </div>
             </div>
-        </>
+        </div>
     );
 }

@@ -47,19 +47,17 @@ export function Breadcrumbs() {
     });
 
     return (
-        <div className="border-b px-4 py-2">
+        <div className="border-b px-4 py-2 overflow-x-auto scrollbar-hide bg-card">
             <nav className="flex items-center space-x-1 text-sm text-muted-foreground">
-                <Link href="/" className="hover:text-foreground">
-                    Home
-                </Link>
                 {breadcrumbs.map((crumb, index) => (
                     <div key={crumb.href} className="flex items-center">
-                        <ChevronRight className="h-4 w-4" />
+                        {index !== 0 && <ChevronRight className="h-4 w-4" />}
                         <Link
                             href={crumb.href}
                             className={cn(
                                 "ml-1 hover:text-foreground",
-                                index === breadcrumbs.length - 1 && "text-foreground font-medium"
+                                index === breadcrumbs.length - 1 &&
+                                    "text-foreground font-medium"
                             )}
                         >
                             {crumb.label}
@@ -69,4 +67,4 @@ export function Breadcrumbs() {
             </nav>
         </div>
     );
-} 
+}

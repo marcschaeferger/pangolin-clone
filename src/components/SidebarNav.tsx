@@ -42,7 +42,7 @@ export function SidebarNav({
     function renderItems(items: SidebarNavItem[]) {
         return items.map((item) => {
             const hydratedHref = hydrateHref(item.href);
-            const isActive = pathname.startsWith(hydratedHref) && !pathname.includes("create");
+            const isActive = pathname.startsWith(hydratedHref);
 
             return (
                 <div key={hydratedHref}>

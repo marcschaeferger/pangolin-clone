@@ -104,20 +104,6 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
 
     return (
         <>
-            <div className="mb-4">
-                <Breadcrumb>
-                    <BreadcrumbList>
-                        <BreadcrumbItem>
-                            <Link href="../">Resources</Link>
-                        </BreadcrumbItem>
-                        <BreadcrumbSeparator />
-                        <BreadcrumbItem>
-                            <BreadcrumbPage>{resource.name}</BreadcrumbPage>
-                        </BreadcrumbItem>
-                    </BreadcrumbList>
-                </Breadcrumb>
-            </div>
-
             <SettingsSectionTitle
                 title={`${resource?.name} Settings`}
                 description="Configure the settings on your resource"

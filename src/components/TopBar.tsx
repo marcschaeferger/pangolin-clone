@@ -10,8 +10,8 @@ interface TopBarProps {
 
 export function TopBar({ orgId, orgs }: TopBarProps) {
     return (
-        <div className="flex items-center justify-between w-full h-full">
-            <div className="flex items-center space-x-4">
+        <div className="flex items-center justify-end md:justify-between w-full h-full">
+            <div className="hidden md:flex items-center space-x-4">
                 <Link
                     href="https://docs.fossorial.io"
                     target="_blank"

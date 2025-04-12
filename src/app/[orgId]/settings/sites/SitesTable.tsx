@@ -284,7 +284,7 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                 <ConfirmDeleteDialog
                     open={isDeleteModalOpen}
                     setOpen={setIsDeleteModalOpen}
-                    onConfirm={() => deleteSite(selectedSite.id)}
+                    onConfirm={async () => deleteSite(selectedSite.id)}
                     title="Delete Site"
                     description="Are you sure you want to delete this site? This action cannot be undone."
                 />

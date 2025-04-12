@@ -25,7 +25,10 @@ export function HorizontalTabs({
     const params = useParams();
 
     function hydrateHref(href: string) {
-        return href.replace("{orgId}", params.orgId as string);
+        return href
+            .replace("{orgId}", params.orgId as string)
+            .replace("{resourceId}", params.resourceId as string)
+            .replace("{niceId}", params.niceId as string);
     }
 
     return (
@@ -35,7 +38,9 @@ export function HorizontalTabs({
                     <div className="flex space-x-4 border-b min-w-max">
                         {items.map((item) => {
                             const hydratedHref = hydrateHref(item.href);
-                            const isActive = pathname.startsWith(hydratedHref) && !pathname.includes("create");
+                            const isActive =
+                                pathname.startsWith(hydratedHref) &&
+                                !pathname.includes("create");
 
                             return (
                                 <Link
@@ -48,7 +53,11 @@ export function HorizontalTabs({
                                             : "text-muted-foreground hover:text-foreground",
                                         disabled && "cursor-not-allowed"
                                     )}
-                                    onClick={disabled ? (e) => e.preventDefault() : undefined}
+                                    onClick={
+                                        disabled
+                                            ? (e) => e.preventDefault()
+                                            : undefined
+                                    }
                                     tabIndex={disabled ? -1 : undefined}
                                     aria-disabled={disabled}
                                 >
@@ -66,9 +75,7 @@ export function HorizontalTabs({
                     </div>
                 </div>
             </div>
-            <div className="space-y-6">
-                {children}
-            </div>
+            <div className="space-y-6">{children}</div>
         </div>
     );
-} 
+}

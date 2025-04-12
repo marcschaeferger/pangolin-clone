@@ -30,7 +30,7 @@ export default function SupporterMessage({ tier }: { tier: string }) {
                 Pangolin
             </span>
             <Star className="w-3 h-3"/>
-            <div className="absolute left-1/2 transform -translate-x-1/2 -top-10 hidden group-hover:block  text-primary text-sm rounded-md border-2 shadow-md px-4 py-2 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute left-1/2 transform -translate-x-1/2 -top-10 hidden group-hover:block  text-primary text-sm rounded-md border shadow-md px-4 py-2 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
                 Thank you for supporting Pangolin as a {tier}!
             </div>
         </div>

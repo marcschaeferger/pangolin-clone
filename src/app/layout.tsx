@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Figtree, Inter } from "next/font/google";
+import { Figtree, Inter, Red_Hat_Display, Red_Hat_Mono, Red_Hat_Text, Space_Grotesk } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@app/providers/ThemeProvider";
 import EnvProvider from "@app/providers/EnvProvider";
@@ -43,7 +43,7 @@ export default async function RootLayout({
 
     return (
         <html suppressHydrationWarning>
-            <body className={`${font.className} min-h-screen flex flex-col`}>
+            <body className={`${font.className} h-screen overflow-hidden`}>
                 <ThemeProvider
                     attribute="class"
                     defaultTheme="system"
@@ -53,8 +53,8 @@ export default async function RootLayout({
                     <EnvProvider env={pullEnv()}>
                         <SupportStatusProvider supporterStatus={supporterData}>
                             {/* Main content */}
-                            <div className="flex flex-col min-h-screen">
-                                <div className="flex-1">
+                            <div className="h-full flex flex-col">
+                                <div className="flex-1 overflow-auto">
                                     {children}
                                 </div>
                             </div>

@@ -46,13 +46,18 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
     ];
 
     return (
-        <SiteProvider site={site}>
-            <div className="space-y-6">
-                <SiteInfoCard />
-                <HorizontalTabs items={navItems}>
-                    {children}
-                </HorizontalTabs>
-            </div>
-        </SiteProvider>
+        <>
+            <SettingsSectionTitle
+                title={`${site?.name} Settings`}
+                description="Configure the settings on your site"
+            />
+
+            <SiteProvider site={site}>
+                <div className="space-y-6">
+                    <SiteInfoCard />
+                    <HorizontalTabs items={navItems}>{children}</HorizontalTabs>
+                </div>
+            </SiteProvider>
+        </>
     );
 }

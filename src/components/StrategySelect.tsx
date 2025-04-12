@@ -44,7 +44,7 @@ export function StrategySelect<TValue extends string>({
                         selected === option.id ? "checked" : "unchecked"
                     }
                     className={cn(
-                        "relative flex rounded-lg border-2 p-4 transition-colors cursor-pointer",
+                        "relative flex rounded-lg border p-4 transition-colors cursor-pointer",
                         option.disabled
                             ? "border-input text-muted-foreground cursor-not-allowed opacity-50"
                             : selected === option.id

@@ -502,20 +502,6 @@ WantedBy=default.target`
 
     return (
         <>
-            <div className="mb-4 flex-row">
-                <Breadcrumb>
-                    <BreadcrumbList>
-                        <BreadcrumbItem>
-                            <Link href="../">Sites</Link>
-                        </BreadcrumbItem>
-                        <BreadcrumbSeparator />
-                        <BreadcrumbItem>
-                            <BreadcrumbPage>Create Site</BreadcrumbPage>
-                        </BreadcrumbItem>
-                    </BreadcrumbList>
-                </Breadcrumb>
-            </div>
-
             <div className="flex justify-between">
                 <HeaderTitle
                     title="Create Site"
