@@ -9,7 +9,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 // Define checkbox variants
 const checkboxVariants = cva(
-    "peer h-4 w-4 shrink-0 ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+    "peer h-4 w-4 shrink-0 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
     {
         variants: {
             variant: {
@@ -33,24 +33,20 @@ interface CheckboxProps
     extends React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>,
         VariantProps<typeof checkboxVariants> {}
 
-const Checkbox = (
-    {
-        ref,
-        className,
-        variant,
-        ...props
-    }: CheckboxProps & {
-        ref: React.RefObject<React.ElementRef<typeof CheckboxPrimitive.Root>>;
-    }
-) => (<CheckboxPrimitive.Root
-    ref={ref}
-    className={cn(checkboxVariants({ variant }), className)}
-    {...props}
->
-    <CheckboxPrimitive.Indicator className="flex items-center justify-center text-current">
-        <Check className="h-4 w-4" />
-    </CheckboxPrimitive.Indicator>
-</CheckboxPrimitive.Root>);
+const Checkbox = React.forwardRef<
+    React.ElementRef<typeof CheckboxPrimitive.Root>,
+    CheckboxProps
+>(({ className, variant, ...props }, ref) => (
+    <CheckboxPrimitive.Root
+        ref={ref}
+        className={cn(checkboxVariants({ variant }), className)}
+        {...props}
+    >
+        <CheckboxPrimitive.Indicator className="flex items-center justify-center text-current">
+            <Check className="h-4 w-4" />
+        </CheckboxPrimitive.Indicator>
+    </CheckboxPrimitive.Root>
+));
 Checkbox.displayName = CheckboxPrimitive.Root.displayName;
 
 interface CheckboxWithLabelProps
@@ -58,17 +54,10 @@ interface CheckboxWithLabelProps
     label: string;
 }
 
-const CheckboxWithLabel = (
-    {
-        ref,
-        className,
-        label,
-        id,
-        ...props
-    }: CheckboxWithLabelProps & {
-        ref: React.RefObject<React.ElementRef<typeof Checkbox>>;
-    }
-) => {
+const CheckboxWithLabel = React.forwardRef<
+    React.ElementRef<typeof Checkbox>,
+    CheckboxWithLabelProps
+>(({ className, label, id, ...props }, ref) => {
     return (
         <div className={cn("flex items-center space-x-2", className)}>
             <Checkbox id={id} ref={ref} {...props} />
@@ -80,7 +69,7 @@ const CheckboxWithLabel = (
             </label>
         </div>
     );
-};
+});
 CheckboxWithLabel.displayName = "CheckboxWithLabel";
 
 export { Checkbox, CheckboxWithLabel };

@@ -283,17 +283,46 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
             {selectedSite && (
                 <ConfirmDeleteDialog
                     open={isDeleteModalOpen}
-                    setOpen={setIsDeleteModalOpen}
-                    onConfirm={async () => deleteSite(selectedSite.id)}
+                    setOpen={(val) => {
+                        setIsDeleteModalOpen(val);
+                        setSelectedSite(null);
+                    }}
+                    dialog={
+                        <div className="space-y-4">
+                            <p>
+                                Are you sure you want to remove the site{" "}
+                                <b>{selectedSite?.name || selectedSite?.id}</b>{" "}
+                                from the organization?
+                            </p>
+
+                            <p>
+                                Once removed, the site will no longer be
+                                accessible.{" "}
+                                <b>
+                                    All resources and targets associated with
+                                    the site will also be removed.
+                                </b>
+                            </p>
+
+                            <p>
+                                To confirm, please type the name of the site
+                                below.
+                            </p>
+                        </div>
+                    }
+                    buttonText="Confirm Delete Site"
+                    onConfirm={async () => deleteSite(selectedSite!.id)}
+                    string={selectedSite.name}
                     title="Delete Site"
-                    description="Are you sure you want to delete this site? This action cannot be undone."
                 />
             )}
 
             <SitesDataTable
                 columns={columns}
                 data={rows}
-                createSite={() => router.push(`/${orgId}/settings/sites/create`)}
+                createSite={() =>
+                    router.push(`/${orgId}/settings/sites/create`)
+                }
             />
         </>
     );
