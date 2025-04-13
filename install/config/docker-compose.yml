@@ -8,9 +8,9 @@ services:
       - ./config:/app/config
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3001/api/v1/"]
-      interval: "3s"
-      timeout: "3s"
-      retries: 5
+      interval: "10s"
+      timeout: "10s"
+      retries: 15
 {{if .InstallGerbil}}
   gerbil:
     image: fosrl/gerbil:{{.GerbilVersion}}
