@@ -103,7 +103,10 @@ export async function traefikConfigProvider(
                             [badgerMiddlewareName]: {
                                 apiBaseUrl: new URL(
                                     "/api/v1",
-                                    `http://${config.getRawConfig().server.internal_hostname}:${
+                                    `http://${
+                                        config.getRawConfig().server
+                                            .internal_hostname
+                                    }:${
                                         config.getRawConfig().server
                                             .internal_port
                                     }`
@@ -351,10 +354,9 @@ export async function traefikConfigProvider(
                         ...(resource.stickySession
                             ? {
                                   sticky: {
-                                      cookie: {
-                                          name: "pangolin_sticky",
-                                          secure: resource.ssl,
-                                          httpOnly: true
+                                      ipStrategy: {
+                                          depth: 0,
+                                          sourcePort: true
                                       }
                                   }
                               }

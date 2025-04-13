@@ -493,15 +493,17 @@ export default function ReverseProxyTargets(props: {
                         </SettingsSectionDescription>
                     </SettingsSectionHeader>
                     <SettingsSectionBody>
-                        <SwitchInput
-                            id="sticky-toggle"
-                            label="Enable Sticky Sessions"
-                            description="Keep users on the same backend target for their entire session. Useful for applications like VNC that require persistent connections."
-                            defaultChecked={resource.stickySession}
-                            onCheckedChange={async (val) => {
-                                await saveStickySession(val);
-                            }}
-                        />
+                        {targets.length >= 2 && (
+                            <SwitchInput
+                                id="sticky-toggle"
+                                label="Enable Sticky Sessions"
+                                description="Keep users on the same backend target for their entire session. Useful for applications like VNC that require persistent connections."
+                                defaultChecked={resource.stickySession}
+                                onCheckedChange={async (val) => {
+                                    await saveStickySession(val);
+                                }}
+                            />
+                        )}
                         <SwitchInput
                             id="ssl-toggle"
                             label="Enable SSL (https)"
