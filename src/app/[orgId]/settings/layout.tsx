@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import { TopbarNav } from "@app/components/TopbarNav";
 import {
     Cog,
     Combine,
@@ -8,7 +7,6 @@ import {
     Users,
     Waypoints
 } from "lucide-react";
-import { Header } from "@app/components/Header";
 import { verifySession } from "@app/lib/auth/verifySession";
 import { redirect } from "next/navigation";
 import { internal } from "@app/lib/api";
@@ -18,14 +16,9 @@ import { authCookieHeader } from "@app/lib/api/cookies";
 import { cache } from "react";
 import { GetOrgUserResponse } from "@server/routers/user";
 import UserProvider from "@app/providers/UserProvider";
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator
-} from "@app/components/ui/breadcrumb";
-import Link from "next/link";
+import { Layout } from "@app/components/Layout";
+import { SidebarNavItem, SidebarNavProps } from "@app/components/SidebarNav";
+import { orgNavItems } from "@app/app/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -33,34 +26,6 @@ export const metadata: Metadata = {
     title: `Settings - Pangolin`,
     description: ""
 };
-
-const topNavItems = [
-    {
-        title: "Sites",
-        href: "/{orgId}/settings/sites",
-        icon: <Combine className="h-4 w-4" />
-    },
-    {
-        title: "Resources",
-        href: "/{orgId}/settings/resources",
-        icon: <Waypoints className="h-4 w-4" />
-    },
-    {
-        title: "Users & Roles",
-        href: "/{orgId}/settings/access",
-        icon: <Users className="h-4 w-4" />
-    },
-    {
-        title: "Shareable Links",
-        href: "/{orgId}/settings/share-links",
-        icon: <LinkIcon className="h-4 w-4" />
-    },
-    {
-        title: "General",
-        href: "/{orgId}/settings/general",
-        icon: <Settings className="h-4 w-4" />
-    }
-];
 
 interface SettingsLayoutProps {
     children: React.ReactNode;
@@ -109,21 +74,10 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
     } catch (e) {}
 
     return (
-        <>
-            <div className="w-full bg-card sm:px-0 fixed top-0 z-10 border-b">
-                <div className="container mx-auto flex flex-col content-between">
-                    <div className="my-4 px-3 md:px-0">
-                        <UserProvider user={user}>
-                            <Header orgId={params.orgId} orgs={orgs} />
-                        </UserProvider>
-                    </div>
-                    <TopbarNav items={topNavItems} orgId={params.orgId} />
-                </div>
-            </div>
-
-            <div className="container mx-auto sm:px-0 px-3 pt-[155px]">
+        <UserProvider user={user}>
+            <Layout orgId={params.orgId} orgs={orgs} navItems={orgNavItems}>
                 {children}
-            </div>
-        </>
+            </Layout>
+        </UserProvider>
     );
 }

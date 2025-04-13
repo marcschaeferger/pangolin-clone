@@ -47,7 +47,6 @@ type SitesTableProps = {
 export default function SitesTable({ sites, orgId }: SitesTableProps) {
     const router = useRouter();
 
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedSite, setSelectedSite] = useState<SiteRow | null>(null);
     const [rows, setRows] = useState<SiteRow[]>(sites);
@@ -279,29 +278,8 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
         }
     ];
 
-    async function test() {
-        const res = await api
-            .post("/auth/org/home-lab/idp/1/oidc/generate-url")
-            .then((res) => {
-                if (res.data.data.redirectUrl) {
-                    window.location.href = res.data.data.redirectUrl;
-                }
-            });
-    }
-
     return (
         <>
-            <Button onClick={async () => await test()}>Test</Button>
-
-            <CreateSiteFormModal
-                open={isCreateModalOpen}
-                setOpen={setIsCreateModalOpen}
-                onCreate={(val) => {
-                    setRows([val, ...rows]);
-                }}
-                orgId={orgId}
-            />
-
             {selectedSite && (
                 <ConfirmDeleteDialog
                     open={isDeleteModalOpen}
@@ -342,9 +320,9 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
             <SitesDataTable
                 columns={columns}
                 data={rows}
-                addSite={() => {
-                    router.push(`/${orgId}/settings/sites/create`);
-                }}
+                createSite={() =>
+                    router.push(`/${orgId}/settings/sites/create`)
+                }
             />
         </>
     );

@@ -8,6 +8,7 @@ import OrgProvider from "@app/providers/OrgProvider";
 import UserProvider from "@app/providers/UserProvider";
 import { verifySession } from "@app/lib/auth/verifySession";
 import AccessPageHeaderAndNav from "../AccessPageHeaderAndNav";
+import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 
 type InvitationsPageProps = {
     params: Promise<{ orgId: string }>;
@@ -72,13 +73,15 @@ export default async function InvitationsPage(props: InvitationsPageProps) {
 
     return (
         <>
-            <AccessPageHeaderAndNav hasInvitations={hasInvitations}>
-                <UserProvider user={user!}>
-                    <OrgProvider org={org}>
-                        <InvitationsTable invitations={invitationRows} />
-                    </OrgProvider>
-                </UserProvider>
-            </AccessPageHeaderAndNav>
+            <SettingsSectionTitle
+                title="Open Invitations"
+                description="Manage your invitations to other users"
+            />
+            <UserProvider user={user!}>
+                <OrgProvider org={org}>
+                    <InvitationsTable invitations={invitationRows} />
+                </OrgProvider>
+            </UserProvider>
         </>
     );
 }

@@ -4,7 +4,7 @@ import { GetSiteResponse } from "@server/routers/site";
 import { AxiosResponse } from "axios";
 import { redirect } from "next/navigation";
 import { authCookieHeader } from "@app/lib/api/cookies";
-import { SidebarSettings } from "@app/components/SidebarSettings";
+import { HorizontalTabs } from "@app/components/HorizontalTabs";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
@@ -38,7 +38,7 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
         redirect(`/${params.orgId}/settings/sites`);
     }
 
-    const sidebarNavItems = [
+    const navItems = [
         {
             title: "General",
             href: "/{orgId}/settings/sites/{niceId}/general"
@@ -47,30 +47,16 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
 
     return (
         <>
-            <div className="mb-4 flex-row">
-                <Breadcrumb>
-                    <BreadcrumbList>
-                        <BreadcrumbItem>
-                            <Link href="../">Sites</Link>
-                        </BreadcrumbItem>
-                        <BreadcrumbSeparator />
-                        <BreadcrumbItem>
-                            <BreadcrumbPage>{site.name}</BreadcrumbPage>
-                        </BreadcrumbItem>
-                    </BreadcrumbList>
-                </Breadcrumb>
-            </div>
-
             <SettingsSectionTitle
                 title={`${site?.name} Settings`}
                 description="Configure the settings on your site"
             />
 
             <SiteProvider site={site}>
-                <SidebarSettings sidebarNavItems={sidebarNavItems}>
+                <div className="space-y-6">
                     <SiteInfoCard />
-                    {children}
-                </SidebarSettings>
+                    <HorizontalTabs items={navItems}>{children}</HorizontalTabs>
+                </div>
             </SiteProvider>
         </>
     );

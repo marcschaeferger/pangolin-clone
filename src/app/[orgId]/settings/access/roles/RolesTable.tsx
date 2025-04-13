@@ -131,7 +131,7 @@ export default function UsersTable({ roles: r }: RolesTableProps) {
             <RolesDataTable
                 columns={columns}
                 data={roles}
-                addRole={() => {
+                createRole={() => {
                     setIsCreateModalOpen(true);
                 }}
             />

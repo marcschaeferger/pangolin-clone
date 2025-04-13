@@ -51,7 +51,7 @@ export default async function SitesPage(props: SitesPageProps) {
 
     return (
         <>
-            <SitesSplashCard />
+            {/* <SitesSplashCard /> */}
 
             <SettingsSectionTitle
                 title="Manage Sites"

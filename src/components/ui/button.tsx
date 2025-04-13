@@ -6,7 +6,7 @@ import { cn } from "@app/lib/cn";
 import { Loader2 } from "lucide-react";
 
 const buttonVariants = cva(
-    "inline-flex items-center justify-center rounded-full whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+    "cursor-pointer inline-flex items-center justify-center rounded-full whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
     {
         variants: {
             variant: {
@@ -15,16 +15,16 @@ const buttonVariants = cva(
                 destructive:
                     "bg-destructive text-destructive-foreground hover:bg-destructive/90",
                 outline:
-                    "border-2 border-input bg-card hover:bg-accent hover:text-accent-foreground",
+                    "border border-input bg-card hover:bg-accent hover:text-accent-foreground",
                 outlinePrimary:
-                    "border-2 border-primary bg-card hover:bg-primary/10 text-primary",
+                    "border border-primary bg-card hover:bg-primary/10 text-primary",
                 secondary:
-                    "bg-secondary border border-input border-2 text-secondary-foreground hover:bg-secondary/80",
+                    "bg-secondary border border-input border text-secondary-foreground hover:bg-secondary/80",
                 ghost: "hover:bg-accent hover:text-accent-foreground",
                 squareOutlinePrimary:
-                    "border-2 border-primary bg-card hover:bg-primary/10 text-primary rounded-md",
+                    "border border-primary bg-card hover:bg-primary/10 text-primary rounded-md",
                 squareOutline:
-                    "border-2 border-input bg-card hover:bg-accent hover:text-accent-foreground rounded-md",
+                    "border border-input bg-card hover:bg-accent hover:text-accent-foreground rounded-md",
                 squareDefault:
                     "bg-primary text-primary-foreground hover:bg-primary/90 rounded-md",
                 text: "",

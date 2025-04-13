@@ -419,7 +419,7 @@ export default function SupporterStatus() {
                 <Button
                     variant="outlinePrimary"
                     size="sm"
-                    className="gap-2"
+                    className="gap-2 w-full"
                     onClick={() => {
                         setPurchaseOptionsOpen(true);
                     }}

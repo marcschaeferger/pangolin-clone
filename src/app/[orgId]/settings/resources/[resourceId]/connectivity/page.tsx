@@ -569,7 +569,7 @@ export default function ReverseProxyTargets(props: {
                                 <Button
                                     type="submit"
                                     variant="outlinePrimary"
-                                    className="mt-8"
+                                    className="mt-6"
                                 >
                                     Add Target
                                 </Button>

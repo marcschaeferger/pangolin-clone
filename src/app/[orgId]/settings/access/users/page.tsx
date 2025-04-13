@@ -9,6 +9,7 @@ import OrgProvider from "@app/providers/OrgProvider";
 import UserProvider from "@app/providers/UserProvider";
 import { verifySession } from "@app/lib/auth/verifySession";
 import AccessPageHeaderAndNav from "../AccessPageHeaderAndNav";
+import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 
 type UsersPageProps = {
     params: Promise<{ orgId: string }>;
@@ -78,13 +79,15 @@ export default async function UsersPage(props: UsersPageProps) {
 
     return (
         <>
-            <AccessPageHeaderAndNav hasInvitations={hasInvitations}>
-                <UserProvider user={user!}>
-                    <OrgProvider org={org}>
-                        <UsersTable users={userRows} />
-                    </OrgProvider>
-                </UserProvider>
-            </AccessPageHeaderAndNav>
+            <SettingsSectionTitle
+                title="Manage Users"
+                description="Invite users and add them to roles to manage access to your organization"
+            />
+            <UserProvider user={user!}>
+                <OrgProvider org={org}>
+                    <UsersTable users={userRows} />
+                </OrgProvider>
+            </UserProvider>
         </>
     );
 }

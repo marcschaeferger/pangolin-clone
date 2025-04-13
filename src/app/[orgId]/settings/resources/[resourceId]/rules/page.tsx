@@ -693,7 +693,7 @@ export default function ResourceRules(props: {
                                     control={addRuleForm.control}
                                     name="value"
                                     render={({ field }) => (
-                                        <FormItem>
+                                        <FormItem className="space-y-0 mb-2">
                                             <InfoPopup
                                                 text="Value"
                                                 info={
@@ -714,6 +714,7 @@ export default function ResourceRules(props: {
                                 <Button
                                     type="submit"
                                     variant="outlinePrimary"
+                                    className="mb-2"
                                     disabled={!rulesEnabled}
                                 >
                                     Add Rule
