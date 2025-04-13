@@ -1,19 +1,20 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { cn } from "@app/lib/cn";
-import { CornerDownRight } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
-interface SidebarNavItem {
+export interface SidebarNavItem {
     href: string;
     title: string;
     icon?: React.ReactNode;
     children?: SidebarNavItem[];
+    autoExpand?: boolean;
 }
 
-interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
+export interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
     items: SidebarNavItem[];
     disabled?: boolean;
 }
@@ -30,6 +31,27 @@ export function SidebarNav({
     const niceId = params.niceId as string;
     const resourceId = params.resourceId as string;
     const userId = params.userId as string;
+    const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+
+    // Initialize expanded items based on autoExpand property
+    useEffect(() => {
+        const autoExpanded = new Set<string>();
+
+        function findAutoExpanded(items: SidebarNavItem[]) {
+            items.forEach(item => {
+                const hydratedHref = hydrateHref(item.href);
+                if (item.autoExpand) {
+                    autoExpanded.add(hydratedHref);
+                }
+                if (item.children) {
+                    findAutoExpanded(item.children);
+                }
+            });
+        }
+
+        findAutoExpanded(items);
+        setExpandedItems(autoExpanded);
+    }, [items]);
 
     function hydrateHref(val: string): string {
         return val
@@ -39,56 +61,62 @@ export function SidebarNav({
             .replace("{userId}", userId);
     }
 
-    function renderItems(items: SidebarNavItem[]) {
+    function toggleItem(href: string) {
+        setExpandedItems(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(href)) {
+                newSet.delete(href);
+            } else {
+                newSet.add(href);
+            }
+            return newSet;
+        });
+    }
+
+    function renderItems(items: SidebarNavItem[], level = 0) {
         return items.map((item) => {
             const hydratedHref = hydrateHref(item.href);
             const isActive = pathname.startsWith(hydratedHref);
+            const hasChildren = item.children && item.children.length > 0;
+            const isExpanded = expandedItems.has(hydratedHref);
+            const indent = level * 16; // Base indent for each level
 
             return (
                 <div key={hydratedHref}>
-                    <Link
-                        href={hydratedHref}
-                        className={cn(
-                            "flex items-center py-2 px-3 w-full transition-colors",
-                            isActive
-                                ? "text-primary font-medium"
-                                : "text-muted-foreground hover:text-foreground",
-                            disabled && "cursor-not-allowed opacity-60"
+                    <div className="flex items-center group" style={{ marginLeft: `${indent}px` }}>
+                        <Link
+                            href={hydratedHref}
+                            className={cn(
+                                "flex items-center py-2 px-3 w-full transition-colors",
+                                isActive
+                                    ? "text-primary font-medium"
+                                    : "text-muted-foreground hover:text-foreground",
+                                disabled && "cursor-not-allowed opacity-60"
+                            )}
+                            onClick={disabled ? (e) => e.preventDefault() : undefined}
+                            tabIndex={disabled ? -1 : undefined}
+                            aria-disabled={disabled}
+                        >
+                            {item.icon && <span className="mr-2">{item.icon}</span>}
+                            {item.title}
+                        </Link>
+                        {hasChildren && (
+                            <button
+                                onClick={() => toggleItem(hydratedHref)}
+                                className="p-2 hover:bg-muted rounded-md ml-auto"
+                                disabled={disabled}
+                            >
+                                {isExpanded ? (
+                                    <ChevronDown className="h-4 w-4" />
+                                ) : (
+                                    <ChevronRight className="h-4 w-4" />
+                                )}
+                            </button>
                         )}
-                        onClick={disabled ? (e) => e.preventDefault() : undefined}
-                        tabIndex={disabled ? -1 : undefined}
-                        aria-disabled={disabled}
-                    >
-                        {item.icon && <span className="mr-2">{item.icon}</span>}
-                        {item.title}
-                    </Link>
-                    {item.children && (
-                        <div className="ml-4 space-y-1 mt-1">
-                            {item.children.map((child) => {
-                                const hydratedChildHref = hydrateHref(child.href);
-                                const isChildActive = pathname.startsWith(hydratedChildHref) && !pathname.includes("create");
-
-                                return (
-                                    <Link
-                                        key={hydratedChildHref}
-                                        href={hydratedChildHref}
-                                        className={cn(
-                                            "flex items-center text-sm py-2 px-3 w-full transition-colors",
-                                            isChildActive
-                                                ? "text-primary font-medium"
-                                                : "text-muted-foreground hover:text-foreground",
-                                            disabled && "cursor-not-allowed opacity-60"
-                                        )}
-                                        onClick={disabled ? (e) => e.preventDefault() : undefined}
-                                        tabIndex={disabled ? -1 : undefined}
-                                        aria-disabled={disabled}
-                                    >
-                                        <CornerDownRight className="h-4 w-4 text-muted-foreground/70 mr-2" />
-                                        {child.icon && <span className="mr-2">{child.icon}</span>}
-                                        {child.title}
-                                    </Link>
-                                );
-                            })}
+                    </div>
+                    {hasChildren && isExpanded && (
+                        <div className="space-y-1 mt-1">
+                            {renderItems(item.children || [], level + 1)}
                         </div>
                     )}
                 </div>

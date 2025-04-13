@@ -17,6 +17,7 @@ import { cache } from "react";
 import { GetOrgUserResponse } from "@server/routers/user";
 import UserProvider from "@app/providers/UserProvider";
 import { Layout } from "@app/components/Layout";
+import { SidebarNavItem, SidebarNavProps } from "@app/components/SidebarNav";
 
 export const dynamic = "force-dynamic";
 
@@ -25,25 +26,32 @@ export const metadata: Metadata = {
     description: ""
 };
 
-const navItems = [
+const navItems: SidebarNavItem[] = [
     {
         title: "Sites",
-        href: "/{orgId}/settings/sites",
+        href: "/{orgId}/settings/sites"
         // icon: <Combine className="h-4 w-4" />
     },
     {
         title: "Resources",
-        href: "/{orgId}/settings/resources",
+        href: "/{orgId}/settings/resources"
         // icon: <Waypoints className="h-4 w-4" />
     },
     {
         title: "Access Control",
         href: "/{orgId}/settings/access",
         // icon: <Users className="h-4 w-4" />,
+        autoExpand: true,
         children: [
             {
                 title: "Users",
-                href: "/{orgId}/settings/access/users"
+                href: "/{orgId}/settings/access/users",
+                children: [
+                    {
+                        title: "Invitations",
+                        href: "/{orgId}/settings/access/invitations"
+                    }
+                ]
             },
             {
                 title: "Roles",
@@ -53,12 +61,12 @@ const navItems = [
     },
     {
         title: "Shareable Links",
-        href: "/{orgId}/settings/share-links",
+        href: "/{orgId}/settings/share-links"
         // icon: <LinkIcon className="h-4 w-4" />
     },
     {
         title: "General",
-        href: "/{orgId}/settings/general",
+        href: "/{orgId}/settings/general"
         // icon: <Settings className="h-4 w-4" />
     }
 ];

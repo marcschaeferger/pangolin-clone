@@ -1,17 +1,16 @@
 import { internal } from "@app/lib/api";
 import { authCookieHeader } from "@app/lib/api/cookies";
-import ProfileIcon from "@app/components/ProfileIcon";
 import { verifySession } from "@app/lib/auth/verifySession";
 import UserProvider from "@app/providers/UserProvider";
 import { ListOrgsResponse } from "@server/routers/org";
 import { AxiosResponse } from "axios";
-import { ArrowUpRight } from "lucide-react";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import OrganizationLanding from "./components/OrganizationLanding";
 import { pullEnv } from "@app/lib/pullEnv";
 import { cleanRedirect } from "@app/lib/cleanRedirect";
+import { Layout } from "@app/components/Layout";
+import { rootNavItems } from "./navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -71,16 +70,12 @@ export default async function Page(props: {
     }
 
     return (
-        <>
-            <div className="p-3">
-                {user && (
-                    <UserProvider user={user}>
-                        <div>
-                            <ProfileIcon />
-                        </div>
-                    </UserProvider>
-                )}
-
+        <UserProvider user={user}>
+            <Layout 
+                orgs={orgs}
+                navItems={rootNavItems}
+                showBreadcrumbs={false}
+            >
                 <div className="w-full max-w-md mx-auto md:mt-32 mt-4">
                     <OrganizationLanding
                         disableCreateOrg={env.flags.disableUserCreateOrg && !user.serverAdmin}
@@ -90,7 +85,7 @@ export default async function Page(props: {
                         }))}
                     />
                 </div>
-            </div>
-        </>
+            </Layout>
+        </UserProvider>
     );
 }

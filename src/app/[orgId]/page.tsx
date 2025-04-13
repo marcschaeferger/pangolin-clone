@@ -1,4 +1,3 @@
-import ProfileIcon from "@app/components/ProfileIcon";
 import { verifySession } from "@app/lib/auth/verifySession";
 import UserProvider from "@app/providers/UserProvider";
 import { cache } from "react";
@@ -8,6 +7,8 @@ import { internal } from "@app/lib/api";
 import { AxiosResponse } from "axios";
 import { authCookieHeader } from "@app/lib/api/cookies";
 import { redirect } from "next/navigation";
+import { Layout } from "@app/components/Layout";
+import { orgNavItems } from "../navigation";
 
 type OrgPageProps = {
     params: Promise<{ orgId: string }>;
@@ -19,6 +20,10 @@ export default async function OrgPage(props: OrgPageProps) {
 
     const getUser = cache(verifySession);
     const user = await getUser();
+
+    if (!user) {
+        redirect("/");
+    }
 
     let redirectToSettings = false;
     let overview: GetOrgOverviewResponse | undefined;
@@ -39,14 +44,11 @@ export default async function OrgPage(props: OrgPageProps) {
     }
 
     return (
-        <>
-            <div className="p-3">
-                {user && (
-                    <UserProvider user={user}>
-                        <ProfileIcon />
-                    </UserProvider>
-                )}
-
+        <UserProvider user={user}>
+            <Layout 
+                orgId={orgId}
+                navItems={orgNavItems}
+            >
                 {overview && (
                     <div className="w-full max-w-4xl mx-auto md:mt-32 mt-4">
                         <OrganizationLandingCard
@@ -65,7 +67,7 @@ export default async function OrgPage(props: OrgPageProps) {
                         />
                     </div>
                 )}
-            </div>
-        </>
+            </Layout>
+        </UserProvider>
     );
 }
