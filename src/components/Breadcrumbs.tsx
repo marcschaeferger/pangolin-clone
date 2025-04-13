@@ -26,7 +26,7 @@ export function Breadcrumbs() {
         } else if (segment === "resources") {
             label = "Resources";
         } else if (segment === "access") {
-            label = "Users & Roles";
+            label = "Access Control";
         } else if (segment === "general") {
             label = "General";
         } else if (segment === "share-links") {
@@ -48,14 +48,14 @@ export function Breadcrumbs() {
 
     return (
         <div className="border-b px-4 py-2 overflow-x-auto scrollbar-hide bg-card">
-            <nav className="flex items-center space-x-1 text-sm text-muted-foreground">
+            <nav className="flex items-center space-x-1 text-sm text-muted-foreground whitespace-nowrap">
                 {breadcrumbs.map((crumb, index) => (
-                    <div key={crumb.href} className="flex items-center">
+                    <div key={crumb.href} className="flex items-center whitespace-nowrap">
                         {index !== 0 && <ChevronRight className="h-4 w-4" />}
                         <Link
                             href={crumb.href}
                             className={cn(
-                                "ml-1 hover:text-foreground",
+                                "ml-1 hover:text-foreground whitespace-nowrap",
                                 index === breadcrumbs.length - 1 &&
                                     "text-foreground font-medium"
                             )}

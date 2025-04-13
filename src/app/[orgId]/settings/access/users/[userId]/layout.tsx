@@ -14,6 +14,7 @@ import {
 } from "@app/components/ui/breadcrumb";
 import Link from "next/link";
 import { cache } from "react";
+import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 
 interface UserLayoutProps {
     children: React.ReactNode;
@@ -48,28 +49,11 @@ export default async function UserLayoutProps(props: UserLayoutProps) {
 
     return (
         <>
+            <SettingsSectionTitle
+                title={`${user?.email}`}
+                description="Manage the settings on this user"
+            />
             <OrgUserProvider orgUser={user}>
-                <div className="mb-4">
-                    <Breadcrumb>
-                        <BreadcrumbList>
-                            <BreadcrumbItem>
-                                <Link href="../../">Users</Link>
-                            </BreadcrumbItem>
-                            <BreadcrumbSeparator />
-                            <BreadcrumbItem>
-                                <BreadcrumbPage>{user.email}</BreadcrumbPage>
-                            </BreadcrumbItem>
-                        </BreadcrumbList>
-                    </Breadcrumb>
-                </div>
-
-                <div className="space-y-0.5 mb-6">
-                    <h2 className="text-2xl font-bold tracking-tight">
-                        User {user?.email}
-                    </h2>
-                    <p className="text-muted-foreground">Manage user</p>
-                </div>
-
                 <HorizontalTabs items={navItems}>
                     {children}
                 </HorizontalTabs>

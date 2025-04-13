@@ -1,3 +1,4 @@
+import { Layout } from "@app/components/Layout";
 import ProfileIcon from "@app/components/ProfileIcon";
 import { verifySession } from "@app/lib/auth/verifySession";
 import { pullEnv } from "@app/lib/pullEnv";
@@ -5,6 +6,7 @@ import UserProvider from "@app/providers/UserProvider";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { cache } from "react";
+import { rootNavItems } from "../navigation";
 
 export const metadata: Metadata = {
     title: `Setup - Pangolin`,
@@ -27,27 +29,19 @@ export default async function SetupLayout({
         redirect("/?redirect=/setup");
     }
 
-    if (
-        !(!env.flags.disableUserCreateOrg || user.serverAdmin)
-    ) {
+    if (!(!env.flags.disableUserCreateOrg || user.serverAdmin)) {
         redirect("/");
     }
 
     return (
         <>
-            <div className="p-3">
-                {user && (
-                    <UserProvider user={user}>
-                        <div>
-                            <ProfileIcon />
-                        </div>
-                    </UserProvider>
-                )}
-
-                <div className="w-full max-w-2xl mx-auto md:mt-32 mt-4">
-                    {children}
-                </div>
-            </div>
+            <UserProvider user={user}>
+                <Layout navItems={rootNavItems} showBreadcrumbs={false}>
+                    <div className="w-full max-w-2xl mx-auto md:mt-32 mt-4">
+                        {children}
+                    </div>
+                </Layout>
+            </UserProvider>
         </>
     );
 }

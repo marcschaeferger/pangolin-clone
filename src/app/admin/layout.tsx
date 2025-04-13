@@ -9,6 +9,7 @@ import { internal } from "@app/lib/api";
 import { AxiosResponse } from "axios";
 import { authCookieHeader } from "@app/lib/api/cookies";
 import { Layout } from "@app/components/Layout";
+import { adminNavItems } from "../navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -16,14 +17,6 @@ export const metadata: Metadata = {
     title: `Server Admin - Pangolin`,
     description: ""
 };
-
-const navItems = [
-    {
-        title: "All Users",
-        href: "/admin/users",
-        icon: <Users className="h-4 w-4" />
-    }
-];
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -51,7 +44,7 @@ export default async function AdminLayout(props: LayoutProps) {
 
     return (
         <UserProvider user={user}>
-            <Layout orgs={orgs} navItems={navItems}>
+            <Layout orgs={orgs} navItems={adminNavItems}>
                 {props.children}
             </Layout>
         </UserProvider>

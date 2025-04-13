@@ -45,7 +45,7 @@ export default async function OrgPage(props: OrgPageProps) {
 
     return (
         <UserProvider user={user}>
-            <Layout 
+            <Layout
                 orgId={orgId}
                 navItems={orgNavItems}
             >

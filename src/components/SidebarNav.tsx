@@ -17,12 +17,14 @@ export interface SidebarNavItem {
 export interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
     items: SidebarNavItem[];
     disabled?: boolean;
+    onItemClick?: () => void;
 }
 
 export function SidebarNav({
     className,
     items,
     disabled = false,
+    onItemClick,
     ...props
 }: SidebarNavProps) {
     const pathname = usePathname();
@@ -87,13 +89,19 @@ export function SidebarNav({
                         <Link
                             href={hydratedHref}
                             className={cn(
-                                "flex items-center py-2 px-3 w-full transition-colors",
+                                "flex items-center py-1 w-full transition-colors",
                                 isActive
                                     ? "text-primary font-medium"
                                     : "text-muted-foreground hover:text-foreground",
                                 disabled && "cursor-not-allowed opacity-60"
                             )}
-                            onClick={disabled ? (e) => e.preventDefault() : undefined}
+                            onClick={(e) => {
+                                if (disabled) {
+                                    e.preventDefault();
+                                } else if (onItemClick) {
+                                    onItemClick();
+                                }
+                            }}
                             tabIndex={disabled ? -1 : undefined}
                             aria-disabled={disabled}
                         >

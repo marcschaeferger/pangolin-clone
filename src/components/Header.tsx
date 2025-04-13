@@ -21,7 +21,7 @@ export function Header({ orgId, orgs }: HeaderProps) {
                     width={34}
                     height={34}
                 />
-                <span className="font-bold text-2xl">Pangolin</span>
+                <span className="font-[Space_Grotesk] font-bold text-2xl text-neutral-500">Pangolin</span>
             </Link>
         </div>
     );

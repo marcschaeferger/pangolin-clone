@@ -24,7 +24,12 @@ import { useState } from "react";
 import { Input } from "@app/components/ui/input";
 import { DataTablePagination } from "@app/components/DataTablePagination";
 import { Plus, Search } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@app/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle
+} from "@app/components/ui/card";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
@@ -47,6 +52,7 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+    const [globalFilter, setGlobalFilter] = useState<any>([]);
 
     const table = useReactTable({
         data,
@@ -57,6 +63,7 @@ export function DataTable<TData, TValue>({
         getSortedRowModel: getSortedRowModel(),
         onColumnFiltersChange: setColumnFilters,
         getFilteredRowModel: getFilteredRowModel(),
+        onGlobalFilterChange: setGlobalFilter,
         initialState: {
             pagination: {
                 pageSize: 20,
@@ -65,7 +72,8 @@ export function DataTable<TData, TValue>({
         },
         state: {
             sorting,
-            columnFilters
+            columnFilters,
+            globalFilter
         }
     });
 
@@ -73,12 +81,12 @@ export function DataTable<TData, TValue>({
         <div className="container mx-auto max-w-12xl">
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                    <div className="flex items-center max-w-sm w-full relative">
+                    <div className="flex items-center max-w-sm w-full relative mr-2">
                         <Input
                             placeholder={searchPlaceholder}
-                            value={(table.getColumn(searchColumn)?.getFilterValue() as string) ?? ""}
-                            onChange={(event) =>
-                                table.getColumn(searchColumn)?.setFilterValue(event.target.value)
+                            value={globalFilter ?? ""}
+                            onChange={(e) =>
+                                table.setGlobalFilter(String(e.target.value))
                             }
                             className="w-full pl-8"
                         />
@@ -101,7 +109,8 @@ export function DataTable<TData, TValue>({
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
-                                                      header.column.columnDef.header,
+                                                      header.column.columnDef
+                                                          .header,
                                                       header.getContext()
                                                   )}
                                         </TableHead>
@@ -114,7 +123,9 @@ export function DataTable<TData, TValue>({
                                 table.getRowModel().rows.map((row) => (
                                     <TableRow
                                         key={row.id}
-                                        data-state={row.getIsSelected() && "selected"}
+                                        data-state={
+                                            row.getIsSelected() && "selected"
+                                        }
                                     >
                                         {row.getVisibleCells().map((cell) => (
                                             <TableCell key={cell.id}>

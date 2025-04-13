@@ -18,6 +18,7 @@ import { GetOrgUserResponse } from "@server/routers/user";
 import UserProvider from "@app/providers/UserProvider";
 import { Layout } from "@app/components/Layout";
 import { SidebarNavItem, SidebarNavProps } from "@app/components/SidebarNav";
+import { orgNavItems } from "@app/app/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -25,51 +26,6 @@ export const metadata: Metadata = {
     title: `Settings - Pangolin`,
     description: ""
 };
-
-const navItems: SidebarNavItem[] = [
-    {
-        title: "Sites",
-        href: "/{orgId}/settings/sites"
-        // icon: <Combine className="h-4 w-4" />
-    },
-    {
-        title: "Resources",
-        href: "/{orgId}/settings/resources"
-        // icon: <Waypoints className="h-4 w-4" />
-    },
-    {
-        title: "Access Control",
-        href: "/{orgId}/settings/access",
-        // icon: <Users className="h-4 w-4" />,
-        autoExpand: true,
-        children: [
-            {
-                title: "Users",
-                href: "/{orgId}/settings/access/users",
-                children: [
-                    {
-                        title: "Invitations",
-                        href: "/{orgId}/settings/access/invitations"
-                    }
-                ]
-            },
-            {
-                title: "Roles",
-                href: "/{orgId}/settings/access/roles"
-            }
-        ]
-    },
-    {
-        title: "Shareable Links",
-        href: "/{orgId}/settings/share-links"
-        // icon: <LinkIcon className="h-4 w-4" />
-    },
-    {
-        title: "General",
-        href: "/{orgId}/settings/general"
-        // icon: <Settings className="h-4 w-4" />
-    }
-];
 
 interface SettingsLayoutProps {
     children: React.ReactNode;
@@ -119,7 +75,7 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
 
     return (
         <UserProvider user={user}>
-            <Layout orgId={params.orgId} orgs={orgs} navItems={navItems}>
+            <Layout orgId={params.orgId} orgs={orgs} navItems={orgNavItems}>
                 {children}
             </Layout>
         </UserProvider>

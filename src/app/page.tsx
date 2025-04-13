@@ -71,7 +71,7 @@ export default async function Page(props: {
 
     return (
         <UserProvider user={user}>
-            <Layout 
+            <Layout
                 orgs={orgs}
                 navItems={rootNavItems}
                 showBreadcrumbs={false}

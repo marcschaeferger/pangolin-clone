@@ -10,7 +10,7 @@ import { ListOrgsResponse } from "@server/routers/org";
 import SupporterStatus from "@app/components/SupporterStatus";
 import { Separator } from "@app/components/ui/separator";
 import { Button } from "@app/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { ExternalLink, Menu, X } from "lucide-react";
 import {
     Sheet,
     SheetContent,
@@ -20,6 +20,7 @@ import {
 } from "@app/components/ui/sheet";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { Breadcrumbs } from "@app/components/Breadcrumbs";
+import Link from "next/link";
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -68,7 +69,10 @@ export function Layout({
                                 <Menu className="h-6 w-6" />
                             </Button>
                         </SheetTrigger>
-                        <SheetContent side="left" className="w-64 p-0 flex flex-col h-full">
+                        <SheetContent
+                            side="left"
+                            className="w-64 p-0 flex flex-col h-full"
+                        >
                             <SheetTitle className="sr-only">
                                 Navigation Menu
                             </SheetTitle>
@@ -81,7 +85,7 @@ export function Layout({
                                 </div>
                             )}
                             <div className="flex-1 overflow-y-auto p-4">
-                                <SidebarNav items={navItems} />
+                                <SidebarNav items={navItems} onItemClick={() => setIsMobileMenuOpen(false)} />
                             </div>
                             <div className="p-4 space-y-4 border-t shrink-0">
                                 <SupporterStatus />
@@ -113,7 +117,15 @@ export function Layout({
                         <OrgSelector orgId={orgId} orgs={orgs} />
                         <div className="space-y-2">
                             <div className="text-xs text-muted-foreground text-center">
-                                Open Source
+                                <Link
+                                    href="https://github.com/fosrl/pangolin"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center justify-center gap-1"
+                                >
+                                    Open Source
+                                    <ExternalLink size={12}/>
+                                </Link>
                             </div>
                             {env?.app?.version && (
                                 <div className="text-xs text-muted-foreground text-center">
@@ -126,7 +138,12 @@ export function Layout({
             )}
 
             {/* Main content */}
-            <div className={cn("flex-1 flex flex-col h-full min-w-0", !showSidebar && "w-full")}>
+            <div
+                className={cn(
+                    "flex-1 flex flex-col h-full min-w-0",
+                    !showSidebar && "w-full"
+                )}
+            >
                 {showTopBar && (
                     <div className="h-16 border-b shrink-0 bg-card">
                         <div className="flex h-full items-center justify-end px-4">
@@ -135,7 +152,7 @@ export function Layout({
                     </div>
                 )}
                 {showBreadcrumbs && <Breadcrumbs />}
-                <main className="flex-1 overflow-y-auto p-6 w-full">
+                <main className="flex-1 overflow-y-auto p-3 md:p-6 w-full">
                     <div className="container mx-auto max-w-12xl">
                         {children}
                     </div>

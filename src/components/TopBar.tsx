@@ -21,7 +21,7 @@ export function TopBar({ orgId, orgs }: TopBarProps) {
                     Documentation
                 </Link>
                 <Link
-                    href="https://fossorial.io/support"
+                    href="mailto:support@fossorial.io"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-muted-foreground hover:text-foreground transition-colors"
