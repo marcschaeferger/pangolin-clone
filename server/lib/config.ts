@@ -91,7 +91,8 @@ const configSchema = z.object({
                 credentials: z.boolean().optional()
             })
             .optional(),
-        trust_proxy: z.boolean().optional().default(true)
+        trust_proxy: z.boolean().optional().default(true),
+        secret: z.string()
     }),
     traefik: z.object({
         http_entrypoint: z.string(),

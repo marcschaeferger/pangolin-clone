@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { userResources, users } from "@server/db/schemas"; // Assuming these are the correct tables
+import { idp, userResources, users } from "@server/db/schemas"; // Assuming these are the correct tables
 import { eq } from "drizzle-orm";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
@@ -23,10 +23,15 @@ async function queryUsers(resourceId: number) {
     return await db
         .select({
             userId: userResources.userId,
+            username: users.username,
+            type: users.type,
+            idpName: idp.name,
+            idpId: users.idpId,
             email: users.email
         })
         .from(userResources)
         .innerJoin(users, eq(userResources.userId, users.userId))
+        .leftJoin(idp, eq(users.idpId, idp.idpId))
         .where(eq(userResources.resourceId, resourceId));
 }
 

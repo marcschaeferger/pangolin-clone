@@ -14,6 +14,7 @@ import logger from "@server/logger";
 import { sendEmail } from "@server/emails";
 import TwoFactorAuthNotification from "@server/emails/templates/TwoFactorAuthNotification";
 import config from "@server/lib/config";
+import { UserType } from "@server/types/UserTypes";
 
 export const verifyTotpBody = z
     .object({
@@ -47,6 +48,15 @@ export async function verifyTotp(
     const { code } = parsedBody.data;
 
     const user = req.user as User;
+
+    if (user.type !== UserType.Internal) {
+        return next(
+            createHttpError(
+                HttpCode.BAD_REQUEST,
+                "Two-factor authentication is not supported for external users"
+            )
+        );
+    }
 
     if (user.twoFactorEnabled) {
         return next(
@@ -111,11 +121,11 @@ export async function verifyTotp(
 
         sendEmail(
             TwoFactorAuthNotification({
-                email: user.email,
+                email: user.email!,
                 enabled: true
             }),
             {
-                to: user.email,
+                to: user.email!,
                 from: config.getRawConfig().email?.no_reply,
                 subject: "Two-factor authentication enabled"
             }

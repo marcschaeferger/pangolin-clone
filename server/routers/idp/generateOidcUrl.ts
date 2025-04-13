@@ -11,11 +11,18 @@ import { and, eq } from "drizzle-orm";
 import * as arctic from "arctic";
 import { generateOidcRedirectUrl } from "@server/lib/idp/generateRedirectUrl";
 import cookie from "cookie";
+import jsonwebtoken from "jsonwebtoken";
+import config from "@server/lib/config";
 
 const paramsSchema = z
     .object({
-        orgId: z.string(),
         idpId: z.coerce.number()
+    })
+    .strict();
+
+const bodySchema = z
+    .object({
+        redirectUrl: z.string()
     })
     .strict();
 
@@ -39,20 +46,25 @@ export async function generateOidcUrl(
             );
         }
 
-        const { orgId, idpId } = parsedParams.data;
+        const { idpId } = parsedParams.data;
+
+        const parsedBody = bodySchema.safeParse(req.body);
+        if (!parsedBody.success) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    fromError(parsedBody.error).toString()
+                )
+            );
+        }
+
+        const { redirectUrl: postAuthRedirectUrl } = parsedBody.data;
 
         const [existingIdp] = await db
             .select()
             .from(idp)
-            .innerJoin(idpOrg, eq(idp.idpId, idpOrg.idpId))
             .innerJoin(idpOidcConfig, eq(idpOidcConfig.idpId, idp.idpId))
-            .where(
-                and(
-                    eq(idpOrg.orgId, orgId),
-                    eq(idp.type, "oidc"),
-                    eq(idp.idpId, idpId)
-                )
-            );
+            .where(and(eq(idp.type, "oidc"), eq(idp.idpId, idpId)));
 
         if (!existingIdp) {
             return next(
@@ -65,7 +77,7 @@ export async function generateOidcUrl(
 
         const parsedScopes = JSON.parse(existingIdp.idpOidcConfig.scopes);
 
-        const redirectUrl = generateOidcRedirectUrl(orgId, idpId);
+        const redirectUrl = generateOidcRedirectUrl(idpId);
         const client = new arctic.OAuth2Client(
             existingIdp.idpOidcConfig.clientId,
             existingIdp.idpOidcConfig.clientSecret,
@@ -82,15 +94,16 @@ export async function generateOidcUrl(
             parsedScopes
         );
 
-        res.cookie("oidc_state", state, {
-            path: "/",
-            httpOnly: true,
-            secure: req.protocol === "https",
-            expires: new Date(Date.now() + 60 * 10 * 1000),
-            sameSite: "lax"
-        });
+        const stateJwt = jsonwebtoken.sign(
+            {
+                redirectUrl: postAuthRedirectUrl, // TODO: validate that this is safe
+                state,
+                codeVerifier
+            },
+            config.getRawConfig().server.secret
+        );
 
-        res.cookie(`oidc_code_verifier`, codeVerifier, {
+        res.cookie("p_oidc_state", stateJwt, {
             path: "/",
             httpOnly: true,
             secure: req.protocol === "https",

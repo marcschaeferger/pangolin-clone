@@ -8,6 +8,7 @@ import { eq } from "drizzle-orm";
 import moment from "moment";
 import { fromError } from "zod-validation-error";
 import { passwordSchema } from "@server/auth/passwordSchema";
+import { UserType } from "@server/types/UserTypes";
 
 export async function setupServerAdmin() {
     const {
@@ -34,7 +35,7 @@ export async function setupServerAdmin() {
             if (existing) {
                 const passwordChanged = !(await verifyPassword(
                     password,
-                    existing.passwordHash
+                    existing.passwordHash!
                 ));
 
                 if (passwordChanged) {
@@ -65,6 +66,8 @@ export async function setupServerAdmin() {
                 await db.insert(users).values({
                     userId: userId,
                     email: email,
+                    type: UserType.Internal,
+                    username: email,
                     passwordHash,
                     dateCreated: moment().toISOString(),
                     serverAdmin: true,

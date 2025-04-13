@@ -45,6 +45,7 @@ import { SwitchInput } from "@app/components/SwitchInput";
 import { InfoPopup } from "@app/components/ui/info-popup";
 import { Tag, TagInput } from "@app/components/tags/tag-input";
 import { useRouter } from "next/navigation";
+import { UserType } from "@server/types/UserTypes";
 
 const UsersRolesFormSchema = z.object({
     roles: z.array(
@@ -175,7 +176,7 @@ export default function ResourceAuthenticationPage() {
                 setAllUsers(
                     usersResponse.data.data.users.map((user) => ({
                         id: user.id.toString(),
-                        text: user.email
+                        text: `${user.email || user.username}${user.type !== UserType.Internal ? ` (${user.idpName})` : ""}`
                     }))
                 );
 
@@ -183,7 +184,7 @@ export default function ResourceAuthenticationPage() {
                     "users",
                     resourceUsersResponse.data.data.users.map((i) => ({
                         id: i.userId.toString(),
-                        text: i.email
+                        text: `${i.email || i.username}${i.type !== UserType.Internal ? ` (${i.idpName})` : ""}`
                     }))
                 );
 

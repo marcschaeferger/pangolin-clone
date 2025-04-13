@@ -12,8 +12,7 @@ export default async function Page(props: {
     const searchParams = await props.searchParams;
 
     const allCookies = await cookies();
-    const stateCookie = allCookies.get("oidc_state")?.value;
-    const verifier = allCookies.get("oidc_code_verifier")?.value;
+    const stateCookie = allCookies.get("p_oidc_state")?.value;
 
     return (
         <>
@@ -21,9 +20,8 @@ export default async function Page(props: {
                 orgId={params.orgId}
                 idpId={params.idpId}
                 code={searchParams.code}
-                storedState={stateCookie}
                 expectedState={searchParams.state}
-                verifier={verifier}
+                stateCookie={stateCookie}
             />
         </>
     );

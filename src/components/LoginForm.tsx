@@ -24,8 +24,8 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LoginResponse } from "@server/routers/auth";
 import { useRouter } from "next/navigation";
-import { AxiosResponse } from "axios";
-import { formatAxiosError } from "@app/lib/api";;
+import { AxiosResponse, AxiosResponse } from "axios";
+import { formatAxiosError } from "@app/lib/api";
 import { LockIcon } from "lucide-react";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
@@ -37,7 +37,8 @@ import {
 } from "./ui/input-otp";
 import Link from "next/link";
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
-import Image from 'next/image'
+import Image from "next/image";
+import { GenerateOidcUrlResponse } from "@server/routers/idp";
 
 type LoginFormProps = {
     redirect?: string;
@@ -130,60 +131,93 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
         setLoading(false);
     }
 
+    async function loginWithIdp(idpId: number) {
+        try {
+            const res = await api.post<AxiosResponse<GenerateOidcUrlResponse>>(
+                `/auth/idp/${idpId}/oidc/generate-url`,
+                {
+                    redirectUrl: redirect || "/" // this is the post auth redirect url
+                }
+            );
+
+            console.log(res);
+
+            if (!res) {
+                setError("An error occurred while logging in");
+                return;
+            }
+
+            const data = res.data.data;
+            window.location.href = data.redirectUrl;
+        } catch (e) {
+            console.error(formatAxiosError(e));
+        }
+    }
+
     return (
         <div className="space-y-4">
             {!mfaRequested && (
-                <Form {...form}>
-                    <form
-                        onSubmit={form.handleSubmit(onSubmit)}
-                        className="space-y-4"
-                        id="form"
-                    >
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Email</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <div className="space-y-4">
+                <>
+                    <Form {...form}>
+                        <form
+                            onSubmit={form.handleSubmit(onSubmit)}
+                            className="space-y-4"
+                            id="form"
+                        >
                             <FormField
                                 control={form.control}
-                                name="password"
+                                name="email"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Password</FormLabel>
+                                        <FormLabel>Email</FormLabel>
                                         <FormControl>
-                                            <Input
-                                                type="password"
-                                                {...field}
-                                            />
+                                            <Input {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
 
-                            <div className="text-center">
-                                <Link
-                                    href={`/auth/reset-password${form.getValues().email ? `?email=${form.getValues().email}` : ""}`}
-                                    className="text-sm text-muted-foreground"
-                                >
-                                    Forgot your password?
-                                </Link>
+                            <div className="space-y-4">
+                                <FormField
+                                    control={form.control}
+                                    name="password"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Password</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="password"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <div className="text-center">
+                                    <Link
+                                        href={`/auth/reset-password${form.getValues().email ? `?email=${form.getValues().email}` : ""}`}
+                                        className="text-sm text-muted-foreground"
+                                    >
+                                        Forgot your password?
+                                    </Link>
+                                </div>
                             </div>
-                        </div>
-                    </form>
-                </Form>
+                        </form>
+                    </Form>
+
+                    <Button
+                        type="button"
+                        className="w-full"
+                        onClick={() => {
+                            loginWithIdp(1);
+                        }}
+                    >
+                        OIDC Login
+                    </Button>
+                </>
             )}
 
             {mfaRequested && (
@@ -193,7 +227,8 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
                             Two-Factor Authentication
                         </h3>
                         <p className="text-sm text-muted-foreground">
-                            Enter the code from your authenticator app or one of your single-use backup codes.
+                            Enter the code from your authenticator app or one of
+                            your single-use backup codes.
                         </p>
                     </div>
                     <Form {...mfaForm}>

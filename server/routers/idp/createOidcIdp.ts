@@ -8,27 +8,20 @@ import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { OpenAPITags, registry } from "@server/openApi";
 import { idp, idpOidcConfig, idpOrg, orgs } from "@server/db/schemas";
-import { eq } from "drizzle-orm";
-import { generateOidcUrl } from "./generateOidcUrl";
 import { generateOidcRedirectUrl } from "@server/lib/idp/generateRedirectUrl";
 
-const paramsSchema = z
-    .object({
-        orgId: z.string()
-    })
-    .strict();
+const paramsSchema = z.object({}).strict();
 
 const bodySchema = z
     .object({
+        name: z.string().nonempty(),
         clientId: z.string().nonempty(),
         clientSecret: z.string().nonempty(),
         authUrl: z.string().url(),
         tokenUrl: z.string().url(),
-        autoProvision: z.boolean(),
         identifierPath: z.string().nonempty(),
         emailPath: z.string().optional(),
         namePath: z.string().optional(),
-        roleMapping: z.string().optional(),
         scopes: z.array(z.string().nonempty())
     })
     .strict();
@@ -44,7 +37,6 @@ registry.registerPath({
     description: "Create an OIDC IdP for an organization.",
     tags: [OpenAPITags.Org, OpenAPITags.Idp],
     request: {
-        params: paramsSchema,
         body: {
             content: {
                 "application/json": {
@@ -62,16 +54,6 @@ export async function createOidcIdp(
     next: NextFunction
 ): Promise<any> {
     try {
-        const parsedParams = paramsSchema.safeParse(req.params);
-        if (!parsedParams.success) {
-            return next(
-                createHttpError(
-                    HttpCode.BAD_REQUEST,
-                    fromError(parsedParams.error).toString()
-                )
-            );
-        }
-
         const parsedBody = bodySchema.safeParse(req.body);
         if (!parsedBody.success) {
             return next(
@@ -82,8 +64,6 @@ export async function createOidcIdp(
             );
         }
 
-        const { orgId } = parsedParams.data;
-
         const {
             clientId,
             clientSecret,
@@ -93,24 +73,15 @@ export async function createOidcIdp(
             identifierPath,
             emailPath,
             namePath,
-            roleMapping,
-            autoProvision
+            name
         } = parsedBody.data;
-
-        // Check if the org exists
-        const [org] = await db.select().from(orgs).where(eq(orgs.orgId, orgId));
-
-        if (!org) {
-            return next(
-                createHttpError(HttpCode.NOT_FOUND, "Organization not found")
-            );
-        }
 
         let idpId: number | undefined;
         await db.transaction(async (trx) => {
             const [idpRes] = await trx
                 .insert(idp)
                 .values({
+                    name,
                     type: "oidc"
                 })
                 .returning();
@@ -123,21 +94,15 @@ export async function createOidcIdp(
                 clientSecret,
                 authUrl,
                 tokenUrl,
-                autoProvision,
+                autoProvision: true,
                 scopes: JSON.stringify(scopes),
                 identifierPath,
                 emailPath,
-                namePath,
-                roleMapping
-            });
-
-            await trx.insert(idpOrg).values({
-                idpId: idpRes.idpId,
-                orgId
+                namePath
             });
         });
 
-        const redirectUrl = generateOidcRedirectUrl(orgId, idpId as number);
+        const redirectUrl = generateOidcRedirectUrl(idpId as number);
 
         return response<CreateIdpResponse>(res, {
             data: {

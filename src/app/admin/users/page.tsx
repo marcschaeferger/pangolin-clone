@@ -27,6 +27,11 @@ export default async function UsersPage(props: PageProps) {
         return {
             id: row.id,
             email: row.email,
+            name: row.name,
+            username: row.username,
+            type: row.type,
+            idpId: row.idpId,
+            idpName: row.idpName || "Internal",
             dateCreated: row.dateCreated,
             serverAdmin: row.serverAdmin
         };

@@ -16,6 +16,7 @@ import { fromError } from "zod-validation-error";
 import { sendEmail } from "@server/emails";
 import SendInviteLink from "@server/emails/templates/SendInviteLink";
 import { OpenAPITags, registry } from "@server/openApi";
+import { UserType } from "@server/types/UserTypes";
 
 const regenerateTracker = new NodeCache({ stdTTL: 3600, checkperiod: 600 });
 
@@ -115,7 +116,13 @@ export async function inviteUser(
             .select()
             .from(users)
             .innerJoin(userOrgs, eq(users.userId, userOrgs.userId))
-            .where(and(eq(users.email, email), eq(userOrgs.orgId, orgId)))
+            .where(
+                and(
+                    eq(users.email, email),
+                    eq(userOrgs.orgId, orgId),
+                    eq(users.type, UserType.Internal)
+                )
+            )
             .limit(1);
 
         if (existingUser.length) {
@@ -190,7 +197,7 @@ export async function inviteUser(
                         inviteLink,
                         expiresInDays: (validHours / 24).toString(),
                         orgName: org[0].name || orgId,
-                        inviterName: req.user?.email
+                        inviterName: req.user?.email || req.user?.username
                     }),
                     {
                         to: email,
@@ -242,7 +249,7 @@ export async function inviteUser(
                     inviteLink,
                     expiresInDays: (validHours / 24).toString(),
                     orgName: org[0].name || orgId,
-                    inviterName: req.user?.email
+                    inviterName: req.user?.email || req.user?.username
                 }),
                 {
                     to: email,

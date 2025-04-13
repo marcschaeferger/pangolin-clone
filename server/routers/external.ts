@@ -495,9 +495,9 @@ authenticated.delete(
 // );
 
 authenticated.put(
-    "/org/:orgId/idp/oidc",
-    verifyOrgAccess,
-    verifyUserHasAction(ActionsEnum.createIdp),
+    "/idp/oidc",
+    verifyUserIsServerAdmin,
+    // verifyUserHasAction(ActionsEnum.createIdp),
     idp.createOidcIdp
 )
 
@@ -595,11 +595,11 @@ authRouter.post(
 );
 
 authRouter.post(
-    "/org/:orgId/idp/:idpId/oidc/generate-url",
+    "/idp/:idpId/oidc/generate-url",
     idp.generateOidcUrl
 )
 
 authRouter.post(
-    "/org/:orgId/idp/:idpId/oidc/validate-callback",
+    "/idp/:idpId/oidc/validate-callback",
     idp.validateOidcCallback
 )

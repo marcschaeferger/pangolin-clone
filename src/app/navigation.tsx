@@ -35,7 +35,13 @@ export const orgNavItems: SidebarNavItem[] = [
         children: [
             {
                 title: "Users",
-                href: "/{orgId}/settings/access/users"
+                href: "/{orgId}/settings/access/users",
+                children: [
+                    {
+                        title: "Invitations",
+                        href: "/{orgId}/settings/access/invitations"
+                    }
+                ]
             },
             {
                 title: "Roles",
