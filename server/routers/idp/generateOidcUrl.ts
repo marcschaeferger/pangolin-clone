@@ -13,6 +13,7 @@ import { generateOidcRedirectUrl } from "@server/lib/idp/generateRedirectUrl";
 import cookie from "cookie";
 import jsonwebtoken from "jsonwebtoken";
 import config from "@server/lib/config";
+import { decrypt } from "@server/lib/crypto";
 
 const paramsSchema = z
     .object({
@@ -77,10 +78,21 @@ export async function generateOidcUrl(
 
         const parsedScopes = JSON.parse(existingIdp.idpOidcConfig.scopes);
 
+        const key = config.getRawConfig().server.secret;
+
+        const decryptedClientId = decrypt(
+            existingIdp.idpOidcConfig.clientId,
+            key
+        );
+        const decryptedClientSecret = decrypt(
+            existingIdp.idpOidcConfig.clientSecret,
+            key
+        );
+
         const redirectUrl = generateOidcRedirectUrl(idpId);
         const client = new arctic.OAuth2Client(
-            existingIdp.idpOidcConfig.clientId,
-            existingIdp.idpOidcConfig.clientSecret,
+            decryptedClientId,
+            decryptedClientSecret,
             redirectUrl
         );
 

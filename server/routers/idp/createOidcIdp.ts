@@ -9,6 +9,8 @@ import { fromError } from "zod-validation-error";
 import { OpenAPITags, registry } from "@server/openApi";
 import { idp, idpOidcConfig, idpOrg, orgs } from "@server/db/schemas";
 import { generateOidcRedirectUrl } from "@server/lib/idp/generateRedirectUrl";
+import { encrypt } from "@server/lib/crypto";
+import config from "@server/lib/config";
 
 const paramsSchema = z.object({}).strict();
 
@@ -22,7 +24,8 @@ const bodySchema = z
         identifierPath: z.string().nonempty(),
         emailPath: z.string().optional(),
         namePath: z.string().optional(),
-        scopes: z.array(z.string().nonempty())
+        scopes: z.array(z.string().nonempty()),
+        autoProvision: z.boolean().optional()
     })
     .strict();
 
@@ -73,8 +76,14 @@ export async function createOidcIdp(
             identifierPath,
             emailPath,
             namePath,
-            name
+            name,
+            autoProvision
         } = parsedBody.data;
+
+        const key = config.getRawConfig().server.secret;
+
+        const encryptedSecret = encrypt(clientSecret, key);
+        const encryptedClientId = encrypt(clientId, key);
 
         let idpId: number | undefined;
         await db.transaction(async (trx) => {
@@ -90,11 +99,11 @@ export async function createOidcIdp(
 
             await trx.insert(idpOidcConfig).values({
                 idpId: idpRes.idpId,
-                clientId,
-                clientSecret,
+                clientId: encryptedClientId,
+                clientSecret: encryptedSecret,
                 authUrl,
                 tokenUrl,
-                autoProvision: true,
+                autoProvision,
                 scopes: JSON.stringify(scopes),
                 identifierPath,
                 emailPath,

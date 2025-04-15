@@ -490,7 +490,7 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
                                         className={`${numMethods <= 1 ? "mt-0" : ""}`}
                                     >
                                         <LoginForm
-                                            redirect={`/auth/resource/${props.resource.id}`}
+                                            redirect={props.redirect}
                                             onLogin={async () =>
                                                 await handleSSOAuth()
                                             }

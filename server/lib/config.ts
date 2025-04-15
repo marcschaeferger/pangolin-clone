@@ -92,7 +92,18 @@ const configSchema = z.object({
             })
             .optional(),
         trust_proxy: z.boolean().optional().default(true),
-        secret: z.string()
+        secret: z
+            .string()
+            .optional()
+            .transform(getEnvOrYaml("SERVER_SECRET"))
+            .pipe(
+                z
+                    .string()
+                    .min(
+                        32,
+                        "SERVER_SECRET must be at least 32 characters long"
+                    )
+            )
     }),
     traefik: z.object({
         http_entrypoint: z.string(),

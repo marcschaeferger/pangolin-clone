@@ -24,7 +24,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LoginResponse } from "@server/routers/auth";
 import { useRouter } from "next/navigation";
-import { AxiosResponse, AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
 import { formatAxiosError } from "@app/lib/api";
 import { LockIcon } from "lucide-react";
 import { createApiClient } from "@app/lib/api";
@@ -136,7 +136,7 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
             const res = await api.post<AxiosResponse<GenerateOidcUrlResponse>>(
                 `/auth/idp/${idpId}/oidc/generate-url`,
                 {
-                    redirectUrl: redirect || "/" // this is the post auth redirect url
+                    redirectUrl: redirect || "/"
                 }
             );
 

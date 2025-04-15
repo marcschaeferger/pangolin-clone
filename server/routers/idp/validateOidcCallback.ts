@@ -28,6 +28,7 @@ import {
     generateSessionToken,
     serializeSessionCookie
 } from "@server/auth/sessions/app";
+import { decrypt } from "@server/lib/crypto";
 
 const paramsSchema = z
     .object({
@@ -90,10 +91,21 @@ export async function validateOidcCallback(
             );
         }
 
+        const key = config.getRawConfig().server.secret;
+
+        const decryptedClientId = decrypt(
+            existingIdp.idpOidcConfig.clientId,
+            key
+        );
+        const decryptedClientSecret = decrypt(
+            existingIdp.idpOidcConfig.clientSecret,
+            key
+        );
+
         const redirectUrl = generateOidcRedirectUrl(existingIdp.idp.idpId);
         const client = new arctic.OAuth2Client(
-            existingIdp.idpOidcConfig.clientId,
-            existingIdp.idpOidcConfig.clientSecret,
+            decryptedClientId,
+            decryptedClientSecret,
             redirectUrl
         );
 

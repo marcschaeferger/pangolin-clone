@@ -6,6 +6,15 @@ import { ValidateOidcUrlCallbackResponse } from "@server/routers/idp";
 import { AxiosResponse } from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardContent,
+    CardDescription
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 
 type ValidateOidcTokenParams = {
     orgId: string;
@@ -13,6 +22,7 @@ type ValidateOidcTokenParams = {
     code: string | undefined;
     expectedState: string | undefined;
     stateCookie: string | undefined;
+    idp: {name: string};
 };
 
 export default function ValidateOidcToken(props: ValidateOidcTokenParams) {
@@ -50,6 +60,9 @@ export default function ValidateOidcToken(props: ValidateOidcTokenParams) {
                     router.push("/");
                 }
 
+                setLoading(false);
+                await new Promise((resolve) => setTimeout(resolve, 100));
+
                 if (redirectUrl.startsWith("http")) {
                     window.location.href = res.data.data.redirectUrl; // TODO: validate this to make sure it's safe
                 } else {
@@ -67,11 +80,36 @@ export default function ValidateOidcToken(props: ValidateOidcTokenParams) {
     }, []);
 
     return (
-        <>
-            <h1>Validating OIDC Token...</h1>
-            {loading && <p>Loading...</p>}
-            {!loading && <p>Token validated successfully!</p>}
-            {error && <p>Error: {error}</p>}
-        </>
+        <div className="flex items-center justify-center min-h-screen">
+            <Card className="w-full max-w-md">
+                <CardHeader>
+                    <CardTitle>Connecting to {props.idp.name}</CardTitle>
+                    <CardDescription>Validating your identity</CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col items-center space-y-4">
+                    {loading && (
+                        <div className="flex items-center space-x-2">
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                            <span>Connecting...</span>
+                        </div>
+                    )}
+                    {!loading && !error && (
+                        <div className="flex items-center space-x-2 text-green-600">
+                            <CheckCircle2 className="h-5 w-5" />
+                            <span>Connected</span>
+                        </div>
+                    )}
+                    {error && (
+                        <Alert variant="destructive" className="w-full">
+                            <AlertCircle className="h-5 w-5" />
+                            <AlertDescription className="flex flex-col space-y-2">
+                                <span>There was a problem connecting to {props.idp.name}. Please contact your administrator.</span>
+                                <span className="text-xs text-muted-foreground">{error}</span>
+                            </AlertDescription>
+                        </Alert>
+                    )}
+                </CardContent>
+            </Card>
+        </div>
     );
 }
