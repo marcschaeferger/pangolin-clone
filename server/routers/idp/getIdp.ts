@@ -9,6 +9,8 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { OpenAPITags, registry } from "@server/openApi";
+import config from "@server/lib/config";
+import { decrypt } from "@server/lib/crypto";
 
 const paramsSchema = z
     .object({
@@ -61,6 +63,22 @@ export async function getIdp(
 
         if (!idpRes) {
             return next(createHttpError(HttpCode.NOT_FOUND, "Idp not found"));
+        }
+
+        const key = config.getRawConfig().server.secret;
+
+        if (idpRes.idp.type === "oidc") {
+            const clientSecret = idpRes.idpOidcConfig!.clientSecret;
+            const clientId = idpRes.idpOidcConfig!.clientId;
+
+            idpRes.idpOidcConfig!.clientSecret = decrypt(
+                clientSecret,
+                key
+            );
+            idpRes.idpOidcConfig!.clientId = decrypt(
+                clientId,
+                key
+            );
         }
 
         return response<GetIdpResponse>(res, {

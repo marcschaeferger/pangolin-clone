@@ -5,7 +5,7 @@ import { idp, roles, userOrgs, users } from "@server/db/schemas";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
-import { sql } from "drizzle-orm";
+import { and, sql } from "drizzle-orm";
 import logger from "@server/logger";
 import { fromZodError } from "zod-validation-error";
 import { OpenAPITags, registry } from "@server/openApi";
@@ -114,7 +114,8 @@ export async function listUsers(
 
         const [{ count }] = await db
             .select({ count: sql<number>`count(*)` })
-            .from(users);
+            .from(users)
+            .where(eq(userOrgs.orgId, orgId));
 
         return response<ListUsersResponse>(res, {
             data: {

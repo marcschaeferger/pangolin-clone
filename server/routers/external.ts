@@ -519,6 +519,24 @@ authenticated.get(
     idp.getIdp
 );
 
+authenticated.put(
+    "/idp/:idpId/org/:orgId",
+    verifyUserIsServerAdmin,
+    idp.createIdpOrgPolicy
+);
+
+authenticated.delete(
+    "/idp/:idpId/org/:orgId",
+    verifyUserIsServerAdmin,
+    idp.deleteIdpOrgPolicy
+);
+
+authenticated.get(
+    "/idp/:idpId/org",
+    verifyUserIsServerAdmin,
+    idp.listIdpOrgPolicies
+);
+
 // Auth routes
 export const authRouter = Router();
 unauthenticated.use("/auth", authRouter);

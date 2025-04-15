@@ -6,20 +6,21 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
-import { idp, idpOidcConfig, idpOrg } from "@server/db/schemas";
-import { eq } from "drizzle-orm";
+import { idp, idpOrg } from "@server/db/schemas";
+import { eq, and } from "drizzle-orm";
 import { OpenAPITags, registry } from "@server/openApi";
 
 const paramsSchema = z
     .object({
-        idpId: z.coerce.number()
+        idpId: z.coerce.number(),
+        orgId: z.string()
     })
     .strict();
 
 registry.registerPath({
     method: "delete",
-    path: "/idp/{idpId}",
-    description: "Delete IDP.",
+    path: "/idp/{idpId}/org/{orgId}",
+    description: "Create an OIDC IdP for an organization.",
     tags: [OpenAPITags.Idp],
     request: {
         params: paramsSchema
@@ -27,7 +28,7 @@ registry.registerPath({
     responses: {}
 });
 
-export async function deleteIdp(
+export async function deleteIdpOrgPolicy(
     req: Request,
     res: Response,
     next: NextFunction
@@ -43,46 +44,41 @@ export async function deleteIdp(
             );
         }
 
-        const { idpId } = parsedParams.data;
+        const { idpId, orgId } = parsedParams.data;
 
-        // Check if IDP exists
-        const [existingIdp] = await db
+        const [existing] = await db
             .select()
             .from(idp)
-            .where(eq(idp.idpId, idpId));
+            .leftJoin(idpOrg, eq(idpOrg.orgId, orgId))
+            .where(and(eq(idp.idpId, idpId), eq(idpOrg.orgId, orgId)));
 
-        if (!existingIdp) {
+        if (!existing.idp) {
             return next(
                 createHttpError(
-                    HttpCode.NOT_FOUND,
-                    "IdP not found"
+                    HttpCode.BAD_REQUEST,
+                    "An IDP with this ID does not exist."
                 )
             );
         }
 
-        // Delete the IDP and its related records in a transaction
-        await db.transaction(async (trx) => {
-            // Delete OIDC config if it exists
-            await trx
-                .delete(idpOidcConfig)
-                .where(eq(idpOidcConfig.idpId, idpId));
+        if (!existing.idpOrg) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    "A policy for this IDP and org does not exist."
+                )
+            );
+        }
 
-            // Delete IDP-org mappings
-            await trx
-                .delete(idpOrg)
-                .where(eq(idpOrg.idpId, idpId));
-
-            // Delete the IDP itself
-            await trx
-                .delete(idp)
-                .where(eq(idp.idpId, idpId));
-        });
+        await db
+            .delete(idpOrg)
+            .where(and(eq(idpOrg.idpId, idpId), eq(idpOrg.orgId, orgId)));
 
         return response<null>(res, {
             data: null,
             success: true,
             error: false,
-            message: "IdP deleted successfully",
+            message: "Policy deleted successfully",
             status: HttpCode.OK
         });
     } catch (error) {
