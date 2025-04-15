@@ -11,6 +11,9 @@ export default async function migration() {
             trx.run(
                 sql`ALTER TABLE 'resources' ADD 'tlsServerName' text DEFAULT '' NOT NULL;`
             );
+            trx.run(
+                sql`ALTER TABLE 'resources' ADD 'setHostHeader' text DEFAULT '' NOT NULL;`
+            );
         });
 
         console.log(`Migrated database schema`);

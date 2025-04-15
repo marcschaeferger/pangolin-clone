@@ -42,7 +42,8 @@ const updateHttpResourceBodySchema = z
         applyRules: z.boolean().optional(),
         domainId: z.string().optional(),
         enabled: z.boolean().optional(),
-        tlsServerName: z.string().optional()
+        tlsServerName: z.string().optional(),
+        setHostHeader: z.string().optional()
     })
     .strict()
     .refine((data) => Object.keys(data).length > 0, {
@@ -78,6 +79,15 @@ const updateHttpResourceBodySchema = z
             return true;
         },
         { message: "Invalid TLS Server Name. Use domain name format, or save empty to remove the TLS Server Name." }
+    )
+    .refine(
+        (data) => {
+            if (data.setHostHeader) {
+                return tlsNameSchema.safeParse(data.setHostHeader).success;
+            }
+            return true;
+        },
+        { message: "Invalid custom Host Header value. Use domain name format, or save empty to unset custom Host Header." }
     );
 
 export type UpdateResourceResponse = Resource;

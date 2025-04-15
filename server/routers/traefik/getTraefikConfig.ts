@@ -41,7 +41,8 @@ export async function traefikConfigProvider(
                         orgId: orgs.orgId
                     },
                     enabled: resources.enabled,
-                    tlsServerName: resources.tlsServerName
+                    tlsServerName: resources.tlsServerName,
+                    setHostHeader: resources.setHostHeader
                 })
                 .from(resources)
                 .innerJoin(sites, eq(sites.siteId, resources.siteId))
@@ -141,6 +142,7 @@ export async function traefikConfigProvider(
             const serviceName = `${resource.resourceId}-service`;
             const fullDomain = `${resource.fullDomain}`;
             const transportName = `${resource.resourceId}-transport`;
+            const hostHeaderMiddlewareName = `${resource.resourceId}-host-header-middleware`;
 
             if (!resource.enabled) {
                 continue;
@@ -293,6 +295,28 @@ export async function traefikConfigProvider(
                         insecureSkipVerify: true
                     };
                     config_output.http.services![serviceName].loadBalancer.serversTransport = transportName;
+                }
+
+                // Add the host header middleware
+                if (resource.setHostHeader) {
+                    if (!config_output.http.middlewares) {
+                        config_output.http.middlewares = {};
+                    }
+                    config_output.http.middlewares[hostHeaderMiddlewareName] =
+                        {
+                            headers: {
+                                customRequestHeaders: {
+                                    Host: resource.setHostHeader
+                                }
+                            }
+                        };
+                    if (!config_output.http.routers![routerName].middlewares) {
+                        config_output.http.routers![routerName].middlewares = [];
+                    }
+                    config_output.http.routers![routerName].middlewares = [
+                        ...config_output.http.routers![routerName].middlewares,
+                        hostHeaderMiddlewareName
+                    ];
                 }
 
             } else {

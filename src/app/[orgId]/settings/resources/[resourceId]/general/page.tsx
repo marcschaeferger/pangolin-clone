@@ -73,8 +73,7 @@ const GeneralFormSchema = z
         proxyPort: z.number().optional(),
         http: z.boolean(),
         isBaseDomain: z.boolean().optional(),
-        domainId: z.string().optional(),
-        tlsServerName: z.string().optional() 
+        domainId: z.string().optional()
     })
     .refine(
         (data) => {
@@ -104,7 +103,18 @@ const GeneralFormSchema = z
             message: "Invalid subdomain",
             path: ["subdomain"]
         }
-    )
+    );
+
+const TransferFormSchema = z.object({
+    siteId: z.number()
+});
+
+const AdvancedFormSchema = z
+    .object({
+        http: z.boolean(),
+        tlsServerName: z.string().optional(),
+        setHostHeader: z.string().optional()
+    })
     .refine(
         (data) => {
             if (data.tlsServerName) {
@@ -116,14 +126,23 @@ const GeneralFormSchema = z
             message: "Invalid TLS Server Name. Use domain name format, or save empty to remove the TLS Server Name.",
             path: ["tlsServerName"]
         }
+    )
+    .refine(
+        (data) => {
+            if (data.setHostHeader) {
+                return tlsNameSchema.safeParse(data.setHostHeader).success;
+            }
+            return true;
+        },
+        { 
+            message: "Invalid custom Host Header value. Use domain name format, or save empty to unset the custom Host Header",
+            path: ["tlsServerName"]
+        }
     );
-
-const TransferFormSchema = z.object({
-    siteId: z.number()
-});
 
 type GeneralFormValues = z.infer<typeof GeneralFormSchema>;
 type TransferFormValues = z.infer<typeof TransferFormSchema>;
+type AdvancedFormValues = z.infer<typeof AdvancedFormSchema>;
 
 export default function GeneralForm() {
     const [formKey, setFormKey] = useState(0);
@@ -159,8 +178,17 @@ export default function GeneralForm() {
             proxyPort: resource.proxyPort ? resource.proxyPort : undefined,
             http: resource.http,
             isBaseDomain: resource.isBaseDomain ? true : false,
-            domainId: resource.domainId || undefined,
-            tlsServerName: resource.http ? resource.tlsServerName || "" : undefined
+            domainId: resource.domainId || undefined
+        },
+        mode: "onChange"
+    });
+
+    const advancedForm = useForm<AdvancedFormValues>({
+        resolver: zodResolver(AdvancedFormSchema),
+        defaultValues: {
+            http: resource.http,
+            tlsServerName: resource.http ? resource.tlsServerName || "" : undefined,
+            setHostHeader: resource.http ? resource.setHostHeader || "" : undefined
         },
         mode: "onChange"
     });
@@ -224,8 +252,7 @@ export default function GeneralForm() {
                     subdomain: data.http ? data.subdomain : undefined,
                     proxyPort: data.proxyPort,
                     isBaseDomain: data.http ? data.isBaseDomain : undefined,
-                    domainId: data.http ? data.domainId : undefined,
-                    tlsServerName: data.http ? data.tlsServerName : undefined
+                    domainId: data.http ? data.domainId : undefined
                 }
             )
             .catch((e) => {
@@ -252,8 +279,7 @@ export default function GeneralForm() {
                 subdomain: data.subdomain,
                 proxyPort: data.proxyPort,
                 isBaseDomain: data.isBaseDomain,
-                fullDomain: resource.fullDomain,
-                tlsServerName: data.tlsServerName
+                fullDomain: resource.fullDomain
             });
 
             router.refresh();
@@ -293,6 +319,46 @@ export default function GeneralForm() {
             });
         }
         setTransferLoading(false);
+    }
+
+    async function onSubmitAdvanced(data: AdvancedFormValues) {
+        setSaveLoading(true);
+
+        const res = await api
+            .post<AxiosResponse<UpdateResourceResponse>>(
+                `resource/${resource?.resourceId}`,
+                {
+                    tlsServerName: data.http ? data.tlsServerName : undefined,
+                    setHostHeader: data.http ? data.setHostHeader : undefined
+                }
+            )
+            .catch((e) => {
+                toast({
+                    variant: "destructive",
+                    title: "Failed to update resource",
+                    description: formatAxiosError(
+                        e,
+                        "An error occurred while updating the resource"
+                    )
+                });
+            });
+
+        if (res && res.status === 200) {
+            toast({
+                title: "Resource updated",
+                description: "The resource has been updated successfully"
+            });
+
+            const resource = res.data.data;
+
+            updateResource({
+                tlsServerName: data.tlsServerName,
+                setHostHeader: data.setHostHeader
+            });
+
+            router.refresh();
+        }
+        setSaveLoading(false);
     }
 
     async function toggleResourceEnabled(val: boolean) {
@@ -561,27 +627,7 @@ export default function GeneralForm() {
                                                         )}
                                                     />
                                                 )}
-                                                {/* New TLS Server Name Field */}
                                             </div>
-                                            <div className="w-fill space-y-2">
-                                                    <FormLabel>
-                                                        TLS Server Name (optional)
-                                                    </FormLabel>
-                                                    <FormField
-                                                        control={form.control}
-                                                        name="tlsServerName"
-                                                        render={({ field }) => (
-                                                            <FormItem>
-                                                                <FormControl>
-                                                                    <Input
-                                                                        {...field}
-                                                                    />
-                                                                </FormControl>
-                                                                <FormMessage />
-                                                            </FormItem>
-                                                        )}
-                                                    />
-                                                </div>
                                         </>
                                     )}
 
@@ -637,6 +683,81 @@ export default function GeneralForm() {
                     </SettingsSectionFooter>
                 </SettingsSection>
 
+        {resource.http && (
+            <>
+                <SettingsSection>
+                    <SettingsSectionHeader>
+                        <SettingsSectionTitle>Advanced</SettingsSectionTitle>
+                        <SettingsSectionDescription>
+                            Adjust advanced settings for the resource, like customize the Host Header or set a TLS Server Name for SNI based routing.
+                        </SettingsSectionDescription>
+                    </SettingsSectionHeader>
+                    <SettingsSectionBody>
+                        <SettingsSectionForm>
+                            <Form {...advancedForm}>
+                                <form
+                                    onSubmit={advancedForm.handleSubmit(onSubmitAdvanced)}
+                                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                                    id="advanced-settings-form"
+                                >
+                                            {/* New TLS Server Name Field */}
+                                            <div className="w-fill space-y-2">
+                                                    <FormLabel>
+                                                        TLS Server Name (optional)
+                                                    </FormLabel>
+                                                    <FormField
+                                                        control={advancedForm.control}
+                                                        name="tlsServerName"
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormControl>
+                                                                    <Input
+                                                                        {...field}
+                                                                    />
+                                                                </FormControl>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+                                                </div>
+                                                {/* New Custom Host Header Field */}
+                                                <div className="w-fill space-y-2">
+                                                    <FormLabel>
+                                                        Custom Host Header (optional)
+                                                    </FormLabel>
+                                                    <FormField
+                                                        control={advancedForm.control}
+                                                        name="setHostHeader"
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormControl>
+                                                                    <Input
+                                                                        {...field}
+                                                                    />
+                                                                </FormControl>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+                                                </div>
+                                </form>
+                            </Form>
+                        </SettingsSectionForm>                       
+                    </SettingsSectionBody>
+
+                    <SettingsSectionFooter>
+                        <Button
+                            type="submit"
+                            loading={saveLoading}
+                            disabled={saveLoading}
+                            form="advanced-settings-form"
+                        >
+                            Save Advanced Settings
+                        </Button>
+                    </SettingsSectionFooter>
+                </SettingsSection>
+            </>
+        )}
                 <SettingsSection>
                     <SettingsSectionHeader>
                         <SettingsSectionTitle>

@@ -69,7 +69,8 @@ function queryResources(
                 protocol: resources.protocol,
                 proxyPort: resources.proxyPort,
                 enabled: resources.enabled,
-                tlsServerName: resources.tlsServerName
+                tlsServerName: resources.tlsServerName,
+                setHostHeader: resources.setHostHeader
             })
             .from(resources)
             .leftJoin(sites, eq(resources.siteId, sites.siteId))
@@ -104,7 +105,8 @@ function queryResources(
                 protocol: resources.protocol,
                 proxyPort: resources.proxyPort,
                 enabled: resources.enabled,
-                tlsServerName: resources.tlsServerName
+                tlsServerName: resources.tlsServerName,
+                setHostHeader: resources.setHostHeader
             })
             .from(resources)
             .leftJoin(sites, eq(resources.siteId, sites.siteId))
