@@ -36,9 +36,9 @@ export type CreateIdpResponse = {
 
 registry.registerPath({
     method: "put",
-    path: "/org/{orgId}/idp/oidc",
-    description: "Create an OIDC IdP for an organization.",
-    tags: [OpenAPITags.Org, OpenAPITags.Idp],
+    path: "/idp/oidc",
+    description: "Create an OIDC IdP.",
+    tags: [OpenAPITags.Idp],
     request: {
         body: {
             content: {

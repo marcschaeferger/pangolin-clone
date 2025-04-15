@@ -88,8 +88,8 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                                                     Manage User
                                                 </DropdownMenuItem>
                                             </Link>
-                                            {userRow.username !==
-                                                user?.username && (
+                                            {`${userRow.username}-${userRow.idpId}` !==
+                                                `${user?.username}-${userRow.idpId}` && (
                                                 <DropdownMenuItem
                                                     onClick={() => {
                                                         setIsDeleteModalOpen(

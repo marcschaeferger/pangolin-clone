@@ -499,7 +499,25 @@ authenticated.put(
     verifyUserIsServerAdmin,
     // verifyUserHasAction(ActionsEnum.createIdp),
     idp.createOidcIdp
-)
+);
+
+authenticated.delete(
+    "/idp/:idpId",
+    verifyUserIsServerAdmin,
+    idp.deleteIdp
+);
+
+authenticated.get(
+    "/idp",
+    verifyUserIsServerAdmin,
+    idp.listIdps
+);
+
+authenticated.get(
+    "/idp/:idpId",
+    verifyUserIsServerAdmin,
+    idp.getIdp
+);
 
 // Auth routes
 export const authRouter = Router();
@@ -597,9 +615,9 @@ authRouter.post(
 authRouter.post(
     "/idp/:idpId/oidc/generate-url",
     idp.generateOidcUrl
-)
+);
 
 authRouter.post(
     "/idp/:idpId/oidc/validate-callback",
     idp.validateOidcCallback
-)
+);
