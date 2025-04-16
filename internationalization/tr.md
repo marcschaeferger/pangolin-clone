@@ -15,3 +15,18 @@
 | Enter your password                                      | Şifrenizi girin                                                                    | user login |
 | Forgot your password?                                    | Şifrenizi mi unuttunuz?                                                            | user login |
 | Log in                                                   | Giriş Yap                                                                          | user login |
+
+---
+
+## Login site
+
+| EN                    | TR                                                     | Notes       |
+| --------------------- | ------------------------------------------------------ | ----------- |
+| Welcome to Pangolin   | Pangolin'e Hoşgeldiniz                                 |             |
+| Log in to get started | Başlamak için giriş yapın                              |             |
+| Email                 | E-posta                                                |             |
+| Enter your email      | E-posta adresinizi girin                               | placeholder |
+| Password              | Şifre                                                  |             |
+| Enter your password   | Şifrenizi girin                                        | placeholder |
+| Forgot your password? | Şifrenizi mi unuttunuz?                                |             |
+| Log in                | Giriş Yap                                              |             |
