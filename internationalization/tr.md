@@ -187,3 +187,36 @@
 | This is the site that will be used in the dashboard.         | Kontrol panelinde kullanılacak sitedir.                                                         |               |
 | Create Resource                                              | Kaynak Oluştur                                                                                  |               |
 | Close                                                        | Kapat                                                                                           |               |
+
+---
+
+## Main “User & Roles”
+
+##### Content
+
+| EN                                                           | TR                                                                                         | Notes                         |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------ | ----------------------------- |
+| Manage User & Roles                                          | Kullanıcılar ve Rolleri Yönet                                                              |                               |
+| Invite users and add them to roles to manage access to your organization | Organizasyonunuza erişimi yönetmek için kullanıcıları davet edin ve rollere atayın |                               |
+| Users                                                        | Kullanıcılar                                                                               | sidebar item                  |
+| Roles                                                        | Roller                                                                                     | sidebar item                  |
+| **User tab**                                                 | **Kullanıcı Sekmesi**                                                                      |                               |
+| Search users                                                 | Kullanıcıları ara                                                                          | placeholder                   |
+| Invite User                                                  | Kullanıcı Davet Et                                                                         | addbutton                     |
+| Email                                                        | E-posta                                                                                    | table header                  |
+| Status                                                       | Durum                                                                                      | table header                  |
+| Role                                                         | Rol                                                                                        | table header                  |
+| Confirmed                                                    | Onaylandı                                                                                  | account status                |
+| Not confirmed (?)                                            | Onaylanmadı (?)                                                                            | account status                |
+| Owner                                                        | Sahip                                                                                      | role                          |
+| Admin                                                        | Yönetici                                                                                   | role                          |
+| Member                                                       | Üye                                                                                        | role                          |
+| **Roles Tab**                                                | **Roller Sekmesi**                                                                         |                               |
+| Search roles                                                 | Rolleri ara                                                                                | placeholder                   |
+| Add Role                                                     | Rol Ekle                                                                                   | addbutton                     |
+| Name                                                         | Ad                                                                                         | table header                  |
+| Description                                                  | Açıklama                                                                                   | table header                  |
+| Admin                                                        | Yönetici                                                                                   | role                          |
+| Member                                                       | Üye                                                                                        | role                          |
+| Admin role with the most permissions                         | En fazla yetkiye sahip yönetici rolü                                                       | admin role desc               |
+| Members can only view resources                              | Üyeler yalnızca kaynakları görüntüleyebilir                                                | member role desc              |
