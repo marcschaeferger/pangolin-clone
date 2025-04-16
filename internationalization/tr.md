@@ -70,3 +70,15 @@
 | User & Roles    | Kullanıcılar ve Roller          |       |
 | Shareable Links | Paylaşılabilir Linkler          |       |
 | General         | Genel                           |       |
+
+##### Footer
+
+| EN                        | TR                                               | Notes                |
+| ------------------------- | ------------------------------------------------ | -------------------- |
+| Page {number} of {number} | Sayfa {number} / {number}                        |                      |
+| Rows per page             | Sayfa başına satırlar                            |                      |
+| Pangolin                  | Pangolin                                         | Footer'da yer alır   |
+| Built by Fossorial        | Fossorial tarafından oluşturuldu                 | Footer'da yer alır   |
+| Open Source               | Açık Kaynak                                      | Footer'da yer alır   |
+| Documentation             | Dokümantasyon                                    | Footer'da yer alır   |
+| {version}                 | {version}                                        | Footer'da yer alır   |
