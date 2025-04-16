@@ -60,3 +60,13 @@
 | Create           | Oluştur                |       |
 | New Organization | Yeni Organizasyon      |       |
 | Organizations    | Organizasyonlar        |       |
+
+##### Navbar
+
+| EN              | TR                              | Notes |
+| --------------- | ------------------------------- | ----- |
+| Sites           | Siteler                         |       |
+| Resources       | Kaynaklar                       |       |
+| User & Roles    | Kullanıcılar ve Roller          |       |
+| Shareable Links | Paylaşılabilir Linkler          |       |
+| General         | Genel                           |       |
