@@ -290,3 +290,21 @@
 | Expiration time is how long the link will be usable and provide access to the resource. After this time, the link will no longer work, and users who used this link will lose access to the resource. | Bağlantının geçerlilik süresi, bağlantının ne kadar süreyle kullanılabilir olacağını ve kaynağa erişim sağlayacağını belirler. Bu sürenin sonunda bağlantı çalışmaz hale gelir ve bağlantıyı kullananlar kaynağa erişimini kaybeder. |                         |
 | Create Link                                                  | Bağlantı Oluştur                                                                                                       |                         |
 | Close                                                        | Kapat                                                                                                                  |                         |
+
+---
+
+## Main “General”
+
+| EN                                                           | TR                                                                                          | Notes        |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------- | ------------ |
+| General                                                      | Genel                                                                                       |              |
+| Configure your organization’s general settings               | Organizasyonunuzun genel ayarlarını yapılandırın                                            |              |
+| General                                                      | Genel                                                                                       | sidebar item |
+| Organization Settings                                        | Organizasyon Ayarları                                                                       |              |
+| Manage your organization details and configuration           | Organizasyonunuzun detaylarını ve yapılandırmasını yönetin                                  |              |
+| Name                                                         | Ad                                                                                          |              |
+| This is the display name of the org                          | Bu, organizasyonunuzun görüntülenecek adıdır.                                               |              |
+| Save Settings                                                | Ayarları Kaydet                                                                             |              |
+| Danger Zone                                                  | Tehlikeli Bölge                                                                             |              |
+| Once you delete this org, there is no going back. Please be certain. | Bu organizasyonu sildikten sonra geri dönüş yoktur. Lütfen emin olun.                       |              |
+| Delete Organization Data                                     | Organizasyon Verilerini Sil                                                                 |              |
