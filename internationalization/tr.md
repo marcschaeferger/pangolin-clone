@@ -99,3 +99,23 @@
 | Basic WireGuard<br>                                          | Temel WireGuard<br>                                                                                                        |       |
 | Compatible with all WireGuard clients<br>                    | Tüm WireGuard istemcileriyle uyumlu<br>                                                                                    |       |
 | Manual configuration required                                | Manuel yapılandırma gereklidir                                                                                             |       |
+
+##### Content
+
+| EN                                                        | TR                                                                          | Notes        |
+| --------------------------------------------------------- | --------------------------------------------------------------------------- | ------------ |
+| Manage Sites                                              | Siteleri Yönet                                                              |              |
+| Allow connectivity to your network through secure tunnels | Güvenli tüneller aracılığıyla ağınıza bağlantı sağlayın                     |              |
+| Search sites                                              | Siteleri ara                                                                | placeholder  |
+| Add Site                                                  | Site Ekle                                                                   |              |
+| Name                                                      | Ad                                                                          | Table Header |
+| Online                                                    | Çevrimiçi                                                                   | Table Header |
+| Site                                                      | Site                                                                        | Table Header |
+| Data In                                                   | Gelen Veri                                                                  | Table Header |
+| Data Out                                                  | Giden Veri                                                                  | Table Header |
+| Connection Type                                           | Bağlantı Türü                                                               | Table Header |
+| Online                                                    | Çevrimiçi                                                                   | Site state   |
+| Offline                                                   | Çevrimdışı                                                                  | Site state   |
+| Edit →                                                    | Düzenle →                                                                   |              |
+| View settings                                             | Ayarları Görüntüle                                                          | Popup        |
+| Delete                                                    | Sil                                                                         | Popup        |
