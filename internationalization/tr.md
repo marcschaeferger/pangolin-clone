@@ -220,3 +220,23 @@
 | Member                                                       | Üye                                                                                        | role                          |
 | Admin role with the most permissions                         | En fazla yetkiye sahip yönetici rolü                                                       | admin role desc               |
 | Members can only view resources                              | Üyeler yalnızca kaynakları görüntüleyebilir                                                | member role desc              |
+
+##### Invite User popup
+
+| EN                | TR                                                                      | Notes       |
+| ----------------- | ----------------------------------------------------------------------- | ----------- |
+| Invite User       | Kullanıcı Davet Et                                                      |             |
+| Email             | E-posta                                                                 |             |
+| Enter an email    | Bir e-posta adresi girin                                                | placeholder |
+| Role              | Rol                                                                     |             |
+| Select role       | Rol seçin                                                               | placeholder |
+| Gültig für        | Geçerlilik Süresi                                                       |             |
+| 1 day             | 1 gün                                                                   |             |
+| 2 days            | 2 gün                                                                   |             |
+| 3 days            | 3 gün                                                                   |             |
+| 4 days            | 4 gün                                                                   |             |
+| 5 days            | 5 gün                                                                   |             |
+| 6 days            | 6 gün                                                                   |             |
+| 7 days            | 7 gün                                                                   |             |
+| Create Invitation | Davetiye Oluştur                                                        |             |
+| Close             | Kapat                                                                   |             |
