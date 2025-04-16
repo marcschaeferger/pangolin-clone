@@ -169,3 +169,21 @@
 | Protected                                          | Korunan                                                       | authentication state |
 | Edit →                                             | Düzenle →                                                     |                      |
 | Add Resource                                       | Kaynak Ekle                                                   |                      |
+
+##### Add Resource Popup
+
+| EN                                                           | TR                                                                                              | Notes         |
+| ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- | ------------- |
+| Create Resource                                              | Kaynak Oluştur                                                                                  |               |
+| Create a new resource to proxy request to your app           | Uygulamanıza gelen istekleri yönlendirmek için yeni bir kaynak oluşturun                        |               |
+| Name                                                         | Ad                                                                                              |               |
+| My Resource                                                  | Kaynağım                                                                                        | name placeholder |
+| This is the name that will be displayed for this resource.   | Bu, kaynağın görüntülenecek adıdır.                                                             |               |
+| Subdomain                                                    | Alt alan adı                                                                                    |               |
+| Enter subdomain                                              | Alt alan adını girin                                                                            |               |
+| This is the fully qualified domain name that will be used to access the resource. | Kaynağa erişmek için kullanılacak tam nitelikli alan adıdır.               |               |
+| Site                                                         | Site                                                                                            |               |
+| Search site…                                                 | Site ara…                                                                                       | Site selector popup |
+| This is the site that will be used in the dashboard.         | Kontrol panelinde kullanılacak sitedir.                                                         |               |
+| Create Resource                                              | Kaynak Oluştur                                                                                  |               |
+| Close                                                        | Kapat                                                                                           |               |
