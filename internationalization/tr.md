@@ -139,3 +139,17 @@
 | I have copied the config                               | Yapılandırmayı kopyaladım                                                                   |             |
 | Create Site                                            | Site Oluştur                                                                                |             |
 | Close                                                  | Kapat                                                                                       |             |
+
+---
+
+## Main “Resources”
+
+##### “Hero” section
+
+| EN                                                           | TR                                                                                                                             | Notes |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ | ----- |
+| Resources                                                    | Kaynaklar                                                                                                                      |       |
+| Ressourcen sind Proxy-Server für Anwendungen, die in Ihrem privaten Netzwerk laufen. Erstellen Sie eine Ressource für jede HTTP- oder HTTPS-Anwendung in Ihrem privaten Netzwerk. Jede Ressource muss mit einer Website verbunden sein, um eine private und sichere Verbindung über den verschlüsselten WireGuard-Tunnel zu ermöglichen. | Kaynaklar, özel ağınızda çalışan uygulamalar için proxy sunucularıdır. Özel ağınızdaki her HTTP veya HTTPS uygulaması için bir kaynak oluşturun. Her kaynağın, şifrelenmiş WireGuard tüneli üzerinden özel ve güvenli bağlantı sağlamak üzere bir siteyle ilişkili olması gerekir. |       |
+| Secure connectivity with WireGuard encryption                | WireGuard şifrelemesiyle güvenli bağlantı                                                                                      |       |
+| Configure multiple authentication methods                    | Birden çok kimlik doğrulama yöntemini yapılandırın                                                                             |       |
+| User and role-based access control                           | Kullanıcı ve role dayalı erişim kontrolü                                                                                       |       |
