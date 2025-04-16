@@ -153,3 +153,19 @@
 | Secure connectivity with WireGuard encryption                | WireGuard şifrelemesiyle güvenli bağlantı                                                                                      |       |
 | Configure multiple authentication methods                    | Birden çok kimlik doğrulama yöntemini yapılandırın                                                                             |       |
 | User and role-based access control                           | Kullanıcı ve role dayalı erişim kontrolü                                                                                       |       |
+
+##### Content
+
+| EN                                                 | TR                                                            | Notes                |
+| -------------------------------------------------- | ------------------------------------------------------------- | -------------------- |
+| Manage Resources                                   | Kaynakları Yönet                                              |                      |
+| Create secure proxies to your private applications | Özel uygulamalarınız için güvenli proxy’ler oluşturun         |                      |
+| Search resources                                   | Kaynakları ara                                                | placeholder          |
+| Name                                               | Ad                                                            |                      |
+| Site                                               | Site                                                          |                      |
+| Full URL                                           | Tam URL                                                       |                      |
+| Authentication                                     | Kimlik Doğrulama                                              |                      |
+| Not Protected                                      | Korunmayan                                                    | authentication state |
+| Protected                                          | Korunan                                                       | authentication state |
+| Edit →                                             | Düzenle →                                                     |                      |
+| Add Resource                                       | Kaynak Ekle                                                   |                      |
