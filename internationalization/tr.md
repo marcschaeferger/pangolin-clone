@@ -82,3 +82,20 @@
 | Open Source               | Açık Kaynak                                      | Footer'da yer alır   |
 | Documentation             | Dokümantasyon                                    | Footer'da yer alır   |
 | {version}                 | {version}                                        | Footer'da yer alır   |
+
+---
+
+## Main “Sites”
+
+##### “Hero” section
+
+| EN                                                           | TR                                                                                                                         | Notes |
+| ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- | ----- |
+| Newt (Recommended)                                           | Newt (Tavsiye Edilen)                                                                                                      |       |
+| For the best user experience, use Newt. It uses WireGuard under the hood and allows you to address your private resources by their LAN address on your private network from within the Pangolin dashboard. | En iyi kullanıcı deneyimi için Newt'i kullanın. Newt, arka planda WireGuard kullanır ve Pangolin kontrol paneli üzerinden özel ağınızdaki kaynaklarınıza LAN adresleriyle erişmenizi sağlar. |       |
+| Runs in Docker                                               | Docker üzerinde çalışır                                                                                                    |       |
+| Runs in shell on macOS, Linux, and Windows                   | macOS, Linux ve Windows’ta komut satırında çalışır                                                                         |       |
+| Install Newt                                                 | Newt'i Yükle                                                                                                               |       |
+| Basic WireGuard<br>                                          | Temel WireGuard<br>                                                                                                        |       |
+| Compatible with all WireGuard clients<br>                    | Tüm WireGuard istemcileriyle uyumlu<br>                                                                                    |       |
+| Manual configuration required                                | Manuel yapılandırma gereklidir                                                                                             |       |
