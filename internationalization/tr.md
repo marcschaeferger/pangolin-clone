@@ -254,3 +254,17 @@
 | Easy to create and share                                     | Oluşturması ve paylaşması kolay                                                                                               |       |
 | Configurable expiration duration                             | Yapılandırılabilir geçerlilik süresi                                                                                          |       |
 | Secure and revocable                                         | Güvenli ve iptal edilebilir                                                                                                   |       |
+
+##### Content
+
+| EN                                                           | TR                                                                                       | Notes          |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------- | -------------- |
+| Manage Shareable Links                                       | Paylaşılabilir Bağlantıları Yönet                                                        |                |
+| Create shareable links to grant temporary or permanent access to your resources | Kaynaklarınıza geçici veya kalıcı erişim sağlamak için paylaşılabilir bağlantılar oluşturun |                |
+| Search links                                                 | Bağlantıları ara                                                                         | placeholder    |
+| Create Share Link                                            | Bağlantı Oluştur                                                                         | addbutton      |
+| Resource                                                     | Kaynak                                                                                   | table header   |
+| Title                                                        | Başlık                                                                                   | table header   |
+| Created                                                      | Oluşturulma Tarihi                                                                       | table header   |
+| Expires                                                      | Son Kullanma Tarihi                                                                      | table header   |
+| No links. Create one to get started.                         | Bağlantı yok. Başlamak için bir tane oluşturun.                                          | table placeholder |
