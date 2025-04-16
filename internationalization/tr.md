@@ -51,3 +51,12 @@
 | Documentation       | Dokümantasyon              |       |
 | Support             | Destek                     |       |
 | Organization {name} | Organizasyon {name}        |       |
+
+##### Organization selector
+
+| EN               | TR                     | Notes |
+| ---------------- | ---------------------- | ----- |
+| Search…          | Ara…                   |       |
+| Create           | Oluştur                |       |
+| New Organization | Yeni Organizasyon      |       |
+| Organizations    | Organizasyonlar        |       |
