@@ -268,3 +268,25 @@
 | Created                                                      | Oluşturulma Tarihi                                                                       | table header   |
 | Expires                                                      | Son Kullanma Tarihi                                                                      | table header   |
 | No links. Create one to get started.                         | Bağlantı yok. Başlamak için bir tane oluşturun.                                          | table placeholder |
+
+##### Create Shareable Link popup
+
+| EN                                                           | TR                                                                                                                     | Notes                   |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| Create Shareable Link                                        | Paylaşılabilir Bağlantı Oluştur                                                                                        |                         |
+| Anyone with this link can access the resource                | Bu bağlantıya sahip olan herkes kaynağa erişebilir                                                                     |                         |
+| Resource                                                     | Kaynak                                                                                                                 |                         |
+| Select resource                                              | Kaynak seçin                                                                                                           |                         |
+| Search resources…                                            | Kaynak ara…                                                                                                            | resource selector popup |
+| Title (optional)                                             | Başlık (isteğe bağlı)                                                                                                  |                         |
+| Enter title                                                  | Başlık girin                                                                                                           | placeholder             |
+| Expire in                                                    | Sona Erme Süresi                                                                                                       |                         |
+| Minutes                                                      | Dakika                                                                                                                 |                         |
+| Hours                                                        | Saat                                                                                                                   |                         |
+| Days                                                         | Gün                                                                                                                    |                         |
+| Months                                                       | Ay                                                                                                                     |                         |
+| Years                                                        | Yıl                                                                                                                    |                         |
+| Never expire                                                 | Asla sona erme                                                                                                         |                         |
+| Expiration time is how long the link will be usable and provide access to the resource. After this time, the link will no longer work, and users who used this link will lose access to the resource. | Bağlantının geçerlilik süresi, bağlantının ne kadar süreyle kullanılabilir olacağını ve kaynağa erişim sağlayacağını belirler. Bu sürenin sonunda bağlantı çalışmaz hale gelir ve bağlantıyı kullananlar kaynağa erişimini kaybeder. |                         |
+| Create Link                                                  | Bağlantı Oluştur                                                                                                       |                         |
+| Close                                                        | Kapat                                                                                                                  |                         |
