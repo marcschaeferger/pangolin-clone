@@ -240,3 +240,17 @@
 | 7 days            | 7 gün                                                                   |             |
 | Create Invitation | Davetiye Oluştur                                                        |             |
 | Close             | Kapat                                                                   |             |
+
+---
+
+## Main “Shareable Links”
+
+##### “Hero” section
+
+| EN                                                           | TR                                                                                                                            | Notes |
+| ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- | ----- |
+| Shareable Links                                              | Paylaşılabilir Bağlantılar                                                                                                    |       |
+| Create shareable links to your resources. Links provide temporary or unlimited access to your resource. You can configure the expiration duration of the link when you create one. | Kaynaklarınıza paylaşılabilir bağlantılar oluşturun. Bağlantılar, kaynağınıza geçici veya sınırsız erişim sağlar. Oluştururken bağlantının geçerlilik süresini ayarlayabilirsiniz. |       |
+| Easy to create and share                                     | Oluşturması ve paylaşması kolay                                                                                               |       |
+| Configurable expiration duration                             | Yapılandırılabilir geçerlilik süresi                                                                                          |       |
+| Secure and revocable                                         | Güvenli ve iptal edilebilir                                                                                                   |       |
