@@ -119,3 +119,23 @@
 | Edit →                                                    | Düzenle →                                                                   |              |
 | View settings                                             | Ayarları Görüntüle                                                          | Popup        |
 | Delete                                                    | Sil                                                                         | Popup        |
+
+##### Add Site Popup
+
+| EN                                                     | TR                                                                                          | Notes       |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------- | ----------- |
+| Create Site                                            | Site Oluştur                                                                                |             |
+| Create a new site to start connection for this site    | Bu site için bağlantıyı başlatmak amacıyla yeni bir site oluşturun                          |             |
+| Name                                                   | Ad                                                                                          |             |
+| Site name                                              | Site adı                                                                                    | placeholder |
+| This is the name that will be displayed for this site. | Bu, site için görüntülenecek addır.                                                         | desc        |
+| Method                                                 | Yöntem                                                                                      |             |
+| Local                                                  | Yerel                                                                                       |             |
+| Newt                                                   | Newt                                                                                        |             |
+| WireGuard                                              | WireGuard                                                                                   |             |
+| This is how you will expose connections.               | Bağlantılarınızı bu şekilde açığa çıkaracaksınız.                                           |             |
+| You will only be able to see the configuration once.   | Yapılandırmayı yalnızca bir kez görüntüleyebilirsiniz.                                      |             |
+| Learn how to install Newt on your system               | Sisteminizde Newt'in nasıl kurulacağını öğrenin                                             |             |
+| I have copied the config                               | Yapılandırmayı kopyaladım                                                                   |             |
+| Create Site                                            | Site Oluştur                                                                                |             |
+| Close                                                  | Kapat                                                                                       |             |
