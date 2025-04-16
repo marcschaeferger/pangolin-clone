@@ -39,3 +39,15 @@
 | ----------------------------------------- | ------------------------------------------------------------------- | ----- |
 | Welcome to Pangolin                       | Pangolin'e Hoşgeldiniz                                              |       |
 | You're a member of {number} organization. | {number} organizasyonunun üyesiniz.                                 |       |
+
+---
+
+## Shared Header, Navbar and Footer
+
+##### Header
+
+| EN                  | TR                         | Notes |
+| ------------------- | -------------------------- | ----- |
+| Documentation       | Dokümantasyon              |       |
+| Support             | Destek                     |       |
+| Organization {name} | Organizasyon {name}        |       |
