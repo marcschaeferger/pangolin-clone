@@ -30,3 +30,12 @@
 | Enter your password   | Şifrenizi girin                                        | placeholder |
 | Forgot your password? | Şifrenizi mi unuttunuz?                                |             |
 | Log in                | Giriş Yap                                              |             |
+
+---
+
+# Organization site after successful login
+
+| EN                                        | TR                                                                  | Notes |
+| ----------------------------------------- | ------------------------------------------------------------------- | ----- |
+| Welcome to Pangolin                       | Pangolin'e Hoşgeldiniz                                              |       |
+| You're a member of {number} organization. | {number} organizasyonunun üyesiniz.                                 |       |
