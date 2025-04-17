@@ -1,3 +1,23 @@
+## Authentication Site
+
+| EN                                                       | DE                                                                                 | Notes      |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------- | ---------- |
+| Powered by [Pangolin](https://github.com/fosrl/pangolin) | Bereitgestellt von [Pangolin](https://github.com/fosrl/pangolin)                   |            |
+| Authentication Required                                  | Authentifizierung erforderlich                                                     |            |
+| Choose your preferred method to access {resource}        | Wählen Sie Ihre bevorzugte Methode, um auf {resource} zuzugreifen                  |            |
+| PIN                                                      | PIN                                                                                |            |
+| User                                                     | Benutzer                                                                           |            |
+| 6-digit PIN Code                                         | 6-stelliger PIN-Code                                                               | pin login  |
+| Login in with PIN                                        | Mit PIN anmelden                                                                   | pin login  |
+| Email                                                    | E-Mail                                                                             | user login |
+| Enter your email                                         | Geben Sie Ihre E-Mail-Adresse ein                                                  | user login |
+| Password                                                 | Passwort                                                                           | user login |
+| Enter your password                                      | Geben Sie Ihr Passwort ein                                                         | user login |
+| Forgot your password?                                    | Passwort vergessen?                                                                | user login |
+| Log in                                                   | Anmelden                                                                           | user login |
+
+---
+
 ## Login site
 
 | EN                    | DE                                 | Notes       |
