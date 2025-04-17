@@ -11,26 +11,26 @@ import {
 export const rootNavItems: SidebarNavItem[] = [
     {
         title: "Home",
-        href: "/"
-        // icon: <Home className="h-4 w-4" />
+        href: "/",
+        icon: <Home className="h-4 w-4" />
     }
 ];
 
 export const orgNavItems: SidebarNavItem[] = [
     {
         title: "Sites",
-        href: "/{orgId}/settings/sites"
-        // icon: <Combine className="h-4 w-4" />
+        href: "/{orgId}/settings/sites",
+        icon: <Combine className="h-4 w-4" />
     },
     {
         title: "Resources",
-        href: "/{orgId}/settings/resources"
-        // icon: <Waypoints className="h-4 w-4" />
+        href: "/{orgId}/settings/resources",
+        icon: <Waypoints className="h-4 w-4" />
     },
     {
         title: "Access Control",
         href: "/{orgId}/settings/access",
-        // icon: <Users className="h-4 w-4" />,
+        icon: <Users className="h-4 w-4" />,
         autoExpand: true,
         children: [
             {
@@ -51,20 +51,20 @@ export const orgNavItems: SidebarNavItem[] = [
     },
     {
         title: "Shareable Links",
-        href: "/{orgId}/settings/share-links"
-        // icon: <LinkIcon className="h-4 w-4" />
+        href: "/{orgId}/settings/share-links",
+        icon: <LinkIcon className="h-4 w-4" />
     },
     {
         title: "Settings",
-        href: "/{orgId}/settings/general"
-        // icon: <Settings className="h-4 w-4" />
+        href: "/{orgId}/settings/general",
+        icon: <Settings className="h-4 w-4" />
     }
 ];
 
 export const adminNavItems: SidebarNavItem[] = [
     {
         title: "All Users",
-        href: "/admin/users"
-        // icon: <Users className="h-4 w-4" />
+        href: "/admin/users",
+        icon: <Users className="h-4 w-4" />
     }
 ];

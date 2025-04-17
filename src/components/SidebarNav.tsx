@@ -35,26 +35,6 @@ export function SidebarNav({
     const userId = params.userId as string;
     const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
-    // Initialize expanded items based on autoExpand property
-    useEffect(() => {
-        const autoExpanded = new Set<string>();
-
-        function findAutoExpanded(items: SidebarNavItem[]) {
-            items.forEach(item => {
-                const hydratedHref = hydrateHref(item.href);
-                if (item.autoExpand) {
-                    autoExpanded.add(hydratedHref);
-                }
-                if (item.children) {
-                    findAutoExpanded(item.children);
-                }
-            });
-        }
-
-        findAutoExpanded(items);
-        setExpandedItems(autoExpanded);
-    }, [items]);
-
     function hydrateHref(val: string): string {
         return val
             .replace("{orgId}", orgId)
@@ -62,6 +42,34 @@ export function SidebarNav({
             .replace("{resourceId}", resourceId)
             .replace("{userId}", userId);
     }
+
+    // Initialize expanded items based on autoExpand property and current path
+    useEffect(() => {
+        const autoExpanded = new Set<string>();
+
+        function findAutoExpandedAndActivePath(items: SidebarNavItem[], parentHrefs: string[] = []) {
+            items.forEach(item => {
+                const hydratedHref = hydrateHref(item.href);
+                
+                // Add current item's href to the path
+                const currentPath = [...parentHrefs, hydratedHref];
+                
+                // Auto expand if specified or if this item or any child is active
+                if (item.autoExpand || pathname.startsWith(hydratedHref)) {
+                    // Expand all parent sections when a child is active
+                    currentPath.forEach(href => autoExpanded.add(href));
+                }
+                
+                // Recursively check children
+                if (item.children) {
+                    findAutoExpandedAndActivePath(item.children, currentPath);
+                }
+            });
+        }
+
+        findAutoExpandedAndActivePath(items);
+        setExpandedItems(autoExpanded);
+    }, [items, pathname]);
 
     function toggleItem(href: string) {
         setExpandedItems(prev => {
@@ -86,41 +94,49 @@ export function SidebarNav({
             return (
                 <div key={hydratedHref}>
                     <div className="flex items-center group" style={{ marginLeft: `${indent}px` }}>
-                        <Link
-                            href={hydratedHref}
+                        <div
                             className={cn(
-                                "flex items-center py-1 w-full transition-colors",
-                                isActive
-                                    ? "text-primary font-medium"
-                                    : "text-muted-foreground hover:text-foreground",
-                                disabled && "cursor-not-allowed opacity-60"
+                                "flex items-center w-full transition-colors rounded-md",
+                                isActive && level === 0 && "bg-primary/10",
+                                "group-hover:bg-muted"
                             )}
-                            onClick={(e) => {
-                                if (disabled) {
-                                    e.preventDefault();
-                                } else if (onItemClick) {
-                                    onItemClick();
-                                }
-                            }}
-                            tabIndex={disabled ? -1 : undefined}
-                            aria-disabled={disabled}
                         >
-                            {item.icon && <span className="mr-2">{item.icon}</span>}
-                            {item.title}
-                        </Link>
-                        {hasChildren && (
-                            <button
-                                onClick={() => toggleItem(hydratedHref)}
-                                className="p-2 hover:bg-muted rounded-md ml-auto"
-                                disabled={disabled}
-                            >
-                                {isExpanded ? (
-                                    <ChevronDown className="h-4 w-4" />
-                                ) : (
-                                    <ChevronRight className="h-4 w-4" />
+                            <Link
+                                href={hydratedHref}
+                                className={cn(
+                                    "flex items-center w-full px-3 py-2",
+                                    isActive
+                                        ? "text-primary font-medium"
+                                        : "text-muted-foreground group-hover:text-foreground",
+                                    disabled && "cursor-not-allowed opacity-60"
                                 )}
-                            </button>
-                        )}
+                                onClick={(e) => {
+                                    if (disabled) {
+                                        e.preventDefault();
+                                    } else if (onItemClick) {
+                                        onItemClick();
+                                    }
+                                }}
+                                tabIndex={disabled ? -1 : undefined}
+                                aria-disabled={disabled}
+                            >
+                                {item.icon && <span className="mr-3 opacity-70">{item.icon}</span>}
+                                {item.title}
+                            </Link>
+                            {hasChildren && (
+                                <button
+                                    onClick={() => toggleItem(hydratedHref)}
+                                    className="p-2 rounded-md opacity-70 hover:opacity-100"
+                                    disabled={disabled}
+                                >
+                                    {isExpanded ? (
+                                        <ChevronDown className="h-4 w-4" />
+                                    ) : (
+                                        <ChevronRight className="h-4 w-4" />
+                                    )}
+                                </button>
+                            )}
+                        </div>
                     </div>
                     {hasChildren && isExpanded && (
                         <div className="space-y-1 mt-1">
@@ -135,7 +151,7 @@ export function SidebarNav({
     return (
         <nav
             className={cn(
-                "flex flex-col space-y-1",
+                "flex flex-col space-y-2",
                 disabled && "pointer-events-none opacity-60",
                 className
             )}
