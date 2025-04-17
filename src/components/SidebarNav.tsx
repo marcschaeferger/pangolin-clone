@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { cn } from "@app/lib/cn";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { useUserContext } from "@app/hooks/useUserContext";
 
 export interface SidebarNavItem {
     href: string;
@@ -35,6 +36,8 @@ export function SidebarNav({
     const userId = params.userId as string;
     const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
+    const { user } = useUserContext();
+
     function hydrateHref(val: string): string {
         return val
             .replace("{orgId}", orgId)
@@ -47,19 +50,22 @@ export function SidebarNav({
     useEffect(() => {
         const autoExpanded = new Set<string>();
 
-        function findAutoExpandedAndActivePath(items: SidebarNavItem[], parentHrefs: string[] = []) {
-            items.forEach(item => {
+        function findAutoExpandedAndActivePath(
+            items: SidebarNavItem[],
+            parentHrefs: string[] = []
+        ) {
+            items.forEach((item) => {
                 const hydratedHref = hydrateHref(item.href);
-                
+
                 // Add current item's href to the path
                 const currentPath = [...parentHrefs, hydratedHref];
-                
+
                 // Auto expand if specified or if this item or any child is active
                 if (item.autoExpand || pathname.startsWith(hydratedHref)) {
                     // Expand all parent sections when a child is active
-                    currentPath.forEach(href => autoExpanded.add(href));
+                    currentPath.forEach((href) => autoExpanded.add(href));
                 }
-                
+
                 // Recursively check children
                 if (item.children) {
                     findAutoExpandedAndActivePath(item.children, currentPath);
@@ -72,7 +78,7 @@ export function SidebarNav({
     }, [items, pathname]);
 
     function toggleItem(href: string) {
-        setExpandedItems(prev => {
+        setExpandedItems((prev) => {
             const newSet = new Set(prev);
             if (newSet.has(href)) {
                 newSet.delete(href);
@@ -93,7 +99,10 @@ export function SidebarNav({
 
             return (
                 <div key={hydratedHref}>
-                    <div className="flex items-center group" style={{ marginLeft: `${indent}px` }}>
+                    <div
+                        className="flex items-center group"
+                        style={{ marginLeft: `${indent}px` }}
+                    >
                         <div
                             className={cn(
                                 "flex items-center w-full transition-colors rounded-md",
@@ -120,7 +129,11 @@ export function SidebarNav({
                                 tabIndex={disabled ? -1 : undefined}
                                 aria-disabled={disabled}
                             >
-                                {item.icon && <span className="mr-3 opacity-70">{item.icon}</span>}
+                                {item.icon && (
+                                    <span className="mr-3 opacity-70">
+                                        {item.icon}
+                                    </span>
+                                )}
                                 {item.title}
                             </Link>
                             {hasChildren && (

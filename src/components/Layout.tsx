@@ -10,7 +10,7 @@ import { ListOrgsResponse } from "@server/routers/org";
 import SupporterStatus from "@app/components/SupporterStatus";
 import { Separator } from "@app/components/ui/separator";
 import { Button } from "@app/components/ui/button";
-import { ExternalLink, Menu, X } from "lucide-react";
+import { ExternalLink, Menu, X, Server } from "lucide-react";
 import {
     Sheet,
     SheetContent,
@@ -21,6 +21,7 @@ import {
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { Breadcrumbs } from "@app/components/Breadcrumbs";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -54,6 +55,8 @@ export function Layout({
 }: LayoutProps) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { env } = useEnvContext();
+    const pathname = usePathname();
+    const isAdminPage = pathname?.startsWith("/admin");
 
     return (
         <div className="flex h-screen overflow-hidden">
@@ -85,7 +88,26 @@ export function Layout({
                                 </div>
                             )}
                             <div className="flex-1 overflow-y-auto p-4">
-                                <SidebarNav items={navItems} onItemClick={() => setIsMobileMenuOpen(false)} />
+                                <SidebarNav
+                                    items={navItems}
+                                    onItemClick={() =>
+                                        setIsMobileMenuOpen(false)
+                                    }
+                                />
+                                {!isAdminPage && (
+                                    <div className="mt-8 pt-4 border-t">
+                                        <Link
+                                            href="/admin"
+                                            className="flex items-center justify-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors px-4 py-2 rounded-md bg-primary/10 hover:bg-primary/20 w-full"
+                                            onClick={() =>
+                                                setIsMobileMenuOpen(false)
+                                            }
+                                        >
+                                            <Server className="h-4 w-4" />
+                                            Server Admin
+                                        </Link>
+                                    </div>
+                                )}
                             </div>
                             <div className="p-4 space-y-4 border-t shrink-0">
                                 <SupporterStatus />
@@ -109,8 +131,21 @@ export function Layout({
                             <Header orgId={orgId} orgs={orgs} />
                         </div>
                     )}
-                    <div className="flex-1 overflow-y-auto p-4">
-                        <SidebarNav items={navItems} />
+                    <div className="flex-1 overflow-y-auto p-4 flex flex-col">
+                        <div className="flex-1">
+                            <SidebarNav items={navItems} />
+                        </div>
+                        {!isAdminPage && (
+                            <div className="mt-8 pt-4 border-t">
+                                <Link
+                                    href="/admin"
+                                    className="flex items-center justify-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors px-4 py-2 rounded-md bg-primary/10 hover:bg-primary/20 w-full"
+                                >
+                                    <Server className="h-4 w-4" />
+                                    Server Admin
+                                </Link>
+                            </div>
+                        )}
                     </div>
                     <div className="p-4 space-y-4 border-t shrink-0">
                         <SupporterStatus />
@@ -124,7 +159,7 @@ export function Layout({
                                     className="flex items-center justify-center gap-1"
                                 >
                                     Open Source
-                                    <ExternalLink size={12}/>
+                                    <ExternalLink size={12} />
                                 </Link>
                             </div>
                             {env?.app?.version && (
