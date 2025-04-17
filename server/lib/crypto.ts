@@ -4,7 +4,9 @@ const ALGORITHM = "aes-256-gcm";
 
 export function encrypt(value: string, key: string): string {
     const iv = crypto.randomBytes(12);
-    const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
+    const keyBuffer = Buffer.from(key, "base64"); // assuming base64 input
+
+    const cipher = crypto.createCipheriv(ALGORITHM, keyBuffer, iv);
 
     const encrypted = Buffer.concat([
         cipher.update(value, "utf8"),
@@ -25,8 +27,9 @@ export function decrypt(encryptedValue: string, key: string): string {
     const iv = Buffer.from(ivB64, "base64");
     const encrypted = Buffer.from(encryptedB64, "base64");
     const authTag = Buffer.from(authTagB64, "base64");
+    const keyBuffer = Buffer.from(key, "base64");
 
-    const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
+    const decipher = crypto.createDecipheriv(ALGORITHM, keyBuffer, iv);
     decipher.setAuthTag(authTag);
 
     const decrypted = Buffer.concat([

@@ -106,8 +106,7 @@ export function SidebarNav({
                         <div
                             className={cn(
                                 "flex items-center w-full transition-colors rounded-md",
-                                isActive && level === 0 && "bg-primary/10",
-                                "group-hover:bg-muted"
+                                isActive && level === 0 && "bg-primary/10"
                             )}
                         >
                             <Link

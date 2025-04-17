@@ -18,30 +18,30 @@ export function Breadcrumbs() {
         const href = `/${segments.slice(0, index + 1).join("/")}`;
         let label = segment;
 
-        // Format labels
-        if (segment === "settings") {
-            label = "Settings";
-        } else if (segment === "sites") {
-            label = "Sites";
-        } else if (segment === "resources") {
-            label = "Resources";
-        } else if (segment === "access") {
-            label = "Access Control";
-        } else if (segment === "general") {
-            label = "General";
-        } else if (segment === "share-links") {
-            label = "Shareable Links";
-        } else if (segment === "users") {
-            label = "Users";
-        } else if (segment === "roles") {
-            label = "Roles";
-        } else if (segment === "invitations") {
-            label = "Invitations";
-        } else if (segment === "connectivity") {
-            label = "Connectivity";
-        } else if (segment === "authentication") {
-            label = "Authentication";
-        }
+        // // Format labels
+        // if (segment === "settings") {
+        //     label = "Settings";
+        // } else if (segment === "sites") {
+        //     label = "Sites";
+        // } else if (segment === "resources") {
+        //     label = "Resources";
+        // } else if (segment === "access") {
+        //     label = "Access Control";
+        // } else if (segment === "general") {
+        //     label = "General";
+        // } else if (segment === "share-links") {
+        //     label = "Shareable Links";
+        // } else if (segment === "users") {
+        //     label = "Users";
+        // } else if (segment === "roles") {
+        //     label = "Roles";
+        // } else if (segment === "invitations") {
+        //     label = "Invitations";
+        // } else if (segment === "connectivity") {
+        //     label = "Connectivity";
+        // } else if (segment === "authentication") {
+        //     label = "Authentication";
+        // }
 
         return { label, href };
     });

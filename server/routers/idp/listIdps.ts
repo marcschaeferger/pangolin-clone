@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { domains, idp, orgDomains, users } from "@server/db/schemas";
+import { domains, idp, orgDomains, users, idpOrg } from "@server/db/schemas";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
@@ -28,13 +28,33 @@ const querySchema = z
     .strict();
 
 async function query(limit: number, offset: number) {
-    const res = await db.select().from(orgDomains).limit(limit).offset(offset);
+    const res = await db
+        .select({
+            idpId: idp.idpId,
+            name: idp.name,
+            type: idp.type,
+            orgCount: sql<number>`count(${idpOrg.orgId})`
+        })
+        .from(idp)
+        .leftJoin(idpOrg, sql`${idp.idpId} = ${idpOrg.idpId}`)
+        .groupBy(idp.idpId)
+        .limit(limit)
+        .offset(offset);
     return res;
 }
 
-export type ListIdpResponse = {
-    idps: NonNullable<Awaited<ReturnType<typeof query>>>;
-    pagination: { total: number; limit: number; offset: number };
+export type ListIdpsResponse = {
+    idps: Array<{
+        idpId: number;
+        name: string;
+        type: string;
+        orgCount: number;
+    }>;
+    pagination: {
+        total: number;
+        limit: number;
+        offset: number;
+    };
 };
 
 registry.registerPath({
@@ -71,7 +91,7 @@ export async function listIdps(
             .select({ count: sql<number>`count(*)` })
             .from(idp);
 
-        return response<ListIdpResponse>(res, {
+        return response<ListIdpsResponse>(res, {
             data: {
                 idps: list,
                 pagination: {
@@ -82,7 +102,7 @@ export async function listIdps(
             },
             success: true,
             error: false,
-            message: "Users retrieved successfully",
+            message: "Idps retrieved successfully",
             status: HttpCode.OK
         });
     } catch (error) {

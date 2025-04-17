@@ -5,7 +5,8 @@ import {
     Users,
     Link as LinkIcon,
     Waypoints,
-    Combine
+    Combine,
+    Fingerprint
 } from "lucide-react";
 
 export const rootNavItems: SidebarNavItem[] = [
@@ -66,5 +67,10 @@ export const adminNavItems: SidebarNavItem[] = [
         title: "All Users",
         href: "/admin/users",
         icon: <Users className="h-4 w-4" />
+    },
+    {
+        title: "Identity Providers",
+        href: "/admin/idp",
+        icon: <Fingerprint className="h-4 w-4" />
     }
 ];
