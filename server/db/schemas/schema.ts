@@ -425,7 +425,14 @@ export const supporterKey = sqliteTable("supporterKey", {
 export const idp = sqliteTable("idp", {
     idpId: integer("idpId").primaryKey({ autoIncrement: true }),
     name: text("name").notNull(),
-    type: text("type").notNull()
+    type: text("type").notNull(),
+    defaultRoleMapping: text("defaultRoleMapping"),
+    defaultOrgMapping: text("defaultOrgMapping"),
+    autoProvision: integer("autoProvision", {
+        mode: "boolean"
+    })
+        .notNull()
+        .default(false)
 });
 
 // Identity Provider OAuth Configuration
@@ -440,11 +447,6 @@ export const idpOidcConfig = sqliteTable("idpOidcConfig", {
     clientSecret: text("clientSecret").notNull(),
     authUrl: text("authUrl").notNull(),
     tokenUrl: text("tokenUrl").notNull(),
-    autoProvision: integer("autoProvision", {
-        mode: "boolean"
-    })
-        .notNull()
-        .default(false),
     identifierPath: text("identifierPath").notNull(),
     emailPath: text("emailPath"),
     namePath: text("namePath"),

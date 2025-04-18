@@ -91,6 +91,7 @@ export async function createOidcIdp(
                 .insert(idp)
                 .values({
                     name,
+                    autoProvision,
                     type: "oidc"
                 })
                 .returning();
@@ -103,7 +104,6 @@ export async function createOidcIdp(
                 clientSecret: encryptedSecret,
                 authUrl,
                 tokenUrl,
-                autoProvision,
                 scopes,
                 identifierPath,
                 emailPath,

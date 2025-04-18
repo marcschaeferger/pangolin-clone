@@ -213,188 +213,229 @@ export async function validateOidcCallback(
                 )
             );
 
-        const idpOrgs = await db
-            .select()
-            .from(idpOrg)
-            .where(eq(idpOrg.idpId, existingIdp.idp.idpId));
-
-        let userOrgInfo: { orgId: string; roleId: number }[] = [];
-        for (const idpOrg of idpOrgs) {
-            let roleId: number | undefined = undefined;
-
-            if (idpOrg.orgMapping) {
-                const orgId = jmespath.search(claims, idpOrg.orgMapping);
-                if (!orgId) {
-                    continue;
-                }
-            }
-
-            if (idpOrg.roleMapping) {
-                const roleName = jmespath.search(claims, idpOrg.roleMapping);
-
-                if (!roleName) {
-                    logger.error("Role name not found in the ID token", {
-                        roleName
-                    });
-                    continue;
-                }
-
-                const [roleRes] = await db
-                    .select()
-                    .from(roles)
-                    .where(
-                        and(
-                            eq(roles.orgId, idpOrg.orgId),
-                            eq(roles.name, roleName)
-                        )
-                    );
-
-                if (!roleRes) {
-                    logger.error("Role not found", {
-                        orgId: idpOrg.orgId,
-                        roleName
-                    });
-                    continue;
-                }
-
-                roleId = roleRes.roleId;
-
-                userOrgInfo.push({
-                    orgId: idpOrg.orgId,
-                    roleId
-                });
-            }
-        }
-
-        logger.debug("User org info", { userOrgInfo });
-
-        let existingUserId = existingUser?.userId;
-
-        // sync the user with the orgs and roles
-        await db.transaction(async (trx) => {
-            let userId = existingUser?.userId;
-
-            // create user if not exists
-            if (!existingUser) {
-                userId = generateId(15);
-
-                await trx.insert(users).values({
-                    userId,
-                    username: userIdentifier,
-                    email: email || null,
-                    name: name || null,
-                    type: UserType.OIDC,
-                    idpId: existingIdp.idp.idpId,
-                    emailVerified: true, // OIDC users are always verified
-                    dateCreated: new Date().toISOString()
-                });
-            } else {
-                // set the name and email
-                await trx
-                    .update(users)
-                    .set({
-                        username: userIdentifier,
-                        email: email || null,
-                        name: name || null
-                    })
-                    .where(eq(users.userId, userId));
-            }
-
-            existingUserId = userId;
-
-            // get all current user orgs
-            const currentUserOrgs = await trx
+        if (existingIdp.idp.autoProvision) {
+            const idpOrgs = await db
                 .select()
-                .from(userOrgs)
-                .where(eq(userOrgs.userId, userId));
+                .from(idpOrg)
+                .where(eq(idpOrg.idpId, existingIdp.idp.idpId));
 
-            // Delete orgs that are no longer valid
-            const orgsToDelete = currentUserOrgs.filter(
-                (currentOrg) =>
-                    !userOrgInfo.some(
-                        (newOrg) => newOrg.orgId === currentOrg.orgId
-                    )
-            );
+            const defaultRoleMapping = existingIdp.idp.defaultRoleMapping;
+            const defaultOrgMapping = existingIdp.idp.defaultOrgMapping;
 
-            if (orgsToDelete.length > 0) {
-                await trx.delete(userOrgs).where(
-                    and(
-                        eq(userOrgs.userId, userId),
-                        inArray(
-                            userOrgs.orgId,
-                            orgsToDelete.map((org) => org.orgId)
-                        )
-                    )
-                );
-            }
+            let userOrgInfo: { orgId: string; roleId: number }[] = [];
+            for (const idpOrg of idpOrgs) {
+                let roleId: number | undefined = undefined;
 
-            // Update roles for existing orgs where the role has changed
-            const orgsToUpdate = currentUserOrgs.filter((currentOrg) => {
-                const newOrg = userOrgInfo.find(
-                    (newOrg) => newOrg.orgId === currentOrg.orgId
-                );
-                return newOrg && newOrg.roleId !== currentOrg.roleId;
-            });
+                const orgMapping = idpOrg.orgMapping || defaultOrgMapping;
+                const hydratedOrgMapping = orgMapping
+                    ?.split("{{orgId}}")
+                    .join(idpOrg.orgId);
 
-            if (orgsToUpdate.length > 0) {
-                for (const org of orgsToUpdate) {
-                    const newRole = userOrgInfo.find(
-                        (newOrg) => newOrg.orgId === org.orgId
-                    );
-                    if (newRole) {
-                        await trx
-                            .update(userOrgs)
-                            .set({ roleId: newRole.roleId })
-                            .where(
-                                and(
-                                    eq(userOrgs.userId, userId),
-                                    eq(userOrgs.orgId, org.orgId)
-                                )
-                            );
+                if (hydratedOrgMapping) {
+                    const orgId = jmespath.search(claims, hydratedOrgMapping);
+                    if (!(orgId === true || orgId === idpOrg.orgId)) {
+                        continue;
                     }
                 }
+
+                const roleMapping = idpOrg.roleMapping || defaultRoleMapping;
+                if (roleMapping) {
+                    const roleName = jmespath.search(claims, roleMapping);
+
+                    if (!roleName) {
+                        logger.error("Role name not found in the ID token", {
+                            roleName
+                        });
+                        continue;
+                    }
+
+                    const [roleRes] = await db
+                        .select()
+                        .from(roles)
+                        .where(
+                            and(
+                                eq(roles.orgId, idpOrg.orgId),
+                                eq(roles.name, roleName)
+                            )
+                        );
+
+                    if (!roleRes) {
+                        logger.error("Role not found", {
+                            orgId: idpOrg.orgId,
+                            roleName
+                        });
+                        continue;
+                    }
+
+                    roleId = roleRes.roleId;
+
+                    userOrgInfo.push({
+                        orgId: idpOrg.orgId,
+                        roleId
+                    });
+                }
             }
 
-            // Add new orgs that don't exist yet
-            const orgsToAdd = userOrgInfo.filter(
-                (newOrg) =>
-                    !currentUserOrgs.some(
-                        (currentOrg) => currentOrg.orgId === newOrg.orgId
-                    )
+            logger.debug("User org info", { userOrgInfo });
+
+            let existingUserId = existingUser?.userId;
+
+            // sync the user with the orgs and roles
+            await db.transaction(async (trx) => {
+                let userId = existingUser?.userId;
+
+                // create user if not exists
+                if (!existingUser) {
+                    userId = generateId(15);
+
+                    await trx.insert(users).values({
+                        userId,
+                        username: userIdentifier,
+                        email: email || null,
+                        name: name || null,
+                        type: UserType.OIDC,
+                        idpId: existingIdp.idp.idpId,
+                        emailVerified: true, // OIDC users are always verified
+                        dateCreated: new Date().toISOString()
+                    });
+                } else {
+                    // set the name and email
+                    await trx
+                        .update(users)
+                        .set({
+                            username: userIdentifier,
+                            email: email || null,
+                            name: name || null
+                        })
+                        .where(eq(users.userId, userId));
+                }
+
+                existingUserId = userId;
+
+                // get all current user orgs
+                const currentUserOrgs = await trx
+                    .select()
+                    .from(userOrgs)
+                    .where(eq(userOrgs.userId, userId));
+
+                // Delete orgs that are no longer valid
+                const orgsToDelete = currentUserOrgs.filter(
+                    (currentOrg) =>
+                        !userOrgInfo.some(
+                            (newOrg) => newOrg.orgId === currentOrg.orgId
+                        )
+                );
+
+                if (orgsToDelete.length > 0) {
+                    await trx.delete(userOrgs).where(
+                        and(
+                            eq(userOrgs.userId, userId),
+                            inArray(
+                                userOrgs.orgId,
+                                orgsToDelete.map((org) => org.orgId)
+                            )
+                        )
+                    );
+                }
+
+                // Update roles for existing orgs where the role has changed
+                const orgsToUpdate = currentUserOrgs.filter((currentOrg) => {
+                    const newOrg = userOrgInfo.find(
+                        (newOrg) => newOrg.orgId === currentOrg.orgId
+                    );
+                    return newOrg && newOrg.roleId !== currentOrg.roleId;
+                });
+
+                if (orgsToUpdate.length > 0) {
+                    for (const org of orgsToUpdate) {
+                        const newRole = userOrgInfo.find(
+                            (newOrg) => newOrg.orgId === org.orgId
+                        );
+                        if (newRole) {
+                            await trx
+                                .update(userOrgs)
+                                .set({ roleId: newRole.roleId })
+                                .where(
+                                    and(
+                                        eq(userOrgs.userId, userId),
+                                        eq(userOrgs.orgId, org.orgId)
+                                    )
+                                );
+                        }
+                    }
+                }
+
+                // Add new orgs that don't exist yet
+                const orgsToAdd = userOrgInfo.filter(
+                    (newOrg) =>
+                        !currentUserOrgs.some(
+                            (currentOrg) => currentOrg.orgId === newOrg.orgId
+                        )
+                );
+
+                if (orgsToAdd.length > 0) {
+                    await trx.insert(userOrgs).values(
+                        orgsToAdd.map((org) => ({
+                            userId,
+                            orgId: org.orgId,
+                            roleId: org.roleId,
+                            dateCreated: new Date().toISOString()
+                        }))
+                    );
+                }
+            });
+
+            const token = generateSessionToken();
+            const sess = await createSession(token, existingUserId);
+            const isSecure = req.protocol === "https";
+            const cookie = serializeSessionCookie(
+                token,
+                isSecure,
+                new Date(sess.expiresAt)
             );
 
-            if (orgsToAdd.length > 0) {
-                await trx.insert(userOrgs).values(
-                    orgsToAdd.map((org) => ({
-                        userId,
-                        orgId: org.orgId,
-                        roleId: org.roleId,
-                        dateCreated: new Date().toISOString()
-                    }))
+            res.appendHeader("Set-Cookie", cookie);
+
+            return response<ValidateOidcUrlCallbackResponse>(res, {
+                data: {
+                    redirectUrl: postAuthRedirectUrl
+                },
+                success: true,
+                error: false,
+                message: "OIDC callback validated successfully",
+                status: HttpCode.CREATED
+            });
+        } else {
+            if (!existingUser) {
+                return next(
+                    createHttpError(
+                        HttpCode.UNAUTHORIZED,
+                        "User not found in the IdP"
+                    )
                 );
             }
-        });
-
-        const token = generateSessionToken();
-        const sess = await createSession(token, existingUserId);
-        const isSecure = req.protocol === "https";
-        const cookie = serializeSessionCookie(
-            token,
-            isSecure,
-            new Date(sess.expiresAt)
-        );
-
-        res.appendHeader("Set-Cookie", cookie);
-
-        return response<ValidateOidcUrlCallbackResponse>(res, {
-            data: {
-                redirectUrl: postAuthRedirectUrl
-            },
-            success: true,
-            error: false,
-            message: "OIDC callback validated successfully",
-            status: HttpCode.CREATED
-        });
+            //
+            // const token = generateSessionToken();
+            // const sess = await createSession(token, existingUser.userId);
+            // const isSecure = req.protocol === "https";
+            // const cookie = serializeSessionCookie(
+            //     token,
+            //     isSecure,
+            //     new Date(sess.expiresAt)
+            // );
+            //
+            // res.appendHeader("Set-Cookie", cookie);
+            //
+            // return response<ValidateOidcUrlCallbackResponse>(res, {
+            //     data: {
+            //         redirectUrl: postAuthRedirectUrl
+            //     },
+            //     success: true,
+            //     error: false,
+            //     message: "OIDC callback validated successfully",
+            //     status: HttpCode.CREATED
+            // });
+        }
     } catch (error) {
         logger.error(error);
         return next(

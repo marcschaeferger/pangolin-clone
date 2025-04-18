@@ -20,16 +20,18 @@ const paramsSchema = z
 
 const bodySchema = z
     .object({
-        name: z.string().nonempty(),
-        clientId: z.string().nonempty(),
-        clientSecret: z.string().nonempty(),
-        authUrl: z.string().url(),
-        tokenUrl: z.string().url(),
-        identifierPath: z.string().nonempty(),
+        name: z.string().optional(),
+        clientId: z.string().optional(),
+        clientSecret: z.string().optional(),
+        authUrl: z.string().optional(),
+        tokenUrl: z.string().optional(),
+        identifierPath: z.string().optional(),
         emailPath: z.string().optional(),
         namePath: z.string().optional(),
         scopes: z.string().optional(),
-        autoProvision: z.boolean().optional()
+        autoProvision: z.boolean().optional(),
+        defaultRoleMapping: z.string().optional(),
+        defaultOrgMapping: z.string().optional()
     })
     .strict();
 
@@ -92,7 +94,9 @@ export async function updateOidcIdp(
             emailPath,
             namePath,
             name,
-            autoProvision
+            autoProvision,
+            defaultRoleMapping,
+            defaultOrgMapping
         } = parsedBody.data;
 
         // Check if IDP exists and is of type OIDC
@@ -115,33 +119,51 @@ export async function updateOidcIdp(
         }
 
         const key = config.getRawConfig().server.secret;
-        const encryptedSecret = encrypt(clientSecret, key);
-        const encryptedClientId = encrypt(clientId, key);
+        const encryptedSecret = clientSecret
+            ? encrypt(clientSecret, key)
+            : undefined;
+        const encryptedClientId = clientId ? encrypt(clientId, key) : undefined;
 
         await db.transaction(async (trx) => {
-            // Update IDP name
-            await trx
-                .update(idp)
-                .set({
-                    name
-                })
-                .where(eq(idp.idpId, idpId));
+            const idpData = {
+                name,
+                autoProvision,
+                defaultRoleMapping,
+                defaultOrgMapping
+            };
 
-            // Update OIDC config
-            await trx
-                .update(idpOidcConfig)
-                .set({
-                    clientId: encryptedClientId,
-                    clientSecret: encryptedSecret,
-                    authUrl,
-                    tokenUrl,
-                    autoProvision,
-                    scopes,
-                    identifierPath,
-                    emailPath,
-                    namePath
-                })
-                .where(eq(idpOidcConfig.idpId, idpId));
+            // only update if at least one key is not undefined
+            let keysToUpdate = Object.keys(idpData).filter(
+                (key) => idpData[key as keyof typeof idpData] !== undefined
+            );
+
+            if (keysToUpdate.length > 0) {
+                await trx.update(idp).set(idpData).where(eq(idp.idpId, idpId));
+            }
+
+            const configData = {
+                clientId: encryptedClientId,
+                clientSecret: encryptedSecret,
+                authUrl,
+                tokenUrl,
+                scopes,
+                identifierPath,
+                emailPath,
+                namePath
+            };
+
+            keysToUpdate = Object.keys(configData).filter(
+                (key) =>
+                    configData[key as keyof typeof configData] !== undefined
+            );
+
+            if (keysToUpdate.length > 0) {
+                // Update OIDC config
+                await trx
+                    .update(idpOidcConfig)
+                    .set(configData)
+                    .where(eq(idpOidcConfig.idpId, idpId));
+            }
         });
 
         return response<UpdateIdpResponse>(res, {

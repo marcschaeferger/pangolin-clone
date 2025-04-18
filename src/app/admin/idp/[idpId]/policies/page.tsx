@@ -32,7 +32,6 @@ import { z } from "zod";
 import { Alert, AlertDescription, AlertTitle } from "@app/components/ui/alert";
 import { InfoIcon, ExternalLink, CheckIcon } from "lucide-react";
 import PolicyTable, { PolicyRow } from "./PolicyTable";
-import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { AxiosResponse } from "axios";
 import { ListOrgsResponse } from "@server/routers/org";
 import {
@@ -53,6 +52,17 @@ import { CaretSortIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import { Textarea } from "@app/components/ui/textarea";
 import { InfoPopup } from "@app/components/ui/info-popup";
+import { GetIdpResponse } from "@server/routers/idp";
+import {
+    SettingsContainer,
+    SettingsSection,
+    SettingsSectionHeader,
+    SettingsSectionTitle,
+    SettingsSectionDescription,
+    SettingsSectionBody,
+    SettingsSectionFooter,
+    SettingsSectionForm
+} from "@app/components/Settings";
 
 type Organization = {
     orgId: string;
@@ -65,7 +75,13 @@ const policyFormSchema = z.object({
     orgMapping: z.string().optional()
 });
 
+const defaultMappingsSchema = z.object({
+    defaultRoleMapping: z.string().optional(),
+    defaultOrgMapping: z.string().optional()
+});
+
 type PolicyFormValues = z.infer<typeof policyFormSchema>;
+type DefaultMappingsValues = z.infer<typeof defaultMappingsSchema>;
 
 export default function PoliciesPage() {
     const { env } = useEnvContext();
@@ -87,6 +103,35 @@ export default function PoliciesPage() {
             orgMapping: ""
         }
     });
+
+    const defaultMappingsForm = useForm<DefaultMappingsValues>({
+        resolver: zodResolver(defaultMappingsSchema),
+        defaultValues: {
+            defaultRoleMapping: "",
+            defaultOrgMapping: ""
+        }
+    });
+
+    const loadIdp = async () => {
+        try {
+            const res = await api.get<AxiosResponse<GetIdpResponse>>(
+                `/idp/${idpId}`
+            );
+            if (res.status === 200) {
+                const data = res.data.data;
+                defaultMappingsForm.reset({
+                    defaultRoleMapping: data.idp.defaultRoleMapping || "",
+                    defaultOrgMapping: data.idp.defaultOrgMapping || ""
+                });
+            }
+        } catch (e) {
+            toast({
+                title: "Error",
+                description: formatAxiosError(e),
+                variant: "destructive"
+            });
+        }
+    };
 
     const loadPolicies = async () => {
         try {
@@ -126,6 +171,7 @@ export default function PoliciesPage() {
         async function load() {
             setLoading(true);
             await loadPolicies();
+            await loadIdp();
             setLoading(false);
         }
         load();
@@ -222,52 +268,160 @@ export default function PoliciesPage() {
         }
     };
 
+    const onUpdateDefaultMappings = async (data: DefaultMappingsValues) => {
+        try {
+            const res = await api.post(`/idp/${idpId}/oidc`, {
+                defaultRoleMapping: data.defaultRoleMapping,
+                defaultOrgMapping: data.defaultOrgMapping
+            });
+            if (res.status === 200) {
+                toast({
+                    title: "Success",
+                    description: "Default mappings updated successfully"
+                });
+            }
+        } catch (e) {
+            toast({
+                title: "Error",
+                description: formatAxiosError(e),
+                variant: "destructive"
+            });
+        }
+    };
+
     if (loading) {
         return null;
     }
 
     return (
         <>
-            <Alert variant="neutral" className="mb-6">
-                <InfoIcon className="h-4 w-4" />
-                <AlertTitle className="font-semibold">
-                    About Organization Policies
-                </AlertTitle>
-                <AlertDescription>
-                    Organization policies are used to control access to
-                    organizations based on the user's ID token. You can specify
-                    JMESPath expressions to extract role and organization
-                    information from the ID token. For more information, see{" "}
-                    <Link
-                        href=""
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                    >
-                        the documentation
-                        <ExternalLink className="ml-1 h-4 w-4 inline" />
-                    </Link>
-                </AlertDescription>
-            </Alert>
+            <SettingsContainer>
+                <Alert variant="neutral" className="mb-6">
+                    <InfoIcon className="h-4 w-4" />
+                    <AlertTitle className="font-semibold">
+                        About Organization Policies
+                    </AlertTitle>
+                    <AlertDescription>
+                        Organization policies are used to control access to
+                        organizations based on the user's ID token. You can
+                        specify JMESPath expressions to extract role and
+                        organization information from the ID token. For more
+                        information, see{" "}
+                        <Link
+                            href=""
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline"
+                        >
+                            the documentation
+                            <ExternalLink className="ml-1 h-4 w-4 inline" />
+                        </Link>
+                    </AlertDescription>
+                </Alert>
 
-            <PolicyTable
-                policies={policies}
-                onDelete={onDeletePolicy}
-                onAdd={() => {
-                    loadOrganizations();
-                    setEditingPolicy(null);
-                    setShowAddDialog(true);
-                }}
-                onEdit={(policy) => {
-                    setEditingPolicy(policy);
-                    form.reset({
-                        orgId: policy.orgId,
-                        roleMapping: policy.roleMapping || "",
-                        orgMapping: policy.orgMapping || ""
-                    });
-                    setShowAddDialog(true);
-                }}
-            />
+                <SettingsSection>
+                    <SettingsSectionHeader>
+                        <SettingsSectionTitle>
+                            Default Mappings (Optional)
+                        </SettingsSectionTitle>
+                        <SettingsSectionDescription>
+                            The default mappings are used when when there is not
+                            an organization policy defined for an organization.
+                            You can specify the default role and organization
+                            mappings to fall back to here.
+                        </SettingsSectionDescription>
+                    </SettingsSectionHeader>
+                    <SettingsSectionBody>
+                        <Form {...defaultMappingsForm}>
+                            <form
+                                onSubmit={defaultMappingsForm.handleSubmit(
+                                    onUpdateDefaultMappings
+                                )}
+                                id="policy-default-mappings-form"
+                                className="space-y-4"
+                            >
+                                <div className="grid gap-6 md:grid-cols-2">
+                                    <FormField
+                                        control={defaultMappingsForm.control}
+                                        name="defaultRoleMapping"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>
+                                                    Default Role Mapping
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input {...field} />
+                                                </FormControl>
+                                                <FormDescription>
+                                                    JMESPath to extract role
+                                                    information from the ID
+                                                    token. The result of this
+                                                    expression must return the
+                                                    role name as defined in the
+                                                    organization as a string.
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <FormField
+                                        control={defaultMappingsForm.control}
+                                        name="defaultOrgMapping"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>
+                                                    Default Organization Mapping
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input {...field} />
+                                                </FormControl>
+                                                <FormDescription>
+                                                    JMESPath to extract
+                                                    organization information
+                                                    from the ID token. This
+                                                    expression must return true
+                                                    for the user to be allowed
+                                                    to access the organization.
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                            </form>
+                        </Form>
+                        <SettingsSectionFooter>
+                            <Button
+                                type="submit"
+                                form="policy-default-mappings-form"
+                                loading={loading}
+                            >
+                                Save Default Mappings
+                            </Button>
+                        </SettingsSectionFooter>
+                    </SettingsSectionBody>
+                </SettingsSection>
+
+                <PolicyTable
+                    policies={policies}
+                    onDelete={onDeletePolicy}
+                    onAdd={() => {
+                        loadOrganizations();
+                        setEditingPolicy(null);
+                        setShowAddDialog(true);
+                    }}
+                    onEdit={(policy) => {
+                        setEditingPolicy(policy);
+                        form.reset({
+                            orgId: policy.orgId,
+                            roleMapping: policy.roleMapping || "",
+                            orgMapping: policy.orgMapping || ""
+                        });
+                        setShowAddDialog(true);
+                    }}
+                />
+            </SettingsContainer>
 
             <Credenza
                 open={showAddDialog}
@@ -392,13 +546,14 @@ export default function PoliciesPage() {
                                                 Role Mapping Path (Optional)
                                             </FormLabel>
                                             <FormControl>
-                                                <Textarea {...field} />
+                                                <Input {...field} />
                                             </FormControl>
                                             <FormDescription>
                                                 JMESPath to extract role
                                                 information from the ID token.
                                                 The result of this expression
-                                                must return the role name as a
+                                                must return the role name as
+                                                defined in the organization as a
                                                 string.
                                             </FormDescription>
                                             <FormMessage />
@@ -416,15 +571,14 @@ export default function PoliciesPage() {
                                                 (Optional)
                                             </FormLabel>
                                             <FormControl>
-                                                <Textarea {...field} />
+                                                <Input {...field} />
                                             </FormControl>
                                             <FormDescription>
                                                 JMESPath to extract organization
                                                 information from the ID token.
-                                                This expression must return a
-                                                truthy value for the user to be
-                                                allowed to access the
-                                                organization.
+                                                This expression must return true
+                                                for the user to be allowed to
+                                                access the organization.
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>
