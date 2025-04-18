@@ -22,6 +22,7 @@ import { useEnvContext } from "@app/hooks/useEnvContext";
 import { Breadcrumbs } from "@app/components/Breadcrumbs";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useUserContext } from "@app/hooks/useUserContext";
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -57,6 +58,7 @@ export function Layout({
     const { env } = useEnvContext();
     const pathname = usePathname();
     const isAdminPage = pathname?.startsWith("/admin");
+    const { user } = useUserContext();
 
     return (
         <div className="flex h-screen overflow-hidden">
@@ -135,7 +137,7 @@ export function Layout({
                         <div className="flex-1">
                             <SidebarNav items={navItems} />
                         </div>
-                        {!isAdminPage && (
+                        {!isAdminPage && user.serverAdmin && (
                             <div className="mt-8 pt-4 border-t">
                                 <Link
                                     href="/admin"

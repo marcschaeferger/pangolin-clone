@@ -6,6 +6,7 @@ import {
     SettingsSectionBody,
     SettingsSectionDescription,
     SettingsSectionForm,
+    SettingsSectionGrid,
     SettingsSectionHeader,
     SettingsSectionTitle
 } from "@app/components/Settings";
@@ -229,269 +230,258 @@ export default function Page() {
                 </SettingsSection>
 
                 {form.watch("type") === "oidc" && (
-                    <>
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <SettingsSection>
-                                <SettingsSectionHeader>
-                                    <SettingsSectionTitle>
-                                        OAuth2/OIDC Configuration
-                                    </SettingsSectionTitle>
-                                    <SettingsSectionDescription>
-                                        Configure the OAuth2/OIDC provider
-                                        endpoints and credentials
-                                    </SettingsSectionDescription>
-                                </SettingsSectionHeader>
-                                <SettingsSectionBody>
-                                    <Form {...form}>
-                                        <form
-                                            className="space-y-4"
-                                            id="create-idp-form"
-                                            onSubmit={form.handleSubmit(
-                                                onSubmit
+                    <SettingsSectionGrid cols={2}>
+                        <SettingsSection>
+                            <SettingsSectionHeader>
+                                <SettingsSectionTitle>
+                                    OAuth2/OIDC Configuration
+                                </SettingsSectionTitle>
+                                <SettingsSectionDescription>
+                                    Configure the OAuth2/OIDC provider endpoints
+                                    and credentials
+                                </SettingsSectionDescription>
+                            </SettingsSectionHeader>
+                            <SettingsSectionBody>
+                                <Form {...form}>
+                                    <form
+                                        className="space-y-4"
+                                        id="create-idp-form"
+                                        onSubmit={form.handleSubmit(onSubmit)}
+                                    >
+                                        <FormField
+                                            control={form.control}
+                                            name="clientId"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        Client ID
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} />
+                                                    </FormControl>
+                                                    <FormDescription>
+                                                        The OAuth2 client ID
+                                                        from your identity
+                                                        provider
+                                                    </FormDescription>
+                                                    <FormMessage />
+                                                </FormItem>
                                             )}
-                                        >
-                                            <FormField
-                                                control={form.control}
-                                                name="clientId"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>
-                                                            Client ID
-                                                        </FormLabel>
-                                                        <FormControl>
-                                                            <Input {...field} />
-                                                        </FormControl>
-                                                        <FormDescription>
-                                                            The OAuth2 client ID
-                                                            from your identity
-                                                            provider
-                                                        </FormDescription>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
+                                        />
 
-                                            <FormField
-                                                control={form.control}
-                                                name="clientSecret"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>
-                                                            Client Secret
-                                                        </FormLabel>
-                                                        <FormControl>
-                                                            <Input
-                                                                type="password"
-                                                                {...field}
-                                                            />
-                                                        </FormControl>
-                                                        <FormDescription>
-                                                            The OAuth2 client
-                                                            secret from your
-                                                            identity provider
-                                                        </FormDescription>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-
-                                            <FormField
-                                                control={form.control}
-                                                name="authUrl"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>
-                                                            Authorization URL
-                                                        </FormLabel>
-                                                        <FormControl>
-                                                            <Input
-                                                                placeholder="https://your-idp.com/oauth2/authorize"
-                                                                {...field}
-                                                            />
-                                                        </FormControl>
-                                                        <FormDescription>
-                                                            The OAuth2
-                                                            authorization
-                                                            endpoint URL
-                                                        </FormDescription>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-
-                                            <FormField
-                                                control={form.control}
-                                                name="tokenUrl"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>
-                                                            Token URL
-                                                        </FormLabel>
-                                                        <FormControl>
-                                                            <Input
-                                                                placeholder="https://your-idp.com/oauth2/token"
-                                                                {...field}
-                                                            />
-                                                        </FormControl>
-                                                        <FormDescription>
-                                                            The OAuth2 token
-                                                            endpoint URL
-                                                        </FormDescription>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </form>
-                                    </Form>
-
-                                    <Alert variant="neutral">
-                                        <InfoIcon className="h-4 w-4" />
-                                        <AlertTitle className="font-semibold">
-                                            Important Information
-                                        </AlertTitle>
-                                        <AlertDescription>
-                                            After creating the identity
-                                            provider, you will need to configure
-                                            the callback URL in your identity
-                                            provider's settings. The callback
-                                            URL will be provided after
-                                            successful creation.
-                                        </AlertDescription>
-                                    </Alert>
-                                </SettingsSectionBody>
-                            </SettingsSection>
-
-                            <SettingsSection>
-                                <SettingsSectionHeader>
-                                    <SettingsSectionTitle>
-                                        Token Configuration
-                                    </SettingsSectionTitle>
-                                    <SettingsSectionDescription>
-                                        Configure how to extract user
-                                        information from the ID token
-                                    </SettingsSectionDescription>
-                                </SettingsSectionHeader>
-                                <SettingsSectionBody>
-                                    <Form {...form}>
-                                        <form
-                                            className="space-y-4"
-                                            id="create-idp-form"
-                                            onSubmit={form.handleSubmit(
-                                                onSubmit
+                                        <FormField
+                                            control={form.control}
+                                            name="clientSecret"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        Client Secret
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            type="password"
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                    <FormDescription>
+                                                        The OAuth2 client secret
+                                                        from your identity
+                                                        provider
+                                                    </FormDescription>
+                                                    <FormMessage />
+                                                </FormItem>
                                             )}
-                                        >
-                                            <Alert variant="neutral">
-                                                <InfoIcon className="h-4 w-4" />
-                                                <AlertTitle className="font-semibold">
-                                                    About JMESPath
-                                                </AlertTitle>
-                                                <AlertDescription>
-                                                    The paths below use JMESPath
-                                                    syntax to extract values
-                                                    from the ID token.
-                                                    <a
-                                                        href="https://jmespath.org"
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-primary hover:underline inline-flex items-center"
-                                                    >
-                                                        Learn more about
-                                                        JMESPath{" "}
-                                                        <ExternalLink className="ml-1 h-4 w-4" />
-                                                    </a>
-                                                </AlertDescription>
-                                            </Alert>
+                                        />
 
-                                            <FormField
-                                                control={form.control}
-                                                name="identifierPath"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>
-                                                            Identifier Path
-                                                        </FormLabel>
-                                                        <FormControl>
-                                                            <Input {...field} />
-                                                        </FormControl>
-                                                        <FormDescription>
-                                                            The JMESPath to the
-                                                            user identifier in
-                                                            the ID token
-                                                        </FormDescription>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
+                                        <FormField
+                                            control={form.control}
+                                            name="authUrl"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        Authorization URL
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            placeholder="https://your-idp.com/oauth2/authorize"
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                    <FormDescription>
+                                                        The OAuth2 authorization
+                                                        endpoint URL
+                                                    </FormDescription>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
 
-                                            <FormField
-                                                control={form.control}
-                                                name="emailPath"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>
-                                                            Email Path
-                                                            (Optional)
-                                                        </FormLabel>
-                                                        <FormControl>
-                                                            <Input {...field} />
-                                                        </FormControl>
-                                                        <FormDescription>
-                                                            The JMESPath to the
-                                                            user's email in the
-                                                            ID token
-                                                        </FormDescription>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
+                                        <FormField
+                                            control={form.control}
+                                            name="tokenUrl"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        Token URL
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            placeholder="https://your-idp.com/oauth2/token"
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                    <FormDescription>
+                                                        The OAuth2 token
+                                                        endpoint URL
+                                                    </FormDescription>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </form>
+                                </Form>
 
-                                            <FormField
-                                                control={form.control}
-                                                name="namePath"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>
-                                                            Name Path (Optional)
-                                                        </FormLabel>
-                                                        <FormControl>
-                                                            <Input {...field} />
-                                                        </FormControl>
-                                                        <FormDescription>
-                                                            The JMESPath to the
-                                                            user's name in the
-                                                            ID token
-                                                        </FormDescription>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
+                                <Alert variant="neutral">
+                                    <InfoIcon className="h-4 w-4" />
+                                    <AlertTitle className="font-semibold">
+                                        Important Information
+                                    </AlertTitle>
+                                    <AlertDescription>
+                                        After creating the identity provider,
+                                        you will need to configure the callback
+                                        URL in your identity provider's
+                                        settings. The callback URL will be
+                                        provided after successful creation.
+                                    </AlertDescription>
+                                </Alert>
+                            </SettingsSectionBody>
+                        </SettingsSection>
 
-                                            <FormField
-                                                control={form.control}
-                                                name="scopes"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>
-                                                            Scopes
-                                                        </FormLabel>
-                                                        <FormControl>
-                                                            <Input {...field} />
-                                                        </FormControl>
-                                                        <FormDescription>
-                                                            Space-separated list
-                                                            of OAuth2 scopes to
-                                                            request
-                                                        </FormDescription>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </form>
-                                    </Form>
-                                </SettingsSectionBody>
-                            </SettingsSection>
-                        </div>
-                    </>
+                        <SettingsSection>
+                            <SettingsSectionHeader>
+                                <SettingsSectionTitle>
+                                    Token Configuration
+                                </SettingsSectionTitle>
+                                <SettingsSectionDescription>
+                                    Configure how to extract user information
+                                    from the ID token
+                                </SettingsSectionDescription>
+                            </SettingsSectionHeader>
+                            <SettingsSectionBody>
+                                <Form {...form}>
+                                    <form
+                                        className="space-y-4"
+                                        id="create-idp-form"
+                                        onSubmit={form.handleSubmit(onSubmit)}
+                                    >
+                                        <Alert variant="neutral">
+                                            <InfoIcon className="h-4 w-4" />
+                                            <AlertTitle className="font-semibold">
+                                                About JMESPath
+                                            </AlertTitle>
+                                            <AlertDescription>
+                                                The paths below use JMESPath
+                                                syntax to extract values from
+                                                the ID token.
+                                                <a
+                                                    href="https://jmespath.org"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-primary hover:underline inline-flex items-center"
+                                                >
+                                                    Learn more about JMESPath{" "}
+                                                    <ExternalLink className="ml-1 h-4 w-4" />
+                                                </a>
+                                            </AlertDescription>
+                                        </Alert>
+
+                                        <FormField
+                                            control={form.control}
+                                            name="identifierPath"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        Identifier Path
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} />
+                                                    </FormControl>
+                                                    <FormDescription>
+                                                        The JMESPath to the user
+                                                        identifier in the ID
+                                                        token
+                                                    </FormDescription>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+
+                                        <FormField
+                                            control={form.control}
+                                            name="emailPath"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        Email Path (Optional)
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} />
+                                                    </FormControl>
+                                                    <FormDescription>
+                                                        The JMESPath to the
+                                                        user's email in the ID
+                                                        token
+                                                    </FormDescription>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+
+                                        <FormField
+                                            control={form.control}
+                                            name="namePath"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        Name Path (Optional)
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} />
+                                                    </FormControl>
+                                                    <FormDescription>
+                                                        The JMESPath to the
+                                                        user's name in the ID
+                                                        token
+                                                    </FormDescription>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+
+                                        <FormField
+                                            control={form.control}
+                                            name="scopes"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        Scopes
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} />
+                                                    </FormControl>
+                                                    <FormDescription>
+                                                        Space-separated list of
+                                                        OAuth2 scopes to request
+                                                    </FormDescription>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </form>
+                                </Form>
+                            </SettingsSectionBody>
+                        </SettingsSection>
+                    </SettingsSectionGrid>
                 )}
             </SettingsContainer>
 
