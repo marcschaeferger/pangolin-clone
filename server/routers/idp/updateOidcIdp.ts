@@ -7,12 +7,16 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { OpenAPITags, registry } from "@server/openApi";
-import { idp, idpOidcConfig, idpOrg, orgs } from "@server/db/schemas";
-import { generateOidcRedirectUrl } from "@server/lib/idp/generateRedirectUrl";
+import { idp, idpOidcConfig } from "@server/db/schemas";
+import { eq } from "drizzle-orm";
 import { encrypt } from "@server/lib/crypto";
 import config from "@server/lib/config";
 
-const paramsSchema = z.object({}).strict();
+const paramsSchema = z
+    .object({
+        idpId: z.coerce.number()
+    })
+    .strict();
 
 const bodySchema = z
     .object({
@@ -24,22 +28,22 @@ const bodySchema = z
         identifierPath: z.string().nonempty(),
         emailPath: z.string().optional(),
         namePath: z.string().optional(),
-        scopes: z.string().nonempty(),
+        scopes: z.string().optional(),
         autoProvision: z.boolean().optional()
     })
     .strict();
 
-export type CreateIdpResponse = {
+export type UpdateIdpResponse = {
     idpId: number;
-    redirectUrl: string;
 };
 
 registry.registerPath({
-    method: "put",
-    path: "/idp/oidc",
-    description: "Create an OIDC IdP.",
+    method: "post",
+    path: "/idp/:idpId/oidc",
+    description: "Update an OIDC IdP.",
     tags: [OpenAPITags.Idp],
     request: {
+        params: paramsSchema,
         body: {
             content: {
                 "application/json": {
@@ -51,12 +55,22 @@ registry.registerPath({
     responses: {}
 });
 
-export async function createOidcIdp(
+export async function updateOidcIdp(
     req: Request,
     res: Response,
     next: NextFunction
 ): Promise<any> {
     try {
+        const parsedParams = paramsSchema.safeParse(req.params);
+        if (!parsedParams.success) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    fromError(parsedParams.error).toString()
+                )
+            );
+        }
+
         const parsedBody = bodySchema.safeParse(req.body);
         if (!parsedBody.success) {
             return next(
@@ -67,6 +81,7 @@ export async function createOidcIdp(
             );
         }
 
+        const { idpId } = parsedParams.data;
         const {
             clientId,
             clientSecret,
@@ -80,48 +95,63 @@ export async function createOidcIdp(
             autoProvision
         } = parsedBody.data;
 
-        const key = config.getRawConfig().server.secret;
+        // Check if IDP exists and is of type OIDC
+        const [existingIdp] = await db
+            .select()
+            .from(idp)
+            .where(eq(idp.idpId, idpId));
 
+        if (!existingIdp) {
+            return next(createHttpError(HttpCode.NOT_FOUND, "IdP not found"));
+        }
+
+        if (existingIdp.type !== "oidc") {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    "IdP is not an OIDC provider"
+                )
+            );
+        }
+
+        const key = config.getRawConfig().server.secret;
         const encryptedSecret = encrypt(clientSecret, key);
         const encryptedClientId = encrypt(clientId, key);
 
-        let idpId: number | undefined;
         await db.transaction(async (trx) => {
-            const [idpRes] = await trx
-                .insert(idp)
-                .values({
-                    name,
-                    type: "oidc"
+            // Update IDP name
+            await trx
+                .update(idp)
+                .set({
+                    name
                 })
-                .returning();
+                .where(eq(idp.idpId, idpId));
 
-            idpId = idpRes.idpId;
-
-            await trx.insert(idpOidcConfig).values({
-                idpId: idpRes.idpId,
-                clientId: encryptedClientId,
-                clientSecret: encryptedSecret,
-                authUrl,
-                tokenUrl,
-                autoProvision,
-                scopes,
-                identifierPath,
-                emailPath,
-                namePath
-            });
+            // Update OIDC config
+            await trx
+                .update(idpOidcConfig)
+                .set({
+                    clientId: encryptedClientId,
+                    clientSecret: encryptedSecret,
+                    authUrl,
+                    tokenUrl,
+                    autoProvision,
+                    scopes,
+                    identifierPath,
+                    emailPath,
+                    namePath
+                })
+                .where(eq(idpOidcConfig.idpId, idpId));
         });
 
-        const redirectUrl = generateOidcRedirectUrl(idpId as number);
-
-        return response<CreateIdpResponse>(res, {
+        return response<UpdateIdpResponse>(res, {
             data: {
-                idpId: idpId as number,
-                redirectUrl
+                idpId
             },
             success: true,
             error: false,
-            message: "Idp created successfully",
-            status: HttpCode.CREATED
+            message: "IdP updated successfully",
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);

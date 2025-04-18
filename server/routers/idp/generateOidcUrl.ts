@@ -76,7 +76,14 @@ export async function generateOidcUrl(
             );
         }
 
-        const parsedScopes = JSON.parse(existingIdp.idpOidcConfig.scopes);
+        const parsedScopes = existingIdp.idpOidcConfig.scopes
+            .split(" ")
+            .map((scope) => {
+                return scope.trim();
+            })
+            .filter((scope) => {
+                return scope.length > 0;
+            });
 
         const key = config.getRawConfig().server.secret;
 

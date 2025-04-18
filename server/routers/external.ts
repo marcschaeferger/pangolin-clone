@@ -501,6 +501,12 @@ authenticated.put(
     idp.createOidcIdp
 );
 
+authenticated.post(
+    "/idp/:idpId/oidc",
+    verifyUserIsServerAdmin,
+    idp.updateOidcIdp
+);
+
 authenticated.delete(
     "/idp/:idpId",
     verifyUserIsServerAdmin,

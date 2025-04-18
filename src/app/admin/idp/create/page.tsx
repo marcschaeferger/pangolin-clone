@@ -105,7 +105,7 @@ export default function Page() {
                 emailPath: data.emailPath,
                 namePath: data.namePath,
                 autoProvision: data.autoProvision,
-                scopes: data.scopes.split(" ").filter(Boolean)
+                scopes: data.scopes
             };
 
             const res = await api.put("/idp/oidc", payload);
@@ -115,7 +115,7 @@ export default function Page() {
                     title: "Success",
                     description: "Identity provider created successfully"
                 });
-                router.push("/admin/idp");
+                router.push(`/admin/idp/${res.data.data.idpId}`);
             }
         } catch (e) {
             toast({

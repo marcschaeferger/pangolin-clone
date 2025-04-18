@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { IdpDataTable } from "./AdminIdpDataTable";
 import { Button } from "@app/components/ui/button";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { ArrowRight, ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { useState } from "react";
 import ConfirmDeleteDialog from "@app/components/ConfirmDeleteDialog";
 import { toast } from "@app/hooks/useToast";
@@ -11,6 +11,14 @@ import { formatAxiosError } from "@app/lib/api";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { Badge } from "@app/components/ui/badge";
+import { useRouter } from "next/navigation";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger
+} from "@app/components/ui/dropdown-menu";
+import Link from "next/link";
 
 export type IdpRow = {
     idpId: number;
@@ -27,6 +35,7 @@ export default function IdpTable({ idps }: Props) {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedIdp, setSelectedIdp] = useState<IdpRow | null>(null);
     const api = createApiClient(useEnvContext());
+    const router = useRouter();
 
     const deleteIdp = async (idpId: number) => {
         try {
@@ -35,8 +44,7 @@ export default function IdpTable({ idps }: Props) {
                 title: "Success",
                 description: "Identity provider deleted successfully"
             });
-            // Refresh the page to update the list
-            window.location.reload();
+            router.refresh();
         } catch (e) {
             toast({
                 title: "Error",
@@ -56,6 +64,41 @@ export default function IdpTable({ idps }: Props) {
     };
 
     const columns: ColumnDef<IdpRow>[] = [
+        {
+            id: "dots",
+            cell: ({ row }) => {
+                const r = row.original;
+
+                return (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <Link
+                                className="block w-full"
+                                href={`/admin/idp/${r.idpId}/general`}
+                            >
+                                <DropdownMenuItem>
+                                    View settings
+                                </DropdownMenuItem>
+                            </Link>
+                            <DropdownMenuItem
+                                onClick={() => {
+                                    setSelectedIdp(r);
+                                    setIsDeleteModalOpen(true);
+                                }}
+                            >
+                                <span className="text-red-500">Delete</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                );
+            }
+        },
         {
             accessorKey: "idpId",
             header: ({ column }) => {
@@ -106,9 +149,7 @@ export default function IdpTable({ idps }: Props) {
             cell: ({ row }) => {
                 const type = row.original.type;
                 return (
-                    <Badge variant="secondary">
-                        {getTypeDisplay(type)}
-                    </Badge>
+                    <Badge variant="secondary">{getTypeDisplay(type)}</Badge>
                 );
             }
         },
@@ -131,19 +172,15 @@ export default function IdpTable({ idps }: Props) {
         {
             id: "actions",
             cell: ({ row }) => {
-                const idp = row.original;
+                const siteRow = row.original;
                 return (
                     <div className="flex items-center justify-end">
-                        <Button
-                            variant="outline"
-                            className="ml-2"
-                            onClick={() => {
-                                setSelectedIdp(idp);
-                                setIsDeleteModalOpen(true);
-                            }}
-                        >
-                            Delete
-                        </Button>
+                        <Link href={`/admin/idp/${siteRow.idpId}/general`}>
+                            <Button variant={"outlinePrimary"} className="ml-2">
+                                Edit
+                                <ArrowRight className="ml-2 w-4 h-4" />
+                            </Button>
+                        </Link>
                     </div>
                 );
             }
