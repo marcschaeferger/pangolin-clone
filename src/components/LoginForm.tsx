@@ -39,10 +39,17 @@ import Link from "next/link";
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
 import Image from "next/image";
 import { GenerateOidcUrlResponse } from "@server/routers/idp";
+import { Separator } from "./ui/separator";
+
+export type LoginFormIDP = {
+    idpId: number;
+    name: string;
+};
 
 type LoginFormProps = {
     redirect?: string;
     onLogin?: () => void | Promise<void>;
+    idps?: LoginFormIDP[];
 };
 
 const formSchema = z.object({
@@ -56,7 +63,7 @@ const mfaSchema = z.object({
     code: z.string().length(6, { message: "Invalid code" })
 });
 
-export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
+export default function LoginForm({ redirect, onLogin, idps }: LoginFormProps) {
     const router = useRouter();
 
     const { env } = useEnvContext();
@@ -65,6 +72,7 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
 
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const hasIdp = idps && idps.length > 0;
 
     const [mfaRequested, setMfaRequested] = useState(false);
 
@@ -207,16 +215,6 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
                             </div>
                         </form>
                     </Form>
-
-                    <Button
-                        type="button"
-                        className="w-full"
-                        onClick={() => {
-                            loginWithIdp(1);
-                        }}
-                    >
-                        OIDC Login
-                    </Button>
                 </>
             )}
 
@@ -303,16 +301,47 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
                 )}
 
                 {!mfaRequested && (
-                    <Button
-                        type="submit"
-                        form="form"
-                        className="w-full"
-                        loading={loading}
-                        disabled={loading}
-                    >
-                        <LockIcon className="w-4 h-4 mr-2" />
-                        Log In
-                    </Button>
+                    <>
+                        <Button
+                            type="submit"
+                            form="form"
+                            className="w-full"
+                            loading={loading}
+                            disabled={loading}
+                        >
+                            <LockIcon className="w-4 h-4 mr-2" />
+                            Log In
+                        </Button>
+
+                        {hasIdp && (
+                            <>
+                                <div className="relative my-4">
+                                    <div className="absolute inset-0 flex items-center">
+                                        <Separator />
+                                    </div>
+                                    <div className="relative flex justify-center text-xs uppercase">
+                                        <span className="px-2 bg-card text-muted-foreground">
+                                            Or continue with
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {idps.map((idp) => (
+                                    <Button
+                                        key={idp.idpId}
+                                        type="button"
+                                        variant="outline"
+                                        className="w-full"
+                                        onClick={() => {
+                                            loginWithIdp(idp.idpId);
+                                        }}
+                                    >
+                                        {idp.name}
+                                    </Button>
+                                ))}
+                            </>
+                        )}
+                    </>
                 )}
 
                 {mfaRequested && (

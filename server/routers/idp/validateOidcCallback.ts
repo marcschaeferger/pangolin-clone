@@ -10,6 +10,7 @@ import {
     idp,
     idpOidcConfig,
     idpOrg,
+    orgs,
     Role,
     roles,
     userOrgs,
@@ -214,32 +215,47 @@ export async function validateOidcCallback(
             );
 
         if (existingIdp.idp.autoProvision) {
-            const idpOrgs = await db
-                .select()
-                .from(idpOrg)
-                .where(eq(idpOrg.idpId, existingIdp.idp.idpId));
+            const allOrgs = await db.select().from(orgs);
 
             const defaultRoleMapping = existingIdp.idp.defaultRoleMapping;
             const defaultOrgMapping = existingIdp.idp.defaultOrgMapping;
 
             let userOrgInfo: { orgId: string; roleId: number }[] = [];
-            for (const idpOrg of idpOrgs) {
+            for (const org of allOrgs) {
+                const [idpOrgRes] = await db
+                    .select()
+                    .from(idpOrg)
+                    .where(
+                        and(
+                            eq(idpOrg.idpId, existingIdp.idp.idpId),
+                            eq(idpOrg.orgId, org.orgId)
+                        )
+                    );
+
                 let roleId: number | undefined = undefined;
 
-                const orgMapping = idpOrg.orgMapping || defaultOrgMapping;
-                const hydratedOrgMapping = orgMapping
-                    ?.split("{{orgId}}")
-                    .join(idpOrg.orgId);
+                const orgMapping = idpOrgRes?.orgMapping || defaultOrgMapping;
+                const hydratedOrgMapping = hydrateOrgMapping(
+                    orgMapping,
+                    org.orgId
+                );
 
                 if (hydratedOrgMapping) {
+                    logger.debug("Hydrated Org Mapping", {
+                        hydratedOrgMapping
+                    });
                     const orgId = jmespath.search(claims, hydratedOrgMapping);
-                    if (!(orgId === true || orgId === idpOrg.orgId)) {
+                    logger.debug("Extraced Org ID", { orgId });
+                    if (orgId !== true && orgId !== org.orgId) {
+                        // user not allowed to access this org
                         continue;
                     }
                 }
 
-                const roleMapping = idpOrg.roleMapping || defaultRoleMapping;
+                const roleMapping =
+                    idpOrgRes?.roleMapping || defaultRoleMapping;
                 if (roleMapping) {
+                    logger.debug("Role Mapping", { roleMapping });
                     const roleName = jmespath.search(claims, roleMapping);
 
                     if (!roleName) {
@@ -254,14 +270,14 @@ export async function validateOidcCallback(
                         .from(roles)
                         .where(
                             and(
-                                eq(roles.orgId, idpOrg.orgId),
+                                eq(roles.orgId, org.orgId),
                                 eq(roles.name, roleName)
                             )
                         );
 
                     if (!roleRes) {
                         logger.error("Role not found", {
-                            orgId: idpOrg.orgId,
+                            orgId: org.orgId,
                             roleName
                         });
                         continue;
@@ -270,7 +286,7 @@ export async function validateOidcCallback(
                     roleId = roleRes.roleId;
 
                     userOrgInfo.push({
-                        orgId: idpOrg.orgId,
+                        orgId: org.orgId,
                         roleId
                     });
                 }
@@ -442,4 +458,14 @@ export async function validateOidcCallback(
             createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
+}
+
+function hydrateOrgMapping(
+    orgMapping: string | null,
+    orgId: string
+): string | undefined {
+    if (!orgMapping) {
+        return undefined;
+    }
+    return orgMapping.split("{{orgId}}").join(orgId);
 }

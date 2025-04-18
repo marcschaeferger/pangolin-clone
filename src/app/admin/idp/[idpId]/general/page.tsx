@@ -101,7 +101,7 @@ export default function GeneralPage() {
                         emailPath: data.idpOidcConfig.emailPath,
                         namePath: data.idpOidcConfig.namePath,
                         scopes: data.idpOidcConfig.scopes,
-                        autoProvision: data.idpOidcConfig.autoProvision
+                        autoProvision: data.idp.autoProvision
                     });
                 }
             } catch (e) {

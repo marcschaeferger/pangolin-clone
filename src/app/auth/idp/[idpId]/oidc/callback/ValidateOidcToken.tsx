@@ -22,7 +22,7 @@ type ValidateOidcTokenParams = {
     code: string | undefined;
     expectedState: string | undefined;
     stateCookie: string | undefined;
-    idp: {name: string};
+    idp: { name: string };
 };
 
 export default function ValidateOidcToken(props: ValidateOidcTokenParams) {
@@ -64,11 +64,10 @@ export default function ValidateOidcToken(props: ValidateOidcTokenParams) {
                 await new Promise((resolve) => setTimeout(resolve, 100));
 
                 if (redirectUrl.startsWith("http")) {
-                    window.location.href = res.data.data.redirectUrl; // TODO: validate this to make sure it's safe
+                    window.location.href = res.data.data.redirectUrl; // this is validated by the parent using this component
                 } else {
                     router.push(res.data.data.redirectUrl);
                 }
-
             } catch (e) {
                 setError(formatAxiosError(e, "Error validating OIDC token"));
             } finally {
@@ -103,8 +102,12 @@ export default function ValidateOidcToken(props: ValidateOidcTokenParams) {
                         <Alert variant="destructive" className="w-full">
                             <AlertCircle className="h-5 w-5" />
                             <AlertDescription className="flex flex-col space-y-2">
-                                <span>There was a problem connecting to {props.idp.name}. Please contact your administrator.</span>
-                                <span className="text-xs text-muted-foreground">{error}</span>
+                                <span>
+                                    There was a problem connecting to{" "}
+                                    {props.idp.name}. Please contact your
+                                    administrator.
+                                </span>
+                                <span className="text-xs">{error}</span>
                             </AlertDescription>
                         </Alert>
                     )}

@@ -90,29 +90,32 @@ export function Layout({
                                             </SheetDescription>
                                             <div className="flex-1 overflow-y-auto">
                                                 <div className="p-4">
-                                                <SidebarNav
-                                                    items={navItems}
-                                                    onItemClick={() =>
-                                                        setIsMobileMenuOpen(
-                                                            false
-                                                        )
-                                                    }
-                                                />
+                                                    <SidebarNav
+                                                        items={navItems}
+                                                        onItemClick={() =>
+                                                            setIsMobileMenuOpen(
+                                                                false
+                                                            )
+                                                        }
+                                                    />
                                                 </div>
-                                                {!isAdminPage && (
-                                                    <div className="p-4 border-t">
-                                                        <Link
-                                                            href="/admin"
-                                                            className="flex items-center gap-3 text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-md w-full"
-                                                            onClick={() =>
-                                                                setIsMobileMenuOpen(false)
-                                                            }
-                                                        >
-                                                            <Server className="h-4 w-4" />
-                                                            Server Admin
-                                                        </Link>
-                                                    </div>
-                                                )}
+                                                {!isAdminPage &&
+                                                    user.serverAdmin && (
+                                                        <div className="p-4 border-t">
+                                                            <Link
+                                                                href="/admin"
+                                                                className="flex items-center gap-3 text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-md w-full"
+                                                                onClick={() =>
+                                                                    setIsMobileMenuOpen(
+                                                                        false
+                                                                    )
+                                                                }
+                                                            >
+                                                                <Server className="h-4 w-4" />
+                                                                Server Admin
+                                                            </Link>
+                                                        </div>
+                                                    )}
                                             </div>
                                             <div className="p-4 space-y-4 border-t shrink-0">
                                                 <SupporterStatus />
@@ -234,7 +237,7 @@ export function Layout({
                     )}
                 >
                     <main className="flex-1 overflow-y-auto p-3 md:p-6 w-full">
-                        <div className="container mx-auto max-w-12xl">
+                        <div className="container mx-auto max-w-12xl mb-12">
                             {children}
                         </div>
                     </main>

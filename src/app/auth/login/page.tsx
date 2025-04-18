@@ -6,6 +6,9 @@ import DashboardLoginForm from "./DashboardLoginForm";
 import { Mail } from "lucide-react";
 import { pullEnv } from "@app/lib/pullEnv";
 import { cleanRedirect } from "@app/lib/cleanRedirect";
+import db from "@server/db";
+import { idp } from "@server/db/schemas";
+import { LoginFormIDP } from "@app/components/LoginForm";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +34,12 @@ export default async function Page(props: {
         redirectUrl = cleanRedirect(searchParams.redirect as string);
     }
 
+    const idps = await db.select().from(idp);
+    const loginIdps = idps.map((idp) => ({
+        idpId: idp.idpId,
+        name: idp.name
+    })) as LoginFormIDP[];
+
     return (
         <>
             {isInvite && (
@@ -48,7 +57,7 @@ export default async function Page(props: {
                 </div>
             )}
 
-            <DashboardLoginForm redirect={redirectUrl} />
+            <DashboardLoginForm redirect={redirectUrl} idps={loginIdps} />
 
             {(!signUpDisabled || isInvite) && (
                 <p className="text-center text-muted-foreground mt-4">
