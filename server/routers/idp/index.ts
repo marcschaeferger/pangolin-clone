@@ -8,3 +8,4 @@ export * from "./getIdp";
 export * from "./createIdpOrgPolicy";
 export * from "./deleteIdpOrgPolicy";
 export * from "./listIdpOrgPolicies";
+export * from "./updateIdpOrgPolicy";

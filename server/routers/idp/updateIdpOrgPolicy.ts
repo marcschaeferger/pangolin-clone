@@ -7,7 +7,6 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { OpenAPITags, registry } from "@server/openApi";
-import config from "@server/lib/config";
 import { eq, and } from "drizzle-orm";
 import { idp, idpOrg } from "@server/db/schemas";
 
@@ -25,12 +24,12 @@ const bodySchema = z
     })
     .strict();
 
-export type CreateIdpOrgPolicyResponse = {};
+export type UpdateIdpOrgPolicyResponse = {};
 
 registry.registerPath({
-    method: "put",
+    method: "post",
     path: "/idp/{idpId}/org/{orgId}",
-    description: "Create an IDP policy for an existing IDP on an organization.",
+    description: "Update an IDP org policy.",
     tags: [OpenAPITags.Idp],
     request: {
         params: paramsSchema,
@@ -45,22 +44,12 @@ registry.registerPath({
     responses: {}
 });
 
-export async function createIdpOrgPolicy(
+export async function updateIdpOrgPolicy(
     req: Request,
     res: Response,
     next: NextFunction
 ): Promise<any> {
     try {
-        const parsedBody = bodySchema.safeParse(req.body);
-        if (!parsedBody.success) {
-            return next(
-                createHttpError(
-                    HttpCode.BAD_REQUEST,
-                    fromError(parsedBody.error).toString()
-                )
-            );
-        }
-
         const parsedParams = paramsSchema.safeParse(req.params);
         if (!parsedParams.success) {
             return next(
@@ -71,9 +60,20 @@ export async function createIdpOrgPolicy(
             );
         }
 
+        const parsedBody = bodySchema.safeParse(req.body);
+        if (!parsedBody.success) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    fromError(parsedBody.error).toString()
+                )
+            );
+        }
+
         const { idpId, orgId } = parsedParams.data;
         const { roleMapping, orgMapping } = parsedBody.data;
 
+        // Check if IDP and policy exist
         const [existing] = await db
             .select()
             .from(idp)
@@ -92,28 +92,30 @@ export async function createIdpOrgPolicy(
             );
         }
 
-        if (existing.idpOrg) {
+        if (!existing.idpOrg) {
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    "An IDP org policy already exists."
+                    "A policy for this IDP and org does not exist."
                 )
             );
         }
 
-        await db.insert(idpOrg).values({
-            idpId,
-            orgId,
-            roleMapping,
-            orgMapping
-        });
+        // Update the policy
+        await db
+            .update(idpOrg)
+            .set({
+                roleMapping,
+                orgMapping
+            })
+            .where(and(eq(idpOrg.idpId, idpId), eq(idpOrg.orgId, orgId)));
 
-        return response<CreateIdpOrgPolicyResponse>(res, {
+        return response<UpdateIdpOrgPolicyResponse>(res, {
             data: {},
             success: true,
             error: false,
-            message: "Idp created successfully",
-            status: HttpCode.CREATED
+            message: "Policy updated successfully",
+            status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);
@@ -121,4 +123,4 @@ export async function createIdpOrgPolicy(
             createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
-}
+} 

@@ -11,7 +11,7 @@ import { verifySession } from "@app/lib/auth/verifySession";
 import { redirect } from "next/navigation";
 import { internal } from "@app/lib/api";
 import { AxiosResponse } from "axios";
-import { GetOrgResponse, ListOrgsResponse } from "@server/routers/org";
+import { GetOrgResponse, ListUserOrgsResponse } from "@server/routers/org";
 import { authCookieHeader } from "@app/lib/api/cookies";
 import { cache } from "react";
 import { GetOrgUserResponse } from "@server/routers/user";
@@ -62,10 +62,13 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
         redirect(`/${params.orgId}`);
     }
 
-    let orgs: ListOrgsResponse["orgs"] = [];
+    let orgs: ListUserOrgsResponse["orgs"] = [];
     try {
         const getOrgs = cache(() =>
-            internal.get<AxiosResponse<ListOrgsResponse>>(`/orgs`, cookie)
+            internal.get<AxiosResponse<ListUserOrgsResponse>>(
+                `/user/${user.userId}/orgs`,
+                cookie
+            )
         );
         const res = await getOrgs();
         if (res && res.data.data.orgs) {

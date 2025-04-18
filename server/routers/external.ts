@@ -25,7 +25,8 @@ import {
     verifySetResourceUsers,
     verifyUserAccess,
     getUserOrgs,
-    verifyUserIsServerAdmin
+    verifyUserIsServerAdmin,
+    verifyIsLoggedInUser
 } from "@server/middlewares";
 import { verifyUserHasAction } from "../middlewares/verifyUserHasAction";
 import { ActionsEnum } from "@server/auth/actions";
@@ -47,7 +48,10 @@ authenticated.use(verifySessionUserMiddleware);
 
 authenticated.get("/org/checkId", org.checkId);
 authenticated.put("/org", getUserOrgs, org.createOrg);
-authenticated.get("/orgs", getUserOrgs, org.listOrgs); // TODO we need to check the orgs here
+
+authenticated.get("/orgs", verifyUserIsServerAdmin, org.listOrgs);
+authenticated.get("/user/:userId/orgs", verifyIsLoggedInUser, org.listUserOrgs);
+
 authenticated.get(
     "/org/:orgId",
     verifyOrgAccess,
@@ -507,28 +511,22 @@ authenticated.post(
     idp.updateOidcIdp
 );
 
-authenticated.delete(
-    "/idp/:idpId",
-    verifyUserIsServerAdmin,
-    idp.deleteIdp
-);
+authenticated.delete("/idp/:idpId", verifyUserIsServerAdmin, idp.deleteIdp);
 
-authenticated.get(
-    "/idp",
-    verifyUserIsServerAdmin,
-    idp.listIdps
-);
+authenticated.get("/idp", verifyUserIsServerAdmin, idp.listIdps);
 
-authenticated.get(
-    "/idp/:idpId",
-    verifyUserIsServerAdmin,
-    idp.getIdp
-);
+authenticated.get("/idp/:idpId", verifyUserIsServerAdmin, idp.getIdp);
 
 authenticated.put(
     "/idp/:idpId/org/:orgId",
     verifyUserIsServerAdmin,
     idp.createIdpOrgPolicy
+);
+
+authenticated.post(
+    "/idp/:idpId/org/:orgId",
+    verifyUserIsServerAdmin,
+    idp.updateIdpOrgPolicy
 );
 
 authenticated.delete(
@@ -631,17 +629,8 @@ authRouter.post(
     resource.authWithAccessToken
 );
 
-authRouter.post(
-    "/access-token",
-    resource.authWithAccessToken
-);
+authRouter.post("/access-token", resource.authWithAccessToken);
 
-authRouter.post(
-    "/idp/:idpId/oidc/generate-url",
-    idp.generateOidcUrl
-);
+authRouter.post("/idp/:idpId/oidc/generate-url", idp.generateOidcUrl);
 
-authRouter.post(
-    "/idp/:idpId/oidc/validate-callback",
-    idp.validateOidcCallback
-);
+authRouter.post("/idp/:idpId/oidc/validate-callback", idp.validateOidcCallback);

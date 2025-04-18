@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { SidebarNav } from "@app/components/SidebarNav";
 import { OrgSelector } from "@app/components/OrgSelector";
 import { cn } from "@app/lib/cn";
-import { ListOrgsResponse } from "@server/routers/org";
+import { ListUserOrgsResponse } from "@server/routers/org";
 import SupporterStatus from "@app/components/SupporterStatus";
 import { Button } from "@app/components/ui/button";
 import { ExternalLink, Menu, X, Server } from "lucide-react";
@@ -26,7 +26,7 @@ import { useUserContext } from "@app/hooks/useUserContext";
 interface LayoutProps {
     children: React.ReactNode;
     orgId?: string;
-    orgs?: ListOrgsResponse["orgs"];
+    orgs?: ListUserOrgsResponse["orgs"];
     navItems?: Array<{
         title: string;
         href: string;

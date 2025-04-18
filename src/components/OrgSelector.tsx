@@ -17,7 +17,7 @@ import {
 } from "@app/components/ui/popover";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { cn } from "@app/lib/cn";
-import { ListOrgsResponse } from "@server/routers/org";
+import { ListUserOrgsResponse } from "@server/routers/org";
 import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -25,7 +25,7 @@ import { useUserContext } from "@app/hooks/useUserContext";
 
 interface OrgSelectorProps {
     orgId?: string;
-    orgs?: ListOrgsResponse["orgs"];
+    orgs?: ListUserOrgsResponse["orgs"];
 }
 
 export function OrgSelector({ orgId, orgs }: OrgSelectorProps) {
@@ -121,4 +121,4 @@ export function OrgSelector({ orgId, orgs }: OrgSelectorProps) {
             </PopoverContent>
         </Popover>
     );
-} 
+}

@@ -39,6 +39,10 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
         {
             title: "General",
             href: `/admin/idp/${params.idpId}/general`
+        },
+        {
+            title: "Organization Policies",
+            href: `/admin/idp/${params.idpId}/policies`
         }
     ];
 
