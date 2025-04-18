@@ -114,7 +114,7 @@ export async function listUsers(
 
         const [{ count }] = await db
             .select({ count: sql<number>`count(*)` })
-            .from(users)
+            .from(userOrgs)
             .where(eq(userOrgs.orgId, orgId));
 
         return response<ListUsersResponse>(res, {

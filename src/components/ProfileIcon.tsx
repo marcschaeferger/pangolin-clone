@@ -66,7 +66,7 @@ export default function ProfileIcon() {
             <Enable2FaForm open={openEnable2fa} setOpen={setOpenEnable2fa} />
             <Disable2FaForm open={openDisable2fa} setOpen={setOpenDisable2fa} />
 
-            <div className="flex items-center md:gap-4 grow min-w-0 gap-2 md:gap-0">
+            <div className="flex items-center md:gap-2 grow min-w-0 gap-2 md:gap-0">
                 <span className="truncate max-w-full font-medium min-w-0">
                     {user.email || user.name || user.username}
                 </span>

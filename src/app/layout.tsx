@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Figtree, Inter, Red_Hat_Display, Red_Hat_Mono, Red_Hat_Text, Space_Grotesk } from "next/font/google";
+import {
+    Figtree,
+    Inter,
+    Red_Hat_Display,
+    Red_Hat_Mono,
+    Red_Hat_Text,
+    Space_Grotesk
+} from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@app/providers/ThemeProvider";
 import EnvProvider from "@app/providers/EnvProvider";

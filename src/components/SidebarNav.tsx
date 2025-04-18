@@ -129,22 +129,20 @@ export function SidebarNav({
                                 aria-disabled={disabled}
                             >
                                 {item.icon && (
-                                    <span className="mr-3 opacity-70">
-                                        {item.icon}
-                                    </span>
+                                    <span className="mr-3">{item.icon}</span>
                                 )}
                                 {item.title}
                             </Link>
                             {hasChildren && (
                                 <button
                                     onClick={() => toggleItem(hydratedHref)}
-                                    className="p-2 rounded-md opacity-70 hover:opacity-100"
+                                    className="p-2 rounded-md text-muted-foreground hover:text-foreground cursor-pointer"
                                     disabled={disabled}
                                 >
                                     {isExpanded ? (
-                                        <ChevronDown className="h-4 w-4" />
+                                        <ChevronDown className="h-5 w-5" />
                                     ) : (
-                                        <ChevronRight className="h-4 w-4" />
+                                        <ChevronRight className="h-5 w-5" />
                                     )}
                                 </button>
                             )}
