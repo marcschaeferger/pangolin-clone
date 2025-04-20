@@ -380,9 +380,10 @@ export default function PoliciesPage() {
                                                     JMESPath to extract
                                                     organization information
                                                     from the ID token. This
-                                                    expression must return true
-                                                    for the user to be allowed
-                                                    to access the organization.
+                                                    expression must return thr
+                                                    org ID or true for the user
+                                                    to be allowed to access the
+                                                    organization.
                                                 </FormDescription>
                                                 <FormMessage />
                                             </FormItem>
@@ -576,9 +577,10 @@ export default function PoliciesPage() {
                                             <FormDescription>
                                                 JMESPath to extract organization
                                                 information from the ID token.
-                                                This expression must return true
-                                                for the user to be allowed to
-                                                access the organization.
+                                                This expression must return the
+                                                org ID or true for the user to
+                                                be allowed to access the
+                                                organization.
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>

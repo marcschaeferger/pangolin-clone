@@ -38,7 +38,9 @@ export default function ProfileIcon() {
     const [openDisable2fa, setOpenDisable2fa] = useState(false);
 
     function getInitials() {
-        return (user.email || user.name || user.username).substring(0, 1).toUpperCase();
+        return (user.email || user.name || user.username)
+            .substring(0, 1)
+            .toUpperCase();
     }
 
     function handleThemeChange(theme: "light" | "dark" | "system") {
@@ -95,9 +97,13 @@ export default function ProfileIcon() {
                                     {user.email || user.name || user.username}
                                 </p>
                             </div>
-                            {user.serverAdmin && (
+                            {user.serverAdmin ? (
                                 <p className="text-xs leading-none text-muted-foreground mt-2">
                                     Server Admin
+                                </p>
+                            ) : (
+                                <p className="text-xs leading-none text-muted-foreground mt-2">
+                                    {user.idpName || "Internal"}
                                 </p>
                             )}
                         </DropdownMenuLabel>
