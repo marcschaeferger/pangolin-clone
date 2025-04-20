@@ -77,7 +77,9 @@ export const resources = sqliteTable("resources", {
     applyRules: integer("applyRules", { mode: "boolean" })
         .notNull()
         .default(false),
-    enabled: integer("enabled", { mode: "boolean" }).notNull().default(true)
+    enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
+    tlsServerName: text("tlsServerName").notNull().default(""),
+    setHostHeader: text("setHostHeader").notNull().default("")
 });
 
 export const targets = sqliteTable("targets", {
