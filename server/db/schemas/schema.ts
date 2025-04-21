@@ -78,8 +78,8 @@ export const resources = sqliteTable("resources", {
         .notNull()
         .default(false),
     enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
-    tlsServerName: text("tlsServerName").notNull().default(""),
-    setHostHeader: text("setHostHeader").notNull().default("")
+    tlsServerName: text("tlsServerName"),
+    setHostHeader: text("setHostHeader")
 });
 
 export const targets = sqliteTable("targets", {

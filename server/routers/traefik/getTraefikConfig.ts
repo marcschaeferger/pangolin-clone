@@ -290,7 +290,7 @@ export async function traefikConfigProvider(
                     }
                     config_output.http.serversTransports![transportName] = {
                         serverName: resource.tlsServerName,
-                        //unfortunately the following needs to be set. traefik doesn't merge the default serverTransport settings 
+                        //unfortunately the following needs to be set. traefik doesn't merge the default serverTransport settings
                         // if defined in the static config and here. if not set, self-signed certs won't work
                         insecureSkipVerify: true
                     };

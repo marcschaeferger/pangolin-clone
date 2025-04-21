@@ -122,8 +122,9 @@ const AdvancedFormSchema = z
             }
             return true;
         },
-        { 
-            message: "Invalid TLS Server Name. Use domain name format, or save empty to remove the TLS Server Name.",
+        {
+            message:
+                "Invalid TLS Server Name. Use domain name format, or save empty to remove the TLS Server Name.",
             path: ["tlsServerName"]
         }
     )
@@ -134,8 +135,9 @@ const AdvancedFormSchema = z
             }
             return true;
         },
-        { 
-            message: "Invalid custom Host Header value. Use domain name format, or save empty to unset the custom Host Header",
+        {
+            message:
+                "Invalid custom Host Header value. Use domain name format, or save empty to unset the custom Host Header",
             path: ["tlsServerName"]
         }
     );
@@ -187,8 +189,12 @@ export default function GeneralForm() {
         resolver: zodResolver(AdvancedFormSchema),
         defaultValues: {
             http: resource.http,
-            tlsServerName: resource.http ? resource.tlsServerName || "" : undefined,
-            setHostHeader: resource.http ? resource.setHostHeader || "" : undefined
+            tlsServerName: resource.http
+                ? resource.tlsServerName || ""
+                : undefined,
+            setHostHeader: resource.http
+                ? resource.setHostHeader || ""
+                : undefined
         },
         mode: "onChange"
     });
@@ -683,81 +689,77 @@ export default function GeneralForm() {
                     </SettingsSectionFooter>
                 </SettingsSection>
 
-        {resource.http && (
-            <>
-                <SettingsSection>
-                    <SettingsSectionHeader>
-                        <SettingsSectionTitle>Advanced</SettingsSectionTitle>
-                        <SettingsSectionDescription>
-                            Adjust advanced settings for the resource, like customize the Host Header or set a TLS Server Name for SNI based routing.
-                        </SettingsSectionDescription>
-                    </SettingsSectionHeader>
-                    <SettingsSectionBody>
-                        <SettingsSectionForm>
-                            <Form {...advancedForm}>
-                                <form
-                                    onSubmit={advancedForm.handleSubmit(onSubmitAdvanced)}
-                                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                                    id="advanced-settings-form"
-                                >
-                                            {/* New TLS Server Name Field */}
-                                            <div className="w-fill space-y-2">
-                                                    <FormLabel>
-                                                        TLS Server Name (optional)
-                                                    </FormLabel>
-                                                    <FormField
-                                                        control={advancedForm.control}
-                                                        name="tlsServerName"
-                                                        render={({ field }) => (
-                                                            <FormItem>
-                                                                <FormControl>
-                                                                    <Input
-                                                                        {...field}
-                                                                    />
-                                                                </FormControl>
-                                                                <FormMessage />
-                                                            </FormItem>
-                                                        )}
-                                                    />
-                                                </div>
-                                                {/* New Custom Host Header Field */}
-                                                <div className="w-fill space-y-2">
-                                                    <FormLabel>
-                                                        Custom Host Header (optional)
-                                                    </FormLabel>
-                                                    <FormField
-                                                        control={advancedForm.control}
-                                                        name="setHostHeader"
-                                                        render={({ field }) => (
-                                                            <FormItem>
-                                                                <FormControl>
-                                                                    <Input
-                                                                        {...field}
-                                                                    />
-                                                                </FormControl>
-                                                                <FormMessage />
-                                                            </FormItem>
-                                                        )}
-                                                    />
-                                                </div>
-                                </form>
-                            </Form>
-                        </SettingsSectionForm>                       
-                    </SettingsSectionBody>
+                {resource.http && (
+                    <>
+                        <SettingsSection>
+                            <SettingsSectionHeader>
+                                <SettingsSectionTitle>
+                                    Advanced
+                                </SettingsSectionTitle>
+                                <SettingsSectionDescription>
+                                    Adjust advanced settings for the resource,
+                                    like customize the Host Header or set a TLS
+                                    Server Name for SNI based routing.
+                                </SettingsSectionDescription>
+                            </SettingsSectionHeader>
+                            <SettingsSectionBody>
+                                <SettingsSectionForm>
+                                    <Form {...advancedForm}>
+                                        <form
+                                            onSubmit={advancedForm.handleSubmit(
+                                                onSubmitAdvanced
+                                            )}
+                                            id="advanced-settings-form"
+                                        >
+                                            <FormLabel>
+                                                TLS Server Name (optional)
+                                            </FormLabel>
+                                            <FormField
+                                                control={advancedForm.control}
+                                                name="tlsServerName"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormControl>
+                                                            <Input {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
 
-                    <SettingsSectionFooter>
-                        <Button
-                            type="submit"
-                            loading={saveLoading}
-                            disabled={saveLoading}
-                            form="advanced-settings-form"
-                        >
-                            Save Advanced Settings
-                        </Button>
-                    </SettingsSectionFooter>
-                </SettingsSection>
-            </>
-        )}
+                                            <FormLabel>
+                                                Custom Host Header (optional)
+                                            </FormLabel>
+                                            <FormField
+                                                control={advancedForm.control}
+                                                name="setHostHeader"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormControl>
+                                                            <Input {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </form>
+                                    </Form>
+                                </SettingsSectionForm>
+                            </SettingsSectionBody>
+
+                            <SettingsSectionFooter>
+                                <Button
+                                    type="submit"
+                                    loading={saveLoading}
+                                    disabled={saveLoading}
+                                    form="advanced-settings-form"
+                                >
+                                    Save Advanced Settings
+                                </Button>
+                            </SettingsSectionFooter>
+                        </SettingsSection>
+                    </>
+                )}
                 <SettingsSection>
                     <SettingsSectionHeader>
                         <SettingsSectionTitle>
