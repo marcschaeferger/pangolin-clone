@@ -80,7 +80,9 @@ export const resources = sqliteTable("resources", {
     enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
     stickySession: integer("stickySession", { mode: "boolean" })
         .notNull()
-        .default(false)
+        .default(false),
+    tlsServerName: text("tlsServerName"),
+    setHostHeader: text("setHostHeader")
 });
 
 export const targets = sqliteTable("targets", {

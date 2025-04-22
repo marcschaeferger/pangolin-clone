@@ -48,7 +48,7 @@ import { useOrgContext } from "@app/hooks/useOrgContext";
 import CustomDomainInput from "../CustomDomainInput";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
-import { subdomainSchema } from "@server/lib/schemas";
+import { subdomainSchema, tlsNameSchema } from "@server/lib/schemas";
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 import { RadioGroup, RadioGroupItem } from "@app/components/ui/radio-group";
 import { Label } from "@app/components/ui/label";
@@ -109,8 +109,42 @@ const TransferFormSchema = z.object({
     siteId: z.number()
 });
 
+const AdvancedFormSchema = z
+    .object({
+        http: z.boolean(),
+        tlsServerName: z.string().optional(),
+        setHostHeader: z.string().optional()
+    })
+    .refine(
+        (data) => {
+            if (data.tlsServerName) {
+                return tlsNameSchema.safeParse(data.tlsServerName).success;
+            }
+            return true;
+        },
+        {
+            message:
+                "Invalid TLS Server Name. Use domain name format, or save empty to remove the TLS Server Name.",
+            path: ["tlsServerName"]
+        }
+    )
+    .refine(
+        (data) => {
+            if (data.setHostHeader) {
+                return tlsNameSchema.safeParse(data.setHostHeader).success;
+            }
+            return true;
+        },
+        {
+            message:
+                "Invalid custom Host Header value. Use domain name format, or save empty to unset the custom Host Header",
+            path: ["tlsServerName"]
+        }
+    );
+
 type GeneralFormValues = z.infer<typeof GeneralFormSchema>;
 type TransferFormValues = z.infer<typeof TransferFormSchema>;
+type AdvancedFormValues = z.infer<typeof AdvancedFormSchema>;
 
 export default function GeneralForm() {
     const [formKey, setFormKey] = useState(0);
@@ -147,6 +181,20 @@ export default function GeneralForm() {
             http: resource.http,
             isBaseDomain: resource.isBaseDomain ? true : false,
             domainId: resource.domainId || undefined
+        },
+        mode: "onChange"
+    });
+
+    const advancedForm = useForm<AdvancedFormValues>({
+        resolver: zodResolver(AdvancedFormSchema),
+        defaultValues: {
+            http: resource.http,
+            tlsServerName: resource.http
+                ? resource.tlsServerName || ""
+                : undefined,
+            setHostHeader: resource.http
+                ? resource.setHostHeader || ""
+                : undefined
         },
         mode: "onChange"
     });
@@ -277,6 +325,46 @@ export default function GeneralForm() {
             });
         }
         setTransferLoading(false);
+    }
+
+    async function onSubmitAdvanced(data: AdvancedFormValues) {
+        setSaveLoading(true);
+
+        const res = await api
+            .post<AxiosResponse<UpdateResourceResponse>>(
+                `resource/${resource?.resourceId}`,
+                {
+                    tlsServerName: data.http ? data.tlsServerName : undefined,
+                    setHostHeader: data.http ? data.setHostHeader : undefined
+                }
+            )
+            .catch((e) => {
+                toast({
+                    variant: "destructive",
+                    title: "Failed to update resource",
+                    description: formatAxiosError(
+                        e,
+                        "An error occurred while updating the resource"
+                    )
+                });
+            });
+
+        if (res && res.status === 200) {
+            toast({
+                title: "Resource updated",
+                description: "The resource has been updated successfully"
+            });
+
+            const resource = res.data.data;
+
+            updateResource({
+                tlsServerName: data.tlsServerName,
+                setHostHeader: data.setHostHeader
+            });
+
+            router.refresh();
+        }
+        setSaveLoading(false);
     }
 
     async function toggleResourceEnabled(val: boolean) {
@@ -601,6 +689,77 @@ export default function GeneralForm() {
                     </SettingsSectionFooter>
                 </SettingsSection>
 
+                {resource.http && (
+                    <>
+                        <SettingsSection>
+                            <SettingsSectionHeader>
+                                <SettingsSectionTitle>
+                                    Advanced
+                                </SettingsSectionTitle>
+                                <SettingsSectionDescription>
+                                    Adjust advanced settings for the resource,
+                                    like customize the Host Header or set a TLS
+                                    Server Name for SNI based routing.
+                                </SettingsSectionDescription>
+                            </SettingsSectionHeader>
+                            <SettingsSectionBody>
+                                <SettingsSectionForm>
+                                    <Form {...advancedForm}>
+                                        <form
+                                            onSubmit={advancedForm.handleSubmit(
+                                                onSubmitAdvanced
+                                            )}
+                                            id="advanced-settings-form"
+                                        >
+                                            <FormLabel>
+                                                TLS Server Name (optional)
+                                            </FormLabel>
+                                            <FormField
+                                                control={advancedForm.control}
+                                                name="tlsServerName"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormControl>
+                                                            <Input {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            <FormLabel>
+                                                Custom Host Header (optional)
+                                            </FormLabel>
+                                            <FormField
+                                                control={advancedForm.control}
+                                                name="setHostHeader"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormControl>
+                                                            <Input {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </form>
+                                    </Form>
+                                </SettingsSectionForm>
+                            </SettingsSectionBody>
+
+                            <SettingsSectionFooter>
+                                <Button
+                                    type="submit"
+                                    loading={saveLoading}
+                                    disabled={saveLoading}
+                                    form="advanced-settings-form"
+                                >
+                                    Save Advanced Settings
+                                </Button>
+                            </SettingsSectionFooter>
+                        </SettingsSection>
+                    </>
+                )}
                 <SettingsSection>
                     <SettingsSectionHeader>
                         <SettingsSectionTitle>
