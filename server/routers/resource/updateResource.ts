@@ -44,6 +44,7 @@ const updateHttpResourceBodySchema = z
         applyRules: z.boolean().optional(),
         domainId: z.string().optional(),
         enabled: z.boolean().optional(),
+        stickySession: z.boolean().optional(),
         tlsServerName: z.string().optional(),
         setHostHeader: z.string().optional()
     })

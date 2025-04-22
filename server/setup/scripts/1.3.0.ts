@@ -9,10 +9,13 @@ export default async function migration() {
     try {
         db.transaction((trx) => {
             trx.run(
-                sql`ALTER TABLE 'resources' ADD 'tlsServerName' text DEFAULT '' NOT NULL;`
+                sql`ALTER TABLE resources ADD stickySession integer DEFAULT false NOT NULL;`
             );
             trx.run(
-                sql`ALTER TABLE 'resources' ADD 'setHostHeader' text DEFAULT '' NOT NULL;`
+                sql`ALTER TABLE 'resources' ADD 'tlsServerName' text;`
+            );
+            trx.run(
+                sql`ALTER TABLE 'resources' ADD 'setHostHeader' text;`
             );
         });
 

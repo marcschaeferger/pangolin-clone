@@ -78,6 +78,9 @@ export const resources = sqliteTable("resources", {
         .notNull()
         .default(false),
     enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
+    stickySession: integer("stickySession", { mode: "boolean" })
+        .notNull()
+        .default(false),
     tlsServerName: text("tlsServerName"),
     setHostHeader: text("setHostHeader")
 });

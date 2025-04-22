@@ -41,6 +41,7 @@ export async function traefikConfigProvider(
                         orgId: orgs.orgId
                     },
                     enabled: resources.enabled,
+                    stickySession: resources.stickySessionk,
                     tlsServerName: resources.tlsServerName,
                     setHostHeader: resources.setHostHeader
                 })
@@ -104,7 +105,10 @@ export async function traefikConfigProvider(
                             [badgerMiddlewareName]: {
                                 apiBaseUrl: new URL(
                                     "/api/v1",
-                                    `http://${config.getRawConfig().server.internal_hostname}:${
+                                    `http://${
+                                        config.getRawConfig().server
+                                            .internal_hostname
+                                    }:${
                                         config.getRawConfig().server
                                             .internal_port
                                     }`
@@ -279,7 +283,18 @@ export async function traefikConfigProvider(
                                         url: `${target.method}://${ip}:${target.internalPort}`
                                     };
                                 }
-                            })
+                            }),
+                        ...(resource.stickySession
+                            ? {
+                                  sticky: {
+                                      cookie: {
+                                          name: "pangolin_sticky",
+                                          secure: resource.ssl,
+                                          httpOnly: true
+                                      }
+                                  }
+                              }
+                            : {})
                     }
                 };
 
@@ -376,7 +391,17 @@ export async function traefikConfigProvider(
                                         address: `${ip}:${target.internalPort}`
                                     };
                                 }
-                            })
+                            }),
+                        ...(resource.stickySession
+                            ? {
+                                  sticky: {
+                                      ipStrategy: {
+                                          depth: 0,
+                                          sourcePort: true
+                                      }
+                                  }
+                              }
+                            : {})
                     }
                 };
             }
