@@ -6,7 +6,7 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
-import { idp, idpOidcConfig, idpOrg } from "@server/db/schemas";
+import { idp, idpOidcConfig } from "@server/db/schemas";
 import { eq } from "drizzle-orm";
 import { OpenAPITags, registry } from "@server/openApi";
 
@@ -66,11 +66,6 @@ export async function deleteIdp(
             await trx
                 .delete(idpOidcConfig)
                 .where(eq(idpOidcConfig.idpId, idpId));
-
-            // Delete IDP-org mappings
-            await trx
-                .delete(idpOrg)
-                .where(eq(idpOrg.idpId, idpId));
 
             // Delete the IDP itself
             await trx

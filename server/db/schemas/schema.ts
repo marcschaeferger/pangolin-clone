@@ -453,17 +453,6 @@ export const idpOidcConfig = sqliteTable("idpOidcConfig", {
     scopes: text("scopes").notNull()
 });
 
-export const idpOrg = sqliteTable("idpOrg", {
-    idpId: integer("idpId")
-        .notNull()
-        .references(() => idp.idpId, { onDelete: "cascade" }),
-    orgId: text("orgId")
-        .notNull()
-        .references(() => orgs.orgId, { onDelete: "cascade" }),
-    roleMapping: text("roleMapping"),
-    orgMapping: text("orgMapping")
-});
-
 export type Org = InferSelectModel<typeof orgs>;
 export type User = InferSelectModel<typeof users>;
 export type Site = InferSelectModel<typeof sites>;
@@ -500,4 +489,3 @@ export type ResourceRule = InferSelectModel<typeof resourceRules>;
 export type Domain = InferSelectModel<typeof domains>;
 export type SupporterKey = InferSelectModel<typeof supporterKey>;
 export type Idp = InferSelectModel<typeof idp>;
-export type IdpOrg = InferSelectModel<typeof idpOrg>;

@@ -7,7 +7,7 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { OpenAPITags, registry } from "@server/openApi";
-import { idp, idpOidcConfig, idpOrg, orgs } from "@server/db/schemas";
+import { idp, idpOidcConfig } from "@server/db/schemas";
 import { generateOidcRedirectUrl } from "@server/lib/idp/generateRedirectUrl";
 import { encrypt } from "@server/lib/crypto";
 import config from "@server/lib/config";
