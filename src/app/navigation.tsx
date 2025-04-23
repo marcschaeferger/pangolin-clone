@@ -9,6 +9,14 @@ import {
     Fingerprint
 } from "lucide-react";
 
+export const orgLangingNavItems: SidebarNavItem[] = [
+    {
+        title: "Overview",
+        href: "/{orgId}",
+        icon: <Home className="h-4 w-4" />
+    }
+];
+
 export const rootNavItems: SidebarNavItem[] = [
     {
         title: "Home",

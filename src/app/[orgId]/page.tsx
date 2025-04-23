@@ -8,7 +8,8 @@ import { AxiosResponse } from "axios";
 import { authCookieHeader } from "@app/lib/api/cookies";
 import { redirect } from "next/navigation";
 import { Layout } from "@app/components/Layout";
-import { orgNavItems } from "../navigation";
+import { orgLangingNavItems, orgNavItems, rootNavItems } from "../navigation";
+import { ListUserOrgsResponse } from "@server/routers/org";
 
 type OrgPageProps = {
     params: Promise<{ orgId: string }>;
@@ -43,12 +44,23 @@ export default async function OrgPage(props: OrgPageProps) {
         redirect(`/${orgId}/settings`);
     }
 
+    let orgs: ListUserOrgsResponse["orgs"] = [];
+    try {
+        const getOrgs = cache(async () =>
+            internal.get<AxiosResponse<ListUserOrgsResponse>>(
+                `/user/${user.userId}/orgs`,
+                await authCookieHeader()
+            )
+        );
+        const res = await getOrgs();
+        if (res && res.data.data.orgs) {
+            orgs = res.data.data.orgs;
+        }
+    } catch (e) {}
+
     return (
         <UserProvider user={user}>
-            <Layout
-                orgId={orgId}
-                navItems={orgNavItems}
-            >
+            <Layout orgId={orgId} navItems={orgLangingNavItems} orgs={orgs}>
                 {overview && (
                     <div className="w-full max-w-4xl mx-auto md:mt-32 mt-4">
                         <OrganizationLandingCard
