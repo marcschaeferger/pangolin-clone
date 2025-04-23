@@ -48,10 +48,6 @@ services:
     depends_on:
       pangolin:
         condition: service_healthy
-{{if .DoCrowdsecInstall}}
-      crowdsec:
-        condition: service_healthy
-{{end}}
     command:
       - --configFile=/etc/traefik/traefik_config.yml
     volumes:
