@@ -377,31 +377,37 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
                                                                                 index={
                                                                                     0
                                                                                 }
+                                                                                obscured
                                                                             />
                                                                             <InputOTPSlot
                                                                                 index={
                                                                                     1
                                                                                 }
+                                                                                obscured
                                                                             />
                                                                             <InputOTPSlot
                                                                                 index={
                                                                                     2
                                                                                 }
+                                                                                obscured
                                                                             />
                                                                             <InputOTPSlot
                                                                                 index={
                                                                                     3
                                                                                 }
+                                                                                obscured
                                                                             />
                                                                             <InputOTPSlot
                                                                                 index={
                                                                                     4
                                                                                 }
+                                                                                obscured
                                                                             />
                                                                             <InputOTPSlot
                                                                                 index={
                                                                                     5
                                                                                 }
+                                                                                obscured
                                                                             />
                                                                         </InputOTPGroup>
                                                                     </InputOTP>
