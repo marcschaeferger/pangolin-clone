@@ -545,7 +545,7 @@ func restartContainer(container string) error {
 	fmt.Println("Restarting containers...")
 	
 	if err := executeDockerComposeCommandWithArgs("-f", "docker-compose.yml", "restart", container); err != nil {
-	return fmt.Errorf("failed to stop the container \"%s\": %v", container, err)
+		return fmt.Errorf("failed to stop the container \"%s\": %v", container, err)
 	}
 
 	return nil
