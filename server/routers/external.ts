@@ -26,7 +26,12 @@ import {
     verifyUserAccess,
     getUserOrgs,
     verifyUserIsServerAdmin,
+<<<<<<< Updated upstream
     verifyIsLoggedInUser
+=======
+    verifyIsLoggedInUser,
+    verifyClientAccess
+>>>>>>> Stashed changes
 } from "@server/middlewares";
 import { verifyUserHasAction } from "../middlewares/verifyUserHasAction";
 import { ActionsEnum } from "@server/auth/actions";
@@ -46,6 +51,10 @@ unauthenticated.get("/", (_, res) => {
 export const authenticated = Router();
 authenticated.use(verifySessionUserMiddleware);
 
+<<<<<<< Updated upstream
+=======
+authenticated.get("/pick-org-defaults", org.pickOrgDefaults);
+>>>>>>> Stashed changes
 authenticated.get("/org/checkId", org.checkId);
 authenticated.put("/org", getUserOrgs, org.createOrg);
 
@@ -448,7 +457,15 @@ authenticated.delete(
     user.adminRemoveUser
 );
 
+authenticated.put(
+    "/org/:orgId/user",
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.createOrgUser),
+    user.createOrgUser
+);
+
 authenticated.get("/org/:orgId/user/:userId", verifyOrgAccess, user.getOrgUser);
+
 authenticated.get(
     "/org/:orgId/users",
     verifyOrgAccess,

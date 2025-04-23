@@ -6,6 +6,7 @@ import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
 
 export enum ActionsEnum {
+    createOrgUser = "createOrgUser",
     listOrgs = "listOrgs",
     listUserOrgs = "listUserOrgs",
     createOrg = "createOrg",

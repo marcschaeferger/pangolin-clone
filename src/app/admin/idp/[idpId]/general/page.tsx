@@ -41,6 +41,7 @@ import {
     InfoSectionTitle
 } from "@app/components/InfoSection";
 import CopyToClipboard from "@app/components/CopyToClipboard";
+import { Badge } from "@app/components/ui/badge";
 
 const GeneralFormSchema = z.object({
     name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -218,20 +219,28 @@ export default function GeneralPage() {
                                     )}
                                 />
 
-                                <SwitchInput
-                                    id="auto-provision-toggle"
-                                    label="Auto Provision Users"
-                                    defaultChecked={form.getValues(
-                                        "autoProvision"
-                                    )}
-                                    onCheckedChange={(checked) => {
-                                        form.setValue("autoProvision", checked);
-                                    }}
-                                />
+                                <div className="flex items-start mb-0">
+                                    <SwitchInput
+                                        id="auto-provision-toggle"
+                                        label="Auto Provision Users"
+                                        defaultChecked={form.getValues(
+                                            "autoProvision"
+                                        )}
+                                        disabled={true}
+                                        onCheckedChange={(checked) => {
+                                            form.setValue(
+                                                "autoProvision",
+                                                checked
+                                            );
+                                        }}
+                                    />
+                                    <Badge className="ml-2">Enterprise</Badge>
+                                </div>
                                 <span className="text-sm text-muted-foreground">
                                     When enabled, users will be automatically
-                                    created in the system upon first login using
-                                    this identity provider.
+                                    created in the system upon first login with
+                                    the ability to map users to roles and
+                                    organizations.
                                 </span>
                             </form>
                         </Form>

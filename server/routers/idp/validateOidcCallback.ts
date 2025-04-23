@@ -5,11 +5,7 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
-import {
-    idp,
-    idpOidcConfig,
-    users
-} from "@server/db/schemas";
+import { idp, idpOidcConfig, users } from "@server/db/schemas";
 import { and, eq } from "drizzle-orm";
 import * as arctic from "arctic";
 import { generateOidcRedirectUrl } from "@server/lib/idp/generateRedirectUrl";
@@ -17,6 +13,12 @@ import jmespath from "jmespath";
 import jsonwebtoken from "jsonwebtoken";
 import config from "@server/lib/config";
 import { decrypt } from "@server/lib/crypto";
+import {
+    createSession,
+    generateSessionToken,
+    serializeSessionCookie
+} from "@server/auth/sessions/app";
+import { response } from "@server/lib";
 
 const paramsSchema = z
     .object({
@@ -213,31 +215,31 @@ export async function validateOidcCallback(
                 return next(
                     createHttpError(
                         HttpCode.UNAUTHORIZED,
-                        "User not found in the IdP"
+                        "User not provisioned in the system"
                     )
                 );
             }
-            //
-            // const token = generateSessionToken();
-            // const sess = await createSession(token, existingUser.userId);
-            // const isSecure = req.protocol === "https";
-            // const cookie = serializeSessionCookie(
-            //     token,
-            //     isSecure,
-            //     new Date(sess.expiresAt)
-            // );
-            //
-            // res.appendHeader("Set-Cookie", cookie);
-            //
-            // return response<ValidateOidcUrlCallbackResponse>(res, {
-            //     data: {
-            //         redirectUrl: postAuthRedirectUrl
-            //     },
-            //     success: true,
-            //     error: false,
-            //     message: "OIDC callback validated successfully",
-            //     status: HttpCode.CREATED
-            // });
+
+            const token = generateSessionToken();
+            const sess = await createSession(token, existingUser.userId);
+            const isSecure = req.protocol === "https";
+            const cookie = serializeSessionCookie(
+                token,
+                isSecure,
+                new Date(sess.expiresAt)
+            );
+
+            res.appendHeader("Set-Cookie", cookie);
+
+            return response<ValidateOidcUrlCallbackResponse>(res, {
+                data: {
+                    redirectUrl: postAuthRedirectUrl
+                },
+                success: true,
+                error: false,
+                message: "OIDC callback validated successfully",
+                status: HttpCode.CREATED
+            });
         }
     } catch (error) {
         logger.error(error);
@@ -245,14 +247,4 @@ export async function validateOidcCallback(
             createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
     }
-}
-
-function hydrateOrgMapping(
-    orgMapping: string | null,
-    orgId: string
-): string | undefined {
-    if (!orgMapping) {
-        return undefined;
-    }
-    return orgMapping.split("{{orgId}}").join(orgId);
 }
