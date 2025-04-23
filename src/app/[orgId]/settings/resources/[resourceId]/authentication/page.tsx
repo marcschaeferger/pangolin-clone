@@ -46,6 +46,8 @@ import { InfoPopup } from "@app/components/ui/info-popup";
 import { Tag, TagInput } from "@app/components/tags/tag-input";
 import { useRouter } from "next/navigation";
 import { UserType } from "@server/types/UserTypes";
+import { Alert, AlertDescription, AlertTitle } from "@app/components/ui/alert";
+import { InfoIcon } from "lucide-react";
 
 const UsersRolesFormSchema = z.object({
     roles: z.array(
@@ -612,117 +614,127 @@ export default function ResourceAuthenticationPage() {
                     </SettingsSectionBody>
                 </SettingsSection>
 
-                {env.email.emailEnabled && (
-                    <SettingsSection>
-                        <SettingsSectionHeader>
-                            <SettingsSectionTitle>
-                                One-time Passwords
-                            </SettingsSectionTitle>
-                            <SettingsSectionDescription>
-                                Require email-based authentication for resource
-                                access
-                            </SettingsSectionDescription>
-                        </SettingsSectionHeader>
-                        <SettingsSectionBody>
-                            <SwitchInput
-                                id="whitelist-toggle"
-                                label="Email Whitelist"
-                                defaultChecked={resource.emailWhitelistEnabled}
-                                onCheckedChange={setWhitelistEnabled}
-                            />
+                <SettingsSection>
+                    <SettingsSectionHeader>
+                        <SettingsSectionTitle>
+                            One-time Passwords
+                        </SettingsSectionTitle>
+                        <SettingsSectionDescription>
+                            Require email-based authentication for resource
+                            access
+                        </SettingsSectionDescription>
+                    </SettingsSectionHeader>
+                    <SettingsSectionBody>
+                        {!env.email.emailEnabled && (
+                            <Alert variant="neutral" className="mb-4">
+                                <InfoIcon className="h-4 w-4" />
+                                <AlertTitle className="font-semibold">
+                                    SMTP Required
+                                </AlertTitle>
+                                <AlertDescription>
+                                    SMTP must be enabled on the server to use one-time password authentication.
+                                </AlertDescription>
+                            </Alert>
+                        )}
+                        <SwitchInput
+                            id="whitelist-toggle"
+                            label="Email Whitelist"
+                            defaultChecked={resource.emailWhitelistEnabled}
+                            onCheckedChange={setWhitelistEnabled}
+                            disabled={!env.email.emailEnabled}
+                        />
 
-                            {whitelistEnabled && (
-                                <Form {...whitelistForm}>
-                                    <form id="whitelist-form">
-                                        <FormField
-                                            control={whitelistForm.control}
-                                            name="emails"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>
-                                                        <InfoPopup
-                                                            text="Whitelisted Emails"
-                                                            info="Only users with these email addresses will be able to access this resource. They will be prompted to enter a one-time password sent to their email. Wildcards (*@example.com) can be used to allow any email address from a domain."
-                                                        />
-                                                    </FormLabel>
-                                                    <FormControl>
-                                                        {/* @ts-ignore */}
-                                                        <TagInput
-                                                            {...field}
-                                                            activeTagIndex={
-                                                                activeEmailTagIndex
-                                                            }
-                                                            size={"sm"}
-                                                            validateTag={(
-                                                                tag
-                                                            ) => {
-                                                                return z
-                                                                    .string()
-                                                                    .email()
-                                                                    .or(
-                                                                        z
-                                                                            .string()
-                                                                            .regex(
-                                                                                /^\*@[\w.-]+\.[a-zA-Z]{2,}$/,
-                                                                                {
-                                                                                    message:
-                                                                                        "Invalid email address. Wildcard (*) must be the entire local part."
-                                                                                }
-                                                                            )
-                                                                    )
-                                                                    .safeParse(
-                                                                        tag
-                                                                    ).success;
-                                                            }}
-                                                            setActiveTagIndex={
-                                                                setActiveEmailTagIndex
-                                                            }
-                                                            placeholder="Enter an email"
-                                                            tags={
-                                                                whitelistForm.getValues()
-                                                                    .emails
-                                                            }
-                                                            setTags={(
-                                                                newRoles
-                                                            ) => {
-                                                                whitelistForm.setValue(
-                                                                    "emails",
-                                                                    newRoles as [
-                                                                        Tag,
-                                                                        ...Tag[]
-                                                                    ]
-                                                                );
-                                                            }}
-                                                            allowDuplicates={
-                                                                false
-                                                            }
-                                                            sortTags={true}
-                                                        />
-                                                    </FormControl>
-                                                    <FormDescription>
-                                                        Press enter to add an
-                                                        email after typing it in
-                                                        the input field.
-                                                    </FormDescription>
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </form>
-                                </Form>
-                            )}
-                        </SettingsSectionBody>
-                        <SettingsSectionFooter>
-                            <Button
-                                onClick={saveWhitelist}
-                                form="whitelist-form"
-                                loading={loadingSaveWhitelist}
-                                disabled={loadingSaveWhitelist}
-                            >
-                                Save Whitelist
-                            </Button>
-                        </SettingsSectionFooter>
-                    </SettingsSection>
-                )}
+                        {whitelistEnabled && env.email.emailEnabled && (
+                            <Form {...whitelistForm}>
+                                <form id="whitelist-form">
+                                    <FormField
+                                        control={whitelistForm.control}
+                                        name="emails"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>
+                                                    <InfoPopup
+                                                        text="Whitelisted Emails"
+                                                        info="Only users with these email addresses will be able to access this resource. They will be prompted to enter a one-time password sent to their email. Wildcards (*@example.com) can be used to allow any email address from a domain."
+                                                    />
+                                                </FormLabel>
+                                                <FormControl>
+                                                    {/* @ts-ignore */}
+                                                    <TagInput
+                                                        {...field}
+                                                        activeTagIndex={
+                                                            activeEmailTagIndex
+                                                        }
+                                                        size={"sm"}
+                                                        validateTag={(
+                                                            tag
+                                                        ) => {
+                                                            return z
+                                                                .string()
+                                                                .email()
+                                                                .or(
+                                                                    z
+                                                                        .string()
+                                                                        .regex(
+                                                                            /^\*@[\w.-]+\.[a-zA-Z]{2,}$/,
+                                                                            {
+                                                                                message:
+                                                                                    "Invalid email address. Wildcard (*) must be the entire local part."
+                                                                            }
+                                                                        )
+                                                                )
+                                                                .safeParse(
+                                                                    tag
+                                                                ).success;
+                                                        }}
+                                                        setActiveTagIndex={
+                                                            setActiveEmailTagIndex
+                                                        }
+                                                        placeholder="Enter an email"
+                                                        tags={
+                                                            whitelistForm.getValues()
+                                                                .emails
+                                                        }
+                                                        setTags={(
+                                                            newRoles
+                                                        ) => {
+                                                            whitelistForm.setValue(
+                                                                "emails",
+                                                                newRoles as [
+                                                                    Tag,
+                                                                    ...Tag[]
+                                                                ]
+                                                            );
+                                                        }}
+                                                        allowDuplicates={
+                                                            false
+                                                        }
+                                                        sortTags={true}
+                                                    />
+                                                </FormControl>
+                                                <FormDescription>
+                                                    Press enter to add an
+                                                    email after typing it in
+                                                    the input field.
+                                                </FormDescription>
+                                            </FormItem>
+                                        )}
+                                    />
+                                </form>
+                            </Form>
+                        )}
+                    </SettingsSectionBody>
+                    <SettingsSectionFooter>
+                        <Button
+                            onClick={saveWhitelist}
+                            form="whitelist-form"
+                            loading={loadingSaveWhitelist}
+                            disabled={loadingSaveWhitelist}
+                        >
+                            Save Whitelist
+                        </Button>
+                    </SettingsSectionFooter>
+                </SettingsSection>
             </SettingsContainer>
         </>
     );
