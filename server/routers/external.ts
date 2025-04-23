@@ -26,12 +26,7 @@ import {
     verifyUserAccess,
     getUserOrgs,
     verifyUserIsServerAdmin,
-<<<<<<< Updated upstream
     verifyIsLoggedInUser
-=======
-    verifyIsLoggedInUser,
-    verifyClientAccess
->>>>>>> Stashed changes
 } from "@server/middlewares";
 import { verifyUserHasAction } from "../middlewares/verifyUserHasAction";
 import { ActionsEnum } from "@server/auth/actions";
@@ -51,10 +46,6 @@ unauthenticated.get("/", (_, res) => {
 export const authenticated = Router();
 authenticated.use(verifySessionUserMiddleware);
 
-<<<<<<< Updated upstream
-=======
-authenticated.get("/pick-org-defaults", org.pickOrgDefaults);
->>>>>>> Stashed changes
 authenticated.get("/org/checkId", org.checkId);
 authenticated.put("/org", getUserOrgs, org.createOrg);
 
@@ -530,8 +521,7 @@ authenticated.post(
 
 authenticated.delete("/idp/:idpId", verifyUserIsServerAdmin, idp.deleteIdp);
 
-authenticated.get("/idp", verifyUserIsServerAdmin, idp.listIdps);
-
+authenticated.get("/idp", idp.listIdps); // anyone can see this; it's just a list of idp names and ids
 authenticated.get("/idp/:idpId", verifyUserIsServerAdmin, idp.getIdp);
 
 // Auth routes

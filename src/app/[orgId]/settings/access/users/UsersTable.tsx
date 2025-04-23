@@ -11,7 +11,6 @@ import { Button } from "@app/components/ui/button";
 import { ArrowRight, ArrowUpDown, Crown, MoreHorizontal } from "lucide-react";
 import { UsersDataTable } from "./UsersDataTable";
 import { useState } from "react";
-import InviteUserForm from "./InviteUserForm";
 import ConfirmDeleteDialog from "@app/components/ConfirmDeleteDialog";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { toast } from "@app/hooks/useToast";
@@ -41,16 +40,11 @@ type UsersTableProps = {
 };
 
 export default function UsersTable({ users: u }: UsersTableProps) {
-    const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
-
     const [users, setUsers] = useState<UserRow[]>(u);
-
     const router = useRouter();
-
     const api = createApiClient(useEnvContext());
-
     const { user, updateUser } = useUserContext();
     const { org } = useOrgContext();
 
@@ -281,16 +275,11 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                 title="Remove User from Organization"
             />
 
-            <InviteUserForm
-                open={isInviteModalOpen}
-                setOpen={setIsInviteModalOpen}
-            />
-
             <UsersDataTable
                 columns={columns}
                 data={users}
                 inviteUser={() => {
-                    setIsInviteModalOpen(true);
+                    router.push(`/${org?.org.orgId}/settings/access/users/create`);
                 }}
             />
         </>
