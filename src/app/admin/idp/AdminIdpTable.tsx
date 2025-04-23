@@ -44,6 +44,7 @@ export default function IdpTable({ idps }: Props) {
                 title: "Success",
                 description: "Identity provider deleted successfully"
             });
+            setIsDeleteModalOpen(false);
             router.refresh();
         } catch (e) {
             toast({
