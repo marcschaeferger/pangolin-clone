@@ -6,6 +6,7 @@ import { useParams, usePathname } from "next/navigation";
 import { cn } from "@app/lib/cn";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useUserContext } from "@app/hooks/useUserContext";
+import { Badge } from "@app/components/ui/badge";
 
 export interface SidebarNavItem {
     href: string;
@@ -13,6 +14,7 @@ export interface SidebarNavItem {
     icon?: React.ReactNode;
     children?: SidebarNavItem[];
     autoExpand?: boolean;
+    showEnterprise?: boolean;
 }
 
 export interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
@@ -95,7 +97,9 @@ export function SidebarNav({
             const isActive = pathname.startsWith(hydratedHref);
             const hasChildren = item.children && item.children.length > 0;
             const isExpanded = expandedItems.has(hydratedHref);
-            const indent = level * 16; // Base indent for each level
+            const indent = level * 28; // Base indent for each level
+            const isEnterprise = item.showEnterprise;
+            const isDisabled = disabled || isEnterprise;
 
             return (
                 <div key={hydratedHref}>
@@ -110,34 +114,41 @@ export function SidebarNav({
                             )}
                         >
                             <Link
-                                href={hydratedHref}
+                                href={isEnterprise ? "#" : hydratedHref}
                                 className={cn(
                                     "flex items-center w-full px-3 py-2",
                                     isActive
                                         ? "text-primary font-medium"
                                         : "text-muted-foreground group-hover:text-foreground",
-                                    disabled && "cursor-not-allowed opacity-60"
+                                    isDisabled && "cursor-not-allowed"
                                 )}
                                 onClick={(e) => {
-                                    if (disabled) {
+                                    if (isDisabled) {
                                         e.preventDefault();
                                     } else if (onItemClick) {
                                         onItemClick();
                                     }
                                 }}
-                                tabIndex={disabled ? -1 : undefined}
-                                aria-disabled={disabled}
+                                tabIndex={isDisabled ? -1 : undefined}
+                                aria-disabled={isDisabled}
                             >
-                                {item.icon && (
-                                    <span className="mr-3">{item.icon}</span>
+                                <div className={cn("flex items-center", isDisabled && "opacity-60")}>
+                                    {item.icon && (
+                                        <span className="mr-3">{item.icon}</span>
+                                    )}
+                                    {item.title}
+                                </div>
+                                {isEnterprise && (
+                                    <Badge className="ml-2">
+                                        Enterprise
+                                    </Badge>
                                 )}
-                                {item.title}
                             </Link>
                             {hasChildren && (
                                 <button
                                     onClick={() => toggleItem(hydratedHref)}
                                     className="p-2 rounded-md text-muted-foreground hover:text-foreground cursor-pointer"
-                                    disabled={disabled}
+                                    disabled={isDisabled}
                                 >
                                     {isExpanded ? (
                                         <ChevronDown className="h-5 w-5" />

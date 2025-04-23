@@ -6,7 +6,8 @@ import {
     Link as LinkIcon,
     Waypoints,
     Combine,
-    Fingerprint
+    Fingerprint,
+    KeyRound
 } from "lucide-react";
 
 export const orgLangingNavItems: SidebarNavItem[] = [
@@ -64,6 +65,12 @@ export const orgNavItems: SidebarNavItem[] = [
         icon: <LinkIcon className="h-4 w-4" />
     },
     {
+        title: "API Keys",
+        href: "/{orgId}/settings/api-keys",
+        icon: <KeyRound className="h-4 w-4" />,
+        showEnterprise: true
+    },
+    {
         title: "Settings",
         href: "/{orgId}/settings/general",
         icon: <Settings className="h-4 w-4" />
@@ -75,6 +82,12 @@ export const adminNavItems: SidebarNavItem[] = [
         title: "All Users",
         href: "/admin/users",
         icon: <Users className="h-4 w-4" />
+    },
+    {
+        title: "API Keys",
+        href: "/{orgId}/settings/api-keys",
+        icon: <KeyRound className="h-4 w-4" />,
+        showEnterprise: true
     },
     {
         title: "Identity Providers",
