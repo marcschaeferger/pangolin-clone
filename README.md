@@ -78,7 +78,7 @@ _Sites page of Pangolin dashboard (dark mode) showing multiple tunnels connected
 
 ### Modular Design
 
--   Extend functionality with existing [Traefik](https://github.com/traefik/traefik) plugins, such as [CrowdSec](https://plugins.traefik.io/plugins/6335346ca4caa9ddeffda116/crowdsec-bouncer-traefik-plugin) and [Geoblock](github.com/PascalMinder/geoblock).
+-   Extend functionality with existing [Traefik](https://github.com/traefik/traefik) plugins, such as [CrowdSec](https://plugins.traefik.io/plugins/6335346ca4caa9ddeffda116/crowdsec-bouncer-traefik-plugin) and [Geoblock](https://github.com/PascalMinder/geoblock).
     - **Automatically install and configure Crowdsec via Pangolin's installer script.**
 -   Attach as many sites to the central server as you wish.
 
@@ -89,7 +89,7 @@ _Sites page of Pangolin dashboard (dark mode) showing multiple tunnels connected
 1. **Deploy the Central Server**:
 
    - Deploy the Docker Compose stack onto a VPS hosted on a cloud platform like RackNerd, Amazon EC2, DigitalOcean Droplet, or similar. There are many cheap VPS hosting options available to suit your needs.
-   
+
 > [!TIP]
 > Many of our users have had a great experience with [RackNerd](https://my.racknerd.com/aff.php?aff=13788). Depending on promotions, you can likely get a **VPS with 1 vCPU, 1GB RAM, and ~20GB SSD for just around $12/year**. That's a great deal!
 > We are part of the [RackNerd](https://my.racknerd.com/aff.php?aff=13788) affiliate program, so if you purchase through [our link](https://my.racknerd.com/aff.php?aff=13788), we receive a small commission which helps us maintain the project and keep it free for everyone.
@@ -108,10 +108,10 @@ _Sites page of Pangolin dashboard (dark mode) showing multiple tunnels connected
     - Add resources to the central server and configure access control rules.
     - Access these resources securely from anywhere.
 
-**Use Case Example - Bypassing Port Restrictions in Home Lab**:  
+**Use Case Example - Bypassing Port Restrictions in Home Lab**:
  Imagine private sites where the ISP restricts port forwarding. By connecting these sites to Pangolin via WireGuard, you can securely expose HTTP and HTTPS resources on the private network without any networking complexity.
 
-**Use Case Example - IoT Networks**:  
+**Use Case Example - IoT Networks**:
  IoT networks are often fragmented and difficult to manage. By deploying Pangolin on a central server, you can connect all your IoT sites via Newt or another WireGuard client. This creates a simple, secure, and centralized way to access IoT resources without the need for intricate networking setups.
 
 
@@ -121,10 +121,10 @@ _Resources page of Pangolin dashboard (dark mode) showing HTTPS and TCP resource
 
 ## Similar Projects and Inspirations
 
-**Cloudflare Tunnels**:  
+**Cloudflare Tunnels**:
     A similar approach to proxying private resources securely, but Pangolin is a self-hosted alternative, giving you full control over your infrastructure.
 
-**Authentik and Authelia**:  
+**Authentik and Authelia**:
     These projects inspired Pangolin’s centralized authentication system for proxies, enabling robust user and role management.
 
 ## Project Development / Roadmap
