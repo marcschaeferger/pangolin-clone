@@ -39,7 +39,6 @@ const createHttpResourceSchema = z
         isBaseDomain: z.boolean().optional(),
         siteId: z.number(),
         http: z.boolean(),
-        protocol: z.string(),
         domainId: z.string()
     })
     .strict()
@@ -203,7 +202,7 @@ async function createHttpResource(
         );
     }
 
-    const { name, subdomain, isBaseDomain, http, protocol, domainId } =
+    const { name, subdomain, isBaseDomain, http, domainId } =
         parsedBody.data;
 
     const [orgDomain] = await db
@@ -262,7 +261,7 @@ async function createHttpResource(
                 name,
                 subdomain,
                 http,
-                protocol,
+                protocol: "tcp",
                 ssl: true,
                 isBaseDomain
             })
