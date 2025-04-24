@@ -25,7 +25,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LoginResponse } from "@server/routers/auth";
 import { useRouter } from "next/navigation";
 import { AxiosResponse } from "axios";
-import { formatAxiosError } from "@app/lib/api";;
+import { formatAxiosError } from "@app/lib/api";
 import { LockIcon } from "lucide-react";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
@@ -37,11 +37,19 @@ import {
 } from "./ui/input-otp";
 import Link from "next/link";
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
-import Image from 'next/image'
+import Image from "next/image";
+import { GenerateOidcUrlResponse } from "@server/routers/idp";
+import { Separator } from "./ui/separator";
+
+export type LoginFormIDP = {
+    idpId: number;
+    name: string;
+};
 
 type LoginFormProps = {
     redirect?: string;
     onLogin?: () => void | Promise<void>;
+    idps?: LoginFormIDP[];
 };
 
 const formSchema = z.object({
@@ -55,7 +63,7 @@ const mfaSchema = z.object({
     code: z.string().length(6, { message: "Invalid code" })
 });
 
-export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
+export default function LoginForm({ redirect, onLogin, idps }: LoginFormProps) {
     const router = useRouter();
 
     const { env } = useEnvContext();
@@ -64,6 +72,7 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
 
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const hasIdp = idps && idps.length > 0;
 
     const [mfaRequested, setMfaRequested] = useState(false);
 
@@ -130,60 +139,83 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
         setLoading(false);
     }
 
+    async function loginWithIdp(idpId: number) {
+        try {
+            const res = await api.post<AxiosResponse<GenerateOidcUrlResponse>>(
+                `/auth/idp/${idpId}/oidc/generate-url`,
+                {
+                    redirectUrl: redirect || "/"
+                }
+            );
+
+            console.log(res);
+
+            if (!res) {
+                setError("An error occurred while logging in");
+                return;
+            }
+
+            const data = res.data.data;
+            window.location.href = data.redirectUrl;
+        } catch (e) {
+            console.error(formatAxiosError(e));
+        }
+    }
+
     return (
         <div className="space-y-4">
             {!mfaRequested && (
-                <Form {...form}>
-                    <form
-                        onSubmit={form.handleSubmit(onSubmit)}
-                        className="space-y-4"
-                        id="form"
-                    >
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Email</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <div className="space-y-4">
+                <>
+                    <Form {...form}>
+                        <form
+                            onSubmit={form.handleSubmit(onSubmit)}
+                            className="space-y-4"
+                            id="form"
+                        >
                             <FormField
                                 control={form.control}
-                                name="password"
+                                name="email"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Password</FormLabel>
+                                        <FormLabel>Email</FormLabel>
                                         <FormControl>
-                                            <Input
-                                                type="password"
-                                                {...field}
-                                            />
+                                            <Input {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
 
-                            <div className="text-center">
-                                <Link
-                                    href={`/auth/reset-password${form.getValues().email ? `?email=${form.getValues().email}` : ""}`}
-                                    className="text-sm text-muted-foreground"
-                                >
-                                    Forgot your password?
-                                </Link>
+                            <div className="space-y-4">
+                                <FormField
+                                    control={form.control}
+                                    name="password"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Password</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="password"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <div className="text-center">
+                                    <Link
+                                        href={`/auth/reset-password${form.getValues().email ? `?email=${form.getValues().email}` : ""}`}
+                                        className="text-sm text-muted-foreground"
+                                    >
+                                        Forgot your password?
+                                    </Link>
+                                </div>
                             </div>
-                        </div>
-                    </form>
-                </Form>
+                        </form>
+                    </Form>
+                </>
             )}
 
             {mfaRequested && (
@@ -193,7 +225,8 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
                             Two-Factor Authentication
                         </h3>
                         <p className="text-sm text-muted-foreground">
-                            Enter the code from your authenticator app or one of your single-use backup codes.
+                            Enter the code from your authenticator app or one of
+                            your single-use backup codes.
                         </p>
                     </div>
                     <Form {...mfaForm}>
@@ -268,16 +301,47 @@ export default function LoginForm({ redirect, onLogin }: LoginFormProps) {
                 )}
 
                 {!mfaRequested && (
-                    <Button
-                        type="submit"
-                        form="form"
-                        className="w-full"
-                        loading={loading}
-                        disabled={loading}
-                    >
-                        <LockIcon className="w-4 h-4 mr-2" />
-                        Log In
-                    </Button>
+                    <>
+                        <Button
+                            type="submit"
+                            form="form"
+                            className="w-full"
+                            loading={loading}
+                            disabled={loading}
+                        >
+                            <LockIcon className="w-4 h-4 mr-2" />
+                            Log In
+                        </Button>
+
+                        {hasIdp && (
+                            <>
+                                <div className="relative my-4">
+                                    <div className="absolute inset-0 flex items-center">
+                                        <Separator />
+                                    </div>
+                                    <div className="relative flex justify-center text-xs uppercase">
+                                        <span className="px-2 bg-card text-muted-foreground">
+                                            Or continue with
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {idps.map((idp) => (
+                                    <Button
+                                        key={idp.idpId}
+                                        type="button"
+                                        variant="outline"
+                                        className="w-full"
+                                        onClick={() => {
+                                            loginWithIdp(idp.idpId);
+                                        }}
+                                    >
+                                        {idp.name}
+                                    </Button>
+                                ))}
+                            </>
+                        )}
+                    </>
                 )}
 
                 {mfaRequested && (

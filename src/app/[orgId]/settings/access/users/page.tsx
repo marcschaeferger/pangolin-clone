@@ -70,7 +70,13 @@ export default async function UsersPage(props: UsersPageProps) {
     const userRows: UserRow[] = users.map((user) => {
         return {
             id: user.id,
+            username: user.username,
+            displayUsername: user.email || user.name || user.username,
+            name: user.name,
             email: user.email,
+            type: user.type,
+            idpId: user.idpId,
+            idpName: user.idpName || "Internal",
             status: "Confirmed",
             role: user.isOwner ? "Owner" : user.roleName || "Member",
             isOwner: user.isOwner || false

@@ -74,7 +74,7 @@ export async function requestPasswordReset(
 
             await trx.insert(passwordResetTokens).values({
                 userId: existingUser[0].userId,
-                email: existingUser[0].email,
+                email: existingUser[0].email!,
                 tokenHash,
                 expiresAt: createDate(new TimeSpan(2, "h")).getTime()
             });

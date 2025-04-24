@@ -10,24 +10,29 @@ import {
 import { Button } from "@/components/ui/button";
 
 interface InfoPopupProps {
-    text: string;
+    text?: string;
     info: string;
+    trigger?: React.ReactNode;
 }
 
-export function InfoPopup({ text, info }: InfoPopupProps) {
+export function InfoPopup({ text, info, trigger }: InfoPopupProps) {
+    const defaultTrigger = (
+        <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 rounded-full p-0"
+        >
+            <Info className="h-4 w-4" />
+            <span className="sr-only">Show info</span>
+        </Button>
+    );
+
     return (
         <div className="flex items-center space-x-2">
-            <span>{text}</span>
+            {text && <span>{text}</span>}
             <Popover>
                 <PopoverTrigger asChild>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 rounded-full p-0"
-                    >
-                        <Info className="h-4 w-4" />
-                        <span className="sr-only">Show info</span>
-                    </Button>
+                    {trigger ?? defaultTrigger}
                 </PopoverTrigger>
                 <PopoverContent className="w-80">
                     <p className="text-sm text-muted-foreground">{info}</p>

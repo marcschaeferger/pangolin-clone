@@ -24,7 +24,7 @@ export function UsersDataTable<TData, TValue>({
             searchPlaceholder="Search users..."
             searchColumn="email"
             onAdd={inviteUser}
-            addButtonText="Invite User"
+            addButtonText="Create User"
         />
     );
 }

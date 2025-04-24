@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { Org, orgs } from "@server/db/schemas";
+import { Org, orgs, userOrgs } from "@server/db/schemas";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
-import { sql, inArray } from "drizzle-orm";
+import { sql, inArray, eq } from "drizzle-orm";
 import logger from "@server/logger";
 import { fromZodError } from "zod-validation-error";
 import { OpenAPITags, registry } from "@server/openApi";
@@ -27,8 +27,8 @@ const listOrgsSchema = z.object({
 
 registry.registerPath({
     method: "get",
-    path: "/orgs",
-    description: "List all organizations in the system",
+    path: "/user/:userId/orgs",
+    description: "List all organizations in the system.",
     tags: [OpenAPITags.Org],
     request: {
         query: listOrgsSchema
@@ -59,37 +59,15 @@ export async function listOrgs(
 
         const { limit, offset } = parsedQuery.data;
 
-        // Use the userOrgs passed from the middleware
-        const userOrgIds = req.userOrgIds;
-
-        if (!userOrgIds || userOrgIds.length === 0) {
-            return response<ListOrgsResponse>(res, {
-                data: {
-                    orgs: [],
-                    pagination: {
-                        total: 0,
-                        limit,
-                        offset
-                    }
-                },
-                success: true,
-                error: false,
-                message: "No organizations found for the user",
-                status: HttpCode.OK
-            });
-        }
-
         const organizations = await db
             .select()
             .from(orgs)
-            .where(inArray(orgs.orgId, userOrgIds))
             .limit(limit)
             .offset(offset);
 
         const totalCountResult = await db
             .select({ count: sql<number>`cast(count(*) as integer)` })
-            .from(orgs)
-            .where(inArray(orgs.orgId, userOrgIds));
+            .from(orgs);
         const totalCount = totalCountResult[0].count;
 
         return response<ListOrgsResponse>(res, {

@@ -6,6 +6,7 @@ import { User } from "@server/db/schemas";
 import { sendEmailVerificationCode } from "../../auth/sendEmailVerificationCode";
 import config from "@server/lib/config";
 import logger from "@server/logger";
+import { UserType } from "@server/types/UserTypes";
 
 export type RequestEmailVerificationCodeResponse = {
     codeSent: boolean;
@@ -28,6 +29,15 @@ export async function requestEmailVerificationCode(
     try {
         const user = req.user as User;
 
+        if (user.type !== UserType.Internal) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    "Email verification is not supported for external users"
+                )
+            );
+        }
+
         if (user.emailVerified) {
             return next(
                 createHttpError(
@@ -37,7 +47,7 @@ export async function requestEmailVerificationCode(
             );
         }
 
-        await sendEmailVerificationCode(user.email, user.userId);
+        await sendEmailVerificationCode(user.email!, user.userId);
 
         return response<RequestEmailVerificationCodeResponse>(res, {
             data: {

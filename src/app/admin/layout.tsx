@@ -4,7 +4,7 @@ import { verifySession } from "@app/lib/auth/verifySession";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import UserProvider from "@app/providers/UserProvider";
-import { ListOrgsResponse } from "@server/routers/org";
+import { ListUserOrgsResponse } from "@server/routers/org";
 import { internal } from "@app/lib/api";
 import { AxiosResponse } from "axios";
 import { authCookieHeader } from "@app/lib/api/cookies";
@@ -31,10 +31,13 @@ export default async function AdminLayout(props: LayoutProps) {
     }
 
     const cookie = await authCookieHeader();
-    let orgs: ListOrgsResponse["orgs"] = [];
+    let orgs: ListUserOrgsResponse["orgs"] = [];
     try {
         const getOrgs = cache(() =>
-            internal.get<AxiosResponse<ListOrgsResponse>>(`/orgs`, cookie)
+            internal.get<AxiosResponse<ListUserOrgsResponse>>(
+                `/user/${user.userId}/orgs`,
+                cookie
+            )
         );
         const res = await getOrgs();
         if (res && res.data.data.orgs) {

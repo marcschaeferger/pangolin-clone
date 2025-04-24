@@ -33,7 +33,7 @@ import { useRouter } from "next/navigation";
 import { Alert, AlertDescription } from "@app/components/ui/alert";
 import { formatAxiosError } from "@app/lib/api";
 import { AxiosResponse } from "axios";
-import LoginForm from "@app/components/LoginForm";
+import LoginForm, { LoginFormIDP } from "@app/components/LoginForm";
 import {
     AuthWithPasswordResponse,
     AuthWithWhitelistResponse
@@ -81,6 +81,7 @@ type ResourceAuthPortalProps = {
         id: number;
     };
     redirect: string;
+    idps?: LoginFormIDP[];
 };
 
 export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
@@ -376,31 +377,37 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
                                                                                 index={
                                                                                     0
                                                                                 }
+                                                                                obscured
                                                                             />
                                                                             <InputOTPSlot
                                                                                 index={
                                                                                     1
                                                                                 }
+                                                                                obscured
                                                                             />
                                                                             <InputOTPSlot
                                                                                 index={
                                                                                     2
                                                                                 }
+                                                                                obscured
                                                                             />
                                                                             <InputOTPSlot
                                                                                 index={
                                                                                     3
                                                                                 }
+                                                                                obscured
                                                                             />
                                                                             <InputOTPSlot
                                                                                 index={
                                                                                     4
                                                                                 }
+                                                                                obscured
                                                                             />
                                                                             <InputOTPSlot
                                                                                 index={
                                                                                     5
                                                                                 }
+                                                                                obscured
                                                                             />
                                                                         </InputOTPGroup>
                                                                     </InputOTP>
@@ -490,7 +497,8 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
                                         className={`${numMethods <= 1 ? "mt-0" : ""}`}
                                     >
                                         <LoginForm
-                                            redirect={`/auth/resource/${props.resource.id}`}
+                                            idps={props.idps}
+                                            redirect={props.redirect}
                                             onLogin={async () =>
                                                 await handleSSOAuth()
                                             }

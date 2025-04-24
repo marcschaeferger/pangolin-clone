@@ -6,7 +6,7 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import { sql, eq } from "drizzle-orm";
 import logger from "@server/logger";
-import { users } from "@server/db/schemas";
+import { idp, users } from "@server/db/schemas";
 import { fromZodError } from "zod-validation-error";
 
 const listUsersSchema = z
@@ -31,10 +31,16 @@ async function queryUsers(limit: number, offset: number) {
         .select({
             id: users.userId,
             email: users.email,
+            username: users.username,
+            name: users.name,
             dateCreated: users.dateCreated,
-            serverAdmin: users.serverAdmin
+            serverAdmin: users.serverAdmin,
+            type: users.type,
+            idpName: idp.name,
+            idpId: users.idpId
         })
         .from(users)
+        .leftJoin(idp, eq(users.idpId, idp.idpId))
         .where(eq(users.serverAdmin, false))
         .limit(limit)
         .offset(offset);

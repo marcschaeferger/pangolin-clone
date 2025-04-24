@@ -2,7 +2,7 @@ import { internal } from "@app/lib/api";
 import { authCookieHeader } from "@app/lib/api/cookies";
 import { verifySession } from "@app/lib/auth/verifySession";
 import UserProvider from "@app/providers/UserProvider";
-import { ListOrgsResponse } from "@server/routers/org";
+import { ListUserOrgsResponse } from "@server/routers/org";
 import { AxiosResponse } from "axios";
 import { redirect } from "next/navigation";
 import { cache } from "react";
@@ -36,10 +36,7 @@ export default async function Page(props: {
         }
     }
 
-    if (
-        !user.emailVerified &&
-        env.flags.emailVerificationRequired
-    ) {
+    if (!user.emailVerified && env.flags.emailVerificationRequired) {
         if (params.redirect) {
             const safe = cleanRedirect(params.redirect);
             redirect(`/auth/verify-email?redirect=${safe}`);
@@ -48,10 +45,10 @@ export default async function Page(props: {
         }
     }
 
-    let orgs: ListOrgsResponse["orgs"] = [];
+    let orgs: ListUserOrgsResponse["orgs"] = [];
     try {
-        const res = await internal.get<AxiosResponse<ListOrgsResponse>>(
-            `/orgs`,
+        const res = await internal.get<AxiosResponse<ListUserOrgsResponse>>(
+            `/user/${user.userId}/orgs`,
             await authCookieHeader()
         );
 
@@ -61,24 +58,19 @@ export default async function Page(props: {
     } catch (e) {}
 
     if (!orgs.length) {
-        if (
-            !env.flags.disableUserCreateOrg ||
-            user.serverAdmin
-        ) {
+        if (!env.flags.disableUserCreateOrg || user.serverAdmin) {
             redirect("/setup");
         }
     }
 
     return (
         <UserProvider user={user}>
-            <Layout
-                orgs={orgs}
-                navItems={rootNavItems}
-                showBreadcrumbs={false}
-            >
+            <Layout orgs={orgs} navItems={rootNavItems} showBreadcrumbs={false}>
                 <div className="w-full max-w-md mx-auto md:mt-32 mt-4">
                     <OrganizationLanding
-                        disableCreateOrg={env.flags.disableUserCreateOrg && !user.serverAdmin}
+                        disableCreateOrg={
+                            env.flags.disableUserCreateOrg && !user.serverAdmin
+                        }
                         organizations={orgs.map((org) => ({
                             name: org.name,
                             id: org.orgId

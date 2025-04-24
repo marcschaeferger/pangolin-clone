@@ -11,7 +11,6 @@ import { Button } from "@app/components/ui/button";
 import { ArrowRight, ArrowUpDown, Crown, MoreHorizontal } from "lucide-react";
 import { UsersDataTable } from "./UsersDataTable";
 import { useState } from "react";
-import InviteUserForm from "./InviteUserForm";
 import ConfirmDeleteDialog from "@app/components/ConfirmDeleteDialog";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { toast } from "@app/hooks/useToast";
@@ -24,7 +23,13 @@ import { useUserContext } from "@app/hooks/useUserContext";
 
 export type UserRow = {
     id: string;
-    email: string;
+    email: string | null;
+    displayUsername: string | null;
+    username: string;
+    name: string | null;
+    idpId: number | null;
+    idpName: string;
+    type: string;
     status: string;
     role: string;
     isOwner: boolean;
@@ -35,16 +40,11 @@ type UsersTableProps = {
 };
 
 export default function UsersTable({ users: u }: UsersTableProps) {
-    const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
-
     const [users, setUsers] = useState<UserRow[]>(u);
-
     const router = useRouter();
-
     const api = createApiClient(useEnvContext());
-
     const { user, updateUser } = useUserContext();
     const { org } = useOrgContext();
 
@@ -82,7 +82,8 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                                                     Manage User
                                                 </DropdownMenuItem>
                                             </Link>
-                                            {userRow.email !== user?.email && (
+                                            {`${userRow.username}-${userRow.idpId}` !==
+                                                `${user?.username}-${userRow.idpId}` && (
                                                 <DropdownMenuItem
                                                     onClick={() => {
                                                         setIsDeleteModalOpen(
@@ -108,7 +109,7 @@ export default function UsersTable({ users: u }: UsersTableProps) {
             }
         },
         {
-            accessorKey: "email",
+            accessorKey: "displayUsername",
             header: ({ column }) => {
                 return (
                     <Button
@@ -117,14 +118,14 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        Email
+                        Username
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
             }
         },
         {
-            accessorKey: "status",
+            accessorKey: "idpName",
             header: ({ column }) => {
                 return (
                     <Button
@@ -133,7 +134,7 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        Status
+                        Identity Provider
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
@@ -185,7 +186,10 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                             <Link
                                 href={`/${org?.org.orgId}/settings/access/users/${userRow.id}`}
                             >
-                                <Button variant={"outlinePrimary"} className="ml-2">
+                                <Button
+                                    variant={"outlinePrimary"}
+                                    className="ml-2"
+                                >
                                     Manage
                                     <ArrowRight className="ml-2 w-4 h-4" />
                                 </Button>
@@ -239,7 +243,12 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                     <div className="space-y-4">
                         <p>
                             Are you sure you want to remove{" "}
-                            <b>{selectedUser?.email}</b> from the organization?
+                            <b>
+                                {selectedUser?.email ||
+                                    selectedUser?.name ||
+                                    selectedUser?.username}
+                            </b>{" "}
+                            from the organization?
                         </p>
 
                         <p>
@@ -250,27 +259,27 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                         </p>
 
                         <p>
-                            To confirm, please type the email address of the
-                            user below.
+                            To confirm, please type the name of the of the user
+                            below.
                         </p>
                     </div>
                 }
                 buttonText="Confirm Remove User"
                 onConfirm={removeUser}
-                string={selectedUser?.email ?? ""}
+                string={
+                    selectedUser?.email ||
+                    selectedUser?.name ||
+                    selectedUser?.username ||
+                    ""
+                }
                 title="Remove User from Organization"
-            />
-
-            <InviteUserForm
-                open={isInviteModalOpen}
-                setOpen={setIsInviteModalOpen}
             />
 
             <UsersDataTable
                 columns={columns}
                 data={users}
                 inviteUser={() => {
-                    setIsInviteModalOpen(true);
+                    router.push(`/${org?.org.orgId}/settings/access/users/create`);
                 }}
             />
         </>

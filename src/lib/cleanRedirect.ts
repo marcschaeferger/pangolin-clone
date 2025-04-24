@@ -9,10 +9,10 @@ const patterns: PatternConfig[] = [
     { name: "Resource Auth Portal", regex: /^\/auth\/resource\/\d+$/ }
 ];
 
-export function cleanRedirect(input: string): string {
+export function cleanRedirect(input: string, fallback?: string): string {
     if (!input || typeof input !== "string") {
         return "/";
     }
     const isAccepted = patterns.some((pattern) => pattern.regex.test(input));
-    return isAccepted ? input : "/";
+    return isAccepted ? input : fallback || "/";
 }

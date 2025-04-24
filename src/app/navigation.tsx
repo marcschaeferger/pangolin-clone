@@ -5,32 +5,42 @@ import {
     Users,
     Link as LinkIcon,
     Waypoints,
-    Combine
+    Combine,
+    Fingerprint,
+    KeyRound
 } from "lucide-react";
+
+export const orgLangingNavItems: SidebarNavItem[] = [
+    {
+        title: "Overview",
+        href: "/{orgId}",
+        icon: <Home className="h-4 w-4" />
+    }
+];
 
 export const rootNavItems: SidebarNavItem[] = [
     {
         title: "Home",
-        href: "/"
-        // icon: <Home className="h-4 w-4" />
+        href: "/",
+        icon: <Home className="h-4 w-4" />
     }
 ];
 
 export const orgNavItems: SidebarNavItem[] = [
     {
         title: "Sites",
-        href: "/{orgId}/settings/sites"
-        // icon: <Combine className="h-4 w-4" />
+        href: "/{orgId}/settings/sites",
+        icon: <Combine className="h-4 w-4" />
     },
     {
         title: "Resources",
-        href: "/{orgId}/settings/resources"
-        // icon: <Waypoints className="h-4 w-4" />
+        href: "/{orgId}/settings/resources",
+        icon: <Waypoints className="h-4 w-4" />
     },
     {
         title: "Access Control",
         href: "/{orgId}/settings/access",
-        // icon: <Users className="h-4 w-4" />,
+        icon: <Users className="h-4 w-4" />,
         autoExpand: true,
         children: [
             {
@@ -51,20 +61,37 @@ export const orgNavItems: SidebarNavItem[] = [
     },
     {
         title: "Shareable Links",
-        href: "/{orgId}/settings/share-links"
-        // icon: <LinkIcon className="h-4 w-4" />
+        href: "/{orgId}/settings/share-links",
+        icon: <LinkIcon className="h-4 w-4" />
+    },
+    {
+        title: "API Keys",
+        href: "/{orgId}/settings/api-keys",
+        icon: <KeyRound className="h-4 w-4" />,
+        showEnterprise: true
     },
     {
         title: "Settings",
-        href: "/{orgId}/settings/general"
-        // icon: <Settings className="h-4 w-4" />
+        href: "/{orgId}/settings/general",
+        icon: <Settings className="h-4 w-4" />
     }
 ];
 
 export const adminNavItems: SidebarNavItem[] = [
     {
         title: "All Users",
-        href: "/admin/users"
-        // icon: <Users className="h-4 w-4" />
+        href: "/admin/users",
+        icon: <Users className="h-4 w-4" />
+    },
+    {
+        title: "API Keys",
+        href: "/{orgId}/settings/api-keys",
+        icon: <KeyRound className="h-4 w-4" />,
+        showEnterprise: true
+    },
+    {
+        title: "Identity Providers",
+        href: "/admin/idp",
+        icon: <Fingerprint className="h-4 w-4" />
     }
 ];

@@ -7,7 +7,7 @@ import db from "@server/db";
 import { users } from "@server/db/schemas";
 import HttpCode from "@server/types/HttpCode";
 import response from "@server/lib/response";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { NextFunction, Request, Response } from "express";
 import createHttpError from "http-errors";
 import { z } from "zod";
@@ -17,6 +17,7 @@ import config from "@server/lib/config";
 import logger from "@server/logger";
 import { verifyPassword } from "@server/auth/password";
 import { verifySession } from "@server/auth/sessions/verifySession";
+import { UserType } from "@server/types/UserTypes";
 
 export const loginBodySchema = z
     .object({
@@ -69,7 +70,9 @@ export async function login(
         const existingUserRes = await db
             .select()
             .from(users)
-            .where(eq(users.email, email));
+            .where(
+                and(eq(users.type, UserType.Internal), eq(users.email, email))
+            );
         if (!existingUserRes || !existingUserRes.length) {
             if (config.getRawConfig().app.log_failed_attempts) {
                 logger.info(
@@ -88,7 +91,7 @@ export async function login(
 
         const validPassword = await verifyPassword(
             password,
-            existingUser.passwordHash
+            existingUser.passwordHash!
         );
         if (!validPassword) {
             if (config.getRawConfig().app.log_failed_attempts) {
