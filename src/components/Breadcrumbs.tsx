@@ -37,8 +37,8 @@ export function Breadcrumbs() {
         //     label = "Roles";
         // } else if (segment === "invitations") {
         //     label = "Invitations";
-        // } else if (segment === "connectivity") {
-        //     label = "Connectivity";
+        // } else if (segment === "proxy") {
+        //     label = "proxy";
         // } else if (segment === "authentication") {
         //     label = "Authentication";
         // }

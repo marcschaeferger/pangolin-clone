@@ -163,7 +163,7 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                         );
                     }
                 } else {
-                    return <span>--</span>;
+                    return <span>-</span>;
                 }
             }
         },

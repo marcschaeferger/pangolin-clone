@@ -86,8 +86,8 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
             href: `/{orgId}/settings/resources/{resourceId}/general`
         },
         {
-            title: "Connectivity",
-            href: `/{orgId}/settings/resources/{resourceId}/connectivity`
+            title: "Proxy",
+            href: `/{orgId}/settings/resources/{resourceId}/proxy`
         }
     ];
 

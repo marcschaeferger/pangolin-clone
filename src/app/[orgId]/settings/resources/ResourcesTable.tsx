@@ -57,7 +57,8 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
     const api = createApiClient(useEnvContext());
 
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [selectedResource, setSelectedResource] = useState<ResourceRow | null>();
+    const [selectedResource, setSelectedResource] =
+        useState<ResourceRow | null>();
 
     const deleteResource = (resourceId: number) => {
         api.delete(`/resource/${resourceId}`)
@@ -238,7 +239,7 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                                 <span>Not Protected</span>
                             </span>
                         ) : (
-                            <span>--</span>
+                            <span>-</span>
                         )}
                     </div>
                 );

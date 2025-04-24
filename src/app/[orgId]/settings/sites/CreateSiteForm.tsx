@@ -227,11 +227,11 @@ export default function CreateSiteForm({
                 mbIn:
                     data.type == "wireguard" || data.type == "newt"
                         ? "0 MB"
-                        : "--",
+                        : "-",
                 mbOut:
                     data.type == "wireguard" || data.type == "newt"
                         ? "0 MB"
-                        : "--",
+                        : "-",
                 orgId: orgId as string,
                 type: data.type as any,
                 online: false

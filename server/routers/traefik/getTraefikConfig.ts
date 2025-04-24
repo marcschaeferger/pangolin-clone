@@ -41,7 +41,7 @@ export async function traefikConfigProvider(
                         orgId: orgs.orgId
                     },
                     enabled: resources.enabled,
-                    stickySession: resources.stickySessionk,
+                    stickySession: resources.stickySession,
                     tlsServerName: resources.tlsServerName,
                     setHostHeader: resources.setHostHeader
                 })
@@ -288,7 +288,7 @@ export async function traefikConfigProvider(
                             ? {
                                   sticky: {
                                       cookie: {
-                                          name: "pangolin_sticky",
+                                          name: "p_sticky", // TODO: make this configurable via config.yml like other cookies
                                           secure: resource.ssl,
                                           httpOnly: true
                                       }
