@@ -57,6 +57,8 @@ import {
     BreadcrumbSeparator
 } from "@app/components/ui/breadcrumb";
 import Link from "next/link";
+import QRCode from "react-qr-code";
+import QRContainer from "@app/components/QRContainer";
 
 const createSiteFormSchema = z
     .object({
@@ -775,8 +777,16 @@ PersistentKeepalive = 5`;
                                     </SettingsSectionDescription>
                                 </SettingsSectionHeader>
                                 <SettingsSectionBody>
-                                    <CopyTextBox text={wgConfig} />
-
+                                    <div className="flex items-center gap-4">
+                                        <CopyTextBox text={wgConfig} />
+                                        <QRContainer>
+                                            <QRCode
+                                                value={wgConfig}
+                                                size={168}
+                                                className="mx-auto"
+                                            />
+                                        </QRContainer>
+                                    </div>
                                     <Alert variant="neutral">
                                         <InfoIcon className="h-4 w-4" />
                                         <AlertTitle className="font-semibold">
