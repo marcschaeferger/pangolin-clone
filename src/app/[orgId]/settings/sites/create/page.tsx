@@ -57,7 +57,7 @@ import {
     BreadcrumbSeparator
 } from "@app/components/ui/breadcrumb";
 import Link from "next/link";
-import QRCode from "react-qr-code";
+import { QRCodeCanvas } from "qrcode.react";
 import QRContainer from "@app/components/QRContainer";
 
 const createSiteFormSchema = z
@@ -780,7 +780,7 @@ PersistentKeepalive = 5`;
                                     <div className="flex items-center gap-4">
                                         <CopyTextBox text={wgConfig} />
                                         <QRContainer>
-                                            <QRCode
+                                            <QRCodeCanvas
                                                 value={wgConfig}
                                                 size={168}
                                                 className="mx-auto"
