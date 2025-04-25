@@ -198,8 +198,11 @@ export default function Page() {
                                                 );
                                             }}
                                         />
-                                        <Badge className="ml-2">
-                                            Enterprise
+                                        <Badge
+                                            variant="outlinePrimary"
+                                            className="ml-2"
+                                        >
+                                            Professional
                                         </Badge>
                                     </div>
                                     <span className="text-sm text-muted-foreground">

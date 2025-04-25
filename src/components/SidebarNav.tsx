@@ -14,7 +14,7 @@ export interface SidebarNavItem {
     icon?: React.ReactNode;
     children?: SidebarNavItem[];
     autoExpand?: boolean;
-    showEnterprise?: boolean;
+    showProfessional?: boolean;
 }
 
 export interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
@@ -98,8 +98,8 @@ export function SidebarNav({
             const hasChildren = item.children && item.children.length > 0;
             const isExpanded = expandedItems.has(hydratedHref);
             const indent = level * 28; // Base indent for each level
-            const isEnterprise = item.showEnterprise;
-            const isDisabled = disabled || isEnterprise;
+            const isProfessional = item.showProfessional;
+            const isDisabled = disabled || isProfessional;
 
             return (
                 <div key={hydratedHref}>
@@ -114,7 +114,7 @@ export function SidebarNav({
                             )}
                         >
                             <Link
-                                href={isEnterprise ? "#" : hydratedHref}
+                                href={isProfessional ? "#" : hydratedHref}
                                 className={cn(
                                     "flex items-center w-full px-3 py-2",
                                     isActive
@@ -132,15 +132,25 @@ export function SidebarNav({
                                 tabIndex={isDisabled ? -1 : undefined}
                                 aria-disabled={isDisabled}
                             >
-                                <div className={cn("flex items-center", isDisabled && "opacity-60")}>
+                                <div
+                                    className={cn(
+                                        "flex items-center",
+                                        isDisabled && "opacity-60"
+                                    )}
+                                >
                                     {item.icon && (
-                                        <span className="mr-3">{item.icon}</span>
+                                        <span className="mr-3">
+                                            {item.icon}
+                                        </span>
                                     )}
                                     {item.title}
                                 </div>
-                                {isEnterprise && (
-                                    <Badge className="ml-2">
-                                        Enterprise
+                                {isProfessional && (
+                                    <Badge
+                                        variant="outlinePrimary"
+                                        className="ml-2"
+                                    >
+                                        Professional
                                     </Badge>
                                 )}
                             </Link>
