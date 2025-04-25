@@ -99,7 +99,7 @@ export const exitNodes = sqliteTable("exitNodes", {
     name: text("name").notNull(),
     address: text("address").notNull(), // this is the address of the wireguard interface in gerbil
     endpoint: text("endpoint").notNull(), // this is how to reach gerbil externally - gets put into the wireguard config
-    publicKey: text("pubicKey").notNull(),
+    publicKey: text("publicKey").notNull(),
     listenPort: integer("listenPort").notNull(),
     reachableAt: text("reachableAt") // this is the internal address of the gerbil http server for command control
 });
