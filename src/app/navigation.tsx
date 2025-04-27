@@ -7,7 +7,8 @@ import {
     Waypoints,
     Combine,
     Fingerprint,
-    KeyRound
+    KeyRound,
+    TicketCheck
 } from "lucide-react";
 
 export const orgLangingNavItems: SidebarNavItem[] = [
@@ -93,5 +94,10 @@ export const adminNavItems: SidebarNavItem[] = [
         title: "Identity Providers",
         href: "/admin/idp",
         icon: <Fingerprint className="h-4 w-4" />
+    },
+    {
+        title: "License",
+        href: "/admin/license",
+        icon: <TicketCheck className="h-4 w-4" />
     }
 ];

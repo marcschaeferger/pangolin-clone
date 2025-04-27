@@ -3,7 +3,7 @@ export function SettingsContainer({ children }: { children: React.ReactNode }) {
 }
 
 export function SettingsSection({ children }: { children: React.ReactNode }) {
-    return <div className="border rounded-lg bg-card p-5">{children}</div>;
+    return <div className="border rounded-lg bg-card p-5 flex flex-col min-h-[200px]">{children}</div>;
 }
 
 export function SettingsSectionHeader({
@@ -47,7 +47,7 @@ export function SettingsSectionBody({
 }: {
     children: React.ReactNode;
 }) {
-    return <div className="space-y-5">{children}</div>;
+    return <div className="space-y-5 flex-grow">{children}</div>;
 }
 
 export function SettingsSectionFooter({
@@ -55,7 +55,7 @@ export function SettingsSectionFooter({
 }: {
     children: React.ReactNode;
 }) {
-    return <div className="flex justify-end space-x-4 mt-8">{children}</div>;
+    return <div className="flex justify-end space-x-2 mt-auto pt-8">{children}</div>;
 }
 
 export function SettingsSectionGrid({

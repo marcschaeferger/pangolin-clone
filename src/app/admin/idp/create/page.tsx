@@ -36,6 +36,7 @@ import { InfoIcon, ExternalLink } from "lucide-react";
 import { StrategySelect } from "@app/components/StrategySelect";
 import { SwitchInput } from "@app/components/SwitchInput";
 import { Badge } from "@app/components/ui/badge";
+import { useLicenseStatusContext } from "@app/hooks/useLicenseStatusContext";
 
 const createIdpFormSchema = z.object({
     name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -74,6 +75,7 @@ export default function Page() {
     const api = createApiClient({ env });
     const router = useRouter();
     const [createLoading, setCreateLoading] = useState(false);
+    const { isUnlocked } = useLicenseStatusContext();
 
     const form = useForm<CreateIdpFormValues>({
         resolver: zodResolver(createIdpFormSchema),
@@ -190,7 +192,7 @@ export default function Page() {
                                             defaultChecked={form.getValues(
                                                 "autoProvision"
                                             )}
-                                            disabled={true}
+                                            disabled={!isUnlocked()}
                                             onCheckedChange={(checked) => {
                                                 form.setValue(
                                                     "autoProvision",
@@ -198,12 +200,14 @@ export default function Page() {
                                                 );
                                             }}
                                         />
-                                        <Badge
-                                            variant="outlinePrimary"
-                                            className="ml-2"
-                                        >
-                                            Professional
-                                        </Badge>
+                                        {!isUnlocked() && (
+                                            <Badge
+                                                variant="outlinePrimary"
+                                                className="ml-2"
+                                            >
+                                                Professional
+                                            </Badge>
+                                        )}
                                     </div>
                                     <span className="text-sm text-muted-foreground">
                                         When enabled, users will be

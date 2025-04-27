@@ -5,14 +5,19 @@ import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { cn } from "@app/lib/cn";
 import { buttonVariants } from "@/components/ui/button";
+import { Badge } from "@app/components/ui/badge";
+import { useLicenseStatusContext } from "@app/hooks/useLicenseStatusContext";
+
+export type HorizontalTabs = Array<{
+    title: string;
+    href: string;
+    icon?: React.ReactNode;
+    showProfessional?: boolean;
+}>;
 
 interface HorizontalTabsProps {
     children: React.ReactNode;
-    items: Array<{
-        title: string;
-        href: string;
-        icon?: React.ReactNode;
-    }>;
+    items: HorizontalTabs;
     disabled?: boolean;
 }
 
@@ -23,6 +28,7 @@ export function HorizontalTabs({
 }: HorizontalTabsProps) {
     const pathname = usePathname();
     const params = useParams();
+    const { licenseStatus, isUnlocked } = useLicenseStatusContext();
 
     function hydrateHref(href: string) {
         return href
@@ -42,34 +48,47 @@ export function HorizontalTabs({
                             const isActive =
                                 pathname.startsWith(hydratedHref) &&
                                 !pathname.includes("create");
+                            const isProfessional =
+                                item.showProfessional && !isUnlocked();
+                            const isDisabled =
+                                disabled || (isProfessional && !isUnlocked());
 
                             return (
                                 <Link
                                     key={hydratedHref}
-                                    href={hydratedHref}
+                                    href={isProfessional ? "#" : hydratedHref}
                                     className={cn(
                                         "px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap",
                                         isActive
                                             ? "border-b-2 border-primary text-primary"
                                             : "text-muted-foreground hover:text-foreground",
-                                        disabled && "cursor-not-allowed"
+                                        isDisabled && "cursor-not-allowed"
                                     )}
-                                    onClick={
-                                        disabled
-                                            ? (e) => e.preventDefault()
-                                            : undefined
-                                    }
-                                    tabIndex={disabled ? -1 : undefined}
-                                    aria-disabled={disabled}
+                                    onClick={(e) => {
+                                        if (isDisabled) {
+                                            e.preventDefault();
+                                        }
+                                    }}
+                                    tabIndex={isDisabled ? -1 : undefined}
+                                    aria-disabled={isDisabled}
                                 >
-                                    {item.icon ? (
-                                        <div className="flex items-center space-x-2">
-                                            {item.icon}
-                                            <span>{item.title}</span>
-                                        </div>
-                                    ) : (
-                                        item.title
-                                    )}
+                                    <div
+                                        className={cn(
+                                            "flex items-center space-x-2",
+                                            isDisabled && "opacity-60"
+                                        )}
+                                    >
+                                        {item.icon && item.icon}
+                                        <span>{item.title}</span>
+                                        {isProfessional && (
+                                            <Badge
+                                                variant="outlinePrimary"
+                                                className="ml-2"
+                                            >
+                                                Professional
+                                            </Badge>
+                                        )}
+                                    </div>
                                 </Link>
                             );
                         })}

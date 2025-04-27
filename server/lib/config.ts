@@ -12,8 +12,8 @@ import { passwordSchema } from "@server/auth/passwordSchema";
 import stoi from "./stoi";
 import db from "@server/db";
 import { SupporterKey, supporterKey } from "@server/db/schemas";
-import { suppressDeprecationWarnings } from "moment";
 import { eq } from "drizzle-orm";
+import { license } from "@server/license/license";
 
 const portSchema = z.number().positive().gt(0).lte(65535);
 
@@ -267,11 +267,17 @@ export class Config {
             : "false";
         process.env.DASHBOARD_URL = parsedConfig.data.app.dashboard_url;
 
-        if (!this.isDev) {
-            this.checkSupporterKey();
-        }
+        this.checkKeyStatus();
 
         this.rawConfig = parsedConfig.data;
+    }
+
+    private async checkKeyStatus() {
+        const licenseStatus = await license.check();
+        console.log("License status", licenseStatus);
+        if (!licenseStatus.isHostLicensed) {
+            this.checkSupporterKey();
+        }
     }
 
     public getRawConfig() {

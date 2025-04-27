@@ -4,6 +4,7 @@ import { AxiosResponse } from "axios";
 import { redirect } from "next/navigation";
 import { authCookieHeader } from "@app/lib/api/cookies";
 import { HorizontalTabs } from "@app/components/HorizontalTabs";
+import { ProfessionalContentOverlay } from "@app/components/ProfessionalContentOverlay";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
@@ -35,7 +36,7 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
         redirect("/admin/idp");
     }
 
-    const navItems = [
+    const navItems: HorizontalTabs = [
         {
             title: "General",
             href: `/admin/idp/${params.idpId}/general`

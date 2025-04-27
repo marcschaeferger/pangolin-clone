@@ -4,10 +4,11 @@ import { useState } from "react";
 
 type CopyToClipboardProps = {
     text: string;
+    displayText?: string;
     isLink?: boolean;
 };
 
-const CopyToClipboard = ({ text, isLink }: CopyToClipboardProps) => {
+const CopyToClipboard = ({ text, displayText, isLink }: CopyToClipboardProps) => {
     const [copied, setCopied] = useState(false);
 
     const handleCopy = () => {
@@ -18,6 +19,8 @@ const CopyToClipboard = ({ text, isLink }: CopyToClipboardProps) => {
             setCopied(false);
         }, 2000);
     };
+
+    const displayValue = displayText ?? text;
 
     return (
         <div className="flex items-center space-x-2 max-w-full">
@@ -30,7 +33,7 @@ const CopyToClipboard = ({ text, isLink }: CopyToClipboardProps) => {
                     style={{ maxWidth: "100%" }} // Ensures truncation works within parent
                     title={text} // Shows full text on hover
                 >
-                    {text}
+                    {displayValue}
                 </Link>
             ) : (
                 <span
@@ -44,7 +47,7 @@ const CopyToClipboard = ({ text, isLink }: CopyToClipboardProps) => {
                     }}
                     title={text} // Full text tooltip
                 >
-                    {text}
+                    {displayValue}
                 </span>
             )}
             <button

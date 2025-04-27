@@ -11,6 +11,7 @@ import { idp, idpOidcConfig } from "@server/db/schemas";
 import { eq } from "drizzle-orm";
 import { encrypt } from "@server/lib/crypto";
 import config from "@server/lib/config";
+import license from "@server/license/license";
 
 const paramsSchema = z
     .object({
@@ -84,7 +85,7 @@ export async function updateOidcIdp(
         }
 
         const { idpId } = parsedParams.data;
-        const {
+        let {
             clientId,
             clientSecret,
             authUrl,
@@ -98,6 +99,10 @@ export async function updateOidcIdp(
             defaultRoleMapping,
             defaultOrgMapping
         } = parsedBody.data;
+
+        if (!(await license.isUnlocked())) {
+            autoProvision = false;
+        }
 
         // Check if IDP exists and is of type OIDC
         const [existingIdp] = await db

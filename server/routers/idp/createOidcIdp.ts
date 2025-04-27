@@ -11,6 +11,7 @@ import { idp, idpOidcConfig } from "@server/db/schemas";
 import { generateOidcRedirectUrl } from "@server/lib/idp/generateRedirectUrl";
 import { encrypt } from "@server/lib/crypto";
 import config from "@server/lib/config";
+import license from "@server/license/license";
 
 const paramsSchema = z.object({}).strict();
 
@@ -67,7 +68,7 @@ export async function createOidcIdp(
             );
         }
 
-        const {
+        let {
             clientId,
             clientSecret,
             authUrl,
@@ -79,6 +80,10 @@ export async function createOidcIdp(
             name,
             autoProvision
         } = parsedBody.data;
+
+        if (!(await license.isUnlocked())) {
+            autoProvision = false;
+        }
 
         const key = config.getRawConfig().server.secret;
 

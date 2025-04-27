@@ -1,25 +1,17 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import {
-    Figtree,
-    Inter,
-    Red_Hat_Display,
-    Red_Hat_Mono,
-    Red_Hat_Text,
-    Space_Grotesk
-} from "next/font/google";
+import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@app/providers/ThemeProvider";
 import EnvProvider from "@app/providers/EnvProvider";
-import { Separator } from "@app/components/ui/separator";
 import { pullEnv } from "@app/lib/pullEnv";
-import { BookOpenText, ExternalLink } from "lucide-react";
-import Image from "next/image";
 import SupportStatusProvider from "@app/providers/SupporterStatusProvider";
-import { createApiClient, internal, priv } from "@app/lib/api";
+import { priv } from "@app/lib/api";
 import { AxiosResponse } from "axios";
 import { IsSupporterKeyVisibleResponse } from "@server/routers/supporterKey";
-import SupporterMessage from "./components/SupporterMessage";
+import LicenseStatusProvider from "@app/providers/LicenseStatusProvider";
+import { GetLicenseStatusResponse } from "@server/routers/license";
+import LicenseViolation from "./components/LicenseViolation";
 
 export const metadata: Metadata = {
     title: `Dashboard - Pangolin`,
@@ -48,6 +40,12 @@ export default async function RootLayout({
     supporterData.visible = res.data.data.visible;
     supporterData.tier = res.data.data.tier;
 
+    const licenseStatusRes =
+        await priv.get<AxiosResponse<GetLicenseStatusResponse>>(
+            "/license/status"
+        );
+    const licenseStatus = licenseStatusRes.data.data;
+
     return (
         <html suppressHydrationWarning>
             <body className={`${font.className} h-screen overflow-hidden`}>
@@ -58,14 +56,19 @@ export default async function RootLayout({
                     disableTransitionOnChange
                 >
                     <EnvProvider env={pullEnv()}>
-                        <SupportStatusProvider supporterStatus={supporterData}>
-                            {/* Main content */}
-                            <div className="h-full flex flex-col">
-                                <div className="flex-1 overflow-auto">
-                                    {children}
+                        <LicenseStatusProvider licenseStatus={licenseStatus}>
+                            <SupportStatusProvider
+                                supporterStatus={supporterData}
+                            >
+                                {/* Main content */}
+                                <div className="h-full flex flex-col">
+                                    <div className="flex-1 overflow-auto">
+                                        <LicenseViolation />
+                                        {children}
+                                    </div>
                                 </div>
-                            </div>
-                        </SupportStatusProvider>
+                            </SupportStatusProvider>
+                        </LicenseStatusProvider>
                     </EnvProvider>
                     <Toaster />
                 </ThemeProvider>

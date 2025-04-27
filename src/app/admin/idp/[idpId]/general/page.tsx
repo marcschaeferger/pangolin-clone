@@ -42,6 +42,7 @@ import {
 } from "@app/components/InfoSection";
 import CopyToClipboard from "@app/components/CopyToClipboard";
 import { Badge } from "@app/components/ui/badge";
+import { useLicenseStatusContext } from "@app/hooks/useLicenseStatusContext";
 
 const GeneralFormSchema = z.object({
     name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -67,6 +68,7 @@ export default function GeneralPage() {
     const { idpId } = useParams();
     const [loading, setLoading] = useState(false);
     const [initialLoading, setInitialLoading] = useState(true);
+    const { isUnlocked } = useLicenseStatusContext();
 
     const redirectUrl = `${env.app.dashboardUrl}/auth/idp/${idpId}/oidc/callback`;
 
@@ -230,7 +232,7 @@ export default function GeneralPage() {
                                             defaultChecked={form.getValues(
                                                 "autoProvision"
                                             )}
-                                            disabled={true}
+                                            disabled={!isUnlocked()}
                                             onCheckedChange={(checked) => {
                                                 form.setValue(
                                                     "autoProvision",
@@ -238,12 +240,14 @@ export default function GeneralPage() {
                                                 );
                                             }}
                                         />
-                                        <Badge
-                                            variant="outlinePrimary"
-                                            className="ml-2"
-                                        >
-                                            Professional
-                                        </Badge>
+                                        {!isUnlocked() && (
+                                            <Badge
+                                                variant="outlinePrimary"
+                                                className="ml-2"
+                                            >
+                                                Professional
+                                            </Badge>
+                                        )}
                                     </div>
                                     <span className="text-sm text-muted-foreground">
                                         When enabled, users will be

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { useLicenseStatusContext } from "@app/hooks/useLicenseStatusContext";
 
 type ValidateOidcTokenParams = {
     orgId: string;
@@ -33,6 +34,8 @@ export default function ValidateOidcToken(props: ValidateOidcTokenParams) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    const { licenseStatus, isLicenseViolation } = useLicenseStatusContext();
+
     useEffect(() => {
         async function validate() {
             setLoading(true);
@@ -42,6 +45,10 @@ export default function ValidateOidcToken(props: ValidateOidcTokenParams) {
                 expectedState: props.expectedState,
                 stateCookie: props.stateCookie
             });
+
+            if (isLicenseViolation()) {
+                await new Promise((resolve) => setTimeout(resolve, 5000));
+            }
 
             try {
                 const res = await api.post<

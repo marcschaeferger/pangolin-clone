@@ -161,14 +161,6 @@ export function Layout({
                                     >
                                         Documentation
                                     </Link>
-                                    <Link
-                                        href="mailto:support@fossorial.io"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-muted-foreground hover:text-foreground transition-colors"
-                                    >
-                                        Support
-                                    </Link>
                                 </div>
                                 <div>
                                     <ProfileIcon />

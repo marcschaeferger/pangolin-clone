@@ -7,6 +7,7 @@ import { cn } from "@app/lib/cn";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useUserContext } from "@app/hooks/useUserContext";
 import { Badge } from "@app/components/ui/badge";
+import { useLicenseStatusContext } from "@app/hooks/useLicenseStatusContext";
 
 export interface SidebarNavItem {
     href: string;
@@ -37,6 +38,7 @@ export function SidebarNav({
     const resourceId = params.resourceId as string;
     const userId = params.userId as string;
     const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+    const { licenseStatus, isUnlocked } = useLicenseStatusContext();
 
     const { user } = useUserContext();
 
@@ -98,7 +100,7 @@ export function SidebarNav({
             const hasChildren = item.children && item.children.length > 0;
             const isExpanded = expandedItems.has(hydratedHref);
             const indent = level * 28; // Base indent for each level
-            const isProfessional = item.showProfessional;
+            const isProfessional = item.showProfessional && !isUnlocked();
             const isDisabled = disabled || isProfessional;
 
             return (
