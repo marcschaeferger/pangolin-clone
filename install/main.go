@@ -191,7 +191,7 @@ func collectUserInput(reader *bufio.Reader) Config {
 	config.BaseDomain = readString(reader, "Enter your base domain (no subdomain e.g. example.com)", "")
 	config.DashboardDomain = readString(reader, "Enter the domain for the Pangolin dashboard", "pangolin."+config.BaseDomain)
 	config.LetsEncryptEmail = readString(reader, "Enter email for Let's Encrypt certificates", "")
-	config.InstallGerbil = readBool(reader, "Do you want to use Gerbil to allow tunned connections", true)
+	config.InstallGerbil = readBool(reader, "Do you want to use Gerbil to allow tunneled connections", true)
 
 	// Admin user configuration
 	fmt.Println("\n=== Admin User Configuration ===")
