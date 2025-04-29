@@ -86,7 +86,7 @@ export const adminNavItems: SidebarNavItem[] = [
     },
     {
         title: "API Keys",
-        href: "/{orgId}/settings/api-keys",
+        href: "/admin/api-keys",
         icon: <KeyRound className="h-4 w-4" />,
         showProfessional: true
     },

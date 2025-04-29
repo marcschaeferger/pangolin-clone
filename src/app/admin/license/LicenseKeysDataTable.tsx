@@ -16,7 +16,7 @@ import CopyToClipboard from "@app/components/CopyToClipboard";
 
 type LicenseKeysDataTableProps = {
     licenseKeys: LicenseKeyCache[];
-    onDelete: (key: string) => void;
+    onDelete: (key: LicenseKeyCache) => void;
     onCreate: () => void;
 };
 
@@ -124,7 +124,7 @@ export function LicenseKeysDataTable({
                 <div className="flex items-center justify-end space-x-2">
                     <Button
                         variant="outlinePrimary"
-                        onClick={() => onDelete(row.original.licenseKey)}
+                        onClick={() => onDelete(row.original)}
                     >
                         Delete
                     </Button>

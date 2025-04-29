@@ -10,6 +10,8 @@ import NodeCache from "node-cache";
 import { validateJWT } from "./licenseJwt";
 import { count, eq } from "drizzle-orm";
 import moment from "moment";
+import { setHostMeta } from "@server/setup/setHostMeta";
+import { encrypt, decrypt } from "@server/lib/crypto";
 
 export type LicenseStatus = {
     isHostLicensed: boolean; // Are there any license keys?
@@ -21,6 +23,7 @@ export type LicenseStatus = {
 
 export type LicenseKeyCache = {
     licenseKey: string;
+    licenseKeyEncrypted: string;
     valid: boolean;
     iat?: Date;
     type?: "LICENSE" | "SITES";
@@ -69,6 +72,7 @@ export class License {
 
     private ephemeralKey!: string;
     private statusKey = "status";
+    private serverSecret!: string;
 
     private publicKey = `-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAx9RKc8cw+G8r7h/xeozF
@@ -100,6 +104,10 @@ LQIDAQAB
         });
     }
 
+    public setServerSecret(secret: string) {
+        this.serverSecret = secret;
+    }
+
     public async forceRecheck() {
         this.statusCache.flushAll();
         this.licenseKeyCache.flushAll();
@@ -129,8 +137,7 @@ LQIDAQAB
             hostId: this.hostId,
             isHostLicensed: true,
             isLicenseValid: false,
-            maxSites: undefined,
-            usedSites: 150
+            maxSites: undefined
         };
 
         try {
@@ -143,8 +150,6 @@ LQIDAQAB
             // Invalidate all
             this.licenseKeyCache.flushAll();
 
-            logger.debug("Checking license status...");
-
             const allKeysRes = await db.select().from(licenseKey);
 
             if (allKeysRes.length === 0) {
@@ -152,24 +157,37 @@ LQIDAQAB
                 return status;
             }
 
+            let foundHostKey = false;
             // Validate stored license keys
             for (const key of allKeysRes) {
                 try {
-                    const payload = validateJWT<TokenPayload>(
+                    // Decrypt the license key and token
+                    const decryptedKey = decrypt(
+                        key.licenseKeyId,
+                        this.serverSecret
+                    );
+                    const decryptedToken = decrypt(
                         key.token,
+                        this.serverSecret
+                    );
+
+                    const payload = validateJWT<TokenPayload>(
+                        decryptedToken,
                         this.publicKey
                     );
 
-                    this.licenseKeyCache.set<LicenseKeyCache>(
-                        key.licenseKeyId,
-                        {
-                            licenseKey: key.licenseKeyId,
-                            valid: payload.valid,
-                            type: payload.type,
-                            numSites: payload.quantity,
-                            iat: new Date(payload.iat * 1000)
-                        }
-                    );
+                    this.licenseKeyCache.set<LicenseKeyCache>(decryptedKey, {
+                        licenseKey: decryptedKey,
+                        licenseKeyEncrypted: key.licenseKeyId,
+                        valid: payload.valid,
+                        type: payload.type,
+                        numSites: payload.quantity,
+                        iat: new Date(payload.iat * 1000)
+                    });
+
+                    if (payload.type === "LICENSE") {
+                        foundHostKey = true;
+                    }
                 } catch (e) {
                     logger.error(
                         `Error validating license key: ${key.licenseKeyId}`
@@ -180,15 +198,21 @@ LQIDAQAB
                         key.licenseKeyId,
                         {
                             licenseKey: key.licenseKeyId,
+                            licenseKeyEncrypted: key.licenseKeyId,
                             valid: false
                         }
                     );
                 }
             }
 
+            if (!foundHostKey && allKeysRes.length) {
+                logger.debug("No host license key found");
+                status.isHostLicensed = false;
+            }
+
             const keys = allKeysRes.map((key) => ({
-                licenseKey: key.licenseKeyId,
-                instanceId: key.instanceId
+                licenseKey: decrypt(key.licenseKeyId, this.serverSecret),
+                instanceId: decrypt(key.instanceId, this.serverSecret)
             }));
 
             let apiResponse: ValidateLicenseAPIResponse | undefined;
@@ -251,12 +275,22 @@ LQIDAQAB
                     cached.numSites = payload.quantity;
                     cached.iat = new Date(payload.iat * 1000);
 
+                    // Encrypt the updated token before storing
+                    const encryptedKey = encrypt(
+                        key.licenseKey,
+                        this.serverSecret
+                    );
+                    const encryptedToken = encrypt(
+                        licenseKeyRes,
+                        this.serverSecret
+                    );
+
                     await db
                         .update(licenseKey)
                         .set({
-                            token: licenseKeyRes
+                            token: encryptedToken
                         })
-                        .where(eq(licenseKey.licenseKeyId, key.licenseKey));
+                        .where(eq(licenseKey.licenseKeyId, encryptedKey));
 
                     this.licenseKeyCache.set<LicenseKeyCache>(
                         key.licenseKey,
@@ -300,10 +334,13 @@ LQIDAQAB
     }
 
     public async activateLicenseKey(key: string) {
+        // Encrypt the license key before storing
+        const encryptedKey = encrypt(key, this.serverSecret);
+
         const [existingKey] = await db
             .select()
             .from(licenseKey)
-            .where(eq(licenseKey.licenseKeyId, key))
+            .where(eq(licenseKey.licenseKeyId, encryptedKey))
             .limit(1);
 
         if (existingKey) {
@@ -380,11 +417,15 @@ LQIDAQAB
                 throw new Error("Invalid license key");
             }
 
+            const encryptedToken = encrypt(licenseKeyRes, this.serverSecret);
+            // Encrypt the instanceId before storing
+            const encryptedInstanceId = encrypt(instanceId!, this.serverSecret);
+
             // Store the license key in the database
             await db.insert(licenseKey).values({
-                licenseKeyId: key,
-                token: licenseKeyRes,
-                instanceId: instanceId!
+                licenseKeyId: encryptedKey,
+                token: encryptedToken,
+                instanceId: encryptedInstanceId
             });
         } catch (error) {
             throw Error(`Error validating license key: ${error}`);
@@ -400,13 +441,21 @@ LQIDAQAB
             instanceId: string;
         }[]
     ): Promise<ValidateLicenseAPIResponse> {
+        // Decrypt the instanceIds before sending to the server
+        const decryptedKeys = keys.map((key) => ({
+            licenseKey: key.licenseKey,
+            instanceId: key.instanceId
+                ? decrypt(key.instanceId, this.serverSecret)
+                : key.instanceId
+        }));
+
         const response = await fetch(this.validationServerUrl, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                licenseKeys: keys,
+                licenseKeys: decryptedKeys,
                 ephemeralKey: this.ephemeralKey,
                 instanceName: this.hostId
             })
@@ -417,6 +466,8 @@ LQIDAQAB
         return data as ValidateLicenseAPIResponse;
     }
 }
+
+await setHostMeta();
 
 const [info] = await db.select().from(hostMeta).limit(1);
 

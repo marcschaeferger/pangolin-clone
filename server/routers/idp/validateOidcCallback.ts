@@ -1,24 +1,30 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
+import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { idp, idpOidcConfig, users } from "@server/db/schemas";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import * as arctic from "arctic";
 import { generateOidcRedirectUrl } from "@server/lib/idp/generateRedirectUrl";
 import jmespath from "jmespath";
 import jsonwebtoken from "jsonwebtoken";
 import config from "@server/lib/config";
-import { decrypt } from "@server/lib/crypto";
 import {
     createSession,
     generateSessionToken,
     serializeSessionCookie
 } from "@server/auth/sessions/app";
-import { response } from "@server/lib";
+import { decrypt } from "@server/lib/crypto";
+import { oidcAutoProvision } from "./oidcAutoProvision";
+import license from "@server/license/license";
+
+const ensureTrailingSlash = (url: string): string => {
+    return url.endsWith('/') ? url : `${url}/`;
+};
 
 const paramsSchema = z
     .object({
@@ -148,7 +154,7 @@ export async function validateOidcCallback(
         }
 
         const tokens = await client.validateAuthorizationCode(
-            existingIdp.idpOidcConfig.tokenUrl,
+            ensureTrailingSlash(existingIdp.idpOidcConfig.tokenUrl),
             code,
             codeVerifier
         );
@@ -204,12 +210,24 @@ export async function validateOidcCallback(
             );
 
         if (existingIdp.idp.autoProvision) {
-            return next(
-                createHttpError(
-                    HttpCode.BAD_REQUEST,
-                    "Auto provisioning is not supported"
-                )
-            );
+            if (!(await license.isUnlocked())) {
+                return next(
+                    createHttpError(
+                        HttpCode.FORBIDDEN,
+                        "Auto-provisioning is not available"
+                    )
+                );
+            }
+            await oidcAutoProvision({
+                idp: existingIdp.idp,
+                userIdentifier,
+                email,
+                name,
+                claims,
+                existingUser,
+                req,
+                res
+            });
         } else {
             if (!existingUser) {
                 return next(

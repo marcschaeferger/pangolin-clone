@@ -60,6 +60,10 @@ const configSchema = z.object({
             }
         ),
     server: z.object({
+        integration_port: portSchema
+            .optional()
+            .transform(stoi)
+            .pipe(portSchema.optional()),
         external_port: portSchema.optional().transform(stoi).pipe(portSchema),
         internal_port: portSchema.optional().transform(stoi).pipe(portSchema),
         next_port: portSchema.optional().transform(stoi).pipe(portSchema),
@@ -96,14 +100,7 @@ const configSchema = z.object({
             .string()
             .optional()
             .transform(getEnvOrYaml("SERVER_SECRET"))
-            .pipe(
-                z
-                    .string()
-                    .min(
-                        32,
-                        "SERVER_SECRET must be at least 32 characters long"
-                    )
-            )
+            .pipe(z.string().min(8))
     }),
     traefik: z.object({
         http_entrypoint: z.string(),
@@ -267,6 +264,8 @@ export class Config {
             : "false";
         process.env.DASHBOARD_URL = parsedConfig.data.app.dashboard_url;
 
+        license.setServerSecret(parsedConfig.data.server.secret);
+
         this.checkKeyStatus();
 
         this.rawConfig = parsedConfig.data;
@@ -274,7 +273,6 @@ export class Config {
 
     private async checkKeyStatus() {
         const licenseStatus = await license.check();
-        console.log("License status", licenseStatus);
         if (!licenseStatus.isHostLicensed) {
             this.checkSupporterKey();
         }

@@ -40,19 +40,25 @@ export function SitePriceCalculator({
         setSiteCount((prev) => (prev > 1 ? prev - 1 : 1));
     };
 
-    const totalCost = mode === "license"
-        ? licenseFlatRate + (siteCount * pricePerSite)
-        : siteCount * pricePerSite;
+    const totalCost =
+        mode === "license"
+            ? licenseFlatRate + siteCount * pricePerSite
+            : siteCount * pricePerSite;
 
     return (
         <Credenza open={isOpen} onOpenChange={onOpenChange}>
             <CredenzaContent>
                 <CredenzaHeader>
                     <CredenzaTitle>
-                        {mode === "license" ? "Purchase License" : "Purchase Additional Sites"}
+                        {mode === "license"
+                            ? "Purchase License"
+                            : "Purchase Additional Sites"}
                     </CredenzaTitle>
                     <CredenzaDescription>
-                        Choose how many sites you want to {mode === "license" ? "purchase a license for" : "add to your existing license"}.
+                        Choose how many sites you want to{" "}
+                        {mode === "license"
+                            ? "purchase a license for. You can always add more sites later."
+                            : "add to your existing license."}
                     </CredenzaDescription>
                 </CredenzaHeader>
                 <CredenzaBody>
@@ -108,14 +114,26 @@ export function SitePriceCalculator({
                                 <span className="text-sm font-medium">
                                     Number of sites:
                                 </span>
-                                <span className="font-medium">
-                                    {siteCount}
-                                </span>
+                                <span className="font-medium">{siteCount}</span>
                             </div>
                             <div className="flex justify-between items-center mt-4 text-lg font-bold">
                                 <span>Total:</span>
                                 <span>${totalCost.toFixed(2)} / mo</span>
                             </div>
+
+                            <p className="text-muted-foreground text-sm mt-2 text-center">
+                                For the most up-to-date pricing, please visit
+                                our{" "}
+                                <a
+                                    href="https://docs.fossorial.io/pricing"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="underline"
+                                >
+                                    pricing page
+                                </a>
+                                .
+                            </p>
                         </div>
                     </div>
                 </CredenzaBody>

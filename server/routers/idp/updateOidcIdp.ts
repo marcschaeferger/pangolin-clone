@@ -42,7 +42,7 @@ export type UpdateIdpResponse = {
 
 registry.registerPath({
     method: "post",
-    path: "/idp/:idpId/oidc",
+    path: "/idp/{idpId}/oidc",
     description: "Update an OIDC IdP.",
     tags: [OpenAPITags.Idp],
     request: {

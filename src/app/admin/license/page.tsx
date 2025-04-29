@@ -55,6 +55,7 @@ import { Progress } from "@app/components/ui/progress";
 import { MinusCircle, PlusCircle } from "lucide-react";
 import ConfirmDeleteDialog from "@app/components/ConfirmDeleteDialog";
 import { SitePriceCalculator } from "./components/SitePriceCalculator";
+import Link from "next/link";
 
 const formSchema = z.object({
     licenseKey: z
@@ -75,9 +76,8 @@ export default function LicensePage() {
     const [rows, setRows] = useState<LicenseKeyCache[]>([]);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [selectedLicenseKey, setSelectedLicenseKey] = useState<string | null>(
-        null
-    );
+    const [selectedLicenseKey, setSelectedLicenseKey] =
+        useState<LicenseKeyCache | null>(null);
     const router = useRouter();
     const { licenseStatus, updateLicenseStatus } = useLicenseStatusContext();
     const [hostLicense, setHostLicense] = useState<string | null>(null);
@@ -136,7 +136,8 @@ export default function LicensePage() {
     async function deleteLicenseKey(key: string) {
         try {
             setIsDeletingLicense(true);
-            const res = await api.delete(`/license/${key}`);
+            const encodedKey = encodeURIComponent(key);
+            const res = await api.delete(`/license/${encodedKey}`);
             if (res.data.data) {
                 updateLicenseStatus(res.data.data);
             }
@@ -294,7 +295,11 @@ export default function LicensePage() {
                         <div className="space-y-4">
                             <p>
                                 Are you sure you want to delete the license key{" "}
-                                <b>{obfuscateLicenseKey(selectedLicenseKey)}</b>
+                                <b>
+                                    {obfuscateLicenseKey(
+                                        selectedLicenseKey.licenseKey
+                                    )}
+                                </b>
                                 ?
                             </p>
                             <p>
@@ -310,8 +315,10 @@ export default function LicensePage() {
                         </div>
                     }
                     buttonText="Confirm Delete License Key"
-                    onConfirm={async () => deleteLicenseKey(selectedLicenseKey)}
-                    string={selectedLicenseKey}
+                    onConfirm={async () =>
+                        deleteLicenseKey(selectedLicenseKey.licenseKeyEncrypted)
+                    }
+                    string={selectedLicenseKey.licenseKey}
                     title="Delete License Key"
                 />
             )}
@@ -429,12 +436,6 @@ export default function LicensePage() {
                             {!licenseStatus?.isHostLicensed ? (
                                 <>
                                     <Button
-                                        variant="outline"
-                                        onClick={() => {}}
-                                    >
-                                        View License Portal
-                                    </Button>
-                                    <Button
                                         onClick={() => {
                                             setPurchaseMode("license");
                                             setIsPurchaseModalOpen(true);
@@ -444,15 +445,17 @@ export default function LicensePage() {
                                     </Button>
                                 </>
                             ) : (
-                                <Button
-                                    variant="outline"
-                                    onClick={() => {
-                                        setPurchaseMode("additional-sites");
-                                        setIsPurchaseModalOpen(true);
-                                    }}
-                                >
-                                    Purchase Additional Sites
-                                </Button>
+                                <>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                            setPurchaseMode("additional-sites");
+                                            setIsPurchaseModalOpen(true);
+                                        }}
+                                    >
+                                        Purchase Additional Sites
+                                    </Button>
+                                </>
                             )}
                         </SettingsSectionFooter>
                     </SettingsSection>

@@ -6,7 +6,7 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
-import { idp, idpOidcConfig } from "@server/db/schemas";
+import { idp, idpOidcConfig, idpOrg } from "@server/db/schemas";
 import { and, eq } from "drizzle-orm";
 import * as arctic from "arctic";
 import { generateOidcRedirectUrl } from "@server/lib/idp/generateRedirectUrl";
@@ -26,6 +26,10 @@ const bodySchema = z
         redirectUrl: z.string()
     })
     .strict();
+
+const ensureTrailingSlash = (url: string): string => {
+    return url.endsWith('/') ? url : `${url}/`;
+};
 
 export type GenerateOidcUrlResponse = {
     redirectUrl: string;
@@ -106,12 +110,13 @@ export async function generateOidcUrl(
         const codeVerifier = arctic.generateCodeVerifier();
         const state = arctic.generateState();
         const url = client.createAuthorizationURLWithPKCE(
-            existingIdp.idpOidcConfig.authUrl,
+            ensureTrailingSlash(existingIdp.idpOidcConfig.authUrl),
             state,
             arctic.CodeChallengeMethod.S256,
             codeVerifier,
             parsedScopes
         );
+        logger.debug("Generated OIDC URL", { url });
 
         const stateJwt = jsonwebtoken.sign(
             {

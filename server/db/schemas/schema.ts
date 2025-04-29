@@ -458,6 +458,57 @@ export const idpOidcConfig = sqliteTable("idpOidcConfig", {
     scopes: text("scopes").notNull()
 });
 
+export const licenseKey = sqliteTable("licenseKey", {
+    licenseKeyId: text("licenseKeyId").primaryKey().notNull(),
+    instanceId: text("instanceId").notNull(),
+    token: text("token").notNull()
+});
+
+export const hostMeta = sqliteTable("hostMeta", {
+    hostMetaId: text("hostMetaId").primaryKey().notNull(),
+    createdAt: integer("createdAt").notNull()
+});
+
+export const apiKeys = sqliteTable("apiKeys", {
+    apiKeyId: text("apiKeyId").primaryKey(),
+    name: text("name").notNull(),
+    apiKeyHash: text("apiKeyHash").notNull(),
+    lastChars: text("lastChars").notNull(),
+    createdAt: text("dateCreated").notNull(),
+    isRoot: integer("isRoot", { mode: "boolean" }).notNull().default(false)
+});
+
+export const apiKeyActions = sqliteTable("apiKeyActions", {
+    apiKeyId: text("apiKeyId")
+        .notNull()
+        .references(() => apiKeys.apiKeyId, { onDelete: "cascade" }),
+    actionId: text("actionId")
+        .notNull()
+        .references(() => actions.actionId, { onDelete: "cascade" })
+});
+
+export const apiKeyOrg = sqliteTable("apiKeyOrg", {
+    apiKeyId: text("apiKeyId")
+        .notNull()
+        .references(() => apiKeys.apiKeyId, { onDelete: "cascade" }),
+    orgId: text("orgId")
+        .references(() => orgs.orgId, {
+            onDelete: "cascade"
+        })
+        .notNull()
+});
+
+export const idpOrg = sqliteTable("idpOrg", {
+    idpId: integer("idpId")
+        .notNull()
+        .references(() => idp.idpId, { onDelete: "cascade" }),
+    orgId: text("orgId")
+        .notNull()
+        .references(() => orgs.orgId, { onDelete: "cascade" }),
+    roleMapping: text("roleMapping"),
+    orgMapping: text("orgMapping")
+});
+
 export type Org = InferSelectModel<typeof orgs>;
 export type User = InferSelectModel<typeof users>;
 export type Site = InferSelectModel<typeof sites>;
@@ -494,3 +545,6 @@ export type ResourceRule = InferSelectModel<typeof resourceRules>;
 export type Domain = InferSelectModel<typeof domains>;
 export type SupporterKey = InferSelectModel<typeof supporterKey>;
 export type Idp = InferSelectModel<typeof idp>;
+export type ApiKey = InferSelectModel<typeof apiKeys>;
+export type ApiKeyAction = InferSelectModel<typeof apiKeyActions>;
+export type ApiKeyOrg = InferSelectModel<typeof apiKeyOrg>;

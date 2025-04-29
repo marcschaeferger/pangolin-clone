@@ -14,6 +14,8 @@ import db from "@server/db";
 import { eq } from "drizzle-orm";
 import { licenseKey } from "@server/db/schemas";
 import license, { LicenseStatus } from "@server/license/license";
+import { encrypt } from "@server/lib/crypto";
+import config from "@server/lib/config";
 
 const paramsSchema = z
     .object({

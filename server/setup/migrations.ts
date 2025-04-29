@@ -20,6 +20,7 @@ import m16 from "./scripts/1.0.0";
 import m17 from "./scripts/1.1.0";
 import m18 from "./scripts/1.2.0";
 import m19 from "./scripts/1.3.0";
+import { setHostMeta } from "./setHostMeta";
 
 // THIS CANNOT IMPORT ANYTHING FROM THE SERVER
 // EXCEPT FOR THE DATABASE AND THE SCHEMA

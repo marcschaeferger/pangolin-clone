@@ -77,7 +77,15 @@ export enum ActionsEnum {
     createIdpOrg = "createIdpOrg",
     deleteIdpOrg = "deleteIdpOrg",
     listIdpOrgs = "listIdpOrgs",
-    updateIdpOrg = "updateIdpOrg"
+    updateIdpOrg = "updateIdpOrg",
+    checkOrgId = "checkOrgId",
+    createApiKey = "createApiKey",
+    deleteApiKey = "deleteApiKey",
+    setApiKeyActions = "setApiKeyActions",
+    setApiKeyOrgs = "setApiKeyOrgs",
+    listApiKeyActions = "listApiKeyActions",
+    listApiKeys = "listApiKeys",
+    getApiKey = "getApiKey"
 }
 
 export async function checkUserActionPermission(

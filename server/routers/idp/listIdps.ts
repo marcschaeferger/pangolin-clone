@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { idp } from "@server/db/schemas";
+import { domains, idp, orgDomains, users, idpOrg } from "@server/db/schemas";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
@@ -33,8 +33,10 @@ async function query(limit: number, offset: number) {
             idpId: idp.idpId,
             name: idp.name,
             type: idp.type,
+            orgCount: sql<number>`count(${idpOrg.orgId})`
         })
         .from(idp)
+        .leftJoin(idpOrg, sql`${idp.idpId} = ${idpOrg.idpId}`)
         .groupBy(idp.idpId)
         .limit(limit)
         .offset(offset);
@@ -46,6 +48,7 @@ export type ListIdpsResponse = {
         idpId: number;
         name: string;
         type: string;
+        orgCount: number;
     }>;
     pagination: {
         total: number;
