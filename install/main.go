@@ -87,7 +87,15 @@ func main() {
 
 		if isDockerInstalled() {
 			if readBool(reader, "Would you like to install and start the containers?", true) {
-				pullAndStartContainers()
+				if err := pullContainers(); err != nil {
+					fmt.Println("Error: ", err)
+					return
+				}
+
+				if err := startContainers(); err != nil {
+					fmt.Println("Error: ", err)
+					return
+				}
 			}
 		}
 	} else {
@@ -427,24 +435,24 @@ func installDocker() error {
 			apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 		`, dockerArch))
 	case strings.Contains(osRelease, "ID=fedora"):
-		installCmd = exec.Command("bash", "-c", fmt.Sprintf(`
+		installCmd = exec.Command("bash", "-c", `
 			dnf -y install dnf-plugins-core &&
 			dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo &&
 			dnf install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-		`))
+		`)
 	case strings.Contains(osRelease, "ID=opensuse") || strings.Contains(osRelease, "ID=\"opensuse-"):
 		installCmd = exec.Command("bash", "-c", `
 			zypper install -y docker docker-compose &&
 			systemctl enable docker
 		`)
 	case strings.Contains(osRelease, "ID=rhel") || strings.Contains(osRelease, "ID=\"rhel"):
-		installCmd = exec.Command("bash", "-c", fmt.Sprintf(`
+		installCmd = exec.Command("bash", "-c", `
 			dnf remove -y runc &&
 			dnf -y install yum-utils &&
 			dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.repo &&
 			dnf install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin &&
 			systemctl enable docker
-		`))
+		`)
 	case strings.Contains(osRelease, "ID=amzn"):
 		installCmd = exec.Command("bash", "-c", `
 			yum update -y &&
@@ -468,162 +476,76 @@ func isDockerInstalled() bool {
 	return true
 }
 
-func getCommandString(useNewStyle bool) string {
-	if useNewStyle {
-		return "'docker compose'"
-	}
-	return "'docker-compose'"
-}
-
-func pullAndStartContainers() error {
-	fmt.Println("Starting containers...")
-
-	// Check which docker compose command is available
+// executeDockerComposeCommandWithArgs executes the appropriate docker command with arguments supplied
+func executeDockerComposeCommandWithArgs(args ...string) error {
+	var cmd *exec.Cmd
 	var useNewStyle bool
+
+	if !isDockerInstalled() {
+		return fmt.Errorf("docker is not installed")
+	}
+
 	checkCmd := exec.Command("docker", "compose", "version")
 	if err := checkCmd.Run(); err == nil {
 		useNewStyle = true
 	} else {
-		// Check if docker-compose (old style) is available
 		checkCmd = exec.Command("docker-compose", "version")
-		if err := checkCmd.Run(); err != nil {
-			return fmt.Errorf("neither 'docker compose' nor 'docker-compose' command is available: %v", err)
-		}
-	}
-
-	// Helper function to execute docker compose commands
-	executeCommand := func(args ...string) error {
-		var cmd *exec.Cmd
-		if useNewStyle {
-			cmd = exec.Command("docker", append([]string{"compose"}, args...)...)
+		if err := checkCmd.Run(); err == nil {
+			useNewStyle = false
 		} else {
-			cmd = exec.Command("docker-compose", args...)
+			return fmt.Errorf("neither 'docker compose' nor 'docker-compose' command is available")
 		}
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		return cmd.Run()
+	}
+	
+	if useNewStyle {
+		cmd = exec.Command("docker", append([]string{"compose"}, args...)...)
+	} else {
+		cmd = exec.Command("docker-compose", args...)
 	}
 
-	// Pull containers
-	fmt.Printf("Using %s command to pull containers...\n", getCommandString(useNewStyle))
-	if err := executeCommand("-f", "docker-compose.yml", "pull"); err != nil {
-		return fmt.Errorf("failed to pull containers: %v", err)
+    cmd.Stdout = os.Stdout
+    cmd.Stderr = os.Stderr
+    return cmd.Run()
+}
+
+// pullContainers pulls the containers using the appropriate command.
+func pullContainers() error {
+	fmt.Println("Pulling the container images...")
+
+	if err := executeDockerComposeCommandWithArgs("-f", "docker-compose.yml", "pull", "--policy", "always"); err != nil {
+		return fmt.Errorf("failed to pull the containers: %v", err)
 	}
 
-	// Start containers
-	fmt.Printf("Using %s command to start containers...\n", getCommandString(useNewStyle))
-	if err := executeCommand("-f", "docker-compose.yml", "up", "-d"); err != nil {
+	return nil
+}
+
+// startContainers starts the containers using the appropriate command.
+func startContainers() error {
+	fmt.Println("Starting containers...")
+	if err := executeDockerComposeCommandWithArgs("-f", "docker-compose.yml", "up", "-d", "--force-recreate"); err != nil {
 		return fmt.Errorf("failed to start containers: %v", err)
 	}
 
 	return nil
 }
 
-// bring containers down
+// stopContainers stops the containers using the appropriate command.
 func stopContainers() error {
 	fmt.Println("Stopping containers...")
-
-	// Check which docker compose command is available
-	var useNewStyle bool
-	checkCmd := exec.Command("docker", "compose", "version")
-	if err := checkCmd.Run(); err == nil {
-		useNewStyle = true
-	} else {
-		// Check if docker-compose (old style) is available
-		checkCmd = exec.Command("docker-compose", "version")
-		if err := checkCmd.Run(); err != nil {
-			return fmt.Errorf("neither 'docker compose' nor 'docker-compose' command is available: %v", err)
-		}
-	}
-
-	// Helper function to execute docker compose commands
-	executeCommand := func(args ...string) error {
-		var cmd *exec.Cmd
-		if useNewStyle {
-			cmd = exec.Command("docker", append([]string{"compose"}, args...)...)
-		} else {
-			cmd = exec.Command("docker-compose", args...)
-		}
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		return cmd.Run()
-	}
-
-	if err := executeCommand("-f", "docker-compose.yml", "down"); err != nil {
+	
+	if err := executeDockerComposeCommandWithArgs("-f", "docker-compose.yml", "down"); err != nil {
 		return fmt.Errorf("failed to stop containers: %v", err)
 	}
 
 	return nil
 }
 
-// just start containers
-func startContainers() error {
-	fmt.Println("Starting containers...")
-
-	// Check which docker compose command is available
-	var useNewStyle bool
-	checkCmd := exec.Command("docker", "compose", "version")
-	if err := checkCmd.Run(); err == nil {
-		useNewStyle = true
-	} else {
-		// Check if docker-compose (old style) is available
-		checkCmd = exec.Command("docker-compose", "version")
-		if err := checkCmd.Run(); err != nil {
-			return fmt.Errorf("neither 'docker compose' nor 'docker-compose' command is available: %v", err)
-		}
-	}
-
-	// Helper function to execute docker compose commands
-	executeCommand := func(args ...string) error {
-		var cmd *exec.Cmd
-		if useNewStyle {
-			cmd = exec.Command("docker", append([]string{"compose"}, args...)...)
-		} else {
-			cmd = exec.Command("docker-compose", args...)
-		}
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		return cmd.Run()
-	}
-
-	if err := executeCommand("-f", "docker-compose.yml", "up", "-d"); err != nil {
-		return fmt.Errorf("failed to start containers: %v", err)
-	}
-
-	return nil
-}
-
+// restartContainer restarts a specific container using the appropriate command.
 func restartContainer(container string) error {
-	fmt.Printf("Restarting %s container...\n", container)
-
-	// Check which docker compose command is available
-	var useNewStyle bool
-	checkCmd := exec.Command("docker", "compose", "version")
-	if err := checkCmd.Run(); err == nil {
-		useNewStyle = true
-	} else {
-		// Check if docker-compose (old style) is available
-		checkCmd = exec.Command("docker-compose", "version")
-		if err := checkCmd.Run(); err != nil {
-			return fmt.Errorf("neither 'docker compose' nor 'docker-compose' command is available: %v", err)
-		}
-	}
-
-	// Helper function to execute docker compose commands
-	executeCommand := func(args ...string) error {
-		var cmd *exec.Cmd
-		if useNewStyle {
-			cmd = exec.Command("docker", append([]string{"compose"}, args...)...)
-		} else {
-			cmd = exec.Command("docker-compose", args...)
-		}
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		return cmd.Run()
-	}
-
-	if err := executeCommand("-f", "docker-compose.yml", "restart", container); err != nil {
-		return fmt.Errorf("failed to restart %s container: %v", container, err)
+	fmt.Println("Restarting containers...")
+	
+	if err := executeDockerComposeCommandWithArgs("-f", "docker-compose.yml", "restart", container); err != nil {
+		return fmt.Errorf("failed to stop the container \"%s\": %v", container, err)
 	}
 
 	return nil

@@ -9,6 +9,9 @@ services:
       PARSERS: crowdsecurity/whitelists
       ENROLL_TAGS: docker
     healthcheck:
+      interval: 10s
+      retries: 15
+      timeout: 10s
       test: ["CMD", "cscli", "capi", "status"]
     labels:
       - "traefik.enable=false" # Disable traefik for crowdsec
