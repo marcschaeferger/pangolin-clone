@@ -3,9 +3,12 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"strings"
+
+	"gopkg.in/yaml.v3"
 )
 
 func installCrowdsec(config Config) error {
@@ -60,6 +63,12 @@ func installCrowdsec(config Config) error {
 
 	if err := CheckAndAddTraefikLogVolume("docker-compose.yml"); err != nil {
 		fmt.Printf("Error checking and adding Traefik log volume: %v\n", err)
+		os.Exit(1)
+	}
+
+	// check and add the service dependency of crowdsec to traefik
+	if err := CheckAndAddCrowdsecDependency("docker-compose.yml"); err != nil {
+		fmt.Printf("Error adding crowdsec dependency to traefik: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -134,4 +143,59 @@ func checkIfTextInFile(file, text string) bool {
 
 	// Check for text
 	return bytes.Contains(content, []byte(text))
+}
+
+func CheckAndAddCrowdsecDependency(composePath string) error {
+	// Read the docker-compose.yml file
+	data, err := os.ReadFile(composePath)
+	if err != nil {
+		return fmt.Errorf("error reading compose file: %w", err)
+	}
+
+	// Parse YAML into a generic map
+	var compose map[string]interface{}
+	if err := yaml.Unmarshal(data, &compose); err != nil {
+		return fmt.Errorf("error parsing compose file: %w", err)
+	}
+
+	// Get services section
+	services, ok := compose["services"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("services section not found or invalid")
+	}
+
+	// Get traefik service
+	traefik, ok := services["traefik"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("traefik service not found or invalid")
+	}
+
+	// Get dependencies
+	dependsOn, ok := traefik["depends_on"].(map[string]interface{})
+	if ok {
+		// Append the new block for crowdsec
+		dependsOn["crowdsec"] = map[string]interface{}{
+			"condition": "service_healthy",
+		}
+	} else {
+		// No dependencies exist, create it
+		traefik["depends_on"] = map[string]interface{}{
+			"crowdsec": map[string]interface{}{
+				"condition": "service_healthy",
+			},
+		}
+	}
+
+	// Marshal the modified data back to YAML with indentation
+	modifiedData, err := MarshalYAMLWithIndent(compose, 2) // Set indentation to 2 spaces
+	if err != nil {
+		log.Fatalf("error marshaling YAML: %v", err)
+	}
+
+	if err := os.WriteFile(composePath, modifiedData, 0644); err != nil {
+		return fmt.Errorf("error writing updated compose file: %w", err)
+	}
+
+	fmt.Println("Added dependency of crowdsec to traefik")
+	return nil
 }
