@@ -28,7 +28,7 @@ export function SitePriceCalculator({
     onOpenChange,
     mode
 }: SitePriceCalculatorProps) {
-    const [siteCount, setSiteCount] = useState(1);
+    const [siteCount, setSiteCount] = useState(3);
     const pricePerSite = 5;
     const licenseFlatRate = 125;
 
