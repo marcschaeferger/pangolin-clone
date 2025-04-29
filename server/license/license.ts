@@ -137,7 +137,8 @@ LQIDAQAB
             hostId: this.hostId,
             isHostLicensed: true,
             isLicenseValid: false,
-            maxSites: undefined
+            maxSites: undefined,
+            usedSites: siteCount.value
         };
 
         try {

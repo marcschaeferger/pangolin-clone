@@ -67,6 +67,12 @@ import { SwitchInput } from "@app/components/SwitchInput";
 import { useRouter } from "next/navigation";
 import { isTargetValid } from "@server/lib/validators";
 import { tlsNameSchema } from "@server/lib/schemas";
+import { ChevronsUpDown } from "lucide-react";
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger
+} from "@app/components/ui/collapsible";
 
 const addTargetSchema = z.object({
     ip: z.string().refine(isTargetValid),
@@ -145,6 +151,7 @@ export default function ReverseProxyTargets(props: {
     const [proxySettingsLoading, setProxySettingsLoading] = useState(false);
 
     const [pageLoading, setPageLoading] = useState(true);
+    const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
     const router = useRouter();
 
     const addTargetForm = useForm({
@@ -589,26 +596,57 @@ export default function ReverseProxyTargets(props: {
                                             </FormItem>
                                         )}
                                     />
-                                    <FormField
-                                        control={tlsSettingsForm.control}
-                                        name="tlsServerName"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>
-                                                    TLS Server Name (SNI)
-                                                </FormLabel>
-                                                <FormControl>
-                                                    <Input {...field} />
-                                                </FormControl>
-                                                <FormDescription>
-                                                    The TLS Server Name to use
-                                                    for SNI. Leave empty to use
-                                                    the default.
-                                                </FormDescription>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
+                                    <Collapsible
+                                        open={isAdvancedOpen}
+                                        onOpenChange={setIsAdvancedOpen}
+                                        className="space-y-2"
+                                    >
+                                        <div className="flex items-center justify-between space-x-4">
+                                            <CollapsibleTrigger asChild>
+                                                <Button
+                                                    variant="text"
+                                                    size="sm"
+                                                    className="p-0 flex items-center justify-start gap-2 w-full"
+                                                >
+                                                    <h4 className="text-sm font-semibold">
+                                                        Advanced TLS Settings
+                                                    </h4>
+                                                    <div>
+                                                        <ChevronsUpDown className="h-4 w-4" />
+                                                        <span className="sr-only">
+                                                            Toggle
+                                                        </span>
+                                                    </div>
+                                                </Button>
+                                            </CollapsibleTrigger>
+                                        </div>
+                                        <CollapsibleContent className="space-y-2">
+                                            <FormField
+                                                control={
+                                                    tlsSettingsForm.control
+                                                }
+                                                name="tlsServerName"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>
+                                                            TLS Server Name
+                                                            (SNI)
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <Input {...field} />
+                                                        </FormControl>
+                                                        <FormDescription>
+                                                            The TLS Server Name
+                                                            to use for SNI.
+                                                            Leave empty to use
+                                                            the default.
+                                                        </FormDescription>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </CollapsibleContent>
+                                    </Collapsible>
                                 </form>
                             </Form>
                         </SettingsSectionForm>

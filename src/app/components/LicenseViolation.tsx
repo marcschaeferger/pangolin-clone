@@ -33,9 +33,10 @@ export default function LicenseViolation() {
         return (
             <div className="fixed bottom-0 left-0 right-0 w-full bg-yellow-500 text-black p-4 text-center z-50">
                 <p>
-                    License Violation: Using {licenseStatus.usedSites} sites
-                    exceeds your licensed limit of {licenseStatus.maxSites}{" "}
-                    sites. Follow license terms to continue using all features.
+                    License Violation: This server is using{" "}
+                    {licenseStatus.usedSites} sites which exceeds its licensed
+                    limit of {licenseStatus.maxSites} sites. Follow license
+                    terms to continue using all features.
                 </p>
             </div>
         );
