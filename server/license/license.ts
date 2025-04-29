@@ -63,9 +63,9 @@ type TokenPayload = {
 export class License {
     private phoneHomeInterval = 6 * 60 * 60; // 6 hours = 6 * 60 * 60 = 21600 seconds
     private validationServerUrl =
-        "https://api.dev.fossorial.io/api/v1/license/professional/validate";
+        "https://api.fossorial.io/api/v1/license/professional/validate";
     private activationServerUrl =
-        "https://api.dev.fossorial.io/api/v1/license/professional/activate";
+        "https://api.fossorial.io/api/v1/license/professional/activate";
 
     private statusCache = new NodeCache({ stdTTL: this.phoneHomeInterval });
     private licenseKeyCache = new NodeCache();

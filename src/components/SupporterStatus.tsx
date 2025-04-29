@@ -204,7 +204,7 @@ export default function SupporterStatus() {
                             Payments are processed via GitHub. Afterward, you
                             can retrieve your key on{" "}
                             <Link
-                                href="https://supporters.dev.fossorial.io/"
+                                href="https://supporters.fossorial.io/"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="underline"

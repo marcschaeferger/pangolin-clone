@@ -323,7 +323,7 @@ export class Config {
 
         try {
             const response = await fetch(
-                "https://api.dev.fossorial.io/api/v1/license/validate",
+                "https://api.fossorial.io/api/v1/license/validate",
                 {
                     method: "POST",
                     headers: {
