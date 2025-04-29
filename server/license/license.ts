@@ -90,8 +90,8 @@ LQIDAQAB
         ).toString("base64");
 
         setInterval(
-            () => {
-                this.check();
+            async () => {
+                await this.check();
             },
             1000 * 60 * 60
         ); // 1 hour = 60 * 60 = 3600 seconds
