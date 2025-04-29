@@ -16,6 +16,7 @@ import (
 	"text/template"
 	"time"
 	"unicode"
+	"math/rand"
 
 	"golang.org/x/term"
 )
@@ -50,6 +51,7 @@ type Config struct {
 	InstallGerbil              bool
 	TraefikBouncerKey          string
 	DoCrowdsecInstall          bool
+	Secret                string
 }
 
 func main() {
@@ -63,6 +65,7 @@ func main() {
 
 	var config Config
 	config.DoCrowdsecInstall = false
+	config.Secret = generateRandomSecretKey()
 
 	// check if there is already a config file
 	if _, err := os.Stat("config/config.yml"); err != nil {
@@ -602,4 +605,18 @@ func waitForContainer(containerName string) error {
 	}
 
 	return fmt.Errorf("container %s did not start within %v seconds", containerName, maxAttempts*int(retryInterval.Seconds()))
+}
+
+func generateRandomSecretKey() string {
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	const length = 32
+
+	var seededRand *rand.Rand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))
+
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[seededRand.Intn(len(charset))]
+	}
+	return string(b)
 }
