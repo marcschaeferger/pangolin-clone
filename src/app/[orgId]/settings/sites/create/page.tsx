@@ -29,14 +29,29 @@ import { InfoIcon, Terminal } from "lucide-react";
 import { Button } from "@app/components/ui/button";
 import CopyTextBox from "@app/components/CopyTextBox";
 import CopyToClipboard from "@app/components/CopyToClipboard";
-import { InfoSection, InfoSectionContent, InfoSections, InfoSectionTitle } from "@app/components/InfoSection";
-import { FaApple, FaCubes, FaDocker, FaFreebsd, FaWindows } from "react-icons/fa";
+import {
+    InfoSection,
+    InfoSectionContent,
+    InfoSections,
+    InfoSectionTitle
+} from "@app/components/InfoSection";
+import {
+    FaApple,
+    FaCubes,
+    FaDocker,
+    FaFreebsd,
+    FaWindows
+} from "react-icons/fa";
 import { Checkbox } from "@app/components/ui/checkbox";
 import { Alert, AlertDescription, AlertTitle } from "@app/components/ui/alert";
 import { generateKeypair } from "../[niceId]/wireguardConfig";
 import { createApiClient, formatAxiosError } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
-import { CreateSiteBody, CreateSiteResponse, PickSiteDefaultsResponse } from "@server/routers/site";
+import {
+    CreateSiteBody,
+    CreateSiteResponse,
+    PickSiteDefaultsResponse
+} from "@server/routers/site";
 import { toast } from "@app/hooks/useToast";
 import { AxiosResponse } from "axios";
 import { useParams, useRouter } from "next/navigation";
@@ -48,6 +63,7 @@ import {
     BreadcrumbSeparator
 } from "@app/components/ui/breadcrumb";
 import Link from "next/link";
+import { QRCodeCanvas } from "qrcode.react";
 
 const createSiteFormSchema = z
     .object({
@@ -101,7 +117,7 @@ const platforms = [
     "freebsd"
 ] as const;
 
-type Platform = typeof platforms[number];
+type Platform = (typeof platforms)[number];
 
 export default function Page() {
     const { env } = useEnvContext();
@@ -725,7 +741,9 @@ WantedBy=default.target`
 
                                         <div>
                                             <p className="font-bold mb-3">
-                                                {["docker", "podman"].includes(platform)
+                                                {["docker", "podman"].includes(
+                                                    platform
+                                                )
                                                     ? "Method"
                                                     : "Architecture"}
                                             </p>
@@ -783,8 +801,20 @@ WantedBy=default.target`
                                     </SettingsSectionDescription>
                                 </SettingsSectionHeader>
                                 <SettingsSectionBody>
-                                    <CopyTextBox text={wgConfig} />
-
+                                    <div className="flex items-center gap-4">
+                                        <CopyTextBox text={wgConfig} />
+                                        <div
+                                            className={`relative w-fit border rounded-md`}
+                                        >
+                                            <div className="bg-white p-6 rounded-md">
+                                                <QRCodeCanvas
+                                                    value={wgConfig}
+                                                    size={168}
+                                                    className="mx-auto"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
                                     <Alert variant="neutral">
                                         <InfoIcon className="h-4 w-4" />
                                         <AlertTitle className="font-semibold">
