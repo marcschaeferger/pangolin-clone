@@ -22,6 +22,7 @@ import { useUserContext } from "@app/hooks/useUserContext";
 import Disable2FaForm from "./Disable2FaForm";
 import Enable2FaForm from "./Enable2FaForm";
 import SupporterStatus from "./SupporterStatus";
+import { UserType } from "@server/types/UserTypes";
 
 export default function ProfileIcon() {
     const { setTheme, theme } = useTheme();
@@ -108,21 +109,25 @@ export default function ProfileIcon() {
                             )}
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        {!user.twoFactorEnabled && (
-                            <DropdownMenuItem
-                                onClick={() => setOpenEnable2fa(true)}
-                            >
-                                <span>Enable Two-factor</span>
-                            </DropdownMenuItem>
+                        {user?.type === UserType.Internal && (
+                            <>
+                                {!user.twoFactorEnabled && (
+                                    <DropdownMenuItem
+                                        onClick={() => setOpenEnable2fa(true)}
+                                    >
+                                        <span>Enable Two-factor</span>
+                                    </DropdownMenuItem>
+                                )}
+                                {user.twoFactorEnabled && (
+                                    <DropdownMenuItem
+                                        onClick={() => setOpenDisable2fa(true)}
+                                    >
+                                        <span>Disable Two-factor</span>
+                                    </DropdownMenuItem>
+                                )}
+                                <DropdownMenuSeparator />
+                            </>
                         )}
-                        {user.twoFactorEnabled && (
-                            <DropdownMenuItem
-                                onClick={() => setOpenDisable2fa(true)}
-                            >
-                                <span>Disable Two-factor</span>
-                            </DropdownMenuItem>
-                        )}
-                        <DropdownMenuSeparator />
                         <DropdownMenuLabel>Theme</DropdownMenuLabel>
                         {(["light", "dark", "system"] as const).map(
                             (themeOption) => (

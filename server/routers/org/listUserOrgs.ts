@@ -29,16 +29,16 @@ const listOrgsSchema = z.object({
         .pipe(z.number().int().nonnegative())
 });
 
-registry.registerPath({
-    method: "get",
-    path: "/user/{userId}/orgs",
-    description: "List all organizations for a user.",
-    tags: [OpenAPITags.Org, OpenAPITags.User],
-    request: {
-        query: listOrgsSchema
-    },
-    responses: {}
-});
+// registry.registerPath({
+//     method: "get",
+//     path: "/user/{userId}/orgs",
+//     description: "List all organizations for a user.",
+//     tags: [OpenAPITags.Org, OpenAPITags.User],
+//     request: {
+//         query: listOrgsSchema
+//     },
+//     responses: {}
+// });
 
 export type ListUserOrgsResponse = {
     orgs: Org[];

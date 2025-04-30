@@ -15,7 +15,6 @@ import {
 } from "@server/middlewares";
 import { authenticated, unauthenticated } from "@server/routers/integration";
 import { logIncomingMiddleware } from "./middlewares/logIncoming";
-import { csrfProtectionMiddleware } from "./middlewares/csrfProtection";
 import helmet from "helmet";
 import swaggerUi from "swagger-ui-express";
 import { OpenApiGeneratorV3 } from "@asteasolutions/zod-to-openapi";
@@ -37,7 +36,6 @@ export function createIntegrationApiServer() {
 
     if (!dev) {
         apiServer.use(helmet());
-        apiServer.use(csrfProtectionMiddleware);
     }
 
     apiServer.use(cookieParser());

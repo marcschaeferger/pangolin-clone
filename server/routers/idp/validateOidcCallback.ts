@@ -23,7 +23,7 @@ import { oidcAutoProvision } from "./oidcAutoProvision";
 import license from "@server/license/license";
 
 const ensureTrailingSlash = (url: string): string => {
-    return url.endsWith('/') ? url : `${url}/`;
+    return url.endsWith("/") ? url : `${url}/`;
 };
 
 const paramsSchema = z
@@ -227,6 +227,16 @@ export async function validateOidcCallback(
                 existingUser,
                 req,
                 res
+            });
+
+            return response<ValidateOidcUrlCallbackResponse>(res, {
+                data: {
+                    redirectUrl: postAuthRedirectUrl
+                },
+                success: true,
+                error: false,
+                message: "OIDC callback validated successfully",
+                status: HttpCode.CREATED
             });
         } else {
             if (!existingUser) {

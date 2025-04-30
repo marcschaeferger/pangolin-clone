@@ -8,8 +8,6 @@ import { APP_PATH, configFilePath1, configFilePath2 } from "@server/lib/consts";
 const version = "1.3.0";
 const location = path.join(APP_PATH, "db", "db.sqlite");
 
-await migration();
-
 export default async function migration() {
     console.log(`Running setup script ${version}...`);
 

@@ -19,7 +19,15 @@ const paramsSchema = z
 
 const bodySchema = z
     .object({
-        email: z.string().email().optional(),
+        email: z
+            .string()
+            .optional()
+            .refine((data) => {
+                if (data) {
+                    return z.string().email().safeParse(data).success;
+                }
+                return true;
+            }),
         username: z.string().nonempty(),
         name: z.string().optional(),
         type: z.enum(["internal", "oidc"]).optional(),

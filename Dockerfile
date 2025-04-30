@@ -2,8 +2,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
-RUN npm ci
+# COPY package.json package-lock.json ./
+COPY package.json ./
+RUN npm install
 
 COPY . .
 
@@ -18,8 +19,9 @@ WORKDIR /app
 # Curl used for the health checks
 RUN apk add --no-cache curl
 
-COPY package.json package-lock.json ./
-RUN npm ci --only=production && npm cache clean --force
+# COPY package.json package-lock.json ./
+COPY package.json ./
+RUN npm install --only=production && npm cache clean --force
 
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static

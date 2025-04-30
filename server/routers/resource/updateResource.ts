@@ -81,7 +81,10 @@ const updateHttpResourceBodySchema = z
             }
             return true;
         },
-        { message: "Invalid TLS Server Name. Use domain name format, or save empty to remove the TLS Server Name." }
+        {
+            message:
+                "Invalid TLS Server Name. Use domain name format, or save empty to remove the TLS Server Name."
+        }
     )
     .refine(
         (data) => {
@@ -90,7 +93,10 @@ const updateHttpResourceBodySchema = z
             }
             return true;
         },
-        { message: "Invalid custom Host Header value. Use domain name format, or save empty to unset custom Host Header." }
+        {
+            message:
+                "Invalid custom Host Header value. Use domain name format, or save empty to unset custom Host Header."
+        }
     );
 
 export type UpdateResourceResponse = Resource;
@@ -300,7 +306,22 @@ async function updateHttpResource(
 
     const updatedResource = await db
         .update(resources)
-        .set(updatePayload)
+        .set({
+            name: updatePayload.name,
+            subdomain: updatePayload.subdomain,
+            ssl: updatePayload.ssl,
+            sso: updatePayload.sso,
+            blockAccess: updatePayload.blockAccess,
+            emailWhitelistEnabled: updatePayload.emailWhitelistEnabled,
+            isBaseDomain: updatePayload.isBaseDomain,
+            applyRules: updatePayload.applyRules,
+            domainId: updatePayload.domainId,
+            enabled: updatePayload.enabled,
+            stickySession: updatePayload.stickySession,
+            tlsServerName: updatePayload.tlsServerName || null,
+            setHostHeader: updatePayload.setHostHeader || null,
+            fullDomain: updatePayload.fullDomain
+        })
         .where(eq(resources.resourceId, resource.resourceId))
         .returning();
 

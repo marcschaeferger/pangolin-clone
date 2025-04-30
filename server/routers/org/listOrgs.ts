@@ -27,7 +27,7 @@ const listOrgsSchema = z.object({
 
 registry.registerPath({
     method: "get",
-    path: "/user/:userId/orgs",
+    path: "/orgs",
     description: "List all organizations in the system.",
     tags: [OpenAPITags.Org],
     request: {
