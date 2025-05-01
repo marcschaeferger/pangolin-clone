@@ -76,6 +76,7 @@ _Resources page of Pangolin dashboard (dark mode) showing multiple resources ava
 -   **Docker Compose based setup** for simplified deployment.
 -   Future-proof installation script for streamlined setup and feature additions.
 -   Use any WireGuard client to connect, or use **Newt, our custom user space client** for the best experience.
+- Use the API to create custom integrations and scripts.
 
 ### Modular Design
 
