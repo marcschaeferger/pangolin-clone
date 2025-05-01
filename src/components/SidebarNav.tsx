@@ -37,7 +37,30 @@ export function SidebarNav({
     const niceId = params.niceId as string;
     const resourceId = params.resourceId as string;
     const userId = params.userId as string;
-    const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+    const [expandedItems, setExpandedItems] = useState<Set<string>>(() => {
+        const autoExpanded = new Set<string>();
+
+        function findAutoExpandedAndActivePath(
+            items: SidebarNavItem[],
+            parentHrefs: string[] = []
+        ) {
+            items.forEach((item) => {
+                const hydratedHref = hydrateHref(item.href);
+                const currentPath = [...parentHrefs, hydratedHref];
+
+                if (item.autoExpand || pathname.startsWith(hydratedHref)) {
+                    currentPath.forEach((href) => autoExpanded.add(href));
+                }
+
+                if (item.children) {
+                    findAutoExpandedAndActivePath(item.children, currentPath);
+                }
+            });
+        }
+
+        findAutoExpandedAndActivePath(items);
+        return autoExpanded;
+    });
     const { licenseStatus, isUnlocked } = useLicenseStatusContext();
 
     const { user } = useUserContext();
@@ -49,37 +72,6 @@ export function SidebarNav({
             .replace("{resourceId}", resourceId)
             .replace("{userId}", userId);
     }
-
-    // Initialize expanded items based on autoExpand property and current path
-    useEffect(() => {
-        const autoExpanded = new Set<string>();
-
-        function findAutoExpandedAndActivePath(
-            items: SidebarNavItem[],
-            parentHrefs: string[] = []
-        ) {
-            items.forEach((item) => {
-                const hydratedHref = hydrateHref(item.href);
-
-                // Add current item's href to the path
-                const currentPath = [...parentHrefs, hydratedHref];
-
-                // Auto expand if specified or if this item or any child is active
-                if (item.autoExpand || pathname.startsWith(hydratedHref)) {
-                    // Expand all parent sections when a child is active
-                    currentPath.forEach((href) => autoExpanded.add(href));
-                }
-
-                // Recursively check children
-                if (item.children) {
-                    findAutoExpandedAndActivePath(item.children, currentPath);
-                }
-            });
-        }
-
-        findAutoExpandedAndActivePath(items);
-        setExpandedItems(autoExpanded);
-    }, [items, pathname]);
 
     function toggleItem(href: string) {
         setExpandedItems((prev) => {
