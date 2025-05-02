@@ -122,8 +122,6 @@ You can use Pangolin as an easy way to expose your business applications to your
 **Use Case Example - IoT Networks**:  
  IoT networks are often fragmented and difficult to manage. By deploying Pangolin on a central server, you can connect all your IoT sites via Newt or another WireGuard client. This creates a simple, secure, and centralized way to access IoT resources without the need for intricate networking setups.
 
-_Resources page of Pangolin dashboard (dark mode) showing HTTPS and TCP resources with access control rules._
-
 ## Similar Projects and Inspirations
 
 **Cloudflare Tunnels**:  
