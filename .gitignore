@@ -32,3 +32,4 @@ installer
 bin
 .secrets
 test_event.json
+.idea/

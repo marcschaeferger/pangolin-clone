@@ -25,7 +25,7 @@ export default async function SitesPage(props: SitesPageProps) {
 
     function formatSize(mb: number, type: string): string {
         if (type === "local") {
-            return "--"; // because we are not able to track the data use in a local site right now
+            return "-"; // because we are not able to track the data use in a local site right now
         }
         if (mb >= 1024 * 1024) {
             return `${(mb / (1024 * 1024)).toFixed(2)} TB`;
@@ -51,7 +51,7 @@ export default async function SitesPage(props: SitesPageProps) {
 
     return (
         <>
-            <SitesSplashCard />
+            {/* <SitesSplashCard /> */}
 
             <SettingsSectionTitle
                 title="Manage Sites"

@@ -8,6 +8,7 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const updateOrgParamsSchema = z
     .object({
@@ -17,13 +18,31 @@ const updateOrgParamsSchema = z
 
 const updateOrgBodySchema = z
     .object({
-        name: z.string().min(1).max(255).optional(),
+        name: z.string().min(1).max(255).optional()
         // domain: z.string().min(1).max(255).optional(),
     })
     .strict()
     .refine((data) => Object.keys(data).length > 0, {
         message: "At least one field must be provided for update"
     });
+
+registry.registerPath({
+    method: "post",
+    path: "/org/{orgId}",
+    description: "Update an organization",
+    tags: [OpenAPITags.Org],
+    request: {
+        params: updateOrgParamsSchema,
+        body: {
+            content: {
+                "application/json": {
+                    schema: updateOrgBodySchema
+                }
+            }
+        }
+    },
+    responses: {}
+});
 
 export async function updateOrg(
     req: Request,

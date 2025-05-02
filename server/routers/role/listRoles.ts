@@ -9,6 +9,7 @@ import { sql, eq } from "drizzle-orm";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import stoi from "@server/lib/stoi";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const listRolesParamsSchema = z
     .object({
@@ -56,6 +57,18 @@ export type ListRolesResponse = {
         offset: number;
     };
 };
+
+registry.registerPath({
+    method: "get",
+    path: "/orgs/{orgId}/roles",
+    description: "List roles.",
+    tags: [OpenAPITags.Org, OpenAPITags.Role],
+    request: {
+        params: listRolesParamsSchema,
+        query: listRolesSchema
+    },
+    responses: {}
+});
 
 export async function listRoles(
     req: Request,

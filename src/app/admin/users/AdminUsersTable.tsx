@@ -14,7 +14,12 @@ import { useEnvContext } from "@app/hooks/useEnvContext";
 
 export type GlobalUserRow = {
     id: string;
-    email: string;
+    name: string | null;
+    username: string;
+    email: string | null;
+    type: string;
+    idpId: number | null;
+    idpName: string;
     dateCreated: string;
 };
 
@@ -68,6 +73,22 @@ export default function UsersTable({ users }: Props) {
             }
         },
         {
+            accessorKey: "username",
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() =>
+                            column.toggleSorting(column.getIsSorted() === "asc")
+                        }
+                    >
+                        Username
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                );
+            }
+        },
+        {
             accessorKey: "email",
             header: ({ column }) => {
                 return (
@@ -78,6 +99,38 @@ export default function UsersTable({ users }: Props) {
                         }
                     >
                         Email
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                );
+            }
+        },
+        {
+            accessorKey: "name",
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() =>
+                            column.toggleSorting(column.getIsSorted() === "asc")
+                        }
+                    >
+                        Name
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                );
+            }
+        },
+        {
+            accessorKey: "idpName",
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() =>
+                            column.toggleSorting(column.getIsSorted() === "asc")
+                        }
+                    >
+                        Identity Provider
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
@@ -120,8 +173,12 @@ export default function UsersTable({ users }: Props) {
                         <div className="space-y-4">
                             <p>
                                 Are you sure you want to permanently delete{" "}
-                                <b>{selected?.email || selected?.id}</b> from
-                                the server?
+                                <b className="break-all">
+                                    {selected?.email ||
+                                        selected?.name ||
+                                        selected?.username}
+                                </b>{" "}
+                                from the server?
                             </p>
 
                             <p>
@@ -133,14 +190,16 @@ export default function UsersTable({ users }: Props) {
                             </p>
 
                             <p>
-                                To confirm, please type the email of the user
+                                To confirm, please type the name of the user
                                 below.
                             </p>
                         </div>
                     }
                     buttonText="Confirm Delete User"
                     onConfirm={async () => deleteUser(selected!.id)}
-                    string={selected.email}
+                    string={
+                        selected.email || selected.name || selected.username
+                    }
                     title="Delete User from Server"
                 />
             )}

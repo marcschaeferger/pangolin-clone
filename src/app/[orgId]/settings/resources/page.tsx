@@ -70,7 +70,7 @@ export default async function ResourcesPage(props: ResourcesPageProps) {
 
     return (
         <>
-            <ResourcesSplashCard />
+            {/* <ResourcesSplashCard /> */}
 
             <SettingsSectionTitle
                 title="Manage Resources"

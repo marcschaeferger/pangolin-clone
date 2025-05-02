@@ -17,6 +17,7 @@ import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { sendToClient } from "../ws";
 import { deletePeer } from "../gerbil/peers";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const deleteOrgSchema = z
     .object({
@@ -25,6 +26,17 @@ const deleteOrgSchema = z
     .strict();
 
 export type DeleteOrgResponse = {};
+
+registry.registerPath({
+    method: "delete",
+    path: "/org/{orgId}",
+    description: "Delete an organization",
+    tags: [OpenAPITags.Org],
+    request: {
+        params: deleteOrgSchema
+    },
+    responses: {}
+});
 
 export async function deleteOrg(
     req: Request,

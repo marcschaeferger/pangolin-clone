@@ -8,12 +8,24 @@ import { fromError } from "zod-validation-error";
 import { resourceAccessToken } from "@server/db/schemas";
 import { and, eq } from "drizzle-orm";
 import db from "@server/db";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const deleteAccessTokenParamsSchema = z
     .object({
         accessTokenId: z.string()
     })
     .strict();
+
+registry.registerPath({
+    method: "delete",
+    path: "/access-token/{accessTokenId}",
+    description: "Delete a access token.",
+    tags: [OpenAPITags.AccessToken],
+    request: {
+        params: deleteAccessTokenParamsSchema
+    },
+    responses: {}
+});
 
 export async function deleteAccessToken(
     req: Request,

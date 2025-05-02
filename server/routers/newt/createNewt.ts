@@ -49,7 +49,7 @@ export async function createNewt(
 
         const { newtId, secret } = parsedBody.data;
 
-        if (!req.userOrgRoleId) {
+        if (req.user && !req.userOrgRoleId) {
             return next(
                 createHttpError(HttpCode.FORBIDDEN, "User does not have a role")
             );

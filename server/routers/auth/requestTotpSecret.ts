@@ -12,6 +12,7 @@ import { createTOTPKeyURI } from "oslo/otp";
 import logger from "@server/logger";
 import { verifyPassword } from "@server/auth/password";
 import { unauthorized } from "@server/auth/unauthorizedResponse";
+import { UserType } from "@server/types/UserTypes";
 
 export const requestTotpSecretBody = z
     .object({
@@ -46,8 +47,17 @@ export async function requestTotpSecret(
 
     const user = req.user as User;
 
+    if (user.type !== UserType.Internal) {
+        return next(
+            createHttpError(
+                HttpCode.BAD_REQUEST,
+                "Two-factor authentication is not supported for external users"
+            )
+        );
+    }
+
     try {
-        const validPassword = await verifyPassword(password, user.passwordHash);
+        const validPassword = await verifyPassword(password, user.passwordHash!);
         if (!validPassword) {
             return next(unauthorized());
         }
@@ -63,7 +73,7 @@ export async function requestTotpSecret(
 
         const hex = crypto.getRandomValues(new Uint8Array(20));
         const secret = encodeHex(hex);
-        const uri = createTOTPKeyURI("Pangolin", user.email, hex);
+        const uri = createTOTPKeyURI("Pangolin", user.email!, hex);
 
         await db
             .update(users)

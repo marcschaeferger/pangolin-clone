@@ -13,6 +13,7 @@ import {
     isValidIP,
     isValidUrlGlobPattern
 } from "@server/lib/validators";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const createResourceRuleSchema = z
     .object({
@@ -32,6 +33,24 @@ const createResourceRuleParamsSchema = z
             .pipe(z.number().int().positive())
     })
     .strict();
+
+registry.registerPath({
+    method: "put",
+    path: "/resource/{resourceId}/rule",
+    description: "Create a resource rule.",
+    tags: [OpenAPITags.Resource, OpenAPITags.Rule],
+    request: {
+        params: createResourceRuleParamsSchema,
+        body: {
+            content: {
+                "application/json": {
+                    schema: createResourceRuleSchema
+                }
+            }
+        }
+    },
+    responses: {}
+});
 
 export async function createResourceRule(
     req: Request,

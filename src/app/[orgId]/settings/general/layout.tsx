@@ -1,7 +1,7 @@
 import { internal } from "@app/lib/api";
 import { authCookieHeader } from "@app/lib/api/cookies";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
-import { SidebarSettings } from "@app/components/SidebarSettings";
+import { HorizontalTabs } from "@app/components/HorizontalTabs";
 import { verifySession } from "@app/lib/auth/verifySession";
 import OrgProvider from "@app/providers/OrgProvider";
 import OrgUserProvider from "@app/providers/OrgUserProvider";
@@ -57,7 +57,7 @@ export default async function GeneralSettingsPage({
         redirect(`/${orgId}`);
     }
 
-    const sidebarNavItems = [
+    const navItems = [
         {
             title: "General",
             href: `/{orgId}/settings/general`,
@@ -73,9 +73,9 @@ export default async function GeneralSettingsPage({
                         description="Configure your organization's general settings"
                     />
 
-                    <SidebarSettings sidebarNavItems={sidebarNavItems}>
+                    <HorizontalTabs items={navItems}>
                         {children}
-                    </SidebarSettings>
+                    </HorizontalTabs>
                 </OrgUserProvider>
             </OrgProvider>
         </>

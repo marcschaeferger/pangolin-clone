@@ -9,6 +9,7 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
+import { OpenAPITags, registry } from "@server/openApi";
 
 async function queryUser(orgId: string, userId: string) {
     const [user] = await db
@@ -16,6 +17,9 @@ async function queryUser(orgId: string, userId: string) {
             orgId: userOrgs.orgId,
             userId: users.userId,
             email: users.email,
+            username: users.username,
+            name: users.name,
+            type: users.type,
             roleId: userOrgs.roleId,
             roleName: roles.name,
             isOwner: userOrgs.isOwner,
@@ -39,6 +43,17 @@ const getOrgUserParamsSchema = z
         orgId: z.string()
     })
     .strict();
+
+registry.registerPath({
+    method: "get",
+    path: "/org/{orgId}/user/{userId}",
+    description: "Get a user in an organization.",
+    tags: [OpenAPITags.Org, OpenAPITags.User],
+    request: {
+        params: getOrgUserParamsSchema
+    },
+    responses: {}
+});
 
 export async function getOrgUser(
     req: Request,
@@ -91,7 +106,7 @@ export async function getOrgUser(
             );
         }
 
-        if (user.userId !== req.userOrg.userId) {
+        if (req.user && user.userId !== req.userOrg.userId) {
             const hasPermission = await checkUserActionPermission(
                 ActionsEnum.getOrgUser,
                 req

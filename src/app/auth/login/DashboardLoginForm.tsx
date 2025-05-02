@@ -8,7 +8,7 @@ import {
     CardTitle
 } from "@/components/ui/card";
 import { createApiClient } from "@app/lib/api";
-import LoginForm from "@app/components/LoginForm";
+import LoginForm, { LoginFormIDP } from "@app/components/LoginForm";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -17,10 +17,12 @@ import { cleanRedirect } from "@app/lib/cleanRedirect";
 
 type DashboardLoginFormProps = {
     redirect?: string;
+    idps?: LoginFormIDP[];
 };
 
 export default function DashboardLoginForm({
-    redirect
+    redirect,
+    idps
 }: DashboardLoginFormProps) {
     const router = useRouter();
     // const api = createApiClient(useEnvContext());
@@ -51,12 +53,15 @@ export default function DashboardLoginForm({
                     <h1 className="text-2xl font-bold mt-1">
                         Welcome to Pangolin
                     </h1>
-                    <p className="text-sm text-muted-foreground">Log in to get started</p>
+                    <p className="text-sm text-muted-foreground">
+                        Log in to get started
+                    </p>
                 </div>
             </CardHeader>
             <CardContent>
                 <LoginForm
                     redirect={redirect}
+                    idps={idps}
                     onLogin={() => {
                         if (redirect) {
                             const safe = cleanRedirect(redirect);

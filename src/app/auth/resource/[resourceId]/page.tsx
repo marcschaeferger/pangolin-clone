@@ -13,6 +13,9 @@ import ResourceNotFound from "./ResourceNotFound";
 import ResourceAccessDenied from "./ResourceAccessDenied";
 import AccessToken from "./AccessToken";
 import { pullEnv } from "@app/lib/pullEnv";
+import { LoginFormIDP } from "@app/components/LoginForm";
+import db from "@server/db";
+import { idp } from "@server/db/schemas";
 
 export default async function ResourceAuthPage(props: {
     params: Promise<{ resourceId: number }>;
@@ -84,7 +87,6 @@ export default async function ResourceAuthPage(props: {
         redirect(redirectUrl);
     }
 
-
     // convert the dashboard token into a resource session token
     let userIsUnauthorized = false;
     if (user && authInfo.sso) {
@@ -128,6 +130,12 @@ export default async function ResourceAuthPage(props: {
         );
     }
 
+    const idps = await db.select().from(idp);
+    const loginIdps = idps.map((idp) => ({
+        idpId: idp.idpId,
+        name: idp.name
+    })) as LoginFormIDP[];
+
     return (
         <>
             {userIsUnauthorized && isSSOOnly ? (
@@ -148,6 +156,7 @@ export default async function ResourceAuthPage(props: {
                             id: authInfo.resourceId
                         }}
                         redirect={redirectUrl}
+                        idps={loginIdps}
                     />
                 </div>
             )}

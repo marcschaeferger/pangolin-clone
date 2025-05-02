@@ -14,6 +14,7 @@ import { sendEmail } from "@server/emails";
 import TwoFactorAuthNotification from "@server/emails/templates/TwoFactorAuthNotification";
 import config from "@server/lib/config";
 import { unauthorized } from "@server/auth/unauthorizedResponse";
+import { UserType } from "@server/types/UserTypes";
 
 export const disable2faBody = z
     .object({
@@ -47,8 +48,17 @@ export async function disable2fa(
     const { password, code } = parsedBody.data;
     const user = req.user as User;
 
+    if (user.type !== UserType.Internal) {
+        return next(
+            createHttpError(
+                HttpCode.BAD_REQUEST,
+                "Two-factor authentication is not supported for external users"
+            )
+        );
+    }
+
     try {
-        const validPassword = await verifyPassword(password, user.passwordHash);
+        const validPassword = await verifyPassword(password, user.passwordHash!);
         if (!validPassword) {
             return next(unauthorized());
         }
@@ -99,11 +109,11 @@ export async function disable2fa(
 
         sendEmail(
             TwoFactorAuthNotification({
-                email: user.email,
+                email: user.email!, // email is not null because we are checking user.type
                 enabled: false
             }),
             {
-                to: user.email,
+                to: user.email!,
                 from: config.getRawConfig().email?.no_reply,
                 subject: "Two-factor authentication disabled"
             }

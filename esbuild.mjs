@@ -52,6 +52,7 @@ esbuild
         bundle: true,
         outfile: argv.out,
         format: "esm",
+        minify: true,
         banner: {
             js: banner,
         },

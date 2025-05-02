@@ -1,13 +1,15 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { roles, userOrgs, users } from "@server/db/schemas";
+import { idp, roles, userOrgs, users } from "@server/db/schemas";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
-import { sql } from "drizzle-orm";
+import { and, sql } from "drizzle-orm";
 import logger from "@server/logger";
 import { fromZodError } from "zod-validation-error";
+import { OpenAPITags, registry } from "@server/openApi";
+import { eq } from "drizzle-orm";
 
 const listUsersParamsSchema = z
     .object({
@@ -40,14 +42,20 @@ async function queryUsers(orgId: string, limit: number, offset: number) {
             emailVerified: users.emailVerified,
             dateCreated: users.dateCreated,
             orgId: userOrgs.orgId,
+            username: users.username,
+            name: users.name,
+            type: users.type,
             roleId: userOrgs.roleId,
             roleName: roles.name,
-            isOwner: userOrgs.isOwner
+            isOwner: userOrgs.isOwner,
+            idpName: idp.name,
+            idpId: users.idpId
         })
         .from(users)
-        .leftJoin(userOrgs, sql`${users.userId} = ${userOrgs.userId}`)
-        .leftJoin(roles, sql`${userOrgs.roleId} = ${roles.roleId}`)
-        .where(sql`${userOrgs.orgId} = ${orgId}`)
+        .leftJoin(userOrgs, eq(users.userId, userOrgs.userId))
+        .leftJoin(roles, eq(userOrgs.roleId, roles.roleId))
+        .leftJoin(idp, eq(users.idpId, idp.idpId))
+        .where(eq(userOrgs.orgId, orgId))
         .limit(limit)
         .offset(offset);
 }
@@ -56,6 +64,18 @@ export type ListUsersResponse = {
     users: NonNullable<Awaited<ReturnType<typeof queryUsers>>>;
     pagination: { total: number; limit: number; offset: number };
 };
+
+registry.registerPath({
+    method: "get",
+    path: "/org/{orgId}/users",
+    description: "List users in an organization.",
+    tags: [OpenAPITags.Org, OpenAPITags.User],
+    request: {
+        params: listUsersParamsSchema,
+        query: listUsersSchema
+    },
+    responses: {}
+});
 
 export async function listUsers(
     req: Request,
@@ -94,7 +114,8 @@ export async function listUsers(
 
         const [{ count }] = await db
             .select({ count: sql<number>`count(*)` })
-            .from(users);
+            .from(userOrgs)
+            .where(eq(userOrgs.orgId, orgId));
 
         return response<ListUsersResponse>(res, {
             data: {

@@ -4,38 +4,39 @@ import { cn } from "@app/lib/cn";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { useState } from "react";
 
-interface StrategyOption {
-    id: string;
+interface StrategyOption<TValue extends string> {
+    id: TValue;
     title: string;
     description: string;
-    disabled?: boolean; // New optional property
+    disabled?: boolean;
 }
 
-interface StrategySelectProps {
-    options: StrategyOption[];
-    defaultValue?: string;
-    onChange?: (value: string) => void;
+interface StrategySelectProps<TValue extends string> {
+    options: ReadonlyArray<StrategyOption<TValue>>;
+    defaultValue?: TValue;
+    onChange?: (value: TValue) => void;
     cols?: number;
 }
 
-export function StrategySelect({
+export function StrategySelect<TValue extends string>({
     options,
     defaultValue,
     onChange,
     cols
-}: StrategySelectProps) {
-    const [selected, setSelected] = useState(defaultValue);
+}: StrategySelectProps<TValue>) {
+    const [selected, setSelected] = useState<TValue | undefined>(defaultValue);
 
     return (
         <RadioGroup
             defaultValue={defaultValue}
-            onValueChange={(value) => {
-                setSelected(value);
-                onChange?.(value);
+            onValueChange={(value: string) => {
+                const typedValue = value as TValue;
+                setSelected(typedValue);
+                onChange?.(typedValue);
             }}
             className={`grid md:grid-cols-${cols ? cols : 1} gap-4`}
         >
-            {options.map((option) => (
+            {options.map((option: StrategyOption<TValue>) => (
                 <label
                     key={option.id}
                     htmlFor={option.id}
@@ -43,7 +44,7 @@ export function StrategySelect({
                         selected === option.id ? "checked" : "unchecked"
                     }
                     className={cn(
-                        "relative flex rounded-lg border-2 p-4 transition-colors cursor-pointer",
+                        "relative flex rounded-lg border p-4 transition-colors cursor-pointer",
                         option.disabled
                             ? "border-input text-muted-foreground cursor-not-allowed opacity-50"
                             : selected === option.id

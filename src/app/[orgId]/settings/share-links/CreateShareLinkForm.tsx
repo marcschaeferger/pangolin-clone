@@ -57,9 +57,7 @@ import {
 import { CheckIcon, ChevronsUpDown } from "lucide-react";
 import { Checkbox } from "@app/components/ui/checkbox";
 import { GenerateAccessTokenResponse } from "@server/routers/accessToken";
-import {
-    constructShareLink
-} from "@app/lib/shareLinks";
+import { constructShareLink } from "@app/lib/shareLinks";
 import { ShareLinkRow } from "./ShareLinksTable";
 import { QRCodeCanvas, QRCodeSVG } from "qrcode.react";
 import {
@@ -528,11 +526,9 @@ export default function CreateShareLinkForm({
                                                                 accessTokenId
                                                             }
                                                             token={accessToken}
-                                                            resourceUrl={
-                                                                form.getValues(
-                                                                    "resourceUrl"
-                                                                )
-                                                            }
+                                                            resourceUrl={form.getValues(
+                                                                "resourceUrl"
+                                                            )}
                                                         />
                                                     </div>
                                                 </div>

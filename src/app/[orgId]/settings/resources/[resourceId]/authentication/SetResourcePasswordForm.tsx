@@ -140,12 +140,6 @@ export default function SetResourcePasswordForm({
                                                 />
                                             </FormControl>
                                             <FormMessage />
-                                            <FormDescription>
-                                                Users will be able to access
-                                                this resource by entering this
-                                                password. It must be at least 4
-                                                characters long.
-                                            </FormDescription>
                                         </FormItem>
                                     )}
                                 />

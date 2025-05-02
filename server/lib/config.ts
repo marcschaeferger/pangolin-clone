@@ -12,8 +12,8 @@ import { passwordSchema } from "@server/auth/passwordSchema";
 import stoi from "./stoi";
 import db from "@server/db";
 import { SupporterKey, supporterKey } from "@server/db/schemas";
-import { suppressDeprecationWarnings } from "moment";
 import { eq } from "drizzle-orm";
+import { license } from "@server/license/license";
 
 const portSchema = z.number().positive().gt(0).lte(65535);
 
@@ -60,6 +60,10 @@ const configSchema = z.object({
             }
         ),
     server: z.object({
+        integration_port: portSchema
+            .optional()
+            .transform(stoi)
+            .pipe(portSchema.optional()),
         external_port: portSchema.optional().transform(stoi).pipe(portSchema),
         internal_port: portSchema.optional().transform(stoi).pipe(portSchema),
         next_port: portSchema.optional().transform(stoi).pipe(portSchema),
@@ -91,7 +95,12 @@ const configSchema = z.object({
                 credentials: z.boolean().optional()
             })
             .optional(),
-        trust_proxy: z.boolean().optional().default(true)
+        trust_proxy: z.boolean().optional().default(true),
+        secret: z
+            .string()
+            .optional()
+            .transform(getEnvOrYaml("SERVER_SECRET"))
+            .pipe(z.string().min(8))
     }),
     traefik: z.object({
         http_entrypoint: z.string(),
@@ -255,11 +264,18 @@ export class Config {
             : "false";
         process.env.DASHBOARD_URL = parsedConfig.data.app.dashboard_url;
 
-        if (!this.isDev) {
-            this.checkSupporterKey();
-        }
+        license.setServerSecret(parsedConfig.data.server.secret);
+
+        this.checkKeyStatus();
 
         this.rawConfig = parsedConfig.data;
+    }
+
+    private async checkKeyStatus() {
+        const licenseStatus = await license.check();
+        if (!licenseStatus.isHostLicensed) {
+            this.checkSupporterKey();
+        }
     }
 
     public getRawConfig() {
@@ -307,7 +323,7 @@ export class Config {
 
         try {
             const response = await fetch(
-                "https://api.dev.fossorial.io/api/v1/license/validate",
+                "https://api.fossorial.io/api/v1/license/validate",
                 {
                     method: "POST",
                     headers: {

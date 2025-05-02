@@ -8,8 +8,8 @@ import { cn } from "@app/lib/cn"
 
 const InputOTP = React.forwardRef<
   React.ElementRef<typeof OTPInput>,
-  React.ComponentPropsWithoutRef<typeof OTPInput>
->(({ className, containerClassName, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof OTPInput> & { obscured?: boolean }
+>(({ className, containerClassName, obscured = false, ...props }, ref) => (
   <OTPInput
     ref={ref}
     containerClassName={cn(
@@ -32,8 +32,8 @@ InputOTPGroup.displayName = "InputOTPGroup"
 
 const InputOTPSlot = React.forwardRef<
   React.ElementRef<"div">,
-  React.ComponentPropsWithoutRef<"div"> & { index: number }
->(({ index, className, ...props }, ref) => {
+  React.ComponentPropsWithoutRef<"div"> & { index: number; obscured?: boolean }
+>(({ index, className, obscured = false, ...props }, ref) => {
   const inputOTPContext = React.useContext(OTPInputContext)
   const { char, hasFakeCaret, isActive } = inputOTPContext.slots[index]
 
@@ -41,13 +41,13 @@ const InputOTPSlot = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        "relative flex h-10 w-10 items-center justify-center border-y-2 border-r-2 border-input text-base md:text-sm transition-all first:rounded-l-md first:border-l-2 last:rounded-r-md",
+        "relative flex h-10 w-10 items-center justify-center border-y border-r border-input text-base md:text-sm transition-all first:rounded-l-md first:border-l last:rounded-r-md",
         isActive && "z-10 ring-2 ring-ring ring-offset-background",
         className
       )}
       {...props}
     >
-      {char}
+      {char && obscured ? "•" : char}
       {hasFakeCaret && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <div className="h-4 w-px animate-caret-blink bg-foreground duration-1000" />

@@ -48,7 +48,7 @@ import { useOrgContext } from "@app/hooks/useOrgContext";
 import CustomDomainInput from "../CustomDomainInput";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
-import { subdomainSchema } from "@server/lib/schemas";
+import { subdomainSchema, tlsNameSchema } from "@server/lib/schemas";
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 import { RadioGroup, RadioGroupItem } from "@app/components/ui/radio-group";
 import { Label } from "@app/components/ui/label";
@@ -596,7 +596,7 @@ export default function GeneralForm() {
                             disabled={saveLoading}
                             form="general-settings-form"
                         >
-                            Save Settings
+                            Save General Settings
                         </Button>
                     </SettingsSectionFooter>
                 </SettingsSection>

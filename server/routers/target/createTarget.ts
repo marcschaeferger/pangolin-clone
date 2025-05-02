@@ -13,6 +13,7 @@ import { addTargets } from "../newt/targets";
 import { eq } from "drizzle-orm";
 import { pickPort } from "./helpers";
 import { isTargetValid } from "@server/lib/validators";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const createTargetParamsSchema = z
     .object({
@@ -33,6 +34,24 @@ const createTargetSchema = z
     .strict();
 
 export type CreateTargetResponse = Target;
+
+registry.registerPath({
+    method: "put",
+    path: "/resource/{resourceId}/target",
+    description: "Create a target for a resource.",
+    tags: [OpenAPITags.Resource, OpenAPITags.Target],
+    request: {
+        params: createTargetParamsSchema,
+        body: {
+            content: {
+                "application/json": {
+                    schema: createTargetSchema
+                }
+            }
+        }
+    },
+    responses: {}
+});
 
 export async function createTarget(
     req: Request,

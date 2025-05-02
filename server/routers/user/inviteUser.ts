@@ -1,3 +1,4 @@
+import NodeCache from "node-cache";
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
@@ -14,6 +15,10 @@ import { hashPassword } from "@server/auth/password";
 import { fromError } from "zod-validation-error";
 import { sendEmail } from "@server/emails";
 import SendInviteLink from "@server/emails/templates/SendInviteLink";
+import { OpenAPITags, registry } from "@server/openApi";
+import { UserType } from "@server/types/UserTypes";
+
+const regenerateTracker = new NodeCache({ stdTTL: 3600, checkperiod: 600 });
 
 const inviteUserParamsSchema = z
     .object({
@@ -29,7 +34,8 @@ const inviteUserBodySchema = z
             .transform((v) => v.toLowerCase()),
         roleId: z.number(),
         validHours: z.number().gt(0).lte(168),
-        sendEmail: z.boolean().optional()
+        sendEmail: z.boolean().optional(),
+        regenerate: z.boolean().optional()
     })
     .strict();
 
@@ -40,7 +46,23 @@ export type InviteUserResponse = {
     expiresAt: number;
 };
 
-const inviteTracker: Record<string, { timestamps: number[] }> = {};
+registry.registerPath({
+    method: "post",
+    path: "/org/{orgId}/create-invite",
+    description: "Invite a user to join an organization.",
+    tags: [OpenAPITags.Org],
+    request: {
+        params: inviteUserParamsSchema,
+        body: {
+            content: {
+                "application/json": {
+                    schema: inviteUserBodySchema
+                }
+            }
+        }
+    },
+    responses: {}
+});
 
 export async function inviteUser(
     req: Request,
@@ -73,31 +95,11 @@ export async function inviteUser(
             email,
             validHours,
             roleId,
-            sendEmail: doEmail
+            sendEmail: doEmail,
+            regenerate
         } = parsedBody.data;
 
-        const currentTime = Date.now();
-        const oneHourAgo = currentTime - 3600000;
-
-        if (!inviteTracker[email]) {
-            inviteTracker[email] = { timestamps: [] };
-        }
-
-        inviteTracker[email].timestamps = inviteTracker[
-            email
-        ].timestamps.filter((timestamp) => timestamp > oneHourAgo); // TODO: this could cause memory increase over time if the object is never deleted
-
-        if (inviteTracker[email].timestamps.length >= 3) {
-            return next(
-                createHttpError(
-                    HttpCode.TOO_MANY_REQUESTS,
-                    "User has already been invited 3 times in the last hour"
-                )
-            );
-        }
-
-        inviteTracker[email].timestamps.push(currentTime);
-
+        // Check if the organization exists
         const org = await db
             .select()
             .from(orgs)
@@ -109,21 +111,115 @@ export async function inviteUser(
             );
         }
 
+        // Check if the user already exists in the `users` table
         const existingUser = await db
             .select()
             .from(users)
             .innerJoin(userOrgs, eq(users.userId, userOrgs.userId))
-            .where(eq(users.email, email))
+            .where(
+                and(
+                    eq(users.email, email),
+                    eq(userOrgs.orgId, orgId),
+                    eq(users.type, UserType.Internal)
+                )
+            )
             .limit(1);
-        if (existingUser.length && existingUser[0].userOrgs?.orgId === orgId) {
+
+        if (existingUser.length) {
             return next(
                 createHttpError(
-                    HttpCode.BAD_REQUEST,
-                    "User is already a member of this organization"
+                    HttpCode.CONFLICT,
+                    "This user is already a member of the organization."
                 )
             );
         }
 
+        // Check if an invitation already exists
+        const existingInvite = await db
+            .select()
+            .from(userInvites)
+            .where(
+                and(eq(userInvites.email, email), eq(userInvites.orgId, orgId))
+            )
+            .limit(1);
+
+        if (existingInvite.length && !regenerate) {
+            return next(
+                createHttpError(
+                    HttpCode.CONFLICT,
+                    "An invitation for this user already exists."
+                )
+            );
+        }
+
+        if (existingInvite.length) {
+            const attempts = regenerateTracker.get<number>(email) || 0;
+            if (attempts >= 3) {
+                return next(
+                    createHttpError(
+                        HttpCode.TOO_MANY_REQUESTS,
+                        "You have exceeded the limit of 3 regenerations per hour."
+                    )
+                );
+            }
+
+            regenerateTracker.set(email, attempts + 1);
+
+            const inviteId = existingInvite[0].inviteId; // Retrieve the original inviteId
+            const token = generateRandomString(
+                32,
+                alphabet("a-z", "A-Z", "0-9")
+            );
+            const expiresAt = createDate(
+                new TimeSpan(validHours, "h")
+            ).getTime();
+            const tokenHash = await hashPassword(token);
+
+            await db
+                .update(userInvites)
+                .set({
+                    tokenHash,
+                    expiresAt
+                })
+                .where(
+                    and(
+                        eq(userInvites.email, email),
+                        eq(userInvites.orgId, orgId)
+                    )
+                );
+
+            const inviteLink = `${config.getRawConfig().app.dashboard_url}/invite?token=${inviteId}-${token}`;
+
+            if (doEmail) {
+                await sendEmail(
+                    SendInviteLink({
+                        email,
+                        inviteLink,
+                        expiresInDays: (validHours / 24).toString(),
+                        orgName: org[0].name || orgId,
+                        inviterName: req.user?.email || req.user?.username
+                    }),
+                    {
+                        to: email,
+                        from: config.getNoReplyEmail(),
+                        subject: "Your invitation has been regenerated"
+                    }
+                );
+            }
+
+            return response<InviteUserResponse>(res, {
+                data: {
+                    inviteLink,
+                    expiresAt
+                },
+                success: true,
+                error: false,
+                message: "Invitation regenerated successfully",
+                status: HttpCode.OK
+            });
+        }
+
+        // Create a new invite if none exists
         const inviteId = generateRandomString(
             10,
             alphabet("a-z", "A-Z", "0-9")
@@ -134,17 +230,6 @@ export async function inviteUser(
         const tokenHash = await hashPassword(token);
 
         await db.transaction(async (trx) => {
-            // delete any existing invites for this email
-            await trx
-                .delete(userInvites)
-                .where(
-                    and(
-                        eq(userInvites.email, email),
-                        eq(userInvites.orgId, orgId)
-                    )
-                )
-                .execute();
-
             await trx.insert(userInvites).values({
                 inviteId,
                 orgId,
@@ -164,12 +249,12 @@ export async function inviteUser(
                     inviteLink,
                     expiresInDays: (validHours / 24).toString(),
                     orgName: org[0].name || orgId,
-                    inviterName: req.user?.email
+                    inviterName: req.user?.email || req.user?.username
                 }),
                 {
                     to: email,
                     from: config.getNoReplyEmail(),
-                    subject: "You're invited to join a Fossorial organization"
+                    subject: `You're invited to join ${org[0].name || orgId}`
                 }
             );
         }

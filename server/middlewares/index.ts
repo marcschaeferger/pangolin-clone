@@ -15,3 +15,8 @@ export * from "./verifySetResourceUsers";
 export * from "./verifyUserInRole";
 export * from "./verifyAccessTokenAccess";
 export * from "./verifyUserIsServerAdmin";
+export * from "./verifyIsLoggedInUser";
+export * from "./integration";
+export * from "./verifyValidLicense";
+export * from "./verifyUserHasAction";
+export * from "./verifyApiKeyAccess";

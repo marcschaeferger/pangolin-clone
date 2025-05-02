@@ -90,7 +90,7 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
                         </>
                     )}
                     <InfoSection>
-                        <InfoSectionTitle>Visibilty</InfoSectionTitle>
+                        <InfoSectionTitle>Visibility</InfoSectionTitle>
                         <InfoSectionContent>
                             <span>{resource.enabled ? "Enabled" : "Disabled"}</span>
                         </InfoSectionContent>

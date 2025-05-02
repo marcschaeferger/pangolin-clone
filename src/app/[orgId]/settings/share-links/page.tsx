@@ -53,7 +53,7 @@ export default async function ShareLinksPage(props: ShareLinksPageProps) {
 
     return (
         <>
-            <ShareableLinksSplash />
+            {/* <ShareableLinksSplash /> */}
 
             <SettingsSectionTitle
                 title="Manage Share Links"

@@ -40,7 +40,10 @@ export async function traefikConfigProvider(
                     org: {
                         orgId: orgs.orgId
                     },
-                    enabled: resources.enabled
+                    enabled: resources.enabled,
+                    stickySession: resources.stickySession,
+                    tlsServerName: resources.tlsServerName,
+                    setHostHeader: resources.setHostHeader
                 })
                 .from(resources)
                 .innerJoin(sites, eq(sites.siteId, resources.siteId))
@@ -102,7 +105,10 @@ export async function traefikConfigProvider(
                             [badgerMiddlewareName]: {
                                 apiBaseUrl: new URL(
                                     "/api/v1",
-                                    `http://${config.getRawConfig().server.internal_hostname}:${
+                                    `http://${
+                                        config.getRawConfig().server
+                                            .internal_hostname
+                                    }:${
                                         config.getRawConfig().server
                                             .internal_port
                                     }`
@@ -139,6 +145,8 @@ export async function traefikConfigProvider(
             const routerName = `${resource.resourceId}-router`;
             const serviceName = `${resource.resourceId}-service`;
             const fullDomain = `${resource.fullDomain}`;
+            const transportName = `${resource.resourceId}-transport`;
+            const hostHeaderMiddlewareName = `${resource.resourceId}-host-header-middleware`;
 
             if (!resource.enabled) {
                 continue;
@@ -275,9 +283,57 @@ export async function traefikConfigProvider(
                                         url: `${target.method}://${ip}:${target.internalPort}`
                                     };
                                 }
-                            })
+                            }),
+                        ...(resource.stickySession
+                            ? {
+                                  sticky: {
+                                      cookie: {
+                                          name: "p_sticky", // TODO: make this configurable via config.yml like other cookies
+                                          secure: resource.ssl,
+                                          httpOnly: true
+                                      }
+                                  }
+                              }
+                            : {})
                     }
                 };
+
+                // Add the serversTransport if TLS server name is provided
+                if (resource.tlsServerName) {
+                    if (!config_output.http.serversTransports) {
+                        config_output.http.serversTransports = {};
+                    }
+                    config_output.http.serversTransports![transportName] = {
+                        serverName: resource.tlsServerName,
+                        //unfortunately the following needs to be set. traefik doesn't merge the default serverTransport settings
+                        // if defined in the static config and here. if not set, self-signed certs won't work
+                        insecureSkipVerify: true
+                    };
+                    config_output.http.services![serviceName].loadBalancer.serversTransport = transportName;
+                }
+
+                // Add the host header middleware
+                if (resource.setHostHeader) {
+                    if (!config_output.http.middlewares) {
+                        config_output.http.middlewares = {};
+                    }
+                    config_output.http.middlewares[hostHeaderMiddlewareName] =
+                        {
+                            headers: {
+                                customRequestHeaders: {
+                                    Host: resource.setHostHeader
+                                }
+                            }
+                        };
+                    if (!config_output.http.routers![routerName].middlewares) {
+                        config_output.http.routers![routerName].middlewares = [];
+                    }
+                    config_output.http.routers![routerName].middlewares = [
+                        ...config_output.http.routers![routerName].middlewares,
+                        hostHeaderMiddlewareName
+                    ];
+                }
+
             } else {
                 // Non-HTTP (TCP/UDP) configuration
                 const protocol = resource.protocol.toLowerCase();
@@ -335,7 +391,17 @@ export async function traefikConfigProvider(
                                         address: `${ip}:${target.internalPort}`
                                     };
                                 }
-                            })
+                            }),
+                        ...(resource.stickySession
+                            ? {
+                                  sticky: {
+                                      ipStrategy: {
+                                          depth: 0,
+                                          sourcePort: true
+                                      }
+                                  }
+                              }
+                            : {})
                     }
                 };
             }

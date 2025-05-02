@@ -8,19 +8,28 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const deleteResourceRuleSchema = z
     .object({
-        ruleId: z
-            .string()
-            .transform(Number)
-            .pipe(z.number().int().positive()),
+        ruleId: z.string().transform(Number).pipe(z.number().int().positive()),
         resourceId: z
             .string()
             .transform(Number)
             .pipe(z.number().int().positive())
     })
     .strict();
+
+registry.registerPath({
+    method: "delete",
+    path: "/resource/{resourceId}/rule/{ruleId}",
+    description: "Delete a resource rule.",
+    tags: [OpenAPITags.Resource, OpenAPITags.Rule],
+    request: {
+        params: deleteResourceRuleSchema
+    },
+    responses: {}
+});
 
 export async function deleteResourceRule(
     req: Request,

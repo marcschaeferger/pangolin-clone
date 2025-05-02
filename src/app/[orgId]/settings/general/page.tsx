@@ -31,7 +31,7 @@ import {
     CardTitle
 } from "@/components/ui/card";
 import { AxiosResponse } from "axios";
-import { DeleteOrgResponse, ListOrgsResponse } from "@server/routers/org";
+import { DeleteOrgResponse, ListUserOrgsResponse } from "@server/routers/org";
 import { redirect, useRouter } from "next/navigation";
 import {
     SettingsContainer,
@@ -43,6 +43,7 @@ import {
     SettingsSectionForm,
     SettingsSectionFooter
 } from "@app/components/Settings";
+import { useUserContext } from "@app/hooks/useUserContext";
 
 const GeneralFormSchema = z.object({
     name: z.string()
@@ -57,6 +58,7 @@ export default function GeneralPage() {
     const router = useRouter();
     const { org } = useOrgContext();
     const api = createApiClient(useEnvContext());
+    const { user } = useUserContext();
 
     const [loadingDelete, setLoadingDelete] = useState(false);
     const [loadingSave, setLoadingSave] = useState(false);
@@ -101,7 +103,9 @@ export default function GeneralPage() {
 
     async function pickNewOrgAndNavigate() {
         try {
-            const res = await api.get<AxiosResponse<ListOrgsResponse>>(`/orgs`);
+            const res = await api.get<AxiosResponse<ListUserOrgsResponse>>(
+                `/user/${user.userId}/orgs`
+            );
 
             if (res.status === 200) {
                 if (res.data.data.orgs.length > 0) {
@@ -230,16 +234,14 @@ export default function GeneralPage() {
                         loading={loadingSave}
                         disabled={loadingSave}
                     >
-                        Save Settings
+                        Save General Settings
                     </Button>
                 </SettingsSectionFooter>
             </SettingsSection>
 
             <SettingsSection>
                 <SettingsSectionHeader>
-                    <SettingsSectionTitle>
-                        Danger Zone
-                    </SettingsSectionTitle>
+                    <SettingsSectionTitle>Danger Zone</SettingsSectionTitle>
                     <SettingsSectionDescription>
                         Once you delete this org, there is no going back. Please
                         be certain.

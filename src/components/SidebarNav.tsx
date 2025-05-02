@@ -1,31 +1,34 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useParams, usePathname, useRouter } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { cn } from "@app/lib/cn";
-import { buttonVariants } from "@/components/ui/button";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { ChevronDown, ChevronRight } from "lucide-react";
+import { useUserContext } from "@app/hooks/useUserContext";
+import { Badge } from "@app/components/ui/badge";
+import { useLicenseStatusContext } from "@app/hooks/useLicenseStatusContext";
 
-interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
-    items: {
-        href: string;
-        title: string;
-        icon?: React.ReactNode;
-    }[];
+export interface SidebarNavItem {
+    href: string;
+    title: string;
+    icon?: React.ReactNode;
+    children?: SidebarNavItem[];
+    autoExpand?: boolean;
+    showProfessional?: boolean;
+}
+
+export interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
+    items: SidebarNavItem[];
     disabled?: boolean;
+    onItemClick?: () => void;
 }
 
 export function SidebarNav({
     className,
     items,
     disabled = false,
+    onItemClick,
     ...props
 }: SidebarNavProps) {
     const pathname = usePathname();
@@ -34,25 +37,33 @@ export function SidebarNav({
     const niceId = params.niceId as string;
     const resourceId = params.resourceId as string;
     const userId = params.userId as string;
+    const [expandedItems, setExpandedItems] = useState<Set<string>>(() => {
+        const autoExpanded = new Set<string>();
 
-    const [selectedValue, setSelectedValue] = React.useState<string>(getSelectedValue());
+        function findAutoExpandedAndActivePath(
+            items: SidebarNavItem[],
+            parentHrefs: string[] = []
+        ) {
+            items.forEach((item) => {
+                const hydratedHref = hydrateHref(item.href);
+                const currentPath = [...parentHrefs, hydratedHref];
 
-    useEffect(() => {
-        setSelectedValue(getSelectedValue());
-    }, [usePathname()]);
+                if (item.autoExpand || pathname.startsWith(hydratedHref)) {
+                    currentPath.forEach((href) => autoExpanded.add(href));
+                }
 
-    const router = useRouter();
-
-    const handleSelectChange = (value: string) => {
-        if (!disabled) {
-            router.push(value);
+                if (item.children) {
+                    findAutoExpandedAndActivePath(item.children, currentPath);
+                }
+            });
         }
-    };
 
-    function getSelectedValue() {
-        const item = items.find((item) => hydrateHref(item.href) === pathname);
-        return hydrateHref(item?.href || "");
-    }
+        findAutoExpandedAndActivePath(items);
+        return autoExpanded;
+    });
+    const { licenseStatus, isUnlocked } = useLicenseStatusContext();
+
+    const { user } = useUserContext();
 
     function hydrateHref(val: string): string {
         return val
@@ -62,68 +73,116 @@ export function SidebarNav({
             .replace("{userId}", userId);
     }
 
-    return (
-        <div>
-            <div className="block lg:hidden">
-                <Select
-                    defaultValue={selectedValue}
-                    value={selectedValue}
-                    onValueChange={handleSelectChange}
-                    disabled={disabled}
-                >
-                    <SelectTrigger>
-                        <SelectValue placeholder="Select an option" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {items.map((item) => (
-                            <SelectItem
-                                key={hydrateHref(item.href)}
-                                value={hydrateHref(item.href)}
-                            >
-                                {item.title}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
-            <nav
-                className={cn(
-                    "hidden lg:flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-3 pr-8",
-                    disabled && "opacity-50 pointer-events-none",
-                    className
-                )}
-                {...props}
-            >
-                {items.map((item) => (
-                    <Link
-                        key={hydrateHref(item.href)}
-                        href={hydrateHref(item.href)}
-                        className={cn(
-                            buttonVariants({ variant: "ghost" }),
-                            pathname === hydrateHref(item.href) &&
-                                !pathname.includes("create")
-                                ? "bg-accent hover:bg-accent dark:bg-border dark:hover:bg-border"
-                                : "hover:bg-transparent hover:underline",
-                            "justify-start",
-                            disabled && "cursor-not-allowed"
-                        )}
-                        onClick={
-                            disabled ? (e) => e.preventDefault() : undefined
-                        }
-                        tabIndex={disabled ? -1 : undefined}
-                        aria-disabled={disabled}
+    function toggleItem(href: string) {
+        setExpandedItems((prev) => {
+            const newSet = new Set(prev);
+            if (newSet.has(href)) {
+                newSet.delete(href);
+            } else {
+                newSet.add(href);
+            }
+            return newSet;
+        });
+    }
+
+    function renderItems(items: SidebarNavItem[], level = 0) {
+        return items.map((item) => {
+            const hydratedHref = hydrateHref(item.href);
+            const isActive = pathname.startsWith(hydratedHref);
+            const hasChildren = item.children && item.children.length > 0;
+            const isExpanded = expandedItems.has(hydratedHref);
+            const indent = level * 28; // Base indent for each level
+            const isProfessional = item.showProfessional && !isUnlocked();
+            const isDisabled = disabled || isProfessional;
+
+            return (
+                <div key={hydratedHref}>
+                    <div
+                        className="flex items-center group"
+                        style={{ marginLeft: `${indent}px` }}
                     >
-                        {item.icon ? (
-                            <div className="flex items-center space-x-2">
-                                {item.icon}
-                                <span>{item.title}</span>
-                            </div>
-                        ) : (
-                            item.title
-                        )}
-                    </Link>
-                ))}
-            </nav>
-        </div>
+                        <div
+                            className={cn(
+                                "flex items-center w-full transition-colors rounded-md",
+                                isActive && level === 0 && "bg-primary/10"
+                            )}
+                        >
+                            <Link
+                                href={isProfessional ? "#" : hydratedHref}
+                                className={cn(
+                                    "flex items-center w-full px-3 py-2",
+                                    isActive
+                                        ? "text-primary font-medium"
+                                        : "text-muted-foreground group-hover:text-foreground",
+                                    isDisabled && "cursor-not-allowed"
+                                )}
+                                onClick={(e) => {
+                                    if (isDisabled) {
+                                        e.preventDefault();
+                                    } else if (onItemClick) {
+                                        onItemClick();
+                                    }
+                                }}
+                                tabIndex={isDisabled ? -1 : undefined}
+                                aria-disabled={isDisabled}
+                            >
+                                <div
+                                    className={cn(
+                                        "flex items-center",
+                                        isDisabled && "opacity-60"
+                                    )}
+                                >
+                                    {item.icon && (
+                                        <span className="mr-3">
+                                            {item.icon}
+                                        </span>
+                                    )}
+                                    {item.title}
+                                </div>
+                                {isProfessional && (
+                                    <Badge
+                                        variant="outlinePrimary"
+                                        className="ml-2"
+                                    >
+                                        Professional
+                                    </Badge>
+                                )}
+                            </Link>
+                            {hasChildren && (
+                                <button
+                                    onClick={() => toggleItem(hydratedHref)}
+                                    className="p-2 rounded-md text-muted-foreground hover:text-foreground cursor-pointer"
+                                    disabled={isDisabled}
+                                >
+                                    {isExpanded ? (
+                                        <ChevronDown className="h-5 w-5" />
+                                    ) : (
+                                        <ChevronRight className="h-5 w-5" />
+                                    )}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                    {hasChildren && isExpanded && (
+                        <div className="space-y-1 mt-1">
+                            {renderItems(item.children || [], level + 1)}
+                        </div>
+                    )}
+                </div>
+            );
+        });
+    }
+
+    return (
+        <nav
+            className={cn(
+                "flex flex-col space-y-2",
+                disabled && "pointer-events-none opacity-60",
+                className
+            )}
+            {...props}
+        >
+            {renderItems(items)}
+        </nav>
     );
 }

@@ -7,6 +7,7 @@ interface SwitchComponentProps {
     label: string;
     description?: string;
     defaultChecked?: boolean;
+    disabled?: boolean;
     onCheckedChange: (checked: boolean) => void;
 }
 
@@ -14,6 +15,7 @@ export function SwitchInput({
     id,
     label,
     description,
+    disabled,
     defaultChecked = false,
     onCheckedChange
 }: SwitchComponentProps) {
@@ -24,6 +26,7 @@ export function SwitchInput({
                     id={id}
                     defaultChecked={defaultChecked}
                     onCheckedChange={onCheckedChange}
+                    disabled={disabled}
                 />
                 <Label htmlFor={id}>{label}</Label>
             </div>

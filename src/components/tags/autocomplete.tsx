@@ -221,7 +221,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                 modal={usePortal}
             >
                 <div
-                    className="relative h-full flex items-center rounded-md border-2 bg-transparent pr-3"
+                    className="relative h-full flex items-center rounded-md border border-input bg-transparent pr-3"
                     ref={triggerContainerRef}
                 >
                     {childrenWithProps}

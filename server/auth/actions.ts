@@ -6,6 +6,9 @@ import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
 
 export enum ActionsEnum {
+    createOrgUser = "createOrgUser",
+    listOrgs = "listOrgs",
+    listUserOrgs = "listUserOrgs",
     createOrg = "createOrg",
     // deleteOrg = "deleteOrg",
     getOrg = "getOrg",
@@ -32,6 +35,8 @@ export enum ActionsEnum {
     listRoles = "listRoles",
     updateRole = "updateRole",
     inviteUser = "inviteUser",
+    listInvitations = "listInvitations",
+    removeInvitation = "removeInvitation",
     removeUser = "removeUser",
     listUsers = "listUsers",
     listSiteRoles = "listSiteRoles",
@@ -64,6 +69,23 @@ export enum ActionsEnum {
     updateResourceRule = "updateResourceRule",
     listOrgDomains = "listOrgDomains",
     createNewt = "createNewt",
+    createIdp = "createIdp",
+    updateIdp = "updateIdp",
+    deleteIdp = "deleteIdp",
+    listIdps = "listIdps",
+    getIdp = "getIdp",
+    createIdpOrg = "createIdpOrg",
+    deleteIdpOrg = "deleteIdpOrg",
+    listIdpOrgs = "listIdpOrgs",
+    updateIdpOrg = "updateIdpOrg",
+    checkOrgId = "checkOrgId",
+    createApiKey = "createApiKey",
+    deleteApiKey = "deleteApiKey",
+    setApiKeyActions = "setApiKeyActions",
+    setApiKeyOrgs = "setApiKeyOrgs",
+    listApiKeyActions = "listApiKeyActions",
+    listApiKeys = "listApiKeys",
+    getApiKey = "getApiKey"
 }
 
 export async function checkUserActionPermission(

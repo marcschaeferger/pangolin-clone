@@ -47,7 +47,6 @@ type SitesTableProps = {
 export default function SitesTable({ sites, orgId }: SitesTableProps) {
     const router = useRouter();
 
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedSite, setSelectedSite] = useState<SiteRow | null>(null);
     const [rows, setRows] = useState<SiteRow[]>(sites);
@@ -164,7 +163,7 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                         );
                     }
                 } else {
-                    return <span>--</span>;
+                    return <span>-</span>;
                 }
             }
         },
@@ -281,15 +280,6 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
 
     return (
         <>
-            <CreateSiteFormModal
-                open={isCreateModalOpen}
-                setOpen={setIsCreateModalOpen}
-                onCreate={(val) => {
-                    setRows([val, ...rows]);
-                }}
-                orgId={orgId}
-            />
-
             {selectedSite && (
                 <ConfirmDeleteDialog
                     open={isDeleteModalOpen}
@@ -330,9 +320,9 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
             <SitesDataTable
                 columns={columns}
                 data={rows}
-                addSite={() => {
-                    router.push(`/${orgId}/settings/sites/create`);
-                }}
+                createSite={() =>
+                    router.push(`/${orgId}/settings/sites/create`)
+                }
             />
         </>
     );

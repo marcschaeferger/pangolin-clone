@@ -5,6 +5,7 @@ import * as resource from "./resource";
 import * as badger from "./badger";
 import * as auth from "@server/routers/auth";
 import * as supporterKey from "@server/routers/supporterKey";
+import * as license from "@server/routers/license";
 import HttpCode from "@server/types/HttpCode";
 import {
     verifyResourceAccess,
@@ -35,6 +36,11 @@ internalRouter.post(
 internalRouter.get(
     `/supporter-key/visible`,
     supporterKey.isSupporterKeyVisible
+);
+
+internalRouter.get(
+    `/license/status`,
+    license.getLicenseStatus
 );
 
 // Gerbil routes

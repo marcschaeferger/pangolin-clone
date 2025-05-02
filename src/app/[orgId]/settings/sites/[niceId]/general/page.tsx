@@ -134,7 +134,7 @@ export default function GeneralPage() {
                         loading={loading}
                         disabled={loading}
                     >
-                        Save Settings
+                        Save General Settings
                     </Button>
                 </SettingsSectionFooter>
             </SettingsSection>

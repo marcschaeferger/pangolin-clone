@@ -3,13 +3,16 @@ import { z } from "zod";
 import { db } from "@server/db";
 import { eq } from "drizzle-orm";
 import {
+    apiKeyOrg,
+    apiKeys,
     domains,
     Org,
     orgDomains,
     orgs,
     roleActions,
     roles,
-    userOrgs
+    userOrgs,
+    users
 } from "@server/db/schemas";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
@@ -19,6 +22,7 @@ import { createAdminRole } from "@server/setup/ensureActions";
 import config from "@server/lib/config";
 import { fromError } from "zod-validation-error";
 import { defaultRoleAllowedActions } from "../role";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const createOrgSchema = z
     .object({
@@ -29,6 +33,23 @@ const createOrgSchema = z
 
 // const MAX_ORGS = 5;
 
+registry.registerPath({
+    method: "put",
+    path: "/org",
+    description: "Create a new organization",
+    tags: [OpenAPITags.Org],
+    request: {
+        body: {
+            content: {
+                "application/json": {
+                    schema: createOrgSchema
+                }
+            }
+        }
+    },
+    responses: {}
+});
+
 export async function createOrg(
     req: Request,
     res: Response,
@@ -37,7 +58,7 @@ export async function createOrg(
     try {
         // should this be in a middleware?
         if (config.getRawConfig().flags?.disable_user_create_org) {
-            if (!req.user?.serverAdmin) {
+            if (req.user && !req.user?.serverAdmin) {
                 return next(
                     createHttpError(
                         HttpCode.FORBIDDEN,
@@ -125,12 +146,33 @@ export async function createOrg(
                 }))
             );
 
-            await trx.insert(userOrgs).values({
-                userId: req.user!.userId,
-                orgId: newOrg[0].orgId,
-                roleId: roleId,
-                isOwner: true
-            });
+            if (req.user) {
+                await trx.insert(userOrgs).values({
+                    userId: req.user!.userId,
+                    orgId: newOrg[0].orgId,
+                    roleId: roleId,
+                    isOwner: true
+                });
+            } else {
+                // if org created by root api key, set the server admin as the owner
+                const [serverAdmin] = await trx
+                    .select()
+                    .from(users)
+                    .where(eq(users.serverAdmin, true));
+
+                if (!serverAdmin) {
+                    error = "Server admin not found";
+                    trx.rollback();
+                    return;
+                }
+
+                await trx.insert(userOrgs).values({
+                    userId: serverAdmin.userId,
+                    orgId: newOrg[0].orgId,
+                    roleId: roleId,
+                    isOwner: true
+                });
+            }
 
             const memberRole = await trx
                 .insert(roles)
@@ -148,6 +190,18 @@ export async function createOrg(
                     orgId
                 }))
             );
+
+            const rootApiKeys = await trx
+                .select()
+                .from(apiKeys)
+                .where(eq(apiKeys.isRoot, true));
+
+            for (const apiKey of rootApiKeys) {
+                await trx.insert(apiKeyOrg).values({
+                    apiKeyId: apiKey.apiKeyId,
+                    orgId: newOrg[0].orgId
+                });
+            }
         });
 
         if (!org) {

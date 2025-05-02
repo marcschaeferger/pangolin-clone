@@ -77,7 +77,12 @@ export const resources = sqliteTable("resources", {
     applyRules: integer("applyRules", { mode: "boolean" })
         .notNull()
         .default(false),
-    enabled: integer("enabled", { mode: "boolean" }).notNull().default(true)
+    enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
+    stickySession: integer("stickySession", { mode: "boolean" })
+        .notNull()
+        .default(false),
+    tlsServerName: text("tlsServerName"),
+    setHostHeader: text("setHostHeader")
 });
 
 export const targets = sqliteTable("targets", {
@@ -106,8 +111,14 @@ export const exitNodes = sqliteTable("exitNodes", {
 
 export const users = sqliteTable("user", {
     userId: text("id").primaryKey(),
-    email: text("email").notNull().unique(),
-    passwordHash: text("passwordHash").notNull(),
+    email: text("email"),
+    username: text("username").notNull(),
+    name: text("name"),
+    type: text("type").notNull(), // "internal", "oidc"
+    idpId: integer("idpId").references(() => idp.idpId, {
+        onDelete: "cascade"
+    }),
+    passwordHash: text("passwordHash"),
     twoFactorEnabled: integer("twoFactorEnabled", { mode: "boolean" })
         .notNull()
         .default(false),
@@ -415,6 +426,89 @@ export const supporterKey = sqliteTable("supporterKey", {
     valid: integer("valid", { mode: "boolean" }).notNull().default(false)
 });
 
+// Identity Providers
+export const idp = sqliteTable("idp", {
+    idpId: integer("idpId").primaryKey({ autoIncrement: true }),
+    name: text("name").notNull(),
+    type: text("type").notNull(),
+    defaultRoleMapping: text("defaultRoleMapping"),
+    defaultOrgMapping: text("defaultOrgMapping"),
+    autoProvision: integer("autoProvision", {
+        mode: "boolean"
+    })
+        .notNull()
+        .default(false)
+});
+
+// Identity Provider OAuth Configuration
+export const idpOidcConfig = sqliteTable("idpOidcConfig", {
+    idpOauthConfigId: integer("idpOauthConfigId").primaryKey({
+        autoIncrement: true
+    }),
+    idpId: integer("idpId")
+        .notNull()
+        .references(() => idp.idpId, { onDelete: "cascade" }),
+    clientId: text("clientId").notNull(),
+    clientSecret: text("clientSecret").notNull(),
+    authUrl: text("authUrl").notNull(),
+    tokenUrl: text("tokenUrl").notNull(),
+    identifierPath: text("identifierPath").notNull(),
+    emailPath: text("emailPath"),
+    namePath: text("namePath"),
+    scopes: text("scopes").notNull()
+});
+
+export const licenseKey = sqliteTable("licenseKey", {
+    licenseKeyId: text("licenseKeyId").primaryKey().notNull(),
+    instanceId: text("instanceId").notNull(),
+    token: text("token").notNull()
+});
+
+export const hostMeta = sqliteTable("hostMeta", {
+    hostMetaId: text("hostMetaId").primaryKey().notNull(),
+    createdAt: integer("createdAt").notNull()
+});
+
+export const apiKeys = sqliteTable("apiKeys", {
+    apiKeyId: text("apiKeyId").primaryKey(),
+    name: text("name").notNull(),
+    apiKeyHash: text("apiKeyHash").notNull(),
+    lastChars: text("lastChars").notNull(),
+    createdAt: text("dateCreated").notNull(),
+    isRoot: integer("isRoot", { mode: "boolean" }).notNull().default(false)
+});
+
+export const apiKeyActions = sqliteTable("apiKeyActions", {
+    apiKeyId: text("apiKeyId")
+        .notNull()
+        .references(() => apiKeys.apiKeyId, { onDelete: "cascade" }),
+    actionId: text("actionId")
+        .notNull()
+        .references(() => actions.actionId, { onDelete: "cascade" })
+});
+
+export const apiKeyOrg = sqliteTable("apiKeyOrg", {
+    apiKeyId: text("apiKeyId")
+        .notNull()
+        .references(() => apiKeys.apiKeyId, { onDelete: "cascade" }),
+    orgId: text("orgId")
+        .references(() => orgs.orgId, {
+            onDelete: "cascade"
+        })
+        .notNull()
+});
+
+export const idpOrg = sqliteTable("idpOrg", {
+    idpId: integer("idpId")
+        .notNull()
+        .references(() => idp.idpId, { onDelete: "cascade" }),
+    orgId: text("orgId")
+        .notNull()
+        .references(() => orgs.orgId, { onDelete: "cascade" }),
+    roleMapping: text("roleMapping"),
+    orgMapping: text("orgMapping")
+});
+
 export type Org = InferSelectModel<typeof orgs>;
 export type User = InferSelectModel<typeof users>;
 export type Site = InferSelectModel<typeof sites>;
@@ -450,3 +544,7 @@ export type VersionMigration = InferSelectModel<typeof versionMigrations>;
 export type ResourceRule = InferSelectModel<typeof resourceRules>;
 export type Domain = InferSelectModel<typeof domains>;
 export type SupporterKey = InferSelectModel<typeof supporterKey>;
+export type Idp = InferSelectModel<typeof idp>;
+export type ApiKey = InferSelectModel<typeof apiKeys>;
+export type ApiKeyAction = InferSelectModel<typeof apiKeyActions>;
+export type ApiKeyOrg = InferSelectModel<typeof apiKeyOrg>;

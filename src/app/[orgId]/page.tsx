@@ -1,4 +1,3 @@
-import ProfileIcon from "@app/components/ProfileIcon";
 import { verifySession } from "@app/lib/auth/verifySession";
 import UserProvider from "@app/providers/UserProvider";
 import { cache } from "react";
@@ -8,6 +7,9 @@ import { internal } from "@app/lib/api";
 import { AxiosResponse } from "axios";
 import { authCookieHeader } from "@app/lib/api/cookies";
 import { redirect } from "next/navigation";
+import { Layout } from "@app/components/Layout";
+import { orgLangingNavItems, orgNavItems, rootNavItems } from "../navigation";
+import { ListUserOrgsResponse } from "@server/routers/org";
 
 type OrgPageProps = {
     params: Promise<{ orgId: string }>;
@@ -19,6 +21,10 @@ export default async function OrgPage(props: OrgPageProps) {
 
     const getUser = cache(verifySession);
     const user = await getUser();
+
+    if (!user) {
+        redirect("/");
+    }
 
     let redirectToSettings = false;
     let overview: GetOrgOverviewResponse | undefined;
@@ -38,15 +44,23 @@ export default async function OrgPage(props: OrgPageProps) {
         redirect(`/${orgId}/settings`);
     }
 
-    return (
-        <>
-            <div className="p-3">
-                {user && (
-                    <UserProvider user={user}>
-                        <ProfileIcon />
-                    </UserProvider>
-                )}
+    let orgs: ListUserOrgsResponse["orgs"] = [];
+    try {
+        const getOrgs = cache(async () =>
+            internal.get<AxiosResponse<ListUserOrgsResponse>>(
+                `/user/${user.userId}/orgs`,
+                await authCookieHeader()
+            )
+        );
+        const res = await getOrgs();
+        if (res && res.data.data.orgs) {
+            orgs = res.data.data.orgs;
+        }
+    } catch (e) {}
 
+    return (
+        <UserProvider user={user}>
+            <Layout orgId={orgId} navItems={orgLangingNavItems} orgs={orgs}>
                 {overview && (
                     <div className="w-full max-w-4xl mx-auto md:mt-32 mt-4">
                         <OrganizationLandingCard
@@ -65,7 +79,7 @@ export default async function OrgPage(props: OrgPageProps) {
                         />
                     </div>
                 )}
-            </div>
-        </>
+            </Layout>
+        </UserProvider>
     );
 }

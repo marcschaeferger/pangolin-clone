@@ -5,6 +5,6 @@ export default async function ResourcePage(props: {
 }) {
     const params = await props.params;
     redirect(
-        `/${params.orgId}/settings/resources/${params.resourceId}/connectivity`
+        `/${params.orgId}/settings/resources/${params.resourceId}/proxy`
     );
 }

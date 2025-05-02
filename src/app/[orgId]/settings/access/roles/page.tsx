@@ -8,6 +8,7 @@ import { ListRolesResponse } from "@server/routers/role";
 import RolesTable, { RoleRow } from "./RolesTable";
 import { SidebarSettings } from "@app/components/SidebarSettings";
 import AccessPageHeaderAndNav from "../AccessPageHeaderAndNav";
+import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 
 type RolesPageProps = {
     params: Promise<{ orgId: string }>;
@@ -19,6 +20,8 @@ export default async function RolesPage(props: RolesPageProps) {
     const params = await props.params;
 
     let roles: ListRolesResponse["roles"] = [];
+    let hasInvitations = false;
+
     const res = await internal
         .get<
             AxiosResponse<ListRolesResponse>
@@ -27,6 +30,21 @@ export default async function RolesPage(props: RolesPageProps) {
 
     if (res && res.status === 200) {
         roles = res.data.data.roles;
+    }
+
+    const invitationsRes = await internal
+        .get<
+            AxiosResponse<{
+                pagination: { total: number };
+            }>
+        >(
+            `/org/${params.orgId}/invitations?limit=1&offset=0`,
+            await authCookieHeader()
+        )
+        .catch((e) => {});
+
+    if (invitationsRes && invitationsRes.status === 200) {
+        hasInvitations = invitationsRes.data.data.pagination.total > 0;
     }
 
     let org: GetOrgResponse | null = null;
@@ -47,11 +65,13 @@ export default async function RolesPage(props: RolesPageProps) {
 
     return (
         <>
-            <AccessPageHeaderAndNav>
-                <OrgProvider org={org}>
-                    <RolesTable roles={roleRows} />
-                </OrgProvider>
-            </AccessPageHeaderAndNav>
+            <SettingsSectionTitle
+                title="Manage Roles"
+                description="Configure roles to manage access to your organization"
+            />
+            <OrgProvider org={org}>
+                <RolesTable roles={roleRows} />
+            </OrgProvider>
         </>
     );
 }

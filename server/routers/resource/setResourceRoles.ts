@@ -1,13 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { roleResources, roles } from "@server/db/schemas";
+import { apiKeys, roleResources, roles } from "@server/db/schemas";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { eq, and, ne } from "drizzle-orm";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const setResourceRolesBodySchema = z
     .object({
@@ -23,6 +24,25 @@ const setResourceRolesParamsSchema = z
             .pipe(z.number().int().positive())
     })
     .strict();
+
+registry.registerPath({
+    method: "post",
+    path: "/resource/{resourceId}/roles",
+    description:
+        "Set roles for a resource. This will replace all existing roles.",
+    tags: [OpenAPITags.Resource, OpenAPITags.Role],
+    request: {
+        params: setResourceRolesParamsSchema,
+        body: {
+            content: {
+                "application/json": {
+                    schema: setResourceRolesBodySchema
+                }
+            }
+        }
+    },
+    responses: {}
+});
 
 export async function setResourceRoles(
     req: Request,
@@ -54,6 +74,17 @@ export async function setResourceRoles(
 
         const { resourceId } = parsedParams.data;
 
+        const orgId = req.userOrg?.orgId || req.apiKeyOrg?.orgId;
+
+        if (!orgId) {
+            return next(
+                createHttpError(
+                    HttpCode.INTERNAL_SERVER_ERROR,
+                    "Organization not found"
+                )
+            );
+        }
+
         // get this org's admin role
         const adminRole = await db
             .select()
@@ -61,7 +92,7 @@ export async function setResourceRoles(
             .where(
                 and(
                     eq(roles.name, "Admin"),
-                    eq(roles.orgId, req.userOrg!.orgId)
+                    eq(roles.orgId, orgId)
                 )
             )
             .limit(1);
@@ -116,3 +147,4 @@ export async function setResourceRoles(
         );
     }
 }
+
