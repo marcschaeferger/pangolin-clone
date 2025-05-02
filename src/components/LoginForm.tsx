@@ -248,6 +248,12 @@ export default function LoginForm({ redirect, onLogin, idps }: LoginFormProps) {
                                                     pattern={
                                                         REGEXP_ONLY_DIGITS_AND_CHARS
                                                     }
+                                                    onChange={(e) => {
+                                                        field.onChange(e);
+                                                        if (e.target.value.length === 6) {
+                                                            mfaForm.handleSubmit(onSubmit)();
+                                                        }
+                                                    }}
                                                 >
                                                     <InputOTPGroup>
                                                         <InputOTPSlot
