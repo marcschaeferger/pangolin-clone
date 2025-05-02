@@ -250,7 +250,7 @@ export default function LoginForm({ redirect, onLogin, idps }: LoginFormProps) {
                                                     }
                                                     onChange={(e) => {
                                                         field.onChange(e);
-                                                        if (e.target.value.length === 6) {
+                                                        if (e.length === 6) {
                                                             mfaForm.handleSubmit(onSubmit)();
                                                         }
                                                     }}
