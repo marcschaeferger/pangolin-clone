@@ -13,12 +13,19 @@ import moment from "moment";
 import { setHostMeta } from "@server/setup/setHostMeta";
 import { encrypt, decrypt } from "@server/lib/crypto";
 
+const keyTypes = ["HOST", "SITES"] as const;
+type KeyType = (typeof keyTypes)[number];
+
+const keyTiers = ["PROFESSIONAL", "ENTERPRISE"] as const;
+type KeyTier = (typeof keyTiers)[number];
+
 export type LicenseStatus = {
     isHostLicensed: boolean; // Are there any license keys?
     isLicenseValid: boolean; // Is the license key valid?
     hostId: string; // Host ID
     maxSites?: number;
     usedSites?: number;
+    tier?: KeyTier;
 };
 
 export type LicenseKeyCache = {
@@ -26,7 +33,8 @@ export type LicenseKeyCache = {
     licenseKeyEncrypted: string;
     valid: boolean;
     iat?: Date;
-    type?: "LICENSE" | "SITES";
+    type?: KeyType;
+    tier?: KeyTier;
     numSites?: number;
 };
 
@@ -54,7 +62,8 @@ type ValidateLicenseAPIResponse = {
 
 type TokenPayload = {
     valid: boolean;
-    type: "LICENSE" | "SITES";
+    type: KeyType;
+    tier: KeyTier;
     quantity: number;
     terminateAt: string; // ISO
     iat: number; // Issued at
@@ -182,11 +191,12 @@ LQIDAQAB
                         licenseKeyEncrypted: key.licenseKeyId,
                         valid: payload.valid,
                         type: payload.type,
+                        tier: payload.tier,
                         numSites: payload.quantity,
                         iat: new Date(payload.iat * 1000)
                     });
 
-                    if (payload.type === "LICENSE") {
+                    if (payload.type === "HOST") {
                         foundHostKey = true;
                     }
                 } catch (e) {
@@ -273,6 +283,7 @@ LQIDAQAB
                     );
                     cached.valid = payload.valid;
                     cached.type = payload.type;
+                    cached.tier = payload.tier;
                     cached.numSites = payload.quantity;
                     cached.iat = new Date(payload.iat * 1000);
 
@@ -311,8 +322,9 @@ LQIDAQAB
 
                 logger.debug("Checking key", cached);
 
-                if (cached.type === "LICENSE") {
+                if (cached.type === "HOST") {
                     status.isLicenseValid = cached.valid;
+                    status.tier = cached.tier;
                 }
 
                 if (!cached.valid) {

@@ -106,7 +106,7 @@ export async function getOrgUser(
             );
         }
 
-        if (user.userId !== req.userOrg.userId) {
+        if (req.user && user.userId !== req.userOrg.userId) {
             const hasPermission = await checkUserActionPermission(
                 ActionsEnum.getOrgUser,
                 req

@@ -49,7 +49,7 @@ export async function addUserRole(
 
         const { userId, roleId } = parsedParams.data;
 
-        if (!req.userOrg) {
+        if (req.user && !req.userOrg) {
             return next(
                 createHttpError(
                     HttpCode.FORBIDDEN,
@@ -58,7 +58,13 @@ export async function addUserRole(
             );
         }
 
-        const orgId = req.userOrg.orgId;
+        const orgId = req.userOrg?.orgId || req.apiKeyOrg?.orgId;
+
+        if (!orgId) {
+            return next(
+                createHttpError(HttpCode.BAD_REQUEST, "Invalid organization ID")
+            );
+        }
 
         const existingUser = await db
             .select()

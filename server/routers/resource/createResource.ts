@@ -39,6 +39,7 @@ const createHttpResourceSchema = z
         isBaseDomain: z.boolean().optional(),
         siteId: z.number(),
         http: z.boolean(),
+        protocol: z.string(),
         domainId: z.string()
     })
     .strict()
@@ -129,7 +130,7 @@ export async function createResource(
 
         const { siteId, orgId } = parsedParams.data;
 
-        if (!req.userOrgRoleId) {
+        if (req.user && !req.userOrgRoleId) {
             return next(
                 createHttpError(HttpCode.FORBIDDEN, "User does not have a role")
             );
@@ -202,7 +203,7 @@ async function createHttpResource(
         );
     }
 
-    const { name, subdomain, isBaseDomain, http, domainId } =
+    const { name, subdomain, isBaseDomain, http, protocol, domainId } =
         parsedBody.data;
 
     const [orgDomain] = await db
@@ -261,7 +262,7 @@ async function createHttpResource(
                 name,
                 subdomain,
                 http,
-                protocol: "tcp",
+                protocol,
                 ssl: true,
                 isBaseDomain
             })
@@ -284,7 +285,7 @@ async function createHttpResource(
             resourceId: newResource[0].resourceId
         });
 
-        if (req.userOrgRoleId != adminRole[0].roleId) {
+        if (req.user && req.userOrgRoleId != adminRole[0].roleId) {
             // make sure the user can access the resource
             await trx.insert(userResources).values({
                 userId: req.user?.userId!,

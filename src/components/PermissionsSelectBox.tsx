@@ -27,7 +27,6 @@ function getActionsCategories(root: boolean) {
             "Get Organization User": "getOrgUser",
             "List Organization Domains": "listOrgDomains",
             "Check Org ID": "checkOrgId",
-            "List Orgs": "listOrgs"
         },
 
         Site: {
@@ -91,14 +90,12 @@ function getActionsCategories(root: boolean) {
             "List Resource Rules": "listResourceRules",
             "Update Resource Rule": "updateResourceRule"
         }
-
-        // "Newt": {
-        //     "Create Newt": "createNewt"
-        // },
     };
 
     if (root) {
         actionsByCategory["Organization"] = {
+            "List Organizations": "listOrgs",
+            "Check ID": "checkOrgId",
             "Create Organization": "createOrg",
             "Delete Organization": "deleteOrg",
             "List API Keys": "listApiKeys",

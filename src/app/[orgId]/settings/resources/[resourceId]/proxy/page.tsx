@@ -657,7 +657,7 @@ export default function ReverseProxyTargets(props: {
                             loading={httpsTlsLoading}
                             form="tls-settings-form"
                         >
-                            Save HTTPS & TLS Settings
+                            Save Settings
                         </Button>
                     </SettingsSectionFooter>
                 </SettingsSection>
@@ -896,7 +896,7 @@ export default function ReverseProxyTargets(props: {
                                                     <Input {...field} />
                                                 </FormControl>
                                                 <FormDescription>
-                                                    The Host header to set when
+                                                    The host header to set when
                                                     proxying requests. Leave
                                                     empty to use the default.
                                                 </FormDescription>

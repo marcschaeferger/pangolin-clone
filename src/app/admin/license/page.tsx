@@ -121,7 +121,7 @@ export default function LicensePage() {
                 );
             const keys = response.data.data;
             setRows(keys);
-            const hostKey = keys.find((key) => key.type === "LICENSE");
+            const hostKey = keys.find((key) => key.type === "HOST");
             if (hostKey) {
                 setHostLicense(hostKey.licenseKey);
             } else {
@@ -285,17 +285,22 @@ export default function LicensePage() {
                                             </FormControl>
                                             <div className="space-y-1 leading-none">
                                                 <FormLabel>
-                                                    I have read and agree to the
-                                                    Fossorial Commercial License
-                                                    - Professional Edition
-                                                    Subscription Terms.{" "}
+                                                    By checking this box, you
+                                                    confirm that you have read
+                                                    and agree to the license
+                                                    terms corresponding to the
+                                                    tier associated with your
+                                                    license key.
+                                                    <br />
                                                     <Link
-                                                        href="https://docs.fossorial.io/license.html"
+                                                        href="https://fossorial.io/license.html"
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="text-primary hover:underline"
                                                     >
-                                                        View License & Terms
+                                                        View Fossorial
+                                                        Commercial License &
+                                                        Subscription Terms
                                                     </Link>
                                                 </FormLabel>
                                                 <FormMessage />
@@ -380,7 +385,13 @@ export default function LicensePage() {
                                     <div className="space-y-2 text-green-500">
                                         <div className="text-2xl flex items-center gap-2">
                                             <Check />
-                                            Licensed
+                                            {licenseStatus?.tier ===
+                                            "PROFESSIONAL"
+                                                ? "Professional License"
+                                                : licenseStatus?.tier ===
+                                                    "ENTERPRISE"
+                                                  ? "Enterprise License"
+                                                  : "Licensed"}
                                         </div>
                                     </div>
                                 ) : (

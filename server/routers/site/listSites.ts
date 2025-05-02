@@ -100,7 +100,7 @@ export async function listSites(
         }
         const { orgId } = parsedParams.data;
 
-        if (orgId && orgId !== req.userOrgId) {
+        if (req.user && orgId && orgId !== req.userOrgId) {
             return next(
                 createHttpError(
                     HttpCode.FORBIDDEN,
@@ -109,18 +109,26 @@ export async function listSites(
             );
         }
 
-        const accessibleSites = await db
-            .select({
-                siteId: sql<number>`COALESCE(${userSites.siteId}, ${roleSites.siteId})`
-            })
-            .from(userSites)
-            .fullJoin(roleSites, eq(userSites.siteId, roleSites.siteId))
-            .where(
-                or(
-                    eq(userSites.userId, req.user!.userId),
-                    eq(roleSites.roleId, req.userOrgRoleId!)
-                )
-            );
+        let accessibleSites;
+        if (req.user) {
+            accessibleSites = await db
+                .select({
+                    siteId: sql<number>`COALESCE(${userSites.siteId}, ${roleSites.siteId})`
+                })
+                .from(userSites)
+                .fullJoin(roleSites, eq(userSites.siteId, roleSites.siteId))
+                .where(
+                    or(
+                        eq(userSites.userId, req.user!.userId),
+                        eq(roleSites.roleId, req.userOrgRoleId!)
+                    )
+                );
+        } else {
+            accessibleSites = await db
+                .select({ siteId: sites.siteId })
+                .from(sites)
+                .where(eq(sites.orgId, orgId));
+        }
 
         const accessibleSiteIds = accessibleSites.map((site) => site.siteId);
         const baseQuery = querySites(orgId, accessibleSiteIds);

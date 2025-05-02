@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { roles, userSites, sites, roleSites, Site } from "@server/db/schemas";
+import { roles, userSites, sites, roleSites, Site, orgs } from "@server/db/schemas";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
@@ -10,7 +10,6 @@ import { eq, and } from "drizzle-orm";
 import { getUniqueSiteName } from "@server/db/names";
 import { addPeer } from "../gerbil/peers";
 import { fromError } from "zod-validation-error";
-import { hash } from "@node-rs/argon2";
 import { newts } from "@server/db/schemas";
 import moment from "moment";
 import { OpenAPITags, registry } from "@server/openApi";
@@ -78,8 +77,15 @@ export async function createSite(
             );
         }
 
-        const { name, type, exitNodeId, pubKey, subnet, newtId, secret } =
-            parsedBody.data;
+        const {
+            name,
+            type,
+            exitNodeId,
+            pubKey,
+            subnet,
+            newtId,
+            secret
+        } = parsedBody.data;
 
         const parsedParams = createSiteParamsSchema.safeParse(req.params);
         if (!parsedParams.success) {
@@ -93,9 +99,20 @@ export async function createSite(
 
         const { orgId } = parsedParams.data;
 
-        if (!req.userOrgRoleId) {
+        if (req.user && !req.userOrgRoleId) {
             return next(
                 createHttpError(HttpCode.FORBIDDEN, "User does not have a role")
+            );
+        }
+
+        const [org] = await db.select().from(orgs).where(eq(orgs.orgId, orgId));
+
+        if (!org) {
+            return next(
+                createHttpError(
+                    HttpCode.NOT_FOUND,
+                    `Organization with ID ${orgId} not found`
+                )
             );
         }
 
@@ -159,7 +176,7 @@ export async function createSite(
                 siteId: newSite.siteId
             });
 
-            if (req.userOrgRoleId != adminRole[0].roleId) {
+            if (req.user && req.userOrgRoleId != adminRole[0].roleId) {
                 // make sure the user can access the site
                 trx.insert(userSites).values({
                     userId: req.user?.userId!,

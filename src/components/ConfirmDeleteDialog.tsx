@@ -105,7 +105,7 @@ export default function InviteUserForm({
                         <CredenzaTitle>{title}</CredenzaTitle>
                     </CredenzaHeader>
                     <CredenzaBody>
-                        <div className="mb-4">{dialog}</div>
+                        <div className="mb-4 break-all overflow-hidden">{dialog}</div>
                         <Form {...form}>
                             <form
                                 onSubmit={form.handleSubmit(onSubmit)}

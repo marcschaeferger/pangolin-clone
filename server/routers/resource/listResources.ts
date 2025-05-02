@@ -69,9 +69,7 @@ function queryResources(
                 http: resources.http,
                 protocol: resources.protocol,
                 proxyPort: resources.proxyPort,
-                enabled: resources.enabled,
-                tlsServerName: resources.tlsServerName,
-                setHostHeader: resources.setHostHeader
+                enabled: resources.enabled
             })
             .from(resources)
             .leftJoin(sites, eq(resources.siteId, sites.siteId))
@@ -105,9 +103,7 @@ function queryResources(
                 http: resources.http,
                 protocol: resources.protocol,
                 proxyPort: resources.proxyPort,
-                enabled: resources.enabled,
-                tlsServerName: resources.tlsServerName,
-                setHostHeader: resources.setHostHeader
+                enabled: resources.enabled
             })
             .from(resources)
             .leftJoin(sites, eq(resources.siteId, sites.siteId))
@@ -187,9 +183,17 @@ export async function listResources(
                 )
             );
         }
-        const { siteId, orgId } = parsedParams.data;
+        const { siteId } = parsedParams.data;
 
-        if (orgId && orgId !== req.userOrgId) {
+        const orgId = parsedParams.data.orgId || req.userOrg?.orgId || req.apiKeyOrg?.orgId;
+
+        if (!orgId) {
+            return next(
+                createHttpError(HttpCode.BAD_REQUEST, "Invalid organization ID")
+            );
+        }
+
+        if (req.user && orgId && orgId !== req.userOrgId) {
             return next(
                 createHttpError(
                     HttpCode.FORBIDDEN,
@@ -198,7 +202,9 @@ export async function listResources(
             );
         }
 
-        const accessibleResources = await db
+        let accessibleResources;
+        if (req.user) {
+            accessibleResources = await db
             .select({
                 resourceId: sql<number>`COALESCE(${userResources.resourceId}, ${roleResources.resourceId})`
             })
@@ -213,6 +219,11 @@ export async function listResources(
                     eq(roleResources.roleId, req.userOrgRoleId!)
                 )
             );
+        } else {
+            accessibleResources = await db.select({
+                resourceId: resources.resourceId
+            }).from(resources).where(eq(resources.orgId, orgId));
+        }
 
         const accessibleResourceIds = accessibleResources.map(
             (resource) => resource.resourceId

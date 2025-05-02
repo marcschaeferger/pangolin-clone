@@ -40,6 +40,21 @@ export function SitePriceCalculator({
         setSiteCount((prev) => (prev > 1 ? prev - 1 : 1));
     };
 
+    function continueToPayment() {
+        if (mode === "license") {
+            // open in new tab
+            window.open(
+                `https://payment.fossorial.io/buy/dab98d3d-9976-49b1-9e55-1580059d833f?quantity=${siteCount}`,
+                "_blank"
+            );
+        } else {
+            window.open(
+                `https://payment.fossorial.io/buy/2b881c36-ea5d-4c11-8652-9be6810a054f?quantity=${siteCount}`,
+                "_blank"
+            );
+        }
+    }
+
     const totalCost =
         mode === "license"
             ? licenseFlatRate + siteCount * pricePerSite
@@ -141,7 +156,9 @@ export function SitePriceCalculator({
                     <CredenzaClose asChild>
                         <Button variant="outline">Cancel</Button>
                     </CredenzaClose>
-                    <Button>Continue to Payment</Button>
+                    <Button onClick={continueToPayment}>
+                        Continue to Payment
+                    </Button>
                 </CredenzaFooter>
             </CredenzaContent>
         </Credenza>

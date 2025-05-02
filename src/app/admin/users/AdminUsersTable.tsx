@@ -173,7 +173,7 @@ export default function UsersTable({ users }: Props) {
                         <div className="space-y-4">
                             <p>
                                 Are you sure you want to permanently delete{" "}
-                                <b>
+                                <b className="break-all">
                                     {selected?.email ||
                                         selected?.name ||
                                         selected?.username}

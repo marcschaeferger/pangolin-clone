@@ -172,9 +172,20 @@ export async function listAccessTokens(
                 )
             );
         }
-        const { orgId, resourceId } = parsedParams.data;
+        const { resourceId } = parsedParams.data;
 
-        if (orgId && orgId !== req.userOrgId) {
+        const orgId =
+            parsedParams.data.orgId ||
+            req.userOrg?.orgId ||
+            req.apiKeyOrg?.orgId;
+
+        if (!orgId) {
+            return next(
+                createHttpError(HttpCode.BAD_REQUEST, "Invalid organization ID")
+            );
+        }
+
+        if (req.user && orgId && orgId !== req.userOrgId) {
             return next(
                 createHttpError(
                     HttpCode.FORBIDDEN,
@@ -183,21 +194,29 @@ export async function listAccessTokens(
             );
         }
 
-        const accessibleResources = await db
-            .select({
-                resourceId: sql<number>`COALESCE(${userResources.resourceId}, ${roleResources.resourceId})`
-            })
-            .from(userResources)
-            .fullJoin(
-                roleResources,
-                eq(userResources.resourceId, roleResources.resourceId)
-            )
-            .where(
-                or(
-                    eq(userResources.userId, req.user!.userId),
-                    eq(roleResources.roleId, req.userOrgRoleId!)
+        let accessibleResources;
+        if (req.user) {
+            accessibleResources = await db
+                .select({
+                    resourceId: sql<number>`COALESCE(${userResources.resourceId}, ${roleResources.resourceId})`
+                })
+                .from(userResources)
+                .fullJoin(
+                    roleResources,
+                    eq(userResources.resourceId, roleResources.resourceId)
                 )
-            );
+                .where(
+                    or(
+                        eq(userResources.userId, req.user!.userId),
+                        eq(roleResources.roleId, req.userOrgRoleId!)
+                    )
+                );
+        } else {
+            accessibleResources = await db
+                .select({ resourceId: resources.resourceId })
+                .from(resources)
+                .where(eq(resources.orgId, orgId));
+        }
 
         const accessibleResourceIds = accessibleResources.map(
             (resource) => resource.resourceId

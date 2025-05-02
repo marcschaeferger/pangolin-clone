@@ -45,8 +45,8 @@ const updateHttpResourceBodySchema = z
         domainId: z.string().optional(),
         enabled: z.boolean().optional(),
         stickySession: z.boolean().optional(),
-        tlsServerName: z.string().optional(),
-        setHostHeader: z.string().optional()
+        tlsServerName: z.string().nullable().optional(),
+        setHostHeader: z.string().nullable().optional()
     })
     .strict()
     .refine((data) => Object.keys(data).length > 0, {
