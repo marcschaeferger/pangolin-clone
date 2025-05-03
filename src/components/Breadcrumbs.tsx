@@ -16,33 +16,7 @@ export function Breadcrumbs() {
 
     const breadcrumbs: BreadcrumbItem[] = segments.map((segment, index) => {
         const href = `/${segments.slice(0, index + 1).join("/")}`;
-        let label = segment;
-
-        // // Format labels
-        // if (segment === "settings") {
-        //     label = "Settings";
-        // } else if (segment === "sites") {
-        //     label = "Sites";
-        // } else if (segment === "resources") {
-        //     label = "Resources";
-        // } else if (segment === "access") {
-        //     label = "Access Control";
-        // } else if (segment === "general") {
-        //     label = "General";
-        // } else if (segment === "share-links") {
-        //     label = "Shareable Links";
-        // } else if (segment === "users") {
-        //     label = "Users";
-        // } else if (segment === "roles") {
-        //     label = "Roles";
-        // } else if (segment === "invitations") {
-        //     label = "Invitations";
-        // } else if (segment === "proxy") {
-        //     label = "proxy";
-        // } else if (segment === "authentication") {
-        //     label = "Authentication";
-        // }
-
+        let label = decodeURIComponent(segment);
         return { label, href };
     });
 

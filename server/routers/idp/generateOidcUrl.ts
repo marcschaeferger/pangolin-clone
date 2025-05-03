@@ -28,7 +28,7 @@ const bodySchema = z
     .strict();
 
 const ensureTrailingSlash = (url: string): string => {
-    return url.endsWith('/') ? url : `${url}/`;
+    return url;
 };
 
 export type GenerateOidcUrlResponse = {

@@ -173,13 +173,15 @@ export default function Page() {
                 if (httpData.isBaseDomain) {
                     Object.assign(payload, {
                         domainId: httpData.domainId,
-                        isBaseDomain: true
+                        isBaseDomain: true,
+                        protocol: "tcp"
                     });
                 } else {
                     Object.assign(payload, {
                         subdomain: httpData.subdomain,
                         domainId: httpData.domainId,
-                        isBaseDomain: false
+                        isBaseDomain: false,
+                        protocol: "tcp"
                     });
                 }
             } else {

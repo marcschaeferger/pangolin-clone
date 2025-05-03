@@ -23,7 +23,7 @@ import { oidcAutoProvision } from "./oidcAutoProvision";
 import license from "@server/license/license";
 
 const ensureTrailingSlash = (url: string): string => {
-    return url.endsWith("/") ? url : `${url}/`;
+    return url;
 };
 
 const paramsSchema = z
@@ -243,7 +243,7 @@ export async function validateOidcCallback(
                 return next(
                     createHttpError(
                         HttpCode.UNAUTHORIZED,
-                        "User not provisioned in the system"
+                        `User with username ${userIdentifier} is unprovisioned. This user must be added to an organization before logging in.`
                     )
                 );
             }
