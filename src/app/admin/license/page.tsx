@@ -452,6 +452,12 @@ export default function LicensePage() {
                                     in system
                                 </div>
                             </div>
+                            {!licenseStatus?.isHostLicensed && (
+                                <p className="text-sm text-muted-foreground">
+                                    There is no limit on the number of sites
+                                    using an unlicensed host.
+                                </p>
+                            )}
                             {licenseStatus?.maxSites && (
                                 <div className="space-y-2">
                                     <div className="flex justify-between text-sm">

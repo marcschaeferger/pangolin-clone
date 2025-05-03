@@ -137,8 +137,8 @@ export function SitePriceCalculator({
                             </div>
 
                             <p className="text-muted-foreground text-sm mt-2 text-center">
-                                For the most up-to-date pricing, please visit
-                                our{" "}
+                                For the most up-to-date pricing and discounts,
+                                please visit the{" "}
                                 <a
                                     href="https://docs.fossorial.io/pricing"
                                     target="_blank"
