@@ -20,6 +20,7 @@ import { formatAxiosError } from "@app/lib/api";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { useUserContext } from "@app/hooks/useUserContext";
+import { useTranslations } from 'next-intl';
 
 export type UserRow = {
     id: string;
@@ -47,6 +48,7 @@ export default function UsersTable({ users: u }: UsersTableProps) {
     const api = createApiClient(useEnvContext());
     const { user, updateUser } = useUserContext();
     const { org } = useOrgContext();
+    const t = useTranslations();
 
     const columns: ColumnDef<UserRow>[] = [
         {
@@ -68,7 +70,7 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                                                 className="h-8 w-8 p-0"
                                             >
                                                 <span className="sr-only">
-                                                    Open menu
+                                                    {t('openMenu')}
                                                 </span>
                                                 <MoreHorizontal className="h-4 w-4" />
                                             </Button>
@@ -79,7 +81,7 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                                                 className="block w-full"
                                             >
                                                 <DropdownMenuItem>
-                                                    Manage User
+                                                    {t('accessUsersManage')}
                                                 </DropdownMenuItem>
                                             </Link>
                                             {`${userRow.username}-${userRow.idpId}` !==
@@ -95,7 +97,7 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                                                     }}
                                                 >
                                                     <span className="text-red-500">
-                                                        Remove User
+                                                        {t('accessUserRemove')}
                                                     </span>
                                                 </DropdownMenuItem>
                                             )}
@@ -118,7 +120,7 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        Username
+                        {t('username')}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
@@ -134,7 +136,7 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        Identity Provider
+                        {t('identityProvider')}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
@@ -150,7 +152,7 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        Role
+                        {t('role')}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );

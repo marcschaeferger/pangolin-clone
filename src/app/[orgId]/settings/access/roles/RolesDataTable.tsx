@@ -4,6 +4,7 @@ import {
     ColumnDef,
 } from "@tanstack/react-table";
 import { DataTable } from "@app/components/ui/data-table";
+import { useTranslations } from 'next-intl';
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
@@ -16,15 +17,18 @@ export function RolesDataTable<TData, TValue>({
     data,
     createRole
 }: DataTableProps<TData, TValue>) {
+
+    const t = useTranslations();
+
     return (
         <DataTable
             columns={columns}
             data={data}
             title="Roles"
-            searchPlaceholder="Search roles..."
+            searchPlaceholder={t('accessRolesSearch')}
             searchColumn="name"
             onAdd={createRole}
-            addButtonText="Add Role"
+            addButtonText={t('accessRolesAdd')}
         />
     );
 }

@@ -9,6 +9,7 @@ import UserProvider from "@app/providers/UserProvider";
 import { verifySession } from "@app/lib/auth/verifySession";
 import AccessPageHeaderAndNav from "../AccessPageHeaderAndNav";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
+import { getTranslations } from 'next-intl/server';
 
 type InvitationsPageProps = {
     params: Promise<{ orgId: string }>;
@@ -71,11 +72,13 @@ export default async function InvitationsPage(props: InvitationsPageProps) {
         };
     });
 
+    const t = await getTranslations();
+
     return (
         <>
             <SettingsSectionTitle
-                title="Open Invitations"
-                description="Manage your invitations to other users"
+                title={t('inviteTitle')}
+                description={t('inviteDescription')}
             />
             <UserProvider user={user!}>
                 <OrgProvider org={org}>

@@ -44,6 +44,7 @@ import {
     SettingsSectionFooter
 } from "@app/components/Settings";
 import { useUserContext } from "@app/hooks/useUserContext";
+import { useTranslations } from 'next-intl';
 
 const GeneralFormSchema = z.object({
     name: z.string()
@@ -79,8 +80,8 @@ export default function GeneralPage() {
             );
 
             toast({
-                title: "Organization deleted",
-                description: "The organization and its data has been deleted."
+                title: t('orgDeleted'),
+                description: t('orgDeletedMessage')
             });
 
             if (res.status === 200) {
@@ -90,11 +91,8 @@ export default function GeneralPage() {
             console.error(err);
             toast({
                 variant: "destructive",
-                title: "Failed to delete org",
-                description: formatAxiosError(
-                    err,
-                    "An error occurred while deleting the org."
-                )
+                title: t('orgErrorDelete'),
+                description: formatAxiosError(err,t('orgErrorDeleteMessage'))
             });
         } finally {
             setLoadingDelete(false);
@@ -121,11 +119,8 @@ export default function GeneralPage() {
             console.error(err);
             toast({
                 variant: "destructive",
-                title: "Failed to fetch orgs",
-                description: formatAxiosError(
-                    err,
-                    "An error occurred while listing your orgs"
-                )
+                title: t('orgErrorFetch'),
+                description: formatAxiosError(err,t('orgErrorFetchMessage'))
             });
         }
     }
@@ -138,8 +133,8 @@ export default function GeneralPage() {
             })
             .then(() => {
                 toast({
-                    title: "Organization updated",
-                    description: "The organization has been updated."
+                    title: t('orgUpdated'),
+                    description: t('orgUpdatedDescription')
                 });
 
                 router.refresh();
@@ -147,17 +142,16 @@ export default function GeneralPage() {
             .catch((e) => {
                 toast({
                     variant: "destructive",
-                    title: "Failed to update org",
-                    description: formatAxiosError(
-                        e,
-                        "An error occurred while updating the org."
-                    )
+                    title: t('orgErrorUpdate'),
+                    description: formatAxiosError(e,t('orgErrorUpdateMessage'))
                 });
             })
             .finally(() => {
                 setLoadingSave(false);
             });
     }
+
+    const t = useTranslations();
 
     return (
         <SettingsContainer>
@@ -169,31 +163,29 @@ export default function GeneralPage() {
                 dialog={
                     <div>
                         <p className="mb-2">
-                            Are you sure you want to delete the organization{" "}
-                            <b>{org?.org.name}?</b>
+                            {t('orgQuestionRemove', {selectedOrg: org?.org.name})}
                         </p>
                         <p className="mb-2">
-                            This action is irreversible and will delete all
-                            associated data.
+                            {t('orgMessageRemove')}
                         </p>
                         <p>
-                            To confirm, type the name of the organization below.
+                            {t('orgMessageConfirm')}
                         </p>
                     </div>
                 }
-                buttonText="Confirm Delete Organization"
+                buttonText={t('orgDeleteConfirm')}
                 onConfirm={deleteOrg}
                 string={org?.org.name || ""}
-                title="Delete Organization"
+                title={t('orgDelete')}
             />
 
             <SettingsSection>
                 <SettingsSectionHeader>
                     <SettingsSectionTitle>
-                        Organization Settings
+                        {t('orgGeneralSettings')}
                     </SettingsSectionTitle>
                     <SettingsSectionDescription>
-                        Manage your organization details and configuration
+                        {t('orgGeneralSettingsDescription')}
                     </SettingsSectionDescription>
                 </SettingsSectionHeader>
 
@@ -210,14 +202,13 @@ export default function GeneralPage() {
                                     name="name"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Name</FormLabel>
+                                            <FormLabel>{t('name')}</FormLabel>
                                             <FormControl>
                                                 <Input {...field} />
                                             </FormControl>
                                             <FormMessage />
                                             <FormDescription>
-                                                This is the display name of the
-                                                organization.
+                                                {t('orgDisplayName')}
                                             </FormDescription>
                                         </FormItem>
                                     )}
@@ -234,17 +225,16 @@ export default function GeneralPage() {
                         loading={loadingSave}
                         disabled={loadingSave}
                     >
-                        Save General Settings
+                        {t('orgGeneralSave')}
                     </Button>
                 </SettingsSectionFooter>
             </SettingsSection>
 
             <SettingsSection>
                 <SettingsSectionHeader>
-                    <SettingsSectionTitle>Danger Zone</SettingsSectionTitle>
+                    <SettingsSectionTitle>{t('orgDangerZone')}</SettingsSectionTitle>
                     <SettingsSectionDescription>
-                        Once you delete this org, there is no going back. Please
-                        be certain.
+                        {t('orgDangerZoneDescription')}
                     </SettingsSectionDescription>
                 </SettingsSectionHeader>
 
@@ -256,7 +246,7 @@ export default function GeneralPage() {
                         loading={loadingDelete}
                         disabled={loadingDelete}
                     >
-                        Delete Organization Data
+                        {t('orgDelete')}
                     </Button>
                 </SettingsSectionFooter>
             </SettingsSection>

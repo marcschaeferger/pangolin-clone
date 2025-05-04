@@ -10,6 +10,7 @@ import UserProvider from "@app/providers/UserProvider";
 import { verifySession } from "@app/lib/auth/verifySession";
 import AccessPageHeaderAndNav from "../AccessPageHeaderAndNav";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
+import { getTranslations } from 'next-intl/server';
 
 type UsersPageProps = {
     params: Promise<{ orgId: string }>;
@@ -83,11 +84,13 @@ export default async function UsersPage(props: UsersPageProps) {
         };
     });
 
+    const t = await getTranslations();
+
     return (
         <>
             <SettingsSectionTitle
-                title="Manage Users"
-                description="Invite users and add them to roles to manage access to your organization"
+                title={t('accessUsersManage')}
+                description={t('accessUsersDescription')}
             />
             <UserProvider user={user!}>
                 <OrgProvider org={org}>

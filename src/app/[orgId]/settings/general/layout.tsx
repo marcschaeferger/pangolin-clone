@@ -10,6 +10,7 @@ import { GetOrgUserResponse } from "@server/routers/user";
 import { AxiosResponse } from "axios";
 import { redirect } from "next/navigation";
 import { cache } from "react";
+import { getTranslations } from 'next-intl/server';
 
 type GeneralSettingsProps = {
     children: React.ReactNode;
@@ -57,9 +58,11 @@ export default async function GeneralSettingsPage({
         redirect(`/${orgId}`);
     }
 
+    const t = await getTranslations();
+
     const navItems = [
         {
-            title: "General",
+            title: t('general'),
             href: `/{orgId}/settings/general`,
         },
     ];
@@ -69,8 +72,8 @@ export default async function GeneralSettingsPage({
             <OrgProvider org={org}>
                 <OrgUserProvider orgUser={orgUser}>
                     <SettingsSectionTitle
-                        title="General"
-                        description="Configure your organization's general settings"
+                        title={t('general')}
+                        description={t('orgSettingsDescription')}
                     />
 
                     <HorizontalTabs items={navItems}>
