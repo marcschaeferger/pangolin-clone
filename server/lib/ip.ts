@@ -17,7 +17,7 @@ function detectIpVersion(ip: string): IPVersion {
  */
 function ipToBigInt(ip: string): bigint {
     const version = detectIpVersion(ip);
-    
+
     if (version === 4) {
         return ip.split('.')
             .reduce((acc, octet) => {
@@ -105,7 +105,7 @@ export function cidrToRange(cidr: string): IPRange {
     const version = detectIpVersion(ip);
     const prefixBits = parseInt(prefix);
     const ipBigInt = ipToBigInt(ip);
-    
+
     // Validate prefix length
     const maxPrefix = version === 4 ? 32 : 128;
     if (prefixBits < 0 || prefixBits > maxPrefix) {
@@ -116,7 +116,7 @@ export function cidrToRange(cidr: string): IPRange {
     const mask = BigInt.asUintN(version === 4 ? 64 : 128, (BigInt(1) << shiftBits) - BigInt(1));
     const start = ipBigInt & ~mask;
     const end = start | mask;
-    
+
     return { start, end };
 }
 
@@ -136,17 +136,17 @@ export function findNextAvailableCidr(
     if (!startCidr && existingCidrs.length === 0) {
         return null;
     }
-        
+
     // If no existing CIDRs, use the IP version from startCidr
-    const version = startCidr 
+    const version = startCidr
         ? detectIpVersion(startCidr.split('/')[0])
         : 4; // Default to IPv4 if no startCidr provided
-    
+
     // Use appropriate default startCidr if none provided
     startCidr = startCidr || (version === 4 ? "0.0.0.0/0" : "::/0");
-    
+
     // If there are existing CIDRs, ensure all are same version
-    if (existingCidrs.length > 0 && 
+    if (existingCidrs.length > 0 &&
         existingCidrs.some(cidr => detectIpVersion(cidr.split('/')[0]) !== version)) {
         throw new Error('All CIDRs must be of the same IP version');
     }
@@ -196,9 +196,11 @@ export function findNextAvailableCidr(
 export function isIpInCidr(ip: string, cidr: string): boolean {
     const ipVersion = detectIpVersion(ip);
     const cidrVersion = detectIpVersion(cidr.split('/')[0]);
-    
+
+    // If IP versions don't match, the IP cannot be in the CIDR range
     if (ipVersion !== cidrVersion) {
-        throw new Error('IP address and CIDR must be of the same version');
+        // throw new Erorr
+        return false;
     }
 
     const ipBigInt = ipToBigInt(ip);

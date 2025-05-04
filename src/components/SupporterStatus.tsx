@@ -189,10 +189,12 @@ export default function SupporterStatus() {
                     <CredenzaBody>
                         <p>
                             Purchase a supporter key to help us continue
-                            developing Pangolin. Your contribution allows us
-                            commit more time to maintain and add new features to
-                            the application for everyone. We will never use this
-                            to paywall features.
+                            developing Pangolin for the community. Your
+                            contribution allows us to commit more time to
+                            maintain and add new features to the application for
+                            everyone. We will never use this to paywall
+                            features. This is separate from the Professional
+                            Edition.
                         </p>
 
                         <p>
