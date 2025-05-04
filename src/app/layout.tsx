@@ -12,6 +12,8 @@ import { IsSupporterKeyVisibleResponse } from "@server/routers/supporterKey";
 import LicenseStatusProvider from "@app/providers/LicenseStatusProvider";
 import { GetLicenseStatusResponse } from "@server/routers/license";
 import LicenseViolation from "./components/LicenseViolation";
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale } from 'next-intl/server';
 
 export const metadata: Metadata = {
     title: `Dashboard - Pangolin`,
@@ -29,6 +31,7 @@ export default async function RootLayout({
     children: React.ReactNode;
 }>) {
     const env = pullEnv();
+    const locale = await getLocale();
 
     let supporterData = {
         visible: true
@@ -47,31 +50,33 @@ export default async function RootLayout({
     const licenseStatus = licenseStatusRes.data.data;
 
     return (
-        <html suppressHydrationWarning>
+        <html suppressHydrationWarning lang={locale}>
             <body className={`${font.className} h-screen overflow-hidden`}>
-                <ThemeProvider
-                    attribute="class"
-                    defaultTheme="system"
-                    enableSystem
-                    disableTransitionOnChange
-                >
-                    <EnvProvider env={pullEnv()}>
-                        <LicenseStatusProvider licenseStatus={licenseStatus}>
-                            <SupportStatusProvider
-                                supporterStatus={supporterData}
-                            >
-                                {/* Main content */}
-                                <div className="h-full flex flex-col">
-                                    <div className="flex-1 overflow-auto">
-                                        <LicenseViolation />
-                                        {children}
+                <NextIntlClientProvider>
+                    <ThemeProvider
+                        attribute="class"
+                        defaultTheme="system"
+                        enableSystem
+                        disableTransitionOnChange
+                    >
+                        <EnvProvider env={pullEnv()}>
+                            <LicenseStatusProvider licenseStatus={licenseStatus}>
+                                <SupportStatusProvider
+                                    supporterStatus={supporterData}
+                                >
+                                    {/* Main content */}
+                                    <div className="h-full flex flex-col">
+                                        <div className="flex-1 overflow-auto">
+                                            <LicenseViolation />
+                                            {children}
+                                        </div>
                                     </div>
-                                </div>
-                            </SupportStatusProvider>
-                        </LicenseStatusProvider>
-                    </EnvProvider>
-                    <Toaster />
-                </ThemeProvider>
+                                </SupportStatusProvider>
+                            </LicenseStatusProvider>
+                        </EnvProvider>
+                        <Toaster />
+                    </ThemeProvider>
+                </NextIntlClientProvider>
             </body>
         </html>
     );

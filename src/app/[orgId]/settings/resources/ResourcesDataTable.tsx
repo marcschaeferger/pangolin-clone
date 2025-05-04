@@ -4,6 +4,7 @@ import {
     ColumnDef,
 } from "@tanstack/react-table";
 import { DataTable } from "@app/components/ui/data-table";
+import { useTranslations } from 'next-intl';
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
@@ -16,15 +17,18 @@ export function ResourcesDataTable<TData, TValue>({
     data,
     createResource
 }: DataTableProps<TData, TValue>) {
+
+    const t = useTranslations();
+
     return (
         <DataTable
             columns={columns}
             data={data}
             title="Resources"
-            searchPlaceholder="Search resources..."
+            searchPlaceholder={t('resourceSearch')}
             searchColumn="name"
             onAdd={createResource}
-            addButtonText="Add Resource"
+            addButtonText={t('resourceAdd')}
         />
     );
 }

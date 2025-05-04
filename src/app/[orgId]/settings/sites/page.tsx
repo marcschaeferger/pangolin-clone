@@ -5,6 +5,7 @@ import { AxiosResponse } from "axios";
 import SitesTable, { SiteRow } from "./SitesTable";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import SitesSplashCard from "./SitesSplashCard";
+import { getTranslations } from 'next-intl/server';
 
 type SitesPageProps = {
     params: Promise<{ orgId: string }>;
@@ -49,13 +50,15 @@ export default async function SitesPage(props: SitesPageProps) {
         };
     });
 
+    const t = await getTranslations();
+
     return (
         <>
             {/* <SitesSplashCard /> */}
 
             <SettingsSectionTitle
-                title="Manage Sites"
-                description="Allow connectivity to your network through secure tunnels"
+                title={t('siteManageSites')}
+                description={t('siteDescription')}
             />
 
             <SitesTable sites={siteRows} orgId={params.orgId} />

@@ -9,6 +9,7 @@ import { cache } from "react";
 import { GetOrgResponse } from "@server/routers/org";
 import OrgProvider from "@app/providers/OrgProvider";
 import ResourcesSplashCard from "./ResourcesSplashCard";
+import { getTranslations } from 'next-intl/server';
 
 type ResourcesPageProps = {
     params: Promise<{ orgId: string }>;
@@ -68,13 +69,15 @@ export default async function ResourcesPage(props: ResourcesPageProps) {
         };
     });
 
+    const t = await getTranslations();
+
     return (
         <>
             {/* <ResourcesSplashCard /> */}
 
             <SettingsSectionTitle
-                title="Manage Resources"
-                description="Create secure proxies to your private applications"
+                title={t('resourceTitle')}
+                description={t('resourceDescription')}
             />
 
             <OrgProvider org={org}>

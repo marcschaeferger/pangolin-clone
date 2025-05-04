@@ -23,6 +23,8 @@ import Disable2FaForm from "./Disable2FaForm";
 import Enable2FaForm from "./Enable2FaForm";
 import SupporterStatus from "./SupporterStatus";
 import { UserType } from "@server/types/UserTypes";
+import LocaleSwitcher from '@app/components/LocaleSwitcher';
+
 
 export default function ProfileIcon() {
     const { setTheme, theme } = useTheme();
@@ -157,6 +159,10 @@ export default function ProfileIcon() {
                                 </DropdownMenuItem>
                             )
                         )}
+                        <DropdownMenuSeparator />
+                            <div>
+                                <LocaleSwitcher />
+                            </div>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => logout()}>
                             {/* <LogOut className="mr-2 h-4 w-4" /> */}

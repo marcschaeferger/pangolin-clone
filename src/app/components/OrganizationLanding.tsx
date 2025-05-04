@@ -11,6 +11,8 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight, Plus } from "lucide-react";
+import { useTranslations } from 'next-intl';
+
 interface Organization {
     id: string;
     name: string;
@@ -31,31 +33,31 @@ export default function OrganizationLanding({
         setSelectedOrg(orgId);
     };
 
+    const t = useTranslations();
+
     function getDescriptionText() {
         if (organizations.length === 0) {
             if (!disableCreateOrg) {
-                return "You are not currently a member of any organizations. Create an organization to get started.";
+                return t('componentsErrorNoMemberCreate');
             } else {
-                return "You are not currently a member of any organizations.";
+                return t('componentsErrorNoMember');
             }
         }
 
-        return `You're a member of ${organizations.length} ${
-            organizations.length === 1 ? "organization" : "organizations"
-        }.`;
+        return t('componentsMember', {count: organizations.length});
     }
 
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Welcome to Pangolin</CardTitle>
+                <CardTitle>{t('welcome')}</CardTitle>
                 <CardDescription>{getDescriptionText()}</CardDescription>
             </CardHeader>
             <CardContent>
                 {organizations.length === 0 ? (
                     disableCreateOrg ? (
                         <p className="text-center text-muted-foreground">
-                            You are not currently a member of any organizations.
+                            t('componentsErrorNoMember')
                         </p>
                     ) : (
                         <Link href="/setup">
@@ -64,7 +66,7 @@ export default function OrganizationLanding({
                                 size="lg"
                             >
                                 <Plus className="mr-2 h-5 w-5" />
-                                Create an Organization
+                                {t('componentsCreateOrg')}
                             </Button>
                         </Link>
                     )

@@ -4,6 +4,7 @@ import {
     ColumnDef,
 } from "@tanstack/react-table";
 import { DataTable } from "@app/components/ui/data-table";
+import { useTranslations } from 'next-intl';
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
@@ -16,15 +17,18 @@ export function ShareLinksDataTable<TData, TValue>({
     data,
     createShareLink
 }: DataTableProps<TData, TValue>) {
+
+    const t = useTranslations();
+
     return (
         <DataTable
             columns={columns}
             data={data}
             title="Share Links"
-            searchPlaceholder="Search share links..."
+            searchPlaceholder={t('shareSearch')}
             searchColumn="name"
             onAdd={createShareLink}
-            addButtonText="Create Share Link"
+            addButtonText={t('shareCreate')}
         />
     );
 }

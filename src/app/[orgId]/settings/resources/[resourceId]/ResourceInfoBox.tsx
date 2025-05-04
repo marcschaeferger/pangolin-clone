@@ -13,11 +13,13 @@ import {
 } from "@app/components/InfoSection";
 import Link from "next/link";
 import { Switch } from "@app/components/ui/switch";
+import { useTranslations } from 'next-intl';
 
 type ResourceInfoBoxType = {};
 
 export default function ResourceInfoBox({}: ResourceInfoBoxType) {
     const { resource, authInfo } = useResourceContext();
+    const t = useTranslations();
 
     let fullUrl = `${resource.ssl ? "https" : "http"}://${resource.fullDomain}`;
 
@@ -25,7 +27,7 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
         <Alert>
             <InfoIcon className="h-4 w-4" />
             <AlertTitle className="font-semibold">
-                Resource Information
+                {t('resourceInfo')}
             </AlertTitle>
             <AlertDescription className="mt-4">
                 <InfoSections cols={4}>
@@ -33,7 +35,7 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
                         <>
                             <InfoSection>
                                 <InfoSectionTitle>
-                                    Authentication
+                                    {t('authentication')}
                                 </InfoSectionTitle>
                                 <InfoSectionContent>
                                     {authInfo.password ||
@@ -42,12 +44,12 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
                                     authInfo.whitelist ? (
                                         <div className="flex items-start space-x-2 text-green-500">
                                             <ShieldCheck className="w-4 h-4 mt-0.5" />
-                                            <span>Protected</span>
+                                            <span>{t('protected')}</span>
                                         </div>
                                     ) : (
                                         <div className="flex items-center space-x-2 text-yellow-500">
                                             <ShieldOff className="w-4 h-4" />
-                                            <span>Not Protected</span>
+                                            <span>{t('notProtected')}</span>
                                         </div>
                                     )}
                                 </InfoSectionContent>
@@ -62,7 +64,7 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
                                 </InfoSectionContent>
                             </InfoSection>
                             <InfoSection>
-                                <InfoSectionTitle>Site</InfoSectionTitle>
+                                <InfoSectionTitle>{t('site')}</InfoSectionTitle>
                                 <InfoSectionContent>
                                     {resource.siteName}
                                 </InfoSectionContent>
@@ -71,7 +73,7 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
                     ) : (
                         <>
                             <InfoSection>
-                                <InfoSectionTitle>Protocol</InfoSectionTitle>
+                                <InfoSectionTitle>{t('protocol')}</InfoSectionTitle>
                                 <InfoSectionContent>
                                     <span>
                                         {resource.protocol.toUpperCase()}
@@ -79,7 +81,7 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
                                 </InfoSectionContent>
                             </InfoSection>
                             <InfoSection>
-                                <InfoSectionTitle>Port</InfoSectionTitle>
+                                <InfoSectionTitle>{t('port')}</InfoSectionTitle>
                                 <InfoSectionContent>
                                     <CopyToClipboard
                                         text={resource.proxyPort!.toString()}
@@ -90,9 +92,9 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
                         </>
                     )}
                     <InfoSection>
-                        <InfoSectionTitle>Visibility</InfoSectionTitle>
+                        <InfoSectionTitle>{t('visibility')}</InfoSectionTitle>
                         <InfoSectionContent>
-                            <span>{resource.enabled ? "Enabled" : "Disabled"}</span>
+                            <span>{resource.enabled ? t('enabled') : t('disabled')}</span>
                         </InfoSectionContent>
                     </InfoSection>
                 </InfoSections>

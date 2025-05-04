@@ -22,6 +22,7 @@ import {
     BreadcrumbSeparator
 } from "@app/components/ui/breadcrumb";
 import Link from "next/link";
+import { getTranslations } from 'next-intl/server';
 
 interface ResourceLayoutProps {
     children: React.ReactNode;
@@ -30,6 +31,7 @@ interface ResourceLayoutProps {
 
 export default async function ResourceLayout(props: ResourceLayoutProps) {
     const params = await props.params;
+    const t = await getTranslations();
 
     const { children } = props;
 
@@ -82,22 +84,22 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
 
     const navItems = [
         {
-            title: "General",
+            title: t('general'),
             href: `/{orgId}/settings/resources/{resourceId}/general`
         },
         {
-            title: "Proxy",
+            title: t('proxy'),
             href: `/{orgId}/settings/resources/{resourceId}/proxy`
         }
     ];
 
     if (resource.http) {
         navItems.push({
-            title: "Authentication",
+            title: t('authentication'),
             href: `/{orgId}/settings/resources/{resourceId}/authentication`
         });
         navItems.push({
-            title: "Rules",
+            title: t('rules'),
             href: `/{orgId}/settings/resources/{resourceId}/rules`
         });
     }
@@ -105,8 +107,8 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
     return (
         <>
             <SettingsSectionTitle
-                title={`${resource?.name} Settings`}
-                description="Configure the settings on your resource"
+                title={t('resourceSetting', {resourceName: resource?.name})}
+                description={t('resourceSettingDescription')}
             />
 
             <OrgProvider org={org}>

@@ -118,3 +118,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+p {
+  word-break: keep-all;
+  white-space: normal;
+}

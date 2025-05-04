@@ -9,6 +9,7 @@ import OrgProvider from "@app/providers/OrgProvider";
 import { ListAccessTokensResponse } from "@server/routers/accessToken";
 import ShareLinksTable, { ShareLinkRow } from "./ShareLinksTable";
 import ShareableLinksSplash from "./ShareLinksSplash";
+import { getTranslations } from 'next-intl/server';
 
 type ShareLinksPageProps = {
     params: Promise<{ orgId: string }>;
@@ -51,13 +52,15 @@ export default async function ShareLinksPage(props: ShareLinksPageProps) {
         (token) => ({ ...token }) as ShareLinkRow
     );
 
+    const t = await getTranslations();
+
     return (
         <>
             {/* <ShareableLinksSplash /> */}
 
             <SettingsSectionTitle
-                title="Manage Share Links"
-                description="Create shareable links to grant temporary or permanent access to your resources"
+                title={t('shareTitle')}
+                description={t('shareDescription')}
             />
 
             <OrgProvider org={org}>
