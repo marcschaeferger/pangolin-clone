@@ -13,8 +13,28 @@ export default function LocaleSwitcher() {
           label: 'Englisch'
         },
         {
+          value: 'fr-FR',
+          label: 'French'
+        },
+        {
           value: 'de-DE',
           label: 'German'
+        },
+        {
+          value: 'it-IT',
+          label: 'Italian'
+        },
+        {
+          value: 'pl-PL',
+          label: 'Polish'
+        },
+        {
+          value: 'pt-PT',
+          label: 'Portuguese'
+        },
+        {
+          value: 'tr-TR',
+          label: 'Turkish'
         }
       ]}
       label='Language'
