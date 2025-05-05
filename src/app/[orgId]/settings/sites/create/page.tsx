@@ -64,6 +64,7 @@ import {
 } from "@app/components/ui/breadcrumb";
 import Link from "next/link";
 import { QRCodeCanvas } from "qrcode.react";
+import { useTranslations } from 'next-intl';
 
 const createSiteFormSchema = z
     .object({
@@ -124,28 +125,27 @@ export default function Page() {
     const api = createApiClient({ env });
     const { orgId } = useParams();
     const router = useRouter();
+    const t = useTranslations();
 
     const [tunnelTypes, setTunnelTypes] = useState<
         ReadonlyArray<TunnelTypeOption>
     >([
         {
             id: "newt",
-            title: "Newt Tunnel (Recommended)",
-            description:
-                "Easiest way to create an entrypoint into your network. No extra setup.",
+            title: t('siteNewtTunnel'),
+            description: t('siteNewtTunnelDescription'),
             disabled: true
         },
         {
             id: "wireguard",
-            title: "Basic WireGuard",
-            description:
-                "Use any WireGuard client to establish a tunnel. Manual NAT setup required.",
+            title: t('siteWg'),
+            description: t('siteWgDescription'),
             disabled: true
         },
         {
             id: "local",
-            title: "Local",
-            description: "Local resources only. No tunneling."
+            title: t('local'),
+            description: t('siteLocalDescription')
         }
     ]);
 
@@ -381,8 +381,8 @@ WantedBy=default.target`
             if (!siteDefaults || !wgConfig) {
                 toast({
                     variant: "destructive",
-                    title: "Error creating site",
-                    description: "Key pair or site defaults not found"
+                    title: t('siteErrorCreate'),
+                    description: t('siteErrorCreateKeyPair')
                 });
                 setCreateLoading(false);
                 return;
@@ -399,8 +399,8 @@ WantedBy=default.target`
             if (!siteDefaults) {
                 toast({
                     variant: "destructive",
-                    title: "Error creating site",
-                    description: "Site defaults not found"
+                    title: t('siteErrorCreate'),
+                    description: t('siteErrorCreateDefaults')
                 });
                 setCreateLoading(false);
                 return;
@@ -422,7 +422,7 @@ WantedBy=default.target`
             .catch((e) => {
                 toast({
                     variant: "destructive",
-                    title: "Error creating site",
+                    title: t('siteErrorCreate'),
                     description: formatAxiosError(e)
                 });
             });
@@ -520,8 +520,8 @@ WantedBy=default.target`
         <>
             <div className="flex justify-between">
                 <HeaderTitle
-                    title="Create Site"
-                    description="Follow the steps below to create and connect a new site"
+                    title={t('siteCreate')}
+                    description={t('siteCreateDescription2')}
                 />
                 <Button
                     variant="outline"
@@ -529,7 +529,7 @@ WantedBy=default.target`
                         router.push(`/${orgId}/settings/sites`);
                     }}
                 >
-                    See All Sites
+                    {t('siteSeeAll')}
                 </Button>
             </div>
 
@@ -539,7 +539,7 @@ WantedBy=default.target`
                         <SettingsSection>
                             <SettingsSectionHeader>
                                 <SettingsSectionTitle>
-                                    Site Information
+                                    {t('siteInfo')}
                                 </SettingsSectionTitle>
                             </SettingsSectionHeader>
                             <SettingsSectionBody>
@@ -555,7 +555,7 @@ WantedBy=default.target`
                                                 render={({ field }) => (
                                                     <FormItem>
                                                         <FormLabel>
-                                                            Name
+                                                            {t('name')}
                                                         </FormLabel>
                                                         <FormControl>
                                                             <Input
@@ -565,8 +565,7 @@ WantedBy=default.target`
                                                         </FormControl>
                                                         <FormMessage />
                                                         <FormDescription>
-                                                            This is the display
-                                                            name for the site.
+                                                            {t('siteNameDescription')}
                                                         </FormDescription>
                                                     </FormItem>
                                                 )}
@@ -580,11 +579,10 @@ WantedBy=default.target`
                         <SettingsSection>
                             <SettingsSectionHeader>
                                 <SettingsSectionTitle>
-                                    Tunnel Type
+                                    {t('tunnelType')}
                                 </SettingsSectionTitle>
                                 <SettingsSectionDescription>
-                                    Determine how you want to connect to your
-                                    site
+                                    {t('siteTunnelDescription')}
                                 </SettingsSectionDescription>
                             </SettingsSectionHeader>
                             <SettingsSectionBody>
@@ -604,11 +602,10 @@ WantedBy=default.target`
                                 <SettingsSection>
                                     <SettingsSectionHeader>
                                         <SettingsSectionTitle>
-                                            Newt Credentials
+                                            {t('siteNewtCredentials')}
                                         </SettingsSectionTitle>
                                         <SettingsSectionDescription>
-                                            This is how Newt will authenticate
-                                            with the server
+                                            {t('siteNewtCredentialsDescription')}
                                         </SettingsSectionDescription>
                                     </SettingsSectionHeader>
                                     <SettingsSectionBody>
@@ -650,12 +647,10 @@ WantedBy=default.target`
                                         <Alert variant="neutral" className="">
                                             <InfoIcon className="h-4 w-4" />
                                             <AlertTitle className="font-semibold">
-                                                Save Your Credentials
+                                                {t('siteCredentialsSave')}
                                             </AlertTitle>
                                             <AlertDescription>
-                                                You will only be able to see
-                                                this once. Make sure to copy it
-                                                to a secure place.
+                                                {t('siteCredentialsSaveDescription')}
                                             </AlertDescription>
                                         </Alert>
 
@@ -690,9 +685,7 @@ WantedBy=default.target`
                                                                     htmlFor="terms"
                                                                     className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                                                 >
-                                                                    I have
-                                                                    copied the
-                                                                    config
+                                                                    {t('siteConfirmCopy')}
                                                                 </label>
                                                             </div>
                                                             <FormMessage />
@@ -707,16 +700,16 @@ WantedBy=default.target`
                                 <SettingsSection>
                                     <SettingsSectionHeader>
                                         <SettingsSectionTitle>
-                                            Install Newt
+                                            {t('siteInstallNewt')}
                                         </SettingsSectionTitle>
                                         <SettingsSectionDescription>
-                                            Get Newt running on your system
+                                            {t('siteInstallNewtDescription')}
                                         </SettingsSectionDescription>
                                     </SettingsSectionHeader>
                                     <SettingsSectionBody>
                                         <div>
                                             <p className="font-bold mb-3">
-                                                Operating System
+                                                {t('operatingSystem')}
                                             </p>
                                             <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                                                 {platforms.map((os) => (
@@ -772,7 +765,7 @@ WantedBy=default.target`
                                             </div>
                                             <div className="pt-4">
                                                 <p className="font-bold mb-3">
-                                                    Commands
+                                                    {t('commands')}
                                                 </p>
                                                 <div className="mt-2">
                                                     <CopyTextBox
@@ -793,11 +786,10 @@ WantedBy=default.target`
                             <SettingsSection>
                                 <SettingsSectionHeader>
                                     <SettingsSectionTitle>
-                                        WireGuard Configuration
+                                        {t('WgConfiguration')}
                                     </SettingsSectionTitle>
                                     <SettingsSectionDescription>
-                                        Use the following configuration to
-                                        connect to your network
+                                        {t('WgConfigurationDescription')}
                                     </SettingsSectionDescription>
                                 </SettingsSectionHeader>
                                 <SettingsSectionBody>
@@ -818,12 +810,10 @@ WantedBy=default.target`
                                     <Alert variant="neutral">
                                         <InfoIcon className="h-4 w-4" />
                                         <AlertTitle className="font-semibold">
-                                            Save Your Credentials
+                                            {t('siteCredentialsSave')}
                                         </AlertTitle>
                                         <AlertDescription>
-                                            You will only be able to see this
-                                            once. Make sure to copy it to a
-                                            secure place.
+                                            {t('siteCredentialsSaveDescription')}
                                         </AlertDescription>
                                     </Alert>
 
@@ -858,8 +848,7 @@ WantedBy=default.target`
                                                                 htmlFor="terms"
                                                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                                             >
-                                                                I have copied
-                                                                the config
+                                                                {t('siteConfirmCopy')}
                                                             </label>
                                                         </div>
                                                         <FormMessage />
@@ -881,7 +870,7 @@ WantedBy=default.target`
                                 router.push(`/${orgId}/settings/sites`);
                             }}
                         >
-                            Cancel
+                            {t('cancel')}
                         </Button>
                         <Button
                             type="button"
@@ -889,7 +878,7 @@ WantedBy=default.target`
                                 form.handleSubmit(onSubmit)();
                             }}
                         >
-                            Create Site
+                            {t('siteCreate')}
                         </Button>
                     </div>
                 </div>

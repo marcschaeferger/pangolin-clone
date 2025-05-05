@@ -791,7 +791,7 @@ export default function Page() {
                                         router.push(`/${orgId}/settings/resources`)
                                     }
                                 >
-                                    {t('cancle')}
+                                    {t('cancel')}
                                 </Button>
                                 <Button
                                     type="button"
