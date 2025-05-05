@@ -9,11 +9,13 @@ import {
     InfoSections,
     InfoSectionTitle
 } from "@app/components/InfoSection";
+import { useTranslations } from 'next-intl';
 
 type SiteInfoCardProps = {};
 
 export default function SiteInfoCard({}: SiteInfoCardProps) {
     const { site, updateSite } = useSiteContext();
+    const t = useTranslations();
 
     const getConnectionTypeString = (type: string) => {
         if (type === "newt") {
@@ -21,7 +23,7 @@ export default function SiteInfoCard({}: SiteInfoCardProps) {
         } else if (type === "wireguard") {
             return "WireGuard";
         } else if (type === "local") {
-            return "Local";
+            return t('local');
         } else {
             return "Unknown";
         }
@@ -30,23 +32,23 @@ export default function SiteInfoCard({}: SiteInfoCardProps) {
     return (
         <Alert>
             <InfoIcon className="h-4 w-4" />
-            <AlertTitle className="font-semibold">Site Information</AlertTitle>
+            <AlertTitle className="font-semibold">{t('siteInfo')}</AlertTitle>
             <AlertDescription className="mt-4">
                 <InfoSections cols={2}>
                     {(site.type == "newt" || site.type == "wireguard") && (
                         <>
                             <InfoSection>
-                                <InfoSectionTitle>Status</InfoSectionTitle>
+                                <InfoSectionTitle>{t('status')}</InfoSectionTitle>
                                 <InfoSectionContent>
                                     {site.online ? (
                                         <div className="text-green-500 flex items-center space-x-2">
                                             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                            <span>Online</span>
+                                            <span>{t('online')}</span>
                                         </div>
                                     ) : (
                                         <div className="text-neutral-500 flex items-center space-x-2">
                                             <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
-                                            <span>Offline</span>
+                                            <span>{t('offline')}</span>
                                         </div>
                                     )}
                                 </InfoSectionContent>
@@ -54,7 +56,7 @@ export default function SiteInfoCard({}: SiteInfoCardProps) {
                         </>
                     )}
                     <InfoSection>
-                        <InfoSectionTitle>Connection Type</InfoSectionTitle>
+                        <InfoSectionTitle>{t('connectionType')}</InfoSectionTitle>
                         <InfoSectionContent>
                             {getConnectionTypeString(site.type)}
                         </InfoSectionContent>

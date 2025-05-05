@@ -31,6 +31,7 @@ import { formatAxiosError } from "@app/lib/api";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { useState } from "react";
+import { useTranslations } from 'next-intl';
 
 const GeneralFormSchema = z.object({
     name: z.string().nonempty("Name is required")
@@ -46,6 +47,7 @@ export default function GeneralPage() {
     const [loading, setLoading] = useState(false);
 
     const router = useRouter();
+    const t = useTranslations();
 
     const form = useForm<GeneralFormValues>({
         resolver: zodResolver(GeneralFormSchema),
@@ -65,19 +67,16 @@ export default function GeneralPage() {
             .catch((e) => {
                 toast({
                     variant: "destructive",
-                    title: "Failed to update site",
-                    description: formatAxiosError(
-                        e,
-                        "An error occurred while updating the site."
-                    )
+                    title: t('siteErrorUpdate'),
+                    description: formatAxiosError(e,t('siteErrorUpdateDescription'))
                 });
             });
 
         updateSite({ name: data.name });
 
         toast({
-            title: "Site updated",
-            description: "The site has been updated."
+            title: t('siteUpdated'),
+            description: t('siteUpdatedDescription')
         });
 
         setLoading(false);
@@ -90,10 +89,10 @@ export default function GeneralPage() {
             <SettingsSection>
                 <SettingsSectionHeader>
                     <SettingsSectionTitle>
-                        General Settings
+                        {t('generalSettings')}
                     </SettingsSectionTitle>
                     <SettingsSectionDescription>
-                        Configure the general settings for this site
+                        {t('siteGeneralDescription')}
                     </SettingsSectionDescription>
                 </SettingsSectionHeader>
 
@@ -110,14 +109,13 @@ export default function GeneralPage() {
                                     name="name"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Name</FormLabel>
+                                            <FormLabel>{t('name')}</FormLabel>
                                             <FormControl>
                                                 <Input {...field} />
                                             </FormControl>
                                             <FormMessage />
                                             <FormDescription>
-                                                This is the display name of the
-                                                site.
+                                                {t('siteNameDescription')}
                                             </FormDescription>
                                         </FormItem>
                                     )}
@@ -134,7 +132,7 @@ export default function GeneralPage() {
                         loading={loading}
                         disabled={loading}
                     >
-                        Save General Settings
+                        {t('saveGeneralSettings')}
                     </Button>
                 </SettingsSectionFooter>
             </SettingsSection>

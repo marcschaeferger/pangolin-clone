@@ -66,6 +66,7 @@ import {
     CollapsibleTrigger
 } from "@app/components/ui/collapsible";
 import AccessTokenSection from "./AccessTokenUsage";
+import { useTranslations } from 'next-intl';
 
 type FormProps = {
     open: boolean;
@@ -91,6 +92,7 @@ export default function CreateShareLinkForm({
 
     const { env } = useEnvContext();
     const api = createApiClient({ env });
+    const t = useTranslations();
 
     const [link, setLink] = useState<string | null>(null);
     const [accessTokenId, setAccessTokenId] = useState<string | null>(null);
@@ -110,12 +112,12 @@ export default function CreateShareLinkForm({
     >([]);
 
     const timeUnits = [
-        { unit: "minutes", name: "Minutes" },
-        { unit: "hours", name: "Hours" },
-        { unit: "days", name: "Days" },
-        { unit: "weeks", name: "Weeks" },
-        { unit: "months", name: "Months" },
-        { unit: "years", name: "Years" }
+        { unit: "minutes", name: t('minutes') },
+        { unit: "hours", name: t('hours') },
+        { unit: "days", name: t('days') },
+        { unit: "weeks", name: t('weeks') },
+        { unit: "months", name: t('months') },
+        { unit: "years", name: t('years') }
     ];
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -141,11 +143,8 @@ export default function CreateShareLinkForm({
                     console.error(e);
                     toast({
                         variant: "destructive",
-                        title: "Failed to fetch resources",
-                        description: formatAxiosError(
-                            e,
-                            "An error occurred while fetching the resources"
-                        )
+                        title: t('shareErrorFetchResource'),
+                        description: formatAxiosError(e, t('shareErrorFetchResourceDescription'))
                     });
                 });
 
@@ -208,11 +207,8 @@ export default function CreateShareLinkForm({
                 console.error(e);
                 toast({
                     variant: "destructive",
-                    title: "Failed to create share link",
-                    description: formatAxiosError(
-                        e,
-                        "An error occurred while creating the share link"
-                    )
+                    title: t('shareErrorCreate'),
+                    description: formatAxiosError(e, t('shareErrorCreateDescription'))
                 });
             });
 
@@ -260,9 +256,9 @@ export default function CreateShareLinkForm({
             >
                 <CredenzaContent>
                     <CredenzaHeader>
-                        <CredenzaTitle>Create Shareable Link</CredenzaTitle>
+                        <CredenzaTitle>{t('shareCreate')}</CredenzaTitle>
                         <CredenzaDescription>
-                            Anyone with this link can access the resource
+                            {t('shareCreateDescription')}
                         </CredenzaDescription>
                     </CredenzaHeader>
                     <CredenzaBody>
@@ -280,7 +276,7 @@ export default function CreateShareLinkForm({
                                             render={({ field }) => (
                                                 <FormItem className="flex flex-col">
                                                     <FormLabel>
-                                                        Resource
+                                                        {t('resource')}
                                                     </FormLabel>
                                                     <Popover>
                                                         <PopoverTrigger asChild>
@@ -305,12 +301,10 @@ export default function CreateShareLinkForm({
                                                         </PopoverTrigger>
                                                         <PopoverContent className="p-0">
                                                             <Command>
-                                                                <CommandInput placeholder="Search resources" />
+                                                                <CommandInput placeholder={t('resourceSearch')} />
                                                                 <CommandList>
                                                                     <CommandEmpty>
-                                                                        No
-                                                                        resources
-                                                                        found
+                                                                        {t('resourceNotFound')}
                                                                     </CommandEmpty>
                                                                     <CommandGroup>
                                                                         {resources.map(
@@ -366,7 +360,7 @@ export default function CreateShareLinkForm({
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>
-                                                        Title (optional)
+                                                        {t('shareTitleOptional')}
                                                     </FormLabel>
                                                     <FormControl>
                                                         <Input {...field} />
@@ -378,7 +372,7 @@ export default function CreateShareLinkForm({
 
                                         <div className="space-y-4">
                                             <div className="space-y-2">
-                                                <FormLabel>Expire In</FormLabel>
+                                                <FormLabel>{t('expireIn')}</FormLabel>
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <FormField
                                                         control={form.control}
@@ -455,18 +449,12 @@ export default function CreateShareLinkForm({
                                                     htmlFor="terms"
                                                     className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                                 >
-                                                    Never expire
+                                                    {t('neverExpire')}
                                                 </label>
                                             </div>
 
                                             <p className="text-sm text-muted-foreground">
-                                                Expiration time is how long the
-                                                link will be usable and provide
-                                                access to the resource. After
-                                                this time, the link will no
-                                                longer work, and users who used
-                                                this link will lose access to
-                                                the resource.
+                                                {t('shareExpireDescription')}
                                             </p>
                                         </div>
                                     </form>
@@ -475,12 +463,10 @@ export default function CreateShareLinkForm({
                             {link && (
                                 <div className="max-w-md space-y-4">
                                     <p>
-                                        You will only be able to see this link
-                                        once. Make sure to copy it.
+                                        {t('shareSeeOnce')}
                                     </p>
                                     <p>
-                                        Anyone with this link can access the
-                                        resource. Share it with care.
+                                        {t('shareAccessHint')}
                                     </p>
 
                                     <div className="h-[250px] w-full mx-auto flex items-center justify-center">
@@ -506,7 +492,7 @@ export default function CreateShareLinkForm({
                                                     className="p-0 flex items-center justify-between w-full"
                                                 >
                                                     <h4 className="text-sm font-semibold">
-                                                        See Access Token Usage
+                                                        {t('shareTokenUsage')}
                                                     </h4>
                                                     <div>
                                                         <ChevronsUpDown className="h-4 w-4" />
@@ -549,7 +535,7 @@ export default function CreateShareLinkForm({
                             loading={loading}
                             disabled={link !== null || loading}
                         >
-                            Create Link
+                            {t('createLink')}
                         </Button>
                     </CredenzaFooter>
                 </CredenzaContent>

@@ -25,7 +25,7 @@ export function ResourcesDataTable<TData, TValue>({
             columns={columns}
             data={data}
             title="Resources"
-            searchPlaceholder={t('resourceSearch')}
+            searchPlaceholder={t('resourcesSearch')}
             searchColumn="name"
             onAdd={createResource}
             addButtonText={t('resourceAdd')}

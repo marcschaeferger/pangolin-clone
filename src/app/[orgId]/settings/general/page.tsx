@@ -225,7 +225,7 @@ export default function GeneralPage() {
                         loading={loadingSave}
                         disabled={loadingSave}
                     >
-                        {t('orgGeneralSave')}
+                        {t('saveGeneralSettings')}
                     </Button>
                 </SettingsSectionFooter>
             </SettingsSection>
