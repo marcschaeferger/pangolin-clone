@@ -303,10 +303,10 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                             </p>
                         </div>
                     }
-                    buttonText="Confirm Delete Resource"
+                    buttonText={t('resourceDeleteConfirm')}
                     onConfirm={async () => deleteResource(selectedResource!.id)}
                     string={selectedResource.name}
-                    title="Delete Resource"
+                    title={t('resourceDelete')}
                 />
             )}
 
