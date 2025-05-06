@@ -164,7 +164,7 @@ export default function StepperForm() {
                                             : "text-muted-foreground"
                                     }`}
                                 >
-                                    {t('setupCreateSite')}
+                                    {t('siteCreate')}
                                 </span>
                             </div>
                             <div className="flex flex-col items-center">
@@ -231,7 +231,7 @@ export default function StepperForm() {
                                                 </FormControl>
                                                 <FormMessage />
                                                 <FormDescription>
-                                                    {t('setupDisplayName')} 
+                                                    {t('orgDisplayName')} 
                                                 </FormDescription>
                                             </FormItem>
                                         )}
