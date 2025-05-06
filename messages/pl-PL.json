@@ -286,6 +286,7 @@
     "apiKeysDelete": "Usuń klucz API",
     "apiKeysManage": "Zarządzaj kluczami API",
     "apiKeysDescription": "Klucze API służą do uwierzytelniania z API integracji",
+    "apiKeysSettings": "Ustawienia {apiKeyName}",
     "userTitle": "Zarządzaj wszystkimi użytkownikami",
     "userDescription": "Zobacz i zarządzaj wszystkimi użytkownikami w systemie",
     "userAbount": "O zarządzaniu użytkownikami",

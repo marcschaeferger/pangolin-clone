@@ -286,6 +286,7 @@
     "apiKeysDelete": "Supprimer la clé API",
     "apiKeysManage": "Gérer les clés API",
     "apiKeysDescription": "Les clés API sont utilisées pour s'authentifier avec l'API d'intégration",
+    "apiKeysSettings": "Paramètres de {apiKeyName}",
     "userTitle": "Gérer tous les utilisateurs",
     "userDescription": "Voir et gérer tous les utilisateurs du système",
     "userAbount": "À propos de la gestion des utilisateurs",

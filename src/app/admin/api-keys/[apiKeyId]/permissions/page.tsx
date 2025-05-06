@@ -23,11 +23,14 @@ import { ListApiKeyActionsResponse } from "@server/routers/apiKeys";
 import { AxiosResponse } from "axios";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 
 export default function Page() {
     const { env } = useEnvContext();
     const api = createApiClient({ env });
     const { apiKeyId } = useParams();
+
+    const t = useTranslations();
 
     const [loadingPage, setLoadingPage] = useState<boolean>(true);
     const [selectedPermissions, setSelectedPermissions] = useState<
@@ -47,10 +50,10 @@ export default function Page() {
                 .catch((e) => {
                     toast({
                         variant: "destructive",
-                        title: "Error loading API key actions",
+                        title: t('apiKeysPermissionsErrorLoadingActions'),
                         description: formatAxiosError(
                             e,
-                            "Error loading API key actions"
+                            t('apiKeysPermissionsErrorLoadingActions')
                         )
                     });
                 });
@@ -81,18 +84,18 @@ export default function Page() {
                 )
             })
             .catch((e) => {
-                console.error("Error setting permissions", e);
+                console.error(t('apiKeysPermissionsErrorUpdate'), e);
                 toast({
                     variant: "destructive",
-                    title: "Error setting permissions",
+                    title: t('apiKeysPermissionsErrorUpdate'),
                     description: formatAxiosError(e)
                 });
             });
 
         if (actionsRes && actionsRes.status === 200) {
             toast({
-                title: "Permissions updated",
-                description: "The permissions have been updated."
+                title: t('apiKeysPermissionsUpdated'),
+                description: t('apiKeysPermissionsUpdatedDescription')
             });
         }
 
@@ -106,10 +109,10 @@ export default function Page() {
                     <SettingsSection>
                         <SettingsSectionHeader>
                             <SettingsSectionTitle>
-                                Permissions
+                                {t('apiKeysPermissionsTitle')}
                             </SettingsSectionTitle>
                             <SettingsSectionDescription>
-                                Determine what this API key can do
+                                {t('apiKeysPermissionsGeneralSettingsDescription')}
                             </SettingsSectionDescription>
                         </SettingsSectionHeader>
                         <SettingsSectionBody>
@@ -127,7 +130,7 @@ export default function Page() {
                                     loading={loadingSavePermissions}
                                     disabled={loadingSavePermissions}
                                 >
-                                    Save Permissions
+                                    {t('apiKeysPermissionsSave')}
                                 </Button>
                             </SettingsSectionFooter>
                         </SettingsSectionBody>

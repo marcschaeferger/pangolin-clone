@@ -59,15 +59,18 @@ import CopyToClipboard from "@app/components/CopyToClipboard";
 import moment from "moment";
 import CopyTextBox from "@app/components/CopyTextBox";
 import PermissionsSelectBox from "@app/components/PermissionsSelectBox";
+import { useTranslations } from "next-intl";
+
+const t = useTranslations();
 
 const createFormSchema = z.object({
     name: z
         .string()
         .min(2, {
-            message: "Name must be at least 2 characters."
+            message: t('apiKeysNameMin')
         })
         .max(255, {
-            message: "Name must not be longer than 255 characters."
+            message: t('apiKeysNameMax')
         })
 });
 
@@ -82,7 +85,7 @@ const copiedFormSchema = z
             return data.copied;
         },
         {
-            message: "You must confirm that you have copied the API key.",
+            message: t('apiKeysConfirmCopy2'),
             path: ["copied"]
         }
     );
@@ -127,7 +130,7 @@ export default function Page() {
             .catch((e) => {
                 toast({
                     variant: "destructive",
-                    title: "Error creating API key",
+                    title: t('apiKeysErrorCreate'),
                     description: formatAxiosError(e)
                 });
             });
@@ -148,10 +151,10 @@ export default function Page() {
                     )
                 })
                 .catch((e) => {
-                    console.error("Error setting permissions", e);
+                    console.error(t('apiKeysErrorSetPermission'), e);
                     toast({
                         variant: "destructive",
-                        title: "Error setting permissions",
+                        title: t('apiKeysErrorSetPermission'),
                         description: formatAxiosError(e)
                     });
                 });
@@ -184,8 +187,8 @@ export default function Page() {
         <>
             <div className="flex justify-between">
                 <HeaderTitle
-                    title="Generate API Key"
-                    description="Generate a new root access API key"
+                    title={t('apiKeysCreate')}
+                    description={t('apiKeysCreateDescription')}
                 />
                 <Button
                     variant="outline"
@@ -205,7 +208,7 @@ export default function Page() {
                                 <SettingsSection>
                                     <SettingsSectionHeader>
                                         <SettingsSectionTitle>
-                                            API Key Information
+                                            {t('apiKeysTitle')}
                                         </SettingsSectionTitle>
                                     </SettingsSectionHeader>
                                     <SettingsSectionBody>
@@ -221,7 +224,7 @@ export default function Page() {
                                                         render={({ field }) => (
                                                             <FormItem>
                                                                 <FormLabel>
-                                                                    Name
+                                                                    {t('name')}
                                                                 </FormLabel>
                                                                 <FormControl>
                                                                     <Input
@@ -242,10 +245,10 @@ export default function Page() {
                                 <SettingsSection>
                                     <SettingsSectionHeader>
                                         <SettingsSectionTitle>
-                                            Permissions
+                                            {t('apiKeysGeneralSettings')}
                                         </SettingsSectionTitle>
                                         <SettingsSectionDescription>
-                                            Determine what this API key can do
+                                            {t('apiKeysGeneralSettingsDescription')}
                                         </SettingsSectionDescription>
                                     </SettingsSectionHeader>
                                     <SettingsSectionBody>
@@ -265,14 +268,14 @@ export default function Page() {
                             <SettingsSection>
                                 <SettingsSectionHeader>
                                     <SettingsSectionTitle>
-                                        Your API Key
+                                        {t('apiKeysList')}
                                     </SettingsSectionTitle>
                                 </SettingsSectionHeader>
                                 <SettingsSectionBody>
                                     <InfoSections cols={2}>
                                         <InfoSection>
                                             <InfoSectionTitle>
-                                                Name
+                                                {t('name')}
                                             </InfoSectionTitle>
                                             <InfoSectionContent>
                                                 <CopyToClipboard
@@ -282,7 +285,7 @@ export default function Page() {
                                         </InfoSection>
                                         <InfoSection>
                                             <InfoSectionTitle>
-                                                Created
+                                                {t('created')}
                                             </InfoSectionTitle>
                                             <InfoSectionContent>
                                                 {moment(
@@ -295,17 +298,15 @@ export default function Page() {
                                     <Alert variant="neutral">
                                         <InfoIcon className="h-4 w-4" />
                                         <AlertTitle className="font-semibold">
-                                            Save Your API Key
+                                            {t('apiKeysSave')}
                                         </AlertTitle>
                                         <AlertDescription>
-                                            You will only be able to see this
-                                            once. Make sure to copy it to a
-                                            secure place.
+                                            {t('apiKeysSaveDescription')}
                                         </AlertDescription>
                                     </Alert>
 
                                     <h4 className="font-semibold">
-                                        Your API key is:
+                                        {t('apiKeysInfo')}
                                     </h4>
 
                                     <CopyTextBox
@@ -343,8 +344,7 @@ export default function Page() {
                                                                 htmlFor="terms"
                                                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                                             >
-                                                                I have copied
-                                                                the API key
+                                                                {t('apiKeysConfirmCopy')}
                                                             </label>
                                                         </div>
                                                         <FormMessage />
@@ -368,7 +368,7 @@ export default function Page() {
                                     router.push(`/admin/api-keys`);
                                 }}
                             >
-                                Cancel
+                                {t('cancel')}
                             </Button>
                         )}
                         {!apiKey && (
@@ -380,7 +380,7 @@ export default function Page() {
                                     form.handleSubmit(onSubmit)();
                                 }}
                             >
-                                Generate
+                                {t('generate')}
                             </Button>
                         )}
 
@@ -391,7 +391,7 @@ export default function Page() {
                                     copiedForm.handleSubmit(onCopiedSubmit)();
                                 }}
                             >
-                                Done
+                                {t('done')}
                             </Button>
                         )}
                     </div>

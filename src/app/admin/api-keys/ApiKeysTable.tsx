@@ -24,6 +24,7 @@ import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import moment from "moment";
 import { ApiKeysDataTable } from "./ApiKeysDataTable";
+import { useTranslations } from "next-intl";
 
 export type ApiKeyRow = {
     id: string;
@@ -45,14 +46,16 @@ export default function ApiKeysTable({ apiKeys }: ApiKeyTableProps) {
 
     const api = createApiClient(useEnvContext());
 
+    const t = useTranslations();
+
     const deleteSite = (apiKeyId: string) => {
         api.delete(`/api-key/${apiKeyId}`)
             .catch((e) => {
-                console.error("Error deleting API key", e);
+                console.error(t('apiKeysErrorDelete'), e);
                 toast({
                     variant: "destructive",
-                    title: "Error deleting API key",
-                    description: formatAxiosError(e, "Error deleting API key")
+                    title: t('apiKeysErrorDelete'),
+                    description: formatAxiosError(e, t('apiKeysErrorDeleteMessage'))
                 });
             })
             .then(() => {
@@ -86,7 +89,7 @@ export default function ApiKeysTable({ apiKeys }: ApiKeyTableProps) {
                                     setSelected(apiKeyROw);
                                 }}
                             >
-                                <span>View settings</span>
+                                <span>{t('viewSettings')}</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 onClick={() => {
@@ -94,7 +97,7 @@ export default function ApiKeysTable({ apiKeys }: ApiKeyTableProps) {
                                     setIsDeleteModalOpen(true);
                                 }}
                             >
-                                <span className="text-red-500">Delete</span>
+                                <span className="text-red-500">{t('delete')}</span>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -111,7 +114,7 @@ export default function ApiKeysTable({ apiKeys }: ApiKeyTableProps) {
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        Name
+                        {t('name')}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
@@ -141,7 +144,7 @@ export default function ApiKeysTable({ apiKeys }: ApiKeyTableProps) {
                     <div className="flex items-center justify-end">
                         <Link href={`/admin/api-keys/${r.id}`}>
                             <Button variant={"outlinePrimary"} className="ml-2">
-                                Edit
+                                {t('edit')}
                                 <ArrowRight className="ml-2 w-4 h-4" />
                             </Button>
                         </Link>
@@ -163,27 +166,24 @@ export default function ApiKeysTable({ apiKeys }: ApiKeyTableProps) {
                     dialog={
                         <div className="space-y-4">
                             <p>
-                                Are you sure you want to remove the API key{" "}
-                                <b>{selected?.name || selected?.id}</b>?
+                                {t('apiKeysQuestionRemove', {selectedApiKey: selected?.name || selected?.id})}
                             </p>
 
                             <p>
                                 <b>
-                                    Once removed, the API key will no longer be
-                                    able to be used.
+                                    {t('apiKeysMessageRemove')}
                                 </b>
                             </p>
 
                             <p>
-                                To confirm, please type the name of the API key
-                                below.
+                                {t('apiKeysMessageConfirm')}
                             </p>
                         </div>
                     }
-                    buttonText="Confirm Delete API Key"
+                    buttonText={t('apiKeysDeleteConfirm')}
                     onConfirm={async () => deleteSite(selected!.id)}
                     string={selected.name}
-                    title="Delete API Key"
+                    title={t('apiKeysDelete')}
                 />
             )}
 

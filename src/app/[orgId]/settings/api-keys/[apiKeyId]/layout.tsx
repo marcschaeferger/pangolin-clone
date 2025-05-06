@@ -55,7 +55,7 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
 
     return (
         <>
-            <SettingsSectionTitle title={`${apiKey?.name} Settings`} />
+            <SettingsSectionTitle title={t('apiKeysSettings', {apiKeyName: apiKey?.name})} />
 
             <ApiKeyProvider apiKey={apiKey}>
                 <HorizontalTabs items={navItems}>{children}</HorizontalTabs>
