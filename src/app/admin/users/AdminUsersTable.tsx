@@ -11,6 +11,7 @@ import { toast } from "@app/hooks/useToast";
 import { formatAxiosError } from "@app/lib/api";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
+import { useTranslations } from 'next-intl';
 
 export type GlobalUserRow = {
     id: string;
@@ -29,6 +30,7 @@ type Props = {
 
 export default function UsersTable({ users }: Props) {
     const router = useRouter();
+    const t = useTranslations();
 
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selected, setSelected] = useState<GlobalUserRow | null>(null);
@@ -42,8 +44,8 @@ export default function UsersTable({ users }: Props) {
                 console.error("Error deleting user", e);
                 toast({
                     variant: "destructive",
-                    title: "Error deleting user",
-                    description: formatAxiosError(e, "Error deleting user")
+                    title: t('userErrorDelete'),
+                    description: formatAxiosError(e, t('userErrorDelete'))
                 });
             })
             .then(() => {
@@ -82,7 +84,7 @@ export default function UsersTable({ users }: Props) {
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        Username
+                        {t('username')}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
@@ -98,7 +100,7 @@ export default function UsersTable({ users }: Props) {
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        Email
+                        {t('email')}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
@@ -114,7 +116,7 @@ export default function UsersTable({ users }: Props) {
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        Name
+                        {t('name')}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
@@ -130,7 +132,7 @@ export default function UsersTable({ users }: Props) {
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        Identity Provider
+                        {t('identityProvider')}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
@@ -151,7 +153,7 @@ export default function UsersTable({ users }: Props) {
                                     setIsDeleteModalOpen(true);
                                 }}
                             >
-                                Delete
+                                {t('delete')}
                             </Button>
                         </div>
                     </>
@@ -172,35 +174,26 @@ export default function UsersTable({ users }: Props) {
                     dialog={
                         <div className="space-y-4">
                             <p>
-                                Are you sure you want to permanently delete{" "}
-                                <b className="break-all">
-                                    {selected?.email ||
-                                        selected?.name ||
-                                        selected?.username}
-                                </b>{" "}
-                                from the server?
+                                {t('userQuestionRemove', {selectedUser: selected?.email || selected?.name || selected?.username})}
                             </p>
 
                             <p>
                                 <b>
-                                    The user will be removed from all
-                                    organizations and be completely removed from
-                                    the server.
+                                    {t('userMessageRemove')}
                                 </b>
                             </p>
 
                             <p>
-                                To confirm, please type the name of the user
-                                below.
+                                {t('userMessageConfirm')}
                             </p>
                         </div>
                     }
-                    buttonText="Confirm Delete User"
+                    buttonText={t('userDeleteConfirm')}
                     onConfirm={async () => deleteUser(selected!.id)}
                     string={
                         selected.email || selected.name || selected.username
                     }
-                    title="Delete User from Server"
+                    title={t('userDeleteServer')}
                 />
             )}
 
