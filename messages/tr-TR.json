@@ -286,6 +286,7 @@
     "apiKeysDelete": "Delete API Key",
     "apiKeysManage": "Manage API Keys",
     "apiKeysDescription": "API keys are used to authenticate with the integration API",
+    "apiKeysSettings": "{apiKeyName} Settings",
     "userTitle": "Manage All Users",
     "userDescription": "View and manage all users in the system",
     "userAbount": "About User Management",
