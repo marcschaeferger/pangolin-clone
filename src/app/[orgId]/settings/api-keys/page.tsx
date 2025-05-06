@@ -9,6 +9,7 @@ import { AxiosResponse } from "axios";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import OrgApiKeysTable, { OrgApiKeyRow } from "./OrgApiKeysTable";
 import { ListOrgApiKeysResponse } from "@server/routers/apiKeys";
+import { useTranslations } from "next-intl";
 
 type ApiKeyPageProps = {
     params: Promise<{ orgId: string }>;
@@ -18,6 +19,7 @@ export const dynamic = "force-dynamic";
 
 export default async function ApiKeysPage(props: ApiKeyPageProps) {
     const params = await props.params;
+    const t = useTranslations();
     let apiKeys: ListOrgApiKeysResponse["apiKeys"] = [];
     try {
         const res = await internal.get<AxiosResponse<ListOrgApiKeysResponse>>(
@@ -39,8 +41,8 @@ export default async function ApiKeysPage(props: ApiKeyPageProps) {
     return (
         <>
             <SettingsSectionTitle
-                title="Manage API Keys"
-                description="API keys are used to authenticate with the integration API"
+                title={t('apiKeysManage')}
+                description={t('apiKeysDescription')}
             />
 
             <OrgApiKeysTable apiKeys={rows} orgId={params.orgId} />
