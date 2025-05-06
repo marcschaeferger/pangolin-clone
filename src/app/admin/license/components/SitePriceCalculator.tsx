@@ -16,6 +16,7 @@ import {
     CredenzaHeader,
     CredenzaTitle
 } from "@app/components/Credenza";
+import { useTranslations } from 'next-intl';
 
 type SitePriceCalculatorProps = {
     isOpen: boolean;
@@ -60,27 +61,26 @@ export function SitePriceCalculator({
             ? licenseFlatRate + siteCount * pricePerSite
             : siteCount * pricePerSite;
 
+    const t = useTranslations();
+
     return (
         <Credenza open={isOpen} onOpenChange={onOpenChange}>
             <CredenzaContent>
                 <CredenzaHeader>
                     <CredenzaTitle>
                         {mode === "license"
-                            ? "Purchase License"
-                            : "Purchase Additional Sites"}
+                            ? t('licensePurchase')
+                            : t('licensePurchaseSites')}
                     </CredenzaTitle>
                     <CredenzaDescription>
-                        Choose how many sites you want to{" "}
-                        {mode === "license"
-                            ? "purchase a license for. You can always add more sites later."
-                            : "add to your existing license."}
+                        {t('licensePurchaseDescription', {selectedMode: mode})}
                     </CredenzaDescription>
                 </CredenzaHeader>
                 <CredenzaBody>
                     <div className="space-y-6">
                         <div className="flex flex-col items-center space-y-4">
                             <div className="text-sm font-medium text-muted-foreground">
-                                Number of Sites
+                                {t('numberOfSites')}
                             </div>
                             <div className="flex items-center space-x-4">
                                 <Button
@@ -110,7 +110,7 @@ export function SitePriceCalculator({
                             {mode === "license" && (
                                 <div className="flex justify-between items-center">
                                     <span className="text-sm font-medium">
-                                        License fee:
+                                        {t('licenseFee')}:
                                     </span>
                                     <span className="font-medium">
                                         ${licenseFlatRate.toFixed(2)}
@@ -119,7 +119,7 @@ export function SitePriceCalculator({
                             )}
                             <div className="flex justify-between items-center mt-2">
                                 <span className="text-sm font-medium">
-                                    Price per site:
+                                    {t('licensePriceSite')}:
                                 </span>
                                 <span className="font-medium">
                                     ${pricePerSite.toFixed(2)}
@@ -127,25 +127,24 @@ export function SitePriceCalculator({
                             </div>
                             <div className="flex justify-between items-center mt-2">
                                 <span className="text-sm font-medium">
-                                    Number of sites:
+                                    {t('numberOfSites')}:
                                 </span>
                                 <span className="font-medium">{siteCount}</span>
                             </div>
                             <div className="flex justify-between items-center mt-4 text-lg font-bold">
-                                <span>Total:</span>
+                                <span>{t('total')}:</span>
                                 <span>${totalCost.toFixed(2)} / mo</span>
                             </div>
 
                             <p className="text-muted-foreground text-sm mt-2 text-center">
-                                For the most up-to-date pricing and discounts,
-                                please visit the{" "}
+                                {t('licensePricingPage')}
                                 <a
                                     href="https://docs.fossorial.io/pricing"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="underline"
                                 >
-                                    pricing page
+                                    {t('pricingPage')}
                                 </a>
                                 .
                             </p>
@@ -154,10 +153,10 @@ export function SitePriceCalculator({
                 </CredenzaBody>
                 <CredenzaFooter>
                     <CredenzaClose asChild>
-                        <Button variant="outline">Cancel</Button>
+                        <Button variant="outline">{t('cancel')}</Button>
                     </CredenzaClose>
                     <Button onClick={continueToPayment}>
-                        Continue to Payment
+                        {t('licenseContinuePayment')}
                     </Button>
                 </CredenzaFooter>
             </CredenzaContent>
