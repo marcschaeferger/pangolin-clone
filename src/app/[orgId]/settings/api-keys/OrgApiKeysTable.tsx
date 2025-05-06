@@ -101,7 +101,7 @@ export default function OrgApiKeysTable({
                                     setIsDeleteModalOpen(true);
                                 }}
                             >
-                                <span className="text-red-500">Delete</span>
+                                <span className="text-red-500">{t('delete')}</span>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
