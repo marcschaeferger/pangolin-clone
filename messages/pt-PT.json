@@ -286,6 +286,7 @@
     "apiKeysDelete": "Excluir Chave API",
     "apiKeysManage": "Gerenciar Chaves API",
     "apiKeysDescription": "As chaves API são usadas para autenticar com a API de integração",
+    "apiKeysSettings": "Configurações de {apiKeyName}",
     "userTitle": "Gerenciar Todos os Usuários",
     "userDescription": "Visualizar e gerenciar todos os usuários no sistema",
     "userAbount": "Sobre a Gestão de Usuário",
