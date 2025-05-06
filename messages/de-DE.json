@@ -286,6 +286,7 @@
     "apiKeysDelete": "API-Schlüssel löschen",
     "apiKeysManage": "API-Schlüssel verwalten",
     "apiKeysDescription": "API-Schlüssel werden zur Authentifizierung mit der Integrations-API verwendet",
+    "apiKeysSettings": "{apiKeyName} Einstellungen",
     "userTitle": "Alle Benutzer verwalten",
     "userDescription": "Alle Benutzer im System anzeigen und verwalten",
     "userAbount": "Über Benutzerverwaltung",
