@@ -798,6 +798,12 @@ export default function ReverseProxyTargets(props: {
                                     type="submit"
                                     variant="outlinePrimary"
                                     className="mt-6"
+                                    disabled={
+                                        !(
+                                            addTargetForm.getValues("ip") &&
+                                            addTargetForm.getValues("port")
+                                        )
+                                    }
                                 >
                                     Add Target
                                 </Button>
