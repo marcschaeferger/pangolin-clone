@@ -320,8 +320,10 @@ export default function ReverseProxyTargets(props: {
                         AxiosResponse<CreateTargetResponse>
                     >(`/resource/${params.resourceId}/target`, data);
                     target.targetId = res.data.data.targetId;
+                    target.new = false;
                 } else if (target.updated) {
                     await api.post(`/target/${target.targetId}`, data);
+                    target.updated = false;
                 }
             }
 
