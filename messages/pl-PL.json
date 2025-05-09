@@ -381,5 +381,6 @@
     "inviteValidityPeriod": "Okres ważności",
     "inviteValidityPeriodSelect": "Wybierz okres ważności",
     "inviteRegenerateMessage": "Zaproszenie zostało ponownie wygenerowane. Użytkownik musi uzyskać dostęp do poniższego linku, aby zaakceptować zaproszenie.",
-    "inviteRegenerateButton": "Wygeneruj ponownie"
+    "inviteRegenerateButton": "Wygeneruj ponownie",
+    "expiresAt": "Wygasa w dniu"
 }

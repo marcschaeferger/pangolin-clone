@@ -382,4 +382,5 @@
     "inviteValidityPeriodSelect": "Gültigkeitszeitraum auswählen",
     "inviteRegenerateMessage": "Die Einladung wurde neu generiert. Der Benutzer muss den untenstehenden Link aufrufen, um die Einladung anzunehmen.",
     "inviteRegenerateButton": "Neu generieren",
+    "expiresAt": "Läuft ab am"
 }

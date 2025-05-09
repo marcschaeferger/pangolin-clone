@@ -382,4 +382,5 @@
     "inviteValidityPeriodSelect": "Select validity period",
     "inviteRegenerateMessage": "The invitation has been regenerated. The user must access the link below to accept the invitation.",
     "inviteRegenerateButton": "Regenerate",
+    "expiresAt": "Expires At"
 }

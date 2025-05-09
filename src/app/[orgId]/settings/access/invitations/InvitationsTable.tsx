@@ -84,11 +84,11 @@ export default function InvitationsTable({
         },
         {
             accessorKey: "email",
-            header: "Email"
+            header: t('email')
         },
         {
             accessorKey: "expiresAt",
-            header: "Expires At",
+            header: t('expiresAt'),
             cell: ({ row }) => {
                 const expiresAt = new Date(row.original.expiresAt);
                 const isExpired = expiresAt < new Date();
@@ -102,7 +102,7 @@ export default function InvitationsTable({
         },
         {
             accessorKey: "role",
-            header: "Role"
+            header: t('role')
         }
     ];
 

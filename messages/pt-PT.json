@@ -381,5 +381,6 @@
     "inviteValidityPeriod": "Período de Validade",
     "inviteValidityPeriodSelect": "Selecione o período de validade",
     "inviteRegenerateMessage": "O convite foi regenerado. O usuário deve acessar o link abaixo para aceitar o convite.",
-    "inviteRegenerateButton": "Regenerar"
+    "inviteRegenerateButton": "Regenerar",
+    "expiresAt": "Expira em"
 }
