@@ -160,7 +160,9 @@ export async function validateOidcCallback(
         );
 
         const idToken = tokens.idToken();
+        logger.debug("ID token", { idToken });
         const claims = arctic.decodeIdToken(idToken);
+        logger.debug("ID token claims", { claims });
 
         const userIdentifier = jmespath.search(
             claims,
