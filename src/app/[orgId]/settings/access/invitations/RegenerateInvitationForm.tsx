@@ -177,7 +177,7 @@ export default function RegenerateInvitationForm({
                     {!inviteLink ? (
                         <div>
                             <p>
-                                {t('inviteQuestionRegenerate', {email: invitation?.email ?? ''})}
+                                {t('inviteQuestionRegenerate', {email: invitation?.email})}
                             </p>
                             <div className="flex items-center space-x-2 mt-4">
                                 <Checkbox
@@ -230,7 +230,7 @@ export default function RegenerateInvitationForm({
                     {!inviteLink ? (
                         <>
                             <CredenzaClose asChild>
-                                <Button variant="outline">Cancel</Button>
+                                <Button variant="outline">{t('cancel')}</Button>
                             </CredenzaClose>
                             <Button
                                 onClick={handleRegenerate}
@@ -241,7 +241,7 @@ export default function RegenerateInvitationForm({
                         </>
                     ) : (
                         <CredenzaClose asChild>
-                            <Button variant="outline">Close</Button>
+                            <Button variant="outline">{t('close')}</Button>
                         </CredenzaClose>
                     )}
                 </CredenzaFooter>
