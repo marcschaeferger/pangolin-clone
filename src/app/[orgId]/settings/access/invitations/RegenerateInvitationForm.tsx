@@ -24,6 +24,7 @@ import {
     SelectValue
 } from "@app/components/ui/select";
 import { Label } from "@app/components/ui/label";
+import { useTranslations } from "next-intl";
 
 type RegenerateInvitationFormProps = {
     open: boolean;
@@ -56,14 +57,16 @@ export default function RegenerateInvitationForm({
     const api = createApiClient(useEnvContext());
     const { org } = useOrgContext();
 
+    const t = useTranslations();
+
     const validForOptions = [
-        { hours: 24, name: "1 day" },
-        { hours: 48, name: "2 days" },
-        { hours: 72, name: "3 days" },
-        { hours: 96, name: "4 days" },
-        { hours: 120, name: "5 days" },
-        { hours: 144, name: "6 days" },
-        { hours: 168, name: "7 days" }
+        { hours: 24, name: t('day', { count: 1 }) },
+        { hours: 48, name: t('day', { count: 2 }) },
+        { hours: 72, name: t('day', { count: 3 }) },
+        { hours: 96, name: t('day', { count: 4 }) },
+        { hours: 120, name: t('day', { count: 5 }) },
+        { hours: 144, name: t('day', { count: 6 }) },
+        { hours: 168, name: t('day', { count: 7 }) }
     ];
 
     useEffect(() => {
@@ -79,9 +82,8 @@ export default function RegenerateInvitationForm({
         if (!org?.org.orgId) {
             toast({
                 variant: "destructive",
-                title: "Organization ID Missing",
-                description:
-                    "Unable to regenerate invitation without an organization ID.",
+                title: t('orgMissing'),
+                description: t('orgMissingMessage'),
                 duration: 5000
             });
             return;
@@ -105,15 +107,15 @@ export default function RegenerateInvitationForm({
                 if (sendEmail) {
                     toast({
                         variant: "default",
-                        title: "Invitation Regenerated",
-                        description: `A new invitation has been sent to ${invitation.email}.`,
+                        title: t('inviteRegenerated'),
+                        description: t('inviteSent', {email: invitation.email}),
                         duration: 5000
                     });
                 } else {
                     toast({
                         variant: "default",
-                        title: "Invitation Regenerated",
-                        description: `A new invitation has been generated for ${invitation.email}.`,
+                        title: t('inviteRegenerated'),
+                        description: t('inviteGenerate', {email: invitation.email}),
                         duration: 5000
                     });
                 }
@@ -130,24 +132,22 @@ export default function RegenerateInvitationForm({
             if (error.response?.status === 409) {
                 toast({
                     variant: "destructive",
-                    title: "Duplicate Invite",
-                    description: "An invitation for this user already exists.",
+                    title: t('inviteDuplicateError'),
+                    description: t('inviteDuplicateErrorDescription'),
                     duration: 5000
                 });
             } else if (error.response?.status === 429) {
                 toast({
                     variant: "destructive",
-                    title: "Rate Limit Exceeded",
-                    description:
-                        "You have exceeded the limit of 3 regenerations per hour. Please try again later.",
+                    title: t('inviteRateLimitError'),
+                    description: t('inviteRateLimitErrorDescription'),
                     duration: 5000
                 });
             } else {
                 toast({
                     variant: "destructive",
-                    title: "Failed to Regenerate Invitation",
-                    description:
-                        "An error occurred while regenerating the invitation.",
+                    title: t('inviteRegenerateError'),
+                    description: t('inviteRegenerateErrorDescription'),
                     duration: 5000
                 });
             }
@@ -168,18 +168,16 @@ export default function RegenerateInvitationForm({
         >
             <CredenzaContent>
                 <CredenzaHeader>
-                    <CredenzaTitle>Regenerate Invitation</CredenzaTitle>
+                    <CredenzaTitle>{t('inviteRegenerate')}</CredenzaTitle>
                     <CredenzaDescription>
-                        Revoke previous invitation and create a new one
+                        {t('inviteRegenerateDescription')}
                     </CredenzaDescription>
                 </CredenzaHeader>
                 <CredenzaBody>
                     {!inviteLink ? (
                         <div>
                             <p>
-                                Are you sure you want to regenerate the
-                                invitation for <b>{invitation?.email}</b>? This
-                                will revoke the previous invitation.
+                                {t('inviteQuestionRegenerate', {email: invitation?.email ?? ''})}
                             </p>
                             <div className="flex items-center space-x-2 mt-4">
                                 <Checkbox
@@ -190,12 +188,12 @@ export default function RegenerateInvitationForm({
                                     }
                                 />
                                 <label htmlFor="send-email">
-                                    Send email notification to the user
+                                    {t('inviteSentEmail')}
                                 </label>
                             </div>
                             <div className="mt-4 space-y-2">
                                 <Label>
-                                    Validity Period
+                                    {t('inviteValidityPeriod')}
                                 </Label>
                                 <Select
                                     value={validHours.toString()}
@@ -204,7 +202,7 @@ export default function RegenerateInvitationForm({
                                     }
                                 >
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Select validity period" />
+                                        <SelectValue placeholder={t('inviteValidityPeriodSelect')} />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {validForOptions.map((option) => (
@@ -222,9 +220,7 @@ export default function RegenerateInvitationForm({
                     ) : (
                         <div className="space-y-4 max-w-md">
                             <p>
-                                The invitation has been regenerated. The user
-                                must access the link below to accept the
-                                invitation.
+                                {t('inviteRegenerateMessage')}
                             </p>
                             <CopyTextBox text={inviteLink} wrapText={false} />
                         </div>
@@ -240,7 +236,7 @@ export default function RegenerateInvitationForm({
                                 onClick={handleRegenerate}
                                 loading={loading}
                             >
-                                Regenerate
+                                {t('inviteRegenerateButton')}
                             </Button>
                         </>
                     ) : (

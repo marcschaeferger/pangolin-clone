@@ -22,7 +22,7 @@ export function InvitationsDataTable<TData, TValue>({
         <DataTable
             columns={columns}
             data={data}
-            title="Invitations"
+            title={t('invite')}
             searchPlaceholder={t('inviteSearch')}
             searchColumn="email"
         />
