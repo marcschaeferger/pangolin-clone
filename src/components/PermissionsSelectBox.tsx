@@ -95,7 +95,7 @@ function getActionsCategories(root: boolean) {
     if (root) {
         actionsByCategory["Organization"] = {
             "List Organizations": "listOrgs",
-            "Check ID": "checkOrgId",
+            "Check ID": "checkId",
             "Create Organization": "createOrg",
             "Delete Organization": "deleteOrg",
             "List API Keys": "listApiKeys",
