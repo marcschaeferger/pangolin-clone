@@ -1,19 +1,30 @@
-import { drizzle } from "drizzle-orm/better-sqlite3";
+import { drizzle as DrizzleSqlite } from "drizzle-orm/better-sqlite3";
+import { drizzle as DrizzlePostgres } from "drizzle-orm/node-postgres";
 import Database from "better-sqlite3";
 import * as schema from "@server/db/schemas";
 import path from "path";
 import fs from "fs/promises";
 import { APP_PATH } from "@server/lib/consts";
 import { existsSync, mkdirSync } from "fs";
+import { readConfigFile } from "@server/lib/readConfigFile";
 
 export const location = path.join(APP_PATH, "db", "db.sqlite");
 export const exists = await checkFileExists(location);
 
 bootstrapVolume();
 
-const sqlite = new Database(location);
-export const db = drizzle(sqlite, { schema });
+function createDb() {
+    const config = readConfigFile();
 
+    if (config.database.type === "postgres") {
+        return DrizzlePostgres(config.database!.postgres!.connection_string!);
+    } else {
+        const sqlite = new Database(location);
+        return DrizzleSqlite(sqlite, { schema });
+    }
+}
+
+export const db = createDb();
 export default db;
 
 async function checkFileExists(filePath: string): Promise<boolean> {
