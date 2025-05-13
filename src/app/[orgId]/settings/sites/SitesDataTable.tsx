@@ -1,8 +1,6 @@
 "use client";
 
-import {
-    ColumnDef,
-} from "@tanstack/react-table";
+import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@app/components/ui/data-table";
 
 interface DataTableProps<TData, TValue> {
@@ -25,6 +23,10 @@ export function SitesDataTable<TData, TValue>({
             searchColumn="name"
             onAdd={createSite}
             addButtonText="Add Site"
+            defaultSort={{
+                id: "name",
+                desc: false
+            }}
         />
     );
 }
