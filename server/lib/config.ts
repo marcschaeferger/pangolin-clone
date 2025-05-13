@@ -216,7 +216,8 @@ const configSchema = z.object({
             disable_user_create_org: z.boolean().optional(),
             allow_raw_resources: z.boolean().optional(),
             allow_base_domain_resources: z.boolean().optional(),
-            allow_local_sites: z.boolean().optional()
+            allow_local_sites: z.boolean().optional(),
+            enable_integration_api: z.boolean().optional()
         })
         .optional()
 });
