@@ -121,7 +121,7 @@ export default function OrgApiKeysTable({
         },
         {
             accessorKey: "key",
-            header: "Key",
+            header: t('key'),
             cell: ({ row }) => {
                 const r = row.original;
                 return <span className="font-mono">{r.key}</span>;
@@ -129,7 +129,7 @@ export default function OrgApiKeysTable({
         },
         {
             accessorKey: "createdAt",
-            header: "Created At",
+            header: t('createdAt'),
             cell: ({ row }) => {
                 const r = row.original;
                 return <span>{moment(r.createdAt).format("lll")} </span>;

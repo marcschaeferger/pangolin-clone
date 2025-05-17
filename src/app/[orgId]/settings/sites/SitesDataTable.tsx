@@ -22,8 +22,8 @@ export function SitesDataTable<TData, TValue>({
         <DataTable
             columns={columns}
             data={data}
-            title="Sites"
-            searchPlaceholder={t('searchSites')}
+            title={t('sites')}
+            searchPlaceholder={t('searchSitesProgress')}
             searchColumn="name"
             onAdd={createSite}
             addButtonText={t('siteAdd')}
