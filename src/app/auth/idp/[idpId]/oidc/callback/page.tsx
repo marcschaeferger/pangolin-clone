@@ -3,7 +3,7 @@ import ValidateOidcToken from "./ValidateOidcToken";
 import { idp } from "@server/db/schemas";
 import db from "@server/db";
 import { eq } from "drizzle-orm";
-import { useTranslations } from "next-intl";
+import { getTranslations } from 'next-intl/server';
 
 export default async function Page(props: {
     params: Promise<{ orgId: string; idpId: string }>;
@@ -14,6 +14,7 @@ export default async function Page(props: {
 }) {
     const params = await props.params;
     const searchParams = await props.searchParams;
+    const t = await getTranslations();
 
     const allCookies = await cookies();
     const stateCookie = allCookies.get("p_oidc_state")?.value;
@@ -23,8 +24,6 @@ export default async function Page(props: {
         .select({ name: idp.name })
         .from(idp)
         .where(eq(idp.idpId, parseInt(params.idpId!)));
-
-    const t = useTranslations();
 
     if (!idpRes) {
         return <div>{t('idpErrorNotFound')}</div>;

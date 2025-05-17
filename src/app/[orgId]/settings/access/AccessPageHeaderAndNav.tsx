@@ -14,6 +14,7 @@ export default function AccessPageHeaderAndNav({
     hasInvitations
 }: AccessPageHeaderAndNavProps) {
     const t = useTranslations();
+    
     const navItems = [
         {
             title: t('users'),

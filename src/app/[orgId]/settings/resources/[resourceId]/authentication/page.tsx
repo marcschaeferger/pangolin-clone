@@ -83,6 +83,7 @@ export default function ResourceAuthenticationPage() {
 
     const api = createApiClient({ env });
     const router = useRouter();
+    const t = useTranslations();
 
     const [pageLoading, setPageLoading] = useState(true);
 
@@ -129,8 +130,6 @@ export default function ResourceAuthenticationPage() {
         resolver: zodResolver(whitelistSchema),
         defaultValues: { emails: [] }
     });
-
-    const t = useTranslations();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -565,8 +564,7 @@ export default function ResourceAuthenticationPage() {
                             >
                                 <Key />
                                 <span>
-                                    Password Protection{" "}
-                                    {authInfo.password ? t('enabled') : t('disabled')}
+                                    {t('resourcePasswordProtection', {status: authInfo.password? t('enabled') : t('disabled')})}
                                 </span>
                             </div>
                             <Button

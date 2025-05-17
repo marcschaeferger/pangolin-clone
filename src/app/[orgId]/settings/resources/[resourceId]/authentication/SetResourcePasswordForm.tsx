@@ -57,6 +57,7 @@ export default function SetResourcePasswordForm({
     onSetPassword
 }: SetPasswordFormProps) {
     const api = createApiClient(useEnvContext());
+    const t = useTranslations();
 
     const [loading, setLoading] = useState(false);
 
@@ -64,8 +65,6 @@ export default function SetResourcePasswordForm({
         resolver: zodResolver(setPasswordFormSchema),
         defaultValues
     });
-
-    const t = useTranslations();
 
     useEffect(() => {
         if (!open) {

@@ -25,6 +25,7 @@ interface SettingsLayoutProps {
 export default async function SettingsLayout(props: SettingsLayoutProps) {
     const params = await props.params;
     const { children } = props;
+    const t = await getTranslations();
 
     let idp = null;
     try {
@@ -36,8 +37,6 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
     } catch {
         redirect("/admin/idp");
     }
-
-    const t = await getTranslations();
 
     const navItems: HorizontalTabs = [
         {

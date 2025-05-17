@@ -6,6 +6,7 @@ import { Star } from "lucide-react";
 import { useTranslations } from 'next-intl';
 
 export default function SupporterMessage({ tier }: { tier: string }) {
+    
     const t = useTranslations();
 
     return (

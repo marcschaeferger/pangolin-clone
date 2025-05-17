@@ -60,6 +60,7 @@ export default function GeneralPage() {
     const { org } = useOrgContext();
     const api = createApiClient(useEnvContext());
     const { user } = useUserContext();
+    const t = useTranslations();
 
     const [loadingDelete, setLoadingDelete] = useState(false);
     const [loadingSave, setLoadingSave] = useState(false);
@@ -150,8 +151,6 @@ export default function GeneralPage() {
                 setLoadingSave(false);
             });
     }
-
-    const t = useTranslations();
 
     return (
         <SettingsContainer>

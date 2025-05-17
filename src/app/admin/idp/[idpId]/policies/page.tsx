@@ -89,6 +89,7 @@ export default function PoliciesPage() {
     const api = createApiClient({ env });
     const router = useRouter();
     const { idpId } = useParams();
+    const t = useTranslations();
 
     const [pageLoading, setPageLoading] = useState(true);
     const [addPolicyLoading, setAddPolicyLoading] = useState(false);
@@ -117,8 +118,6 @@ export default function PoliciesPage() {
             defaultOrgMapping: ""
         }
     });
-
-    const t = useTranslations();
 
     const loadIdp = async () => {
         try {
@@ -450,7 +449,7 @@ export default function PoliciesPage() {
                                 : t('orgPoliciesAdd')}
                         </CredenzaTitle>
                         <CredenzaDescription>
-                            Configure access for an organization
+                            {t('orgPolicyConfig')}
                         </CredenzaDescription>
                     </CredenzaHeader>
                     <CredenzaBody>

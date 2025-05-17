@@ -9,7 +9,6 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select";
-import { useTranslations } from "next-intl";
 
 interface DomainOption {
     baseDomain: string;
@@ -24,12 +23,10 @@ interface CustomDomainInputProps {
     onChange?: (value: string, selectedDomainId: string) => void;
 }
 
-const t = useTranslations();
-
 export default function CustomDomainInput({
     domainOptions,
     selectedDomainId,
-    placeholder = t('subdomain'),
+    placeholder = "Subdomain",
     value: defaultValue,
     onChange
 }: CustomDomainInputProps) {

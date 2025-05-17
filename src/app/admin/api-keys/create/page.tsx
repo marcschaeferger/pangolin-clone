@@ -89,6 +89,7 @@ export default function Page() {
     const { env } = useEnvContext();
     const api = createApiClient({ env });
     const router = useRouter();
+    const t = useTranslations();
 
     const [loadingPage, setLoadingPage] = useState(true);
     const [createLoading, setCreateLoading] = useState(false);
@@ -110,8 +111,6 @@ export default function Page() {
             copied: false
         }
     });
-
-    const t = useTranslations();
 
     async function onSubmit(data: CreateFormValues) {
         setCreateLoading(true);

@@ -122,7 +122,7 @@ export function SitePriceCalculator({
                         <Button variant="outline">{t('cancel')}</Button>
                     </CredenzaClose>
                     <Button onClick={continueToPayment}>
-                        See Purchase Portal
+                        {t('pricingPortal')}
                     </Button>
                 </CredenzaFooter>
             </CredenzaContent>

@@ -56,6 +56,7 @@ export default function VerifyEmailForm({
     redirect,
 }: VerifyEmailFormProps) {
     const router = useRouter();
+    const t = useTranslations();
 
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -72,8 +73,6 @@ export default function VerifyEmailForm({
         },
     });
 
-    const t = useTranslations();
-
     async function onSubmit(data: z.infer<typeof FormSchema>) {
         setIsSubmitting(true);
 
@@ -82,15 +81,15 @@ export default function VerifyEmailForm({
                 code: data.pin,
             })
             .catch((e) => {
-                setError(formatAxiosError(e, "An error occurred"));
-                console.error("Failed to verify email:", e);
+                setError(formatAxiosError(e, t('errorOccurred')));
+                console.error(t('emailErrorVerify'), e);
                 setIsSubmitting(false);
             });
 
         if (res && res.data?.data?.valid) {
             setError(null);
             setSuccessMessage(
-                "Email successfully verified! Redirecting you..."
+                t('emailVerified')
             );
             setTimeout(() => {
                 if (redirect) {
@@ -108,16 +107,16 @@ export default function VerifyEmailForm({
         setIsResending(true);
 
         const res = await api.post("/auth/verify-email/request").catch((e) => {
-            setError(formatAxiosError(e, "An error occurred"));
-            console.error("Failed to resend verification code:", e);
+            setError(formatAxiosError(e, t('errorOccurred')));
+            console.error(t('verificationCodeErrorResend'), e);
         });
 
         if (res) {
             setError(null);
             toast({
                 variant: "default",
-                title: "Verification code resent",
-                description: "We've resent a verification code to your email address. Please check your inbox.",
+                title: t('verificationCodeResend'),
+                description: t('verificationCodeResendDescription'),
             });
         }
 

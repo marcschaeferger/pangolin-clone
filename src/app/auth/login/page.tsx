@@ -63,7 +63,7 @@ export default async function Page(props: {
 
             {(!signUpDisabled || isInvite) && (
                 <p className="text-center text-muted-foreground mt-4">
-                    Don't have an account?{" "}
+                    {t('authNoAccount')}{" "}
                     <Link
                         href={
                             !redirectUrl

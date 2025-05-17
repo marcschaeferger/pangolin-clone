@@ -77,6 +77,7 @@ export default function Page() {
     const router = useRouter();
     const [createLoading, setCreateLoading] = useState(false);
     const { isUnlocked } = useLicenseStatusContext();
+    const t = useTranslations();
 
     const form = useForm<CreateIdpFormValues>({
         resolver: zodResolver(createIdpFormSchema),
@@ -94,8 +95,6 @@ export default function Page() {
             autoProvision: false
         }
     });
-
-    const t = useTranslations();
 
     async function onSubmit(data: CreateIdpFormValues) {
         setCreateLoading(true);
@@ -370,7 +369,6 @@ export default function Page() {
                                                 {t('idpJmespathAbout')}
                                             </AlertTitle>
                                             <AlertDescription>
-                                                {/*TODO(vlalx): Validate replacing */}
                                                 {t('idpJmespathAboutDescription')}{" "}
                                                 <a
                                                     href="https://jmespath.org"

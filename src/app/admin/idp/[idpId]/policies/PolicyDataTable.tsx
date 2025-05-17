@@ -15,7 +15,9 @@ export function PolicyDataTable<TData, TValue>({
     data,
     onAdd
 }: DataTableProps<TData, TValue>) {
+
     const t = useTranslations();
+    
     return (
         <DataTable
             columns={columns}

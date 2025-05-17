@@ -4,7 +4,7 @@ import { AxiosResponse } from "axios";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { ListRootApiKeysResponse } from "@server/routers/apiKeys";
 import ApiKeysTable, { ApiKeyRow } from "./ApiKeysTable";
-import { useTranslations } from "next-intl";
+import { getTranslations } from 'next-intl/server';
 
 type ApiKeyPageProps = {};
 
@@ -12,7 +12,6 @@ export const dynamic = "force-dynamic";
 
 export default async function ApiKeysPage(props: ApiKeyPageProps) {
     let apiKeys: ListRootApiKeysResponse["apiKeys"] = [];
-    const t = useTranslations();
     try {
         const res = await internal.get<AxiosResponse<ListRootApiKeysResponse>>(
             `/api-keys`,
@@ -29,6 +28,8 @@ export default async function ApiKeysPage(props: ApiKeyPageProps) {
             createdAt: key.createdAt
         };
     });
+
+    const t = await getTranslations();
 
     return (
         <>

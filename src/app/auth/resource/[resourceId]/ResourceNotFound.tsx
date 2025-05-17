@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 
 export default async function ResourceNotFound() {
+    
     const t = useTranslations();
 
     return (

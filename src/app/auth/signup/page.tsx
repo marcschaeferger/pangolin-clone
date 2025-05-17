@@ -6,7 +6,7 @@ import { Mail } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { cache } from "react";
-import { useTranslations } from "next-intl";
+import { getTranslations } from 'next-intl/server';
 
 export const dynamic = "force-dynamic";
 
@@ -16,12 +16,11 @@ export default async function Page(props: {
     const searchParams = await props.searchParams;
     const getUser = cache(verifySession);
     const user = await getUser();
+    const t = await getTranslations();
 
     const env = pullEnv();
 
     const isInvite = searchParams?.redirect?.includes("/invite");
-
-    const t = useTranslations();
 
     if (env.flags.disableSignupWithoutInvite && !isInvite) {
         redirect("/");

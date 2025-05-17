@@ -144,10 +144,10 @@ export default function CreateShareLinkForm({
                     console.error(e);
                     toast({
                         variant: "destructive",
-                        title: "Failed to fetch resources",
+                        title: t('shareErrorFetchResource'),
                         description: formatAxiosError(
                             e,
-                            "An error occurred while fetching the resources"
+                            t('shareErrorFetchResourceDescription')
                         )
                     });
                 });
@@ -211,10 +211,10 @@ export default function CreateShareLinkForm({
                 console.error(e);
                 toast({
                     variant: "destructive",
-                    title: "Failed to create share link",
+                    title: t('shareErrorCreate'),
                     description: formatAxiosError(
                         e,
-                        "An error occurred while creating the share link"
+                        t('shareErrorCreateDescription')
                     )
                 });
             });

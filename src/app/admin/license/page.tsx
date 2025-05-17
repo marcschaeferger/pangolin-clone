@@ -130,10 +130,10 @@ export default function LicensePage() {
             }
         } catch (e) {
             toast({
-                title: "Failed to load license keys",
+                title: t('licenseErrorKeyLoad'),
                 description: formatAxiosError(
                     e,
-                    "An error occurred loading license keys."
+                    t('licenseErrorKeyLoadDescription')
                 )
             });
         }
@@ -149,16 +149,16 @@ export default function LicensePage() {
             }
             await loadLicenseKeys();
             toast({
-                title: "License key deleted",
-                description: "The license key has been deleted."
+                title: t('licenseKeyDeleted'),
+                description: t('licenseKeyDeletedDescription')
             });
             setIsDeleteModalOpen(false);
         } catch (e) {
             toast({
-                title: "Failed to delete license key",
+                title: t('licenseErrorKeyDelete'),
                 description: formatAxiosError(
                     e,
-                    "An error occurred deleting license key."
+                    t('licenseErrorKeyDeleteDescription')
                 )
             });
         } finally {
@@ -175,15 +175,15 @@ export default function LicensePage() {
             }
             await loadLicenseKeys();
             toast({
-                title: "License keys rechecked",
-                description: "All license keys have been rechecked"
+                title: t('licenseErrorKeyRechecked'),
+                description: t('licenseErrorKeyRecheckedDescription')
             });
         } catch (e) {
             toast({
-                title: "Failed to recheck license keys",
+                title: t('licenseErrorKeyRecheck'),
                 description: formatAxiosError(
                     e,
-                    "An error occurred rechecking license keys."
+                    t('licenseErrorKeyRecheckDescription')
                 )
             });
         } finally {
@@ -202,8 +202,8 @@ export default function LicensePage() {
             }
 
             toast({
-                title: "License key activated",
-                description: "The license key has been successfully activated."
+                title: t('licenseKeyActivated'),
+                description: t('licenseKeyActivatedDescription')
             });
 
             setIsCreateModalOpen(false);
@@ -212,10 +212,10 @@ export default function LicensePage() {
         } catch (e) {
             toast({
                 variant: "destructive",
-                title: "Failed to activate license key",
+                title: t('licenseErrorKeyActivate'),
                 description: formatAxiosError(
                     e,
-                    "An error occurred while activating the license key."
+                    t('licenseErrorKeyActivateDescription')
                 )
             });
         } finally {
@@ -360,12 +360,10 @@ export default function LicensePage() {
             <Alert variant="neutral" className="mb-6">
                 <InfoIcon className="h-4 w-4" />
                 <AlertTitle className="font-semibold">
-                    About Licensing
+                    {t('licenseAbout')}
                 </AlertTitle>
                 <AlertDescription>
-                    This is for business and enterprise users who are using
-                    Pangolin in a commercial environment. If you are using
-                    Pangolin for personal use, you can ignore this section.
+                    {t('licenseAboutDescription')}
                 </AlertDescription>
             </Alert>
 
@@ -397,12 +395,12 @@ export default function LicensePage() {
                                     <div className="space-y-2">
                                         {supporterStatus?.visible ? (
                                             <div className="text-2xl">
-                                                Community Edition
+                                                {t('communityEdition')}
                                             </div>
                                         ) : (
                                             <div className="text-2xl flex items-center gap-2 text-pink-500">
                                                 <Heart />
-                                                Community Edition
+                                                {t('communityEdition')}
                                             </div>
                                         )}
                                     </div>

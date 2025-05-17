@@ -6,9 +6,7 @@ import { AxiosResponse } from "axios";
 import { redirect } from "next/navigation";
 import InviteStatusCard from "./InviteStatusCard";
 import { formatAxiosError } from "@app/lib/api";
-import { useTranslations } from "next-intl";
-
-;
+import { getTranslations } from 'next-intl/server';
 
 export default async function InvitePage(props: {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -22,8 +20,7 @@ export default async function InvitePage(props: {
     }
 
     const user = await verifySession();
-
-    const t = useTranslations();
+    const t = await getTranslations();
 
     const parts = tokenParam.split("-");
     if (parts.length !== 2) {

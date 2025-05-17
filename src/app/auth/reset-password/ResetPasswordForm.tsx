@@ -138,8 +138,8 @@ export default function ResetPasswordForm({
                 } as RequestPasswordResetBody
             )
             .catch((e) => {
-                setError(formatAxiosError(e, "An error occurred"));
-                console.error("Failed to request reset:", e);
+                setError(formatAxiosError(e, t('errorOccurred')));
+                console.error(t('passwordErrorRequestReset'), e);
                 setIsSubmitting(false);
             });
 
@@ -168,8 +168,8 @@ export default function ResetPasswordForm({
                 } as ResetPasswordBody
             )
             .catch((e) => {
-                setError(formatAxiosError(e, "An error occurred"));
-                console.error("Failed to reset password:", e);
+                setError(formatAxiosError(e, t('errorOccurred')));
+                console.error(t('passwordErrorReset'), e);
                 setIsSubmitting(false);
             });
 
@@ -185,7 +185,7 @@ export default function ResetPasswordForm({
                 return;
             }
 
-            setSuccessMessage("Password reset successfully! Back to log in...");
+            setSuccessMessage(t('passwordResetSuccess'));
 
             setTimeout(() => {
                 if (redirect) {

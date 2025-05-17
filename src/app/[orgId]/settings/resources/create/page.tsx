@@ -199,10 +199,10 @@ export default function Page() {
                 .catch((e) => {
                     toast({
                         variant: "destructive",
-                        title: "Error creating resource",
+                        title: t('resourceErrorCreate'),
                         description: formatAxiosError(
                             e,
-                            "An error occurred when creating the resource"
+                            t('resourceErrorCreateDescription')
                         )
                     });
                 });
@@ -219,11 +219,11 @@ export default function Page() {
                 }
             }
         } catch (e) {
-            console.error("Error creating resource:", e);
+            console.error(t('resourceErrorCreateMessage'), e);
             toast({
                 variant: "destructive",
-                title: "Error creating resource",
-                description: "An unexpected error occurred"
+                title: t('resourceErrorCreate'),
+                description:t('resourceErrorCreateMessageDescription')
             });
         }
 

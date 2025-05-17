@@ -146,14 +146,14 @@ export default function GeneralPage() {
 
             if (res.status === 200) {
                 toast({
-                    title: "Success",
-                    description: "Identity provider updated successfully"
+                    title: t('success'),
+                    description: t('idpUpdatedDescription')
                 });
                 router.refresh();
             }
         } catch (e) {
             toast({
-                title: "Error",
+                title: t('error'),
                 description: formatAxiosError(e),
                 variant: "destructive"
             });
@@ -372,7 +372,6 @@ export default function GeneralPage() {
                                                 {t('idpJmespathAbout')}
                                             </AlertTitle>
                                             <AlertDescription>
-                                                {/*TODO(vlalx): Validate replacing */}
                                                 {t('idpJmespathAboutDescription')}
                                                 <a
                                                     href="https://jmespath.org"

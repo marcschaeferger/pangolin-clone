@@ -92,7 +92,8 @@ export default function Page() {
     const api = createApiClient({ env });
     const { orgId } = useParams();
     const router = useRouter();
-
+    const t = useTranslations();
+    
     const [loadingPage, setLoadingPage] = useState(true);
     const [createLoading, setCreateLoading] = useState(false);
     const [apiKey, setApiKey] = useState<CreateOrgApiKeyResponse | null>(null);
@@ -113,8 +114,6 @@ export default function Page() {
             copied: false
         }
     });
-
-    const t = useTranslations();
 
     async function onSubmit(data: CreateFormValues) {
         setCreateLoading(true);

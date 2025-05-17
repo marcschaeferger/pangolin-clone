@@ -19,6 +19,7 @@ export const dynamic = "force-dynamic";
 
 export default async function InvitationsPage(props: InvitationsPageProps) {
     const params = await props.params;
+    const t = await getTranslations();
 
     const getUser = cache(verifySession);
     const user = await getUser();
@@ -71,8 +72,6 @@ export default async function InvitationsPage(props: InvitationsPageProps) {
             roleId: invite.roleId
         };
     });
-
-    const t = await getTranslations();
 
     return (
         <>

@@ -87,6 +87,7 @@ type ResourceAuthPortalProps = {
 
 export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
     const router = useRouter();
+    const t = useTranslations();
 
     const getNumMethods = () => {
         let colLength = 0;
@@ -170,8 +171,6 @@ export default function ResourceAuthPortal(props: ResourceAuthPortalProps) {
         );
         return fullUrl.toString();
     }
-
-    const t = useTranslations();
 
     const onWhitelistSubmit = (values: any) => {
         setLoadingLogin(true);

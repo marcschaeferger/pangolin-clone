@@ -79,18 +79,18 @@ export default function Page() {
                 )
             })
             .catch((e) => {
-                console.error("Error setting permissions", e);
+                console.error(t('apiKeysErrorSetPermission'), e);
                 toast({
                     variant: "destructive",
-                    title: "Error setting permissions",
+                    title: t('apiKeysErrorSetPermission'),
                     description: formatAxiosError(e)
                 });
             });
 
         if (actionsRes && actionsRes.status === 200) {
             toast({
-                title: "Permissions updated",
-                description: "The permissions have been updated."
+                title: t('apiKeysPermissionsUpdated'),
+                description: t('apiKeysPermissionsUpdatedDescription')
             });
         }
 

@@ -45,6 +45,7 @@ const orgSchema = z.object({
 export default function StepperForm() {
     const [currentStep, setCurrentStep] = useState<Step>("org");
     const [orgIdTaken, setOrgIdTaken] = useState(false);
+    const t = useTranslations();
 
     const [loading, setLoading] = useState(false);
     const [isChecked, setIsChecked] = useState(false);
@@ -106,14 +107,12 @@ export default function StepperForm() {
         } catch (e) {
             console.error(e);
             setError(
-                formatAxiosError(e, "An error occurred while creating org")
+                formatAxiosError(e, t('orgErrorCreate'))
             );
         }
 
         setLoading(false);
     }
-
-    const t = useTranslations();
 
     return (
         <>

@@ -42,6 +42,7 @@ export function ApiKeysDataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
 
     const t = useTranslations();
+    
     return (
         <DataTable
             columns={columns}

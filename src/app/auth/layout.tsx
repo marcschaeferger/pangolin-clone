@@ -73,7 +73,7 @@ export default async function AuthLayout({ children }: AuthLayoutProps) {
                             aria-label="GitHub"
                             className="flex items-center space-x-2 whitespace-nowrap"
                         >
-                            <span>Community Edition</span>
+                            <span>{t('communityEdition')}</span>
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24"

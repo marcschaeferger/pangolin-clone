@@ -87,7 +87,7 @@ export default function SignupForm({
             .catch((e) => {
                 console.error(e);
                 setError(
-                    formatAxiosError(e, "An error occurred while signing up")
+                    formatAxiosError(e, t('signupError'))
                 );
             });
 
