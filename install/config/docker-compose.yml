@@ -35,7 +35,7 @@ services:
       - 80:80 # Port for traefik because of the network_mode
 {{end}}
   traefik:
-    image: traefik:v3.3.6
+    image: traefik:v3.4.0
     container_name: traefik
     restart: unless-stopped
 {{if .InstallGerbil}}
@@ -54,6 +54,36 @@ services:
       - ./config/traefik:/etc/traefik:ro # Volume to store the Traefik configuration
       - ./config/letsencrypt:/letsencrypt # Volume to store the Let's Encrypt certificates
       - ./config/traefik/logs:/var/log/traefik # Volume to store Traefik logs
+      - /var/run/docker.sock:/var/run/docker.sock:ro # Needed for the USR1 signal for log rotating
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+  logrotate:
+    image: vegardit/traefik-logrotate:latest
+    container_name: traefik-logrotate
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:rw # required to send USR1 signal to Traefik after log rotation
+      - ./config/traefik/logs:/var/log/traefik:rw # folder containing access.log file
+    environment:
+      TZ: "Europe/Berlin"
+      # all environment variables are optional and show the default values:
+      LOGROTATE_LOGS: "/var/log/traefik/*.log" # log files to rotate, directory must match volume mount
+      LOGROTATE_TRIGGER_INTERVAL: daily  # rotate daily, must be one of: daily, weekly, monthly, yearly
+      LOGROTATE_TRIGGER_SIZE: 50M        # rotate if log file size reaches 50MB
+      LOGROTATE_MAX_BACKUPS: 3           # keep 3 backup copies per rotated log file
+      LOGROTATE_START_INDEX: 1           # first rotated file is called access.1.log
+      LOGROTATE_FILE_MODE: 0644          # file mode of the rotated file
+      LOGROTATE_FILE_USER: root          # owning user of the rotated file
+      LOGROTATE_FILE_GROUP: root         # owning group of the rotated file
+      CRON_SCHEDULE: "* * * * *"
+      CRON_LOG_LEVEL: 8                  # see https://unix.stackexchange.com/a/414010/378036
+      # command to determine the id of the container running Traefik:
+      TRAEFIK_CONTAINER_ID_COMMAND: docker ps --no-trunc --quiet --filter label=org.opencontainers.image.title=Traefik
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
 
 networks:
   default:
