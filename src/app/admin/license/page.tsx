@@ -384,10 +384,10 @@ export default function LicensePage() {
                                             <Check />
                                             {licenseStatus?.tier ===
                                             "PROFESSIONAL"
-                                                ? t('licenseTierProfessional')
+                                                ? t('licenseTierCommercial')
                                                 : licenseStatus?.tier ===
                                                     "ENTERPRISE"
-                                                  ? t('licenseTierEnterprise')
+                                                  ? t('licenseTierCommercial')
                                                   : t('licensed')}
                                         </div>
                                     </div>

@@ -15,7 +15,7 @@ import {
 import Link from "next/link";
 import { cache } from "react";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
-import { useTranslations } from "next-intl";
+import { getTranslations } from 'next-intl/server';
 
 interface UserLayoutProps {
     children: React.ReactNode;
@@ -27,7 +27,7 @@ export default async function UserLayoutProps(props: UserLayoutProps) {
 
     const { children } = props;
 
-    const t = useTranslations();
+    const t = await getTranslations();
 
     let user = null;
     try {
