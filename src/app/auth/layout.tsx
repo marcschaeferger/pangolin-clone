@@ -8,6 +8,7 @@ import { AxiosResponse } from "axios";
 import { ExternalLink } from "lucide-react";
 import { Metadata } from "next";
 import { cache } from "react";
+import { useTranslations } from "next-intl";
 
 export const metadata: Metadata = {
     title: `Auth - Pangolin`,
@@ -21,6 +22,7 @@ type AuthLayoutProps = {
 export default async function AuthLayout({ children }: AuthLayoutProps) {
     const getUser = cache(verifySession);
     const user = await getUser();
+    const t = useTranslations();
 
     const licenseStatusRes = await cache(
         async () =>

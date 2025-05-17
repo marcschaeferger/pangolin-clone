@@ -57,8 +57,10 @@ const createSiteFormSchema = z.object({
         .string()
         .min(2, {
             message: "Name must be at least 2 characters."
+            message: "Name must be at least 2 characters."
         })
         .max(30, {
+            message: "Name must not be longer than 30 characters."
             message: "Name must not be longer than 30 characters."
         }),
     method: z.enum(["wireguard", "newt", "local"])
@@ -272,6 +274,8 @@ PersistentKeepalive = 5`
             - NEWT_SECRET=${siteDefaults?.newtSecret}`;
 
     const newtConfigDockerRun = `docker run -it fosrl/newt --id ${siteDefaults?.newtId} --secret ${siteDefaults?.newtSecret} --endpoint ${env.app.dashboardUrl}`;
+
+    const t = useTranslations();
 
     return loadingPage ? (
         <LoaderPlaceholder height="300px" />

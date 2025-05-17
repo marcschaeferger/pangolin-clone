@@ -311,7 +311,7 @@ export default function CreateShareLinkForm({
                                                                 <CommandInput placeholder={t('resourceSearch')} />
                                                                 <CommandList>
                                                                     <CommandEmpty>
-                                                                        {t('resourceNotFound')}
+                                                                        {t('resourcesNotFound')}
                                                                     </CommandEmpty>
                                                                     <CommandGroup>
                                                                         {resources.map(
