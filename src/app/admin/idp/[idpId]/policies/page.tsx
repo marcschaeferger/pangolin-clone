@@ -63,6 +63,7 @@ import {
     SettingsSectionFooter,
     SettingsSectionForm
 } from "@app/components/Settings";
+import { useTranslations } from "next-intl";
 
 type Organization = {
     orgId: string;
@@ -117,6 +118,8 @@ export default function PoliciesPage() {
         }
     });
 
+    const t = useTranslations();
+
     const loadIdp = async () => {
         try {
             const res = await api.get<AxiosResponse<GetIdpResponse>>(
@@ -131,7 +134,7 @@ export default function PoliciesPage() {
             }
         } catch (e) {
             toast({
-                title: "Error",
+                title: t('error'),
                 description: formatAxiosError(e),
                 variant: "destructive"
             });
@@ -146,7 +149,7 @@ export default function PoliciesPage() {
             }
         } catch (e) {
             toast({
-                title: "Error",
+                title: t('error'),
                 description: formatAxiosError(e),
                 variant: "destructive"
             });
@@ -165,7 +168,7 @@ export default function PoliciesPage() {
             }
         } catch (e) {
             toast({
-                title: "Error",
+                title: t('error'),
                 description: formatAxiosError(e),
                 variant: "destructive"
             });
@@ -200,15 +203,15 @@ export default function PoliciesPage() {
                 };
                 setPolicies([...policies, newPolicy]);
                 toast({
-                    title: "Success",
-                    description: "Policy added successfully"
+                    title: t('success'),
+                    description: t('orgPolicyAddedDescription')
                 });
                 setShowAddDialog(false);
                 form.reset();
             }
         } catch (e) {
             toast({
-                title: "Error",
+                title: t('error'),
                 description: formatAxiosError(e),
                 variant: "destructive"
             });
@@ -242,8 +245,8 @@ export default function PoliciesPage() {
                     )
                 );
                 toast({
-                    title: "Success",
-                    description: "Policy updated successfully"
+                    title: t('success'),
+                    description: t('orgPolicyUpdatedDescription')
                 });
                 setShowAddDialog(false);
                 setEditingPolicy(null);
@@ -251,7 +254,7 @@ export default function PoliciesPage() {
             }
         } catch (e) {
             toast({
-                title: "Error",
+                title: t('error'),
                 description: formatAxiosError(e),
                 variant: "destructive"
             });
@@ -269,13 +272,13 @@ export default function PoliciesPage() {
                     policies.filter((policy) => policy.orgId !== orgId)
                 );
                 toast({
-                    title: "Success",
-                    description: "Policy deleted successfully"
+                    title: t('success'),
+                    description: t('orgPolicyDeletedDescription')
                 });
             }
         } catch (e) {
             toast({
-                title: "Error",
+                title: t('error'),
                 description: formatAxiosError(e),
                 variant: "destructive"
             });
@@ -293,13 +296,13 @@ export default function PoliciesPage() {
             });
             if (res.status === 200) {
                 toast({
-                    title: "Success",
-                    description: "Default mappings updated successfully"
+                    title: t('success'),
+                    description: t('defaultMappingsUpdatedDescription')
                 });
             }
         } catch (e) {
             toast({
-                title: "Error",
+                title: t('error'),
                 description: formatAxiosError(e),
                 variant: "destructive"
             });
@@ -318,21 +321,18 @@ export default function PoliciesPage() {
                 <Alert variant="neutral" className="mb-6">
                     <InfoIcon className="h-4 w-4" />
                     <AlertTitle className="font-semibold">
-                        About Organization Policies
+                        {t('orgPoliciesAbout')}
                     </AlertTitle>
                     <AlertDescription>
-                        Organization policies are used to control access to
-                        organizations based on the user's ID token. You can
-                        specify JMESPath expressions to extract role and
-                        organization information from the ID token. For more
-                        information, see{" "}
+                        {/*TODO(vlalx): Validate replacing */}
+                        {t('orgPoliciesAboutDescription')}{" "}
                         <Link
                             href="https://docs.fossorial.io/Pangolin/Identity%20Providers/auto-provision"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-primary hover:underline"
                         >
-                            the documentation
+                            {t('orgPoliciesAboutDescriptionLink')}
                             <ExternalLink className="ml-1 h-4 w-4 inline" />
                         </Link>
                     </AlertDescription>
@@ -341,13 +341,10 @@ export default function PoliciesPage() {
                 <SettingsSection>
                     <SettingsSectionHeader>
                         <SettingsSectionTitle>
-                            Default Mappings (Optional)
+                            {t('defaultMappingsOptional')}
                         </SettingsSectionTitle>
                         <SettingsSectionDescription>
-                            The default mappings are used when when there is not
-                            an organization policy defined for an organization.
-                            You can specify the default role and organization
-                            mappings to fall back to here.
+                            {t('defaultMappingsOptionalDescription')}
                         </SettingsSectionDescription>
                     </SettingsSectionHeader>
                     <SettingsSectionBody>
@@ -366,16 +363,13 @@ export default function PoliciesPage() {
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
-                                                    Default Role Mapping
+                                                    {t('defaultMappingsRole')}
                                                 </FormLabel>
                                                 <FormControl>
                                                     <Input {...field} />
                                                 </FormControl>
                                                 <FormDescription>
-                                                    The result of this
-                                                    expression must return the
-                                                    role name as defined in the
-                                                    organization as a string.
+                                                    {t('defaultMappingsRoleDescription')}
                                                 </FormDescription>
                                                 <FormMessage />
                                             </FormItem>
@@ -388,16 +382,13 @@ export default function PoliciesPage() {
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
-                                                    Default Organization Mapping
+                                                    {t('defaultMappingsOrg')}
                                                 </FormLabel>
                                                 <FormControl>
                                                     <Input {...field} />
                                                 </FormControl>
                                                 <FormDescription>
-                                                    This expression must return
-                                                    thr org ID or true for the
-                                                    user to be allowed to access
-                                                    the organization.
+                                                    {t('defaultMappingsOrgDescription')}
                                                 </FormDescription>
                                                 <FormMessage />
                                             </FormItem>
@@ -412,7 +403,7 @@ export default function PoliciesPage() {
                                 form="policy-default-mappings-form"
                                 loading={updateDefaultMappingsLoading}
                             >
-                                Save Default Mappings
+                                {t('defaultMappingsSubmit')}
                             </Button>
                         </SettingsSectionFooter>
                     </SettingsSectionBody>
@@ -455,8 +446,8 @@ export default function PoliciesPage() {
                     <CredenzaHeader>
                         <CredenzaTitle>
                             {editingPolicy
-                                ? "Edit Organization Policy"
-                                : "Add Organization Policy"}
+                                ? t('orgPoliciesEdit')
+                                : t('orgPoliciesAdd')}
                         </CredenzaTitle>
                         <CredenzaDescription>
                             Configure access for an organization
@@ -476,7 +467,7 @@ export default function PoliciesPage() {
                                     name="orgId"
                                     render={({ field }) => (
                                         <FormItem className="flex flex-col">
-                                            <FormLabel>Organization</FormLabel>
+                                            <FormLabel>{t('org')}</FormLabel>
                                             {editingPolicy ? (
                                                 <Input {...field} disabled />
                                             ) : (
@@ -500,18 +491,17 @@ export default function PoliciesPage() {
                                                                               org.orgId ===
                                                                               field.value
                                                                       )?.name
-                                                                    : "Select organization"}
+                                                                    : t('orgSelect')}
                                                                 <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                                             </Button>
                                                         </FormControl>
                                                     </PopoverTrigger>
                                                     <PopoverContent className="p-0">
                                                         <Command>
-                                                            <CommandInput placeholder="Search org" />
+                                                            <CommandInput placeholder={t('orgSearch')} />
                                                             <CommandList>
                                                                 <CommandEmpty>
-                                                                    No org
-                                                                    found.
+                                                                    {t('orgNotFound')}
                                                                 </CommandEmpty>
                                                                 <CommandGroup>
                                                                     {organizations.map(
@@ -562,16 +552,13 @@ export default function PoliciesPage() {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>
-                                                Role Mapping Path (Optional)
+                                                {t('roleMappingPathOptional')}
                                             </FormLabel>
                                             <FormControl>
                                                 <Input {...field} />
                                             </FormControl>
                                             <FormDescription>
-                                                The result of this expression
-                                                must return the role name as
-                                                defined in the organization as a
-                                                string.
+                                                {t('defaultMappingsRoleDescription')}
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>
@@ -584,17 +571,13 @@ export default function PoliciesPage() {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>
-                                                Organization Mapping Path
-                                                (Optional)
+                                                {t('orgMappingPathOptional')}
                                             </FormLabel>
                                             <FormControl>
                                                 <Input {...field} />
                                             </FormControl>
                                             <FormDescription>
-                                                This expression must return the
-                                                org ID or true for the user to
-                                                be allowed to access the
-                                                organization.
+                                                {t('defaultMappingsOrgDescription')}
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>
@@ -605,7 +588,7 @@ export default function PoliciesPage() {
                     </CredenzaBody>
                     <CredenzaFooter>
                         <CredenzaClose asChild>
-                            <Button variant="outline">Cancel</Button>
+                            <Button variant="outline">{t("cancel")}</Button>
                         </CredenzaClose>
                         <Button
                             type="submit"
@@ -621,7 +604,7 @@ export default function PoliciesPage() {
                                     : addPolicyLoading
                             }
                         >
-                            {editingPolicy ? "Update Policy" : "Add Policy"}
+                            {editingPolicy ? t('orgPolicyUpdate') : t('orgPolicyAdd')}
                         </Button>
                     </CredenzaFooter>
                 </CredenzaContent>

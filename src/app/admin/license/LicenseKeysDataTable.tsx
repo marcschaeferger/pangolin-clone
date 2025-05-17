@@ -73,7 +73,7 @@ export function LicenseKeysDataTable({
                 );
             },
             cell: ({ row }) => {
-                return row.original.valid ? "Yes" : "No";
+                return row.original.valid ? t('yes') : t('no');
             }
         },
         {
@@ -94,7 +94,7 @@ export function LicenseKeysDataTable({
             cell: ({ row }) => {
                 const type = row.original.type;
                 const label =
-                    type === "SITES" ? "Additional Sites" : "Host License";
+                    type === "SITES" ? t('sitesAdditional') : t('licenseHost');
                 const variant = type === "SITES" ? "secondary" : "default";
                 return row.original.valid ? (
                     <Badge variant={variant}>{label}</Badge>
@@ -136,7 +136,7 @@ export function LicenseKeysDataTable({
         <DataTable
             columns={columns}
             data={licenseKeys}
-            title="License Keys"
+            title={t('licenseKeys')}
             searchPlaceholder={t('licenseKeySearch')}
             searchColumn="licenseKey"
             onAdd={onCreate}

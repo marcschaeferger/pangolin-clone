@@ -172,8 +172,8 @@ export default function CreateSiteForm({
             if (!keypair || !siteDefaults) {
                 toast({
                     variant: "destructive",
-                    title: "Error creating site",
-                    description: "Key pair or site defaults not found"
+                    title: t('siteErrorCreate'),
+                    description: t('siteErrorCreateKeyPair')
                 });
                 setLoading?.(false);
                 setIsLoading(false);
@@ -191,8 +191,8 @@ export default function CreateSiteForm({
             if (!siteDefaults) {
                 toast({
                     variant: "destructive",
-                    title: "Error creating site",
-                    description: "Site defaults not found"
+                    title: t('siteErrorCreate'),
+                    description: t('siteErrorCreateDefaults')
                 });
                 setLoading?.(false);
                 setIsLoading(false);
@@ -215,7 +215,7 @@ export default function CreateSiteForm({
             .catch((e) => {
                 toast({
                     variant: "destructive",
-                    title: "Error creating site",
+                    title: t('siteErrorCreate'),
                     description: formatAxiosError(e)
                 });
             });

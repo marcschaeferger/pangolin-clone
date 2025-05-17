@@ -75,7 +75,6 @@ function obfuscateLicenseKey(key: string): string {
 
 export default function LicensePage() {
     const api = createApiClient(useEnvContext());
-    const t = useTranslations();
     const [rows, setRows] = useState<LicenseKeyCache[]>([]);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -104,6 +103,8 @@ export default function LicensePage() {
         }
     });
 
+    const t = useTranslations();
+
     useEffect(() => {
         async function load() {
             setIsInitialLoading(true);
@@ -129,8 +130,11 @@ export default function LicensePage() {
             }
         } catch (e) {
             toast({
-                title: t('licenseErrorKeyLoad'),
-                description: formatAxiosError(e, t('licenseErrorKeyLoadDescription'))
+                title: "Failed to load license keys",
+                description: formatAxiosError(
+                    e,
+                    "An error occurred loading license keys."
+                )
             });
         }
     }
@@ -145,14 +149,17 @@ export default function LicensePage() {
             }
             await loadLicenseKeys();
             toast({
-                title: t('licenseKeyDeleted'),
-                description: t('licenseKeyDeletedDescription')
+                title: "License key deleted",
+                description: "The license key has been deleted."
             });
             setIsDeleteModalOpen(false);
         } catch (e) {
             toast({
-                title: t('licenseErrorKeyDelete'),
-                description: formatAxiosError(e, t('licenseErrorKeyDeleteDescription'))
+                title: "Failed to delete license key",
+                description: formatAxiosError(
+                    e,
+                    "An error occurred deleting license key."
+                )
             });
         } finally {
             setIsDeletingLicense(false);
@@ -168,13 +175,16 @@ export default function LicensePage() {
             }
             await loadLicenseKeys();
             toast({
-                title: t('licenseErrorKeyRechecked'),
-                description: t('licenseErrorKeyRecheckedDescription')
+                title: "License keys rechecked",
+                description: "All license keys have been rechecked"
             });
         } catch (e) {
             toast({
-                title: t('licenseErrorKeyRecheck'),
-                description: formatAxiosError(e, t('licenseErrorKeyRecheckDescription'))
+                title: "Failed to recheck license keys",
+                description: formatAxiosError(
+                    e,
+                    "An error occurred rechecking license keys."
+                )
             });
         } finally {
             setIsRecheckingLicense(false);
@@ -192,8 +202,8 @@ export default function LicensePage() {
             }
 
             toast({
-                title: t('licenseKeyActivated'),
-                description: t('licenseKeyActivatedDescription')
+                title: "License key activated",
+                description: "The license key has been successfully activated."
             });
 
             setIsCreateModalOpen(false);
@@ -202,8 +212,11 @@ export default function LicensePage() {
         } catch (e) {
             toast({
                 variant: "destructive",
-                title: t('licenseErrorKeyActivate'),
-                description: formatAxiosError(e, t('licenseErrorKeyActivateDescription'))
+                title: "Failed to activate license key",
+                description: formatAxiosError(
+                    e,
+                    "An error occurred while activating the license key."
+                )
             });
         } finally {
             setIsActivatingLicense(false);
@@ -317,7 +330,7 @@ export default function LicensePage() {
                     }}
                     dialog={
                         <div className="space-y-4">
-                            <p> 
+                            <p>
                                 {t('licenseQuestionRemove', {selectedKey: obfuscateLicenseKey(selectedLicenseKey.licenseKey)})}
                             </p>
                             <p>
@@ -373,11 +386,11 @@ export default function LicensePage() {
                                             <Check />
                                             {licenseStatus?.tier ===
                                             "PROFESSIONAL"
-                                                ? "Commercial License"
+                                                ? t('licenseTierProfessional')
                                                 : licenseStatus?.tier ===
                                                     "ENTERPRISE"
-                                                  ? "Commercial License"
-                                                  : "Licensed"}
+                                                  ? t('licenseTierEnterprise')
+                                                  : t('licensed')}
                                         </div>
                                     </div>
                                 ) : (
