@@ -431,7 +431,7 @@
     "accessRoleSelect": "Selecionar função",
     "inviteEmailSentDescription": "Um e-mail foi enviado ao usuário com o link de acesso abaixo. Eles devem acessar o link para aceitar o convite.",
     "inviteSentDescription": "O usuário foi convidado. Eles devem acessar o link abaixo para aceitar o convite.",
-    "inviteExpiresIn": "O convite expirará em <b>{days, plural, =1 {# dia} other {# dias}}</b>.",
+    "inviteExpiresIn": "O convite expirará em {days, plural, =1 {# dia} other {# dias}}.",
     "idpTitle": "Provedor de Identidade",
     "idpSelect": "Selecione o provedor de identidade para o usuário externo",
     "idpNotConfigured": "Nenhum provedor de identidade está configurado. Configure um provedor de identidade antes de criar usuários externos.",

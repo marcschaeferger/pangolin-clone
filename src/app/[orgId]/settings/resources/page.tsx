@@ -10,7 +10,6 @@ import { GetOrgResponse } from "@server/routers/org";
 import OrgProvider from "@app/providers/OrgProvider";
 import ResourcesSplashCard from "./ResourcesSplashCard";
 import { getTranslations } from 'next-intl/server';
-import { useTranslations } from "next-intl";
 
 type ResourcesPageProps = {
     params: Promise<{ orgId: string }>;
@@ -20,6 +19,8 @@ export const dynamic = "force-dynamic";
 
 export default async function ResourcesPage(props: ResourcesPageProps) {
     const params = await props.params;
+    const t = await getTranslations();
+
     let resources: ListResourcesResponse["resources"] = [];
     try {
         const res = await internal.get<AxiosResponse<ListResourcesResponse>>(
@@ -46,8 +47,6 @@ export default async function ResourcesPage(props: ResourcesPageProps) {
     if (!org) {
         redirect(`/${params.orgId}/settings/resources`);
     }
-
-    const t = useTranslations();
 
     const resourceRows: ResourceRow[] = resources.map((resource) => {
         return {

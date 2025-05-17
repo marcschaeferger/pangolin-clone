@@ -371,7 +371,7 @@ export default function Page() {
                                             </AlertTitle>
                                             <AlertDescription>
                                                 {/*TODO(vlalx): Validate replacing */}
-                                                {t('idpJmespathAboutDescription')}
+                                                {t('idpJmespathAboutDescription')}{" "}
                                                 <a
                                                     href="https://jmespath.org"
                                                     target="_blank"
@@ -447,8 +447,7 @@ export default function Page() {
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>
-                                                        "idpOidcConfigureScopes": "Scopes"
-                                                        {t('')}
+                                                        {t('idpOidcConfigureScopes')}
                                                     </FormLabel>
                                                     <FormControl>
                                                         <Input {...field} />

@@ -19,7 +19,7 @@ import UserProvider from "@app/providers/UserProvider";
 import { Layout } from "@app/components/Layout";
 import { SidebarNavItem, SidebarNavProps } from "@app/components/SidebarNav";
 import { orgNavItems } from "@app/app/navigation";
-import { useTranslations } from "next-intl";
+import { getTranslations } from 'next-intl/server';
 
 export const dynamic = "force-dynamic";
 
@@ -47,7 +47,7 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
 
     const cookie = await authCookieHeader();
 
-    const t = useTranslations();
+    const t = await getTranslations();
 
     try {
         const getOrgUser = cache(() =>

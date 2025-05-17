@@ -15,7 +15,7 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator
 } from "@app/components/ui/breadcrumb";
-import { useTranslations } from "next-intl";
+import { getTranslations } from 'next-intl/server';
 
 interface SettingsLayoutProps {
     children: React.ReactNode;
@@ -37,7 +37,7 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
         redirect("/admin/idp");
     }
 
-    const t = useTranslations();
+    const t = await getTranslations();
 
     const navItems: HorizontalTabs = [
         {

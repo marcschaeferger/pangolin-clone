@@ -9,7 +9,7 @@ import { cleanRedirect } from "@app/lib/cleanRedirect";
 import db from "@server/db";
 import { idp } from "@server/db/schemas";
 import { LoginFormIDP } from "@app/components/LoginForm";
-import { useTranslations } from "next-intl";
+import { getTranslations } from 'next-intl/server';
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +41,7 @@ export default async function Page(props: {
         name: idp.name
     })) as LoginFormIDP[];
 
-    const t = useTranslations();
+    const t = await getTranslations();
 
     return (
         <>

@@ -93,8 +93,6 @@ type LocalTarget = Omit<
     "protocol"
 >;
 
-const t = useTranslations();
-
 const proxySettingsSchema = z.object({
     setHostHeader: z
         .string()
@@ -107,7 +105,7 @@ const proxySettingsSchema = z.object({
                 return true;
             },
             {
-                message: t('proxyErrorInvalidHeader')
+                message: "Invalid custom Host Header value. Use domain name format, or save empty to unset custom Host Header."
             }
         )
 });
@@ -125,7 +123,7 @@ const tlsSettingsSchema = z.object({
                 return true;
             },
             {
-                message: t('proxyErrorTls')
+                message: "Invalid TLS Server Name. Use domain name format, or save empty to remove the TLS Server Name."
             }
         )
 });
@@ -138,6 +136,7 @@ export default function ReverseProxyTargets(props: {
     params: Promise<{ resourceId: number }>;
 }) {
     const params = use(props.params);
+    const t = useTranslations();
 
     const { resource, updateResource } = useResourceContext();
 

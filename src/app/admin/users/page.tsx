@@ -7,7 +7,6 @@ import UsersTable, { GlobalUserRow } from "./AdminUsersTable";
 import { Alert, AlertDescription, AlertTitle } from "@app/components/ui/alert";
 import { InfoIcon } from "lucide-react";
 import { getTranslations } from 'next-intl/server';
-import { useTranslations } from "next-intl";
 
 type PageProps = {
     params: Promise<{ orgId: string }>;
@@ -26,7 +25,8 @@ export default async function UsersPage(props: PageProps) {
     } catch (e) {
         console.error(e);
     }
-    const t = useTranslations();
+
+    const t = await getTranslations();
 
     const userRows: GlobalUserRow[] = rows.map((row) => {
         return {

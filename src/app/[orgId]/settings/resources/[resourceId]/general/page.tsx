@@ -67,8 +67,6 @@ import {
 import { SwitchInput } from "@app/components/SwitchInput";
 import { useTranslations } from "next-intl";
 
-const t = useTranslations();
-
 const GeneralFormSchema = z
     .object({
         subdomain: z.string().optional(),
@@ -91,7 +89,7 @@ const GeneralFormSchema = z
             return true;
         },
         {
-            message: t('proxyErrorInvalidPort'),
+            message: "Invalid port number",
             path: ["proxyPort"]
         }
     )
@@ -103,7 +101,7 @@ const GeneralFormSchema = z
             return true;
         },
         {
-            message: t('subdomainErrorInvalid'),
+            message: "Invalid subdomain",
             path: ["subdomain"]
         }
     );
@@ -121,6 +119,7 @@ export default function GeneralForm() {
     const { resource, updateResource } = useResourceContext();
     const { org } = useOrgContext();
     const router = useRouter();
+    const t = useTranslations();
 
     const { env } = useEnvContext();
 
@@ -178,10 +177,7 @@ export default function GeneralForm() {
                     toast({
                         variant: "destructive",
                         title: t('domainErrorFetch'),
-                        description: formatAxiosError(
-                            e,
-                            t('domainErrorFetchDescription')
-                        )
+                        description: formatAxiosError(e, t('domainErrorFetchDescription'))
                     });
                 });
 
@@ -220,10 +216,7 @@ export default function GeneralForm() {
                 toast({
                     variant: "destructive",
                     title: t('resourceErrorUpdate'),
-                    description: formatAxiosError(
-                        e,
-                        t('resourceErrorUpdateDescription')
-                    )
+                    description: formatAxiosError(e, t('resourceErrorUpdateDescription'))
                 });
             });
 
@@ -259,9 +252,7 @@ export default function GeneralForm() {
                 toast({
                     variant: "destructive",
                     title: t('resourceErrorTransfer'),
-                    description: formatAxiosError(
-                        e,
-                        t('resourceErrorTransferDescription')
+                    description: formatAxiosError(e, t('resourceErrorTransferDescription')
                     )
                 });
             });

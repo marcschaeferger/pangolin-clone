@@ -47,10 +47,8 @@ type CreateRoleFormProps = {
     afterDelete?: () => void;
 };
 
-const t = useTranslations();
-
 const formSchema = z.object({
-    newRoleId: z.string({ message: t('accessRoleErrorNewRequired') })
+    newRoleId: z.string({ message: "New role is required" })
 });
 
 export default function DeleteRoleForm({
@@ -60,6 +58,7 @@ export default function DeleteRoleForm({
     afterDelete
 }: CreateRoleFormProps) {
     const { org } = useOrgContext();
+    const t = useTranslations();
 
     const [loading, setLoading] = useState(false);
     const [roles, setRoles] = useState<ListRolesResponse["roles"]>([]);

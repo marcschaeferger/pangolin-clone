@@ -4,7 +4,7 @@ import { AxiosResponse } from "axios";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import OrgApiKeysTable, { OrgApiKeyRow } from "./OrgApiKeysTable";
 import { ListOrgApiKeysResponse } from "@server/routers/apiKeys";
-import { useTranslations } from "next-intl";
+import { getTranslations } from 'next-intl/server';
 
 type ApiKeyPageProps = {
     params: Promise<{ orgId: string }>;
@@ -14,7 +14,8 @@ export const dynamic = "force-dynamic";
 
 export default async function ApiKeysPage(props: ApiKeyPageProps) {
     const params = await props.params;
-    const t = useTranslations();
+    const t = await getTranslations();
+    
     let apiKeys: ListOrgApiKeysResponse["apiKeys"] = [];
     try {
         const res = await internal.get<AxiosResponse<ListOrgApiKeysResponse>>(

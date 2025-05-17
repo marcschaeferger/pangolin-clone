@@ -15,7 +15,7 @@ import {
 import { GetApiKeyResponse } from "@server/routers/apiKeys";
 import ApiKeyProvider from "@app/providers/ApiKeyProvider";
 import { HorizontalTabs } from "@app/components/HorizontalTabs";
-import { useTranslations } from "next-intl";
+import { getTranslations } from 'next-intl/server';
 
 interface SettingsLayoutProps {
     children: React.ReactNode;
@@ -25,7 +25,7 @@ interface SettingsLayoutProps {
 export default async function SettingsLayout(props: SettingsLayoutProps) {
     const params = await props.params;
 
-    const t = useTranslations();
+    const t = await getTranslations();
 
     const { children } = props;
 

@@ -60,30 +60,28 @@ interface IdpOption {
     type: string;
 }
 
-const t = useTranslations();
-
 const internalFormSchema = z.object({
-    email: z.string().email({ message: t('emailInvalid') }),
-    validForHours: z.string().min(1, { message: t('inviteValidityDuration') }),
-    roleId: z.string().min(1, { message: t('accessRoleSelectPlease') })
+    email: z.string().email({ message: "Invalid email address" }),
+    validForHours: z.string().min(1, { message: "Please select a duration" }),
+    roleId: z.string().min(1, { message: "Please select a role" })
 });
 
 const externalFormSchema = z.object({
-    username: z.string().min(1, { message: t('usernameRequired') }),
+    username: z.string().min(1, { message: "Username is required" }),
     email: z
         .string()
-        .email({ message: t('emailInvalid') })
+        .email({ message: "Invalid email address" })
         .optional()
         .or(z.literal("")),
     name: z.string().optional(),
-    roleId: z.string().min(1, { message: t('accessRoleSelectPlease') }),
-    idpId: z.string().min(1, { message: t('idpSelectPlease') })
+    roleId: z.string().min(1, { message: "Please select a role" }),
+    idpId: z.string().min(1, { message: "Please select an identity provider" })
 });
 
 const formatIdpType = (type: string) => {
     switch (type.toLowerCase()) {
         case "oidc":
-            return t('idpGenericOidc');
+            return "Generic OAuth2/OIDC provider.";
         default:
             return type;
     }
@@ -94,6 +92,7 @@ export default function Page() {
     const router = useRouter();
     const { env } = useEnvContext();
     const api = createApiClient({ env });
+    const t = useTranslations();
 
     const [userType, setUserType] = useState<UserType | null>("internal");
     const [inviteLink, setInviteLink] = useState<string | null>(null);
@@ -351,7 +350,7 @@ export default function Page() {
                             <SettingsSection>
                                 <SettingsSectionHeader>
                                     <SettingsSectionTitle>
-                                        {t('userInfo')}
+                                        {t('userSettings')}
                                     </SettingsSectionTitle>
                                     <SettingsSectionDescription>
                                         {t('userSettingsDescription')}

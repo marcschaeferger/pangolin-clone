@@ -11,7 +11,6 @@ import { verifySession } from "@app/lib/auth/verifySession";
 import AccessPageHeaderAndNav from "../AccessPageHeaderAndNav";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { getTranslations } from 'next-intl/server';
-import { useTranslations } from "next-intl";
 
 type UsersPageProps = {
     params: Promise<{ orgId: string }>;
@@ -24,8 +23,7 @@ export default async function UsersPage(props: UsersPageProps) {
 
     const getUser = cache(verifySession);
     const user = await getUser();
-
-    const t = useTranslations();
+    const t = await getTranslations();
 
     let users: ListUsersResponse["users"] = [];
     let hasInvitations = false;

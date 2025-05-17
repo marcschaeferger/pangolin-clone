@@ -1,8 +1,9 @@
-import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { getTranslations } from 'next-intl/server';
 
 export default async function NotFound() {
-    const t = useTranslations();
+
+    const t = await getTranslations();
+
     return (
         <div className="w-full max-w-md mx-auto p-3 md:mt-32 text-center">
             <h1 className="text-6xl font-bold mb-4">404</h1>
