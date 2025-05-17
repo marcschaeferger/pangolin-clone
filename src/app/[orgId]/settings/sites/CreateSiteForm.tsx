@@ -57,10 +57,8 @@ const createSiteFormSchema = z.object({
         .string()
         .min(2, {
             message: "Name must be at least 2 characters."
-            message: "Name must be at least 2 characters."
         })
         .max(30, {
-            message: "Name must not be longer than 30 characters."
             message: "Name must not be longer than 30 characters."
         }),
     method: z.enum(["wireguard", "newt", "local"])

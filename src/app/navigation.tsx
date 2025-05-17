@@ -10,6 +10,7 @@ import {
     KeyRound,
     TicketCheck
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export const orgLangingNavItems: SidebarNavItem[] = [
     {
