@@ -15,7 +15,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import CopyToClipboard from "@app/components/CopyToClipboard";
 import CopyTextBox from "@app/components/CopyTextBox";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 
 interface AccessTokenSectionProps {
     token: string;

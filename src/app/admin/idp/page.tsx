@@ -3,7 +3,7 @@ import { authCookieHeader } from "@app/lib/api/cookies";
 import { AxiosResponse } from "axios";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import IdpTable, { IdpRow } from "./AdminIdpTable";
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from "next-intl/server";
 
 export default async function IdpPage() {
     let idps: IdpRow[] = [];

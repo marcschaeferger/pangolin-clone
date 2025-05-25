@@ -13,7 +13,7 @@ import {
 } from "@app/components/InfoSection";
 import Link from "next/link";
 import { Switch } from "@app/components/ui/switch";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 
 type ResourceInfoBoxType = {};
 

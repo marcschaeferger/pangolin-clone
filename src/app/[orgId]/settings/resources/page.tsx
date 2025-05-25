@@ -9,7 +9,7 @@ import { cache } from "react";
 import { GetOrgResponse } from "@server/routers/org";
 import OrgProvider from "@app/providers/OrgProvider";
 import ResourcesSplashCard from "./ResourcesSplashCard";
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from "next-intl/server";
 
 type ResourcesPageProps = {
     params: Promise<{ orgId: string }>;

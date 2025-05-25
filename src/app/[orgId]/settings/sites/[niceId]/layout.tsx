@@ -16,7 +16,7 @@ import {
     BreadcrumbSeparator
 } from "@app/components/ui/breadcrumb";
 import SiteInfoCard from "./SiteInfoCard";
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from "next-intl/server";
 
 interface SettingsLayoutProps {
     children: React.ReactNode;

@@ -12,7 +12,7 @@ import {
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 
 type InviteStatusCardProps = {
     type: "rejected" | "wrong_user" | "user_does_not_exist" | "not_logged_in";

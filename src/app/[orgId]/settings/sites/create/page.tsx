@@ -64,33 +64,7 @@ import {
 } from "@app/components/ui/breadcrumb";
 import Link from "next/link";
 import { QRCodeCanvas } from "qrcode.react";
-import { useTranslations } from 'next-intl';
-
-const createSiteFormSchema = z
-    .object({
-        name: z
-            .string()
-            .min(2, "Name must be at least 2 characters.")
-            .max(30, {
-                message: "Name must not be longer than 30 characters."
-            }),
-        method: z.enum(["newt", "wireguard", "local"]),
-        copied: z.boolean()
-    })
-    .refine(
-        (data) => {
-            if (data.method !== "local") {
-                return data.copied;
-            }
-            return true;
-        },
-        {
-            message: "Please confirm that you have copied the config.",
-            path: ["copied"]
-        }
-    );
-
-type CreateSiteFormValues = z.infer<typeof createSiteFormSchema>;
+import { useTranslations } from "next-intl";
 
 type SiteType = "newt" | "wireguard" | "local";
 
@@ -126,6 +100,32 @@ export default function Page() {
     const { orgId } = useParams();
     const router = useRouter();
     const t = useTranslations();
+
+    const createSiteFormSchema = z
+        .object({
+            name: z
+                .string()
+                .min(2, { message: t('nameMin', {len: 2}) })
+                .max(30, {
+                    message: t('nameMax', {len: 30})
+                }),
+            method: z.enum(["newt", "wireguard", "local"]),
+            copied: z.boolean()
+        })
+        .refine(
+            (data) => {
+                if (data.method !== "local") {
+                    return data.copied;
+                }
+                return true;
+            },
+            {
+                message: t('sitesConfirmCopy'),
+                path: ["copied"]
+            }
+        );
+
+    type CreateSiteFormValues = z.infer<typeof createSiteFormSchema>;
 
     const [tunnelTypes, setTunnelTypes] = useState<
         ReadonlyArray<TunnelTypeOption>

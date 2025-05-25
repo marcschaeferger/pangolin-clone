@@ -1,4 +1,4 @@
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from "next-intl/server";
 
 export default async function NotFound() {
 

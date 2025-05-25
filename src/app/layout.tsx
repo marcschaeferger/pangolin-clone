@@ -13,8 +13,8 @@ import LicenseStatusProvider from "@app/providers/LicenseStatusProvider";
 import { GetLicenseStatusResponse } from "@server/routers/license";
 import LicenseViolation from "./components/LicenseViolation";
 import { cache } from "react";
-import { NextIntlClientProvider } from 'next-intl';
-import { getLocale } from 'next-intl/server';
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale } from "next-intl/server";
 
 export const metadata: Metadata = {
     title: `Dashboard - Pangolin`,

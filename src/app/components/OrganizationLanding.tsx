@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight, Plus } from "lucide-react";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 
 interface Organization {
     id: string;

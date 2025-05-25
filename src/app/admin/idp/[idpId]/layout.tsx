@@ -15,7 +15,7 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator
 } from "@app/components/ui/breadcrumb";
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from "next-intl/server";
 
 interface SettingsLayoutProps {
     children: React.ReactNode;
@@ -52,7 +52,7 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
     return (
         <>
             <SettingsSectionTitle
-                title={t('idpSettings', { idpName: idp?.idp.name })}
+                title={t('idpSettings', { idpName: idp.idp.name })}
                 description={t('idpSettingsDescription')}
             />
 

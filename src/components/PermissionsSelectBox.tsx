@@ -163,13 +163,15 @@ export default function PermissionsSelectBox({
         onChange(updated);
     };
 
+    const t = useTranslations();
+
     return (
         <>
             <div className="mb-4">
                 <CheckboxWithLabel
                     variant="outlinePrimarySquare"
                     id="toggle-all-permissions"
-                    label="Allow All Permissions"
+                    label={t('permissionsAllowAll')}
                     checked={allPermissionsChecked}
                     onCheckedChange={(checked) =>
                         toggleAllPermissions(checked as boolean)
@@ -188,7 +190,7 @@ export default function PermissionsSelectBox({
                                         <CheckboxWithLabel
                                             variant="outlinePrimarySquare"
                                             id={`toggle-all-${category}`}
-                                            label="Allow All"
+                                            label={t('allowAll')}
                                             checked={allChecked}
                                             onCheckedChange={(checked) =>
                                                 toggleAllInCategory(

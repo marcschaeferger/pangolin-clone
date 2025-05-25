@@ -39,13 +39,6 @@ import { useEnvContext } from "@app/hooks/useEnvContext";
 import { cleanRedirect } from "@app/lib/cleanRedirect";
 import { useTranslations } from "next-intl";
 
-const FormSchema = z.object({
-    email: z.string().email({ message: "Invalid email address" }),
-    pin: z.string().min(8, {
-        message: "Your verification code must be 8 characters.",
-    }),
-});
-
 export type VerifyEmailFormProps = {
     email: string;
     redirect?: string;
@@ -64,6 +57,13 @@ export default function VerifyEmailForm({
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const api = createApiClient(useEnvContext());
+
+    const FormSchema = z.object({
+        email: z.string().email({ message: t('emailInvalid') }),
+        pin: z.string().min(8, {
+            message: t('verificationCodeLengthRequirements'),
+        }),
+    });
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),

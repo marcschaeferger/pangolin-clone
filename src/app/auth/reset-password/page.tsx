@@ -4,7 +4,7 @@ import { cache } from "react";
 import ResetPasswordForm from "./ResetPasswordForm";
 import Link from "next/link";
 import { cleanRedirect } from "@app/lib/cleanRedirect";
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 

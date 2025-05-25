@@ -31,7 +31,7 @@ import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import Image from "next/image";
 import { cleanRedirect } from "@app/lib/cleanRedirect";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 
 type SignupFormProps = {
     redirect?: string;

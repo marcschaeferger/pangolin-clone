@@ -33,14 +33,9 @@ import {
 } from "@app/components/ui/form";
 import { Alert, AlertDescription } from "@app/components/ui/alert";
 import CreateSiteForm from "../[orgId]/settings/sites/CreateSiteForm";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 
 type Step = "org" | "site" | "resources";
-
-const orgSchema = z.object({
-    orgName: z.string().min(1, { message: "Organization name is required" }),
-    orgId: z.string().min(1, { message: "Organization ID is required" })
-});
 
 export default function StepperForm() {
     const [currentStep, setCurrentStep] = useState<Step>("org");
@@ -50,6 +45,11 @@ export default function StepperForm() {
     const [loading, setLoading] = useState(false);
     const [isChecked, setIsChecked] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const orgSchema = z.object({
+        orgName: z.string().min(1, { message: t('orgNameRequired') }),
+        orgId: z.string().min(1, { message: t('orgIdRequired') })
+    });
 
     const orgForm = useForm<z.infer<typeof orgSchema>>({
         resolver: zodResolver(orgSchema),

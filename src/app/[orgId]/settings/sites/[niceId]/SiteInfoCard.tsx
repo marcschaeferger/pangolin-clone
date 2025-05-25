@@ -9,7 +9,7 @@ import {
     InfoSections,
     InfoSectionTitle
 } from "@app/components/InfoSection";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 
 type SiteInfoCardProps = {};
 

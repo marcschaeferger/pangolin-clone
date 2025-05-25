@@ -31,13 +31,7 @@ import { formatAxiosError } from "@app/lib/api";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { useState } from "react";
-import { useTranslations } from 'next-intl';
-
-const GeneralFormSchema = z.object({
-    name: z.string().nonempty("Name is required")
-});
-
-type GeneralFormValues = z.infer<typeof GeneralFormSchema>;
+import { useTranslations } from "next-intl";
 
 export default function GeneralPage() {
     const { site, updateSite } = useSiteContext();
@@ -47,6 +41,13 @@ export default function GeneralPage() {
     const [loading, setLoading] = useState(false);
 
     const router = useRouter();
+    const t = useTranslations();
+
+    const GeneralFormSchema = z.object({
+        name: z.string().nonempty(t('nameRequired'))
+    });
+
+    type GeneralFormValues = z.infer<typeof GeneralFormSchema>;
 
     const form = useForm<GeneralFormValues>({
         resolver: zodResolver(GeneralFormSchema),
@@ -55,7 +56,6 @@ export default function GeneralPage() {
         },
         mode: "onChange"
     });
-    const t = useTranslations();
 
     async function onSubmit(data: GeneralFormValues) {
         setLoading(true);

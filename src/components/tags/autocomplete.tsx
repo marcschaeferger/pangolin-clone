@@ -4,7 +4,7 @@ import { TagInputStyleClassesProps, type Tag as TagType } from "./tag-input";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Button } from "../ui/button";
 import { cn } from "@app/lib/cn";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 
 type AutocompleteProps = {
     tags: TagType[];

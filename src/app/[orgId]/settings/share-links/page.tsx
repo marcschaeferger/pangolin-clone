@@ -9,7 +9,7 @@ import OrgProvider from "@app/providers/OrgProvider";
 import { ListAccessTokensResponse } from "@server/routers/accessToken";
 import ShareLinksTable, { ShareLinkRow } from "./ShareLinksTable";
 import ShareableLinksSplash from "./ShareLinksSplash";
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from "next-intl/server";
 
 type ShareLinksPageProps = {
     params: Promise<{ orgId: string }>;

@@ -42,14 +42,6 @@ import { QRCodeCanvas, QRCodeSVG } from "qrcode.react";
 import { useUserContext } from "@app/hooks/useUserContext";
 import { useTranslations } from "next-intl";
 
-const enableSchema = z.object({
-    password: z.string().min(1, { message: "Password is required" })
-});
-
-const confirmSchema = z.object({
-    code: z.string().length(6, { message: "Invalid code" })
-});
-
 type Enable2FaProps = {
     open: boolean;
     setOpen: (val: boolean) => void;
@@ -68,6 +60,15 @@ export default function Enable2FaForm({ open, setOpen }: Enable2FaProps) {
     const { user, updateUser } = useUserContext();
 
     const api = createApiClient(useEnvContext());
+    const t = useTranslations();
+
+    const enableSchema = z.object({
+        password: z.string().min(1, { message: t('passwordRequired') })
+    });
+
+    const confirmSchema = z.object({
+        code: z.string().length(6, { message: t('pincodeInvalid') })
+    });
 
     const enableForm = useForm<z.infer<typeof enableSchema>>({
         resolver: zodResolver(enableSchema),
@@ -82,8 +83,6 @@ export default function Enable2FaForm({ open, setOpen }: Enable2FaProps) {
             code: ""
         }
     });
-
-    const t = useTranslations();
 
     const request2fa = async (values: z.infer<typeof enableSchema>) => {
         setLoading(true);

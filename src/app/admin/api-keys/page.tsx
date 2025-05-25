@@ -4,7 +4,7 @@ import { AxiosResponse } from "axios";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { ListRootApiKeysResponse } from "@server/routers/apiKeys";
 import ApiKeysTable, { ApiKeyRow } from "./ApiKeysTable";
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from "next-intl/server";
 
 type ApiKeyPageProps = {};
 

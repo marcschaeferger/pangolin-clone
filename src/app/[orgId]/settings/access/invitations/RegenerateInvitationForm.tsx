@@ -60,13 +60,13 @@ export default function RegenerateInvitationForm({
     const t = useTranslations();
 
     const validForOptions = [
-        { hours: 24, name: t('day', { count: 1 }) },
-        { hours: 48, name: t('day', { count: 2 }) },
-        { hours: 72, name: t('day', { count: 3 }) },
-        { hours: 96, name: t('day', { count: 4 }) },
-        { hours: 120, name: t('day', { count: 5 }) },
-        { hours: 144, name: t('day', { count: 6 }) },
-        { hours: 168, name: t('day', { count: 7 }) }
+        { hours: 24, name: t('day', {count: 1}) },
+        { hours: 48, name: t('day', {count: 2}) },
+        { hours: 72, name: t('day', {count: 3}) },
+        { hours: 96, name: t('day', {count: 4}) },
+        { hours: 120, name: t('day', {count: 5}) },
+        { hours: 144, name: t('day', {count: 6}) },
+        { hours: 168, name: t('day', {count: 7}) }
     ];
 
     useEffect(() => {
@@ -177,7 +177,7 @@ export default function RegenerateInvitationForm({
                     {!inviteLink ? (
                         <div>
                             <p>
-                                {t('inviteQuestionRegenerate', {email: invitation?.email || ''})}
+                                {t('inviteQuestionRegenerate', {email: invitation?.email})}
                             </p>
                             <div className="flex items-center space-x-2 mt-4">
                                 <Checkbox

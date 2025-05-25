@@ -8,7 +8,7 @@ import { LicenseKeyCache } from "@server/license/license";
 import { ArrowUpDown } from "lucide-react";
 import moment from "moment";
 import CopyToClipboard from "@app/components/CopyToClipboard";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 
 type LicenseKeysDataTableProps = {
     licenseKeys: LicenseKeyCache[];

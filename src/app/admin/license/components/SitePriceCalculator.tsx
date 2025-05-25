@@ -11,7 +11,7 @@ import {
     CredenzaHeader,
     CredenzaTitle
 } from "@app/components/Credenza";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 
 type SitePriceCalculatorProps = {
     isOpen: boolean;

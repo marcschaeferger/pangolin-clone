@@ -9,7 +9,7 @@ import { cleanRedirect } from "@app/lib/cleanRedirect";
 import db from "@server/db";
 import { idp } from "@server/db/schemas";
 import { LoginFormIDP } from "@app/components/LoginForm";
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 

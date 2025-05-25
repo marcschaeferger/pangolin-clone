@@ -66,22 +66,13 @@ import {
     CollapsibleTrigger
 } from "@app/components/ui/collapsible";
 import AccessTokenSection from "./AccessTokenUsage";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 
 type FormProps = {
     open: boolean;
     setOpen: (open: boolean) => void;
     onCreated?: (result: ShareLinkRow) => void;
 };
-
-const formSchema = z.object({
-    resourceId: z.number({ message: "Please select a resource" }),
-    resourceName: z.string(),
-    resourceUrl: z.string(),
-    timeUnit: z.string(),
-    timeValue: z.coerce.number().int().positive().min(1),
-    title: z.string().optional()
-});
 
 export default function CreateShareLinkForm({
     open,
@@ -100,6 +91,7 @@ export default function CreateShareLinkForm({
     const [neverExpire, setNeverExpire] = useState(false);
 
     const [isOpen, setIsOpen] = useState(false);
+    const t = useTranslations();
 
     const [resources, setResources] = useState<
         {
@@ -110,7 +102,14 @@ export default function CreateShareLinkForm({
         }[]
     >([]);
 
-    const t = useTranslations();
+    const formSchema = z.object({
+        resourceId: z.number({ message: t('shareErrorSelectResource') }),
+        resourceName: z.string(),
+        resourceUrl: z.string(),
+        timeUnit: z.string(),
+        timeValue: z.coerce.number().int().positive().min(1),
+        title: z.string().optional()
+    });
 
     const timeUnits = [
         { unit: "minutes", name: t('minutes') },

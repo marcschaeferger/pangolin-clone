@@ -5,7 +5,7 @@ import { AxiosResponse } from "axios";
 import SitesTable, { SiteRow } from "./SitesTable";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import SitesSplashCard from "./SitesSplashCard";
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from "next-intl/server";
 
 type SitesPageProps = {
     params: Promise<{ orgId: string }>;

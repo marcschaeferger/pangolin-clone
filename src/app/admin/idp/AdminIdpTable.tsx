@@ -60,7 +60,7 @@ export default function IdpTable({ idps }: Props) {
     const getTypeDisplay = (type: string) => {
         switch (type) {
             case "oidc":
-                return t('idpOidc');
+                return "OAuth2/OIDC";
             default:
                 return type;
         }

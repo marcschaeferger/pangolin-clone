@@ -50,26 +50,7 @@ import {
     CollapsibleTrigger
 } from "@app/components/ui/collapsible";
 import LoaderPlaceholder from "@app/components/PlaceHolderLoader";
-import { useTranslations } from 'next-intl';
-
-const createSiteFormSchema = z.object({
-    name: z
-        .string()
-        .min(2, {
-            message: "Name must be at least 2 characters."
-        })
-        .max(30, {
-            message: "Name must not be longer than 30 characters."
-        }),
-    method: z.enum(["wireguard", "newt", "local"])
-});
-
-type CreateSiteFormValues = z.infer<typeof createSiteFormSchema>;
-
-const defaultValues: Partial<CreateSiteFormValues> = {
-    name: "",
-    method: "newt"
-};
+import { useTranslations } from "next-intl";
 
 type CreateSiteFormProps = {
     onCreate?: (site: SiteRow) => void;
@@ -96,6 +77,25 @@ export default function CreateSiteForm({
         publicKey: string;
         privateKey: string;
     } | null>(null);
+
+    const createSiteFormSchema = z.object({
+        name: z
+            .string()
+            .min(2, {
+                message: t('nameMin', {len: 2})
+            })
+            .max(30, {
+                message: t('nameMax', {len: 30})
+            }),
+        method: z.enum(["wireguard", "newt", "local"])
+    });
+
+    type CreateSiteFormValues = z.infer<typeof createSiteFormSchema>;
+
+    const defaultValues: Partial<CreateSiteFormValues> = {
+        name: "",
+        method: "newt"
+    };
 
     const [siteDefaults, setSiteDefaults] =
         useState<PickSiteDefaultsResponse | null>(null);

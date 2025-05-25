@@ -6,7 +6,7 @@ import { AxiosResponse } from "axios";
 import { redirect } from "next/navigation";
 import InviteStatusCard from "./InviteStatusCard";
 import { formatAxiosError } from "@app/lib/api";
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from "next-intl/server";
 
 export default async function InvitePage(props: {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;

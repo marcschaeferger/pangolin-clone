@@ -93,45 +93,6 @@ type LocalTarget = Omit<
     "protocol"
 >;
 
-const proxySettingsSchema = z.object({
-    setHostHeader: z
-        .string()
-        .optional()
-        .refine(
-            (data) => {
-                if (data) {
-                    return tlsNameSchema.safeParse(data).success;
-                }
-                return true;
-            },
-            {
-                message: "Invalid custom Host Header value. Use domain name format, or save empty to unset custom Host Header."
-            }
-        )
-});
-
-const tlsSettingsSchema = z.object({
-    ssl: z.boolean(),
-    tlsServerName: z
-        .string()
-        .optional()
-        .refine(
-            (data) => {
-                if (data) {
-                    return tlsNameSchema.safeParse(data).success;
-                }
-                return true;
-            },
-            {
-                message: "Invalid TLS Server Name. Use domain name format, or save empty to remove the TLS Server Name."
-            }
-        )
-});
-
-type ProxySettingsValues = z.infer<typeof proxySettingsSchema>;
-type TlsSettingsValues = z.infer<typeof tlsSettingsSchema>;
-type TargetsSettingsValues = z.infer<typeof targetsSettingsSchema>;
-
 export default function ReverseProxyTargets(props: {
     params: Promise<{ resourceId: number }>;
 }) {
@@ -153,6 +114,45 @@ export default function ReverseProxyTargets(props: {
     const [pageLoading, setPageLoading] = useState(true);
     const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
     const router = useRouter();
+
+    const proxySettingsSchema = z.object({
+        setHostHeader: z
+            .string()
+            .optional()
+            .refine(
+                (data) => {
+                    if (data) {
+                        return tlsNameSchema.safeParse(data).success;
+                    }
+                    return true;
+                },
+                {
+                    message: t('proxyErrorInvalidHeader')
+                }
+            )
+    });
+
+    const tlsSettingsSchema = z.object({
+        ssl: z.boolean(),
+        tlsServerName: z
+            .string()
+            .optional()
+            .refine(
+                (data) => {
+                    if (data) {
+                        return tlsNameSchema.safeParse(data).success;
+                    }
+                    return true;
+                },
+                {
+                    message: t('proxyErrorTls')
+                }
+            )
+    });
+
+    type ProxySettingsValues = z.infer<typeof proxySettingsSchema>;
+    type TlsSettingsValues = z.infer<typeof tlsSettingsSchema>;
+    type TargetsSettingsValues = z.infer<typeof targetsSettingsSchema>;
 
     const addTargetForm = useForm({
         resolver: zodResolver(addTargetSchema),
@@ -583,7 +583,7 @@ export default function ReverseProxyTargets(props: {
                                                 <FormControl>
                                                     <SwitchInput
                                                         id="ssl-toggle"
-                                                        label="Enable SSL (https)"
+                                                        label={t('proxyEnableSSL')}
                                                         defaultChecked={
                                                             field.value
                                                         }
@@ -927,7 +927,6 @@ function isIPInSubnet(subnet: string, ip: string): boolean {
     // Split subnet into IP and mask parts
     const [subnetIP, maskBits] = subnet.split("/");
     const mask = parseInt(maskBits);
-    const t = useTranslations();
 
     if (mask < 0 || mask > 32) {
         throw new Error(t('subnetMaskErrorInvalid'));

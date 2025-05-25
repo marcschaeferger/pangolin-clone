@@ -50,13 +50,6 @@ import { Check, ExternalLink } from "lucide-react";
 import confetti from "canvas-confetti";
 import { useTranslations } from "next-intl";
 
-const formSchema = z.object({
-    githubUsername: z
-        .string()
-        .nonempty({ message: "GitHub username is required" }),
-    key: z.string().nonempty({ message: "Supporter key is required" })
-});
-
 export default function SupporterStatus() {
     const { supporterStatus, updateSupporterStatus } =
         useSupporterStatusContext();
@@ -65,6 +58,14 @@ export default function SupporterStatus() {
     const [purchaseOptionsOpen, setPurchaseOptionsOpen] = useState(false);
 
     const api = createApiClient(useEnvContext());
+    const t = useTranslations();
+
+    const formSchema = z.object({
+        githubUsername: z
+            .string()
+            .nonempty({ message: "GitHub username is required" }),
+        key: z.string().nonempty({ message: "Supporter key is required" })
+    });
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -73,8 +74,6 @@ export default function SupporterStatus() {
             key: ""
         }
     });
-
-    const t = useTranslations();
 
     async function hide() {
         await api.post("/supporter-key/hide");
@@ -167,7 +166,7 @@ export default function SupporterStatus() {
                 title: t('error'),
                 description: formatAxiosError(
                     error,
-                    "Failed to validate supporter key."
+                    t('supportKeyErrorValidationDescription')
                 )
             });
             return;

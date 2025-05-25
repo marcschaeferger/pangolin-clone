@@ -33,7 +33,7 @@ import { ListAccessTokensResponse } from "@server/routers/accessToken";
 import moment from "moment";
 import CreateShareLinkForm from "./CreateShareLinkForm";
 import { constructShareLink } from "@app/lib/shareLinks";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 
 export type ShareLinkRow = {
     accessTokenId: string;

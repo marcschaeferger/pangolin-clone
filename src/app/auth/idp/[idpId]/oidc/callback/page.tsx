@@ -3,7 +3,7 @@ import ValidateOidcToken from "./ValidateOidcToken";
 import { idp } from "@server/db/schemas";
 import db from "@server/db";
 import { eq } from "drizzle-orm";
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from "next-intl/server";
 
 export default async function Page(props: {
     params: Promise<{ orgId: string; idpId: string }>;

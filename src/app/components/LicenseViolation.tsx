@@ -3,7 +3,7 @@
 import { Button } from "@app/components/ui/button";
 import { useLicenseStatusContext } from "@app/hooks/useLicenseStatusContext";
 import { useState } from "react";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 
 export default function LicenseViolation() {
     const { licenseStatus } = useLicenseStatusContext();

@@ -14,7 +14,7 @@ import {
 } from "@app/components/Credenza";
 import { SiteRow } from "./SitesTable";
 import CreateSiteForm from "./CreateSiteForm";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 
 type CreateSiteFormProps = {
     open: boolean;

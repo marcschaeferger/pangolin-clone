@@ -67,45 +67,6 @@ import {
 import { SwitchInput } from "@app/components/SwitchInput";
 import { useTranslations } from "next-intl";
 
-const GeneralFormSchema = z
-    .object({
-        subdomain: z.string().optional(),
-        name: z.string().min(1).max(255),
-        proxyPort: z.number().optional(),
-        http: z.boolean(),
-        isBaseDomain: z.boolean().optional(),
-        domainId: z.string().optional()
-    })
-    .refine(
-        (data) => {
-            if (!data.http) {
-                return z
-                    .number()
-                    .int()
-                    .min(1)
-                    .max(65535)
-                    .safeParse(data.proxyPort).success;
-            }
-            return true;
-        },
-        {
-            message: "Invalid port number",
-            path: ["proxyPort"]
-        }
-    )
-    .refine(
-        (data) => {
-            if (data.http && !data.isBaseDomain) {
-                return subdomainSchema.safeParse(data.subdomain).success;
-            }
-            return true;
-        },
-        {
-            message: "Invalid subdomain",
-            path: ["subdomain"]
-        }
-    );
-
 const TransferFormSchema = z.object({
     siteId: z.number()
 });
@@ -139,6 +100,45 @@ export default function GeneralForm() {
     const [domainType, setDomainType] = useState<"subdomain" | "basedomain">(
         resource.isBaseDomain ? "basedomain" : "subdomain"
     );
+
+    const GeneralFormSchema = z
+        .object({
+            subdomain: z.string().optional(),
+            name: z.string().min(1).max(255),
+            proxyPort: z.number().optional(),
+            http: z.boolean(),
+            isBaseDomain: z.boolean().optional(),
+            domainId: z.string().optional()
+        })
+        .refine(
+            (data) => {
+                if (!data.http) {
+                    return z
+                        .number()
+                        .int()
+                        .min(1)
+                        .max(65535)
+                        .safeParse(data.proxyPort).success;
+                }
+                return true;
+            },
+            {
+                message: t('proxyErrorInvalidPort'),
+                path: ["proxyPort"]
+            }
+        )
+        .refine(
+            (data) => {
+                if (data.http && !data.isBaseDomain) {
+                    return subdomainSchema.safeParse(data.subdomain).success;
+                }
+                return true;
+            },
+            {
+                message: t('subdomainErrorInvalid'),
+                path: ["subdomain"]
+            }
+        );
 
     const form = useForm<GeneralFormValues>({
         resolver: zodResolver(GeneralFormSchema),

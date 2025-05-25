@@ -7,11 +7,11 @@ import {
     CardTitle,
 } from "@app/components/ui/card";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
 export default async function ResourceNotFound() {
     
-    const t = useTranslations();
+    const t = await getTranslations();
 
     return (
         <Card className="w-full max-w-md">

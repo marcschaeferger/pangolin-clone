@@ -4,7 +4,7 @@ import {
     ColumnDef,
 } from "@tanstack/react-table";
 import { DataTable } from "@app/components/ui/data-table";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];

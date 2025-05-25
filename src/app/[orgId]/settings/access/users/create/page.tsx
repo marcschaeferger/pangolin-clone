@@ -60,15 +60,6 @@ interface IdpOption {
     type: string;
 }
 
-const formatIdpType = (type: string) => {
-    switch (type.toLowerCase()) {
-        case "oidc":
-            return "Generic OAuth2/OIDC provider.";
-        default:
-            return type;
-    }
-};
-
 export default function Page() {
     const { orgId } = useParams();
     const router = useRouter();
@@ -103,6 +94,15 @@ export default function Page() {
         roleId: z.string().min(1, { message: t('accessRoleSelectPlease') }),
         idpId: z.string().min(1, { message: t('idpSelectPlease') })
     });
+
+    const formatIdpType = (type: string) => {
+        switch (type.toLowerCase()) {
+            case "oidc":
+                return t('idpGenericOidc');
+            default:
+                return type;
+        }
+    };
 
     const validFor = [
         { hours: 24, name: t('day', {count: 1}) },

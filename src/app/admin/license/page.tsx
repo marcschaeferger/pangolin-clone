@@ -54,17 +54,7 @@ import Link from "next/link";
 import { Checkbox } from "@app/components/ui/checkbox";
 import { Alert, AlertDescription, AlertTitle } from "@app/components/ui/alert";
 import { useSupporterStatusContext } from "@app/hooks/useSupporterStatusContext";
-import { useTranslations } from 'next-intl';
-
-const formSchema = z.object({
-    licenseKey: z
-        .string()
-        .nonempty({ message: "License key is required" })
-        .max(255),
-    agreeToTerms: z.boolean().refine((val) => val === true, {
-        message: "You must agree to the license terms"
-    })
-});
+import { useTranslations } from "next-intl";
 
 function obfuscateLicenseKey(key: string): string {
     if (key.length <= 8) return key;
@@ -95,6 +85,18 @@ export default function LicensePage() {
     const [isRecheckingLicense, setIsRecheckingLicense] = useState(false);
     const { supporterStatus } = useSupporterStatusContext();
 
+    const t = useTranslations();
+
+    const formSchema = z.object({
+        licenseKey: z
+            .string()
+            .nonempty({ message: t('licenseKeyRequired') })
+            .max(255),
+        agreeToTerms: z.boolean().refine((val) => val === true, {
+            message: t('licenseTermsAgree')
+        })
+    });
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -102,8 +104,6 @@ export default function LicensePage() {
             agreeToTerms: false
         }
     });
-
-    const t = useTranslations();
 
     useEffect(() => {
         async function load() {

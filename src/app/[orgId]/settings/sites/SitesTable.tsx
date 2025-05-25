@@ -27,7 +27,7 @@ import { formatAxiosError } from "@app/lib/api";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import CreateSiteFormModal from "./CreateSiteModal";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 
 export type SiteRow = {
     id: number;

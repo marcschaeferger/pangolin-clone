@@ -50,22 +50,6 @@ const requestSchema = z.object({
     email: z.string().email()
 });
 
-const formSchema = z
-    .object({
-        email: z.string().email({ message: "Invalid email address" }),
-        token: z.string().min(8, { message: "Invalid token" }),
-        password: passwordSchema,
-        confirmPassword: passwordSchema
-    })
-    .refine((data) => data.password === data.confirmPassword, {
-        path: ["confirmPassword"],
-        message: "Passwords do not match"
-    });
-
-const mfaSchema = z.object({
-    code: z.string().length(6, { message: "Invalid code" })
-});
-
 export type ResetPasswordFormProps = {
     emailParam?: string;
     tokenParam?: string;
@@ -82,6 +66,7 @@ export default function ResetPasswordForm({
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const t = useTranslations();
 
     function getState() {
         if (emailParam && !tokenParam) {
@@ -98,6 +83,22 @@ export default function ResetPasswordForm({
     const [state, setState] = useState<"request" | "reset" | "mfa">(getState());
 
     const api = createApiClient(useEnvContext());
+
+    const formSchema = z
+        .object({
+            email: z.string().email({ message: t('emailInvalid') }),
+            token: z.string().min(8, { message: t('tokenInvalid') }),
+            password: passwordSchema,
+            confirmPassword: passwordSchema
+        })
+        .refine((data) => data.password === data.confirmPassword, {
+            path: ["confirmPassword"],
+            message: t('passwordNotMatch')
+        });
+
+    const mfaSchema = z.object({
+        code: z.string().length(6, { message: t('pincodeInvalid') })
+    });
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -122,8 +123,6 @@ export default function ResetPasswordForm({
             email: emailParam || ""
         }
     });
-
-    const t = useTranslations();
 
     async function onRequest(data: z.infer<typeof requestSchema>) {
         const { email } = data;

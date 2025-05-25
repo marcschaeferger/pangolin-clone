@@ -6,7 +6,7 @@ import { AdminListUsersResponse } from "@server/routers/user/adminListUsers";
 import UsersTable, { GlobalUserRow } from "./AdminUsersTable";
 import { Alert, AlertDescription, AlertTitle } from "@app/components/ui/alert";
 import { InfoIcon } from "lucide-react";
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from "next-intl/server";
 
 type PageProps = {
     params: Promise<{ orgId: string }>;

@@ -70,20 +70,6 @@ type Organization = {
     name: string;
 };
 
-const policyFormSchema = z.object({
-    orgId: z.string().min(1, { message: "Organization is required" }),
-    roleMapping: z.string().optional(),
-    orgMapping: z.string().optional()
-});
-
-const defaultMappingsSchema = z.object({
-    defaultRoleMapping: z.string().optional(),
-    defaultOrgMapping: z.string().optional()
-});
-
-type PolicyFormValues = z.infer<typeof policyFormSchema>;
-type DefaultMappingsValues = z.infer<typeof defaultMappingsSchema>;
-
 export default function PoliciesPage() {
     const { env } = useEnvContext();
     const api = createApiClient({ env });
@@ -101,6 +87,20 @@ export default function PoliciesPage() {
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [editingPolicy, setEditingPolicy] = useState<PolicyRow | null>(null);
+
+    const policyFormSchema = z.object({
+        orgId: z.string().min(1, { message: t('orgRequired') }),
+        roleMapping: z.string().optional(),
+        orgMapping: z.string().optional()
+    });
+
+    const defaultMappingsSchema = z.object({
+        defaultRoleMapping: z.string().optional(),
+        defaultOrgMapping: z.string().optional()
+    });
+
+    type PolicyFormValues = z.infer<typeof policyFormSchema>;
+    type DefaultMappingsValues = z.infer<typeof defaultMappingsSchema>;
 
     const form = useForm<PolicyFormValues>({
         resolver: zodResolver(policyFormSchema),

@@ -102,7 +102,8 @@ export default function ResourceRules(props: {
     const router = useRouter();
     const t = useTranslations();
 
-    const RuleAction = {
+    
+     RuleAction = {
         ACCEPT: t('alwaysAllow'),
         DROP: t('alwaysDeny')
     } as const;

@@ -8,7 +8,7 @@ import { AxiosResponse } from "axios";
 import { ExternalLink } from "lucide-react";
 import { Metadata } from "next";
 import { cache } from "react";
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from "next-intl/server";
 
 export const metadata: Metadata = {
     title: `Auth - Pangolin`,

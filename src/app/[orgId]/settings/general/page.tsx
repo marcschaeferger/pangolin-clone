@@ -93,7 +93,7 @@ export default function GeneralPage() {
             toast({
                 variant: "destructive",
                 title: t('orgErrorDelete'),
-                description: formatAxiosError(err,t('orgErrorDeleteMessage'))
+                description: formatAxiosError(err, t('orgErrorDeleteMessage'))
             });
         } finally {
             setLoadingDelete(false);
@@ -121,7 +121,7 @@ export default function GeneralPage() {
             toast({
                 variant: "destructive",
                 title: t('orgErrorFetch'),
-                description: formatAxiosError(err,t('orgErrorFetchMessage'))
+                description: formatAxiosError(err, t('orgErrorFetchMessage'))
             });
         }
     }
@@ -144,7 +144,7 @@ export default function GeneralPage() {
                 toast({
                     variant: "destructive",
                     title: t('orgErrorUpdate'),
-                    description: formatAxiosError(e,t('orgErrorUpdateMessage'))
+                    description: formatAxiosError(e, t('orgErrorUpdateMessage'))
                 });
             })
             .finally(() => {

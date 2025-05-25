@@ -15,7 +15,7 @@ import {
 import { GetApiKeyResponse } from "@server/routers/apiKeys";
 import ApiKeyProvider from "@app/providers/ApiKeyProvider";
 import { HorizontalTabs } from "@app/components/HorizontalTabs";
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from "next-intl/server";
 
 interface SettingsLayoutProps {
     children: React.ReactNode;

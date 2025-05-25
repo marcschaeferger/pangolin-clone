@@ -62,7 +62,7 @@ import { cn } from "@app/lib/cn";
 import { SquareArrowOutUpRight } from "lucide-react";
 import CopyTextBox from "@app/components/CopyTextBox";
 import Link from "next/link";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 
 const baseResourceFormSchema = z.object({
     name: z.string().min(1).max(255),
