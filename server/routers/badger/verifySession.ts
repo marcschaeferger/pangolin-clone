@@ -56,9 +56,16 @@ export type VerifyResourceSessionSchema = z.infer<
     typeof verifyResourceSessionSchema
 >;
 
+type BasicUserData = {
+    username: string;
+    email: string | null;
+    name: string | null;
+};
+
 export type VerifyUserResponse = {
     valid: boolean;
     redirectUrl?: string;
+    userData?: BasicUserData;
 };
 
 export async function verifyResourceSession(
@@ -350,23 +357,26 @@ export async function verifyResourceSession(
                         resourceSession.userSessionId
                     }:${resource.resourceId}`;
 
-                    let isAllowed: boolean | undefined =
+                    let allowedUserData: BasicUserData | null | undefined =
                         cache.get(userAccessCacheKey);
 
-                    if (isAllowed === undefined) {
-                        isAllowed = await isUserAllowedToAccessResource(
+                    if (allowedUserData === undefined) {
+                        allowedUserData = await isUserAllowedToAccessResource(
                             resourceSession.userSessionId,
                             resource
                         );
 
-                        cache.set(userAccessCacheKey, isAllowed);
+                        cache.set(userAccessCacheKey, allowedUserData);
                     }
 
-                    if (isAllowed) {
+                    if (
+                        allowedUserData !== null &&
+                        allowedUserData !== undefined
+                    ) {
                         logger.debug(
                             "Resource allowed because user session is valid"
                         );
-                        return allowed(res);
+                        return allowed(res, allowedUserData);
                     }
                 }
             }
@@ -448,15 +458,17 @@ function notAllowed(res: Response, redirectUrl?: string) {
     return response<VerifyUserResponse>(res, data);
 }
 
-function allowed(res: Response) {
+function allowed(res: Response, userData?: BasicUserData) {
     const data = {
-        data: { valid: true },
+        data:
+            userData !== undefined && userData !== null
+                ? { valid: true, ...userData }
+                : { valid: true },
         success: true,
         error: false,
         message: "Access allowed",
         status: HttpCode.OK
     };
-    logger.debug(JSON.stringify(data));
     return response<VerifyUserResponse>(res, data);
 }
 
@@ -496,7 +508,7 @@ async function createAccessTokenSession(
 async function isUserAllowedToAccessResource(
     userSessionId: string,
     resource: Resource
-): Promise<boolean> {
+): Promise<BasicUserData | null> {
     const [res] = await db
         .select()
         .from(sessions)
@@ -507,14 +519,14 @@ async function isUserAllowedToAccessResource(
     const session = res.session;
 
     if (!user || !session) {
-        return false;
+        return null;
     }
 
     if (
         config.getRawConfig().flags?.require_email_verification &&
         !user.emailVerified
     ) {
-        return false;
+        return null;
     }
 
     const userOrgRole = await db
@@ -529,7 +541,7 @@ async function isUserAllowedToAccessResource(
         .limit(1);
 
     if (userOrgRole.length === 0) {
-        return false;
+        return null;
     }
 
     const roleResourceAccess = await db
@@ -544,7 +556,11 @@ async function isUserAllowedToAccessResource(
         .limit(1);
 
     if (roleResourceAccess.length > 0) {
-        return true;
+        return {
+            username: user.username,
+            email: user.email,
+            name: user.name
+        };
     }
 
     const userResourceAccess = await db
@@ -559,10 +575,14 @@ async function isUserAllowedToAccessResource(
         .limit(1);
 
     if (userResourceAccess.length > 0) {
-        return true;
+        return {
+            username: user.username,
+            email: user.email,
+            name: user.name
+        };
     }
 
-    return false;
+    return null;
 }
 
 async function checkRules(
