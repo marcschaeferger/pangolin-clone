@@ -58,9 +58,11 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 
 	// check if the user is root
-	if os.Geteuid() != 0 {
-		fmt.Println("This script must be run as root")
-		os.Exit(1)
+	if !isDockerInstalled() {
+		if os.Geteuid() != 0 {
+			fmt.Println("Docker is not installed. Please install Docker manually or run this installer as root.")
+			os.Exit(1)
+		}
 	}
 
 	var config Config
