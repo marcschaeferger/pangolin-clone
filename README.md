@@ -9,7 +9,7 @@
 
 </div>
 
-<h3 align="center">Tunneled Mesh Reverse Proxy Server with Access Control</h3>
+<h3 align="center">Tunneled Reverse Proxy Server with Access Control</h3>
 <div align="center">
 
 _Your own self-hosted zero trust tunnel._
