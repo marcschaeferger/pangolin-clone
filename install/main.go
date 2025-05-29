@@ -17,6 +17,7 @@ import (
 	"time"
 	"unicode"
 	"math/rand"
+	"strconv"
 
 	"golang.org/x/term"
 )
@@ -397,7 +398,7 @@ func installDocker() error {
 		return fmt.Errorf("failed to detect Linux distribution: %v", err)
 	}
 	osRelease := string(output)
-
+	
 	// Detect system architecture
 	archCmd := exec.Command("uname", "-m")
 	archOutput, err := archCmd.Output()
@@ -405,7 +406,7 @@ func installDocker() error {
 		return fmt.Errorf("failed to detect system architecture: %v", err)
 	}
 	arch := strings.TrimSpace(string(archOutput))
-
+	
 	// Map architecture to Docker's architecture naming
 	var dockerArch string
 	switch arch {
@@ -438,11 +439,31 @@ func installDocker() error {
 			apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 		`, dockerArch))
 	case strings.Contains(osRelease, "ID=fedora"):
-		installCmd = exec.Command("bash", "-c", `
+		// Detect Fedora version to handle DNF 5 changes
+		versionCmd := exec.Command("bash", "-c", "grep VERSION_ID /etc/os-release | cut -d'=' -f2 | tr -d '\"'")
+		versionOutput, err := versionCmd.Output()
+		var fedoraVersion int
+		if err == nil {
+			if v, parseErr := strconv.Atoi(strings.TrimSpace(string(versionOutput))); parseErr == nil {
+				fedoraVersion = v
+			}
+		}
+		
+		// Use appropriate DNF syntax based on version
+		var repoCmd string
+		if fedoraVersion >= 42 {
+			// DNF 5 syntax for Fedora 42+
+			repoCmd = "dnf config-manager addrepo --from-repofile=https://download.docker.com/linux/fedora/docker-ce.repo"
+		} else {
+			// DNF 4 syntax for Fedora < 42
+			repoCmd = "dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo"
+		}
+		
+		installCmd = exec.Command("bash", "-c", fmt.Sprintf(`
 			dnf -y install dnf-plugins-core &&
-			dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo &&
+			%s &&
 			dnf install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-		`)
+		`, repoCmd))
 	case strings.Contains(osRelease, "ID=opensuse") || strings.Contains(osRelease, "ID=\"opensuse-"):
 		installCmd = exec.Command("bash", "-c", `
 			zypper install -y docker docker-compose &&
@@ -466,6 +487,7 @@ func installDocker() error {
 	default:
 		return fmt.Errorf("unsupported Linux distribution")
 	}
+	
 	installCmd.Stdout = os.Stdout
 	installCmd.Stderr = os.Stderr
 	return installCmd.Run()
