@@ -57,12 +57,6 @@ type Config struct {
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 
-	// check if the user is root
-	if os.Geteuid() != 0 {
-		fmt.Println("This script must be run as root")
-		os.Exit(1)
-	}
-
 	var config Config
 	
 	// check if there is already a config file
@@ -81,6 +75,15 @@ func main() {
 		moveFile("config/docker-compose.yml", "docker-compose.yml")
 
 		if !isDockerInstalled() && runtime.GOOS == "linux" {
+			// Prompt to install Docker if not installed
+			// But only if the user is root, otherwise we exit with an error message
+			if os.Geteuid() != 0 {
+				fmt.Println("Docker is not installed. Please install Docker manually or run this installer as root.")
+				fmt.Println("You can run this installer with 'sudo' to install Docker automatically.")
+				fmt.Println("Exiting...")
+				os.Exit(1)
+			}
+
 			if readBool(reader, "Docker is not installed. Would you like to install it?", true) {
 				installDocker()
 			}
