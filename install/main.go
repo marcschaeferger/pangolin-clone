@@ -461,11 +461,11 @@ func installDocker() error {
 		
 		// Use appropriate DNF syntax based on version
 		var repoCmd string
-		if fedoraVersion >= 42 {
-			// DNF 5 syntax for Fedora 42+
+		if fedoraVersion >= 41 {
+			// DNF 5 syntax for Fedora 41+
 			repoCmd = "dnf config-manager addrepo --from-repofile=https://download.docker.com/linux/fedora/docker-ce.repo"
 		} else {
-			// DNF 4 syntax for Fedora < 42
+			// DNF 4 syntax for Fedora < 41
 			repoCmd = "dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo"
 		}
 		
