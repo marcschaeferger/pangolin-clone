@@ -94,6 +94,12 @@ func main() {
 		if !isDockerInstalled() && runtime.GOOS == "linux" {
 			if readBool(reader, "Docker is not installed. Would you like to install it?", true) {
 				installDocker()
+				// try to start docker service but ignore errors
+				if err := startDockerService(); err != nil {
+					fmt.Println("Error starting Docker service:", err)
+				} else {
+					fmt.Println("Docker service started successfully!")
+				}
 				// wait 10 seconds for docker to start checking if docker is running every 2 seconds
 				fmt.Println("Waiting for Docker to start...")
 				for i := 0; i < 5; i++ {
@@ -516,6 +522,20 @@ func installDocker() error {
 	installCmd.Stdout = os.Stdout
 	installCmd.Stderr = os.Stderr
 	return installCmd.Run()
+}
+
+func startDockerService() error {
+	if runtime.GOOS == "linux" {
+		cmd := exec.Command("systemctl", "enable", "--now", "docker")
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		return cmd.Run()
+	} else if runtime.GOOS == "darwin" {
+		// On macOS, Docker is usually started via the Docker Desktop application
+		fmt.Println("Please start Docker Desktop manually on macOS.")
+		return nil
+	}
+	return fmt.Errorf("unsupported operating system for starting Docker service")
 }
 
 func isDockerInstalled() bool {
