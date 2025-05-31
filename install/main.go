@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -58,9 +59,18 @@ type Config struct {
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 
-	// check if the user is root
-	if os.Geteuid() != 0 {
-		fmt.Println("This script must be run as root")
+	// check if docker is not installed and the user is root
+	if !isDockerInstalled() {
+		if os.Geteuid() != 0 {
+			fmt.Println("Docker is not installed. Please install Docker manually or run this installer as root.")
+			os.Exit(1)
+		}
+	}
+
+	// check if the user is in the docker group (linux only)
+	if !isUserInDockerGroup() {
+		fmt.Println("You are not in the docker group.")
+		fmt.Println("The installer will not be able to run docker commands without running it as root.")
 		os.Exit(1)
 	}
 
@@ -499,6 +509,34 @@ func isDockerInstalled() bool {
 		return false
 	}
 	return true
+}
+
+func isUserInDockerGroup() bool {
+	if runtime.GOOS == "darwin" {
+		// Docker group is not applicable on macOS
+		// So we assume that the user can run Docker commands
+		return true
+	}
+
+	if os.Geteuid() == 0 {
+		return true // Root user can run Docker commands anyway
+	}
+
+	// Check if the current user is in the docker group
+	if dockerGroup, err := user.LookupGroup("docker"); err == nil {
+		if currentUser, err := user.Current(); err == nil {
+			if currentUserGroupIds, err := currentUser.GroupIds(); err == nil {
+				for _, groupId := range currentUserGroupIds {
+					if groupId == dockerGroup.Gid {
+						return true
+					}
+				}
+			}
+		}
+	}
+
+	// Eventually, if any of the checks fail, we assume the user cannot run Docker commands
+	return false
 }
 
 // executeDockerComposeCommandWithArgs executes the appropriate docker command with arguments supplied
