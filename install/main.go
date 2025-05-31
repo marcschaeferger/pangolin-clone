@@ -94,6 +94,21 @@ func main() {
 		if !isDockerInstalled() && runtime.GOOS == "linux" {
 			if readBool(reader, "Docker is not installed. Would you like to install it?", true) {
 				installDocker()
+				// wait 10 seconds for docker to start checking if docker is running every 2 seconds
+				fmt.Println("Waiting for Docker to start...")
+				for i := 0; i < 5; i++ {
+					if isDockerRunning() {
+						fmt.Println("Docker is running!")
+						break
+					}
+					fmt.Println("Docker is not running yet, waiting...")
+					time.Sleep(2 * time.Second)
+				}
+				if !isDockerRunning() {
+					fmt.Println("Docker is still not running after 10 seconds. Please check the installation.")
+					os.Exit(1)
+				}
+				fmt.Println("Docker installed successfully!")
 			}
 		}
 
@@ -537,6 +552,15 @@ func isUserInDockerGroup() bool {
 
 	// Eventually, if any of the checks fail, we assume the user cannot run Docker commands
 	return false
+}
+
+// isDockerRunning checks if the Docker daemon is running by using the `docker info` command.
+func isDockerRunning() bool {
+	cmd := exec.Command("docker", "info")
+	if err := cmd.Run(); err != nil {
+		return false
+	}
+	return true
 }
 
 // executeDockerComposeCommandWithArgs executes the appropriate docker command with arguments supplied
