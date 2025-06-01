@@ -26,8 +26,8 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-      update-types:
-        - "major"
+    update-types:
+      - "major"
           
   - package-ecosystem: "docker"
     directory: "/"
