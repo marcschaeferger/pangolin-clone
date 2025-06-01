@@ -21,6 +21,13 @@ updates:
         dependency-type: "production"
         update-types:
           - "minor"
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      update-types:
+        - "major"
           
   - package-ecosystem: "docker"
     directory: "/"
