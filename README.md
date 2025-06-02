@@ -9,7 +9,7 @@
 
 </div>
 
-<h3 align="center">Tunneled Mesh Reverse Proxy Server with Access Control</h3>
+<h3 align="center">Tunneled Reverse Proxy Server with Access Control</h3>
 <div align="center">
 
 _Your own self-hosted zero trust tunnel._
@@ -83,7 +83,7 @@ _Resources page of Pangolin dashboard (dark mode) showing multiple resources ava
 
 ### Modular Design
 
-- Extend functionality with existing [Traefik](https://github.com/traefik/traefik) plugins, such as [CrowdSec](https://plugins.traefik.io/plugins/6335346ca4caa9ddeffda116/crowdsec-bouncer-traefik-plugin) and [Geoblock](github.com/PascalMinder/geoblock).
+- Extend functionality with existing [Traefik](https://github.com/traefik/traefik) plugins, such as [CrowdSec](https://plugins.traefik.io/plugins/6335346ca4caa9ddeffda116/crowdsec-bouncer-traefik-plugin) and [Geoblock](https://github.com/PascalMinder/geoblock).
     - **Automatically install and configure Crowdsec via Pangolin's installer script.**
 - Attach as many sites to the central server as you wish.
 
