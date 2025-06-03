@@ -1,4 +1,4 @@
-import { useLocale } from 'next-intl';
+import { useLocale } from "next-intl";
 import LocaleSwitcherSelect from './LocaleSwitcherSelect';
 
 export default function LocaleSwitcher() {
@@ -9,35 +9,34 @@ export default function LocaleSwitcher() {
       defaultValue={locale}
       items={[
         {
-          value: 'en-US',
-          label: 'Englisch'
+            value: 'en-US',
+            label: 'English'
         },
         {
-          value: 'fr-FR',
-          label: 'French'
+            value: 'fr-FR',
+            label: "Français"
         },
         {
-          value: 'de-DE',
-          label: 'German'
+            value: 'de-DE',
+            label: 'Deutsch'
         },
         {
-          value: 'it-IT',
-          label: 'Italian'
+            value: 'it-IT',
+            label: 'Italiano'
         },
         {
-          value: 'pl-PL',
-          label: 'Polish'
+            value: 'pl-PL',
+            label: 'Polski'
         },
         {
-          value: 'pt-PT',
-          label: 'Portuguese'
+            value: 'pt-PT',
+            label: 'Português'
         },
         {
-          value: 'tr-TR',
-          label: 'Turkish'
+            value: 'tr-TR',
+            label: 'Türkçe'
         }
       ]}
-      label='Language'
     />
   );
 }
