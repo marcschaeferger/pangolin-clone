@@ -44,7 +44,7 @@ export const sites = sqliteTable("sites", {
     online: integer("online", { mode: "boolean" }).notNull().default(false),
     dockerSocketEnabled: integer("dockerSocketEnabled", { mode: "boolean" })
         .notNull()
-        .default(false)
+        .default(true)
 });
 
 export const resources = sqliteTable("resources", {

@@ -24,7 +24,7 @@ export function useDockerSocket(siteId: number) {
 
     const api = createApiClient(useEnvContext());
 
-    const { dockerSocketEnabled: isEnabled = false } = site || {};
+    const { dockerSocketEnabled: isEnabled = true } = site || {};
     const { isAvailable = false, socketPath } = dockerSocket || {};
 
     const fetchSite = useCallback(async () => {
