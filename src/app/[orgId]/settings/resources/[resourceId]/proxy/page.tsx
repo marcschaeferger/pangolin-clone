@@ -163,6 +163,9 @@ export default function ReverseProxyTargets(props: {
         } as z.infer<typeof addTargetSchema>
     });
 
+    const watchedIp = addTargetForm.watch("ip");
+    const watchedPort = addTargetForm.watch("port");
+
     const tlsSettingsForm = useForm<TlsSettingsValues>({
         resolver: zodResolver(tlsSettingsSchema),
         defaultValues: {
@@ -818,12 +821,7 @@ export default function ReverseProxyTargets(props: {
                                     type="submit"
                                     variant="outlinePrimary"
                                     className="mt-6"
-                                    disabled={
-                                        !(
-                                            addTargetForm.getValues("ip") &&
-                                            addTargetForm.getValues("port")
-                                        )
-                                    }
+                                    disabled={!(watchedIp && watchedPort)}
                                 >
                                     Add Target
                                 </Button>
