@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { DrizzleError, eq } from "drizzle-orm";
-import { sites, resources, targets, exitNodes } from "@server/db";
+import { eq } from "drizzle-orm";
+import { sites, } from "@server/db";
 import { db } from "@server/db";
 import logger from "@server/logger";
 import createHttpError from "http-errors";
@@ -86,9 +86,3 @@ export const receiveBandwidth = async (
         );
     }
 };
-
-function calculateSubnet(index: number): string {
-    const baseIp = 10 << 24;
-    const subnetSize = 16;
-    return `${(baseIp | (index * subnetSize)).toString()}/28`;
-}
