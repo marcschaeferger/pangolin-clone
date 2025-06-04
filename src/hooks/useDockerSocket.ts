@@ -121,16 +121,12 @@ export function useDockerSocket(siteId: number) {
                         if (error?.response?.status === 425) {
                             if (attempt < maxRetries) {
                                 // Ask the newt server to check containers
-                                await getContainers();
-                                // Exponential backoff: 2s, 4s, 8s...
-                                const retryDelay = Math.min(
-                                    2000 * Math.pow(2, attempt - 1),
-                                    10000
-                                );
+                                await fetchContainerList();
+
                                 console.log(
-                                    `Containers not ready yet (attempt ${attempt}/${maxRetries}). Retrying in ${retryDelay}ms...`
+                                    `Containers not ready yet (attempt ${attempt}/${maxRetries}). Retrying in 250ms...`
                                 );
-                                await sleep(retryDelay);
+                                await sleep(250);
                                 continue;
                             } else {
                                 console.warn(
@@ -166,7 +162,6 @@ export function useDockerSocket(siteId: number) {
                 const res = await api.post<AxiosResponse<TriggerFetchResponse>>(
                     `/site/${siteId}/docker/trigger`
                 );
-                await sleep(1000); // Wait a second before fetching containers
                 // TODO: identify a way to poll the server for latest container list periodically?
                 await fetchContainerList();
                 return res.data.data;
@@ -188,11 +183,8 @@ export function useDockerSocket(siteId: number) {
         }
 
         checkDockerSocket();
-        const timeout = setTimeout(() => {
-            getDockerSocketStatus();
-        }, 3000);
+        getDockerSocketStatus();
 
-        return () => clearTimeout(timeout);
     }, [isEnabled, isAvailable, checkDockerSocket, getDockerSocketStatus]);
 
     return {

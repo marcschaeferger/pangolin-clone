@@ -154,6 +154,11 @@ async function triggerFetch(siteId: number) {
         `Triggering fetch containers for site ${siteId} with Newt ${newt.newtId}`
     );
     fetchContainers(newt.newtId);
+
+    // clear the cache for this Newt ID so that the site has to keep asking for the containers
+    // this is to ensure that the site always gets the latest data
+    dockerSocketCache.del(`${newt.newtId}:dockerContainers`);
+
     return { siteId, newtId: newt.newtId };
 }
 

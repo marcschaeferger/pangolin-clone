@@ -78,12 +78,6 @@ export const ContainersSelector: FC<ContainerSelectorProps> = ({
         }
     }, [isAvailable]);
 
-    useEffect(() => {
-        if (isAvailable && containers.length === 0) {
-            fetchContainers();
-        }
-    }, [isAvailable, containers.length]);
-
     if (!site || !isAvailable) {
         return null;
     }
