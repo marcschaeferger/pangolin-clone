@@ -47,7 +47,8 @@ export const sites = pgTable("sites", {
     megabytesOut: real("bytesOut"),
     lastBandwidthUpdate: varchar("lastBandwidthUpdate"),
     type: varchar("type").notNull(), // "newt" or "wireguard"
-    online: boolean("online").notNull().default(false)
+    online: boolean("online").notNull().default(false),
+    dockerSocketEnabled: boolean("dockerSocketEnabled").notNull().default(true)
 });
 
 export const resources = pgTable("resources", {
