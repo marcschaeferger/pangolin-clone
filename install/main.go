@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -58,9 +59,18 @@ type Config struct {
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 
-	// check if the user is root
-	if os.Geteuid() != 0 {
-		fmt.Println("This script must be run as root")
+	// check if docker is not installed and the user is root
+	if !isDockerInstalled() {
+		if os.Geteuid() != 0 {
+			fmt.Println("Docker is not installed. Please install Docker manually or run this installer as root.")
+			os.Exit(1)
+		}
+	}
+
+	// check if the user is in the docker group (linux only)
+	if !isUserInDockerGroup() {
+		fmt.Println("You are not in the docker group.")
+		fmt.Println("The installer will not be able to run docker commands without running it as root.")
 		os.Exit(1)
 	}
 
@@ -84,6 +94,27 @@ func main() {
 		if !isDockerInstalled() && runtime.GOOS == "linux" {
 			if readBool(reader, "Docker is not installed. Would you like to install it?", true) {
 				installDocker()
+				// try to start docker service but ignore errors
+				if err := startDockerService(); err != nil {
+					fmt.Println("Error starting Docker service:", err)
+				} else {
+					fmt.Println("Docker service started successfully!")
+				}
+				// wait 10 seconds for docker to start checking if docker is running every 2 seconds
+				fmt.Println("Waiting for Docker to start...")
+				for i := 0; i < 5; i++ {
+					if isDockerRunning() {
+						fmt.Println("Docker is running!")
+						break
+					}
+					fmt.Println("Docker is not running yet, waiting...")
+					time.Sleep(2 * time.Second)
+				}
+				if !isDockerRunning() {
+					fmt.Println("Docker is still not running after 10 seconds. Please check the installation.")
+					os.Exit(1)
+				}
+				fmt.Println("Docker installed successfully!")
 			}
 		}
 
@@ -451,11 +482,11 @@ func installDocker() error {
 		
 		// Use appropriate DNF syntax based on version
 		var repoCmd string
-		if fedoraVersion >= 42 {
-			// DNF 5 syntax for Fedora 42+
+		if fedoraVersion >= 41 {
+			// DNF 5 syntax for Fedora 41+
 			repoCmd = "dnf config-manager addrepo --from-repofile=https://download.docker.com/linux/fedora/docker-ce.repo"
 		} else {
-			// DNF 4 syntax for Fedora < 42
+			// DNF 4 syntax for Fedora < 41
 			repoCmd = "dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo"
 		}
 		
@@ -493,8 +524,59 @@ func installDocker() error {
 	return installCmd.Run()
 }
 
+func startDockerService() error {
+	if runtime.GOOS == "linux" {
+		cmd := exec.Command("systemctl", "enable", "--now", "docker")
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		return cmd.Run()
+	} else if runtime.GOOS == "darwin" {
+		// On macOS, Docker is usually started via the Docker Desktop application
+		fmt.Println("Please start Docker Desktop manually on macOS.")
+		return nil
+	}
+	return fmt.Errorf("unsupported operating system for starting Docker service")
+}
+
 func isDockerInstalled() bool {
 	cmd := exec.Command("docker", "--version")
+	if err := cmd.Run(); err != nil {
+		return false
+	}
+	return true
+}
+
+func isUserInDockerGroup() bool {
+	if runtime.GOOS == "darwin" {
+		// Docker group is not applicable on macOS
+		// So we assume that the user can run Docker commands
+		return true
+	}
+
+	if os.Geteuid() == 0 {
+		return true // Root user can run Docker commands anyway
+	}
+
+	// Check if the current user is in the docker group
+	if dockerGroup, err := user.LookupGroup("docker"); err == nil {
+		if currentUser, err := user.Current(); err == nil {
+			if currentUserGroupIds, err := currentUser.GroupIds(); err == nil {
+				for _, groupId := range currentUserGroupIds {
+					if groupId == dockerGroup.Gid {
+						return true
+					}
+				}
+			}
+		}
+	}
+
+	// Eventually, if any of the checks fail, we assume the user cannot run Docker commands
+	return false
+}
+
+// isDockerRunning checks if the Docker daemon is running by using the `docker info` command.
+func isDockerRunning() bool {
+	cmd := exec.Command("docker", "info")
 	if err := cmd.Run(); err != nil {
 		return false
 	}
