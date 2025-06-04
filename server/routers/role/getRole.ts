@@ -8,12 +8,24 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
+import { OpenAPITags, registry } from "@server/openApi";
 
 const getRoleSchema = z
     .object({
         roleId: z.string().transform(Number).pipe(z.number().int().positive())
     })
     .strict();
+
+registry.registerPath({
+    method: "get",
+    path: "/role/{roleId}",
+    description: "Get a role.",
+    tags: [OpenAPITags.Role],
+    request: {
+        params: getRoleSchema
+    },
+    responses: {}
+});
 
 export async function getRole(
     req: Request,

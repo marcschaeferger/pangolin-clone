@@ -280,6 +280,13 @@ authenticated.delete(
     role.deleteRole
 );
 
+authenticated.get(
+    "/role/:roleId",
+    verifyApiKeyRoleAccess,
+    verifyApiKeyHasAction(ActionsEnum.getRole),
+    role.getRole
+);
+
 authenticated.post(
     "/role/:roleId/add/:userId",
     verifyApiKeyRoleAccess,
