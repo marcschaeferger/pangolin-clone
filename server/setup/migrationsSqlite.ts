@@ -20,7 +20,7 @@ import m16 from "./scriptsSqlite/1.0.0";
 import m17 from "./scriptsSqlite/1.1.0";
 import m18 from "./scriptsSqlite/1.2.0";
 import m19 from "./scriptsSqlite/1.3.0";
-import { setHostMeta } from "./setHostMeta";
+import m20 from "./scriptsSqlite/1.3.0";
 
 // THIS CANNOT IMPORT ANYTHING FROM THE SERVER
 // EXCEPT FOR THE DATABASE AND THE SCHEMA
@@ -40,7 +40,8 @@ const migrations = [
     { version: "1.0.0", run: m16 },
     { version: "1.1.0", run: m17 },
     { version: "1.2.0", run: m18 },
-    { version: "1.3.0", run: m19 }
+    { version: "1.3.0", run: m19 },
+    { version: "1.4.0", run: m20 },
     // Add new migrations here as they are created
 ] as const;
 
