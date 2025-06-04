@@ -97,7 +97,28 @@ export async function verifyResourceSession(
             query
         } = parsedBody.data;
 
-        const clientIp = requestIp?.split(":")[0];
+        const clientIp = requestIp
+            ? (() => {
+                  logger.debug("Request IP:", { requestIp });
+                  if (requestIp.startsWith("[") && requestIp.includes("]")) {
+                      // if brackets are found, extract the IPv6 address from between the brackets
+                      const ipv6Match = requestIp.match(/\[(.*?)\]/);
+                      if (ipv6Match) {
+                          return ipv6Match[1];
+                      }
+                  }
+
+                  // ivp4
+                  // split at last colon
+                  const lastColonIndex = requestIp.lastIndexOf(":");
+                  if (lastColonIndex !== -1) {
+                      return requestIp.substring(0, lastColonIndex);
+                  }
+                  return requestIp;
+              })()
+            : undefined;
+
+        logger.debug("Client IP:", { clientIp });
 
         let cleanHost = host;
         // if the host ends with :443 or :80 remove it

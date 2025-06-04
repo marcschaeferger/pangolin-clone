@@ -31,6 +31,12 @@ docker run -d \
   postgres:17
 ```
 
+### Schema
+
+`server/db/pg/schema.ts` and `server/db/sqlite/schema.ts` contain the database schema definitions. These need to be kept in sync with with each other.
+
+Stick to common data types and avoid Postgres-specific features to ensure compatibility with SQLite.
+
 ### SQLite
 
 To use SQLite, edit `server/db/index.ts` to export all from `server/db/sqlite/index.ts`:

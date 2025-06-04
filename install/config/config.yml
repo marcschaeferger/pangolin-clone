@@ -26,7 +26,7 @@ server:
     cors:
         origins: ["https://{{.DashboardDomain}}"]
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
-        headers: ["X-CSRF-Token", "Content-Type"]
+        allowed_headers: ["X-CSRF-Token", "Content-Type"]
         credentials: false
 
 traefik:
