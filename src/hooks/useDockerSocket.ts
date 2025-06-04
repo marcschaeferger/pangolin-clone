@@ -4,7 +4,6 @@ import { useEnvContext } from "./useEnvContext";
 import {
     Container,
     GetDockerStatusResponse,
-    GetSiteResponse,
     ListContainersResponse,
     TriggerFetchResponse
 } from "@server/routers/site";
@@ -89,16 +88,13 @@ export function useDockerSocket(site: Site) {
                             AxiosResponse<ListContainersResponse>
                         >(`/site/${site.siteId}/docker/containers`);
                         setContainers(res.data.data);
-                        return;
+                        return res.data.data;
                     } catch (error: any) {
                         attempt++;
 
                         // Check if the error is a 425 (Too Early) status
                         if (error?.response?.status === 425) {
                             if (attempt < maxRetries) {
-                                // Ask the newt server to check containers
-                                await fetchContainerList();
-
                                 console.log(
                                     `Containers not ready yet (attempt ${attempt}/${maxRetries}). Retrying in 250ms...`
                                 );
