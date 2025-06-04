@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SidebarNav } from "@app/components/SidebarNav";
 import { OrgSelector } from "@app/components/OrgSelector";
 import { cn } from "@app/lib/cn";
@@ -23,6 +23,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUserContext } from "@app/hooks/useUserContext";
 import { useLicenseStatusContext } from "@app/hooks/useLicenseStatusContext";
+import { useTheme } from "next-themes";
 import { useTranslations } from "next-intl";
 
 interface LayoutProps {
@@ -61,6 +62,31 @@ export function Layout({
     const isAdminPage = pathname?.startsWith("/admin");
     const { user } = useUserContext();
     const { isUnlocked } = useLicenseStatusContext();
+
+    const { theme } = useTheme();
+    const [path, setPath] = useState<string>(""); // Default logo path
+
+    useEffect(() => {
+        function getPath() {
+            let lightOrDark = theme;
+
+            if (theme === "system" || !theme) {
+                lightOrDark = window.matchMedia("(prefers-color-scheme: dark)")
+                    .matches
+                    ? "dark"
+                    : "light";
+            }
+
+            if (lightOrDark === "light") {
+                return "/logo/word_mark_black.png";
+            }
+
+            return "/logo/word_mark_white.png";
+        }
+
+        setPath(getPath());
+    }, [theme, env]);
+    
     const t = useTranslations();
 
     return (
@@ -140,12 +166,14 @@ export function Layout({
                                 href="/"
                                 className="flex items-center hidden md:block"
                             >
-                                <Image
-                                    src="/logo/pangolin_orange.svg"
-                                    alt="Pangolin Logo"
-                                    width={35}
-                                    height={35}
-                                />
+                                {path && (
+                                    <Image
+                                        src={path}
+                                        alt="Pangolin Logo"
+                                        width={110}
+                                        height={25}
+                                    />
+                                )}
                             </Link>
                             {showBreadcrumbs && (
                                 <div className="hidden md:block overflow-x-auto scrollbar-hide">

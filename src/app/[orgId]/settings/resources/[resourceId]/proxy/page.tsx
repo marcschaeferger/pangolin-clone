@@ -41,7 +41,6 @@ import {
     TableBody,
     TableCaption,
     TableCell,
-    TableContainer,
     TableHead,
     TableHeader,
     TableRow
@@ -73,6 +72,7 @@ import {
     CollapsibleContent,
     CollapsibleTrigger
 } from "@app/components/ui/collapsible";
+import { ContainersSelector } from "@app/components/ContainersSelector";
 import { useTranslations } from "next-intl";
 
 const addTargetSchema = z.object({
@@ -162,6 +162,9 @@ export default function ReverseProxyTargets(props: {
             port: "" as any as number
         } as z.infer<typeof addTargetSchema>
     });
+
+    const watchedIp = addTargetForm.watch("ip");
+    const watchedPort = addTargetForm.watch("port");
 
     const tlsSettingsForm = useForm<TlsSettingsValues>({
         resolver: zodResolver(tlsSettingsSchema),
@@ -762,12 +765,32 @@ export default function ReverseProxyTargets(props: {
                                     control={addTargetForm.control}
                                     name="ip"
                                     render={({ field }) => (
-                                        <FormItem>
+                                        <FormItem className="relative">
                                             <FormLabel>{t('targetAddr')}</FormLabel>
                                             <FormControl>
                                                 <Input id="ip" {...field} />
                                             </FormControl>
                                             <FormMessage />
+                                            {site && (
+                                                <ContainersSelector
+                                                    site={site}
+                                                    onContainerSelect={(
+                                                        hostname,
+                                                        port
+                                                    ) => {
+                                                        addTargetForm.setValue(
+                                                            "ip",
+                                                            hostname
+                                                        );
+                                                        if (port) {
+                                                            addTargetForm.setValue(
+                                                                "port",
+                                                                port
+                                                            );
+                                                        }
+                                                    }}
+                                                />
+                                            )}
                                         </FormItem>
                                     )}
                                 />
@@ -793,12 +816,7 @@ export default function ReverseProxyTargets(props: {
                                     type="submit"
                                     variant="outlinePrimary"
                                     className="mt-6"
-                                    disabled={
-                                        !(
-                                            addTargetForm.getValues("ip") &&
-                                            addTargetForm.getValues("port")
-                                        )
-                                    }
+                                    disabled={!(watchedIp && watchedPort)}
                                 >
                                     {t('targetSubmit')}
                                 </Button>

@@ -48,8 +48,8 @@ export default function DashboardLoginForm({
                     <Image
                         src={`/logo/pangolin_orange.svg`}
                         alt={t('pangolinLogoAlt')}
-                        width="100"
-                        height="100"
+                        width={100}
+                        height={100}
                     />
                 </div>
                 <div className="text-center space-y-1">
