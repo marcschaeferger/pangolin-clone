@@ -4,8 +4,8 @@ import createHttpError from "http-errors";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
 import logger from "@server/logger";
-import { resourceAccessToken, resources, sessions } from "@server/db/schemas";
-import db from "@server/db";
+import { resourceAccessToken, resources, sessions } from "@server/db";
+import { db } from "@server/db";
 import { eq } from "drizzle-orm";
 import {
     createResourceSession,

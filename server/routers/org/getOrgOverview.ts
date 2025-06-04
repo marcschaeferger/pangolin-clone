@@ -10,7 +10,7 @@ import {
     userResources,
     users,
     userSites
-} from "@server/db/schemas";
+} from "@server/db";
 import { and, count, eq, inArray } from "drizzle-orm";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";

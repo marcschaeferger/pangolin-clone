@@ -119,28 +119,10 @@ export const configSchema = z.object({
             .transform(getEnvOrYaml("SERVER_SECRET"))
             .pipe(z.string().min(8))
     }),
-    database: z
+    postgres: z
         .object({
-            type: z.enum(["sqlite", "postgres"]).optional().default("sqlite"),
-            postgres: z
-                .object({
-                    connection_string: z.string()
-                })
-                .optional()
+            connection_string: z.string().optional()
         })
-        .refine(
-            (data) => {
-                if (data.type === "postgres" && !data.postgres) {
-                    return false;
-                }
-                return true;
-            },
-            {
-                message:
-                    "Postgres config required"
-            }
-        )
-        .optional()
         .default({}),
     traefik: z
         .object({
@@ -230,7 +212,8 @@ export const configSchema = z.object({
             disable_user_create_org: z.boolean().optional(),
             allow_raw_resources: z.boolean().optional(),
             allow_base_domain_resources: z.boolean().optional(),
-            allow_local_sites: z.boolean().optional()
+            allow_local_sites: z.boolean().optional(),
+            enable_integration_api: z.boolean().optional()
         })
         .optional()
 });

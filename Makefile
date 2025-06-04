@@ -3,8 +3,10 @@ build-release:
 		echo "Error: tag is required. Usage: make build-all tag=<tag>"; \
 		exit 1; \
 	fi
-	docker buildx build --platform linux/arm64,linux/amd64 -t fosrl/pangolin:latest -f Dockerfile --push .
-	docker buildx build --platform linux/arm64,linux/amd64 -t fosrl/pangolin:$(tag) -f Dockerfile --push .
+	docker buildx build --platform linux/arm64,linux/amd64 -t fosrl/pangolin:latest -f Dockerfile.sqlite --push .
+	docker buildx build --platform linux/arm64,linux/amd64 -t fosrl/pangolin:$(tag) -f Dockerfile.sqlite --push .
+	docker buildx build --platform linux/arm64,linux/amd64 -t fosrl/pangolin:postgresql-latest -f Dockerfile.pg --push .
+	docker buildx build --platform linux/arm64,linux/amd64 -t fosrl/pangolin:postgresql-$(tag) -f Dockerfile.pg --push .
 
 build-arm:
 	docker buildx build --platform linux/arm64 -t fosrl/pangolin:latest .

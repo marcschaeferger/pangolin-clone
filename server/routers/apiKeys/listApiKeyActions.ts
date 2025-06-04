@@ -1,5 +1,5 @@
 import { db } from "@server/db";
-import { actions, apiKeyActions, apiKeyOrg, apiKeys } from "@server/db/schemas";
+import { actions, apiKeyActions, apiKeyOrg, apiKeys } from "@server/db";
 import logger from "@server/logger";
 import HttpCode from "@server/types/HttpCode";
 import response from "@server/lib/response";

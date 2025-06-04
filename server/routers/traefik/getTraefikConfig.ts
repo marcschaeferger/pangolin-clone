@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import db from "@server/db";
+import { db } from "@server/db";
 import { and, eq, inArray } from "drizzle-orm";
 import logger from "@server/logger";
 import HttpCode from "@server/types/HttpCode";
 import config from "@server/lib/config";
-import { orgs, resources, sites, Target, targets } from "@server/db/schemas";
+import { orgs, resources, sites, Target, targets } from "@server/db";
 import { sql } from "drizzle-orm";
 
 export async function traefikConfigProvider(

@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import db from "@server/db";
+import { db } from "@server/db";
 import { hash } from "@node-rs/argon2";
 import HttpCode from "@server/types/HttpCode";
 import { z } from "zod";
-import { newts } from "@server/db/schemas";
+import { newts } from "@server/db";
 import createHttpError from "http-errors";
 import response from "@server/lib/response";
 import { SqliteError } from "better-sqlite3";

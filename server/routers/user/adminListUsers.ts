@@ -6,7 +6,7 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import { sql, eq } from "drizzle-orm";
 import logger from "@server/logger";
-import { idp, users } from "@server/db/schemas";
+import { idp, users } from "@server/db";
 import { fromZodError } from "zod-validation-error";
 
 const listUsersSchema = z

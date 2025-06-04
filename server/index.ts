@@ -4,7 +4,7 @@ import { runSetupFunctions } from "./setup";
 import { createApiServer } from "./apiServer";
 import { createNextServer } from "./nextServer";
 import { createInternalServer } from "./internalServer";
-import { ApiKey, ApiKeyOrg, Session, User, UserOrg } from "./db/schemas";
+import { ApiKey, ApiKeyOrg, Session, User, UserOrg } from "@server/db";
 import { createIntegrationApiServer } from "./integrationApiServer";
 import config from "@server/lib/config";
 

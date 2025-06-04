@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { resources } from "@server/db/schemas";
+import { resources } from "@server/db";
 import { eq } from "drizzle-orm";
 import { createResourceSession } from "@server/auth/sessions/resource";
 import HttpCode from "@server/types/HttpCode";

@@ -1,10 +1,10 @@
-import db from "@server/db";
+import { db } from "@server/db";
 import {
     Resource,
     ResourceAccessToken,
     resourceAccessToken,
     resources
-} from "@server/db/schemas";
+} from "@server/db";
 import { and, eq } from "drizzle-orm";
 import { isWithinExpirationDate } from "oslo";
 import { verifyPassword } from "./password";

@@ -3,8 +3,8 @@ import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
 import logger from "@server/logger";
 import { ActionsEnum } from "@server/auth/actions";
-import db from "@server/db";
-import { apiKeyActions } from "@server/db/schemas";
+import { db } from "@server/db";
+import { apiKeyActions } from "@server/db";
 import { and, eq } from "drizzle-orm";
 
 export function verifyApiKeyHasAction(action: ActionsEnum) {

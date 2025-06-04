@@ -5,7 +5,7 @@ import {
     validateResourceSessionToken
 } from "@server/auth/sessions/resource";
 import { verifyResourceAccessToken } from "@server/auth/verifyResourceAccessToken";
-import db from "@server/db";
+import { db } from "@server/db";
 import {
     Resource,
     ResourceAccessToken,
@@ -21,7 +21,7 @@ import {
     userOrgs,
     userResources,
     users
-} from "@server/db/schemas";
+} from "@server/db";
 import config from "@server/lib/config";
 import { isIpInCidr } from "@server/lib/ip";
 import { response } from "@server/lib/response";

@@ -9,7 +9,7 @@ import { fromError } from "zod-validation-error";
 import { OpenAPITags, registry } from "@server/openApi";
 import config from "@server/lib/config";
 import { eq, and } from "drizzle-orm";
-import { idp, idpOrg } from "@server/db/schemas";
+import { idp, idpOrg } from "@server/db";
 
 const paramsSchema = z
     .object({

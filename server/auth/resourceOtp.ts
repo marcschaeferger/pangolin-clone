@@ -1,5 +1,5 @@
-import db from "@server/db";
-import { resourceOtp } from "@server/db/schemas";
+import { db } from "@server/db";
+import { resourceOtp } from "@server/db";
 import { and, eq } from "drizzle-orm";
 import { createDate, isWithinExpirationDate, TimeSpan } from "oslo";
 import { alphabet, generateRandomString, sha256 } from "oslo/crypto";

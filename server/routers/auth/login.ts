@@ -3,8 +3,8 @@ import {
     generateSessionToken,
     serializeSessionCookie
 } from "@server/auth/sessions/app";
-import db from "@server/db";
-import { users } from "@server/db/schemas";
+import { db } from "@server/db";
+import { users } from "@server/db";
 import HttpCode from "@server/types/HttpCode";
 import response from "@server/lib/response";
 import { eq, and } from "drizzle-orm";

@@ -14,8 +14,8 @@ import ResourceAccessDenied from "./ResourceAccessDenied";
 import AccessToken from "./AccessToken";
 import { pullEnv } from "@app/lib/pullEnv";
 import { LoginFormIDP } from "@app/components/LoginForm";
-import db from "@server/db";
-import { idp } from "@server/db/schemas";
+import { db } from "@server/db";
+import { idp } from "@server/db";
 
 export default async function ResourceAuthPage(props: {
     params: Promise<{ resourceId: number }>;
