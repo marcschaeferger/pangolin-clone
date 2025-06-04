@@ -129,31 +129,35 @@ export default function GeneralPage() {
                                         </FormItem>
                                     )}
                                 />
-                                <FormField
-                                    control={form.control}
-                                    name="dockerSocketEnabled"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormControl>
-                                                <SwitchInput
-                                                    id="docker-socket-enabled"
-                                                    label="Enable Docker Socket"
-                                                    defaultChecked={field.value}
-                                                    onCheckedChange={
-                                                        field.onChange
-                                                    }
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                            <FormDescription>
-                                                Enable Docker Socket discovery
-                                                for populating container
-                                                information, useful in resource
-                                                targets.
-                                            </FormDescription>
-                                        </FormItem>
-                                    )}
-                                />
+                                {site && site.type === "newt" && (
+                                    <FormField
+                                        control={form.control}
+                                        name="dockerSocketEnabled"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormControl>
+                                                    <SwitchInput
+                                                        id="docker-socket-enabled"
+                                                        label="Enable Docker Socket"
+                                                        defaultChecked={
+                                                            field.value
+                                                        }
+                                                        onCheckedChange={
+                                                            field.onChange
+                                                        }
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                                <FormDescription>
+                                                    Enable Docker Socket
+                                                    discovery for populating
+                                                    container information,
+                                                    useful in resource targets.
+                                                </FormDescription>
+                                            </FormItem>
+                                        )}
+                                    />
+                                )}
                             </form>
                         </Form>
                     </SettingsSectionForm>

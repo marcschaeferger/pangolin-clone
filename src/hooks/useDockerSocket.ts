@@ -10,15 +10,13 @@ import {
 } from "@server/routers/site";
 import { AxiosResponse } from "axios";
 import { toast } from "./useToast";
+import { Site } from "@server/db";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export function useDockerSocket(siteId: number) {
-    if (!siteId) {
-        throw new Error("Site ID is required to use Docker Socket");
-    }
+export function useDockerSocket(site: Site) {
+    console.log(`useDockerSocket initialized for site ID: ${site.siteId}`);
 
-    const [site, setSite] = useState<GetSiteResponse>();
     const [dockerSocket, setDockerSocket] = useState<GetDockerStatusResponse>();
     const [containers, setContainers] = useState<Container[]>([]);
 
@@ -27,40 +25,18 @@ export function useDockerSocket(siteId: number) {
     const { dockerSocketEnabled: isEnabled = true } = site || {};
     const { isAvailable = false, socketPath } = dockerSocket || {};
 
-    const fetchSite = useCallback(async () => {
-        try {
-            const res = await api.get<AxiosResponse<GetSiteResponse>>(
-                `/site/${siteId}`
-            );
-
-            if (res.status === 200) {
-                setSite(res.data.data);
-            }
-        } catch (err) {
-            console.error(err);
-            toast({
-                variant: "destructive",
-                title: "Failed to fetch resource",
-                description: formatAxiosError(
-                    err,
-                    "An error occurred while fetching resource"
-                )
-            });
-        }
-    }, [api, siteId]);
-
     const checkDockerSocket = useCallback(async () => {
         if (!isEnabled) {
             console.warn("Docker socket is not enabled for this site.");
             return;
         }
         try {
-            const res = await api.post(`/site/${siteId}/docker/check`);
+            const res = await api.post(`/site/${site.siteId}/docker/check`);
             console.log("Docker socket check response:", res);
         } catch (error) {
             console.error("Failed to check Docker socket:", error);
         }
-    }, [api, siteId, isEnabled]);
+    }, [api, site.siteId, isEnabled]);
 
     const getDockerSocketStatus = useCallback(async () => {
         if (!isEnabled) {
@@ -70,7 +46,7 @@ export function useDockerSocket(siteId: number) {
 
         try {
             const res = await api.get<AxiosResponse<GetDockerStatusResponse>>(
-                `/site/${siteId}/docker/status`
+                `/site/${site.siteId}/docker/status`
             );
 
             if (res.status === 200) {
@@ -92,7 +68,7 @@ export function useDockerSocket(siteId: number) {
                 description: "An error occurred while fetching Docker status."
             });
         }
-    }, [api, siteId, isEnabled]);
+    }, [api, site.siteId, isEnabled]);
 
     const getContainers = useCallback(
         async (maxRetries: number = 3) => {
@@ -111,7 +87,7 @@ export function useDockerSocket(siteId: number) {
                     try {
                         const res = await api.get<
                             AxiosResponse<ListContainersResponse>
-                        >(`/site/${siteId}/docker/containers`);
+                        >(`/site/${site.siteId}/docker/containers`);
                         setContainers(res.data.data);
                         return;
                     } catch (error: any) {
@@ -160,7 +136,7 @@ export function useDockerSocket(siteId: number) {
 
             try {
                 const res = await api.post<AxiosResponse<TriggerFetchResponse>>(
-                    `/site/${siteId}/docker/trigger`
+                    `/site/${site.siteId}/docker/trigger`
                 );
                 // TODO: identify a way to poll the server for latest container list periodically?
                 await fetchContainerList();
@@ -169,12 +145,8 @@ export function useDockerSocket(siteId: number) {
                 console.error("Failed to trigger Docker containers:", error);
             }
         },
-        [api, siteId, isEnabled, isAvailable]
+        [api, site.siteId, isEnabled, isAvailable]
     );
-
-    useEffect(() => {
-        fetchSite();
-    }, [fetchSite]);
 
     // 2. Docker socket status monitoring
     useEffect(() => {

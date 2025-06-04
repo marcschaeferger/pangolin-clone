@@ -776,7 +776,7 @@ export default function ReverseProxyTargets(props: {
                                                 <Input id="ip" {...field} />
                                             </FormControl>
                                             <FormMessage />
-                                            {site && (
+                                            {site && site.type == 'newt' && (
                                                 <ContainersSelector
                                                     site={site}
                                                     onContainerSelect={(

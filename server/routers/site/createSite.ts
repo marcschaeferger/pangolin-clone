@@ -141,6 +141,7 @@ export async function createSite(
                         niceId,
                         subnet,
                         type,
+                        dockerSocketEnabled: type == "newt",
                         ...(pubKey && type == "wireguard" && { pubKey })
                     })
                     .returning();
@@ -154,6 +155,7 @@ export async function createSite(
                         name,
                         niceId,
                         type,
+                        dockerSocketEnabled: type == "newt",
                         subnet: "0.0.0.0/0"
                     })
                     .returning();
