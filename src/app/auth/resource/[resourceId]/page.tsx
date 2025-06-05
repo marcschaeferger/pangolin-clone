@@ -14,8 +14,9 @@ import ResourceAccessDenied from "./ResourceAccessDenied";
 import AccessToken from "./AccessToken";
 import { pullEnv } from "@app/lib/pullEnv";
 import { LoginFormIDP } from "@app/components/LoginForm";
-import { db } from "@server/db";
-import { idp } from "@server/db";
+import { ListIdpsResponse } from "@server/routers/idp";
+
+export const dynamic = "force-dynamic";
 
 export default async function ResourceAuthPage(props: {
     params: Promise<{ resourceId: number }>;
@@ -130,8 +131,10 @@ export default async function ResourceAuthPage(props: {
         );
     }
 
-    const idps = await db.select().from(idp);
-    const loginIdps = idps.map((idp) => ({
+    const idpsRes = await cache(
+        async () => await priv.get<AxiosResponse<ListIdpsResponse>>("/idp")
+    )();
+    const loginIdps = idpsRes.data.data.idps.map((idp) => ({
         idpId: idp.idpId,
         name: idp.name
     })) as LoginFormIDP[];

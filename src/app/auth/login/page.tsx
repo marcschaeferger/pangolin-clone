@@ -6,9 +6,11 @@ import DashboardLoginForm from "./DashboardLoginForm";
 import { Mail } from "lucide-react";
 import { pullEnv } from "@app/lib/pullEnv";
 import { cleanRedirect } from "@app/lib/cleanRedirect";
-import { db } from "@server/db";
 import { idp } from "@server/db";
 import { LoginFormIDP } from "@app/components/LoginForm";
+import { priv } from "@app/lib/api";
+import { AxiosResponse } from "axios";
+import { ListIdpsResponse } from "@server/routers/idp";
 
 export const dynamic = "force-dynamic";
 
@@ -34,8 +36,10 @@ export default async function Page(props: {
         redirectUrl = cleanRedirect(searchParams.redirect as string);
     }
 
-    const idps = await db.select().from(idp);
-    const loginIdps = idps.map((idp) => ({
+    const idpsRes = await cache(
+        async () => await priv.get<AxiosResponse<ListIdpsResponse>>("/idp")
+    )();
+    const loginIdps = idpsRes.data.data.idps.map((idp) => ({
         idpId: idp.idpId,
         name: idp.name
     })) as LoginFormIDP[];

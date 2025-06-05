@@ -37,6 +37,8 @@ export type LoginResponse = {
     emailVerificationRequired?: boolean;
 };
 
+export const dynamic = "force-dynamic";
+
 export async function login(
     req: Request,
     res: Response,
