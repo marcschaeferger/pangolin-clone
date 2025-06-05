@@ -289,17 +289,17 @@ export default function LicensePage() {
                                                     terms corresponding to the
                                                     tier associated with your
                                                     license key.
-                                                    <br />
-                                                    <Link
-                                                        href="https://fossorial.io/license.html"
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-primary hover:underline"
-                                                    >
-                                                        View Fossorial
-                                                        Commercial License &
-                                                        Subscription Terms
-                                                    </Link>
+                                                    {/* <br /> */}
+                                                    {/* <Link */}
+                                                    {/*     href="https://fossorial.io/license.html" */}
+                                                    {/*     target="_blank" */}
+                                                    {/*     rel="noopener noreferrer" */}
+                                                    {/*     className="text-primary hover:underline" */}
+                                                    {/* > */}
+                                                    {/*     View Fossorial */}
+                                                    {/*     Commercial License & */}
+                                                    {/*     Subscription Terms */}
+                                                    {/* </Link> */}
                                                 </FormLabel>
                                                 <FormMessage />
                                             </div>
@@ -503,32 +503,32 @@ export default function LicensePage() {
                                 </div>
                             )}
                         </div>
-                        <SettingsSectionFooter>
-                            {!licenseStatus?.isHostLicensed ? (
-                                <>
-                                    <Button
-                                        onClick={() => {
-                                            setPurchaseMode("license");
-                                            setIsPurchaseModalOpen(true);
-                                        }}
-                                    >
-                                        Purchase License
-                                    </Button>
-                                </>
-                            ) : (
-                                <>
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => {
-                                            setPurchaseMode("additional-sites");
-                                            setIsPurchaseModalOpen(true);
-                                        }}
-                                    >
-                                        Purchase Additional Sites
-                                    </Button>
-                                </>
-                            )}
-                        </SettingsSectionFooter>
+                        {/* <SettingsSectionFooter> */}
+                        {/*     {!licenseStatus?.isHostLicensed ? ( */}
+                        {/*         <> */}
+                        {/*             <Button */}
+                        {/*                 onClick={() => { */}
+                        {/*                     setPurchaseMode("license"); */}
+                        {/*                     setIsPurchaseModalOpen(true); */}
+                        {/*                 }} */}
+                        {/*             > */}
+                        {/*                 Purchase License */}
+                        {/*             </Button> */}
+                        {/*         </> */}
+                        {/*     ) : ( */}
+                        {/*         <> */}
+                        {/*             <Button */}
+                        {/*                 variant="outline" */}
+                        {/*                 onClick={() => { */}
+                        {/*                     setPurchaseMode("additional-sites"); */}
+                        {/*                     setIsPurchaseModalOpen(true); */}
+                        {/*                 }} */}
+                        {/*             > */}
+                        {/*                 Purchase Additional Sites */}
+                        {/*             </Button> */}
+                        {/*         </> */}
+                        {/*     )} */}
+                        {/* </SettingsSectionFooter> */}
                     </SettingsSection>
                 </SettingsSectionGrid>
                 <LicenseKeysDataTable
