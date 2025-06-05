@@ -95,7 +95,7 @@ export const ContainersSelector: FC<ContainerSelectorProps> = ({
                         <CredenzaTitle>Containers in {site.name}</CredenzaTitle>
                         <CredenzaDescription>
                             Select any container to use as a hostname for this
-                            target. Click a port to use select a port.
+                            target. Click a port to use a port.
                         </CredenzaDescription>
                     </CredenzaHeader>
                     <CredenzaBody>
