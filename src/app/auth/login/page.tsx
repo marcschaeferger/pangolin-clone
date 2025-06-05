@@ -6,8 +6,8 @@ import DashboardLoginForm from "./DashboardLoginForm";
 import { Mail } from "lucide-react";
 import { pullEnv } from "@app/lib/pullEnv";
 import { cleanRedirect } from "@app/lib/cleanRedirect";
-import db from "@server/db";
-import { idp } from "@server/db/schemas";
+import { db } from "@server/db";
+import { idp } from "@server/db";
 import { LoginFormIDP } from "@app/components/LoginForm";
 import { getTranslations } from "next-intl/server";
 

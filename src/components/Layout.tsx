@@ -172,6 +172,8 @@ export function Layout({
                                         alt="Pangolin Logo"
                                         width={110}
                                         height={25}
+                                        priority={true}
+                                        quality={25}
                                     />
                                 )}
                             </Link>

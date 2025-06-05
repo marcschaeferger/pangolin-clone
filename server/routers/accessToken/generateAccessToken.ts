@@ -4,12 +4,12 @@ import {
     generateIdFromEntropySize,
     SESSION_COOKIE_EXPIRES
 } from "@server/auth/sessions/app";
-import db from "@server/db";
+import { db } from "@server/db";
 import {
     ResourceAccessToken,
     resourceAccessToken,
     resources
-} from "@server/db/schemas";
+} from "@server/db";
 import HttpCode from "@server/types/HttpCode";
 import response from "@server/lib/response";
 import { eq } from "drizzle-orm";

@@ -5,7 +5,7 @@ import { fromError } from "zod-validation-error";
 import HttpCode from "@server/types/HttpCode";
 import { response } from "@server/lib";
 import { db } from "@server/db";
-import { twoFactorBackupCodes, User, users } from "@server/db/schemas";
+import { twoFactorBackupCodes, User, users } from "@server/db";
 import { eq } from "drizzle-orm";
 import { alphabet, generateRandomString } from "oslo/crypto";
 import { hashPassword } from "@server/auth/password";

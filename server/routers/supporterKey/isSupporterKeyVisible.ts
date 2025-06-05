@@ -4,9 +4,9 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { response as sendResponse } from "@server/lib";
 import config from "@server/lib/config";
-import db from "@server/db";
+import { db } from "@server/db";
 import { count } from "drizzle-orm";
-import { users } from "@server/db/schemas";
+import { users } from "@server/db";
 import license from "@server/license/license";
 
 export type IsSupporterKeyVisibleResponse = {

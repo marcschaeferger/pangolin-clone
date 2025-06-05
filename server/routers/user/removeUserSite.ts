@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { resources, userResources, userSites } from "@server/db/schemas";
+import { resources, userResources, userSites } from "@server/db";
 import { and, eq } from "drizzle-orm";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";

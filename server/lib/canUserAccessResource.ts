@@ -1,6 +1,6 @@
-import db from "@server/db";
+import { db } from "@server/db";
 import { and, eq } from "drizzle-orm";
-import { roleResources, userResources } from "@server/db/schemas";
+import { roleResources, userResources } from "@server/db";
 
 export async function canUserAccessResource({
     userId,

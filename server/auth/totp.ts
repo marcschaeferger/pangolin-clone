@@ -1,6 +1,6 @@
 import { verify } from "@node-rs/argon2";
-import db from "@server/db";
-import { twoFactorBackupCodes } from "@server/db/schemas";
+import { db } from "@server/db";
+import { twoFactorBackupCodes } from "@server/db";
 import { eq } from "drizzle-orm";
 import { decodeHex } from "oslo/encoding";
 import { TOTPController } from "oslo/otp";

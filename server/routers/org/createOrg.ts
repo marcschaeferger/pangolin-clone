@@ -12,13 +12,13 @@ import {
     roleActions,
     roles,
     userOrgs,
-    users
-} from "@server/db/schemas";
+    users,
+    actions
+} from "@server/db";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
-import { createAdminRole } from "@server/setup/ensureActions";
 import config from "@server/lib/config";
 import { fromError } from "zod-validation-error";
 import { defaultRoleAllowedActions } from "../role";
@@ -78,16 +78,6 @@ export async function createOrg(
             );
         }
 
-        // const userOrgIds = req.userOrgIds;
-        // if (userOrgIds && userOrgIds.length > MAX_ORGS) {
-        //     return next(
-        //         createHttpError(
-        //             HttpCode.FORBIDDEN,
-        //             `Maximum number of organizations reached.`
-        //         )
-        //     );
-        // }
-
         const { orgId, name } = parsedBody.data;
 
         // make sure the orgId is unique
@@ -131,12 +121,38 @@ export async function createOrg(
 
             org = newOrg[0];
 
-            const roleId = await createAdminRole(newOrg[0].orgId);
+            // Create admin role within the same transaction
+            const [insertedRole] = await trx
+                .insert(roles)
+                .values({
+                    orgId: newOrg[0].orgId,
+                    isAdmin: true,
+                    name: "Admin",
+                    description: "Admin role with the most permissions"
+                })
+                .returning({ roleId: roles.roleId });
 
-            if (!roleId) {
+            if (!insertedRole || !insertedRole.roleId) {
                 error = "Failed to create Admin role";
                 trx.rollback();
                 return;
+            }
+
+            const roleId = insertedRole.roleId;
+
+            // Get all actions and create role actions
+            const actionIds = await trx.select().from(actions).execute();
+            
+            if (actionIds.length > 0) {
+                await trx
+                    .insert(roleActions)
+                    .values(
+                        actionIds.map((action) => ({
+                            roleId,
+                            actionId: action.actionId,
+                            orgId: newOrg[0].orgId
+                        }))
+                    );
             }
 
             await trx.insert(orgDomains).values(
@@ -208,7 +224,7 @@ export async function createOrg(
             return next(
                 createHttpError(
                     HttpCode.INTERNAL_SERVER_ERROR,
-                    "Failed to createo org"
+                    "Failed to create org"
                 )
             );
         }

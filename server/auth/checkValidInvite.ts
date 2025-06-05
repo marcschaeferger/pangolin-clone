@@ -1,5 +1,5 @@
-import db from "@server/db";
-import { UserInvite, userInvites } from "@server/db/schemas";
+import { db } from "@server/db";
+import { UserInvite, userInvites } from "@server/db";
 import { isWithinExpirationDate } from "oslo";
 import { verifyPassword } from "./password";
 import { eq } from "drizzle-orm";

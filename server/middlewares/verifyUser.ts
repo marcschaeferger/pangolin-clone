@@ -1,7 +1,7 @@
 import { NextFunction, Response } from "express";
 import ErrorResponse from "@server/types/ErrorResponse";
 import { db } from "@server/db";
-import { users } from "@server/db/schemas";
+import { users } from "@server/db";
 import { eq } from "drizzle-orm";
 import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";

@@ -1,7 +1,7 @@
 import { TimeSpan, createDate } from "oslo";
 import { generateRandomString, alphabet } from "oslo/crypto";
-import db from "@server/db";
-import { users, emailVerificationCodes } from "@server/db/schemas";
+import { db } from "@server/db";
+import { users, emailVerificationCodes } from "@server/db";
 import { eq } from "drizzle-orm";
 import { sendEmail } from "@server/emails";
 import config from "@server/lib/config";

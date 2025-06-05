@@ -1,7 +1,7 @@
 import axios from 'axios';
 import logger from '@server/logger';
-import db from '@server/db';
-import { exitNodes } from '@server/db/schemas';
+import { db } from "@server/db";
+import { exitNodes } from '@server/db';
 import { eq } from 'drizzle-orm';
 
 export async function addPeer(exitNodeId: number, peer: {

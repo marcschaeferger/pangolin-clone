@@ -68,8 +68,9 @@ export const ContainersSelector: FC<ContainerSelectorProps> = ({
 }) => {
     const [open, setOpen] = useState(false);
     const isDesktop = useMediaQuery("(min-width: 768px)");
+    
     const { isAvailable, containers, fetchContainers } = useDockerSocket(
-        site.siteId
+       site 
     );
 
     useEffect(() => {

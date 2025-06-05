@@ -32,7 +32,7 @@ import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { toast } from "@app/hooks/useToast";
 import { AxiosResponse } from "axios";
-import { Resource } from "@server/db/schemas";
+import { Resource } from "@server/db";
 import { StrategySelect } from "@app/components/StrategySelect";
 import {
     Select,

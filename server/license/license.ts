@@ -1,5 +1,5 @@
-import db from "@server/db";
-import { hostMeta, licenseKey, sites } from "@server/db/schemas";
+import { db } from "@server/db";
+import { hostMeta, licenseKey, sites } from "@server/db";
 import logger from "@server/logger";
 import NodeCache from "node-cache";
 import { validateJWT } from "./licenseJwt";

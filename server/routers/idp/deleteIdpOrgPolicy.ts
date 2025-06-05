@@ -6,7 +6,7 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
-import { idp, idpOrg } from "@server/db/schemas";
+import { idp, idpOrg } from "@server/db";
 import { eq, and } from "drizzle-orm";
 import { OpenAPITags, registry } from "@server/openApi";
 

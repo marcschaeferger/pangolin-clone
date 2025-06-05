@@ -8,7 +8,7 @@ import {
     resourceSessions,
     sessions,
     userInvites
-} from "@server/db/schemas";
+} from "@server/db";
 import logger from "@server/logger";
 import { lt } from "drizzle-orm";
 

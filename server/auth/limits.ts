@@ -1,5 +1,5 @@
 import { db } from '@server/db';
-import { limitsTable } from '@server/db/schemas';
+import { limitsTable } from '@server/db';
 import { and, eq } from 'drizzle-orm';
 import createHttpError from 'http-errors';
 import HttpCode from '@server/types/HttpCode';

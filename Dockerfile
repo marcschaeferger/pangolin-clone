@@ -8,9 +8,11 @@ RUN npm install
 
 COPY . .
 
-RUN npx drizzle-kit generate --dialect sqlite --schema ./server/db/schemas/ --out init
+RUN echo 'export * from "./sqlite";' > server/db/index.ts
 
-RUN npm run build
+RUN npx drizzle-kit generate --dialect sqlite --schema ./server/db/sqlite/schema.ts --out init
+
+RUN npm run build:sqlite
 
 FROM node:20-alpine AS runner
 
@@ -32,4 +34,4 @@ COPY server/db/names.json ./dist/names.json
 
 COPY public ./public
 
-CMD ["npm", "start"]
+CMD ["npm", "run", "start:sqlite"]

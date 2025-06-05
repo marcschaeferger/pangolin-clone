@@ -21,7 +21,7 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
     const { resource, authInfo, site } = useResourceContext();
     const api = createApiClient(useEnvContext());
 
-    const { isEnabled, isAvailable } = useDockerSocket(resource.siteId);
+    const { isEnabled, isAvailable } = useDockerSocket(site!);
     const t = useTranslations();
 
     let fullUrl = `${resource.ssl ? "https" : "http"}://${resource.fullDomain}`;
@@ -72,7 +72,7 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
                                     {resource.siteName}
                                 </InfoSectionContent>
                             </InfoSection>
-                            {isEnabled && (
+                            {/* {isEnabled && (
                                 <InfoSection>
                                     <InfoSectionTitle>Socket</InfoSectionTitle>
                                     <InfoSectionContent>
@@ -89,7 +89,7 @@ export default function ResourceInfoBox({}: ResourceInfoBoxType) {
                                         )}
                                     </InfoSectionContent>
                                 </InfoSection>
-                            )}
+                            )} */}
                         </>
                     ) : (
                         <>

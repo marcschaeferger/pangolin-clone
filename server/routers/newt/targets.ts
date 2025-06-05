@@ -1,4 +1,4 @@
-import { Target } from "@server/db/schemas";
+import { Target } from "@server/db";
 import { sendToClient } from "../ws";
 
 export function addTargets(

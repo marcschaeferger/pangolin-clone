@@ -1,6 +1,6 @@
 import { Request } from "express";
 import { db } from "@server/db";
-import { userActions, roleActions, userOrgs } from "@server/db/schemas";
+import { userActions, roleActions, userOrgs } from "@server/db";
 import { and, eq } from "drizzle-orm";
 import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
