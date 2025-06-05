@@ -1,7 +1,7 @@
 import { join } from "path";
 import { readFileSync } from "fs";
 import { db } from "@server/db";
-import { exitNodes, sites } from "./schemas/schema";
+import { exitNodes, sites } from "@server/db";
 import { eq, and } from "drizzle-orm";
 import { __DIRNAME } from "@server/lib/consts";
 

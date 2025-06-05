@@ -1,5 +1,5 @@
 import { db } from "@server/db";
-import { resources, targets } from "@server/db/schemas";
+import { resources, targets } from "@server/db";
 import { eq } from "drizzle-orm";
 
 let currentBannedPorts: number[] = [];
@@ -8,10 +8,10 @@ export async function pickPort(siteId: number): Promise<{
     internalPort: number;
     targetIps: string[];
 }> {
-    // Fetch resources for this site
-    const resourcesRes = await db.query.resources.findMany({
-        where: eq(resources.siteId, siteId)
-    });
+    const resourcesRes = await db
+        .select()
+        .from(resources)
+        .where(eq(resources.siteId, siteId));
 
     // TODO: is this all inefficient?
     // Fetch targets for all resources of this site
@@ -19,9 +19,10 @@ export async function pickPort(siteId: number): Promise<{
     let targetInternalPorts: number[] = [];
     await Promise.all(
         resourcesRes.map(async (resource) => {
-            const targetsRes = await db.query.targets.findMany({
-                where: eq(targets.resourceId, resource.resourceId)
-            });
+            const targetsRes = await db
+                .select()
+                .from(targets)
+                .where(eq(targets.resourceId, resource.resourceId));
             targetsRes.forEach((target) => {
                 targetIps.push(`${target.ip}/32`);
                 if (target.internalPort) {
@@ -49,16 +50,19 @@ export async function pickPort(siteId: number): Promise<{
 
 export async function getAllowedIps(siteId: number) {
     // TODO: is this all inefficient?
-    const resourcesRes = await db.query.resources.findMany({
-        where: eq(resources.siteId, siteId)
-    });
+
+    const resourcesRes = await db
+        .select()
+        .from(resources)
+        .where(eq(resources.siteId, siteId));
 
     // Fetch targets for all resources of this site
     const targetIps = await Promise.all(
         resourcesRes.map(async (resource) => {
-            const targetsRes = await db.query.targets.findMany({
-                where: eq(targets.resourceId, resource.resourceId)
-            });
+            const targetsRes = await db
+                .select()
+                .from(targets)
+                .where(eq(targets.resourceId, resource.resourceId));
             return targetsRes.map((target) => `${target.ip}/32`);
         })
     );

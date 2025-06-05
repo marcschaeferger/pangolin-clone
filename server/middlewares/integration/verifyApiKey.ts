@@ -1,6 +1,6 @@
 import { verifyPassword } from "@server/auth/password";
-import db from "@server/db";
-import { apiKeys } from "@server/db/schemas";
+import { db } from "@server/db";
+import { apiKeys } from "@server/db";
 import logger from "@server/logger";
 import HttpCode from "@server/types/HttpCode";
 import { eq } from "drizzle-orm";

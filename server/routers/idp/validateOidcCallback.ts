@@ -14,7 +14,7 @@ import {
     roles,
     userOrgs,
     users
-} from "@server/db/schemas";
+} from "@server/db";
 import { and, eq, inArray } from "drizzle-orm";
 import * as arctic from "arctic";
 import { generateOidcRedirectUrl } from "@server/lib/idp/generateRedirectUrl";

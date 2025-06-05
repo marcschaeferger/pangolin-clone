@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import ValidateOidcToken from "./ValidateOidcToken";
-import { idp } from "@server/db/schemas";
-import db from "@server/db";
+import { idp } from "@server/db";
+import { db } from "@server/db";
 import { eq } from "drizzle-orm";
 
 export default async function Page(props: {

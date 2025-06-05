@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { db } from "@server/db";
-import { resources, apiKeyOrg } from "@server/db/schemas";
+import { resources, apiKeyOrg } from "@server/db";
 import { eq, and } from "drizzle-orm";
 import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";

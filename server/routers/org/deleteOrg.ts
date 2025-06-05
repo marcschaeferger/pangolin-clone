@@ -7,7 +7,7 @@ import {
     orgs,
     sites,
     userActions
-} from "@server/db/schemas";
+} from "@server/db";
 import { eq } from "drizzle-orm";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";

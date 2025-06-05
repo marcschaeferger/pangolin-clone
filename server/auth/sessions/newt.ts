@@ -2,8 +2,8 @@ import {
     encodeHexLowerCase,
 } from "@oslojs/encoding";
 import { sha256 } from "@oslojs/crypto/sha2";
-import { Newt, newts, newtSessions, NewtSession } from "@server/db/schemas";
-import db from "@server/db";
+import { Newt, newts, newtSessions, NewtSession } from "@server/db";
+import { db } from "@server/db";
 import { eq } from "drizzle-orm";
 
 export const EXPIRES = 1000 * 60 * 60 * 24 * 30;

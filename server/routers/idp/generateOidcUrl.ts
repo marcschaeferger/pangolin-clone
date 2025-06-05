@@ -6,7 +6,7 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
-import { idp, idpOidcConfig, idpOrg } from "@server/db/schemas";
+import { idp, idpOidcConfig, idpOrg } from "@server/db";
 import { and, eq } from "drizzle-orm";
 import * as arctic from "arctic";
 import { generateOidcRedirectUrl } from "@server/lib/idp/generateRedirectUrl";

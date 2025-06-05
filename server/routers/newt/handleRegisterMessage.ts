@@ -1,4 +1,4 @@
-import db from "@server/db";
+import { db } from "@server/db";
 import { MessageHandler } from "../ws";
 import {
     exitNodes,
@@ -6,7 +6,7 @@ import {
     sites,
     Target,
     targets
-} from "@server/db/schemas";
+} from "@server/db";
 import { eq, and, sql, inArray } from "drizzle-orm";
 import { addPeer, deletePeer } from "../gerbil/peers";
 import logger from "@server/logger";

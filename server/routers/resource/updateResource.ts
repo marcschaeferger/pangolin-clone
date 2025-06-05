@@ -8,7 +8,7 @@ import {
     orgs,
     Resource,
     resources
-} from "@server/db/schemas";
+} from "@server/db";
 import { eq, and } from "drizzle-orm";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";

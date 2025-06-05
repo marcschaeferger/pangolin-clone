@@ -5,6 +5,8 @@ build-release:
 	fi
 	docker buildx build --platform linux/arm64,linux/amd64 -t fosrl/pangolin:latest -f Dockerfile --push .
 	docker buildx build --platform linux/arm64,linux/amd64 -t fosrl/pangolin:$(tag) -f Dockerfile --push .
+	docker buildx build --platform linux/arm64,linux/amd64 -t fosrl/pangolin:postgresql-latest -f Dockerfile.pg --push .
+	docker buildx build --platform linux/arm64,linux/amd64 -t fosrl/pangolin:postgresql-$(tag) -f Dockerfile.pg --push .
 
 build-arm:
 	docker buildx build --platform linux/arm64 -t fosrl/pangolin:latest .

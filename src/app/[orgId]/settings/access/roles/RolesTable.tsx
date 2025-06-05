@@ -14,7 +14,7 @@ import ConfirmDeleteDialog from "@app/components/ConfirmDeleteDialog";
 import { useOrgContext } from "@app/hooks/useOrgContext";
 import { toast } from "@app/hooks/useToast";
 import { RolesDataTable } from "./RolesDataTable";
-import { Role } from "@server/db/schemas";
+import { Role } from "@server/db";
 import CreateRoleForm from "./CreateRoleForm";
 import DeleteRoleForm from "./DeleteRoleForm";
 import { createApiClient } from "@app/lib/api";

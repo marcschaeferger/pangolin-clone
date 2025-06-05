@@ -9,8 +9,8 @@ import {
     sessions,
     User,
     users
-} from "@server/db/schemas";
-import db from "@server/db";
+} from "@server/db";
+import { db } from "@server/db";
 import { eq, inArray } from "drizzle-orm";
 import config from "@server/lib/config";
 import type { RandomReader } from "@oslojs/crypto/random";

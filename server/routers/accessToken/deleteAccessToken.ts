@@ -5,9 +5,9 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
-import { resourceAccessToken } from "@server/db/schemas";
+import { resourceAccessToken } from "@server/db";
 import { and, eq } from "drizzle-orm";
-import db from "@server/db";
+import { db } from "@server/db";
 import { OpenAPITags, registry } from "@server/openApi";
 
 const deleteAccessTokenParamsSchema = z

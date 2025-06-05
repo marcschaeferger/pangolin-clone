@@ -28,7 +28,7 @@ import {
 } from "@app/components/Credenza";
 import { formatAxiosError } from "@app/lib/api";
 import { AxiosResponse } from "axios";
-import { Resource } from "@server/db/schemas";
+import { Resource } from "@server/db";
 import {
     InputOTP,
     InputOTPGroup,

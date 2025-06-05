@@ -1,11 +1,11 @@
 import { generateSessionToken } from "@server/auth/sessions/app";
-import db from "@server/db";
+import { db } from "@server/db";
 import {
     orgs,
     resourceOtp,
     resources,
     resourceWhitelist
-} from "@server/db/schemas";
+} from "@server/db";
 import HttpCode from "@server/types/HttpCode";
 import response from "@server/lib/response";
 import { eq, and } from "drizzle-orm";

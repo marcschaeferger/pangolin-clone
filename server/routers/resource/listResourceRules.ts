@@ -1,5 +1,5 @@
 import { db } from "@server/db";
-import { resourceRules, resources } from "@server/db/schemas";
+import { resourceRules, resources } from "@server/db";
 import HttpCode from "@server/types/HttpCode";
 import response from "@server/lib/response";
 import { eq, sql } from "drizzle-orm";

@@ -1,8 +1,8 @@
 import { generateId, invalidateAllSessions } from "@server/auth/sessions/app";
 import { hashPassword, verifyPassword } from "@server/auth/password";
 import config from "@server/lib/config";
-import db from "@server/db";
-import { users } from "@server/db/schemas";
+import { db } from "@server/db";
+import { users } from "@server/db";
 import logger from "@server/logger";
 import { eq } from "drizzle-orm";
 import moment from "moment";

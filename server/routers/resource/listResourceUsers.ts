@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { idp, userResources, users } from "@server/db/schemas"; // Assuming these are the correct tables
+import { idp, userResources, users } from "@server/db"; // Assuming these are the correct tables
 import { eq } from "drizzle-orm";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";

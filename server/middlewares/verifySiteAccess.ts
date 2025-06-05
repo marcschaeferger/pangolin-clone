@@ -6,7 +6,7 @@ import {
     userSites,
     roleSites,
     roles,
-} from "@server/db/schemas";
+} from "@server/db";
 import { and, eq, or } from "drizzle-orm";
 import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";

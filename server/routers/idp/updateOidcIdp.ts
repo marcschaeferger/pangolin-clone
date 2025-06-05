@@ -7,7 +7,7 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { OpenAPITags, registry } from "@server/openApi";
-import { idp, idpOidcConfig } from "@server/db/schemas";
+import { idp, idpOidcConfig } from "@server/db";
 import { eq } from "drizzle-orm";
 import { encrypt } from "@server/lib/crypto";
 import config from "@server/lib/config";

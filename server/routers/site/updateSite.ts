@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { sites } from "@server/db/schemas";
+import { sites } from "@server/db";
 import { eq } from "drizzle-orm";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
@@ -19,6 +19,7 @@ const updateSiteParamsSchema = z
 const updateSiteBodySchema = z
     .object({
         name: z.string().min(1).max(255).optional(),
+        dockerSocketEnabled: z.boolean().optional(),
         // subdomain: z
         //     .string()
         //     .min(1)
