@@ -395,7 +395,7 @@ export default function PoliciesPage() {
                                                 </FormControl>
                                                 <FormDescription>
                                                     This expression must return
-                                                    thr org ID or true for the
+                                                    the org ID or true for the
                                                     user to be allowed to access
                                                     the organization.
                                                 </FormDescription>
