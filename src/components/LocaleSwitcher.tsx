@@ -25,12 +25,20 @@ export default function LocaleSwitcher() {
             label: 'Italiano'
         },
         {
+            value: 'nl-NL',
+            label: 'Nederlands'
+        },
+        {
             value: 'pl-PL',
             label: 'Polski'
         },
         {
             value: 'pt-PT',
             label: 'Português'
+        },
+        {
+            value: 'es-ES',
+            label: 'Español'
         },
         {
             value: 'tr-TR',
