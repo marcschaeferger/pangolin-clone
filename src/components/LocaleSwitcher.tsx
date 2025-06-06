@@ -46,7 +46,7 @@ export default function LocaleSwitcher() {
         },
         {
             value: 'zh-CN',
-            label: '中国人'
+            label: '简体中文'
         }
       ]}
     />
