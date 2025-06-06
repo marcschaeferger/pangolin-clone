@@ -104,12 +104,12 @@ export function useDockerSocket(site: Site) {
                                 console.warn(
                                     "Max retry attempts reached. Containers may still be loading."
                                 );
-                                toast({
-                                    variant: "destructive",
-                                    title: "Containers not ready",
-                                    description:
-                                        "Containers are still loading. Please try again in a moment."
-                                });
+                                // toast({
+                                //     variant: "destructive",
+                                //     title: "Containers not ready",
+                                //     description:
+                                //         "Containers are still loading. Please try again in a moment."
+                                // });
                             }
                         } else {
                             console.error(

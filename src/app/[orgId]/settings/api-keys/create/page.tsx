@@ -44,7 +44,6 @@ import {
     CreateOrgApiKeyBody,
     CreateOrgApiKeyResponse
 } from "@server/routers/apiKeys";
-import { ApiKey } from "@server/db";
 import {
     InfoSection,
     InfoSectionContent,

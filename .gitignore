@@ -33,3 +33,4 @@ bin
 .secrets
 test_event.json
 .idea/
+package-lock.json
