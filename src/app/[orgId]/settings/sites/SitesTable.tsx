@@ -27,6 +27,7 @@ import { formatAxiosError } from "@app/lib/api";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import CreateSiteFormModal from "./CreateSiteModal";
+import { parseDataSize } from '@app/lib/dataSize';
 
 export type SiteRow = {
     id: number;
@@ -197,7 +198,12 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
-            }
+            },
+            sortingFn: (rowA, rowB) => {
+                const a = parseDataSize(rowA.original.mbIn);
+                const b = parseDataSize(rowB.original.mbIn);
+                return a > b ? 1 : a < b ? -1 : 0;
+            },
         },
         {
             accessorKey: "mbOut",
@@ -213,7 +219,12 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
-            }
+            },
+            sortingFn: (rowA, rowB) => {
+                const a = parseDataSize(rowA.original.mbOut);
+                const b = parseDataSize(rowB.original.mbOut);
+                return a > b ? 1 : a < b ? -1 : 0;
+            },
         },
         {
             accessorKey: "type",
