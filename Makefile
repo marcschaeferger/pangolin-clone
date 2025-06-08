@@ -1,4 +1,4 @@
-.PHONY: build build-release build-arm build-x86 build test clean
+.PHONY: build build-release build-arm build-x86 test clean
 
 build-release:
 	@if [ -z "$(tag)" ]; then \
