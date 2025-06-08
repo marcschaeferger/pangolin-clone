@@ -7,35 +7,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository
       - uses: actions/checkout@v4
 
-      # Set up Node.js v20
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # Copy example configuration
       - name: Copy config file
         run: cp config/config.example.yml config/config.yml
 
-      # Install dependencies
       - name: Install dependencies
         run: npm ci
 
-      # Generate SQLite database migrations
       - name: Generate database migrations
         run: npm run db:sqlite:generate
 
-      # Apply database migrations
       - name: Apply database migrations
         run: npm run db:sqlite:push
 
-      # Start the app in the background
       - name: Start app in background
         run: nohup npm run dev &
 
-      # Wait for the app to become available
       - name: Wait for app availability
         run: |
           for i in {1..5}; do
@@ -48,3 +40,6 @@ jobs:
           done
           echo "App failed to start"
           exit 1
+
+      - name: Build Docker container
+        run: make build
