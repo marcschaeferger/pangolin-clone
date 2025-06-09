@@ -140,7 +140,7 @@ export function SidebarNav({
                                             {item.icon}
                                         </span>
                                     )}
-                                    {item.title}
+                                    {t(item.title)}
                                 </div>
                                 {isProfessional && (
                                     <Badge
