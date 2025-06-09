@@ -33,7 +33,7 @@ import { useEnvContext } from "@app/hooks/useEnvContext";
 import { useState } from "react";
 import { SwitchInput } from "@app/components/SwitchInput";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ExternalLink } from "lucide-react";
 
 const GeneralFormSchema = z.object({
     name: z.string().nonempty("Name is required"),
@@ -153,22 +153,18 @@ export default function GeneralPage() {
                                                 <FormDescription>
                                                     Enable Docker Socket
                                                     discovery for populating
-                                                    container information,
-                                                    useful in resource targets.
-                                                    <Link
+                                                    container information.
+                                                    Socket path must be provided
+                                                    to Newt.{" "}
+                                                    <a
                                                         href="https://docs.fossorial.io/Newt/overview#docker-socket-integration"
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="underline"
+                                                        className="text-primary hover:underline inline-flex items-center"
                                                     >
-                                                        <span>
-                                                            {" "}
-                                                            Docker socket path
-                                                            must be provided to
-                                                            Newt in order to use
-                                                            this feature.
-                                                        </span>
-                                                    </Link>
+                                                        Learn more
+                                                        <ExternalLink className="ml-1 h-4 w-4" />
+                                                    </a>
                                                 </FormDescription>
                                             </FormItem>
                                         )}
