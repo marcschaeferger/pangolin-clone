@@ -199,11 +199,8 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                     </Button>
                 );
             },
-            sortingFn: (rowA, rowB) => {
-                const a = parseDataSize(rowA.original.mbIn);
-                const b = parseDataSize(rowB.original.mbIn);
-                return a > b ? 1 : a < b ? -1 : 0;
-            },
+            sortingFn: (rowA, rowB) => 
+                parseDataSize(rowA.original.mbIn) - parseDataSize(rowB.original.mbIn)
         },
         {
             accessorKey: "mbOut",
@@ -220,11 +217,8 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                     </Button>
                 );
             },
-            sortingFn: (rowA, rowB) => {
-                const a = parseDataSize(rowA.original.mbOut);
-                const b = parseDataSize(rowB.original.mbOut);
-                return a > b ? 1 : a < b ? -1 : 0;
-            },
+            sortingFn: (rowA, rowB) =>
+                parseDataSize(rowA.original.mbOut) - parseDataSize(rowB.original.mbOut),
         },
         {
             accessorKey: "type",
