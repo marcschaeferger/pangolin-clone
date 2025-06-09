@@ -32,6 +32,8 @@ import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { useState } from "react";
 import { SwitchInput } from "@app/components/SwitchInput";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 const GeneralFormSchema = z.object({
     name: z.string().nonempty("Name is required"),
@@ -153,6 +155,20 @@ export default function GeneralPage() {
                                                     discovery for populating
                                                     container information,
                                                     useful in resource targets.
+                                                    <Link
+                                                        href="https://docs.fossorial.io/Newt/overview#docker-socket-integration"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="underline"
+                                                    >
+                                                        <span>
+                                                            {" "}
+                                                            Docker socket path
+                                                            must be provided to
+                                                            Newt in order to use
+                                                            this feature.
+                                                        </span>
+                                                    </Link>
                                                 </FormDescription>
                                             </FormItem>
                                         )}
