@@ -1,5 +1,7 @@
-// eslint.config.js
-export default [
+import tseslint from 'typescript-eslint';
+
+export default tseslint.config(
+    tseslint.configs.recommended,
     {
         files: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
         rules: {
@@ -7,4 +9,4 @@ export default [
             "prefer-const": "error"
         }
     }
-];
+);
