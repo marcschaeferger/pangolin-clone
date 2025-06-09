@@ -6,6 +6,7 @@ export default function LocaleSwitcher() {
 
   return (
     <LocaleSwitcherSelect
+      label="Select language"
       defaultValue={locale}
       items={[
         {
