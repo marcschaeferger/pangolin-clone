@@ -28,6 +28,7 @@ import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import CreateSiteFormModal from "./CreateSiteModal";
 import { useTranslations } from "next-intl";
+import { parseDataSize } from '@app/lib/dataSize';
 
 export type SiteRow = {
     id: number;
@@ -199,7 +200,9 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
-            }
+            },
+            sortingFn: (rowA, rowB) => 
+                parseDataSize(rowA.original.mbIn) - parseDataSize(rowB.original.mbIn)
         },
         {
             accessorKey: "mbOut",
@@ -215,7 +218,9 @@ export default function SitesTable({ sites, orgId }: SitesTableProps) {
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
-            }
+            },
+            sortingFn: (rowA, rowB) =>
+                parseDataSize(rowA.original.mbOut) - parseDataSize(rowB.original.mbOut),
         },
         {
             accessorKey: "type",

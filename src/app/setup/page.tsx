@@ -84,7 +84,14 @@ export default function StepperForm() {
     );
 
     const generateId = (name: string) => {
-        return name.toLowerCase().replace(/\s+/g, "-");
+        // Replace any character that is not a letter, number, space, or hyphen with a hyphen
+        // Also collapse multiple hyphens and trim
+        return name
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, "-")
+            .replace(/\s+/g, "-")
+            .replace(/-+/g, "-")
+            .replace(/^-+|-+$/g, "");
     };
 
     async function orgSubmit(values: z.infer<typeof orgSchema>) {
@@ -209,23 +216,22 @@ export default function StepperForm() {
                                                         type="text"
                                                         {...field}
                                                         onChange={(e) => {
-                                                            const orgId =
-                                                                generateId(
-                                                                    e.target
-                                                                        .value
-                                                                );
+                                                            // Prevent "/" in orgName input
+                                                            const sanitizedValue = e.target.value.replace(/\//g, "-");
+                                                            const orgId = generateId(sanitizedValue);
                                                             orgForm.setValue(
                                                                 "orgId",
                                                                 orgId
                                                             );
                                                             orgForm.setValue(
                                                                 "orgName",
-                                                                e.target.value
+                                                                sanitizedValue
                                                             );
                                                             debouncedCheckOrgIdAvailability(
                                                                 orgId
                                                             );
                                                         }}
+                                                        value={field.value.replace(/\//g, "-")}
                                                     />
                                                 </FormControl>
                                                 <FormMessage />

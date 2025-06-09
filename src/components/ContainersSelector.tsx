@@ -346,16 +346,19 @@ const DockerContainersTable: FC<{
         {
             id: "actions",
             header: "Actions",
-            cell: ({ row }) => (
-                <Button
-                    variant="default"
-                    size="sm"
-                    onClick={() => onContainerSelect(row.original)}
-                    disabled={row.original.state !== "running"}
-                >
-                    Select
-                </Button>
-            )
+            cell: ({ row }) => {
+                const ports = getExposedPorts(row.original);
+                return (
+                    <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => onContainerSelect(row.original, ports[0])}
+                        disabled={row.original.state !== "running"}
+                    >
+                        Select
+                    </Button>
+                );
+            }
         }
     ];
 
