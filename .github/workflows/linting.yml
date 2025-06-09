@@ -1,4 +1,4 @@
-name: ESLint Linting
+name: ESLint
 
 on:
     pull_request:
@@ -14,7 +14,7 @@ on:
             - 'package-lock.json'
 
 jobs:
-    lint:
+    Linter:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
