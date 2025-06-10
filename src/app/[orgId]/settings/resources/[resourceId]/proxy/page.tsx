@@ -74,7 +74,6 @@ import {
     CollapsibleTrigger
 } from "@app/components/ui/collapsible";
 import { ContainersSelector } from "@app/components/ContainersSelector";
-import { FaDocker } from "react-icons/fa";
 import { useTranslations } from "next-intl";
 
 const addTargetSchema = z.object({

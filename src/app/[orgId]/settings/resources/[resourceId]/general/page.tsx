@@ -71,7 +71,6 @@ const TransferFormSchema = z.object({
     siteId: z.number()
 });
 
-type GeneralFormValues = z.infer<typeof GeneralFormSchema>;
 type TransferFormValues = z.infer<typeof TransferFormSchema>;
 
 export default function GeneralForm() {
@@ -123,7 +122,7 @@ export default function GeneralForm() {
                 return true;
             },
             {
-                message: t('proxyErrorInvalidPort'),
+                message: t("proxyErrorInvalidPort"),
                 path: ["proxyPort"]
             }
         )
@@ -135,10 +134,12 @@ export default function GeneralForm() {
                 return true;
             },
             {
-                message: t('subdomainErrorInvalid'),
+                message: t("subdomainErrorInvalid"),
                 path: ["subdomain"]
             }
         );
+
+    type GeneralFormValues = z.infer<typeof GeneralFormSchema>;
 
     const form = useForm<GeneralFormValues>({
         resolver: zodResolver(GeneralFormSchema),
@@ -176,8 +177,11 @@ export default function GeneralForm() {
                 .catch((e) => {
                     toast({
                         variant: "destructive",
-                        title: t('domainErrorFetch'),
-                        description: formatAxiosError(e, t('domainErrorFetchDescription'))
+                        title: t("domainErrorFetch"),
+                        description: formatAxiosError(
+                            e,
+                            t("domainErrorFetchDescription")
+                        )
                     });
                 });
 
@@ -215,15 +219,18 @@ export default function GeneralForm() {
             .catch((e) => {
                 toast({
                     variant: "destructive",
-                    title: t('resourceErrorUpdate'),
-                    description: formatAxiosError(e, t('resourceErrorUpdateDescription'))
+                    title: t("resourceErrorUpdate"),
+                    description: formatAxiosError(
+                        e,
+                        t("resourceErrorUpdateDescription")
+                    )
                 });
             });
 
         if (res && res.status === 200) {
             toast({
-                title: t('resourceUpdated'),
-                description: t('resourceUpdatedDescription')
+                title: t("resourceUpdated"),
+                description: t("resourceUpdatedDescription")
             });
 
             const resource = res.data.data;
@@ -251,16 +258,18 @@ export default function GeneralForm() {
             .catch((e) => {
                 toast({
                     variant: "destructive",
-                    title: t('resourceErrorTransfer'),
-                    description: formatAxiosError(e, t('resourceErrorTransferDescription')
+                    title: t("resourceErrorTransfer"),
+                    description: formatAxiosError(
+                        e,
+                        t("resourceErrorTransferDescription")
                     )
                 });
             });
 
         if (res && res.status === 200) {
             toast({
-                title: t('resourceTransferred'),
-                description: t('resourceTransferredDescription')
+                title: t("resourceTransferred"),
+                description: t("resourceTransferredDescription")
             });
             router.refresh();
 
@@ -284,10 +293,10 @@ export default function GeneralForm() {
             .catch((e) => {
                 toast({
                     variant: "destructive",
-                    title: t('resourceErrorToggle'),
+                    title: t("resourceErrorToggle"),
                     description: formatAxiosError(
                         e,
-                        t('resourceErrorToggleDescription')
+                        t("resourceErrorToggleDescription")
                     )
                 });
             });
@@ -302,15 +311,17 @@ export default function GeneralForm() {
             <SettingsContainer>
                 <SettingsSection>
                     <SettingsSectionHeader>
-                        <SettingsSectionTitle>{t('resourceVisibilityTitle')}</SettingsSectionTitle>
+                        <SettingsSectionTitle>
+                            {t("resourceVisibilityTitle")}
+                        </SettingsSectionTitle>
                         <SettingsSectionDescription>
-                            {t('resourceVisibilityTitleDescription')}
+                            {t("resourceVisibilityTitleDescription")}
                         </SettingsSectionDescription>
                     </SettingsSectionHeader>
                     <SettingsSectionBody>
                         <SwitchInput
                             id="enable-resource"
-                            label={t('resourceEnable')}
+                            label={t("resourceEnable")}
                             defaultChecked={resource.enabled}
                             onCheckedChange={async (val) => {
                                 await toggleResourceEnabled(val);
@@ -322,10 +333,10 @@ export default function GeneralForm() {
                 <SettingsSection>
                     <SettingsSectionHeader>
                         <SettingsSectionTitle>
-                            {t('resourceGeneral')}
+                            {t("resourceGeneral")}
                         </SettingsSectionTitle>
                         <SettingsSectionDescription>
-                            {t('resourceGeneralDescription')}
+                            {t("resourceGeneralDescription")}
                         </SettingsSectionDescription>
                     </SettingsSectionHeader>
 
@@ -342,7 +353,9 @@ export default function GeneralForm() {
                                         name="name"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>{t('name')}</FormLabel>
+                                                <FormLabel>
+                                                    {t("name")}
+                                                </FormLabel>
                                                 <FormControl>
                                                     <Input {...field} />
                                                 </FormControl>
@@ -361,7 +374,9 @@ export default function GeneralForm() {
                                                     render={({ field }) => (
                                                         <FormItem>
                                                             <FormLabel>
-                                                                {t('domainType')}
+                                                                {t(
+                                                                    "domainType"
+                                                                )}
                                                             </FormLabel>
                                                             <Select
                                                                 value={
@@ -392,10 +407,14 @@ export default function GeneralForm() {
                                                                 </FormControl>
                                                                 <SelectContent>
                                                                     <SelectItem value="subdomain">
-                                                                        {t('subdomain')}
+                                                                        {t(
+                                                                            "subdomain"
+                                                                        )}
                                                                     </SelectItem>
                                                                     <SelectItem value="basedomain">
-                                                                        {t('baseDomain')}
+                                                                        {t(
+                                                                            "baseDomain"
+                                                                        )}
                                                                     </SelectItem>
                                                                 </SelectContent>
                                                             </Select>
@@ -409,7 +428,7 @@ export default function GeneralForm() {
                                                 {domainType === "subdomain" ? (
                                                     <div className="w-fill space-y-2">
                                                         <FormLabel>
-                                                            {t('subdomain')}
+                                                            {t("subdomain")}
                                                         </FormLabel>
                                                         <div className="flex">
                                                             <div className="w-1/2">
@@ -495,7 +514,9 @@ export default function GeneralForm() {
                                                         render={({ field }) => (
                                                             <FormItem>
                                                                 <FormLabel>
-                                                                    {t('baseDomain')}
+                                                                    {t(
+                                                                        "baseDomain"
+                                                                    )}
                                                                 </FormLabel>
                                                                 <Select
                                                                     onValueChange={
@@ -549,7 +570,9 @@ export default function GeneralForm() {
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>
-                                                        {t('resourcePortNumber')}
+                                                        {t(
+                                                            "resourcePortNumber"
+                                                        )}
                                                     </FormLabel>
                                                     <FormControl>
                                                         <Input
@@ -589,7 +612,7 @@ export default function GeneralForm() {
                             disabled={saveLoading}
                             form="general-settings-form"
                         >
-                            {t('saveGeneralSettings')}
+                            {t("saveGeneralSettings")}
                         </Button>
                     </SettingsSectionFooter>
                 </SettingsSection>
@@ -597,10 +620,10 @@ export default function GeneralForm() {
                 <SettingsSection>
                     <SettingsSectionHeader>
                         <SettingsSectionTitle>
-                            {t('resourceTransfer')}
+                            {t("resourceTransfer")}
                         </SettingsSectionTitle>
                         <SettingsSectionDescription>
-                            {t('resourceTransferDescription')}
+                            {t("resourceTransferDescription")}
                         </SettingsSectionDescription>
                     </SettingsSectionHeader>
 
@@ -620,7 +643,7 @@ export default function GeneralForm() {
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
-                                                    {t('siteDestination')}
+                                                    {t("siteDestination")}
                                                 </FormLabel>
                                                 <Popover
                                                     open={open}
@@ -645,16 +668,24 @@ export default function GeneralForm() {
                                                                               site.siteId ===
                                                                               field.value
                                                                       )?.name
-                                                                    : t('siteSelect')}
+                                                                    : t(
+                                                                          "siteSelect"
+                                                                      )}
                                                                 <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                                             </Button>
                                                         </FormControl>
                                                     </PopoverTrigger>
                                                     <PopoverContent className="w-full p-0">
                                                         <Command>
-                                                            <CommandInput placeholder={t('searchSites')} />
+                                                            <CommandInput
+                                                                placeholder={t(
+                                                                    "searchSites"
+                                                                )}
+                                                            />
                                                             <CommandEmpty>
-                                                                {t('sitesNotFound')}
+                                                                {t(
+                                                                    "sitesNotFound"
+                                                                )}
                                                             </CommandEmpty>
                                                             <CommandGroup>
                                                                 {sites.map(
@@ -709,7 +740,7 @@ export default function GeneralForm() {
                             disabled={transferLoading}
                             form="transfer-form"
                         >
-                            {t('resourceTransferSubmit')}
+                            {t("resourceTransferSubmit")}
                         </Button>
                     </SettingsSectionFooter>
                 </SettingsSection>

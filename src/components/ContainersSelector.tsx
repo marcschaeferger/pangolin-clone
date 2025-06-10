@@ -45,7 +45,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, RefreshCw, Filter, Columns } from "lucide-react";
 import { GetSiteResponse, Container } from "@server/routers/site";
 import { useDockerSocket } from "@app/hooks/useDockerSocket";
-import { FaDocker } from "react-icons/fa";
+import { useTranslations } from "next-intl";
 
 // Type definitions based on the JSON structure
 
@@ -59,6 +59,8 @@ export const ContainersSelector: FC<ContainerSelectorProps> = ({
     onContainerSelect
 }) => {
     const [open, setOpen] = useState(false);
+
+    const t = useTranslations();
 
     const { isAvailable, containers, fetchContainers } = useDockerSocket(site);
 
@@ -87,15 +89,16 @@ export const ContainersSelector: FC<ContainerSelectorProps> = ({
                 className="text-sm text-primary hover:underline cursor-pointer"
                 onClick={() => setOpen(true)}
             >
-                View Docker Containers
+                {t("viewDockerContainers")}
             </a>
             <Credenza open={open} onOpenChange={setOpen}>
                 <CredenzaContent className="max-w-[75vw] max-h-[75vh] flex flex-col">
                     <CredenzaHeader>
-                        <CredenzaTitle>Containers in {site.name}</CredenzaTitle>
+                        <CredenzaTitle>
+                            {t("containersIn", { siteName: site.name })}
+                        </CredenzaTitle>
                         <CredenzaDescription>
-                            Select any container to use as a hostname for this
-                            target. Click a port to use a port.
+                            {t("selectContainerDescription")}
                         </CredenzaDescription>
                     </CredenzaHeader>
                     <CredenzaBody>
@@ -109,7 +112,7 @@ export const ContainersSelector: FC<ContainerSelectorProps> = ({
                     </CredenzaBody>
                     <CredenzaFooter>
                         <CredenzaClose asChild>
-                            <Button variant="outline">Close</Button>
+                            <Button variant="outline">{t("close")}</Button>
                         </CredenzaClose>
                     </CredenzaFooter>
                 </CredenzaContent>
@@ -131,6 +134,8 @@ const DockerContainersTable: FC<{
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
         labels: false
     });
+
+    const t = useTranslations();
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -182,14 +187,14 @@ const DockerContainersTable: FC<{
     const columns: ColumnDef<Container>[] = [
         {
             accessorKey: "name",
-            header: "Name",
+            header: t("containerName"),
             cell: ({ row }) => (
                 <div className="font-medium">{row.original.name}</div>
             )
         },
         {
             accessorKey: "image",
-            header: "Image",
+            header: t("containerImage"),
             cell: ({ row }) => (
                 <div className="text-sm text-muted-foreground">
                     {row.original.image}
@@ -198,7 +203,7 @@ const DockerContainersTable: FC<{
         },
         {
             accessorKey: "state",
-            header: "State",
+            header: t("containerState"),
             cell: ({ row }) => (
                 <Badge
                     variant={
@@ -213,7 +218,7 @@ const DockerContainersTable: FC<{
         },
         {
             accessorKey: "networks",
-            header: "Networks",
+            header: t("containerNetworks"),
             cell: ({ row }) => {
                 const networks = Object.keys(row.original.networks);
                 return (
@@ -231,7 +236,7 @@ const DockerContainersTable: FC<{
         },
         {
             accessorKey: "hostname",
-            header: "Hostname/IP",
+            header: t("containerHostnameIp"),
             enableHiding: false,
             cell: ({ row }) => (
                 <div className="text-sm font-mono">
@@ -241,7 +246,7 @@ const DockerContainersTable: FC<{
         },
         {
             accessorKey: "labels",
-            header: "Labels",
+            header: t("containerLabels"),
             cell: ({ row }) => {
                 const labels = row.original.labels || {};
                 const labelEntries = Object.entries(labels);
@@ -258,15 +263,14 @@ const DockerContainersTable: FC<{
                                 size="sm"
                                 className="h-6 px-2 text-xs hover:bg-muted"
                             >
-                                {labelEntries.length} label
-                                {labelEntries.length !== 1 ? "s" : ""}
+                                {t("containerLabelsCount", { count: labelEntries.length })}
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent side="top" align="start">
                             <ScrollArea className="w-64 h-64">
                                 <div className="space-y-2">
                                     <h4 className="font-medium text-sm">
-                                        Container Labels
+                                        {t("containerLabelsTitle")}
                                     </h4>
                                     <div className="space-y-1">
                                         {labelEntries.map(([key, value]) => (
@@ -275,7 +279,7 @@ const DockerContainersTable: FC<{
                                                     {key}
                                                 </div>
                                                 <div className="font-mono text-muted-foreground pl-2 break-all">
-                                                    {value || "<empty>"}
+                                                    {value || t("containerLabelEmpty")}
                                                 </div>
                                             </div>
                                         ))}
@@ -289,7 +293,7 @@ const DockerContainersTable: FC<{
         },
         {
             accessorKey: "ports",
-            header: "Ports",
+            header: t("containerPorts"),
             enableHiding: false,
             cell: ({ row }) => {
                 const ports = getExposedPorts(row.original);
@@ -312,7 +316,7 @@ const DockerContainersTable: FC<{
                             <Popover>
                                 <PopoverTrigger asChild>
                                     <Button variant="link" size="sm">
-                                        +{ports.length - 2} more
+                                        {t("containerPortsMore", { count: ports.length - 2 })}
                                     </Button>
                                 </PopoverTrigger>
                                 <PopoverContent
@@ -345,7 +349,7 @@ const DockerContainersTable: FC<{
         },
         {
             id: "actions",
-            header: "Actions",
+            header: t("containerActions"),
             cell: ({ row }) => {
                 const ports = getExposedPorts(row.original);
                 return (
@@ -355,7 +359,7 @@ const DockerContainersTable: FC<{
                         onClick={() => onContainerSelect(row.original, ports[0])}
                         disabled={row.original.state !== "running"}
                     >
-                        Select
+                        {t("select")}
                     </Button>
                 );
             }
@@ -412,8 +416,7 @@ const DockerContainersTable: FC<{
                         containers.length > 0 ? (
                             <>
                                 <p>
-                                    No containers found matching the current
-                                    filters.
+                                    {t("noContainersMatchingFilters")}
                                 </p>
                                 <div className="space-x-2">
                                     {hideContainersWithoutPorts && (
@@ -426,7 +429,7 @@ const DockerContainersTable: FC<{
                                                 )
                                             }
                                         >
-                                            Show containers without ports
+                                            {t("showContainersWithoutPorts")}
                                         </Button>
                                     )}
                                     {hideStoppedContainers && (
@@ -437,15 +440,14 @@ const DockerContainersTable: FC<{
                                                 setHideStoppedContainers(false)
                                             }
                                         >
-                                            Show stopped containers
+                                            {t("showStoppedContainers")}
                                         </Button>
                                     )}
                                 </div>
                             </>
                         ) : (
                             <p>
-                                No containers found. Make sure Docker containers
-                                are running.
+                                {t("noContainersFound")}
                             </p>
                         )}
                     </div>
@@ -461,7 +463,7 @@ const DockerContainersTable: FC<{
                     <div className="relative flex-1">
                         <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
-                            placeholder={`Search across ${initialFilters.length} containers...`}
+                            placeholder={t("searchContainersPlaceholder", { count: initialFilters.length })}
                             value={searchInput}
                             onChange={(event) =>
                                 setSearchInput(event.target.value)
@@ -471,12 +473,7 @@ const DockerContainersTable: FC<{
                         {searchInput &&
                             table.getFilteredRowModel().rows.length > 0 && (
                                 <div className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                                    {table.getFilteredRowModel().rows.length}{" "}
-                                    result
-                                    {table.getFilteredRowModel().rows.length !==
-                                    1
-                                        ? "s"
-                                        : ""}
+                                    {t("searchResultsCount", { count: table.getFilteredRowModel().rows.length })}
                                 </div>
                             )}
                     </div>
@@ -489,7 +486,7 @@ const DockerContainersTable: FC<{
                                     className="gap-2"
                                 >
                                     <Filter className="h-4 w-4" />
-                                    Filters
+                                    {t("filters")}
                                     {(hideContainersWithoutPorts ||
                                         hideStoppedContainers) && (
                                         <span className="bg-primary text-primary-foreground rounded-full w-5 h-5 text-xs flex items-center justify-center">
@@ -502,7 +499,7 @@ const DockerContainersTable: FC<{
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="start" className="w-64">
                                 <DropdownMenuLabel>
-                                    Filter Options
+                                    {t("filterOptions")}
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuCheckboxItem
@@ -511,13 +508,13 @@ const DockerContainersTable: FC<{
                                         setHideContainersWithoutPorts
                                     }
                                 >
-                                    Ports
+                                    {t("filterPorts")}
                                 </DropdownMenuCheckboxItem>
                                 <DropdownMenuCheckboxItem
                                     checked={hideStoppedContainers}
                                     onCheckedChange={setHideStoppedContainers}
                                 >
-                                    Stopped
+                                    {t("filterStopped")}
                                 </DropdownMenuCheckboxItem>
                                 {(hideContainersWithoutPorts ||
                                     hideStoppedContainers) && (
@@ -537,7 +534,7 @@ const DockerContainersTable: FC<{
                                                 }}
                                                 className="w-full text-xs"
                                             >
-                                                Clear all filters
+                                                {t("clearAllFilters")}
                                             </Button>
                                         </div>
                                     </>
@@ -553,12 +550,12 @@ const DockerContainersTable: FC<{
                                     className="gap-2"
                                 >
                                     <Columns className="h-4 w-4" />
-                                    Columns
+                                    {t("columns")}
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="start" className="w-48">
                                 <DropdownMenuLabel>
-                                    Toggle Columns
+                                    {t("toggleColumns")}
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator />
                                 {table
@@ -577,7 +574,7 @@ const DockerContainersTable: FC<{
                                                 }
                                             >
                                                 {column.id === "hostname"
-                                                    ? "Hostname/IP"
+                                                    ? t("containerHostnameIp")
                                                     : column.id}
                                             </DropdownMenuCheckboxItem>
                                         );
@@ -589,7 +586,7 @@ const DockerContainersTable: FC<{
                         variant="outline"
                         size="icon"
                         onClick={onRefresh}
-                        title="Refresh containers list"
+                        title={t("refreshContainersList")}
                     >
                         <RefreshCw className="h-4 w-4" />
                     </Button>
@@ -644,10 +641,10 @@ const DockerContainersTable: FC<{
                                     {searchInput && !globalFilter ? (
                                         <div className="flex items-center justify-center gap-2 text-muted-foreground">
                                             <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                                            Searching...
+                                            {t("searching")}
                                         </div>
                                     ) : (
-                                        `No containers found matching "${globalFilter}".`
+                                        t("noContainersFoundMatching", { filter: globalFilter })
                                     )}
                                 </TableCell>
                             </TableRow>

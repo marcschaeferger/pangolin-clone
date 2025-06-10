@@ -34,7 +34,6 @@ import { useState } from "react";
 import { SwitchInput } from "@app/components/SwitchInput";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 
 const GeneralFormSchema = z.object({
     name: z.string().nonempty("Name is required"),
@@ -52,13 +51,6 @@ export default function GeneralPage() {
 
     const router = useRouter();
     const t = useTranslations();
-
-    const GeneralFormSchema = z.object({
-    name: z.string().nonempty("Name is required"),
-    dockerSocketEnabled: z.boolean().optional()
-    });
-
-    type GeneralFormValues = z.infer<typeof GeneralFormSchema>;
 
     const form = useForm<GeneralFormValues>({
         resolver: zodResolver(GeneralFormSchema),
@@ -80,10 +72,10 @@ export default function GeneralPage() {
             .catch((e) => {
                 toast({
                     variant: "destructive",
-                    title: t('siteErrorUpdate'),
+                    title: t("siteErrorUpdate"),
                     description: formatAxiosError(
                         e,
-                        t('siteErrorUpdateDescription')
+                        t("siteErrorUpdateDescription")
                     )
                 });
             });
@@ -94,8 +86,8 @@ export default function GeneralPage() {
         });
 
         toast({
-            title: t('siteUpdated'),
-            description: t('siteUpdatedDescription')
+            title: t("siteUpdated"),
+            description: t("siteUpdatedDescription")
         });
 
         setLoading(false);
@@ -108,10 +100,10 @@ export default function GeneralPage() {
             <SettingsSection>
                 <SettingsSectionHeader>
                     <SettingsSectionTitle>
-                        {t('generalSettings')}
+                        {t("generalSettings")}
                     </SettingsSectionTitle>
                     <SettingsSectionDescription>
-                        {t('siteGeneralDescription')}
+                        {t("siteGeneralDescription")}
                     </SettingsSectionDescription>
                 </SettingsSectionHeader>
 
@@ -128,13 +120,13 @@ export default function GeneralPage() {
                                     name="name"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>{t('name')}</FormLabel>
+                                            <FormLabel>{t("name")}</FormLabel>
                                             <FormControl>
                                                 <Input {...field} />
                                             </FormControl>
                                             <FormMessage />
                                             <FormDescription>
-                                                {t('siteNameDescription')}
+                                                {t("siteNameDescription")}
                                             </FormDescription>
                                         </FormItem>
                                     )}
@@ -148,7 +140,9 @@ export default function GeneralPage() {
                                                 <FormControl>
                                                     <SwitchInput
                                                         id="docker-socket-enabled"
-                                                        label="Enable Docker Socket"
+                                                        label={t(
+                                                            "enableDockerSocket"
+                                                        )}
                                                         defaultChecked={
                                                             field.value
                                                         }
@@ -159,10 +153,9 @@ export default function GeneralPage() {
                                                 </FormControl>
                                                 <FormMessage />
                                                 <FormDescription>
-                                                    Enable Docker Socket
-                                                    discovery for populating
-                                                    container information,
-                                                    useful in resource targets.
+                                                    {t(
+                                                        "enableDockerSocketDescription"
+                                                    )}
                                                     <Link
                                                         href="https://docs.fossorial.io/Newt/overview#docker-socket-integration"
                                                         target="_blank"
@@ -171,10 +164,9 @@ export default function GeneralPage() {
                                                     >
                                                         <span>
                                                             {" "}
-                                                            Docker socket path
-                                                            must be provided to
-                                                            Newt in order to use
-                                                            this feature.
+                                                            {t(
+                                                                "enableDockerSocketLink"
+                                                            )}
                                                         </span>
                                                     </Link>
                                                 </FormDescription>
@@ -194,7 +186,7 @@ export default function GeneralPage() {
                         loading={loading}
                         disabled={loading}
                     >
-                        {t('saveGeneralSettings')}
+                        {t("saveGeneralSettings")}
                     </Button>
                 </SettingsSectionFooter>
             </SettingsSection>
