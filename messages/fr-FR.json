@@ -1075,5 +1075,19 @@
     "authErrorNoUpdate": "Pas d'informations d'authentification à mettre à jour",
     "orgErrorNoUpdate": "Pas d'organisation à mettre à jour",
     "orgErrorNoProvided": "Aucune organisation fournie",
-    "apiKeysErrorNoUpdate": "Pas de clé API à mettre à jour"
+    "apiKeysErrorNoUpdate": "Pas de clé API à mettre à jour",
+    "sidebarOverview": "Aperçu",
+    "sidebarHome": "Domicile",
+    "sidebarSites": "Espaces",
+    "sidebarResources": "Ressource",
+    "sidebarAccessControl": "Contrôle d'accès",
+    "sidebarUsers": "Utilisateurs",
+    "sidebarInvitations": "Invitations",
+    "sidebarRoles": "Rôles",
+    "sidebarShareableLinks": "Liens partagables",
+    "sidebarApiKeys": "Clés API",
+    "sidebarSettings": "Réglages",
+    "sidebarAllUsers": "Tous les utilisateurs",
+    "sidebarIdentityProviders": "Fournisseurs d'identité",
+    "sidebarLicense": "Licence"
 }

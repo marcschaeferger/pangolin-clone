@@ -1075,5 +1075,19 @@
     "authErrorNoUpdate": "Keine Auth-Informationen zum Aktualisieren",
     "orgErrorNoUpdate": "Keine Organisation zum Aktualisieren",
     "orgErrorNoProvided": "Keine Organisation angegeben",
-    "apiKeysErrorNoUpdate": "Kein API-Schlüssel zum Aktualisieren"
+    "apiKeysErrorNoUpdate": "Kein API-Schlüssel zum Aktualisieren",
+    "sidebarOverview": "Übersicht",
+    "sidebarHome": "Zuhause",
+    "sidebarSites": "Seiten",
+    "sidebarResources": "Ressourcen",
+    "sidebarAccessControl": "Zugriffskontrolle",
+    "sidebarUsers": "Benutzer",
+    "sidebarInvitations": "Einladungen",
+    "sidebarRoles": "Rollen",
+    "sidebarShareableLinks": "Teilbare Links",
+    "sidebarApiKeys": "API-Schlüssel",
+    "sidebarSettings": "Einstellungen",
+    "sidebarAllUsers": "Alle Benutzer",
+    "sidebarIdentityProviders": "Identitätsanbieter",
+    "sidebarLicense": "Lizenz"
 }

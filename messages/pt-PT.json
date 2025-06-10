@@ -1075,5 +1075,19 @@
     "authErrorNoUpdate": "Não existem informações de autenticação para atualizar",
     "orgErrorNoUpdate": "Não existe organização para atualizar",
     "orgErrorNoProvided": "Nenhuma organização fornecida",
-    "apiKeysErrorNoUpdate": "Não existe chave API para atualizar"
+    "apiKeysErrorNoUpdate": "Não existe chave API para atualizar",
+    "sidebarOverview": "Geral",
+    "sidebarHome": "Residencial",
+    "sidebarSites": "sites",
+    "sidebarResources": "Recursos",
+    "sidebarAccessControl": "Controle de Acesso",
+    "sidebarUsers": "Utilizadores",
+    "sidebarInvitations": "Convites",
+    "sidebarRoles": "Papéis",
+    "sidebarShareableLinks": "Links compartilháveis",
+    "sidebarApiKeys": "Chaves API",
+    "sidebarSettings": "Confirgurações",
+    "sidebarAllUsers": "Todos os usuários",
+    "sidebarIdentityProviders": "Provedores de identidade",
+    "sidebarLicense": "Tipo:"
 }

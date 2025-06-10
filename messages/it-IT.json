@@ -1075,5 +1075,19 @@
     "authErrorNoUpdate": "Nessuna informazione di autenticazione da aggiornare",
     "orgErrorNoUpdate": "Nessuna organizzazione da aggiornare",
     "orgErrorNoProvided": "Nessuna organizzazione fornita",
-    "apiKeysErrorNoUpdate": "Nessuna chiave API da aggiornare"
+    "apiKeysErrorNoUpdate": "Nessuna chiave API da aggiornare",
+    "sidebarOverview": "Panoramica",
+    "sidebarHome": "Home",
+    "sidebarSites": "Siti",
+    "sidebarResources": "Risorse",
+    "sidebarAccessControl": "Controllo Accesso",
+    "sidebarUsers": "Utenti",
+    "sidebarInvitations": "Inviti",
+    "sidebarRoles": "Ruoli",
+    "sidebarShareableLinks": "Collegamenti Condividibili",
+    "sidebarApiKeys": "Chiavi API",
+    "sidebarSettings": "Impostazioni",
+    "sidebarAllUsers": "Tutti Gli Utenti",
+    "sidebarIdentityProviders": "Fornitori Di Identità",
+    "sidebarLicense": "Licenza"
 }

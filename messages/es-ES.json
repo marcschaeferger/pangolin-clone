@@ -1075,5 +1075,19 @@
     "authErrorNoUpdate": "No hay información de autenticación para actualizar",
     "orgErrorNoUpdate": "No hay org para actualizar",
     "orgErrorNoProvided": "No hay org proporcionado",
-    "apiKeysErrorNoUpdate": "Ninguna clave API para actualizar"
+    "apiKeysErrorNoUpdate": "Ninguna clave API para actualizar",
+    "sidebarOverview": "Resumen",
+    "sidebarHome": "Inicio",
+    "sidebarSites": "Sitios",
+    "sidebarResources": "Recursos",
+    "sidebarAccessControl": "Control de acceso",
+    "sidebarUsers": "Usuarios",
+    "sidebarInvitations": "Invitaciones",
+    "sidebarRoles": "Roles",
+    "sidebarShareableLinks": "Enlaces compartibles",
+    "sidebarApiKeys": "Claves API",
+    "sidebarSettings": "Ajustes",
+    "sidebarAllUsers": "Todos los usuarios",
+    "sidebarIdentityProviders": "Proveedores de identidad",
+    "sidebarLicense": "Licencia"
 }
