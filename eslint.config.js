@@ -3,8 +3,7 @@ export default [
     {
         rules: {
             semi: "error",
-            "prefer-const": "error",
-            quotes: ["error", "double"]
+            "prefer-const": "error"
         }
     }
 ];
