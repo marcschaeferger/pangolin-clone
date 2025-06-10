@@ -560,111 +560,6 @@ export default function ReverseProxyTargets(props: {
 
     return (
         <SettingsContainer>
-            {resource.http && (
-                <SettingsSection>
-                    <SettingsSectionHeader>
-                        <SettingsSectionTitle>
-                            {t('targetTlsSettings')}
-                        </SettingsSectionTitle>
-                        <SettingsSectionDescription>
-                            {t('targetTlsSettingsDescription')}
-                        </SettingsSectionDescription>
-                    </SettingsSectionHeader>
-                    <SettingsSectionBody>
-                        <SettingsSectionForm>
-                            <Form {...tlsSettingsForm}>
-                                <form
-                                    onSubmit={tlsSettingsForm.handleSubmit(
-                                        saveTlsSettings
-                                    )}
-                                    className="space-y-4"
-                                    id="tls-settings-form"
-                                >
-                                    <FormField
-                                        control={tlsSettingsForm.control}
-                                        name="ssl"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormControl>
-                                                    <SwitchInput
-                                                        id="ssl-toggle"
-                                                        label={t('proxyEnableSSL')}
-                                                        defaultChecked={
-                                                            field.value
-                                                        }
-                                                        onCheckedChange={(
-                                                            val
-                                                        ) => {
-                                                            field.onChange(val);
-                                                        }}
-                                                    />
-                                                </FormControl>
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <Collapsible
-                                        open={isAdvancedOpen}
-                                        onOpenChange={setIsAdvancedOpen}
-                                        className="space-y-2"
-                                    >
-                                        <div className="flex items-center justify-between space-x-4">
-                                            <CollapsibleTrigger asChild>
-                                                <Button
-                                                    variant="text"
-                                                    size="sm"
-                                                    className="p-0 flex items-center justify-start gap-2 w-full"
-                                                >
-                                                    <h4 className="text-sm font-semibold">
-                                                        {t('targetTlsSettingsAdvanced')}
-                                                    </h4>
-                                                    <div>
-                                                        <ChevronsUpDown className="h-4 w-4" />
-                                                        <span className="sr-only">
-                                                            {t('toggle')}
-                                                        </span>
-                                                    </div>
-                                                </Button>
-                                            </CollapsibleTrigger>
-                                        </div>
-                                        <CollapsibleContent className="space-y-2">
-                                            <FormField
-                                                control={
-                                                    tlsSettingsForm.control
-                                                }
-                                                name="tlsServerName"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>
-                                                            {t('targetTlsSni')}
-                                                        </FormLabel>
-                                                        <FormControl>
-                                                            <Input {...field} />
-                                                        </FormControl>
-                                                        <FormDescription>
-                                                            {t('targetTlsSniDescription')}
-                                                        </FormDescription>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </CollapsibleContent>
-                                    </Collapsible>
-                                </form>
-                            </Form>
-                        </SettingsSectionForm>
-                    </SettingsSectionBody>
-                    <SettingsSectionFooter>
-                        <Button
-                            type="submit"
-                            loading={httpsTlsLoading}
-                            form="tls-settings-form"
-                        >
-                            {t('targetTlsSubmit')}
-                        </Button>
-                    </SettingsSectionFooter>
-                </SettingsSection>
-            )}
-
             <SettingsSection>
                 <SettingsSectionHeader>
                     <SettingsSectionTitle>
@@ -891,10 +786,10 @@ export default function ReverseProxyTargets(props: {
                     <SettingsSection>
                         <SettingsSectionHeader>
                             <SettingsSectionTitle>
-                                Secure Connection Configuration
+                                {t('targetTlsSettings')}
                             </SettingsSectionTitle>
                             <SettingsSectionDescription>
-                                Configure SSL/TLS settings for your resource
+                                {t('targetTlsSettingsDescription')}
                             </SettingsSectionDescription>
                         </SettingsSectionHeader>
                         <SettingsSectionBody>
@@ -915,7 +810,7 @@ export default function ReverseProxyTargets(props: {
                                                     <FormControl>
                                                         <SwitchInput
                                                             id="ssl-toggle"
-                                                            label="Enable SSL (https)"
+                                                            label={t('proxyEnableSSL')}
                                                             defaultChecked={
                                                                 field.value
                                                             }
@@ -944,8 +839,7 @@ export default function ReverseProxyTargets(props: {
                                                         className="p-0 flex items-center justify-start gap-2 w-full"
                                                     >
                                                         <p className="text-sm text-muted-foreground">
-                                                            Advanced TLS
-                                                            Settings
+                                                            {t('targetTlsSettingsAdvanced')}
                                                         </p>
                                                         <div>
                                                             <ChevronsUpDown className="h-4 w-4" />
@@ -965,8 +859,7 @@ export default function ReverseProxyTargets(props: {
                                                     render={({ field }) => (
                                                         <FormItem>
                                                             <FormLabel>
-                                                                TLS Server Name
-                                                                (SNI)
+                                                                {t('targetTlsSni')}
                                                             </FormLabel>
                                                             <FormControl>
                                                                 <Input
@@ -974,11 +867,7 @@ export default function ReverseProxyTargets(props: {
                                                                 />
                                                             </FormControl>
                                                             <FormDescription>
-                                                                The TLS Server
-                                                                Name to use for
-                                                                SNI. Leave empty
-                                                                to use the
-                                                                default.
+                                                                {t('targetTlsSniDescription')}
                                                             </FormDescription>
                                                             <FormMessage />
                                                         </FormItem>
@@ -996,18 +885,17 @@ export default function ReverseProxyTargets(props: {
                                 loading={httpsTlsLoading}
                                 form="tls-settings-form"
                             >
-                                Save Settings
+                                {t('targetTlsSubmit')}
                             </Button>
                         </SettingsSectionFooter>
                     </SettingsSection>
                     <SettingsSection>
                         <SettingsSectionHeader>
                             <SettingsSectionTitle>
-                                Additional Proxy Settings
+                                {t('proxyAdditional')}
                             </SettingsSectionTitle>
                             <SettingsSectionDescription>
-                                Configure how your resource handles proxy
-                                settings
+                                {t('proxyAdditionalDescription')}
                             </SettingsSectionDescription>
                         </SettingsSectionHeader>
                         <SettingsSectionBody>
@@ -1026,16 +914,13 @@ export default function ReverseProxyTargets(props: {
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>
-                                                        Custom Host Header
+                                                        {t('proxyCustomHeader')}
                                                     </FormLabel>
                                                     <FormControl>
                                                         <Input {...field} />
                                                     </FormControl>
                                                     <FormDescription>
-                                                        The host header to set
-                                                        when proxying requests.
-                                                        Leave empty to use the
-                                                        default.
+                                                        {t('proxyCustomHeaderDescription')}
                                                     </FormDescription>
                                                     <FormMessage />
                                                 </FormItem>
@@ -1051,7 +936,7 @@ export default function ReverseProxyTargets(props: {
                                 loading={proxySettingsLoading}
                                 form="proxy-settings-form"
                             >
-                                Save Settings
+                                {t('targetTlsSubmit')}
                             </Button>
                         </SettingsSectionFooter>
                     </SettingsSection>
