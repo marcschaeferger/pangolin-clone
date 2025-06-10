@@ -160,7 +160,7 @@ export default function GeneralPage() {
                                                         href="https://docs.fossorial.io/Newt/overview#docker-socket-integration"
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="underline"
+                                                        className="text-primary hover:underline inline-flex items-center"
                                                     >
                                                         <span>
                                                             {" "}

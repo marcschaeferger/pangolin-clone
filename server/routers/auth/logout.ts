@@ -34,7 +34,7 @@ export async function logout(
         try {
             await invalidateSession(session.sessionId);
         } catch (error) {
-            logger.error("Failed to invalidate session", error)
+            logger.error("Failed to invalidate session", error);
         }
 
         const isSecure = req.protocol === "https";
