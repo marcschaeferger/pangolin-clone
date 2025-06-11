@@ -155,7 +155,7 @@ export default function GeneralPage() {
                                                 <FormDescription>
                                                     {t(
                                                         "enableDockerSocketDescription"
-                                                    )}
+                                                    )}{" "}
                                                     <Link
                                                         href="https://docs.fossorial.io/Newt/overview#docker-socket-integration"
                                                         target="_blank"
@@ -163,7 +163,6 @@ export default function GeneralPage() {
                                                         className="text-primary hover:underline inline-flex items-center"
                                                     >
                                                         <span>
-                                                            {" "}
                                                             {t(
                                                                 "enableDockerSocketLink"
                                                             )}
