@@ -231,7 +231,7 @@
     "accessUserCreate": "Create User",
     "accessUserRemove": "Remove User",
     "username": "Username",
-    "identityProvider": "Identity Provider",
+    "identityProvider": "General Information",
     "role": "Role",
     "nameRequired": "Name is required",
     "accessRolesManage": "Manage Roles",
