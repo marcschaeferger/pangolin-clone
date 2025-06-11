@@ -1124,5 +1124,9 @@
     "toggleColumns": "Cambiar Columnas",
     "refreshContainersList": "Actualizar lista de contenedores",
     "searching": "Buscando...",
-    "noContainersFoundMatching": "No se han encontrado contenedores que coincidan con \"{filter}\"."
+    "noContainersFoundMatching": "No se han encontrado contenedores que coincidan con \"{filter}\".",
+    "light": "claro",
+    "dark": "oscuro",
+    "system": "sistema",
+    "theme": "Tema"
 }

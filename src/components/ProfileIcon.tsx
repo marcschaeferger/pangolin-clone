@@ -133,7 +133,7 @@ export default function ProfileIcon() {
                                 <DropdownMenuSeparator />
                             </>
                         )}
-                        <DropdownMenuLabel>Theme</DropdownMenuLabel>
+                        <DropdownMenuLabel>{t("theme")}</DropdownMenuLabel>
                         {(["light", "dark", "system"] as const).map(
                             (themeOption) => (
                                 <DropdownMenuItem
@@ -152,7 +152,7 @@ export default function ProfileIcon() {
                                         <Laptop className="mr-2 h-4 w-4" />
                                     )}
                                     <span className="capitalize">
-                                        {themeOption}
+                                        {t(themeOption)}
                                     </span>
                                     {userTheme === themeOption && (
                                         <span className="absolute right-2 flex h-3.5 w-3.5 items-center justify-center">
@@ -163,9 +163,7 @@ export default function ProfileIcon() {
                             )
                         )}
                         <DropdownMenuSeparator />
-                            <div>
                                 <LocaleSwitcher />
-                            </div>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => logout()}>
                             {/* <LogOut className="mr-2 h-4 w-4" /> */}

@@ -1124,5 +1124,9 @@
     "toggleColumns": "Attiva/Disattiva Colonne",
     "refreshContainersList": "Aggiorna elenco contenitori",
     "searching": "Ricerca...",
-    "noContainersFoundMatching": "Nessun contenitore trovato corrispondente \"{filter}\"."
+    "noContainersFoundMatching": "Nessun contenitore trovato corrispondente \"{filter}\".",
+    "light": "chiaro",
+    "dark": "scuro",
+    "system": "sistema",
+    "theme": "Tema"
 }

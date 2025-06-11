@@ -1124,5 +1124,9 @@
     "toggleColumns": "Toggle Columns",
     "refreshContainersList": "Refresh containers list",
     "searching": "Searching...",
-    "noContainersFoundMatching": "No containers found matching \"{filter}\"."
+    "noContainersFoundMatching": "No containers found matching \"{filter}\".",
+    "light": "açık",
+    "dark": "koyu",
+    "system": "sistem",
+    "theme": "Tema"
 }

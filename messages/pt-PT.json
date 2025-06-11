@@ -1124,5 +1124,9 @@
     "toggleColumns": "Alternar Colunas",
     "refreshContainersList": "Atualizar lista de contêineres",
     "searching": "Buscando...",
-    "noContainersFoundMatching": "Nenhum recipiente encontrado \"{filter}\"."
+    "noContainersFoundMatching": "Nenhum recipiente encontrado \"{filter}\".",
+    "light": "claro",
+    "dark": "escuro",
+    "system": "sistema",
+    "theme": "Tema"
 }

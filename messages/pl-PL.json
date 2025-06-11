@@ -1124,5 +1124,9 @@
     "toggleColumns": "Przełącz kolumny",
     "refreshContainersList": "Odśwież listę kontenerów",
     "searching": "Wyszukiwanie...",
-    "noContainersFoundMatching": "Nie znaleziono kontenerów pasujących do \"{filter}\"."
+    "noContainersFoundMatching": "Nie znaleziono kontenerów pasujących do \"{filter}\".",
+    "light": "jasny",
+    "dark": "ciemny",
+    "system": "system",
+    "theme": "Motyw"
 }

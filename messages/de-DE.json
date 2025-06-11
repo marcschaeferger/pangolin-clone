@@ -1124,5 +1124,9 @@
     "toggleColumns": "Spalten umschalten",
     "refreshContainersList": "Container-Liste aktualisieren",
     "searching": "Suche...",
-    "noContainersFoundMatching": "Keine Container gefunden mit \"{filter}\"."
+    "noContainersFoundMatching": "Keine Container gefunden mit \"{filter}\".",
+    "light": "hell",
+    "dark": "dunkel",
+    "system": "system",
+    "theme": "Design"
 }

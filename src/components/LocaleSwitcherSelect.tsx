@@ -41,13 +41,15 @@ export default function LocaleSwitcherSelect({
         <Button
           variant="ghost"
           className={clsx(
-            'rounded-sm p-2 transition-colors flex items-center gap-2',
+            'w-full rounded-sm h-8 gap-2 justify-start font-normal',
             isPending && 'pointer-events-none'
           )}
           aria-label={label}
         >
           <Languages className="h-4 w-4" />
-          <span >{selected?.label ?? label}</span>
+          <span className="text-left flex-1">
+            {selected?.label ?? label}
+          </span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[8rem]">

@@ -1124,5 +1124,9 @@
     "toggleColumns": "Kolommen omschakelen",
     "refreshContainersList": "Vernieuw containers lijst",
     "searching": "Zoeken...",
-    "noContainersFoundMatching": "Geen containers gevonden die overeenkomen met \"{filter}\"."
+    "noContainersFoundMatching": "Geen containers gevonden die overeenkomen met \"{filter}\".",
+    "light": "licht",
+    "dark": "donker",
+    "system": "systeem",
+    "theme": "Thema"
 }
