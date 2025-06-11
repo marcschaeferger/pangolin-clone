@@ -19,6 +19,7 @@ import { formatAxiosError } from "@app/lib/api";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import moment from "moment";
+import { useTranslations } from "next-intl";
 
 export type OrgApiKeyRow = {
     id: string;
@@ -44,14 +45,16 @@ export default function OrgApiKeysTable({
 
     const api = createApiClient(useEnvContext());
 
+    const t = useTranslations();
+
     const deleteSite = (apiKeyId: string) => {
         api.delete(`/org/${orgId}/api-key/${apiKeyId}`)
             .catch((e) => {
-                console.error("Error deleting API key", e);
+                console.error(t('apiKeysErrorDelete'), e);
                 toast({
                     variant: "destructive",
-                    title: "Error deleting API key",
-                    description: formatAxiosError(e, "Error deleting API key")
+                    title: t('apiKeysErrorDelete'),
+                    description: formatAxiosError(e, t('apiKeysErrorDeleteMessage'))
                 });
             })
             .then(() => {
@@ -75,7 +78,7 @@ export default function OrgApiKeysTable({
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
+                                <span className="sr-only">{t('openMenu')}</span>
                                 <MoreHorizontal className="h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
@@ -85,7 +88,7 @@ export default function OrgApiKeysTable({
                                     setSelected(apiKeyROw);
                                 }}
                             >
-                                <span>View settings</span>
+                                <span>{t('viewSettings')}</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 onClick={() => {
@@ -93,7 +96,7 @@ export default function OrgApiKeysTable({
                                     setIsDeleteModalOpen(true);
                                 }}
                             >
-                                <span className="text-red-500">Delete</span>
+                                <span className="text-red-500">{t('delete')}</span>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -110,7 +113,7 @@ export default function OrgApiKeysTable({
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        Name
+                        {t('name')}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
@@ -118,7 +121,7 @@ export default function OrgApiKeysTable({
         },
         {
             accessorKey: "key",
-            header: "Key",
+            header: t('key'),
             cell: ({ row }) => {
                 const r = row.original;
                 return <span className="font-mono">{r.key}</span>;
@@ -126,7 +129,7 @@ export default function OrgApiKeysTable({
         },
         {
             accessorKey: "createdAt",
-            header: "Created At",
+            header: t('createdAt'),
             cell: ({ row }) => {
                 const r = row.original;
                 return <span>{moment(r.createdAt).format("lll")} </span>;
@@ -140,7 +143,7 @@ export default function OrgApiKeysTable({
                     <div className="flex items-center justify-end">
                         <Link href={`/${orgId}/settings/api-keys/${r.id}`}>
                             <Button variant={"outlinePrimary"} className="ml-2">
-                                Edit
+                                {t('edit')}
                                 <ArrowRight className="ml-2 w-4 h-4" />
                             </Button>
                         </Link>
@@ -162,28 +165,24 @@ export default function OrgApiKeysTable({
                     dialog={
                         <div className="space-y-4">
                             <p>
-                                Are you sure you want to remove the API key{" "}
-                                <b>{selected?.name || selected?.id}</b> from the
-                                organization?
+                                {t('apiKeysQuestionRemove', {selectedApiKey: selected?.name || selected?.id})}
                             </p>
 
                             <p>
                                 <b>
-                                    Once removed, the API key will no longer be
-                                    able to be used.
+                                    {t('apiKeysMessageRemove')}
                                 </b>
                             </p>
 
                             <p>
-                                To confirm, please type the name of the API key
-                                below.
+                                {t('apiKeysMessageConfirm')}
                             </p>
                         </div>
                     }
-                    buttonText="Confirm Delete API Key"
+                    buttonText={t('apiKeysDeleteConfirm')}
                     onConfirm={async () => deleteSite(selected!.id)}
                     string={selected.name}
-                    title="Delete API Key"
+                    title={t('apiKeysDelete')}
                 />
             )}
 

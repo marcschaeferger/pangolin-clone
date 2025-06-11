@@ -27,6 +27,7 @@ import { Input } from "@app/components/ui/input";
 import { DataTablePagination } from "@app/components/DataTablePagination";
 import { Plus, Search } from "lucide-react";
 import { DataTable } from "@app/components/ui/data-table";
+import { useTranslations } from "next-intl";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
@@ -39,15 +40,18 @@ export function ApiKeysDataTable<TData, TValue>({
     columns,
     data
 }: DataTableProps<TData, TValue>) {
+
+    const t = useTranslations();
+    
     return (
         <DataTable
             columns={columns}
             data={data}
-            title="API Keys"
-            searchPlaceholder="Search API keys..."
+            title={t('apiKeys')}
+            searchPlaceholder={t('searchApiKeys')}
             searchColumn="name"
             onAdd={addApiKey}
-            addButtonText="Generate API Key"
+            addButtonText={t('apiKeysAdd')}
         />
     );
 }

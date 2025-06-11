@@ -23,6 +23,9 @@ import Disable2FaForm from "./Disable2FaForm";
 import Enable2FaForm from "./Enable2FaForm";
 import SupporterStatus from "./SupporterStatus";
 import { UserType } from "@server/types/UserTypes";
+import LocaleSwitcher from '@app/components/LocaleSwitcher';
+import { useTranslations } from "next-intl";
+
 
 export default function ProfileIcon() {
     const { setTheme, theme } = useTheme();
@@ -38,6 +41,8 @@ export default function ProfileIcon() {
     const [openEnable2fa, setOpenEnable2fa] = useState(false);
     const [openDisable2fa, setOpenDisable2fa] = useState(false);
 
+    const t = useTranslations();
+
     function getInitials() {
         return (user.email || user.name || user.username)
             .substring(0, 1)
@@ -52,10 +57,10 @@ export default function ProfileIcon() {
     function logout() {
         api.post("/auth/logout")
             .catch((e) => {
-                console.error("Error logging out", e);
+                console.error(t('logoutError'), e);
                 toast({
-                    title: "Error logging out",
-                    description: formatAxiosError(e, "Error logging out")
+                    title: t('logoutError'),
+                    description: formatAxiosError(e, t('logoutError'))
                 });
             })
             .then(() => {
@@ -92,7 +97,7 @@ export default function ProfileIcon() {
                         <DropdownMenuLabel className="font-normal">
                             <div className="flex flex-col space-y-1">
                                 <p className="text-sm font-medium leading-none">
-                                    Signed in as
+                                    {t('signingAs')}
                                 </p>
                                 <p className="text-xs leading-none text-muted-foreground">
                                     {user.email || user.name || user.username}
@@ -100,11 +105,11 @@ export default function ProfileIcon() {
                             </div>
                             {user.serverAdmin ? (
                                 <p className="text-xs leading-none text-muted-foreground mt-2">
-                                    Server Admin
+                                    {t('serverAdmin')}
                                 </p>
                             ) : (
                                 <p className="text-xs leading-none text-muted-foreground mt-2">
-                                    {user.idpName || "Internal"}
+                                    {user.idpName || t('idpNameInternal')}
                                 </p>
                             )}
                         </DropdownMenuLabel>
@@ -115,20 +120,20 @@ export default function ProfileIcon() {
                                     <DropdownMenuItem
                                         onClick={() => setOpenEnable2fa(true)}
                                     >
-                                        <span>Enable Two-factor</span>
+                                        <span>{t('otpEnable')}</span>
                                     </DropdownMenuItem>
                                 )}
                                 {user.twoFactorEnabled && (
                                     <DropdownMenuItem
                                         onClick={() => setOpenDisable2fa(true)}
                                     >
-                                        <span>Disable Two-factor</span>
+                                        <span>{t('otpDisable')}</span>
                                     </DropdownMenuItem>
                                 )}
                                 <DropdownMenuSeparator />
                             </>
                         )}
-                        <DropdownMenuLabel>Theme</DropdownMenuLabel>
+                        <DropdownMenuLabel>{t("theme")}</DropdownMenuLabel>
                         {(["light", "dark", "system"] as const).map(
                             (themeOption) => (
                                 <DropdownMenuItem
@@ -147,7 +152,7 @@ export default function ProfileIcon() {
                                         <Laptop className="mr-2 h-4 w-4" />
                                     )}
                                     <span className="capitalize">
-                                        {themeOption}
+                                        {t(themeOption)}
                                     </span>
                                     {userTheme === themeOption && (
                                         <span className="absolute right-2 flex h-3.5 w-3.5 items-center justify-center">
@@ -158,9 +163,11 @@ export default function ProfileIcon() {
                             )
                         )}
                         <DropdownMenuSeparator />
+                                <LocaleSwitcher />
+                        <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => logout()}>
                             {/* <LogOut className="mr-2 h-4 w-4" /> */}
-                            <span>Log Out</span>
+                            <span>{t('logout')}</span>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

@@ -24,6 +24,7 @@ import { usePathname } from "next/navigation";
 import { useUserContext } from "@app/hooks/useUserContext";
 import { useLicenseStatusContext } from "@app/hooks/useLicenseStatusContext";
 import { useTheme } from "next-themes";
+import { useTranslations } from "next-intl";
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -85,6 +86,8 @@ export function Layout({
 
         setPath(getPath());
     }, [theme, env]);
+    
+    const t = useTranslations();
 
     return (
         <div className="flex flex-col h-screen overflow-hidden">
@@ -109,11 +112,10 @@ export function Layout({
                                             className="w-64 p-0 flex flex-col h-full"
                                         >
                                             <SheetTitle className="sr-only">
-                                                Navigation Menu
+                                                {t('navbar')}
                                             </SheetTitle>
                                             <SheetDescription className="sr-only">
-                                                Main navigation menu for the
-                                                application
+                                                {t('navbarDescription')}
                                             </SheetDescription>
                                             <div className="flex-1 overflow-y-auto">
                                                 <div className="p-4">
@@ -139,7 +141,7 @@ export function Layout({
                                                                 }
                                                             >
                                                                 <Server className="h-4 w-4" />
-                                                                Server Admin
+                                                                {t('serverAdmin')}
                                                             </Link>
                                                         </div>
                                                     )}
@@ -190,7 +192,7 @@ export function Layout({
                                         rel="noopener noreferrer"
                                         className="text-muted-foreground hover:text-foreground transition-colors"
                                     >
-                                        Documentation
+                                        {t('navbarDocsLink')}
                                     </Link>
                                 </div>
                                 <div>
@@ -222,7 +224,7 @@ export function Layout({
                                         className="flex items-center gap-3 text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-md w-full"
                                     >
                                         <Server className="h-4 w-4" />
-                                        Server Admin
+                                        {t('serverAdmin')}
                                     </Link>
                                 </div>
                             )}
@@ -239,8 +241,8 @@ export function Layout({
                                         className="flex items-center justify-center gap-1"
                                     >
                                         {!isUnlocked()
-                                            ? "Community Edition"
-                                            : "Commercial Edition"}
+                                            ? t('communityEdition')
+                                            : t('commercialEdition')}
                                         <ExternalLink size={12} />
                                     </Link>
                                 </div>

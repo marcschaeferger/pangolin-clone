@@ -19,6 +19,7 @@ import CreateRoleForm from "./CreateRoleForm";
 import DeleteRoleForm from "./DeleteRoleForm";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
+import { useTranslations } from 'next-intl';
 
 export type RoleRow = Role;
 
@@ -37,6 +38,8 @@ export default function UsersTable({ roles: r }: RolesTableProps) {
     const api = createApiClient(useEnvContext());
 
     const { org } = useOrgContext();
+
+    const t = useTranslations();
 
     const columns: ColumnDef<RoleRow>[] = [
         {
@@ -58,7 +61,7 @@ export default function UsersTable({ roles: r }: RolesTableProps) {
                                             className="h-8 w-8 p-0"
                                         >
                                             <span className="sr-only">
-                                                Open menu
+                                                {t('openMenu')}
                                             </span>
                                             <MoreHorizontal className="h-4 w-4" />
                                         </Button>
@@ -71,7 +74,7 @@ export default function UsersTable({ roles: r }: RolesTableProps) {
                                             }}
                                         >
                                             <span className="text-red-500">
-                                                Delete Role
+                                                {t('accessRoleDelete')}
                                             </span>
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
@@ -92,7 +95,7 @@ export default function UsersTable({ roles: r }: RolesTableProps) {
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        Name
+                        {t('name')}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
@@ -100,7 +103,7 @@ export default function UsersTable({ roles: r }: RolesTableProps) {
         },
         {
             accessorKey: "description",
-            header: "Description"
+            header: t('description')
         }
     ];
 

@@ -9,6 +9,7 @@ import { cache } from "react";
 import { GetOrgResponse } from "@server/routers/org";
 import OrgProvider from "@app/providers/OrgProvider";
 import ResourcesSplashCard from "./ResourcesSplashCard";
+import { getTranslations } from "next-intl/server";
 
 type ResourcesPageProps = {
     params: Promise<{ orgId: string }>;
@@ -18,6 +19,8 @@ export const dynamic = "force-dynamic";
 
 export default async function ResourcesPage(props: ResourcesPageProps) {
     const params = await props.params;
+    const t = await getTranslations();
+
     let resources: ListResourcesResponse["resources"] = [];
     try {
         const res = await internal.get<AxiosResponse<ListResourcesResponse>>(
@@ -51,8 +54,8 @@ export default async function ResourcesPage(props: ResourcesPageProps) {
             name: resource.name,
             orgId: params.orgId,
             domain: `${resource.ssl ? "https://" : "http://"}${resource.fullDomain}`,
-            site: resource.siteName || "None",
-            siteId: resource.siteId || "Unknown",
+            site: resource.siteName || t('none'),
+            siteId: resource.siteId || t('unknown'),
             protocol: resource.protocol,
             proxyPort: resource.proxyPort,
             http: resource.http,
@@ -73,8 +76,8 @@ export default async function ResourcesPage(props: ResourcesPageProps) {
             {/* <ResourcesSplashCard /> */}
 
             <SettingsSectionTitle
-                title="Manage Resources"
-                description="Create secure proxies to your private applications"
+                title={t('resourceTitle')}
+                description={t('resourceDescription')}
             />
 
             <OrgProvider org={org}>

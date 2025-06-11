@@ -7,20 +7,24 @@ import {
     CardTitle,
 } from "@app/components/ui/card";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 export default async function ResourceNotFound() {
+    
+    const t = await getTranslations();
+
     return (
         <Card className="w-full max-w-md">
             <CardHeader>
                 <CardTitle className="text-center text-2xl font-bold">
-                    Resource Not Found
+                    {t('resourceNotFound')}
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                The resource you're trying to access does not exist.
+                {t('resourceNotFoundDescription')}
                 <div className="text-center mt-4">
                     <Button>
-                        <Link href="/">Go Home</Link>
+                        <Link href="/">{t('goHome')}</Link>
                     </Button>
                 </div>
             </CardContent>

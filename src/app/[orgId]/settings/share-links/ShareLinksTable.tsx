@@ -33,6 +33,7 @@ import { ListAccessTokensResponse } from "@server/routers/accessToken";
 import moment from "moment";
 import CreateShareLinkForm from "./CreateShareLinkForm";
 import { constructShareLink } from "@app/lib/shareLinks";
+import { useTranslations } from "next-intl";
 
 export type ShareLinkRow = {
     accessTokenId: string;
@@ -54,6 +55,7 @@ export default function ShareLinksTable({
     orgId
 }: ShareLinksTableProps) {
     const router = useRouter();
+    const t = useTranslations();
 
     const api = createApiClient(useEnvContext());
 
@@ -67,10 +69,10 @@ export default function ShareLinksTable({
     async function deleteSharelink(id: string) {
         await api.delete(`/access-token/${id}`).catch((e) => {
             toast({
-                title: "Failed to delete link",
+                title: t('shareErrorDelete'),
                 description: formatAxiosError(
                     e,
-                    "An error occurred deleting link"
+                    t('shareErrorDeleteMessage')
                 )
             });
         });
@@ -79,8 +81,8 @@ export default function ShareLinksTable({
         setRows(newRows);
 
         toast({
-            title: "Link deleted",
-            description: "The link has been deleted"
+            title: t('shareDeleted'),
+            description: t('shareDeletedDescription')
         });
     }
 
@@ -102,7 +104,7 @@ export default function ShareLinksTable({
                                         className="h-8 w-8 p-0"
                                     >
                                         <span className="sr-only">
-                                            Open menu
+                                            {t('openMenu')}
                                         </span>
                                         <MoreHorizontal className="h-4 w-4" />
                                     </Button>
@@ -116,7 +118,7 @@ export default function ShareLinksTable({
                                         }}
                                     >
                                         <button className="text-red-500">
-                                            Delete
+                                            {t('delete')}
                                         </button>
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
@@ -136,7 +138,7 @@ export default function ShareLinksTable({
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        Resource
+                        {t('resource')}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
@@ -164,7 +166,7 @@ export default function ShareLinksTable({
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        Title
+                        {t('title')}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
@@ -243,7 +245,7 @@ export default function ShareLinksTable({
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        Created
+                        {t('created')}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
@@ -263,7 +265,7 @@ export default function ShareLinksTable({
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        Expires
+                        {t('expires')}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
@@ -273,7 +275,7 @@ export default function ShareLinksTable({
                 if (r.expiresAt) {
                     return moment(r.expiresAt).format("lll");
                 }
-                return "Never";
+                return t('never');
             }
         },
         {
@@ -286,7 +288,7 @@ export default function ShareLinksTable({
                             deleteSharelink(row.original.accessTokenId)
                         }
                     >
-                        Delete
+                        {t('delete')}
                     </Button>
                 </div>
             )

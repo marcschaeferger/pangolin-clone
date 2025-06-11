@@ -37,13 +37,7 @@ import { formatAxiosError } from "@app/lib/api";;
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { cleanRedirect } from "@app/lib/cleanRedirect";
-
-const FormSchema = z.object({
-    email: z.string().email({ message: "Invalid email address" }),
-    pin: z.string().min(8, {
-        message: "Your verification code must be 8 characters.",
-    }),
-});
+import { useTranslations } from "next-intl";
 
 export type VerifyEmailFormProps = {
     email: string;
@@ -55,6 +49,7 @@ export default function VerifyEmailForm({
     redirect,
 }: VerifyEmailFormProps) {
     const router = useRouter();
+    const t = useTranslations();
 
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -62,6 +57,13 @@ export default function VerifyEmailForm({
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const api = createApiClient(useEnvContext());
+
+    const FormSchema = z.object({
+        email: z.string().email({ message: t('emailInvalid') }),
+        pin: z.string().min(8, {
+            message: t('verificationCodeLengthRequirements'),
+        }),
+    });
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
@@ -79,15 +81,15 @@ export default function VerifyEmailForm({
                 code: data.pin,
             })
             .catch((e) => {
-                setError(formatAxiosError(e, "An error occurred"));
-                console.error("Failed to verify email:", e);
+                setError(formatAxiosError(e, t('errorOccurred')));
+                console.error(t('emailErrorVerify'), e);
                 setIsSubmitting(false);
             });
 
         if (res && res.data?.data?.valid) {
             setError(null);
             setSuccessMessage(
-                "Email successfully verified! Redirecting you..."
+                t('emailVerified')
             );
             setTimeout(() => {
                 if (redirect) {
@@ -105,17 +107,16 @@ export default function VerifyEmailForm({
         setIsResending(true);
 
         const res = await api.post("/auth/verify-email/request").catch((e) => {
-            setError(formatAxiosError(e, "An error occurred"));
-            console.error("Failed to resend verification code:", e);
+            setError(formatAxiosError(e, t('errorOccurred')));
+            console.error(t('verificationCodeErrorResend'), e);
         });
 
         if (res) {
             setError(null);
             toast({
                 variant: "default",
-                title: "Verification code resent",
-                description:
-                    "We've resent a verification code to your email address. Please check your inbox.",
+                title: t('verificationCodeResend'),
+                description: t('verificationCodeResendDescription'),
             });
         }
 
@@ -126,9 +127,9 @@ export default function VerifyEmailForm({
         <div>
             <Card className="w-full max-w-md">
                 <CardHeader>
-                    <CardTitle>Verify Email</CardTitle>
+                    <CardTitle>{t('emailVerify')}</CardTitle>
                     <CardDescription>
-                        Enter the verification code sent to your email address.
+                        {t('emailVerifyDescription')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -142,7 +143,7 @@ export default function VerifyEmailForm({
                                 name="email"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Email</FormLabel>
+                                        <FormLabel>{t('email')}</FormLabel>
                                         <FormControl>
                                             <Input
                                                 {...field}
@@ -159,7 +160,7 @@ export default function VerifyEmailForm({
                                 name="pin"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Verification Code</FormLabel>
+                                        <FormLabel>{t('verificationCode')}</FormLabel>
                                         <FormControl>
                                             <div className="flex justify-center">
                                                 <InputOTP
@@ -197,8 +198,7 @@ export default function VerifyEmailForm({
                                         </FormControl>
                                         <FormMessage />
                                         <FormDescription>
-                                            We sent a verification code to your
-                                            email address.
+                                            {t('verificationCodeEmailSent')}
                                         </FormDescription>
                                     </FormItem>
                                 )}
@@ -226,7 +226,7 @@ export default function VerifyEmailForm({
                                 {isSubmitting && (
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                 )}
-                                Submit
+                                {t('submit')}
                             </Button>
                         </form>
                     </Form>
@@ -241,8 +241,8 @@ export default function VerifyEmailForm({
                     disabled={isResending}
                 >
                     {isResending
-                        ? "Resending..."
-                        : "Didn't receive a code? Click here to resend"}
+                        ? t('emailVerifyResendProgress')
+                        : t('emailVerifyResend')}
                 </Button>
             </div>
         </div>

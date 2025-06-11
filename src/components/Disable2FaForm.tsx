@@ -32,11 +32,7 @@ import { toast } from "@app/hooks/useToast";
 import { formatAxiosError } from "@app/lib/api";
 import { useUserContext } from "@app/hooks/useUserContext";
 import { CheckCircle2 } from "lucide-react";
-
-const disableSchema = z.object({
-    password: z.string().min(1, { message: "Password is required" }),
-    code: z.string().min(1, { message: "Code is required" })
-});
+import { useTranslations } from "next-intl";
 
 type Disable2FaProps = {
     open: boolean;
@@ -51,6 +47,13 @@ export default function Disable2FaForm({ open, setOpen }: Disable2FaProps) {
     const { user, updateUser } = useUserContext();
 
     const api = createApiClient(useEnvContext());
+
+    const t = useTranslations();
+
+    const disableSchema = z.object({
+        password: z.string().min(1, { message: t('passwordRequired') }),
+        code: z.string().min(1, { message: t('verificationCodeRequired') })
+    });
 
     const disableForm = useForm<z.infer<typeof disableSchema>>({
         resolver: zodResolver(disableSchema),
@@ -70,10 +73,10 @@ export default function Disable2FaForm({ open, setOpen }: Disable2FaProps) {
             } as Disable2faBody)
             .catch((e) => {
                 toast({
-                    title: "Unable to disable 2FA",
+                    title: t('otpErrorDisable'),
                     description: formatAxiosError(
                         e,
-                        "An error occurred while disabling 2FA"
+                        t('otpErrorDisableDescription')
                     ),
                     variant: "destructive"
                 });
@@ -109,10 +112,10 @@ export default function Disable2FaForm({ open, setOpen }: Disable2FaProps) {
             <CredenzaContent>
                 <CredenzaHeader>
                     <CredenzaTitle>
-                        Disable Two-factor Authentication
+                        {t('otpRemove')}
                     </CredenzaTitle>
                     <CredenzaDescription>
-                        Disable two-factor authentication for your account
+                        {t('otpRemoveDescription')}
                     </CredenzaDescription>
                 </CredenzaHeader>
                 <CredenzaBody>
@@ -129,7 +132,7 @@ export default function Disable2FaForm({ open, setOpen }: Disable2FaProps) {
                                         name="password"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Password</FormLabel>
+                                                <FormLabel>{t('password')}</FormLabel>
                                                 <FormControl>
                                                     <Input
                                                         type="password"
@@ -147,7 +150,7 @@ export default function Disable2FaForm({ open, setOpen }: Disable2FaProps) {
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
-                                                    Authenticator Code
+                                                    {t('otpSetupSecretCode')}
                                                 </FormLabel>
                                                 <FormControl>
                                                     <Input {...field} />
@@ -168,19 +171,17 @@ export default function Disable2FaForm({ open, setOpen }: Disable2FaProps) {
                                 size={48}
                             />
                             <p className="font-semibold text-lg">
-                                Two-Factor Authentication Disabled
+                                {t('otpRemoveSuccess')}
                             </p>
                             <p>
-                                Two-factor authentication has been disabled for
-                                your account. You can enable it again at any
-                                time.
+                                {t('otpRemoveSuccessMessage')}
                             </p>
                         </div>
                     )}
                 </CredenzaBody>
                 <CredenzaFooter>
                     <CredenzaClose asChild>
-                        <Button variant="outline">Close</Button>
+                        <Button variant="outline">{t('close')}</Button>
                     </CredenzaClose>
                     {step === "password" && (
                         <Button
@@ -189,7 +190,7 @@ export default function Disable2FaForm({ open, setOpen }: Disable2FaProps) {
                             loading={loading}
                             disabled={loading}
                         >
-                            Disable 2FA
+                            {t('otpRemoveSubmit')}
                         </Button>
                     )}
                 </CredenzaFooter>

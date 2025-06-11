@@ -6,6 +6,7 @@ import { AdminListUsersResponse } from "@server/routers/user/adminListUsers";
 import UsersTable, { GlobalUserRow } from "./AdminUsersTable";
 import { Alert, AlertDescription, AlertTitle } from "@app/components/ui/alert";
 import { InfoIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 type PageProps = {
     params: Promise<{ orgId: string }>;
@@ -25,6 +26,8 @@ export default async function UsersPage(props: PageProps) {
         console.error(e);
     }
 
+    const t = await getTranslations();
+
     const userRows: GlobalUserRow[] = rows.map((row) => {
         return {
             id: row.id,
@@ -33,7 +36,7 @@ export default async function UsersPage(props: PageProps) {
             username: row.username,
             type: row.type,
             idpId: row.idpId,
-            idpName: row.idpName || "Internal",
+            idpName: row.idpName || t('idpNameInternal'),
             dateCreated: row.dateCreated,
             serverAdmin: row.serverAdmin
         };
@@ -42,14 +45,14 @@ export default async function UsersPage(props: PageProps) {
     return (
         <>
             <SettingsSectionTitle
-                title="Manage All Users"
-                description="View and manage all users in the system"
+                title={t('userTitle')}
+                description={t('userDescription')}
             />
             <Alert variant="neutral" className="mb-6">
                 <InfoIcon className="h-4 w-4" />
-                <AlertTitle className="font-semibold">About User Management</AlertTitle>
+                <AlertTitle className="font-semibold">{t('userAbount')}</AlertTitle>
                 <AlertDescription>
-                    This table displays all root user objects in the system. Each user may belong to multiple organizations. Removing a user from an organization does not delete their root user object - they will remain in the system. To completely remove a user from the system, you must delete their root user object using the delete action in this table.
+                    {t('userAbountDescription')}
                 </AlertDescription>
             </Alert>
             <UsersTable users={userRows} />

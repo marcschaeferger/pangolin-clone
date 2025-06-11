@@ -4,6 +4,7 @@ import { cache } from "react";
 import ResetPasswordForm from "./ResetPasswordForm";
 import Link from "next/link";
 import { cleanRedirect } from "@app/lib/cleanRedirect";
+import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,7 @@ export default async function Page(props: {
     const searchParams = await props.searchParams;
     const getUser = cache(verifySession);
     const user = await getUser();
+    const t = await getTranslations();
 
     if (user) {
         redirect("/");
@@ -44,7 +46,7 @@ export default async function Page(props: {
                     }
                     className="underline"
                 >
-                    Go back to log in
+                    {t('loginBack')}
                 </Link>
             </p>
         </>

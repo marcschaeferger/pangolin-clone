@@ -8,6 +8,7 @@ import { AxiosResponse } from "axios";
 import { ExternalLink } from "lucide-react";
 import { Metadata } from "next";
 import { cache } from "react";
+import { getTranslations } from "next-intl/server";
 
 export const metadata: Metadata = {
     title: `Auth - Pangolin`,
@@ -21,6 +22,7 @@ type AuthLayoutProps = {
 export default async function AuthLayout({ children }: AuthLayoutProps) {
     const getUser = cache(verifySession);
     const user = await getUser();
+    const t = await getTranslations();
 
     const licenseStatusRes = await cache(
         async () =>
@@ -71,7 +73,7 @@ export default async function AuthLayout({ children }: AuthLayoutProps) {
                             aria-label="GitHub"
                             className="flex items-center space-x-2 whitespace-nowrap"
                         >
-                            <span>Community Edition</span>
+                            <span>{t('communityEdition')}</span>
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24"

@@ -12,6 +12,7 @@ import {
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 type InviteStatusCardProps = {
     type: "rejected" | "wrong_user" | "user_does_not_exist" | "not_logged_in";
@@ -23,8 +24,8 @@ export default function InviteStatusCard({
     token,
 }: InviteStatusCardProps) {
     const router = useRouter();
-
     const api = createApiClient(useEnvContext());
+    const t = useTranslations();
 
     async function goToLogin() {
         await api.post("/auth/logout", {});
@@ -41,13 +42,12 @@ export default function InviteStatusCard({
             return (
                 <div>
                     <p className="text-center mb-4">
-                        We're sorry, but it looks like the invite you're trying
-                        to access has not been accepted or is no longer valid.
+                        {t('inviteErrorNotValid')}
                     </p>
                     <ul className="list-disc list-inside text-sm space-y-2">
-                        <li>The invite may have expired</li>
-                        <li>The invite might have been revoked</li>
-                        <li>There could be a typo in the invite link</li>
+                        <li>{t('inviteErrorExpired')}</li>
+                        <li>{t('inviteErrorRevoked')}</li>
+                        <li>{t('inviteErrorTypo')}</li>
                     </ul>
                 </div>
             );
@@ -55,11 +55,10 @@ export default function InviteStatusCard({
             return (
                 <div>
                     <p className="text-center mb-4">
-                        We're sorry, but it looks like the invite you're trying
-                        to access is not for this user.
+                        {t('inviteErrorUser')}
                     </p>
                     <p className="text-center">
-                        Please make sure you're logged in as the correct user.
+                        {t('inviteLoginUser')}
                     </p>
                 </div>
             );
@@ -67,11 +66,10 @@ export default function InviteStatusCard({
             return (
                 <div>
                     <p className="text-center mb-4">
-                        We're sorry, but it looks like the invite you're trying
-                        to access is not for a user that exists.
+                        {t('inviteErrorNoUser')}
                     </p>
                     <p className="text-center">
-                        Please create an account first.
+                        {t('inviteCreateUser')}
                     </p>
                 </div>
             );
@@ -86,15 +84,15 @@ export default function InviteStatusCard({
                         router.push("/");
                     }}
                 >
-                    Go Home
+                    {t('goHome')}
                 </Button>
             );
         } else if (type === "wrong_user") {
             return (
-                <Button onClick={goToLogin}>Log In as a Different User</Button>
+                <Button onClick={goToLogin}>{t('inviteLogInOtherUser')}</Button>
             );
         } else if (type === "user_does_not_exist") {
-            return <Button onClick={goToSignup}>Create an Account</Button>;
+            return <Button onClick={goToSignup}>{t('createAnAccount')}</Button>;
         }
     }
 
@@ -109,7 +107,7 @@ export default function InviteStatusCard({
                         />
                     </div> */}
                     <CardTitle className="text-center text-2xl font-bold">
-                        Invite Not Accepted
+                        {t('inviteNotAccepted')}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>{renderBody()}</CardContent>

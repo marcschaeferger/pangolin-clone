@@ -62,6 +62,7 @@ import { cn } from "@app/lib/cn";
 import { SquareArrowOutUpRight } from "lucide-react";
 import CopyTextBox from "@app/components/CopyTextBox";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 const baseResourceFormSchema = z.object({
     name: z.string().min(1).max(255),
@@ -104,6 +105,7 @@ export default function Page() {
     const api = createApiClient({ env });
     const { orgId } = useParams();
     const router = useRouter();
+    const t = useTranslations();
 
     const [loadingPage, setLoadingPage] = useState(true);
     const [sites, setSites] = useState<ListSitesResponse["sites"]>([]);
@@ -117,15 +119,13 @@ export default function Page() {
     const resourceTypes: ReadonlyArray<ResourceTypeOption> = [
         {
             id: "http",
-            title: "HTTPS Resource",
-            description:
-                "Proxy requests to your app over HTTPS using a subdomain or base domain."
+            title: t('resourceHTTP'),
+            description: t('resourceHTTPDescription')
         },
         {
             id: "raw",
-            title: "Raw TCP/UDP Resource",
-            description:
-                "Proxy requests to your app over TCP/UDP using a port number.",
+            title: t('resourceRaw'),
+            description: t('resourceRawDescription'),
             disabled: !env.flags.allowRawResources
         }
     ];
@@ -199,10 +199,10 @@ export default function Page() {
                 .catch((e) => {
                     toast({
                         variant: "destructive",
-                        title: "Error creating resource",
+                        title: t('resourceErrorCreate'),
                         description: formatAxiosError(
                             e,
-                            "An error occurred when creating the resource"
+                            t('resourceErrorCreateDescription')
                         )
                     });
                 });
@@ -219,11 +219,11 @@ export default function Page() {
                 }
             }
         } catch (e) {
-            console.error("Error creating resource:", e);
+            console.error(t('resourceErrorCreateMessage'), e);
             toast({
                 variant: "destructive",
-                title: "Error creating resource",
-                description: "An unexpected error occurred"
+                title: t('resourceErrorCreate'),
+                description:t('resourceErrorCreateMessageDescription')
             });
         }
 
@@ -242,10 +242,10 @@ export default function Page() {
                     .catch((e) => {
                         toast({
                             variant: "destructive",
-                            title: "Error fetching sites",
+                            title: t('sitesErrorFetch'),
                             description: formatAxiosError(
                                 e,
-                                "An error occurred when fetching the sites"
+                                t('sitesErrorFetchDescription')
                             )
                         });
                     });
@@ -270,10 +270,10 @@ export default function Page() {
                     .catch((e) => {
                         toast({
                             variant: "destructive",
-                            title: "Error fetching domains",
+                            title: t('domainsErrorFetch'),
                             description: formatAxiosError(
                                 e,
-                                "An error occurred when fetching the domains"
+                                t('domainsErrorFetchDescription')
                             )
                         });
                     });
@@ -300,8 +300,8 @@ export default function Page() {
         <>
             <div className="flex justify-between">
                 <HeaderTitle
-                    title="Create Resource"
-                    description="Follow the steps below to create a new resource"
+                    title={t('resourceCreate')}
+                    description={t('resourceCreateDescription')}
                 />
                 <Button
                     variant="outline"
@@ -309,7 +309,7 @@ export default function Page() {
                         router.push(`/${orgId}/settings/resources`);
                     }}
                 >
-                    See All Resources
+                    {t('resourceSeeAll')}
                 </Button>
             </div>
 
@@ -320,7 +320,7 @@ export default function Page() {
                             <SettingsSection>
                                 <SettingsSectionHeader>
                                     <SettingsSectionTitle>
-                                        Resource Information
+                                        {t('resourceInfo')}
                                     </SettingsSectionTitle>
                                 </SettingsSectionHeader>
                                 <SettingsSectionBody>
@@ -336,7 +336,7 @@ export default function Page() {
                                                     render={({ field }) => (
                                                         <FormItem>
                                                             <FormLabel>
-                                                                Name
+                                                                {t('name')}
                                                             </FormLabel>
                                                             <FormControl>
                                                                 <Input
@@ -345,9 +345,7 @@ export default function Page() {
                                                             </FormControl>
                                                             <FormMessage />
                                                             <FormDescription>
-                                                                This is the
-                                                                display name for
-                                                                the resource.
+                                                                {t('resourceNameDescription')}
                                                             </FormDescription>
                                                         </FormItem>
                                                     )}
@@ -359,7 +357,7 @@ export default function Page() {
                                                     render={({ field }) => (
                                                         <FormItem className="flex flex-col">
                                                             <FormLabel>
-                                                                Site
+                                                                {t('site')}
                                                             </FormLabel>
                                                             <Popover>
                                                                 <PopoverTrigger
@@ -384,19 +382,17 @@ export default function Page() {
                                                                                           field.value
                                                                                   )
                                                                                       ?.name
-                                                                                : "Select site"}
+                                                                                : t('siteSelect')}
                                                                             <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                                                         </Button>
                                                                     </FormControl>
                                                                 </PopoverTrigger>
                                                                 <PopoverContent className="p-0">
                                                                     <Command>
-                                                                        <CommandInput placeholder="Search site" />
+                                                                        <CommandInput placeholder={t('siteSearch')} />
                                                                         <CommandList>
                                                                             <CommandEmpty>
-                                                                                No
-                                                                                site
-                                                                                found.
+                                                                                {t('siteNotFound')}
                                                                             </CommandEmpty>
                                                                             <CommandGroup>
                                                                                 {sites.map(
@@ -437,10 +433,7 @@ export default function Page() {
                                                             </Popover>
                                                             <FormMessage />
                                                             <FormDescription>
-                                                                This site will
-                                                                provide
-                                                                connectivity to
-                                                                the resource.
+                                                                {t('siteSelectionDescription')}
                                                             </FormDescription>
                                                         </FormItem>
                                                     )}
@@ -454,11 +447,10 @@ export default function Page() {
                             <SettingsSection>
                                 <SettingsSectionHeader>
                                     <SettingsSectionTitle>
-                                        Resource Type
+                                        {t('resourceType')}
                                     </SettingsSectionTitle>
                                     <SettingsSectionDescription>
-                                        Determine how you want to access your
-                                        resource
+                                        {t('resourceTypeDescription')}
                                     </SettingsSectionDescription>
                                 </SettingsSectionHeader>
                                 <SettingsSectionBody>
@@ -480,11 +472,10 @@ export default function Page() {
                                 <SettingsSection>
                                     <SettingsSectionHeader>
                                         <SettingsSectionTitle>
-                                            HTTPS Settings
+                                            {t('resourceHTTPSSettings')}
                                         </SettingsSectionTitle>
                                         <SettingsSectionDescription>
-                                            Configure how your resource will be
-                                            accessed over HTTPS
+                                            {t('resourceHTTPSSettingsDescription')}
                                         </SettingsSectionDescription>
                                     </SettingsSectionHeader>
                                     <SettingsSectionBody>
@@ -506,8 +497,7 @@ export default function Page() {
                                                             }) => (
                                                                 <FormItem>
                                                                     <FormLabel>
-                                                                        Domain
-                                                                        Type
+                                                                        {t('domainType')}
                                                                     </FormLabel>
                                                                     <Select
                                                                         value={
@@ -531,11 +521,10 @@ export default function Page() {
                                                                         </FormControl>
                                                                         <SelectContent>
                                                                             <SelectItem value="subdomain">
-                                                                                Subdomain
+                                                                                {t('subdomain')}
                                                                             </SelectItem>
                                                                             <SelectItem value="basedomain">
-                                                                                Base
-                                                                                Domain
+                                                                                {t('baseDomain')}
                                                                             </SelectItem>
                                                                         </SelectContent>
                                                                     </Select>
@@ -550,7 +539,7 @@ export default function Page() {
                                                     ) && (
                                                         <FormItem>
                                                             <FormLabel>
-                                                                Subdomain
+                                                                {t('subdomain')}
                                                             </FormLabel>
                                                             <div className="flex space-x-0">
                                                                 <div className="w-1/2">
@@ -629,10 +618,7 @@ export default function Page() {
                                                                 </div>
                                                             </div>
                                                             <FormDescription>
-                                                                The subdomain
-                                                                where your
-                                                                resource will be
-                                                                accessible.
+                                                                {t('subdomnainDescription')}
                                                             </FormDescription>
                                                         </FormItem>
                                                     )}
@@ -650,8 +636,7 @@ export default function Page() {
                                                             }) => (
                                                                 <FormItem>
                                                                     <FormLabel>
-                                                                        Base
-                                                                        Domain
+                                                                        {t('baseDomain')}
                                                                     </FormLabel>
                                                                     <Select
                                                                         onValueChange={
@@ -702,11 +687,10 @@ export default function Page() {
                                 <SettingsSection>
                                     <SettingsSectionHeader>
                                         <SettingsSectionTitle>
-                                            TCP/UDP Settings
+                                            {t('resourceRawSettings')}
                                         </SettingsSectionTitle>
                                         <SettingsSectionDescription>
-                                            Configure how your resource will be
-                                            accessed over TCP/UDP
+                                            {t('resourceRawSettingsDescription')}
                                         </SettingsSectionDescription>
                                     </SettingsSectionHeader>
                                     <SettingsSectionBody>
@@ -724,7 +708,7 @@ export default function Page() {
                                                         render={({ field }) => (
                                                             <FormItem>
                                                                 <FormLabel>
-                                                                    Protocol
+                                                                    {t('protocol')}
                                                                 </FormLabel>
                                                                 <Select
                                                                     onValueChange={
@@ -734,7 +718,7 @@ export default function Page() {
                                                                 >
                                                                     <FormControl>
                                                                         <SelectTrigger>
-                                                                            <SelectValue placeholder="Select a protocol" />
+                                                                            <SelectValue placeholder={t('protocolSelect')} />
                                                                         </SelectTrigger>
                                                                     </FormControl>
                                                                     <SelectContent>
@@ -759,7 +743,7 @@ export default function Page() {
                                                         render={({ field }) => (
                                                             <FormItem>
                                                                 <FormLabel>
-                                                                    Port Number
+                                                                    {t('resourcePortNumber')}
                                                                 </FormLabel>
                                                                 <FormControl>
                                                                     <Input
@@ -787,10 +771,7 @@ export default function Page() {
                                                                 </FormControl>
                                                                 <FormMessage />
                                                                 <FormDescription>
-                                                                    The external
-                                                                    port number
-                                                                    to proxy
-                                                                    requests.
+                                                                    {t('resourcePortNumberDescription')}
                                                                 </FormDescription>
                                                             </FormItem>
                                                         )}
@@ -810,7 +791,7 @@ export default function Page() {
                                         router.push(`/${orgId}/settings/resources`)
                                     }
                                 >
-                                    Cancel
+                                    {t('cancel')}
                                 </Button>
                                 <Button
                                     type="button"
@@ -827,7 +808,7 @@ export default function Page() {
                                     }}
                                     loading={createLoading}
                                 >
-                                    Create Resource
+                                    {t('resourceCreate')}
                                 </Button>
                             </div>
                         </SettingsContainer>
@@ -836,17 +817,17 @@ export default function Page() {
                             <SettingsSection>
                                 <SettingsSectionHeader>
                                     <SettingsSectionTitle>
-                                        Configuration Snippets
+                                        {t('resourceConfig')}
                                     </SettingsSectionTitle>
                                     <SettingsSectionDescription>
-                                        Copy and paste these configuration snippets to set up your TCP/UDP resource
+                                        {t('resourceConfigDescription')}
                                     </SettingsSectionDescription>
                                 </SettingsSectionHeader>
                                 <SettingsSectionBody>
                                     <div className="space-y-6">
                                         <div className="space-y-4">
                                             <h3 className="text-lg font-semibold">
-                                                Traefik: Add Entrypoints
+                                                {t('resourceAddEntrypoints')}
                                             </h3>
                                             <CopyTextBox
                                                 text={`entryPoints:
@@ -858,7 +839,7 @@ export default function Page() {
 
                                         <div className="space-y-4">
                                             <h3 className="text-lg font-semibold">
-                                                Gerbil: Expose Ports in Docker Compose
+                                                {t('resourceExposePorts')}
                                             </h3>
                                             <CopyTextBox
                                                 text={`ports:
@@ -874,7 +855,7 @@ export default function Page() {
                                             rel="noopener noreferrer"
                                         >
                                             <span>
-                                                Learn how to configure TCP/UDP resources
+                                                {t('resourceLearnRaw')}
                                             </span>
                                             <SquareArrowOutUpRight size={14} />
                                         </Link>
@@ -890,7 +871,7 @@ export default function Page() {
                                         router.push(`/${orgId}/settings/resources`)
                                     }
                                 >
-                                    Back to Resources
+                                    {t('resourceBack')}
                                 </Button>
                                 <Button
                                     type="button"
@@ -900,7 +881,7 @@ export default function Page() {
                                         )
                                     }
                                 >
-                                    Go to Resource
+                                    {t('resourceGoTo')}
                                 </Button>
                             </div>
                         </SettingsContainer>

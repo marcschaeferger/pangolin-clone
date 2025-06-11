@@ -13,7 +13,7 @@ import {
 
 export const orgLangingNavItems: SidebarNavItem[] = [
     {
-        title: "Overview",
+        title: "sidebarOverview",
         href: "/{orgId}",
         icon: <Home className="h-4 w-4" />
     }
@@ -21,7 +21,7 @@ export const orgLangingNavItems: SidebarNavItem[] = [
 
 export const rootNavItems: SidebarNavItem[] = [
     {
-        title: "Home",
+        title: "sidebarHome",
         href: "/",
         icon: <Home className="h-4 w-4" />
     }
@@ -29,49 +29,49 @@ export const rootNavItems: SidebarNavItem[] = [
 
 export const orgNavItems: SidebarNavItem[] = [
     {
-        title: "Sites",
+        title: "sidebarSites",
         href: "/{orgId}/settings/sites",
         icon: <Combine className="h-4 w-4" />
     },
     {
-        title: "Resources",
+        title: "sidebarResources",
         href: "/{orgId}/settings/resources",
         icon: <Waypoints className="h-4 w-4" />
     },
     {
-        title: "Access Control",
+        title: "sidebarAccessControl",
         href: "/{orgId}/settings/access",
         icon: <Users className="h-4 w-4" />,
         autoExpand: true,
         children: [
             {
-                title: "Users",
+                title: "sidebarUsers",
                 href: "/{orgId}/settings/access/users",
                 children: [
                     {
-                        title: "Invitations",
+                        title: "sidebarInvitations",
                         href: "/{orgId}/settings/access/invitations"
                     }
                 ]
             },
             {
-                title: "Roles",
+                title: "sidebarRoles",
                 href: "/{orgId}/settings/access/roles"
             }
         ]
     },
     {
-        title: "Shareable Links",
+        title: "sidebarShareableLinks",
         href: "/{orgId}/settings/share-links",
         icon: <LinkIcon className="h-4 w-4" />
     },
     {
-        title: "API Keys",
+        title: "sidebarApiKeys",
         href: "/{orgId}/settings/api-keys",
         icon: <KeyRound className="h-4 w-4" />
     },
     {
-        title: "Settings",
+        title: "sidebarSettings",
         href: "/{orgId}/settings/general",
         icon: <Settings className="h-4 w-4" />
     }
@@ -79,22 +79,22 @@ export const orgNavItems: SidebarNavItem[] = [
 
 export const adminNavItems: SidebarNavItem[] = [
     {
-        title: "All Users",
+        title: "sidebarAllUsers",
         href: "/admin/users",
         icon: <Users className="h-4 w-4" />
     },
     {
-        title: "API Keys",
+        title: "sidebarApiKeys",
         href: "/admin/api-keys",
         icon: <KeyRound className="h-4 w-4" />
     },
     {
-        title: "Identity Providers",
+        title: "sidebarIdentityProviders",
         href: "/admin/idp",
         icon: <Fingerprint className="h-4 w-4" />
     },
     {
-        title: "License",
+        title: "sidebarLicense",
         href: "/admin/license",
         icon: <TicketCheck className="h-4 w-4" />
     }

@@ -33,21 +33,23 @@ import {
 } from "@app/components/ui/form";
 import { Alert, AlertDescription } from "@app/components/ui/alert";
 import CreateSiteForm from "../[orgId]/settings/sites/CreateSiteForm";
+import { useTranslations } from "next-intl";
 
 type Step = "org" | "site" | "resources";
-
-const orgSchema = z.object({
-    orgName: z.string().min(1, { message: "Organization name is required" }),
-    orgId: z.string().min(1, { message: "Organization ID is required" })
-});
 
 export default function StepperForm() {
     const [currentStep, setCurrentStep] = useState<Step>("org");
     const [orgIdTaken, setOrgIdTaken] = useState(false);
+    const t = useTranslations();
 
     const [loading, setLoading] = useState(false);
     const [isChecked, setIsChecked] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const orgSchema = z.object({
+        orgName: z.string().min(1, { message: t('orgNameRequired') }),
+        orgId: z.string().min(1, { message: t('orgIdRequired') })
+    });
 
     const orgForm = useForm<z.infer<typeof orgSchema>>({
         resolver: zodResolver(orgSchema),
@@ -112,7 +114,7 @@ export default function StepperForm() {
         } catch (e) {
             console.error(e);
             setError(
-                formatAxiosError(e, "An error occurred while creating org")
+                formatAxiosError(e, t('orgErrorCreate'))
             );
         }
 
@@ -123,9 +125,9 @@ export default function StepperForm() {
         <>
             <Card>
                 <CardHeader>
-                    <CardTitle>New Organization</CardTitle>
+                    <CardTitle>{t('setupNewOrg')}</CardTitle>
                     <CardDescription>
-                        Create your organization, site, and resources
+                        {t('setupCreate')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -148,7 +150,7 @@ export default function StepperForm() {
                                             : "text-muted-foreground"
                                     }`}
                                 >
-                                    Create Org
+                                    {t('setupCreateOrg')}
                                 </span>
                             </div>
                             <div className="flex flex-col items-center">
@@ -168,7 +170,7 @@ export default function StepperForm() {
                                             : "text-muted-foreground"
                                     }`}
                                 >
-                                    Create Site
+                                    {t('siteCreate')}
                                 </span>
                             </div>
                             <div className="flex flex-col items-center">
@@ -188,7 +190,7 @@ export default function StepperForm() {
                                             : "text-muted-foreground"
                                     }`}
                                 >
-                                    Create Resources
+                                    {t('setupCreateResources')}
                                 </span>
                             </div>
                         </div>
@@ -207,7 +209,7 @@ export default function StepperForm() {
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
-                                                    Organization Name
+                                                    {t('setupOrgName')}
                                                 </FormLabel>
                                                 <FormControl>
                                                     <Input
@@ -234,8 +236,7 @@ export default function StepperForm() {
                                                 </FormControl>
                                                 <FormMessage />
                                                 <FormDescription>
-                                                    This is the display name for
-                                                    your organization.
+                                                    {t('orgDisplayName')}
                                                 </FormDescription>
                                             </FormItem>
                                         )}
@@ -246,7 +247,7 @@ export default function StepperForm() {
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
-                                                    Organization ID
+                                                    {t('orgId')}
                                                 </FormLabel>
                                                 <FormControl>
                                                     <Input
@@ -256,11 +257,7 @@ export default function StepperForm() {
                                                 </FormControl>
                                                 <FormMessage />
                                                 <FormDescription>
-                                                    This is the unique
-                                                    identifier for your
-                                                    organization. This is
-                                                    separate from the display
-                                                    name.
+                                                    {t('setupIdentifierMessage')}
                                                 </FormDescription>
                                             </FormItem>
                                         )}
@@ -269,9 +266,7 @@ export default function StepperForm() {
                                     {orgIdTaken && (
                                         <Alert variant="destructive">
                                             <AlertDescription>
-                                                Organization ID is already
-                                                taken. Please choose a different
-                                                one.
+                                                {t('setupErrorIdentifier')}
                                             </AlertDescription>
                                         </Alert>
                                     )}
@@ -294,7 +289,7 @@ export default function StepperForm() {
                                                 orgIdTaken
                                             }
                                         >
-                                            Create Organization
+                                            {t('setupCreateOrg')}
                                         </Button>
                                     </div>
                                 </form>

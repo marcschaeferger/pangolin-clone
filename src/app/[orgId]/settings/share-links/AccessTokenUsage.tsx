@@ -15,6 +15,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import CopyToClipboard from "@app/components/CopyToClipboard";
 import CopyTextBox from "@app/components/CopyTextBox";
+import { useTranslations } from "next-intl";
 
 interface AccessTokenSectionProps {
     token: string;
@@ -37,37 +38,37 @@ export default function AccessTokenSection({
         setTimeout(() => setCopied(null), 2000);
     };
 
+    const t = useTranslations();
+
     return (
         <>
             <div className="flex items-start space-x-2">
                 <p className="text-sm text-muted-foreground">
-                    Your access token can be passed in two ways: as a query
-                    parameter or in the request headers. These must be passed
-                    from the client on every request for authenticated access.
+                    {t('shareTokenDescription')}
                 </p>
             </div>
 
             <Tabs defaultValue="token" className="w-full mt-4">
                 <TabsList className="grid grid-cols-2">
-                    <TabsTrigger value="token">Access Token</TabsTrigger>
-                    <TabsTrigger value="usage">Usage Examples</TabsTrigger>
+                    <TabsTrigger value="token">{t('accessToken')}</TabsTrigger>
+                    <TabsTrigger value="usage">{t('usageExamples')}</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="token" className="space-y-4">
                     <div className="space-y-1">
-                        <div className="font-bold">Token ID</div>
+                        <div className="font-bold">{t('tokenId')}</div>
                         <CopyToClipboard text={tokenId} isLink={false} />
                     </div>
 
                     <div className="space-y-1">
-                        <div className="font-bold">Token</div>
+                        <div className="font-bold">{t('token')}</div>
                         <CopyToClipboard text={token} isLink={false} />
                     </div>
                 </TabsContent>
 
                 <TabsContent value="usage" className="space-y-4">
                     <div className="space-y-2">
-                        <h3 className="text-sm font-medium">Request Headers</h3>
+                        <h3 className="text-sm font-medium">{t('requestHeades')}</h3>
                         <CopyTextBox
                             text={`${env.server.resourceAccessTokenHeadersId}: ${tokenId}
 ${env.server.resourceAccessTokenHeadersToken}: ${token}`}
@@ -75,7 +76,7 @@ ${env.server.resourceAccessTokenHeadersToken}: ${token}`}
                     </div>
 
                     <div className="space-y-2">
-                        <h3 className="text-sm font-medium">Query Parameter</h3>
+                        <h3 className="text-sm font-medium">{t('queryParameter')}</h3>
                         <CopyTextBox
                             text={`${resourceUrl}?${env.server.resourceAccessTokenParam}=${tokenId}.${token}`}
                         />
@@ -84,21 +85,17 @@ ${env.server.resourceAccessTokenHeadersToken}: ${token}`}
                     <Alert variant="neutral">
                         <InfoIcon className="h-4 w-4" />
                         <AlertTitle className="font-semibold">
-                            Important Note
+                            {t('importantNote')}
                         </AlertTitle>
                         <AlertDescription>
-                            For security reasons, using headers is recommended
-                            over query parameters when possible, as query
-                            parameters may be logged in server logs or browser
-                            history.
+                            {t('shareImportantDescription')}
                         </AlertDescription>
                     </Alert>
                 </TabsContent>
             </Tabs>
 
             <div className="text-sm text-muted-foreground mt-4">
-                Keep your access token secure. Do not share it in publicly
-                accessible areas or client-side code.
+                {t('shareTokenSecurety')}
             </div>
         </>
     );

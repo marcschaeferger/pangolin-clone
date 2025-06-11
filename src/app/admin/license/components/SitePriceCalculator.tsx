@@ -11,6 +11,7 @@ import {
     CredenzaHeader,
     CredenzaTitle
 } from "@app/components/Credenza";
+import { useTranslations } from "next-intl";
 
 type SitePriceCalculatorProps = {
     isOpen: boolean;
@@ -55,27 +56,26 @@ export function SitePriceCalculator({
             ? licenseFlatRate + siteCount * pricePerSite
             : siteCount * pricePerSite;
 
+    const t = useTranslations();
+
     return (
         <Credenza open={isOpen} onOpenChange={onOpenChange}>
             <CredenzaContent>
                 <CredenzaHeader>
                     <CredenzaTitle>
                         {mode === "license"
-                            ? "Purchase License"
-                            : "Purchase Additional Sites"}
+                            ? t('licensePurchase')
+                            : t('licensePurchaseSites')}
                     </CredenzaTitle>
                     <CredenzaDescription>
-                        Choose how many sites you want to{" "}
-                        {mode === "license"
-                            ? "purchase a license for. You can always add more sites later."
-                            : "add to your existing license."}
+                        {t('licensePurchaseDescription', {selectedMode: mode})}
                     </CredenzaDescription>
                 </CredenzaHeader>
                 <CredenzaBody>
                     <div className="space-y-6">
                         <div className="flex flex-col items-center space-y-4">
                             <div className="text-sm font-medium text-muted-foreground">
-                                Number of Sites
+                                {t('numberOfSites')}
                             </div>
                             <div className="flex items-center space-x-4">
                                 <Button
@@ -83,7 +83,7 @@ export function SitePriceCalculator({
                                     size="icon"
                                     onClick={decrementSites}
                                     disabled={siteCount <= 1}
-                                    aria-label="Decrease site count"
+                                    aria-label={t('sitestCountDecrease')}
                                 >
                                     <MinusCircle className="h-5 w-5" />
                                 </Button>
@@ -94,7 +94,7 @@ export function SitePriceCalculator({
                                     variant="ghost"
                                     size="icon"
                                     onClick={incrementSites}
-                                    aria-label="Increase site count"
+                                    aria-label={t('sitestCountIncrease')}
                                 >
                                     <PlusCircle className="h-5 w-5" />
                                 </Button>
@@ -103,15 +103,14 @@ export function SitePriceCalculator({
 
                         <div className="border-t pt-4">
                             <p className="text-muted-foreground text-sm mt-2 text-center">
-                                For the most up-to-date pricing and discounts,
-                                please visit the{" "}
+                                {t('licensePricingPage')}
                                 <a
                                     href="https://docs.fossorial.io/pricing"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="underline"
                                 >
-                                    pricing page
+                                    {t('pricingPage')}
                                 </a>
                                 .
                             </p>
@@ -120,10 +119,10 @@ export function SitePriceCalculator({
                 </CredenzaBody>
                 <CredenzaFooter>
                     <CredenzaClose asChild>
-                        <Button variant="outline">Cancel</Button>
+                        <Button variant="outline">{t('cancel')}</Button>
                     </CredenzaClose>
                     <Button onClick={continueToPayment}>
-                        See Purchase Portal
+                        {t('pricingPortal')}
                     </Button>
                 </CredenzaFooter>
             </CredenzaContent>

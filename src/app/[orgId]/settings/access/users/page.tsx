@@ -10,6 +10,7 @@ import UserProvider from "@app/providers/UserProvider";
 import { verifySession } from "@app/lib/auth/verifySession";
 import AccessPageHeaderAndNav from "../AccessPageHeaderAndNav";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
+import { getTranslations } from 'next-intl/server';
 
 type UsersPageProps = {
     params: Promise<{ orgId: string }>;
@@ -22,6 +23,7 @@ export default async function UsersPage(props: UsersPageProps) {
 
     const getUser = cache(verifySession);
     const user = await getUser();
+    const t = await getTranslations();
 
     let users: ListUsersResponse["users"] = [];
     let hasInvitations = false;
@@ -76,9 +78,9 @@ export default async function UsersPage(props: UsersPageProps) {
             email: user.email,
             type: user.type,
             idpId: user.idpId,
-            idpName: user.idpName || "Internal",
-            status: "Confirmed",
-            role: user.isOwner ? "Owner" : user.roleName || "Member",
+            idpName: user.idpName || t('idpNameInternal'),
+            status: t('userConfirmed'),
+            role: user.isOwner ? t('accessRoleOwner') : user.roleName || t('accessRoleMember'),
             isOwner: user.isOwner || false
         };
     });
@@ -86,8 +88,8 @@ export default async function UsersPage(props: UsersPageProps) {
     return (
         <>
             <SettingsSectionTitle
-                title="Manage Users"
-                description="Invite users and add them to roles to manage access to your organization"
+                title={t('accessUsersManage')}
+                description={t('accessUsersDescription')}
             />
             <UserProvider user={user!}>
                 <OrgProvider org={org}>

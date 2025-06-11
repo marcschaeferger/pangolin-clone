@@ -16,6 +16,7 @@ import {
     BreadcrumbSeparator
 } from "@app/components/ui/breadcrumb";
 import SiteInfoCard from "./SiteInfoCard";
+import { getTranslations } from "next-intl/server";
 
 interface SettingsLayoutProps {
     children: React.ReactNode;
@@ -38,9 +39,11 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
         redirect(`/${params.orgId}/settings/sites`);
     }
 
+    const t = await getTranslations();
+
     const navItems = [
         {
-            title: "General",
+            title: t('general'),
             href: "/{orgId}/settings/sites/{niceId}/general"
         }
     ];
@@ -48,8 +51,8 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
     return (
         <>
             <SettingsSectionTitle
-                title={`${site?.name} Settings`}
-                description="Configure the settings on your site"
+                title={t('siteSetting', {siteName: site?.name})}
+                description={t('siteSettingDescription')}
             />
 
             <SiteProvider site={site}>

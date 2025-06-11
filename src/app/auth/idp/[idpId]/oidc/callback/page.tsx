@@ -4,6 +4,7 @@ import { cache } from "react";
 import { priv } from "@app/lib/api";
 import { AxiosResponse } from "axios";
 import { GetIdpResponse } from "@server/routers/idp";
+import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,7 @@ export default async function Page(props: {
 }) {
     const params = await props.params;
     const searchParams = await props.searchParams;
+    const t = await getTranslations();
 
     const allCookies = await cookies();
     const stateCookie = allCookies.get("p_oidc_state")?.value;
@@ -28,7 +30,7 @@ export default async function Page(props: {
     const foundIdp = idpRes.data?.data?.idp;
 
     if (!foundIdp) {
-        return <div>IdP not found</div>;
+        return <div>{t('idpErrorNotFound')}</div>;
     }
 
     return (

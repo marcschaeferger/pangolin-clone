@@ -14,6 +14,7 @@ import {
 } from "@app/components/Credenza";
 import { SiteRow } from "./SitesTable";
 import CreateSiteForm from "./CreateSiteForm";
+import { useTranslations } from "next-intl";
 
 type CreateSiteFormProps = {
     open: boolean;
@@ -30,6 +31,7 @@ export default function CreateSiteFormModal({
 }: CreateSiteFormProps) {
     const [loading, setLoading] = useState(false);
     const [isChecked, setIsChecked] = useState(false);
+    const t = useTranslations();
 
     return (
         <>
@@ -42,9 +44,9 @@ export default function CreateSiteFormModal({
             >
                 <CredenzaContent>
                     <CredenzaHeader>
-                        <CredenzaTitle>Create Site</CredenzaTitle>
+                        <CredenzaTitle>{t('siteCreate')}</CredenzaTitle>
                         <CredenzaDescription>
-                            Create a new site to start connecting your resources
+                            {t('siteCreateDescription')}
                         </CredenzaDescription>
                     </CredenzaHeader>
                     <CredenzaBody>
@@ -59,7 +61,7 @@ export default function CreateSiteFormModal({
                     </CredenzaBody>
                     <CredenzaFooter>
                         <CredenzaClose asChild>
-                            <Button variant="outline">Close</Button>
+                            <Button variant="outline">{t('close')}</Button>
                         </CredenzaClose>
                         <Button
                             type="submit"
@@ -70,7 +72,7 @@ export default function CreateSiteFormModal({
                                 setOpen(false);
                             }}
                         >
-                            Create Site
+                            {t('siteCreate')}
                         </Button>
                     </CredenzaFooter>
                 </CredenzaContent>

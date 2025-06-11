@@ -4,6 +4,7 @@ import { TagInputStyleClassesProps, type Tag as TagType } from "./tag-input";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Button } from "../ui/button";
 import { cn } from "@app/lib/cn";
+import { useTranslations } from "next-intl";
 
 type AutocompleteProps = {
     tags: TagType[];
@@ -40,6 +41,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     const triggerRef = useRef<HTMLButtonElement | null>(null);
     const inputRef = useRef<HTMLInputElement | null>(null);
     const popoverContentRef = useRef<HTMLDivElement | null>(null);
+    const t = useTranslations();
 
     const [popoverWidth, setPopoverWidth] = useState<number>(0);
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -342,7 +344,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                             </div>
                         ) : (
                             <div className="py-6 text-center text-sm">
-                                No results found.
+                                {t('noResults')}
                             </div>
                         )}
                     </div>

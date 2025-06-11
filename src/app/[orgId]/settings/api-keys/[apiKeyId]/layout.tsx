@@ -15,6 +15,7 @@ import {
 import { GetApiKeyResponse } from "@server/routers/apiKeys";
 import ApiKeyProvider from "@app/providers/ApiKeyProvider";
 import { HorizontalTabs } from "@app/components/HorizontalTabs";
+import { getTranslations } from 'next-intl/server';
 
 interface SettingsLayoutProps {
     children: React.ReactNode;
@@ -23,6 +24,7 @@ interface SettingsLayoutProps {
 
 export default async function SettingsLayout(props: SettingsLayoutProps) {
     const params = await props.params;
+    const t = await getTranslations();
 
     const { children } = props;
 
@@ -40,14 +42,14 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
 
     const navItems = [
         {
-            title: "Permissions",
+            title: t('apiKeysPermissionsTitle'),
             href: "/{orgId}/settings/api-keys/{apiKeyId}/permissions"
         }
     ];
 
     return (
         <>
-            <SettingsSectionTitle title={`${apiKey?.name} Settings`} />
+            <SettingsSectionTitle title={t('apiKeysSettings', {apiKeyName: apiKey?.name})} />
 
             <ApiKeyProvider apiKey={apiKey}>
                 <HorizontalTabs items={navItems}>{children}</HorizontalTabs>

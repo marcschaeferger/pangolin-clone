@@ -5,6 +5,7 @@ import { AxiosResponse } from "axios";
 import SitesTable, { SiteRow } from "./SitesTable";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import SitesSplashCard from "./SitesSplashCard";
+import { getTranslations } from "next-intl/server";
 
 type SitesPageProps = {
     params: Promise<{ orgId: string }>;
@@ -23,16 +24,18 @@ export default async function SitesPage(props: SitesPageProps) {
         sites = res.data.data.sites;
     } catch (e) {}
 
+    const t = await getTranslations();
+
     function formatSize(mb: number, type: string): string {
         if (type === "local") {
             return "-"; // because we are not able to track the data use in a local site right now
         }
         if (mb >= 1024 * 1024) {
-            return `${(mb / (1024 * 1024)).toFixed(2)} TB`;
+            return t('terabytes', {count: (mb / (1024 * 1024)).toFixed(2)});
         } else if (mb >= 1024) {
-            return `${(mb / 1024).toFixed(2)} GB`;
+            return t('gigabytes', {count: (mb / 1024).toFixed(2)});
         } else {
-            return `${mb.toFixed(2)} MB`;
+            return t('megabytes', {count: mb.toFixed(2)});
         }
     }
 
@@ -54,8 +57,8 @@ export default async function SitesPage(props: SitesPageProps) {
             {/* <SitesSplashCard /> */}
 
             <SettingsSectionTitle
-                title="Manage Sites"
-                description="Allow connectivity to your network through secure tunnels"
+                title={t('siteManageSites')}
+                description={t('siteDescription')}
             />
 
             <SitesTable sites={siteRows} orgId={params.orgId} />

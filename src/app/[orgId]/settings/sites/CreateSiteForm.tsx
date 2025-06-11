@@ -50,25 +50,7 @@ import {
     CollapsibleTrigger
 } from "@app/components/ui/collapsible";
 import LoaderPlaceholder from "@app/components/PlaceHolderLoader";
-
-const createSiteFormSchema = z.object({
-    name: z
-        .string()
-        .min(2, {
-            message: "Name must be at least 2 characters."
-        })
-        .max(30, {
-            message: "Name must not be longer than 30 characters."
-        }),
-    method: z.enum(["wireguard", "newt", "local"])
-});
-
-type CreateSiteFormValues = z.infer<typeof createSiteFormSchema>;
-
-const defaultValues: Partial<CreateSiteFormValues> = {
-    name: "",
-    method: "newt"
-};
+import { useTranslations } from "next-intl";
 
 type CreateSiteFormProps = {
     onCreate?: (site: SiteRow) => void;
@@ -95,6 +77,27 @@ export default function CreateSiteForm({
         publicKey: string;
         privateKey: string;
     } | null>(null);
+
+    const t = useTranslations();
+
+    const createSiteFormSchema = z.object({
+        name: z
+            .string()
+            .min(2, {
+                message: t('nameMin', {len: 2})
+            })
+            .max(30, {
+                message: t('nameMax', {len: 30})
+            }),
+        method: z.enum(["wireguard", "newt", "local"])
+    });
+
+    type CreateSiteFormValues = z.infer<typeof createSiteFormSchema>;
+
+    const defaultValues: Partial<CreateSiteFormValues> = {
+        name: "",
+        method: "newt"
+    };
 
     const [siteDefaults, setSiteDefaults] =
         useState<PickSiteDefaultsResponse | null>(null);
@@ -169,8 +172,8 @@ export default function CreateSiteForm({
             if (!keypair || !siteDefaults) {
                 toast({
                     variant: "destructive",
-                    title: "Error creating site",
-                    description: "Key pair or site defaults not found"
+                    title: t('siteErrorCreate'),
+                    description: t('siteErrorCreateKeyPair')
                 });
                 setLoading?.(false);
                 setIsLoading(false);
@@ -188,8 +191,8 @@ export default function CreateSiteForm({
             if (!siteDefaults) {
                 toast({
                     variant: "destructive",
-                    title: "Error creating site",
-                    description: "Site defaults not found"
+                    title: t('siteErrorCreate'),
+                    description: t('siteErrorCreateDefaults')
                 });
                 setLoading?.(false);
                 setIsLoading(false);
@@ -212,7 +215,7 @@ export default function CreateSiteForm({
             .catch((e) => {
                 toast({
                     variant: "destructive",
-                    title: "Error creating site",
+                    title: t('siteErrorCreate'),
                     description: formatAxiosError(e)
                 });
             });
@@ -226,11 +229,11 @@ export default function CreateSiteForm({
                 nice: data.niceId.toString(),
                 mbIn:
                     data.type == "wireguard" || data.type == "newt"
-                        ? "0 MB"
+                        ? t('megabytes', {count: 0})
                         : "-",
                 mbOut:
                     data.type == "wireguard" || data.type == "newt"
-                        ? "0 MB"
+                        ? t('megabytes', {count: 0})
                         : "-",
                 orgId: orgId as string,
                 type: data.type as any,
@@ -285,13 +288,13 @@ PersistentKeepalive = 5`
                         name="name"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Name</FormLabel>
+                                <FormLabel>{t('name')}</FormLabel>
                                 <FormControl>
                                     <Input autoComplete="off" {...field} />
                                 </FormControl>
                                 <FormMessage />
                                 <FormDescription>
-                                    This is the display name for the site.
+                                    {t('siteNameDescription')}
                                 </FormDescription>
                             </FormItem>
                         )}
@@ -301,18 +304,18 @@ PersistentKeepalive = 5`
                         name="method"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Method</FormLabel>
+                                <FormLabel>{t('method')}</FormLabel>
                                 <FormControl>
                                     <Select
                                         value={field.value}
                                         onValueChange={field.onChange}
                                     >
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Select method" />
+                                            <SelectValue placeholder={t('methodSelect')} />
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="local">
-                                                Local
+                                                {t('local')}
                                             </SelectItem>
                                             <SelectItem
                                                 value="newt"
@@ -331,7 +334,7 @@ PersistentKeepalive = 5`
                                 </FormControl>
                                 <FormMessage />
                                 <FormDescription>
-                                    This is how you will expose connections.
+                                    {t('siteMethodDescription')}
                                 </FormDescription>
                             </FormItem>
                         )}
@@ -345,7 +348,7 @@ PersistentKeepalive = 5`
                             rel="noopener noreferrer"
                         >
                             <span>
-                                Learn how to install Newt on your system
+                                {t('siteLearnNewt')}
                             </span>
                             <SquareArrowOutUpRight size={14} />
                         </Link>
@@ -356,13 +359,12 @@ PersistentKeepalive = 5`
                             <>
                                 <CopyTextBox text={wgConfig} />
                                 <span className="text-sm text-muted-foreground mt-2">
-                                    You will only be able to see the
-                                    configuration once.
+                                    {t('siteSeeConfigOnce')}
                                 </span>
                             </>
                         ) : form.watch("method") === "wireguard" &&
                           isLoading ? (
-                            <p>Loading WireGuard configuration...</p>
+                            <p>{t('siteLoadWGConfig')}</p>
                         ) : form.watch("method") === "newt" && siteDefaults ? (
                             <>
                                 <div className="mb-2">
@@ -378,8 +380,7 @@ PersistentKeepalive = 5`
                                             />
                                         </div>
                                         <span className="text-sm text-muted-foreground">
-                                            You will only be able to see the
-                                            configuration once.
+                                            {t('siteSeeConfigOnce')}
                                         </span>
                                         <div className="flex items-center justify-between space-x-4">
                                             <CollapsibleTrigger asChild>
@@ -389,13 +390,12 @@ PersistentKeepalive = 5`
                                                     className="p-0 flex items-center justify-between w-full"
                                                 >
                                                     <h4 className="text-sm font-semibold">
-                                                        Expand for Docker
-                                                        Deployment Details
+                                                        {t('siteDocker')}
                                                     </h4>
                                                     <div>
                                                         <ChevronsUpDown className="h-4 w-4" />
                                                         <span className="sr-only">
-                                                            Toggle
+                                                            {t('toggle')}
                                                         </span>
                                                     </div>
                                                 </Button>
@@ -403,7 +403,7 @@ PersistentKeepalive = 5`
                                         </div>
                                         <CollapsibleContent className="space-y-4">
                                             <div className="space-y-2">
-                                                <b>Docker Compose</b>
+                                                <b>{t('dockerCompose')}</b>
                                                 <CopyTextBox
                                                     text={
                                                         newtConfigDockerCompose
@@ -412,7 +412,7 @@ PersistentKeepalive = 5`
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <b>Docker Run</b>
+                                                <b>{t('dockerRun')}</b>
 
                                                 <CopyTextBox
                                                     text={newtConfigDockerRun}
@@ -433,7 +433,7 @@ PersistentKeepalive = 5`
                             target="_blank"
                             rel="noopener noreferrer"
                         >
-                            <span> Local sites do not tunnel, learn more</span>
+                            <span>{t('siteLearnLocal')}</span>
                             <SquareArrowOutUpRight size={14} />
                         </Link>
                     )}
@@ -450,7 +450,7 @@ PersistentKeepalive = 5`
                                 htmlFor="terms"
                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                             >
-                                I have copied the config
+                                {t('siteConfirmCopy')}
                             </label>
                         </div>
                     )}

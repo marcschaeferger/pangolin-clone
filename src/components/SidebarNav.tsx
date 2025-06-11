@@ -8,6 +8,7 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { useUserContext } from "@app/hooks/useUserContext";
 import { Badge } from "@app/components/ui/badge";
 import { useLicenseStatusContext } from "@app/hooks/useLicenseStatusContext";
+import { useTranslations } from "next-intl";
 
 export interface SidebarNavItem {
     href: string;
@@ -64,6 +65,8 @@ export function SidebarNav({
     const { licenseStatus, isUnlocked } = useLicenseStatusContext();
 
     const { user } = useUserContext();
+
+    const t = useTranslations();
 
     function hydrateHref(val: string): string {
         return val
@@ -137,14 +140,14 @@ export function SidebarNav({
                                             {item.icon}
                                         </span>
                                     )}
-                                    {item.title}
+                                    {t(item.title)}
                                 </div>
                                 {isProfessional && (
                                     <Badge
                                         variant="outlinePrimary"
                                         className="ml-2"
                                     >
-                                        Professional
+                                        {t('licenseBadge')}
                                     </Badge>
                                 )}
                             </Link>

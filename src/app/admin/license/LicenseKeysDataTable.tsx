@@ -8,6 +8,7 @@ import { LicenseKeyCache } from "@server/license/license";
 import { ArrowUpDown } from "lucide-react";
 import moment from "moment";
 import CopyToClipboard from "@app/components/CopyToClipboard";
+import { useTranslations } from "next-intl";
 
 type LicenseKeysDataTableProps = {
     licenseKeys: LicenseKeyCache[];
@@ -27,6 +28,9 @@ export function LicenseKeysDataTable({
     onDelete,
     onCreate
 }: LicenseKeysDataTableProps) {
+
+    const t = useTranslations();
+
     const columns: ColumnDef<LicenseKeyCache>[] = [
         {
             accessorKey: "licenseKey",
@@ -38,7 +42,7 @@ export function LicenseKeysDataTable({
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        License Key
+                        {t('licenseKey')}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
@@ -63,13 +67,13 @@ export function LicenseKeysDataTable({
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        Valid
+                        {t('valid')}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
             },
             cell: ({ row }) => {
-                return row.original.valid ? "Yes" : "No";
+                return row.original.valid ? t('yes') : t('no');
             }
         },
         {
@@ -82,7 +86,7 @@ export function LicenseKeysDataTable({
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        Type
+                        {t('type')}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
@@ -90,7 +94,7 @@ export function LicenseKeysDataTable({
             cell: ({ row }) => {
                 const type = row.original.type;
                 const label =
-                    type === "SITES" ? "Additional Sites" : "Host License";
+                    type === "SITES" ? t('sitesAdditional') : t('licenseHost');
                 const variant = type === "SITES" ? "secondary" : "default";
                 return row.original.valid ? (
                     <Badge variant={variant}>{label}</Badge>
@@ -107,7 +111,7 @@ export function LicenseKeysDataTable({
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        Number of Sites
+                        {t('numberOfSites')}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
@@ -121,7 +125,7 @@ export function LicenseKeysDataTable({
                         variant="outlinePrimary"
                         onClick={() => onDelete(row.original)}
                     >
-                        Delete
+                        {t('delete')}
                     </Button>
                 </div>
             )
@@ -132,11 +136,11 @@ export function LicenseKeysDataTable({
         <DataTable
             columns={columns}
             data={licenseKeys}
-            title="License Keys"
-            searchPlaceholder="Search license keys..."
+            title={t('licenseKeys')}
+            searchPlaceholder={t('licenseKeySearch')}
             searchColumn="licenseKey"
             onAdd={onCreate}
-            addButtonText="Add License Key"
+            addButtonText={t('licenseKeyAdd')}
         />
     );
 }

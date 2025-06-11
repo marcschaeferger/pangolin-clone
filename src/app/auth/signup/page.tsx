@@ -6,6 +6,7 @@ import { Mail } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { cache } from "react";
+import { getTranslations } from 'next-intl/server';
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +16,7 @@ export default async function Page(props: {
     const searchParams = await props.searchParams;
     const getUser = cache(verifySession);
     const user = await getUser();
+    const t = await getTranslations();
 
     const env = pullEnv();
 
@@ -54,11 +56,10 @@ export default async function Page(props: {
                     <div className="flex flex-col items-center">
                         <Mail className="w-12 h-12 mb-4 text-primary" />
                         <h2 className="text-2xl font-bold mb-2 text-center">
-                            Looks like you've been invited!
+                            {t('inviteAlready')}
                         </h2>
                         <p className="text-center">
-                            To accept the invite, you must log in or create an
-                            account.
+                            {t('inviteAlreadyDescription')}
                         </p>
                     </div>
                 </div>
@@ -71,7 +72,7 @@ export default async function Page(props: {
             />
 
             <p className="text-center text-muted-foreground mt-4">
-                Already have an account?{" "}
+                {t('signupQuestion')}{" "}
                 <Link
                     href={
                         !redirectUrl
@@ -80,7 +81,7 @@ export default async function Page(props: {
                     }
                     className="underline"
                 >
-                    Log in
+                    {t('login')}
                 </Link>
             </p>
         </>

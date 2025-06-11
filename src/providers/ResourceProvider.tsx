@@ -5,6 +5,7 @@ import { GetResourceAuthInfoResponse } from "@server/routers/resource";
 import { GetResourceResponse } from "@server/routers/resource/getResource";
 import { GetSiteResponse } from "@server/routers/site";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface ResourceProviderProps {
     children: React.ReactNode;
@@ -25,9 +26,11 @@ export function ResourceProvider({
     const [authInfo, setAuthInfo] =
         useState<GetResourceAuthInfoResponse>(serverAuthInfo);
 
+    const t = useTranslations();
+
     const updateResource = (updatedResource: Partial<GetResourceResponse>) => {
         if (!resource) {
-            throw new Error("No resource to update");
+            throw new Error(t('resourceErrorNoUpdate'));
         }
 
         setResource((prev) => {
@@ -46,7 +49,7 @@ export function ResourceProvider({
         updatedAuthInfo: Partial<GetResourceAuthInfoResponse>
     ) => {
         if (!authInfo) {
-            throw new Error("No auth info to update");
+            throw new Error(t('authErrorNoUpdate'));
         }
 
         setAuthInfo((prev) => {

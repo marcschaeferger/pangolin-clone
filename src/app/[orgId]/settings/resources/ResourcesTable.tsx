@@ -31,6 +31,7 @@ import CopyToClipboard from "@app/components/CopyToClipboard";
 import { Switch } from "@app/components/ui/switch";
 import { AxiosResponse } from "axios";
 import { UpdateResourceResponse } from "@server/routers/resource";
+import { useTranslations } from 'next-intl';
 
 export type ResourceRow = {
     id: number;
@@ -53,6 +54,7 @@ type ResourcesTableProps = {
 
 export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
     const router = useRouter();
+    const t = useTranslations();
 
     const api = createApiClient(useEnvContext());
 
@@ -63,11 +65,11 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
     const deleteResource = (resourceId: number) => {
         api.delete(`/resource/${resourceId}`)
             .catch((e) => {
-                console.error("Error deleting resource", e);
+                console.error(t('resourceErrorDelte'), e);
                 toast({
                     variant: "destructive",
-                    title: "Error deleting resource",
-                    description: formatAxiosError(e, "Error deleting resource")
+                    title: t('resourceErrorDelte'),
+                    description: formatAxiosError(e, t('resourceErrorDelte'))
                 });
             })
             .then(() => {
@@ -87,11 +89,8 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
             .catch((e) => {
                 toast({
                     variant: "destructive",
-                    title: "Failed to toggle resource",
-                    description: formatAxiosError(
-                        e,
-                        "An error occurred while updating the resource"
-                    )
+                    title: t('resourcesErrorUpdate'),
+                    description: formatAxiosError(e, t('resourcesErrorUpdateDescription'))
                 });
             });
     }
@@ -108,7 +107,7 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
+                                <span className="sr-only">{t('openMenu')}</span>
                                 <MoreHorizontal className="h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
@@ -118,7 +117,7 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                                 href={`/${resourceRow.orgId}/settings/resources/${resourceRow.id}`}
                             >
                                 <DropdownMenuItem>
-                                    View settings
+                                    {t('viewSettings')}
                                 </DropdownMenuItem>
                             </Link>
                             <DropdownMenuItem
@@ -127,7 +126,7 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                                     setIsDeleteModalOpen(true);
                                 }}
                             >
-                                <span className="text-red-500">Delete</span>
+                                <span className="text-red-500">{t('delete')}</span>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -144,7 +143,7 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        Name
+                        {t('name')}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
@@ -160,7 +159,7 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        Site
+                        {t('site')}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
@@ -181,7 +180,7 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
         },
         {
             accessorKey: "protocol",
-            header: "Protocol",
+            header: t('protocol'),
             cell: ({ row }) => {
                 const resourceRow = row.original;
                 return <span>{resourceRow.protocol.toUpperCase()}</span>;
@@ -189,7 +188,7 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
         },
         {
             accessorKey: "domain",
-            header: "Access",
+            header: t('access'),
             cell: ({ row }) => {
                 const resourceRow = row.original;
                 return (
@@ -219,7 +218,7 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        Authentication
+                        {t('authentication')}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
@@ -231,12 +230,12 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                         {resourceRow.authState === "protected" ? (
                             <span className="text-green-500 flex items-center space-x-2">
                                 <ShieldCheck className="w-4 h-4" />
-                                <span>Protected</span>
+                                <span>{t('protected')}</span>
                             </span>
                         ) : resourceRow.authState === "not_protected" ? (
                             <span className="text-yellow-500 flex items-center space-x-2">
                                 <ShieldOff className="w-4 h-4" />
-                                <span>Not Protected</span>
+                                <span>{t('notProtected')}</span>
                             </span>
                         ) : (
                             <span>-</span>
@@ -247,7 +246,7 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
         },
         {
             accessorKey: "enabled",
-            header: "Enabled",
+            header: t('enabled'),
             cell: ({ row }) => (
                 <Switch
                     defaultChecked={row.original.enabled}
@@ -267,7 +266,7 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                             href={`/${resourceRow.orgId}/settings/resources/${resourceRow.id}`}
                         >
                             <Button variant={"outlinePrimary"} className="ml-2">
-                                Edit
+                                {t('edit')}
                                 <ArrowRight className="ml-2 w-4 h-4" />
                             </Button>
                         </Link>
@@ -289,30 +288,22 @@ export default function SitesTable({ resources, orgId }: ResourcesTableProps) {
                     dialog={
                         <div>
                             <p className="mb-2">
-                                Are you sure you want to remove the resource{" "}
-                                <b>
-                                    {selectedResource?.name ||
-                                        selectedResource?.id}
-                                </b>{" "}
-                                from the organization?
+                                {t('resourceQuestionRemove', {selectedResource: selectedResource?.name || selectedResource?.id})}
                             </p>
 
                             <p className="mb-2">
-                                Once removed, the resource will no longer be
-                                accessible. All targets attached to the resource
-                                will be removed.
+                                {t('resourceMessageRemove')}
                             </p>
 
                             <p>
-                                To confirm, please type the name of the resource
-                                below.
+                                {t('resourceMessageConfirm')}
                             </p>
                         </div>
                     }
-                    buttonText="Confirm Delete Resource"
+                    buttonText={t('resourceDeleteConfirm')}
                     onConfirm={async () => deleteResource(selectedResource!.id)}
                     string={selectedResource.name}
-                    title="Delete Resource"
+                    title={t('resourceDelete')}
                 />
             )}
 

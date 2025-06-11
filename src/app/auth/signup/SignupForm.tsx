@@ -31,6 +31,7 @@ import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import Image from "next/image";
 import { cleanRedirect } from "@app/lib/cleanRedirect";
+import { useTranslations } from "next-intl";
 
 type SignupFormProps = {
     redirect?: string;
@@ -70,6 +71,8 @@ export default function SignupForm({
         }
     });
 
+    const t = useTranslations();
+
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const { email, password } = values;
 
@@ -84,7 +87,7 @@ export default function SignupForm({
             .catch((e) => {
                 console.error(e);
                 setError(
-                    formatAxiosError(e, "An error occurred while signing up")
+                    formatAxiosError(e, t('signupError'))
                 );
             });
 
@@ -118,17 +121,17 @@ export default function SignupForm({
                 <div className="flex flex-row items-center justify-center">
                     <Image
                         src={`/logo/pangolin_orange.svg`}
-                        alt="Pangolin Logo"
+                        alt={t('pangolinLogoAlt')}
                         width="100"
                         height="100"
                     />
                 </div>
                 <div className="text-center space-y-1">
                     <h1 className="text-2xl font-bold mt-1">
-                        Welcome to Pangolin
+                        {t('welcome')}
                     </h1>
                     <p className="text-sm text-muted-foreground">
-                        Create an account to get started
+                        {t('authCreateAccount')}
                     </p>
                 </div>
             </CardHeader>
@@ -143,7 +146,7 @@ export default function SignupForm({
                             name="email"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Email</FormLabel>
+                                    <FormLabel>{t('email')}</FormLabel>
                                     <FormControl>
                                         <Input {...field} />
                                     </FormControl>
@@ -156,7 +159,7 @@ export default function SignupForm({
                             name="password"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Password</FormLabel>
+                                    <FormLabel>{t('password')}</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="password"
@@ -172,7 +175,7 @@ export default function SignupForm({
                             name="confirmPassword"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Confirm Password</FormLabel>
+                                    <FormLabel>{t('confirmPassword')}</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="password"
@@ -191,7 +194,7 @@ export default function SignupForm({
                         )}
 
                         <Button type="submit" className="w-full">
-                            Create Account
+                            {t('createAccount')}
                         </Button>
                     </form>
                 </Form>

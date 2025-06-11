@@ -9,6 +9,7 @@ import RolesTable, { RoleRow } from "./RolesTable";
 import { SidebarSettings } from "@app/components/SidebarSettings";
 import AccessPageHeaderAndNav from "../AccessPageHeaderAndNav";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
+import { getTranslations } from 'next-intl/server';
 
 type RolesPageProps = {
     params: Promise<{ orgId: string }>;
@@ -62,12 +63,13 @@ export default async function RolesPage(props: RolesPageProps) {
     }
 
     const roleRows: RoleRow[] = roles;
+    const t = await getTranslations();
 
     return (
         <>
             <SettingsSectionTitle
-                title="Manage Roles"
-                description="Configure roles to manage access to your organization"
+                title={t('accessRolesManage')}
+                description={t('accessRolesDescription')}
             />
             <OrgProvider org={org}>
                 <RolesTable roles={roleRows} />

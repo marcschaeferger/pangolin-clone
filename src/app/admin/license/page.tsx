@@ -54,16 +54,7 @@ import Link from "next/link";
 import { Checkbox } from "@app/components/ui/checkbox";
 import { Alert, AlertDescription, AlertTitle } from "@app/components/ui/alert";
 import { useSupporterStatusContext } from "@app/hooks/useSupporterStatusContext";
-
-const formSchema = z.object({
-    licenseKey: z
-        .string()
-        .nonempty({ message: "License key is required" })
-        .max(255),
-    agreeToTerms: z.boolean().refine((val) => val === true, {
-        message: "You must agree to the license terms"
-    })
-});
+import { useTranslations } from "next-intl";
 
 function obfuscateLicenseKey(key: string): string {
     if (key.length <= 8) return key;
@@ -93,6 +84,18 @@ export default function LicensePage() {
     const [isDeletingLicense, setIsDeletingLicense] = useState(false);
     const [isRecheckingLicense, setIsRecheckingLicense] = useState(false);
     const { supporterStatus } = useSupporterStatusContext();
+
+    const t = useTranslations();
+
+    const formSchema = z.object({
+        licenseKey: z
+            .string()
+            .nonempty({ message: t('licenseKeyRequired') })
+            .max(255),
+        agreeToTerms: z.boolean().refine((val) => val === true, {
+            message: t('licenseTermsAgree')
+        })
+    });
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -127,10 +130,10 @@ export default function LicensePage() {
             }
         } catch (e) {
             toast({
-                title: "Failed to load license keys",
+                title: t('licenseErrorKeyLoad'),
                 description: formatAxiosError(
                     e,
-                    "An error occurred loading license keys"
+                    t('licenseErrorKeyLoadDescription')
                 )
             });
         }
@@ -146,16 +149,16 @@ export default function LicensePage() {
             }
             await loadLicenseKeys();
             toast({
-                title: "License key deleted",
-                description: "The license key has been deleted"
+                title: t('licenseKeyDeleted'),
+                description: t('licenseKeyDeletedDescription')
             });
             setIsDeleteModalOpen(false);
         } catch (e) {
             toast({
-                title: "Failed to delete license key",
+                title: t('licenseErrorKeyDelete'),
                 description: formatAxiosError(
                     e,
-                    "An error occurred deleting license key"
+                    t('licenseErrorKeyDeleteDescription')
                 )
             });
         } finally {
@@ -172,15 +175,15 @@ export default function LicensePage() {
             }
             await loadLicenseKeys();
             toast({
-                title: "License keys rechecked",
-                description: "All license keys have been rechecked"
+                title: t('licenseErrorKeyRechecked'),
+                description: t('licenseErrorKeyRecheckedDescription')
             });
         } catch (e) {
             toast({
-                title: "Failed to recheck license keys",
+                title: t('licenseErrorKeyRecheck'),
                 description: formatAxiosError(
                     e,
-                    "An error occurred rechecking license keys"
+                    t('licenseErrorKeyRecheckDescription')
                 )
             });
         } finally {
@@ -199,8 +202,8 @@ export default function LicensePage() {
             }
 
             toast({
-                title: "License key activated",
-                description: "The license key has been successfully activated."
+                title: t('licenseKeyActivated'),
+                description: t('licenseKeyActivatedDescription')
             });
 
             setIsCreateModalOpen(false);
@@ -209,10 +212,10 @@ export default function LicensePage() {
         } catch (e) {
             toast({
                 variant: "destructive",
-                title: "Failed to activate license key",
+                title: t('licenseErrorKeyActivate'),
                 description: formatAxiosError(
                     e,
-                    "An error occurred while activating the license key."
+                    t('licenseErrorKeyActivateDescription')
                 )
             });
         } finally {
@@ -243,9 +246,9 @@ export default function LicensePage() {
             >
                 <CredenzaContent>
                     <CredenzaHeader>
-                        <CredenzaTitle>Activate License Key</CredenzaTitle>
+                        <CredenzaTitle>{t('licenseActivateKey')}</CredenzaTitle>
                         <CredenzaDescription>
-                            Enter a license key to activate it.
+                            {t('licenseActivateKeyDescription')}
                         </CredenzaDescription>
                     </CredenzaHeader>
                     <CredenzaBody>
@@ -260,7 +263,7 @@ export default function LicensePage() {
                                     name="licenseKey"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>License Key</FormLabel>
+                                            <FormLabel>{t('licenseKey')}</FormLabel>
                                             <FormControl>
                                                 <Input {...field} />
                                             </FormControl>
@@ -283,12 +286,7 @@ export default function LicensePage() {
                                             </FormControl>
                                             <div className="space-y-1 leading-none">
                                                 <FormLabel>
-                                                    By checking this box, you
-                                                    confirm that you have read
-                                                    and agree to the license
-                                                    terms corresponding to the
-                                                    tier associated with your
-                                                    license key.
+                                                    {t('licenseAgreement')}
                                                     {/* <br /> */}
                                                     {/* <Link */}
                                                     {/*     href="https://fossorial.io/license.html" */}
@@ -296,9 +294,7 @@ export default function LicensePage() {
                                                     {/*     rel="noopener noreferrer" */}
                                                     {/*     className="text-primary hover:underline" */}
                                                     {/* > */}
-                                                    {/*     View Fossorial */}
-                                                    {/*     Commercial License & */}
-                                                    {/*     Subscription Terms */}
+                                                    {/* {t('fossorialLicense')} */}
                                                     {/* </Link> */}
                                                 </FormLabel>
                                                 <FormMessage />
@@ -311,7 +307,7 @@ export default function LicensePage() {
                     </CredenzaBody>
                     <CredenzaFooter>
                         <CredenzaClose asChild>
-                            <Button variant="outline">Close</Button>
+                            <Button variant="outline">{t('close')}</Button>
                         </CredenzaClose>
                         <Button
                             type="submit"
@@ -319,7 +315,7 @@ export default function LicensePage() {
                             loading={isActivatingLicense}
                             disabled={isActivatingLicense}
                         >
-                            Activate License
+                            {t('licenseActivate')}
                         </Button>
                     </CredenzaFooter>
                 </CredenzaContent>
@@ -335,48 +331,39 @@ export default function LicensePage() {
                     dialog={
                         <div className="space-y-4">
                             <p>
-                                Are you sure you want to delete the license key{" "}
-                                <b>
-                                    {obfuscateLicenseKey(
-                                        selectedLicenseKey.licenseKey
-                                    )}
-                                </b>
-                                ?
+                                {t('licenseQuestionRemove', {selectedKey: obfuscateLicenseKey(selectedLicenseKey.licenseKey)})}
                             </p>
                             <p>
                                 <b>
-                                    This will remove the license key and all
-                                    associated permissions granted by it.
+                                    {t('licenseMessageRemove')}
                                 </b>
                             </p>
                             <p>
-                                To confirm, please type the license key below.
+                                {t('licenseMessageConfirm')}
                             </p>
                         </div>
                     }
-                    buttonText="Confirm Delete License Key"
+                    buttonText={t('licenseKeyDeleteConfirm')}
                     onConfirm={async () =>
                         deleteLicenseKey(selectedLicenseKey.licenseKeyEncrypted)
                     }
                     string={selectedLicenseKey.licenseKey}
-                    title="Delete License Key"
+                    title={t('licenseKeyDelete')}
                 />
             )}
 
             <SettingsSectionTitle
-                title="Manage License Status"
-                description="View and manage license keys in the system"
+                title={t('licenseTitle')}
+                description={t('licenseTitleDescription')}
             />
 
             <Alert variant="neutral" className="mb-6">
                 <InfoIcon className="h-4 w-4" />
                 <AlertTitle className="font-semibold">
-                    About Licensing
+                    {t('licenseAbout')}
                 </AlertTitle>
                 <AlertDescription>
-                    This is for business and enterprise users who are using
-                    Pangolin in a commercial environment. If you are using
-                    Pangolin for personal use, you can ignore this section.
+                    {t('licenseAboutDescription')}
                 </AlertDescription>
             </Alert>
 
@@ -384,9 +371,9 @@ export default function LicensePage() {
                 <SettingsSectionGrid cols={2}>
                     <SettingsSection>
                         <SettingsSectionHeader>
-                            <SSTitle>Host License</SSTitle>
+                            <SSTitle>{t('licenseHost')}</SSTitle>
                             <SettingsSectionDescription>
-                                Manage the main license key for the host.
+                            {t('licenseHostDescription')}
                             </SettingsSectionDescription>
                         </SettingsSectionHeader>
                         <div className="space-y-4">
@@ -397,23 +384,23 @@ export default function LicensePage() {
                                             <Check />
                                             {licenseStatus?.tier ===
                                             "PROFESSIONAL"
-                                                ? "Commercial License"
+                                                ? t('licenseTierCommercial')
                                                 : licenseStatus?.tier ===
                                                     "ENTERPRISE"
-                                                  ? "Commercial License"
-                                                  : "Licensed"}
+                                                  ? t('licenseTierCommercial')
+                                                  : t('licensed')}
                                         </div>
                                     </div>
                                 ) : (
                                     <div className="space-y-2">
                                         {supporterStatus?.visible ? (
                                             <div className="text-2xl">
-                                                Community Edition
+                                                {t('communityEdition')}
                                             </div>
                                         ) : (
                                             <div className="text-2xl flex items-center gap-2 text-pink-500">
                                                 <Heart />
-                                                Community Edition
+                                                {t('communityEdition')}
                                             </div>
                                         )}
                                     </div>
@@ -422,7 +409,7 @@ export default function LicensePage() {
                             {licenseStatus?.hostId && (
                                 <div className="space-y-2">
                                     <div className="text-sm font-medium">
-                                        Host ID
+                                        {t('hostId')}
                                     </div>
                                     <CopyTextBox text={licenseStatus.hostId} />
                                 </div>
@@ -430,7 +417,7 @@ export default function LicensePage() {
                             {hostLicense && (
                                 <div className="space-y-2">
                                     <div className="text-sm font-medium">
-                                        License Key
+                                        {t('licenseKey')}
                                     </div>
                                     <CopyTextBox
                                         text={hostLicense}
@@ -448,39 +435,33 @@ export default function LicensePage() {
                                 disabled={isRecheckingLicense}
                                 loading={isRecheckingLicense}
                             >
-                                Recheck All Keys
+                                {t('licenseReckeckAll')}
                             </Button>
                         </SettingsSectionFooter>
                     </SettingsSection>
                     <SettingsSection>
                         <SettingsSectionHeader>
-                            <SSTitle>Sites Usage</SSTitle>
+                            <SSTitle>{t('licenseSiteUsage')}</SSTitle>
                             <SettingsSectionDescription>
-                                View the number of sites using this license.
+                                {t('licenseSiteUsageDecsription')}
                             </SettingsSectionDescription>
                         </SettingsSectionHeader>
                         <div className="space-y-4">
                             <div className="space-y-2">
                                 <div className="text-2xl">
-                                    {licenseStatus?.usedSites || 0}{" "}
-                                    {licenseStatus?.usedSites === 1
-                                        ? "site"
-                                        : "sites"}{" "}
-                                    in system
+                                    {t('licenseSitesUsed', {count: licenseStatus?.usedSites || 0})}
                                 </div>
                             </div>
                             {!licenseStatus?.isHostLicensed && (
                                 <p className="text-sm text-muted-foreground">
-                                    There is no limit on the number of sites
-                                    using an unlicensed host.
+                                    {t('licenseNoSiteLimit')}
                                 </p>
                             )}
                             {licenseStatus?.maxSites && (
                                 <div className="space-y-2">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-muted-foreground">
-                                            {licenseStatus.usedSites || 0} of{" "}
-                                            {licenseStatus.maxSites} sites used
+                                            {t('licenseSitesUsedMax', {usedSites: licenseStatus.usedSites || 0, maxSites: licenseStatus.maxSites})}
                                         </span>
                                         <span className="text-muted-foreground">
                                             {Math.round(
@@ -512,7 +493,7 @@ export default function LicensePage() {
                         {/*                     setIsPurchaseModalOpen(true); */}
                         {/*                 }} */}
                         {/*             > */}
-                        {/*                 Purchase License */}
+                        {/*                 {t('licensePurchase')} */}
                         {/*             </Button> */}
                         {/*         </> */}
                         {/*     ) : ( */}
@@ -524,7 +505,7 @@ export default function LicensePage() {
                         {/*                     setIsPurchaseModalOpen(true); */}
                         {/*                 }} */}
                         {/*             > */}
-                        {/*                 Purchase Additional Sites */}
+                        {/*                 {t('licensePurchaseSites')} */}
                         {/*             </Button> */}
                         {/*         </> */}
                         {/*     )} */}

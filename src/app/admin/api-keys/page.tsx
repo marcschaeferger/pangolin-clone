@@ -4,6 +4,7 @@ import { AxiosResponse } from "axios";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { ListRootApiKeysResponse } from "@server/routers/apiKeys";
 import ApiKeysTable, { ApiKeyRow } from "./ApiKeysTable";
+import { getTranslations } from "next-intl/server";
 
 type ApiKeyPageProps = {};
 
@@ -28,11 +29,13 @@ export default async function ApiKeysPage(props: ApiKeyPageProps) {
         };
     });
 
+    const t = await getTranslations();
+
     return (
         <>
             <SettingsSectionTitle
-                title="Manage API Keys"
-                description="API keys are used to authenticate with the integration API"
+                title={t('apiKeysManage')}
+                description={t('apiKeysDescription')}
             />
 
             <ApiKeysTable apiKeys={rows} />
