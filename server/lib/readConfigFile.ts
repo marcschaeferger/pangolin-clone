@@ -121,9 +121,16 @@ export const configSchema = z.object({
     }),
     postgres: z
         .object({
-            connection_string: z.string().optional()
+            connection_string: z.string(),
+            replicas: z
+                .array(
+                    z.object({
+                        connection_string: z.string()
+                    })
+                )
+                .optional()
         })
-        .default({}),
+        .optional(),
     traefik: z
         .object({
             http_entrypoint: z.string().optional().default("web"),
