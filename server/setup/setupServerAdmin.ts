@@ -53,7 +53,7 @@ export async function setupServerAdmin() {
                 if (existing.email !== email) {
                     await trx
                         .update(users)
-                        .set({ email })
+                        .set({ email, username: email })
                         .where(eq(users.userId, existing.userId));
 
                     logger.info(`Server admin email updated`);
@@ -77,6 +77,7 @@ export async function setupServerAdmin() {
                 logger.info(`Server admin created`);
             }
         } catch (e) {
+            console.error("Failed to setup server admin");
             logger.error(e);
             trx.rollback();
         }

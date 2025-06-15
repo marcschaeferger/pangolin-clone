@@ -23,7 +23,8 @@
         "build:pg": "mkdir -p dist && next build && node esbuild.mjs -e server/index.ts -o dist/server.mjs && node esbuild.mjs -e server/setup/migrationsPg.ts -o dist/migrations.mjs",
         "start:sqlite": "DB_TYPE=sqlite NODE_OPTIONS=--enable-source-maps NODE_ENV=development ENVIRONMENT=prod sh -c 'node dist/migrations.mjs && node dist/server.mjs'",
         "start:pg": "DB_TYPE=pg NODE_OPTIONS=--enable-source-maps NODE_ENV=development ENVIRONMENT=prod sh -c 'node dist/migrations.mjs && node dist/server.mjs'",
-        "email": "email dev --dir server/emails/templates --port 3005"
+        "email": "email dev --dir server/emails/templates --port 3005",
+        "build:cli": "node esbuild.mjs -e cli/index.ts -o dist/cli.mjs"
     },
     "dependencies": {
         "@asteasolutions/zod-to-openapi": "^7.3.2",
@@ -106,7 +107,8 @@
         "winston-daily-rotate-file": "5.0.0",
         "ws": "8.18.2",
         "zod": "3.25.56",
-        "zod-validation-error": "3.4.1"
+        "zod-validation-error": "3.4.1",
+        "yargs": "18.0.0"
     },
     "devDependencies": {
         "@dotenvx/dotenvx": "1.44.1",
@@ -137,8 +139,7 @@
         "tsc-alias": "1.8.16",
         "tsx": "4.19.4",
         "typescript": "^5",
-        "typescript-eslint": "^8.34.0",
-        "yargs": "18.0.0"
+        "typescript-eslint": "^8.34.0"
     },
     "overrides": {
         "emblor": {

@@ -13,6 +13,7 @@ RUN echo 'export * from "./sqlite";' > server/db/index.ts
 RUN npx drizzle-kit generate --dialect sqlite --schema ./server/db/sqlite/schema.ts --out init
 
 RUN npm run build:sqlite
+RUN npm run build:cli
 
 FROM node:20-alpine AS runner
 
@@ -29,6 +30,9 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/init ./dist/init
+
+COPY ./cli/wrapper.sh /usr/local/bin/pangctl
+RUN chmod +x /usr/local/bin/pangctl ./dist/cli.mjs
 
 COPY server/db/names.json ./dist/names.json
 
