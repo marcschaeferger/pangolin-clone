@@ -28,7 +28,7 @@ export async function addPeer(exitNodeId: number, peer: {
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            throw new Error(`HTTP error! status: ${error.response?.status}`);
+            throw new Error(`Error communicating with Gerbil. Make sure Pangolin can reach the Gerbil HTTP API: ${error.response?.status}`);
         }
         throw error;
     }
@@ -48,7 +48,7 @@ export async function deletePeer(exitNodeId: number, publicKey: string) {
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            throw new Error(`HTTP error! status: ${error.response?.status}`);
+            throw new Error(`Error communicating with Gerbil. Make sure Pangolin can reach the Gerbil HTTP API: ${error.response?.status}`);
         }
         throw error;
     }
