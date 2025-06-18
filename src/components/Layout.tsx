@@ -78,15 +78,17 @@ export function Layout({
             }
 
             if (lightOrDark === "light") {
-                return "/logo/word_mark_black.png";
+                // return "/logo/word_mark_black.png";
+                return "/logo/pangolin_orange.svg";
             }
 
-            return "/logo/word_mark_white.png";
+            // return "/logo/word_mark_white.png";
+            return "/logo/pangolin_orange.svg";
         }
 
         setPath(getPath());
     }, [theme, env]);
-    
+
     const t = useTranslations();
 
     return (
@@ -170,8 +172,8 @@ export function Layout({
                                     <Image
                                         src={path}
                                         alt="Pangolin Logo"
-                                        width={110}
-                                        height={25}
+                                        width={35}
+                                        height={35}
                                         priority={true}
                                         quality={25}
                                     />
