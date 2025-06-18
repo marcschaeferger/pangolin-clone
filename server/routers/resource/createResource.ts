@@ -39,7 +39,7 @@ const createHttpResourceSchema = z
         isBaseDomain: z.boolean().optional(),
         siteId: z.number(),
         http: z.boolean(),
-        protocol: z.string(),
+        protocol: z.enum(["tcp", "udp"]),
         domainId: z.string()
     })
     .strict()
@@ -71,7 +71,7 @@ const createRawResourceSchema = z
         name: z.string().min(1).max(255),
         siteId: z.number(),
         http: z.boolean(),
-        protocol: z.string(),
+        protocol: z.enum(["tcp", "udp"]),
         proxyPort: z.number().int().min(1).max(65535)
     })
     .strict()
@@ -85,7 +85,7 @@ const createRawResourceSchema = z
             return true;
         },
         {
-            message: "Proxy port cannot be set"
+            message: "Raw resources are not allowed"
         }
     );
 
@@ -392,7 +392,7 @@ async function createRawResource(
             resourceId: newResource[0].resourceId
         });
 
-        if (req.userOrgRoleId != adminRole[0].roleId) {
+        if (req.user && req.userOrgRoleId != adminRole[0].roleId) {
             // make sure the user can access the resource
             await trx.insert(userResources).values({
                 userId: req.user?.userId!,
