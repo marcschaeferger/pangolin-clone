@@ -45,6 +45,7 @@ export default function StepperForm() {
     const [loading, setLoading] = useState(false);
     const [isChecked, setIsChecked] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [orgCreated, setOrgCreated] = useState(false);
 
     const orgSchema = z.object({
         orgName: z.string().min(1, { message: t('orgNameRequired') }),
@@ -63,7 +64,7 @@ export default function StepperForm() {
     const router = useRouter();
 
     const checkOrgIdAvailability = useCallback(async (value: string) => {
-        if (loading) {
+        if (loading || orgCreated) {
             return;
         }
         try {
@@ -76,7 +77,7 @@ export default function StepperForm() {
         } catch (error) {
             setOrgIdTaken(false);
         }
-    }, []);
+    }, [loading, orgCreated, api]);
 
     const debouncedCheckOrgIdAvailability = useCallback(
         debounce(checkOrgIdAvailability, 300),
@@ -108,7 +109,7 @@ export default function StepperForm() {
             });
 
             if (res && res.status === 201) {
-                // setCurrentStep("site");
+                setOrgCreated(true);
                 router.push(`/${values.orgId}/settings/sites/create`);
             }
         } catch (e) {
