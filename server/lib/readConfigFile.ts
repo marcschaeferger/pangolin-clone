@@ -112,7 +112,7 @@ export const configSchema = z.object({
                 credentials: z.boolean().optional()
             })
             .optional(),
-        trust_proxy: z.boolean().optional().default(true),
+        trust_proxy: z.number().int().gte(0).optional().default(1),
         secret: z
             .string()
             .optional()
