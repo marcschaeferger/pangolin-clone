@@ -22,8 +22,8 @@ const authWithWhitelistBodySchema = z
     .object({
         email: z
             .string()
-            .email()
-            .transform((v) => v.toLowerCase()),
+            .toLowerCase()
+            .email(),
         otp: z.string().optional()
     })
     .strict();

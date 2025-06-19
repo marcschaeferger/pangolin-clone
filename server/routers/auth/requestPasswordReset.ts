@@ -20,8 +20,8 @@ export const requestPasswordResetBody = z
     .object({
         email: z
             .string()
-            .email()
-            .transform((v) => v.toLowerCase())
+            .toLowerCase()
+            .email(),
     })
     .strict();
 

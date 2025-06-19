@@ -30,8 +30,8 @@ const inviteUserBodySchema = z
     .object({
         email: z
             .string()
-            .email()
-            .transform((v) => v.toLowerCase()),
+            .toLowerCase()
+            .email(),
         roleId: z.number(),
         validHours: z.number().gt(0).lte(168),
         sendEmail: z.boolean().optional(),

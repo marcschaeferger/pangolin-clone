@@ -23,8 +23,8 @@ export const loginBodySchema = z
     .object({
         email: z
             .string()
-            .email()
-            .transform((v) => v.toLowerCase()),
+            .toLowerCase()
+            .email(),
         password: z.string(),
         code: z.string().optional()
     })

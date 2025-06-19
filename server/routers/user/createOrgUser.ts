@@ -21,6 +21,7 @@ const bodySchema = z
     .object({
         email: z
             .string()
+            .toLowerCase()
             .optional()
             .refine((data) => {
                 if (data) {
@@ -28,7 +29,7 @@ const bodySchema = z
                 }
                 return true;
             }),
-        username: z.string().nonempty(),
+        username: z.string().nonempty().toLowerCase(),
         name: z.string().optional(),
         type: z.enum(["internal", "oidc"]).optional(),
         idpId: z.number().optional(),

@@ -26,8 +26,8 @@ import { UserType } from "@server/types/UserTypes";
 export const signupBodySchema = z.object({
     email: z
         .string()
-        .email()
-        .transform((v) => v.toLowerCase()),
+        .toLowerCase()
+        .email(),
     password: passwordSchema,
     inviteToken: z.string().optional(),
     inviteId: z.string().optional()
