@@ -2,14 +2,16 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { db } from "../db/pg";
 import semver from "semver";
 import { versionMigrations } from "../db/pg";
-import { __DIRNAME, APP_PATH, APP_VERSION } from "@server/lib/consts";
+import { __DIRNAME, APP_VERSION } from "@server/lib/consts";
 import path from "path";
+import m1 from "./scriptsSqlite/1.6.0";
 
 // THIS CANNOT IMPORT ANYTHING FROM THE SERVER
 // EXCEPT FOR THE DATABASE AND THE SCHEMA
 
 // Define the migration list with versions and their corresponding functions
 const migrations = [
+    { version: "1.6.0", run: m1 }
     // Add new migrations here as they are created
 ] as {
     version: string;
