@@ -1,4 +1,6 @@
+import { db } from "@server/db/pg/driver";
 import { configFilePath1, configFilePath2 } from "@server/lib/consts";
+import { sql } from "drizzle-orm";
 import fs from "fs";
 import yaml from "js-yaml";
 
@@ -6,6 +8,15 @@ const version = "1.6.0";
 
 export default async function migration() {
     console.log(`Running setup script ${version}...`);
+
+    try {
+        db.execute(sql`UPDATE 'user' SET email = LOWER(email);`);
+        db.execute(sql`UPDATE 'user' SET username = LOWER(username);`);
+        console.log(`Migrated database schema`);
+    } catch (e) {
+        console.log("Unable to make all usernames and emails lowercase");
+        console.log(e);
+    }
 
     try {
         // Determine which config file exists

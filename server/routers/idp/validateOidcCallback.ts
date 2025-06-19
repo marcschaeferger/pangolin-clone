@@ -211,6 +211,10 @@ export async function validateOidcCallback(
         logger.debug("User email", { email });
         logger.debug("User name", { name });
 
+        if (email) {
+            email = email.toLowerCase();
+        }
+
         const [existingUser] = await db
             .select()
             .from(users)
