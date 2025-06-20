@@ -1129,8 +1129,8 @@
     "dark": "koyu",
     "system": "sistem",
     "theme": "Tema",
-    "initialSetupTitle": "Initial Server Setup",
-    "initialSetupDescription": "Create the intial server admin account. Only one server admin can exist. You can always change these credentials later.",
-    "createAdminAccount": "Create Admin Account",
-    "setupErrorCreateAdmin": "An error occurred while creating the server admin account."
+    "initialSetupTitle": "İlk Sunucu Kurulumu",
+    "initialSetupDescription": "İlk sunucu yönetici hesabını oluşturun. Yalnızca bir sunucu yöneticisi olabilir. Bu kimlik bilgilerini daha sonra her zaman değiştirebilirsiniz.",
+    "createAdminAccount": "Yönetici Hesabı Oluştur",
+    "setupErrorCreateAdmin": "Sunucu yönetici hesabı oluşturulurken bir hata oluştu."
 }
