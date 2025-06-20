@@ -16,7 +16,6 @@ import (
 	"syscall"
 	"text/template"
 	"time"
-	"unicode"
 	"math/rand"
 	"strconv"
 
@@ -40,8 +39,6 @@ type Config struct {
 	BaseDomain                 string
 	DashboardDomain            string
 	LetsEncryptEmail           string
-	AdminUserEmail             string
-	AdminUserPassword          string
 	DisableSignupWithoutInvite bool
 	DisableUserCreateOrg       bool
 	EnableEmail                bool
@@ -171,6 +168,7 @@ func main() {
 	}
 
 	fmt.Println("Installation complete!")
+	fmt.Printf("\nTo complete the initial setup, please visit:\nhttps://%s/auth/initial-setup\n", config.DashboardDomain)
 }
 
 func readString(reader *bufio.Reader, prompt string, defaultValue string) string {
@@ -236,30 +234,6 @@ func collectUserInput(reader *bufio.Reader) Config {
 	config.LetsEncryptEmail = readString(reader, "Enter email for Let's Encrypt certificates", "")
 	config.InstallGerbil = readBool(reader, "Do you want to use Gerbil to allow tunneled connections", true)
 
-	// Admin user configuration
-	fmt.Println("\n=== Admin User Configuration ===")
-	config.AdminUserEmail = readString(reader, "Enter admin user email", "admin@"+config.BaseDomain)
-	for {
-		pass1 := readPassword("Create admin user password", reader)
-		pass2 := readPassword("Confirm admin user password", reader)
-
-		if pass1 != pass2 {
-			fmt.Println("Passwords do not match")
-		} else {
-			config.AdminUserPassword = pass1
-			if valid, message := validatePassword(config.AdminUserPassword); valid {
-				break
-			} else {
-				fmt.Println("Invalid password:", message)
-				fmt.Println("Password requirements:")
-				fmt.Println("- At least one uppercase English letter")
-				fmt.Println("- At least one lowercase English letter")
-				fmt.Println("- At least one digit")
-				fmt.Println("- At least one special character")
-			}
-		}
-	}
-
 	// Security settings
 	fmt.Println("\n=== Security Settings ===")
 	config.DisableSignupWithoutInvite = readBool(reader, "Disable signup without invite", true)
@@ -290,58 +264,8 @@ func collectUserInput(reader *bufio.Reader) Config {
 		fmt.Println("Error: Let's Encrypt email is required")
 		os.Exit(1)
 	}
-	if config.AdminUserEmail == "" || config.AdminUserPassword == "" {
-		fmt.Println("Error: Admin user email and password are required")
-		os.Exit(1)
-	}
 
 	return config
-}
-
-func validatePassword(password string) (bool, string) {
-	if len(password) == 0 {
-		return false, "Password cannot be empty"
-	}
-
-	var (
-		hasUpper   bool
-		hasLower   bool
-		hasDigit   bool
-		hasSpecial bool
-	)
-
-	for _, char := range password {
-		switch {
-		case unicode.IsUpper(char):
-			hasUpper = true
-		case unicode.IsLower(char):
-			hasLower = true
-		case unicode.IsDigit(char):
-			hasDigit = true
-		case unicode.IsPunct(char) || unicode.IsSymbol(char):
-			hasSpecial = true
-		}
-	}
-
-	var missing []string
-	if !hasUpper {
-		missing = append(missing, "an uppercase letter")
-	}
-	if !hasLower {
-		missing = append(missing, "a lowercase letter")
-	}
-	if !hasDigit {
-		missing = append(missing, "a digit")
-	}
-	if !hasSpecial {
-		missing = append(missing, "a special character")
-	}
-
-	if len(missing) > 0 {
-		return false, fmt.Sprintf("Password must contain %s", strings.Join(missing, ", "))
-	}
-
-	return true, ""
 }
 
 func createConfigFiles(config Config) error {

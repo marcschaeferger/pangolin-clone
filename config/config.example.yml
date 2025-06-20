@@ -41,11 +41,6 @@ rate_limits:
         window_minutes: 1
         max_requests: 500
 
-users:
-    server_admin:
-        email: "admin@example.com"
-        password: "Password123!"
-
 flags:
     require_email_verification: false
     disable_signup_without_invite: true

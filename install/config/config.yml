@@ -54,10 +54,6 @@ email:
     smtp_pass: "{{.EmailSMTPPass}}"
     no_reply: "{{.EmailNoReply}}"
 {{end}}
-users:
-    server_admin:
-        email: "{{.AdminUserEmail}}"
-        password: "{{.AdminUserPassword}}"
 
 flags:
     require_email_verification: {{.EnableEmail}}

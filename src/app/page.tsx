@@ -11,6 +11,7 @@ import { pullEnv } from "@app/lib/pullEnv";
 import { cleanRedirect } from "@app/lib/cleanRedirect";
 import { Layout } from "@app/components/Layout";
 import { rootNavItems } from "./navigation";
+import { InitialSetupCompleteResponse } from "@server/routers/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,15 @@ export default async function Page(props: {
 
     const getUser = cache(verifySession);
     const user = await getUser({ skipCheckVerifyEmail: true });
+
+    const setupRes = await internal.get<
+        AxiosResponse<InitialSetupCompleteResponse>
+    >(`/auth/initial-setup-complete`, await authCookieHeader());
+    const complete = setupRes.data.data.complete;
+    if (!complete) {
+        console.log("compelte", complete);
+        redirect("/auth/initial-setup");
+    }
 
     if (!user) {
         if (params.redirect) {

@@ -785,3 +785,6 @@ authRouter.post("/access-token", resource.authWithAccessToken);
 authRouter.post("/idp/:idpId/oidc/generate-url", idp.generateOidcUrl);
 
 authRouter.post("/idp/:idpId/oidc/validate-callback", idp.validateOidcCallback);
+
+authRouter.put("/set-server-admin", auth.setServerAdmin);
+authRouter.get("/initial-setup-complete", auth.initialSetupComplete);

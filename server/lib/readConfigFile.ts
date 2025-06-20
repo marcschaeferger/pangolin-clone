@@ -197,21 +197,6 @@ export const configSchema = z.object({
             no_reply: z.string().email().optional()
         })
         .optional(),
-    users: z.object({
-        server_admin: z.object({
-            email: z
-                .string()
-                .email()
-                .optional()
-                .transform(getEnvOrYaml("USERS_SERVERADMIN_EMAIL"))
-                .pipe(z.string().email())
-                .transform((v) => v.toLowerCase()),
-            password: passwordSchema
-                .optional()
-                .transform(getEnvOrYaml("USERS_SERVERADMIN_PASSWORD"))
-                .pipe(passwordSchema)
-        })
-    }),
     flags: z
         .object({
             require_email_verification: z.boolean().optional(),
