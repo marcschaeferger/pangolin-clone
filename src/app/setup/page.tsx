@@ -264,13 +264,13 @@ export default function StepperForm() {
                                         )}
                                     />
 
-                                    {orgIdTaken && (
+                                    {orgIdTaken && !orgCreated ? (
                                         <Alert variant="destructive">
                                             <AlertDescription>
                                                 {t('setupErrorIdentifier')}
                                             </AlertDescription>
                                         </Alert>
-                                    )}
+                                    ) : null}
 
                                     {error && (
                                         <Alert variant="destructive">
