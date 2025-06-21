@@ -33,7 +33,6 @@ export default async function Page(props: {
     >(`/auth/initial-setup-complete`, await authCookieHeader());
     const complete = setupRes.data.data.complete;
     if (!complete) {
-        console.log("compelte", complete);
         redirect("/auth/initial-setup");
     }
 

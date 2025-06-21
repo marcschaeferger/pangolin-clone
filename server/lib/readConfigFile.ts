@@ -233,24 +233,11 @@ export function readConfigFile() {
         environment = loadConfig(configFilePath2);
     }
 
-    if (process.env.APP_BASE_DOMAIN) {
-        console.log(
-            "You're using deprecated environment variables. Transition to the configuration file. https://docs.fossorial.io/"
-        );
-    }
-
     if (!environment) {
         throw new Error(
             "No configuration file found. Please create one. https://docs.fossorial.io/"
         );
     }
 
-    const parsedConfig = configSchema.safeParse(environment);
-
-    if (!parsedConfig.success) {
-        const errors = fromError(parsedConfig.error);
-        throw new Error(`Invalid configuration file: ${errors}`);
-    }
-
-    return parsedConfig.data;
+    return environment;
 }

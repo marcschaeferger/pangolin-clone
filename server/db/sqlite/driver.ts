@@ -5,7 +5,6 @@ import path from "path";
 import fs from "fs/promises";
 import { APP_PATH } from "@server/lib/consts";
 import { existsSync, mkdirSync } from "fs";
-import { readConfigFile } from "@server/lib/readConfigFile";
 
 export const location = path.join(APP_PATH, "db", "db.sqlite");
 export const exists = await checkFileExists(location);
@@ -13,8 +12,6 @@ export const exists = await checkFileExists(location);
 bootstrapVolume();
 
 function createDb() {
-    const config = readConfigFile();
-
     const sqlite = new Database(location);
     return DrizzleSqlite(sqlite, { schema });
 }

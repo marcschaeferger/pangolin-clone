@@ -5,6 +5,12 @@ import { withReplicas } from "drizzle-orm/pg-core";
 function createDb() {
     const config = readConfigFile();
 
+    if (!config.postgres) {
+        throw new Error(
+            "Postgres configuration is missing in the configuration file."
+        );
+    }
+
     const connectionString = config.postgres?.connection_string;
     const replicaConnections = config.postgres?.replicas || [];
 

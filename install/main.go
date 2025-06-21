@@ -24,9 +24,9 @@ import (
 
 // DO NOT EDIT THIS FUNCTION; IT MATCHED BY REGEX IN CICD
 func loadVersions(config *Config) {
-	config.PangolinVersion = "replaceme"
-	config.GerbilVersion = "replaceme"
-	config.BadgerVersion = "replaceme"
+	config.PangolinVersion = "1.5.1"
+	config.GerbilVersion = "1.0.0"
+	config.BadgerVersion = "v1.2.0"
 }
 
 //go:embed config/*
@@ -39,8 +39,6 @@ type Config struct {
 	BaseDomain                 string
 	DashboardDomain            string
 	LetsEncryptEmail           string
-	DisableSignupWithoutInvite bool
-	DisableUserCreateOrg       bool
 	EnableEmail                bool
 	EmailSMTPHost              string
 	EmailSMTPPort              int
@@ -72,15 +70,15 @@ func main() {
 	}
 
 	var config Config
-	
+
 	// check if there is already a config file
 	if _, err := os.Stat("config/config.yml"); err != nil {
 		config = collectUserInput(reader)
-		
+
 		loadVersions(&config)
 		config.DoCrowdsecInstall = false
 		config.Secret = generateRandomSecretKey()
-		
+
 		if err := createConfigFiles(config); err != nil {
 			fmt.Printf("Error creating config files: %v\n", err)
 			os.Exit(1)
@@ -234,14 +232,9 @@ func collectUserInput(reader *bufio.Reader) Config {
 	config.LetsEncryptEmail = readString(reader, "Enter email for Let's Encrypt certificates", "")
 	config.InstallGerbil = readBool(reader, "Do you want to use Gerbil to allow tunneled connections", true)
 
-	// Security settings
-	fmt.Println("\n=== Security Settings ===")
-	config.DisableSignupWithoutInvite = readBool(reader, "Disable signup without invite", true)
-	config.DisableUserCreateOrg = readBool(reader, "Disable users from creating organizations", false)
-
 	// Email configuration
 	fmt.Println("\n=== Email Configuration ===")
-	config.EnableEmail = readBool(reader, "Enable email functionality", false)
+	config.EnableEmail = readBool(reader, "Enable email functionality (SMTP)", false)
 
 	if config.EnableEmail {
 		config.EmailSMTPHost = readString(reader, "Enter SMTP host", "")
@@ -353,7 +346,7 @@ func installDocker() error {
 		return fmt.Errorf("failed to detect Linux distribution: %v", err)
 	}
 	osRelease := string(output)
-	
+
 	// Detect system architecture
 	archCmd := exec.Command("uname", "-m")
 	archOutput, err := archCmd.Output()
@@ -361,7 +354,7 @@ func installDocker() error {
 		return fmt.Errorf("failed to detect system architecture: %v", err)
 	}
 	arch := strings.TrimSpace(string(archOutput))
-	
+
 	// Map architecture to Docker's architecture naming
 	var dockerArch string
 	switch arch {
@@ -403,7 +396,7 @@ func installDocker() error {
 				fedoraVersion = v
 			}
 		}
-		
+
 		// Use appropriate DNF syntax based on version
 		var repoCmd string
 		if fedoraVersion >= 41 {
@@ -413,7 +406,7 @@ func installDocker() error {
 			// DNF 4 syntax for Fedora < 41
 			repoCmd = "dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo"
 		}
-		
+
 		installCmd = exec.Command("bash", "-c", fmt.Sprintf(`
 			dnf -y install dnf-plugins-core &&
 			%s &&
@@ -442,7 +435,7 @@ func installDocker() error {
 	default:
 		return fmt.Errorf("unsupported Linux distribution")
 	}
-	
+
 	installCmd.Stdout = os.Stdout
 	installCmd.Stderr = os.Stderr
 	return installCmd.Run()
@@ -527,7 +520,7 @@ func executeDockerComposeCommandWithArgs(args ...string) error {
 			return fmt.Errorf("neither 'docker compose' nor 'docker-compose' command is available")
 		}
 	}
-	
+
 	if useNewStyle {
 		cmd = exec.Command("docker", append([]string{"compose"}, args...)...)
 	} else {
@@ -563,7 +556,7 @@ func startContainers() error {
 // stopContainers stops the containers using the appropriate command.
 func stopContainers() error {
 	fmt.Println("Stopping containers...")
-	
+
 	if err := executeDockerComposeCommandWithArgs("-f", "docker-compose.yml", "down"); err != nil {
 		return fmt.Errorf("failed to stop containers: %v", err)
 	}
@@ -574,7 +567,7 @@ func stopContainers() error {
 // restartContainer restarts a specific container using the appropriate command.
 func restartContainer(container string) error {
 	fmt.Println("Restarting containers...")
-	
+
 	if err := executeDockerComposeCommandWithArgs("-f", "docker-compose.yml", "restart", container); err != nil {
 		return fmt.Errorf("failed to stop the container \"%s\": %v", container, err)
 	}
