@@ -36,13 +36,19 @@ export class Config {
 
         if (process.env.APP_BASE_DOMAIN) {
             console.log(
-                "You're using deprecated environment variables. Transition to the configuration file. https://docs.fossorial.io/"
+                "WARNING: You're using deprecated environment variables. Transition to the configuration file. https://docs.fossorial.io/"
             );
         }
 
-        // @ts-ignore
-        if (parsedConfig.users) {
-            console.log("You're admin credentials are still in the config file. This method of setting admin credentials is deprecated. It is recommended to remove them from the config file.");
+        if (
+            // @ts-ignore
+            parsedConfig.users ||
+            process.env.USERS_SERVERADMIN_EMAIL ||
+            process.env.USERS_SERVERADMIN_PASSWORD
+        ) {
+            console.log(
+                "WARNING: Your admin credentials are still in the config file or environment variables. This method of setting admin credentials is no longer supported. It is recommended to remove them."
+            );
         }
 
         process.env.APP_VERSION = APP_VERSION;
