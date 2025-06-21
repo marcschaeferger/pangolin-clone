@@ -24,9 +24,9 @@ import (
 
 // DO NOT EDIT THIS FUNCTION; IT MATCHED BY REGEX IN CICD
 func loadVersions(config *Config) {
-	config.PangolinVersion = "1.5.1"
-	config.GerbilVersion = "1.0.0"
-	config.BadgerVersion = "v1.2.0"
+	config.PangolinVersion = "replaceme"
+	config.GerbilVersion = "replaceme"
+	config.BadgerVersion = "replaceme"
 }
 
 //go:embed config/*
