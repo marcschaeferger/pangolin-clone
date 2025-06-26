@@ -111,6 +111,28 @@ export default function UsersTable({ users: u }: UsersTableProps) {
             }
         },
         {
+            accessorKey: "name",
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() =>
+                            column.toggleSorting(column.getIsSorted() === "asc")
+                        }
+                    >
+                        {t('name')}
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                );
+            },
+            cell: ({ row }) => {
+                const userRow = row.original;
+                return (
+                    <span>{userRow.name || "-"}</span>
+                );
+            }
+        },
+        {
             accessorKey: "displayUsername",
             header: ({ column }) => {
                 return (
@@ -120,7 +142,7 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        {t('username')}
+                        {t('email')}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );

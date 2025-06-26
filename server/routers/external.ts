@@ -67,6 +67,12 @@ authenticated.post(
     verifyUserHasAction(ActionsEnum.updateOrg),
     org.updateOrg
 );
+authenticated.put(
+    "/org/:orgId/security",
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.updateOrg),
+    org.updateOrgSecurity
+);
 authenticated.delete(
     "/org/:orgId",
     verifyOrgAccess,
@@ -490,6 +496,20 @@ authenticated.put(
 );
 
 authenticated.get("/org/:orgId/user/:userId", verifyOrgAccess, user.getOrgUser);
+
+authenticated.post(
+    "/org/:orgId/user/:userId",
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.getOrgUser),
+    user.updateUser
+);
+
+authenticated.post(
+    "/org/:orgId/user/:userId/reset-password",
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.getOrgUser),
+    user.adminResetUserPassword
+);
 
 authenticated.get(
     "/org/:orgId/users",
