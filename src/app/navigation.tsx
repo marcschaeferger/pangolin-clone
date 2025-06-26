@@ -8,14 +8,37 @@ import {
     Combine,
     Fingerprint,
     KeyRound,
-    TicketCheck
+    TicketCheck,
+    User
 } from "lucide-react";
 
 export const orgLangingNavItems: SidebarNavItem[] = [
     {
         title: "sidebarOverview",
         href: "/{orgId}",
-        icon: <Home className="h-4 w-4" />
+        icon: <Home className="h-4 w-4" />,
+        exact: true
+    }
+];
+
+export const orgMemberNavItems: SidebarNavItem[] = [
+    {
+        title: "sidebarOverview",
+        href: "/{orgId}",
+        icon: <Home className="h-4 w-4" />,
+        exact: true
+    },
+    {
+        title: "sidebarAccount",
+        href: "/{orgId}/account",
+        icon: <User className="h-4 w-4" />,
+        autoExpand: true,
+        children: [
+            {
+                title: "resources",
+                href: "/{orgId}/account/my-resources"
+            }
+        ]
     }
 ];
 

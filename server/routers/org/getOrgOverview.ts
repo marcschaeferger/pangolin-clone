@@ -5,13 +5,14 @@ import {
     orgs,
     resources,
     roles,
+    roleResources,
     sites,
     userOrgs,
     userResources,
     users,
     userSites
 } from "@server/db";
-import { and, count, eq, inArray } from "drizzle-orm";
+import { and, count, eq, inArray, or, sql } from "drizzle-orm";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
@@ -101,18 +102,29 @@ export async function getOrgOverview(
             .from(resources)
             .where(eq(resources.orgId, orgId));
 
-        const [{ numResources }] = await db
-            .select({ numResources: count() })
+        // Get resources accessible to user through both direct assignment and role assignment
+        const accessibleResources = await db
+            .select({
+                resourceId: sql<number>`COALESCE(${userResources.resourceId}, ${roleResources.resourceId})`
+            })
             .from(userResources)
+            .fullJoin(
+                roleResources,
+                eq(userResources.resourceId, roleResources.resourceId)
+            )
             .where(
-                and(
+                or(
                     eq(userResources.userId, req.userOrg.userId),
-                    inArray(
-                        userResources.resourceId,
-                        allResourceIds.map((resource) => resource.resourceId)
-                    )
+                    eq(roleResources.roleId, req.userOrg.roleId)
                 )
             );
+
+        // Filter to only resources in this organization
+        const accessibleResourceIds = accessibleResources
+            .map((resource) => resource.resourceId)
+            .filter((id) => allResourceIds.some((orgResource) => orgResource.resourceId === id));
+
+        const numResources = accessibleResourceIds.length;
 
         const [{ numUsers }] = await db
             .select({ numUsers: count() })

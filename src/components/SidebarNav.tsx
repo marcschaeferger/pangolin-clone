@@ -17,6 +17,7 @@ export interface SidebarNavItem {
     children?: SidebarNavItem[];
     autoExpand?: boolean;
     showProfessional?: boolean;
+    exact?: boolean;
 }
 
 export interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
@@ -38,6 +39,11 @@ export function SidebarNav({
     const niceId = params.niceId as string;
     const resourceId = params.resourceId as string;
     const userId = params.userId as string;
+    const { user } = useUserContext();
+    const { licenseStatus, isUnlocked } = useLicenseStatusContext();
+
+    const t = useTranslations();
+
     const [expandedItems, setExpandedItems] = useState<Set<string>>(() => {
         const autoExpanded = new Set<string>();
 
@@ -62,18 +68,13 @@ export function SidebarNav({
         findAutoExpandedAndActivePath(items);
         return autoExpanded;
     });
-    const { licenseStatus, isUnlocked } = useLicenseStatusContext();
-
-    const { user } = useUserContext();
-
-    const t = useTranslations();
 
     function hydrateHref(val: string): string {
         return val
             .replace("{orgId}", orgId)
             .replace("{niceId}", niceId)
             .replace("{resourceId}", resourceId)
-            .replace("{userId}", userId);
+            .replace("{userId}", userId || user?.userId || "");
     }
 
     function toggleItem(href: string) {
@@ -91,7 +92,7 @@ export function SidebarNav({
     function renderItems(items: SidebarNavItem[], level = 0) {
         return items.map((item) => {
             const hydratedHref = hydrateHref(item.href);
-            const isActive = pathname.startsWith(hydratedHref);
+            const isActive = item.exact ? pathname === hydratedHref : pathname.startsWith(hydratedHref);
             const hasChildren = item.children && item.children.length > 0;
             const isExpanded = expandedItems.has(hydratedHref);
             const indent = level * 28; // Base indent for each level

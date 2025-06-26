@@ -10,13 +10,28 @@ interface BreadcrumbItem {
     href: string;
 }
 
+function formatBreadcrumbLabel(segment: string): string {
+    // Map specific segments to user-friendly names
+    const labelMap: Record<string, string> = {
+        'account': 'Account',
+        'my-resources': 'My Resources',
+        'settings': 'Settings',
+        'access': 'Access Control',
+        'users': 'Users',
+        'resources': 'Resources',
+        'sites': 'Sites'
+    };
+    
+    return labelMap[segment] || decodeURIComponent(segment);
+}
+
 export function Breadcrumbs() {
     const pathname = usePathname();
     const segments = pathname.split("/").filter(Boolean);
 
     const breadcrumbs: BreadcrumbItem[] = segments.map((segment, index) => {
         const href = `/${segments.slice(0, index + 1).join("/")}`;
-        let label = decodeURIComponent(segment);
+        const label = formatBreadcrumbLabel(segment);
         return { label, href };
     });
 
