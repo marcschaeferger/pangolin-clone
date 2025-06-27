@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
-import { db } from "@server/db";
+import { db, resources, sites } from "@server/db";
 import { userOrgs, userResources, users, userSites } from "@server/db";
-import { and, eq } from "drizzle-orm";
+import { and, eq, exists } from "drizzle-orm";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
@@ -50,7 +50,7 @@ export async function removeUserOrg(
         const user = await db
             .select()
             .from(userOrgs)
-            .where(eq(userOrgs.userId, userId));
+            .where(and(eq(userOrgs.userId, userId), eq(userOrgs.orgId, orgId)));
 
         if (!user || user.length === 0) {
             return next(createHttpError(HttpCode.NOT_FOUND, "User not found"));
@@ -72,11 +72,42 @@ export async function removeUserOrg(
                     and(eq(userOrgs.userId, userId), eq(userOrgs.orgId, orgId))
                 );
 
-            await trx
-                .delete(userResources)
-                .where(eq(userResources.userId, userId));
+            await db.delete(userResources).where(
+                and(
+                    eq(userResources.userId, userId),
+                    exists(
+                        db
+                            .select()
+                            .from(resources)
+                            .where(
+                                and(
+                                    eq(
+                                        resources.resourceId,
+                                        userResources.resourceId
+                                    ),
+                                    eq(resources.orgId, orgId)
+                                )
+                            )
+                    )
+                )
+            );
 
-            await trx.delete(userSites).where(eq(userSites.userId, userId));
+            await db.delete(userSites).where(
+                and(
+                    eq(userSites.userId, userId),
+                    exists(
+                        db
+                            .select()
+                            .from(sites)
+                            .where(
+                                and(
+                                    eq(sites.siteId, userSites.siteId),
+                                    eq(sites.orgId, orgId)
+                                )
+                            )
+                    )
+                )
+            );
         });
 
         return response(res, {
