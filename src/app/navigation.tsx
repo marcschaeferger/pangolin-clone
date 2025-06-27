@@ -13,21 +13,11 @@ import {
 } from "lucide-react";
 
 export const orgLangingNavItems: SidebarNavItem[] = [
-    {
-        title: "sidebarOverview",
-        href: "/{orgId}",
-        icon: <Home className="h-4 w-4" />,
-        exact: true
-    }
+    // Removed Overview menu item
 ];
 
 export const orgMemberNavItems: SidebarNavItem[] = [
-    {
-        title: "sidebarOverview",
-        href: "/{orgId}",
-        icon: <Home className="h-4 w-4" />,
-        exact: true
-    },
+    // Removed Overview menu item - now starts directly with Account
     {
         title: "sidebarAccount",
         href: "/{orgId}/account",

@@ -18,68 +18,7 @@ type OrgPageProps = {
 export default async function OrgPage(props: OrgPageProps) {
     const params = await props.params;
     const orgId = params.orgId;
-
-    const getUser = cache(verifySession);
-    const user = await getUser();
-
-    if (!user) {
-        redirect("/");
-    }
-
-    let redirectToSettings = false;
-    let overview: GetOrgOverviewResponse | undefined;
-    try {
-        const res = await internal.get<AxiosResponse<GetOrgOverviewResponse>>(
-            `/org/${orgId}/overview`,
-            await authCookieHeader()
-        );
-        overview = res.data.data;
-
-        if (overview.isAdmin || overview.isOwner) {
-            redirectToSettings = true;
-        }
-    } catch (e) {}
-
-    if (redirectToSettings) {
-        redirect(`/${orgId}/settings`);
-    }
-
-    let orgs: ListUserOrgsResponse["orgs"] = [];
-    try {
-        const getOrgs = cache(async () =>
-            internal.get<AxiosResponse<ListUserOrgsResponse>>(
-                `/user/${user.userId}/orgs`,
-                await authCookieHeader()
-            )
-        );
-        const res = await getOrgs();
-        if (res && res.data.data.orgs) {
-            orgs = res.data.data.orgs;
-        }
-    } catch (e) {}
-
-    return (
-        <UserProvider user={user}>
-            <Layout orgId={orgId} navItems={orgMemberNavItems} orgs={orgs}>
-                {overview && (
-                    <div className="w-full max-w-4xl mx-auto md:mt-32 mt-4">
-                        <OrganizationLandingCard
-                            overview={{
-                                orgId: overview.orgId,
-                                orgName: overview.orgName,
-                                stats: {
-                                    users: overview.numUsers,
-                                    sites: overview.numSites,
-                                    resources: overview.numResources
-                                },
-                                isAdmin: overview.isAdmin,
-                                isOwner: overview.isOwner,
-                                userRole: overview.userRoleName
-                            }}
-                        />
-                    </div>
-                )}
-            </Layout>
-        </UserProvider>
-    );
+    
+    // Redirect to my-resources page instead of showing overview
+    redirect(`/${orgId}/account/my-resources`);
 }
