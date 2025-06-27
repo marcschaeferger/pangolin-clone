@@ -191,7 +191,7 @@ export default function ResetPasswordForm({
                     const safe = cleanRedirect(redirect);
                     router.push(safe);
                 } else {
-                    router.push("/login");
+                    router.push("/auth/login");
                 }
                 setIsSubmitting(false);
             }, 1500);
