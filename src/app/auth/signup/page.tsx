@@ -33,13 +33,14 @@ export default async function Page(props: {
     let inviteId;
     let inviteToken;
     if (searchParams.redirect && isInvite) {
-        const parts = searchParams.redirect.split("token=");
-        if (parts.length) {
-            const token = parts[1];
-            const tokenParts = token.split("-");
-            if (tokenParts.length === 2) {
+        // Handle URLs like "/invite?token=inviteId-tokenValue"
+        const url = new URL(searchParams.redirect, 'http://localhost');
+        const tokenParam = url.searchParams.get('token');
+        if (tokenParam) {
+            const tokenParts = tokenParam.split("-");
+            if (tokenParts.length >= 2) {
                 inviteId = tokenParts[0];
-                inviteToken = tokenParts[1];
+                inviteToken = tokenParts.slice(1).join("-"); // Handle tokens with multiple dashes
             }
         }
     }

@@ -215,6 +215,7 @@ authenticated.post(
     user.inviteUser
 ); // maybe make this /invite/create instead
 unauthenticated.post("/invite/accept", user.acceptInvite); // this is supposed to be unauthenticated
+unauthenticated.get("/invite/:inviteId/:token/details", user.getInviteDetails); // for email autofill in signup
 
 authenticated.get(
     "/resource/:resourceId/roles",

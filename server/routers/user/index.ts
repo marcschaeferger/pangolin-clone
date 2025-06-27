@@ -4,6 +4,7 @@ export * from "./listUsers";
 export * from "./addUserRole";
 export * from "./inviteUser";
 export * from "./acceptInvite";
+export * from "./getInviteDetails";
 export * from "./getOrgUser";
 export * from "./adminListUsers";
 export * from "./adminRemoveUser";

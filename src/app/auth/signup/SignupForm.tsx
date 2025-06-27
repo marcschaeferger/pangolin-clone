@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -32,6 +32,7 @@ import { useEnvContext } from "@app/hooks/useEnvContext";
 import Image from "next/image";
 import { cleanRedirect } from "@app/lib/cleanRedirect";
 import { useTranslations } from "next-intl";
+import { GetInviteDetailsResponse } from "@server/routers/user/getInviteDetails";
 
 type SignupFormProps = {
     redirect?: string;
@@ -61,7 +62,9 @@ export default function SignupForm({
     const api = createApiClient(useEnvContext());
 
     const [loading, setLoading] = useState(false);
+    const [loadingInviteDetails, setLoadingInviteDetails] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [inviteEmail, setInviteEmail] = useState<string | null>(null);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -74,6 +77,28 @@ export default function SignupForm({
     });
 
     const t = useTranslations();
+
+    // Fetch invite details if coming from an invite link
+    useEffect(() => {
+        if (inviteId && inviteToken) {
+            setLoadingInviteDetails(true);
+            api.get<AxiosResponse<GetInviteDetailsResponse>>(`/invite/${inviteId}/${inviteToken}/details`)
+                .then((res) => {
+                    if (res.status === 200) {
+                        const email = res.data.data.email;
+                        setInviteEmail(email);
+                        form.setValue("email", email);
+                    }
+                })
+                .catch((e) => {
+                    console.error("Failed to fetch invite details:", e);
+                    // Don't show error for invite details, just continue with normal signup
+                })
+                .finally(() => {
+                    setLoadingInviteDetails(false);
+                });
+        }
+    }, [inviteId, inviteToken, api, form]);
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const { name, email, password } = values;
@@ -117,6 +142,8 @@ export default function SignupForm({
 
         setLoading(false);
     }
+
+    const isFromInvite = !!(inviteId && inviteToken);
 
     return (
         <Card className="w-full max-w-md">
@@ -164,9 +191,19 @@ export default function SignupForm({
                                 <FormItem>
                                     <FormLabel>{t('email')}</FormLabel>
                                     <FormControl>
-                                        <Input {...field} />
+                                        <Input 
+                                            {...field} 
+                                            readOnly={isFromInvite}
+                                            disabled={loadingInviteDetails}
+                                            className={isFromInvite ? "bg-muted" : ""}
+                                        />
                                     </FormControl>
                                     <FormMessage />
+                                    {isFromInvite && inviteEmail && (
+                                        <p className="text-sm text-muted-foreground">
+                                            {t('inviteEmailPreFilled')}
+                                        </p>
+                                    )}
                                 </FormItem>
                             )}
                         />
@@ -209,8 +246,12 @@ export default function SignupForm({
                             </Alert>
                         )}
 
-                        <Button type="submit" className="w-full">
-                            {t('createAccount')}
+                        <Button 
+                            type="submit" 
+                            className="w-full"
+                            disabled={loading || loadingInviteDetails}
+                        >
+                            {loading ? t('creatingAccount') : t('createAccount')}
                         </Button>
                     </form>
                 </Form>

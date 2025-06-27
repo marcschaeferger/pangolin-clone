@@ -32,6 +32,7 @@
     "password": "Password",
     "confirmPassword": "Confirm Password",
     "createAccount": "Create Account",
+    "creatingAccount": "Creating account...",
     "viewSettings": "View settings",
     "delete": "Delete",
     "name": "Name",
@@ -1170,5 +1171,8 @@
     "securitySettingsUpdated": "Security Settings Updated",
     "securitySettingsUpdatedDescription": "Your security settings have been updated successfully",
     "securitySettingsError": "Security Settings Error",
-    "saveSecuritySettings": "Save Security Settings"
+    "saveSecuritySettings": "Save Security Settings",
+    "signup": "Sign up",
+    "loginStart": "Log in to get started",
+    "inviteEmailPreFilled": "Email address from your invitation"
 }
