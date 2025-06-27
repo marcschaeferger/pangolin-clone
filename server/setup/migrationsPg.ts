@@ -5,13 +5,15 @@ import { versionMigrations } from "../db/pg";
 import { __DIRNAME, APP_VERSION } from "@server/lib/consts";
 import path from "path";
 import m1 from "./scriptsSqlite/1.6.0";
+import m2 from "./scriptsPg/1.7.0";
 
 // THIS CANNOT IMPORT ANYTHING FROM THE SERVER
 // EXCEPT FOR THE DATABASE AND THE SCHEMA
 
 // Define the migration list with versions and their corresponding functions
 const migrations = [
-    { version: "1.6.0", run: m1 }
+    { version: "1.6.0", run: m1 },
+    { version: "1.7.0", run: m2 }
     // Add new migrations here as they are created
 ] as {
     version: string;

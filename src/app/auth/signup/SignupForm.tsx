@@ -41,6 +41,7 @@ type SignupFormProps = {
 
 const formSchema = z
     .object({
+        name: z.string().optional(),
         email: z.string().email({ message: "Invalid email address" }),
         password: passwordSchema,
         confirmPassword: passwordSchema
@@ -65,6 +66,7 @@ export default function SignupForm({
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
+            name: "",
             email: "",
             password: "",
             confirmPassword: ""
@@ -74,11 +76,12 @@ export default function SignupForm({
     const t = useTranslations();
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        const { email, password } = values;
+        const { name, email, password } = values;
 
         setLoading(true);
         const res = await api
             .put<AxiosResponse<SignUpResponse>>("/auth/signup", {
+                name,
                 email,
                 password,
                 inviteId,
@@ -108,7 +111,7 @@ export default function SignupForm({
                 const safe = cleanRedirect(redirect);
                 router.push(safe);
             } else {
-                router.push("/");
+                router.push("/setup");
             }
         }
 
@@ -141,6 +144,19 @@ export default function SignupForm({
                         onSubmit={form.handleSubmit(onSubmit)}
                         className="space-y-4"
                     >
+                        <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>{t('name')}</FormLabel>
+                                    <FormControl>
+                                        <Input {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                         <FormField
                             control={form.control}
                             name="email"

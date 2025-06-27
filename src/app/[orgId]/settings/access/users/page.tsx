@@ -73,7 +73,7 @@ export default async function UsersPage(props: UsersPageProps) {
         return {
             id: user.id,
             username: user.username,
-            displayUsername: user.email || user.name || user.username,
+            displayUsername: user.email || user.username,
             name: user.name,
             email: user.email,
             type: user.type,
