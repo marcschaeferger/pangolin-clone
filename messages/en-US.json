@@ -838,6 +838,7 @@
     "pangolinLogoAlt": "Pangolin Logo",
     "inviteAlready": "Looks like you've been invited!",
     "inviteAlreadyDescription": "To accept the invite, you must log in or create an account.",
+    "inviteAlreadyDescriptionSignup": "To accept the invite, you must create an account.",
     "signupQuestion": "Already have an account?",
     "login": "Log in",
     "resourceNotFound": "Resource Not Found",

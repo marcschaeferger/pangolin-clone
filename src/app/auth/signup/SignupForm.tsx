@@ -22,6 +22,7 @@ import {
     CardTitle
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
 import { SignUpResponse } from "@server/routers/auth";
 import { useRouter } from "next/navigation";
 import { passwordSchema } from "@server/auth/passwordSchema";
@@ -33,11 +34,45 @@ import Image from "next/image";
 import { cleanRedirect } from "@app/lib/cleanRedirect";
 import { useTranslations } from "next-intl";
 import { GetInviteDetailsResponse } from "@server/routers/user/getInviteDetails";
+import { Check, X, Eye, EyeOff } from "lucide-react";
+import { cn } from "@app/lib/cn";
 
 type SignupFormProps = {
     redirect?: string;
     inviteId?: string;
     inviteToken?: string;
+};
+
+// Password strength calculation
+const calculatePasswordStrength = (password: string) => {
+    const requirements = {
+        length: password.length >= 8,
+        uppercase: /[A-Z]/.test(password),
+        lowercase: /[a-z]/.test(password),
+        number: /[0-9]/.test(password),
+        special: /[~!`@#$%^&*()_\-+={}[\]|\\:;"'<>,.\/?]/.test(password)
+    };
+
+    const score = Object.values(requirements).filter(Boolean).length;
+    let strength: "weak" | "medium" | "strong" = "weak";
+    let color = "bg-red-500";
+    let percentage = 0;
+
+    if (score >= 5) {
+        strength = "strong";
+        color = "bg-green-500";
+        percentage = 100;
+    } else if (score >= 3) {
+        strength = "medium";
+        color = "bg-yellow-500";
+        percentage = 60;
+    } else if (score >= 1) {
+        strength = "weak";
+        color = "bg-red-500";
+        percentage = 30;
+    }
+
+    return { requirements, strength, color, percentage, score };
 };
 
 const formSchema = z
@@ -58,13 +93,17 @@ export default function SignupForm({
     inviteToken
 }: SignupFormProps) {
     const router = useRouter();
-
     const api = createApiClient(useEnvContext());
+    const t = useTranslations();
 
     const [loading, setLoading] = useState(false);
     const [loadingInviteDetails, setLoadingInviteDetails] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [inviteEmail, setInviteEmail] = useState<string | null>(null);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [passwordValue, setPasswordValue] = useState("");
+    const [confirmPasswordValue, setConfirmPasswordValue] = useState("");
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -73,10 +112,12 @@ export default function SignupForm({
             email: "",
             password: "",
             confirmPassword: ""
-        }
+        },
+        mode: "onChange" // Enable real-time validation
     });
 
-    const t = useTranslations();
+    const passwordStrength = calculatePasswordStrength(passwordValue);
+    const doPasswordsMatch = passwordValue.length > 0 && confirmPasswordValue.length > 0 && passwordValue === confirmPasswordValue;
 
     // Fetch invite details if coming from an invite link
     useEffect(() => {
@@ -178,12 +219,20 @@ export default function SignupForm({
                                 <FormItem>
                                     <FormLabel>{t('name')}</FormLabel>
                                     <FormControl>
-                                        <Input {...field} />
+                                        <Input 
+                                            {...field}
+                                            onChange={(e) => {
+                                                field.onChange(e);
+                                            }}
+                                            autoComplete="given-name"
+                                            tabIndex={1}
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
+                        
                         <FormField
                             control={form.control}
                             name="email"
@@ -192,10 +241,17 @@ export default function SignupForm({
                                     <FormLabel>{t('email')}</FormLabel>
                                     <FormControl>
                                         <Input 
-                                            {...field} 
+                                            {...field}
+                                            onChange={(e) => {
+                                                if (!isFromInvite) {
+                                                    field.onChange(e);
+                                                }
+                                            }}
                                             readOnly={isFromInvite}
                                             disabled={loadingInviteDetails}
                                             className={isFromInvite ? "bg-muted" : ""}
+                                            autoComplete="email"
+                                            tabIndex={2}
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -207,35 +263,203 @@ export default function SignupForm({
                                 </FormItem>
                             )}
                         />
+                        
                         <FormField
                             control={form.control}
                             name="password"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>{t('password')}</FormLabel>
+                                    <div className="flex items-center gap-2">
+                                        <FormLabel>{t('password')}</FormLabel>
+                                        {passwordStrength.strength === "strong" && (
+                                            <Check className="h-4 w-4 text-green-500" />
+                                        )}
+                                    </div>
                                     <FormControl>
-                                        <Input
-                                            type="password"
-                                            {...field}
-                                        />
+                                        <div className="relative">
+                                            <Input
+                                                type={showPassword ? "text" : "password"}
+                                                {...field}
+                                                onChange={(e) => {
+                                                    field.onChange(e);
+                                                    setPasswordValue(e.target.value);
+                                                }}
+                                                className={cn(
+                                                    "pr-10",
+                                                    passwordStrength.strength === "strong" && "border-green-500 focus-visible:ring-green-500",
+                                                    passwordStrength.strength === "medium" && "border-yellow-500 focus-visible:ring-yellow-500",
+                                                    passwordStrength.strength === "weak" && passwordValue.length > 0 && "border-red-500 focus-visible:ring-red-500"
+                                                )}
+                                                autoComplete="new-password"
+                                                tabIndex={3}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                                tabIndex={-1}
+                                                aria-label={showPassword ? "Hide password" : "Show password"}
+                                            >
+                                                {showPassword ? (
+                                                    <EyeOff className="h-4 w-4" />
+                                                ) : (
+                                                    <Eye className="h-4 w-4" />
+                                                )}
+                                            </button>
+                                        </div>
                                     </FormControl>
-                                    <FormMessage />
+                                    
+                                    {passwordValue.length > 0 && (
+                                        <div className="space-y-3 mt-2">
+                                            {/* Password Strength Meter */}
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-sm font-medium text-gray-700">Password strength</span>
+                                                    <span className={cn(
+                                                        "text-sm font-semibold",
+                                                        passwordStrength.strength === "strong" && "text-green-600",
+                                                        passwordStrength.strength === "medium" && "text-yellow-600",
+                                                        passwordStrength.strength === "weak" && "text-red-600"
+                                                    )}>
+                                                        {passwordStrength.strength.charAt(0).toUpperCase() + passwordStrength.strength.slice(1)}
+                                                    </span>
+                                                </div>
+                                                <Progress 
+                                                    value={passwordStrength.percentage} 
+                                                    className="h-2"
+                                                />
+                                            </div>
+                                            
+                                            {/* Requirements Checklist */}
+                                            <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+                                                <div className="text-sm font-medium text-gray-700 mb-2">Requirements:</div>
+                                                <div className="grid grid-cols-1 gap-1.5">
+                                                    <div className="flex items-center gap-2">
+                                                        {passwordStrength.requirements.length ? (
+                                                            <Check className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
+                                                        ) : (
+                                                            <X className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                                                        )}
+                                                        <span className={cn(
+                                                            "text-sm",
+                                                            passwordStrength.requirements.length ? "text-green-700" : "text-gray-600"
+                                                        )}>
+                                                            8+ characters
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        {passwordStrength.requirements.uppercase ? (
+                                                            <Check className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
+                                                        ) : (
+                                                            <X className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                                                        )}
+                                                        <span className={cn(
+                                                            "text-sm",
+                                                            passwordStrength.requirements.uppercase ? "text-green-700" : "text-gray-600"
+                                                        )}>
+                                                            Uppercase letter (A-Z)
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        {passwordStrength.requirements.lowercase ? (
+                                                            <Check className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
+                                                        ) : (
+                                                            <X className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                                                        )}
+                                                        <span className={cn(
+                                                            "text-sm",
+                                                            passwordStrength.requirements.lowercase ? "text-green-700" : "text-gray-600"
+                                                        )}>
+                                                            Lowercase letter (a-z)
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        {passwordStrength.requirements.number ? (
+                                                            <Check className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
+                                                        ) : (
+                                                            <X className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                                                        )}
+                                                        <span className={cn(
+                                                            "text-sm",
+                                                            passwordStrength.requirements.number ? "text-green-700" : "text-gray-600"
+                                                        )}>
+                                                            Number (0-9)
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        {passwordStrength.requirements.special ? (
+                                                            <Check className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
+                                                        ) : (
+                                                            <X className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                                                        )}
+                                                        <span className={cn(
+                                                            "text-sm",
+                                                            passwordStrength.requirements.special ? "text-green-700" : "text-gray-600"
+                                                        )}>
+                                                            Special character (!@#$%...)
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    
+                                    {/* Only show FormMessage when not showing our custom requirements */}
+                                    {passwordValue.length === 0 && <FormMessage />}
                                 </FormItem>
                             )}
                         />
+                        
                         <FormField
                             control={form.control}
                             name="confirmPassword"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>{t('confirmPassword')}</FormLabel>
+                                    <div className="flex items-center gap-2">
+                                        <FormLabel>{t('confirmPassword')}</FormLabel>
+                                        {doPasswordsMatch && (
+                                            <Check className="h-4 w-4 text-green-500" />
+                                        )}
+                                    </div>
                                     <FormControl>
-                                        <Input
-                                            type="password"
-                                            {...field}
-                                        />
+                                        <div className="relative">
+                                            <Input
+                                                type={showConfirmPassword ? "text" : "password"}
+                                                {...field}
+                                                onChange={(e) => {
+                                                    field.onChange(e);
+                                                    setConfirmPasswordValue(e.target.value);
+                                                }}
+                                                className={cn(
+                                                    "pr-10",
+                                                    doPasswordsMatch && "border-green-500 focus-visible:ring-green-500",
+                                                    confirmPasswordValue.length > 0 && !doPasswordsMatch && "border-red-500 focus-visible:ring-red-500"
+                                                )}
+                                                autoComplete="new-password"
+                                                tabIndex={4}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                                tabIndex={-1}
+                                                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                                            >
+                                                {showConfirmPassword ? (
+                                                    <EyeOff className="h-4 w-4" />
+                                                ) : (
+                                                    <Eye className="h-4 w-4" />
+                                                )}
+                                            </button>
+                                        </div>
                                     </FormControl>
-                                    <FormMessage />
+                                    {confirmPasswordValue.length > 0 && !doPasswordsMatch && (
+                                        <p className="text-sm text-red-600 mt-1">
+                                            Passwords do not match
+                                        </p>
+                                    )}
+                                    {/* Only show FormMessage when field is empty */}
+                                    {confirmPasswordValue.length === 0 && <FormMessage />}
                                 </FormItem>
                             )}
                         />
@@ -250,6 +474,7 @@ export default function SignupForm({
                             type="submit" 
                             className="w-full"
                             disabled={loading || loadingInviteDetails}
+                            tabIndex={5}
                         >
                             {loading ? t('creatingAccount') : t('createAccount')}
                         </Button>

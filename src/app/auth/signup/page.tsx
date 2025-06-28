@@ -60,7 +60,7 @@ export default async function Page(props: {
                             {t('inviteAlready')}
                         </h2>
                         <p className="text-center">
-                            {t('inviteAlreadyDescription')}
+                            {t('inviteAlreadyDescriptionSignup')}
                         </p>
                     </div>
                 </div>
@@ -72,19 +72,21 @@ export default async function Page(props: {
                 inviteId={inviteId}
             />
 
-            <p className="text-center text-muted-foreground mt-4">
-                {t('signupQuestion')}{" "}
-                <Link
-                    href={
-                        !redirectUrl
-                            ? `/auth/login`
-                            : `/auth/login?redirect=${redirectUrl}`
-                    }
-                    className="underline"
-                >
-                    {t('login')}
-                </Link>
-            </p>
+            {!isInvite && (
+                <p className="text-center text-muted-foreground mt-4">
+                    {t('signupQuestion')}{" "}
+                    <Link
+                        href={
+                            !redirectUrl
+                                ? `/auth/login`
+                                : `/auth/login?redirect=${redirectUrl}`
+                        }
+                        className="underline"
+                    >
+                        {t('login')}
+                    </Link>
+                </p>
+            )}
         </>
     );
 }
