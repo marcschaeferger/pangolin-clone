@@ -35,7 +35,7 @@ declare global {
         interface Request {
             apiKey?: ApiKey;
             user?: User;
-            session?: Session;
+            session: Session;
             userOrg?: UserOrg;
             apiKeyOrg?: ApiKeyOrg;
             userOrgRoleId?: number;

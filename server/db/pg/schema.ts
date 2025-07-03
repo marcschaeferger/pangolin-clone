@@ -492,6 +492,16 @@ export const idpOrg = pgTable("idpOrg", {
     orgMapping: varchar("orgMapping")
 });
 
+export const webauthnChallenge = pgTable("webauthnChallenge", {
+    sessionId: varchar("sessionId").primaryKey(),
+    challenge: varchar("challenge").notNull(),
+    passkeyName: varchar("passkeyName"),
+    userId: varchar("userId").references(() => users.userId, {
+        onDelete: "cascade"
+    }),
+    expiresAt: bigint("expiresAt", { mode: "number" }).notNull() // Unix timestamp
+});
+
 export type Org = InferSelectModel<typeof orgs>;
 export type User = InferSelectModel<typeof users>;
 export type Site = InferSelectModel<typeof sites>;

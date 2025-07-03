@@ -22,7 +22,6 @@ import m18 from "./scriptsSqlite/1.2.0";
 import m19 from "./scriptsSqlite/1.3.0";
 import m20 from "./scriptsSqlite/1.5.0";
 import m21 from "./scriptsSqlite/1.6.0";
-import m22 from "./scriptsSqlite/1.7.0";
 
 // THIS CANNOT IMPORT ANYTHING FROM THE SERVER
 // EXCEPT FOR THE DATABASE AND THE SCHEMA
@@ -44,8 +43,7 @@ const migrations = [
     { version: "1.2.0", run: m18 },
     { version: "1.3.0", run: m19 },
     { version: "1.5.0", run: m20 },
-    { version: "1.6.0", run: m21 },
-    { version: "1.7.0", run: m22 }
+    { version: "1.6.0", run: m21 }
     // Add new migrations here as they are created
 ] as const;
 
@@ -81,17 +79,21 @@ export async function runMigrations() {
     try {
         const appVersion = APP_VERSION;
 
-        if (exists) {
+        // Check if the database file exists and has tables
+        const hasTables = await db.select().from(versionMigrations).limit(1).catch(() => false);
+
+        if (hasTables) {
             await executeScripts();
         } else {
-            console.log("Running migrations...");
+            console.log("Running initial migrations...");
             try {
                 migrate(db, {
-                    migrationsFolder: path.join(__DIRNAME, "init") // put here during the docker build
+                    migrationsFolder: path.join(APP_PATH, "server", "migrations")
                 });
-                console.log("Migrations completed successfully.");
+                console.log("Initial migrations completed successfully.");
             } catch (error) {
-                console.error("Error running migrations:", error);
+                console.error("Error running initial migrations:", error);
+                throw error;
             }
 
             await db

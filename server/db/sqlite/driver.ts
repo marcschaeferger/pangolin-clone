@@ -13,6 +13,8 @@ bootstrapVolume();
 
 function createDb() {
     const sqlite = new Database(location);
+    sqlite.pragma('foreign_keys = ON');
+    sqlite.exec('VACUUM;'); // This will initialize the database file with a valid SQLite header
     return DrizzleSqlite(sqlite, { schema });
 }
 

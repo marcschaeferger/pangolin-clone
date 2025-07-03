@@ -138,6 +138,29 @@ export const users = sqliteTable("user", {
         .default(false)
 });
 
+export const passkeys = sqliteTable("webauthnCredentials", {
+    credentialId: text("credentialId").primaryKey(),
+    userId: text("userId").notNull().references(() => users.userId, {
+        onDelete: "cascade"
+    }),
+    publicKey: text("publicKey").notNull(),
+    signCount: integer("signCount").notNull(),
+    transports: text("transports"),
+    name: text("name"),
+    lastUsed: text("lastUsed").notNull(),
+    dateCreated: text("dateCreated").notNull()
+});
+
+export const webauthnChallenge = sqliteTable("webauthnChallenge", {
+    sessionId: text("sessionId").primaryKey(),
+    challenge: text("challenge").notNull(),
+    passkeyName: text("passkeyName"),
+    userId: text("userId").references(() => users.userId, {
+        onDelete: "cascade"
+    }),
+    expiresAt: integer("expiresAt").notNull() // Unix timestamp
+});
+
 export const newts = sqliteTable("newt", {
     newtId: text("id").primaryKey(),
     secretHash: text("secretHash").notNull(),

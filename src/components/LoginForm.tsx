@@ -26,7 +26,7 @@ import { LoginResponse } from "@server/routers/auth";
 import { useRouter } from "next/navigation";
 import { AxiosResponse } from "axios";
 import { formatAxiosError } from "@app/lib/api";
-import { LockIcon } from "lucide-react";
+import { LockIcon, FingerprintIcon } from "lucide-react";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import {
@@ -41,6 +41,7 @@ import Image from "next/image";
 import { GenerateOidcUrlResponse } from "@server/routers/idp";
 import { Separator } from "./ui/separator";
 import { useTranslations } from "next-intl";
+import { startAuthentication } from "@simplewebauthn/browser";
 
 export type LoginFormIDP = {
     idpId: number;
@@ -162,6 +163,52 @@ export default function LoginForm({ redirect, onLogin, idps }: LoginFormProps) {
             window.location.href = data.redirectUrl;
         } catch (e) {
             console.error(formatAxiosError(e));
+        }
+    }
+
+    async function loginWithPasskey() {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const email = form.getValues().email;
+
+            // Start passkey authentication
+            const startRes = await api.post("/auth/passkey/authenticate/start", {
+                email: email || undefined
+            });
+
+            if (!startRes) {
+                setError(t('passkeyAuthError'));
+                return;
+            }
+
+            const { tempSessionId, ...options } = startRes.data.data;
+
+            // Perform passkey authentication
+            const credential = await startAuthentication(options);
+
+            // Verify authentication
+            const verifyRes = await api.post(
+                "/auth/passkey/authenticate/verify",
+                { credential },
+                {
+                    headers: {
+                        'X-Temp-Session-Id': tempSessionId
+                    }
+                }
+            );
+
+            if (verifyRes) {
+                if (onLogin) {
+                    await onLogin();
+                }
+            }
+        } catch (e) {
+            console.error(e);
+            setError(formatAxiosError(e, t('passkeyAuthError')));
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -319,6 +366,18 @@ export default function LoginForm({ redirect, onLogin, idps }: LoginFormProps) {
                         >
                             <LockIcon className="w-4 h-4 mr-2" />
                             {t('login')}
+                        </Button>
+
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full"
+                            onClick={loginWithPasskey}
+                            loading={loading}
+                            disabled={loading}
+                        >
+                            <FingerprintIcon className="w-4 h-4 mr-2" />
+                            {t('passkeyLogin')}
                         </Button>
 
                         {hasIdp && (
