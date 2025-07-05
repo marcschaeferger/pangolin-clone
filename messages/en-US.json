@@ -31,8 +31,6 @@
     "email": "Email",
     "password": "Password",
     "passwordRequired": "Password is required",
-    "passwordRequirementsLength": "Password must be at least 8 characters",
-    "passwordRequirementsChars": "Password must be at least 8 characters",
     "confirmPassword": "Confirm Password",
     "createAccount": "Create Account",
     "creatingAccount": "Creating account...",
