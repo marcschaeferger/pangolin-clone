@@ -7,6 +7,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { getTranslations } from 'next-intl/server';
+import { internal } from "@app/lib/api";
+import { AxiosResponse } from "axios";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +22,7 @@ export default async function Page(props: {
 
     const env = pullEnv();
 
-    const isInvite = searchParams?.redirect?.includes("/invite");
+    const isInvite = searchParams?.redirect?.includes("/invite") ?? false;
 
     if (env.flags.disableSignupWithoutInvite && !isInvite) {
         redirect("/");
@@ -32,6 +34,8 @@ export default async function Page(props: {
 
     let inviteId;
     let inviteToken;
+    let isValidInvite = false;
+
     if (searchParams.redirect && isInvite) {
         // Handle URLs like "/invite?token=inviteId-tokenValue"
         const url = new URL(searchParams.redirect, 'http://localhost');
@@ -41,6 +45,14 @@ export default async function Page(props: {
             if (tokenParts.length >= 2) {
                 inviteId = tokenParts[0];
                 inviteToken = tokenParts.slice(1).join("-"); // Handle tokens with multiple dashes
+
+                // Verify if the invite is valid
+                try {
+                    const inviteRes = await internal.get<AxiosResponse<any>>(`/invite/${inviteId}/${inviteToken}/details`);
+                    isValidInvite = inviteRes.status === 200;
+                } catch (e) {
+                    isValidInvite = false;
+                }
             }
         }
     }
@@ -52,7 +64,7 @@ export default async function Page(props: {
 
     return (
         <>
-            {isInvite && (
+            {isInvite && isValidInvite && (
                 <div className="border rounded-md p-3 mb-4 bg-card">
                     <div className="flex flex-col items-center">
                         <Mail className="w-12 h-12 mb-4 text-primary" />
@@ -70,6 +82,8 @@ export default async function Page(props: {
                 redirect={redirectUrl}
                 inviteToken={inviteToken}
                 inviteId={inviteId}
+                isValidInvite={isValidInvite}
+                isInvite={isInvite}
             />
 
             {!isInvite && (

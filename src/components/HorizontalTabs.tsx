@@ -48,9 +48,12 @@ export function HorizontalTabs({
                     <div className="flex space-x-4 border-b min-w-max">
                         {items.map((item) => {
                             const hydratedHref = hydrateHref(item.href);
-                            const isActive =
-                                pathname.startsWith(hydratedHref) &&
-                                !pathname.includes("create");
+                            // Get the current tab's path segments
+                            const hrefSegments = hydratedHref.split('/').filter(Boolean);
+                            const pathSegments = pathname.split('/').filter(Boolean);
+                            
+                            // A tab is active if its path segments match the current path segments up to its length
+                            const isActive = hrefSegments.every((segment, index) => segment === pathSegments[index]);
                             const isProfessional =
                                 item.showProfessional && !isUnlocked();
                             const isDisabled =

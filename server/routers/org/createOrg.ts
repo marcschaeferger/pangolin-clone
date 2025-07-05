@@ -109,7 +109,8 @@ export async function createOrg(
                 .insert(orgs)
                 .values({
                     orgId,
-                    name
+                    name,
+                    dateCreated: new Date().toISOString()
                 })
                 .returning();
 

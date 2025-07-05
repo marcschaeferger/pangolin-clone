@@ -17,6 +17,7 @@ import { sendEmail } from "@server/emails";
 import SendInviteLink from "@server/emails/templates/SendInviteLink";
 import { OpenAPITags, registry } from "@server/openApi";
 import { UserType } from "@server/types/UserTypes";
+import { logAuditEvent } from "@server/lib/auditLogger";
 
 const regenerateTracker = new NodeCache({ stdTTL: 3600, checkperiod: 600 });
 
@@ -144,6 +145,14 @@ export async function inviteUser(
             .limit(1);
 
         if (existingInvite.length && !regenerate) {
+            logAuditEvent("invite.create", {
+                userId: req.user?.userId,
+                orgId,
+                targetEmail: email,
+                success: false,
+                error: "Duplicate invitation",
+                ip: req.ip
+            });
             return next(
                 createHttpError(
                     HttpCode.CONFLICT,
@@ -155,6 +164,15 @@ export async function inviteUser(
         if (existingInvite.length) {
             const attempts = regenerateTracker.get<number>(email) || 0;
             if (attempts >= 3) {
+                logAuditEvent("invite.regenerate", {
+                    userId: req.user?.userId,
+                    orgId,
+                    targetEmail: email,
+                    inviteId: existingInvite[0].inviteId,
+                    success: false,
+                    error: "Rate limit exceeded",
+                    ip: req.ip
+                });
                 return next(
                     createHttpError(
                         HttpCode.TOO_MANY_REQUESTS,
@@ -206,6 +224,16 @@ export async function inviteUser(
                     }
                 );
             }
+
+            logAuditEvent("invite.regenerate", {
+                userId: req.user?.userId,
+                orgId,
+                targetEmail: email,
+                inviteId: existingInvite[0].inviteId,
+                roleId,
+                success: true,
+                ip: req.ip
+            });
 
             return response<InviteUserResponse>(res, {
                 data: {
@@ -259,6 +287,16 @@ export async function inviteUser(
             );
         }
 
+        logAuditEvent("invite.create", {
+            userId: req.user?.userId,
+            orgId,
+            targetEmail: email,
+            inviteId,
+            roleId,
+            success: true,
+            ip: req.ip
+        });
+
         return response<InviteUserResponse>(res, {
             data: {
                 inviteLink,
@@ -271,6 +309,14 @@ export async function inviteUser(
         });
     } catch (error) {
         logger.error(error);
+        logAuditEvent("invite.create", {
+            userId: req.user?.userId,
+            orgId: req.params.orgId,
+            targetEmail: req.body.email,
+            success: false,
+            error: error instanceof Error ? error.message : "Unknown error",
+            ip: req.ip
+        });
         return next(
             createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );

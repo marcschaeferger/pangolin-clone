@@ -63,7 +63,7 @@ export default async function GeneralSettingsPage({
     const navItems = [
         {
             title: t('general'),
-            href: `/${orgId}/settings/general`,
+            href: `/${orgId}/settings/general/overview`,
         },
         {
             title: t('security'),

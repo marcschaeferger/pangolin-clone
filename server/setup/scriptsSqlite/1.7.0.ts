@@ -13,15 +13,18 @@ export default async function migration() {
     try {
         db.pragma("foreign_keys = OFF");
         db.transaction(() => {
-            // Add passwordResetTokenExpiryHours column to orgs table with default value of 1
+            // Add missing columns to tables
             db.exec(`
-                ALTER TABLE orgs ADD COLUMN passwordResetTokenExpiryHours INTEGER NOT NULL DEFAULT 1;
+                ALTER TABLE orgs ADD COLUMN passwordResetTokenExpiryHours INTEGER NOT NULL DEFAULT 24;
+                ALTER TABLE roles ADD COLUMN description TEXT;
+                ALTER TABLE actions ADD COLUMN description TEXT;
+                ALTER TABLE resourceAccessToken ADD COLUMN description TEXT;
             `);
         })(); // <-- executes the transaction immediately
         db.pragma("foreign_keys = ON");
-        console.log(`Added passwordResetTokenExpiryHours column to orgs table`);
+        console.log(`Added missing columns to database tables`);
     } catch (e) {
-        console.log("Error adding passwordResetTokenExpiryHours column to orgs table:");
+        console.log("Error updating database schema:");
         console.log(e);
         throw e;
     }

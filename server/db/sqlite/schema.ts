@@ -12,7 +12,9 @@ export const domains = sqliteTable("domains", {
 export const orgs = sqliteTable("orgs", {
     orgId: text("orgId").primaryKey(),
     name: text("name").notNull(),
-    passwordResetTokenExpiryHours: integer("passwordResetTokenExpiryHours").notNull().default(1)
+    description: text("description"),
+    dateCreated: text("dateCreated").notNull(),
+    passwordResetTokenExpiryHours: integer("passwordResetTokenExpiryHours").notNull().default(24)
 });
 
 export const orgDomains = sqliteTable("orgDomains", {

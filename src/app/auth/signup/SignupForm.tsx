@@ -41,6 +41,8 @@ type SignupFormProps = {
     redirect?: string;
     inviteId?: string;
     inviteToken?: string;
+    isValidInvite: boolean;
+    isInvite: boolean;
 };
 
 // Password strength calculation
@@ -90,7 +92,9 @@ const formSchema = z
 export default function SignupForm({
     redirect,
     inviteId,
-    inviteToken
+    inviteToken,
+    isValidInvite,
+    isInvite
 }: SignupFormProps) {
     const router = useRouter();
     const api = createApiClient(useEnvContext());
@@ -119,9 +123,9 @@ export default function SignupForm({
     const passwordStrength = calculatePasswordStrength(passwordValue);
     const doPasswordsMatch = passwordValue.length > 0 && confirmPasswordValue.length > 0 && passwordValue === confirmPasswordValue;
 
-    // Fetch invite details if coming from an invite link
+    // Fetch invite details if coming from a valid invite link
     useEffect(() => {
-        if (inviteId && inviteToken) {
+        if (inviteId && inviteToken && isValidInvite) {
             setLoadingInviteDetails(true);
             api.get<AxiosResponse<GetInviteDetailsResponse>>(`/invite/${inviteId}/${inviteToken}/details`)
                 .then((res) => {
@@ -133,13 +137,56 @@ export default function SignupForm({
                 })
                 .catch((e) => {
                     console.error("Failed to fetch invite details:", e);
-                    // Don't show error for invite details, just continue with normal signup
                 })
                 .finally(() => {
                     setLoadingInviteDetails(false);
                 });
         }
-    }, [inviteId, inviteToken, api, form]);
+    }, [inviteId, inviteToken, isValidInvite, api, form]);
+
+    // Show invalid invite card
+    if (isInvite && !isValidInvite) {
+        return (
+            <Card className="w-full max-w-md">
+                <CardHeader>
+                    <div className="flex flex-row items-center justify-center">
+                        <Image
+                            src={`/logo/pangolin_orange.svg`}
+                            alt={t('pangolinLogoAlt')}
+                            width="100"
+                            height="100"
+                        />
+                    </div>
+                    <div className="text-center space-y-1">
+                        <CardTitle className="text-2xl font-bold">
+                            {t('inviteInvalid')}
+                        </CardTitle>
+                        <CardDescription>
+                            {t('inviteInvalidDescription')}
+                        </CardDescription>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <div className="text-center space-y-4">
+                        <p className="text-muted-foreground">
+                            {t('inviteErrorNotValid')}
+                        </p>
+                        <ul className="list-disc list-inside text-sm space-y-2 text-left">
+                            <li>{t('inviteErrorExpired')}</li>
+                            <li>{t('inviteErrorRevoked')}</li>
+                            <li>{t('inviteErrorTypo')}</li>
+                        </ul>
+                        <Button 
+                            onClick={() => router.push('/')}
+                            className="mt-4"
+                        >
+                            {t('goHome')}
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+        );
+    }
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const { name, email, password } = values;
@@ -184,8 +231,6 @@ export default function SignupForm({
         setLoading(false);
     }
 
-    const isFromInvite = !!(inviteId && inviteToken);
-
     return (
         <Card className="w-full max-w-md">
             <CardHeader>
@@ -207,6 +252,11 @@ export default function SignupForm({
                 </div>
             </CardHeader>
             <CardContent>
+                {error && (
+                    <Alert variant="destructive" className="mb-4">
+                        <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                )}
                 <Form {...form}>
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
@@ -243,19 +293,19 @@ export default function SignupForm({
                                         <Input 
                                             {...field}
                                             onChange={(e) => {
-                                                if (!isFromInvite) {
+                                                if (!isInvite) {
                                                     field.onChange(e);
                                                 }
                                             }}
-                                            readOnly={isFromInvite}
+                                            readOnly={isInvite}
                                             disabled={loadingInviteDetails}
-                                            className={isFromInvite ? "bg-muted" : ""}
+                                            className={isInvite ? "bg-muted" : ""}
                                             autoComplete="email"
                                             tabIndex={2}
                                         />
                                     </FormControl>
                                     <FormMessage />
-                                    {isFromInvite && inviteEmail && (
+                                    {isInvite && inviteEmail && (
                                         <p className="text-sm text-muted-foreground">
                                             {t('inviteEmailPreFilled')}
                                         </p>
@@ -463,12 +513,6 @@ export default function SignupForm({
                                 </FormItem>
                             )}
                         />
-
-                        {error && (
-                            <Alert variant="destructive">
-                                <AlertDescription>{error}</AlertDescription>
-                            </Alert>
-                        )}
 
                         <Button 
                             type="submit" 

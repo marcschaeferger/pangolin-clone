@@ -12,28 +12,41 @@ export default async function InvitePage(props: {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
     const params = await props.searchParams;
+    const t = await getTranslations();
 
     const tokenParam = params.token as string;
 
     if (!tokenParam) {
-        redirect("/");
+        return (
+            <InviteStatusCard type="rejected" token={tokenParam} />
+        );
     }
-
-    const user = await verifySession();
-    const t = await getTranslations();
 
     const parts = tokenParam.split("-");
     if (parts.length !== 2) {
         return (
-            <>
-                <h1>{t('inviteInvalid')}</h1>
-                <p>{t('inviteInvalidDescription')}</p>
-            </>
+            <InviteStatusCard type="rejected" token={tokenParam} />
         );
     }
 
     const inviteId = parts[0];
     const token = parts[1];
+
+    // First verify if the invite exists and is valid
+    let inviteError = "";
+    const inviteRes = await internal
+        .get<AxiosResponse<any>>(`/invite/${inviteId}/${token}/details`)
+        .catch((e) => {
+            inviteError = formatAxiosError(e);
+        });
+
+    if (inviteError || !inviteRes) {
+        return (
+            <InviteStatusCard type="rejected" token={tokenParam} />
+        );
+    }
+
+    const user = await verifySession();
 
     let error = "";
     const res = await internal
