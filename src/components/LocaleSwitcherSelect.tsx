@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger
 } from '@app/components/ui/dropdown-menu';
 import { Button } from '@app/components/ui/button';
-import { Check, Globe, Languages } from 'lucide-react';
+import { Check, Languages } from 'lucide-react';
 import clsx from 'clsx';
 import { useTransition } from 'react';
 import { Locale } from '@/i18n/config';
@@ -26,10 +26,14 @@ export default function LocaleSwitcherSelect({
 }: Props) {
   const [isPending, startTransition] = useTransition();
 
-  function onChange(value: string) {
+  async function onChange(value: string) {
     const locale = value as Locale;
-    startTransition(() => {
-      setUserLocale(locale);
+    startTransition(async () => {
+      await setUserLocale(locale);
+      // Add a small delay to ensure cookie is set
+      await new Promise(resolve => setTimeout(resolve, 100));
+      // Use full page reload instead of client-side navigation
+      window.location.reload();
     });
   }
 
@@ -42,7 +46,7 @@ export default function LocaleSwitcherSelect({
           variant="ghost"
           className={clsx(
             'w-full rounded-sm h-8 gap-2 justify-start font-normal',
-            isPending && 'pointer-events-none'
+            isPending && 'pointer-events-none opacity-50'
           )}
           aria-label={label}
         >
