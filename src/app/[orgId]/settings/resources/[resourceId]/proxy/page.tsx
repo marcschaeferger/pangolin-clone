@@ -128,7 +128,7 @@ export default function ReverseProxyTargets(props: {
                     return true;
                 },
                 {
-                    message: t('proxyErrorInvalidHeader')
+                    message: t("proxyErrorInvalidHeader")
                 }
             )
     });
@@ -146,7 +146,7 @@ export default function ReverseProxyTargets(props: {
                     return true;
                 },
                 {
-                    message: t('proxyErrorTls')
+                    message: t("proxyErrorTls")
                 }
             )
     });
@@ -203,10 +203,10 @@ export default function ReverseProxyTargets(props: {
                 console.error(err);
                 toast({
                     variant: "destructive",
-                    title: t('targetErrorFetch'),
+                    title: t("targetErrorFetch"),
                     description: formatAxiosError(
                         err,
-                        t('targetErrorFetchDescription')
+                        t("targetErrorFetchDescription")
                     )
                 });
             } finally {
@@ -228,10 +228,10 @@ export default function ReverseProxyTargets(props: {
                 console.error(err);
                 toast({
                     variant: "destructive",
-                    title: t('siteErrorFetch'),
+                    title: t("siteErrorFetch"),
                     description: formatAxiosError(
                         err,
-                        t('siteErrorFetchDescription')
+                        t("siteErrorFetchDescription")
                     )
                 });
             }
@@ -251,8 +251,8 @@ export default function ReverseProxyTargets(props: {
         if (isDuplicate) {
             toast({
                 variant: "destructive",
-                title: t('targetErrorDuplicate'),
-                description: t('targetErrorDuplicateDescription')
+                title: t("targetErrorDuplicate"),
+                description: t("targetErrorDuplicateDescription")
             });
             return;
         }
@@ -261,11 +261,23 @@ export default function ReverseProxyTargets(props: {
             // make sure that the target IP is within the site subnet
             const targetIp = data.ip;
             const subnet = site.subnet;
-            if (!isIPInSubnet(targetIp, subnet)) {
+            try {
+                if (!isIPInSubnet(targetIp, subnet)) {
+                    toast({
+                        variant: "destructive",
+                        title: t("targetWireGuardErrorInvalidIp"),
+                        description: t(
+                            "targetWireGuardErrorInvalidIpDescription"
+                        )
+                    });
+                    return;
+                }
+            } catch (error) {
+                console.error(error);
                 toast({
                     variant: "destructive",
-                    title: t('targetWireGuardErrorInvalidIp'),
-                    description: t('targetWireGuardErrorInvalidIpDescription')
+                    title: t("targetWireGuardErrorInvalidIp"),
+                    description: t("targetWireGuardErrorInvalidIpDescription")
                 });
                 return;
             }
@@ -343,8 +355,8 @@ export default function ReverseProxyTargets(props: {
             updateResource({ stickySession: stickySessionData.stickySession });
 
             toast({
-                title: t('targetsUpdated'),
-                description: t('targetsUpdatedDescription')
+                title: t("targetsUpdated"),
+                description: t("targetsUpdatedDescription")
             });
 
             setTargetsToRemove([]);
@@ -353,10 +365,10 @@ export default function ReverseProxyTargets(props: {
             console.error(err);
             toast({
                 variant: "destructive",
-                title: t('targetsErrorUpdate'),
+                title: t("targetsErrorUpdate"),
                 description: formatAxiosError(
                     err,
-                    t('targetsErrorUpdateDescription')
+                    t("targetsErrorUpdateDescription")
                 )
             });
         } finally {
@@ -377,17 +389,17 @@ export default function ReverseProxyTargets(props: {
                 tlsServerName: data.tlsServerName || null
             });
             toast({
-                title: t('targetTlsUpdate'),
-                description: t('targetTlsUpdateDescription')
+                title: t("targetTlsUpdate"),
+                description: t("targetTlsUpdateDescription")
             });
         } catch (err) {
             console.error(err);
             toast({
                 variant: "destructive",
-                title: t('targetErrorTlsUpdate'),
+                title: t("targetErrorTlsUpdate"),
                 description: formatAxiosError(
                     err,
-                    t('targetErrorTlsUpdateDescription')
+                    t("targetErrorTlsUpdateDescription")
                 )
             });
         } finally {
@@ -406,17 +418,17 @@ export default function ReverseProxyTargets(props: {
                 setHostHeader: data.setHostHeader || null
             });
             toast({
-                title: t('proxyUpdated'),
-                description: t('proxyUpdatedDescription')
+                title: t("proxyUpdated"),
+                description: t("proxyUpdatedDescription")
             });
         } catch (err) {
             console.error(err);
             toast({
                 variant: "destructive",
-                title: t('proxyErrorUpdate'),
+                title: t("proxyErrorUpdate"),
                 description: formatAxiosError(
                     err,
-                    t('proxyErrorUpdateDescription')
+                    t("proxyErrorUpdateDescription")
                 )
             });
         } finally {
@@ -427,7 +439,7 @@ export default function ReverseProxyTargets(props: {
     const columns: ColumnDef<LocalTarget>[] = [
         {
             accessorKey: "ip",
-            header: t('targetAddr'),
+            header: t("targetAddr"),
             cell: ({ row }) => (
                 <Input
                     defaultValue={row.original.ip}
@@ -442,7 +454,7 @@ export default function ReverseProxyTargets(props: {
         },
         {
             accessorKey: "port",
-            header: t('targetPort'),
+            header: t("targetPort"),
             cell: ({ row }) => (
                 <Input
                     type="number"
@@ -476,7 +488,7 @@ export default function ReverseProxyTargets(props: {
         // },
         {
             accessorKey: "enabled",
-            header: t('enabled'),
+            header: t("enabled"),
             cell: ({ row }) => (
                 <Switch
                     defaultChecked={row.original.enabled}
@@ -503,7 +515,7 @@ export default function ReverseProxyTargets(props: {
                             variant="outline"
                             onClick={() => removeTarget(row.original.targetId)}
                         >
-                            {t('delete')}
+                            {t("delete")}
                         </Button>
                     </div>
                 </>
@@ -514,7 +526,7 @@ export default function ReverseProxyTargets(props: {
     if (resource.http) {
         const methodCol: ColumnDef<LocalTarget> = {
             accessorKey: "method",
-            header: t('method'),
+            header: t("method"),
             cell: ({ row }) => (
                 <Select
                     defaultValue={row.original.method ?? ""}
@@ -561,11 +573,9 @@ export default function ReverseProxyTargets(props: {
         <SettingsContainer>
             <SettingsSection>
                 <SettingsSectionHeader>
-                    <SettingsSectionTitle>
-                        {t('targets')}
-                    </SettingsSectionTitle>
+                    <SettingsSectionTitle>{t("targets")}</SettingsSectionTitle>
                     <SettingsSectionDescription>
-                        {t('targetsDescription')}
+                        {t("targetsDescription")}
                     </SettingsSectionDescription>
                 </SettingsSectionHeader>
                 <SettingsSectionBody>
@@ -587,8 +597,12 @@ export default function ReverseProxyTargets(props: {
                                                 <FormControl>
                                                     <SwitchInput
                                                         id="sticky-toggle"
-                                                        label={t('targetStickySessions')}
-                                                        description={t('targetStickySessionsDescription')}
+                                                        label={t(
+                                                            "targetStickySessions"
+                                                        )}
+                                                        description={t(
+                                                            "targetStickySessionsDescription"
+                                                        )}
                                                         defaultChecked={
                                                             field.value
                                                         }
@@ -619,7 +633,9 @@ export default function ReverseProxyTargets(props: {
                                         name="method"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>{t('method')}</FormLabel>
+                                                <FormLabel>
+                                                    {t("method")}
+                                                </FormLabel>
                                                 <FormControl>
                                                     <Select
                                                         value={
@@ -636,7 +652,11 @@ export default function ReverseProxyTargets(props: {
                                                         }}
                                                     >
                                                         <SelectTrigger id="method">
-                                                            <SelectValue placeholder={t('methodSelect')} />
+                                                            <SelectValue
+                                                                placeholder={t(
+                                                                    "methodSelect"
+                                                                )}
+                                                            />
                                                         </SelectTrigger>
                                                         <SelectContent>
                                                             <SelectItem value="http">
@@ -662,7 +682,9 @@ export default function ReverseProxyTargets(props: {
                                     name="ip"
                                     render={({ field }) => (
                                         <FormItem className="relative">
-                                            <FormLabel>{t('targetAddr')}</FormLabel>
+                                            <FormLabel>
+                                                {t("targetAddr")}
+                                            </FormLabel>
                                             <FormControl>
                                                 <Input id="ip" {...field} />
                                             </FormControl>
@@ -695,7 +717,9 @@ export default function ReverseProxyTargets(props: {
                                     name="port"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>{t('targetPort')}</FormLabel>
+                                            <FormLabel>
+                                                {t("targetPort")}
+                                            </FormLabel>
                                             <FormControl>
                                                 <Input
                                                     id="port"
@@ -714,7 +738,7 @@ export default function ReverseProxyTargets(props: {
                                     className="mt-6"
                                     disabled={!(watchedIp && watchedPort)}
                                 >
-                                    {t('targetSubmit')}
+                                    {t("targetSubmit")}
                                 </Button>
                             </div>
                         </form>
@@ -758,13 +782,13 @@ export default function ReverseProxyTargets(props: {
                                         colSpan={columns.length}
                                         className="h-24 text-center"
                                     >
-                                        {t('targetNoOne')}
+                                        {t("targetNoOne")}
                                     </TableCell>
                                 </TableRow>
                             )}
                         </TableBody>
                         <TableCaption>
-                            {t('targetNoOneDescription')}
+                            {t("targetNoOneDescription")}
                         </TableCaption>
                     </Table>
                 </SettingsSectionBody>
@@ -775,7 +799,7 @@ export default function ReverseProxyTargets(props: {
                         disabled={targetsLoading}
                         form="targets-settings-form"
                     >
-                        {t('targetsSubmit')}
+                        {t("targetsSubmit")}
                     </Button>
                 </SettingsSectionFooter>
             </SettingsSection>
@@ -785,10 +809,10 @@ export default function ReverseProxyTargets(props: {
                     <SettingsSection>
                         <SettingsSectionHeader>
                             <SettingsSectionTitle>
-                                {t('targetTlsSettings')}
+                                {t("targetTlsSettings")}
                             </SettingsSectionTitle>
                             <SettingsSectionDescription>
-                                {t('targetTlsSettingsDescription')}
+                                {t("targetTlsSettingsDescription")}
                             </SettingsSectionDescription>
                         </SettingsSectionHeader>
                         <SettingsSectionBody>
@@ -809,7 +833,9 @@ export default function ReverseProxyTargets(props: {
                                                     <FormControl>
                                                         <SwitchInput
                                                             id="ssl-toggle"
-                                                            label={t('proxyEnableSSL')}
+                                                            label={t(
+                                                                "proxyEnableSSL"
+                                                            )}
                                                             defaultChecked={
                                                                 field.value
                                                             }
@@ -838,7 +864,9 @@ export default function ReverseProxyTargets(props: {
                                                         className="p-0 flex items-center justify-start gap-2 w-full"
                                                     >
                                                         <p className="text-sm text-muted-foreground">
-                                                            {t('targetTlsSettingsAdvanced')}
+                                                            {t(
+                                                                "targetTlsSettingsAdvanced"
+                                                            )}
                                                         </p>
                                                         <div>
                                                             <ChevronsUpDown className="h-4 w-4" />
@@ -858,7 +886,9 @@ export default function ReverseProxyTargets(props: {
                                                     render={({ field }) => (
                                                         <FormItem>
                                                             <FormLabel>
-                                                                {t('targetTlsSni')}
+                                                                {t(
+                                                                    "targetTlsSni"
+                                                                )}
                                                             </FormLabel>
                                                             <FormControl>
                                                                 <Input
@@ -866,7 +896,9 @@ export default function ReverseProxyTargets(props: {
                                                                 />
                                                             </FormControl>
                                                             <FormDescription>
-                                                                {t('targetTlsSniDescription')}
+                                                                {t(
+                                                                    "targetTlsSniDescription"
+                                                                )}
                                                             </FormDescription>
                                                             <FormMessage />
                                                         </FormItem>
@@ -884,17 +916,17 @@ export default function ReverseProxyTargets(props: {
                                 loading={httpsTlsLoading}
                                 form="tls-settings-form"
                             >
-                                {t('targetTlsSubmit')}
+                                {t("targetTlsSubmit")}
                             </Button>
                         </SettingsSectionFooter>
                     </SettingsSection>
                     <SettingsSection>
                         <SettingsSectionHeader>
                             <SettingsSectionTitle>
-                                {t('proxyAdditional')}
+                                {t("proxyAdditional")}
                             </SettingsSectionTitle>
                             <SettingsSectionDescription>
-                                {t('proxyAdditionalDescription')}
+                                {t("proxyAdditionalDescription")}
                             </SettingsSectionDescription>
                         </SettingsSectionHeader>
                         <SettingsSectionBody>
@@ -913,13 +945,15 @@ export default function ReverseProxyTargets(props: {
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>
-                                                        {t('proxyCustomHeader')}
+                                                        {t("proxyCustomHeader")}
                                                     </FormLabel>
                                                     <FormControl>
                                                         <Input {...field} />
                                                     </FormControl>
                                                     <FormDescription>
-                                                        {t('proxyCustomHeaderDescription')}
+                                                        {t(
+                                                            "proxyCustomHeaderDescription"
+                                                        )}
                                                     </FormDescription>
                                                     <FormMessage />
                                                 </FormItem>
@@ -935,7 +969,7 @@ export default function ReverseProxyTargets(props: {
                                 loading={proxySettingsLoading}
                                 form="proxy-settings-form"
                             >
-                                {t('targetTlsSubmit')}
+                                {t("targetTlsSubmit")}
                             </Button>
                         </SettingsSectionFooter>
                     </SettingsSection>
@@ -950,10 +984,8 @@ function isIPInSubnet(subnet: string, ip: string): boolean {
     const [subnetIP, maskBits] = subnet.split("/");
     const mask = parseInt(maskBits);
 
-    const t = useTranslations();
-
     if (mask < 0 || mask > 32) {
-        throw new Error(t('subnetMaskErrorInvalid'));
+        throw new Error("subnetMaskErrorInvalid");
     }
 
     // Convert IP addresses to binary numbers
@@ -970,17 +1002,16 @@ function isIPInSubnet(subnet: string, ip: string): boolean {
 function ipToNumber(ip: string): number {
     // Validate IP address format
     const parts = ip.split(".");
-    const t = useTranslations();
 
     if (parts.length !== 4) {
-        throw new Error(t('ipAddressErrorInvalidFormat'));
+        throw new Error("ipAddressErrorInvalidFormat");
     }
 
     // Convert IP octets to 32-bit number
     return parts.reduce((num, octet) => {
         const oct = parseInt(octet);
         if (isNaN(oct) || oct < 0 || oct > 255) {
-            throw new Error(t('ipAddressErrorInvalidOctet'));
+            throw new Error("ipAddressErrorInvalidOctet");
         }
         return (num << 8) + oct;
     }, 0);

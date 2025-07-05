@@ -3,8 +3,8 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # COPY package.json package-lock.json ./
-COPY package.json ./
-RUN npm install
+COPY package*.json ./
+RUN npm ci
 
 COPY . .
 
@@ -23,8 +23,8 @@ WORKDIR /app
 RUN apk add --no-cache curl
 
 # COPY package.json package-lock.json ./
-COPY package.json ./
-RUN npm install --only=production && npm cache clean --force
+COPY package*.json ./
+RUN npm ci --omit=dev && npm cache clean --force
 
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
