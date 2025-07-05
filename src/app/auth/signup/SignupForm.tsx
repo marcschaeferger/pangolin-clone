@@ -144,8 +144,52 @@ export default function SignupForm({
         }
     }, [inviteId, inviteToken, isValidInvite, api, form]);
 
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        const { name, email, password } = values;
+
+        setLoading(true);
+        const res = await api
+            .put<AxiosResponse<SignUpResponse>>("/auth/signup", {
+                name,
+                email,
+                password,
+                inviteId,
+                inviteToken
+            })
+            .catch((e) => {
+                console.error(e);
+                setError(
+                    formatAxiosError(e, t('signupError'))
+                );
+            });
+
+        if (res && res.status === 200) {
+            setError(null);
+
+            if (res.data?.data?.emailVerificationRequired) {
+                if (redirect) {
+                    const safe = cleanRedirect(redirect);
+                    router.push(`/auth/verify-email?redirect=${safe}`);
+                } else {
+                    router.push("/auth/verify-email");
+                }
+                return;
+            }
+
+            if (redirect) {
+                const safe = cleanRedirect(redirect);
+                router.replace(safe);
+            } else {
+                router.replace("/setup");
+            }
+            return;
+        }
+
+        setLoading(false);
+    }
+
     // Show invalid invite card
-    if (isInvite && !isValidInvite) {
+    if (isInvite && !isValidInvite && !loading) {
         return (
             <Card className="w-full max-w-md">
                 <CardHeader>
@@ -186,49 +230,6 @@ export default function SignupForm({
                 </CardContent>
             </Card>
         );
-    }
-
-    async function onSubmit(values: z.infer<typeof formSchema>) {
-        const { name, email, password } = values;
-
-        setLoading(true);
-        const res = await api
-            .put<AxiosResponse<SignUpResponse>>("/auth/signup", {
-                name,
-                email,
-                password,
-                inviteId,
-                inviteToken
-            })
-            .catch((e) => {
-                console.error(e);
-                setError(
-                    formatAxiosError(e, t('signupError'))
-                );
-            });
-
-        if (res && res.status === 200) {
-            setError(null);
-
-            if (res.data?.data?.emailVerificationRequired) {
-                if (redirect) {
-                    const safe = cleanRedirect(redirect);
-                    router.push(`/auth/verify-email?redirect=${safe}`);
-                } else {
-                    router.push("/auth/verify-email");
-                }
-                return;
-            }
-
-            if (redirect) {
-                const safe = cleanRedirect(redirect);
-                router.push(safe);
-            } else {
-                router.push("/setup");
-            }
-        }
-
-        setLoading(false);
     }
 
     return (
