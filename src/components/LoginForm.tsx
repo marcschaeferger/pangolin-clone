@@ -42,7 +42,7 @@ import { GenerateOidcUrlResponse } from "@server/routers/idp";
 import { Separator } from "./ui/separator";
 import { useTranslations } from "next-intl";
 import { useToast } from "@/hooks/useToast";
-import { useAuth } from "@/hooks/auth";
+import { useAuth } from "@app/hooks/auth";
 import { useSearchParams } from "next/navigation";
 
 export type LoginFormIDP = {
