@@ -183,7 +183,7 @@ export async function inviteUser(
                 })
                 .where(eq(userInvites.inviteId, inviteId));
 
-            const inviteLink = `${config.getRawConfig().app.dashboard_url}/invite/${inviteId}/${token}`;
+            const inviteLink = `${config.getRawConfig().app.dashboard_url}/invite?token=${inviteId}-${token}`;
 
             if (doEmail) {
                 await sendEmail(
@@ -229,7 +229,7 @@ export async function inviteUser(
             expiresAt
         });
 
-        const inviteLink = `${config.getRawConfig().app.dashboard_url}/invite/${inviteId}/${token}`;
+        const inviteLink = `${config.getRawConfig().app.dashboard_url}/invite?token=${inviteId}-${token}`;
 
         if (doEmail) {
             await sendEmail(

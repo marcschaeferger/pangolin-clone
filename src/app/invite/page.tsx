@@ -35,7 +35,7 @@ export default async function InvitePage(props: {
     // First verify if the invite exists and is valid
     let inviteError = "";
     const inviteRes = await internal
-        .get<AxiosResponse<any>>(`/invite/${inviteId}/${token}/details`)
+        .get<AxiosResponse<any>>(`/invite/details?token=${tokenParam}`)
         .catch((e) => {
             inviteError = formatAxiosError(e);
         });

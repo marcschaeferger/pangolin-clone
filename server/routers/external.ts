@@ -214,8 +214,8 @@ authenticated.post(
     verifyUserHasAction(ActionsEnum.inviteUser),
     user.inviteUser
 ); // maybe make this /invite/create instead
-unauthenticated.post("/invite/accept", user.acceptInvite); // this is supposed to be unauthenticated
-unauthenticated.get("/invite/:inviteId/:token/details", user.getInviteDetails); // for email autofill in signup
+unauthenticated.post("/invite/accept", user.acceptInvite);
+unauthenticated.get("/invite/details", user.getInviteDetails);
 
 authenticated.get(
     "/resource/:resourceId/roles",

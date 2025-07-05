@@ -10,9 +10,8 @@ import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { checkValidInvite } from "@server/auth/checkValidInvite";
 
-const getInviteDetailsParamsSchema = z
+const getInviteDetailsQuerySchema = z
     .object({
-        inviteId: z.string(),
         token: z.string()
     })
     .strict();
@@ -29,17 +28,28 @@ export async function getInviteDetails(
     next: NextFunction
 ): Promise<any> {
     try {
-        const parsedParams = getInviteDetailsParamsSchema.safeParse(req.params);
-        if (!parsedParams.success) {
+        const parsedQuery = getInviteDetailsQuerySchema.safeParse(req.query);
+        if (!parsedQuery.success) {
             return next(
                 createHttpError(
                     HttpCode.BAD_REQUEST,
-                    fromError(parsedParams.error).toString()
+                    fromError(parsedQuery.error).toString()
                 )
             );
         }
 
-        const { inviteId, token } = parsedParams.data;
+        const tokenParam = parsedQuery.data.token;
+        const parts = tokenParam.split("-");
+        if (parts.length !== 2) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    "Invalid token format"
+                )
+            );
+        }
+
+        const [inviteId, token] = parts;
 
         const { error, existingInvite } = await checkValidInvite({
             token,
