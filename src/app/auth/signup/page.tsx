@@ -48,7 +48,7 @@ export default async function Page(props: {
 
                 // Verify if the invite is valid
                 try {
-                    const inviteRes = await internal.get<AxiosResponse<any>>(`/invite/${inviteId}/${inviteToken}/details`);
+                    const inviteRes = await internal.get<AxiosResponse<any>>(`/invite/details?token=${tokenParam}`);
                     isValidInvite = inviteRes.status === 200;
                 } catch (e) {
                     isValidInvite = false;

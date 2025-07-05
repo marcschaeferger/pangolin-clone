@@ -127,7 +127,7 @@ export default function SignupForm({
     useEffect(() => {
         if (inviteId && inviteToken && isValidInvite) {
             setLoadingInviteDetails(true);
-            api.get<AxiosResponse<GetInviteDetailsResponse>>(`/invite/${inviteId}/${inviteToken}/details`)
+            api.get<AxiosResponse<GetInviteDetailsResponse>>(`/invite/details?token=${inviteId}-${inviteToken}`)
                 .then((res) => {
                     if (res.status === 200) {
                         const email = res.data.data.email;
