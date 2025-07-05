@@ -8,7 +8,6 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
-import { logAuditEvent } from "@server/lib/auditLogger";
 
 const removeInvitationParamsSchema = z
     .object({
@@ -46,14 +45,6 @@ export async function removeInvitation(
             .returning();
 
         if (deletedInvitation.length === 0) {
-            logAuditEvent("invite.delete", {
-                userId: req.user?.userId,
-                orgId,
-                inviteId,
-                success: false,
-                error: "Invitation not found",
-                ip: req.ip
-            });
             return next(
                 createHttpError(
                     HttpCode.NOT_FOUND,
@@ -61,15 +52,6 @@ export async function removeInvitation(
                 )
             );
         }
-
-        logAuditEvent("invite.delete", {
-            userId: req.user?.userId,
-            orgId,
-            inviteId,
-            targetEmail: deletedInvitation[0].email,
-            success: true,
-            ip: req.ip
-        });
 
         return response(res, {
             data: null,
@@ -80,14 +62,6 @@ export async function removeInvitation(
         });
     } catch (error) {
         logger.error(error);
-        logAuditEvent("invite.delete", {
-            userId: req.user?.userId,
-            orgId: req.params.orgId,
-            inviteId: req.params.inviteId,
-            success: false,
-            error: error instanceof Error ? error.message : "Unknown error",
-            ip: req.ip
-        });
         return next(
             createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );

@@ -37,7 +37,6 @@ import { verifyUserIsOrgOwner } from "../middlewares/verifyUserIsOrgOwner";
 import { createNewt, getToken } from "./newt";
 import rateLimit from "express-rate-limit";
 import createHttpError from "http-errors";
-import * as auditLogs from "./admin/auditLogs";
 
 // Root routes
 export const unauthenticated = Router();
@@ -816,16 +815,3 @@ authRouter.post("/idp/:idpId/oidc/validate-callback", idp.validateOidcCallback);
 
 authRouter.put("/set-server-admin", auth.setServerAdmin);
 authRouter.get("/initial-setup-complete", auth.initialSetupComplete);
-
-// Add audit logs routes
-authenticated.get(
-    `/admin/audit-logs`,
-    verifyUserIsServerAdmin,
-    auditLogs.getAuditLogs
-);
-
-authenticated.get(
-    `/admin/audit-logs/download`,
-    verifyUserIsServerAdmin,
-    auditLogs.downloadAuditLogs
-);

@@ -17,7 +17,6 @@ import { sendEmail } from "@server/emails";
 import SendInviteLink from "@server/emails/templates/SendInviteLink";
 import { OpenAPITags, registry } from "@server/openApi";
 import { UserType } from "@server/types/UserTypes";
-import { logAuditEvent } from "@server/lib/auditLogger";
 
 const regenerateTracker = new NodeCache({ stdTTL: 3600, checkperiod: 600 });
 
@@ -145,14 +144,6 @@ export async function inviteUser(
             .limit(1);
 
         if (existingInvite.length && !regenerate) {
-            logAuditEvent("invite.create", {
-                userId: req.user?.userId,
-                orgId,
-                targetEmail: email,
-                success: false,
-                error: "Duplicate invitation",
-                ip: req.ip
-            });
             return next(
                 createHttpError(
                     HttpCode.CONFLICT,
@@ -164,15 +155,6 @@ export async function inviteUser(
         if (existingInvite.length) {
             const attempts = regenerateTracker.get<number>(email) || 0;
             if (attempts >= 3) {
-                logAuditEvent("invite.regenerate", {
-                    userId: req.user?.userId,
-                    orgId,
-                    targetEmail: email,
-                    inviteId: existingInvite[0].inviteId,
-                    success: false,
-                    error: "Rate limit exceeded",
-                    ip: req.ip
-                });
                 return next(
                     createHttpError(
                         HttpCode.TOO_MANY_REQUESTS,
@@ -183,7 +165,7 @@ export async function inviteUser(
 
             regenerateTracker.set(email, attempts + 1);
 
-            const inviteId = existingInvite[0].inviteId; // Retrieve the original inviteId
+            const inviteId = existingInvite[0].inviteId;
             const token = generateRandomString(
                 32,
                 alphabet("a-z", "A-Z", "0-9")
@@ -199,14 +181,9 @@ export async function inviteUser(
                     tokenHash,
                     expiresAt
                 })
-                .where(
-                    and(
-                        eq(userInvites.email, email),
-                        eq(userInvites.orgId, orgId)
-                    )
-                );
+                .where(eq(userInvites.inviteId, inviteId));
 
-            const inviteLink = `${config.getRawConfig().app.dashboard_url}/invite?token=${inviteId}-${token}`;
+            const inviteLink = `${config.getRawConfig().app.dashboard_url}/invite/${inviteId}/${token}`;
 
             if (doEmail) {
                 await sendEmail(
@@ -214,7 +191,7 @@ export async function inviteUser(
                         email,
                         inviteLink,
                         expiresInDays: (validHours / 24).toString(),
-                        orgName: org[0].name || orgId,
+                        orgName: org[0].name,
                         inviterName: req.user?.email || req.user?.username
                     }),
                     {
@@ -224,16 +201,6 @@ export async function inviteUser(
                     }
                 );
             }
-
-            logAuditEvent("invite.regenerate", {
-                userId: req.user?.userId,
-                orgId,
-                targetEmail: email,
-                inviteId: existingInvite[0].inviteId,
-                roleId,
-                success: true,
-                ip: req.ip
-            });
 
             return response<InviteUserResponse>(res, {
                 data: {
@@ -247,28 +214,22 @@ export async function inviteUser(
             });
         }
 
-        // Create a new invite if none exists
-        const inviteId = generateRandomString(
-            10,
-            alphabet("a-z", "A-Z", "0-9")
-        );
+        // Create a new invitation
+        const inviteId = generateRandomString(32, alphabet("a-z", "A-Z", "0-9"));
         const token = generateRandomString(32, alphabet("a-z", "A-Z", "0-9"));
         const expiresAt = createDate(new TimeSpan(validHours, "h")).getTime();
-
         const tokenHash = await hashPassword(token);
 
-        await db.transaction(async (trx) => {
-            await trx.insert(userInvites).values({
-                inviteId,
-                orgId,
-                email,
-                expiresAt,
-                tokenHash,
-                roleId
-            });
+        await db.insert(userInvites).values({
+            inviteId,
+            email,
+            tokenHash,
+            orgId,
+            roleId,
+            expiresAt
         });
 
-        const inviteLink = `${config.getRawConfig().app.dashboard_url}/invite?token=${inviteId}-${token}`;
+        const inviteLink = `${config.getRawConfig().app.dashboard_url}/invite/${inviteId}/${token}`;
 
         if (doEmail) {
             await sendEmail(
@@ -276,26 +237,16 @@ export async function inviteUser(
                     email,
                     inviteLink,
                     expiresInDays: (validHours / 24).toString(),
-                    orgName: org[0].name || orgId,
+                    orgName: org[0].name,
                     inviterName: req.user?.email || req.user?.username
                 }),
                 {
                     to: email,
                     from: config.getNoReplyEmail(),
-                    subject: `You're invited to join ${org[0].name || orgId}`
+                    subject: `You're invited to join ${org[0].name}`
                 }
             );
         }
-
-        logAuditEvent("invite.create", {
-            userId: req.user?.userId,
-            orgId,
-            targetEmail: email,
-            inviteId,
-            roleId,
-            success: true,
-            ip: req.ip
-        });
 
         return response<InviteUserResponse>(res, {
             data: {
@@ -304,19 +255,11 @@ export async function inviteUser(
             },
             success: true,
             error: false,
-            message: "User invited successfully",
+            message: "Invitation created successfully",
             status: HttpCode.OK
         });
     } catch (error) {
         logger.error(error);
-        logAuditEvent("invite.create", {
-            userId: req.user?.userId,
-            orgId: req.params.orgId,
-            targetEmail: req.body.email,
-            success: false,
-            error: error instanceof Error ? error.message : "Unknown error",
-            ip: req.ip
-        });
         return next(
             createHttpError(HttpCode.INTERNAL_SERVER_ERROR, "An error occurred")
         );
