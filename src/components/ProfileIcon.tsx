@@ -21,7 +21,6 @@ import { useState } from "react";
 import { useUserContext } from "@app/hooks/useUserContext";
 import Disable2FaForm from "./Disable2FaForm";
 import Enable2FaForm from "./Enable2FaForm";
-import PasskeyForm from "./PasskeyForm";
 import SupporterStatus from "./SupporterStatus";
 import { UserType } from "@server/types/UserTypes";
 import LocaleSwitcher from '@app/components/LocaleSwitcher';
@@ -40,7 +39,6 @@ export default function ProfileIcon() {
 
     const [openEnable2fa, setOpenEnable2fa] = useState(false);
     const [openDisable2fa, setOpenDisable2fa] = useState(false);
-    const [openPasskey, setOpenPasskey] = useState(false);
 
     const t = useTranslations();
 
@@ -74,7 +72,6 @@ export default function ProfileIcon() {
         <>
             <Enable2FaForm open={openEnable2fa} setOpen={setOpenEnable2fa} />
             <Disable2FaForm open={openDisable2fa} setOpen={setOpenDisable2fa} />
-            <PasskeyForm open={openPasskey} setOpen={setOpenPasskey} />
 
             <div className="flex items-center md:gap-2 grow min-w-0 gap-2 md:gap-0">
                 <span className="truncate max-w-full font-medium min-w-0">
@@ -132,11 +129,6 @@ export default function ProfileIcon() {
                                         <span>{t('otpDisable')}</span>
                                     </DropdownMenuItem>
                                 )}
-                                <DropdownMenuItem
-                                    onClick={() => setOpenPasskey(true)}
-                                >
-                                    <span>{t('passkeyManage')}</span>
-                                </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                             </>
                         )}

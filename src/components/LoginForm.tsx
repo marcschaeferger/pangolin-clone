@@ -26,7 +26,7 @@ import { LoginResponse } from "@server/routers/auth";
 import { useRouter } from "next/navigation";
 import { AxiosResponse } from "axios";
 import { formatAxiosError } from "@app/lib/api";
-import { LockIcon, FingerprintIcon } from "lucide-react";
+import { LockIcon } from "lucide-react";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import {
@@ -41,7 +41,9 @@ import Image from "next/image";
 import { GenerateOidcUrlResponse } from "@server/routers/idp";
 import { Separator } from "./ui/separator";
 import { useTranslations } from "next-intl";
-import { startAuthentication } from "@simplewebauthn/browser";
+import { useToast } from "@/hooks/useToast";
+import { useAuth } from "@/hooks/auth";
+import { useSearchParams } from "next/navigation";
 
 export type LoginFormIDP = {
     idpId: number;
@@ -56,6 +58,9 @@ type LoginFormProps = {
 
 export default function LoginForm({ redirect, onLogin, idps }: LoginFormProps) {
     const router = useRouter();
+    const { toast } = useToast();
+    const { login } = useAuth();
+    const searchParams = useSearchParams();
 
     const { env } = useEnvContext();
 
@@ -166,48 +171,32 @@ export default function LoginForm({ redirect, onLogin, idps }: LoginFormProps) {
         }
     }
 
-    async function loginWithPasskey() {
+    async function handleSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        setError("");
+        setLoading(true);
+
         try {
-            setLoading(true);
-            setError(null);
-
-            const email = form.getValues().email;
-
-            // Start passkey authentication
-            const startRes = await api.post("/auth/passkey/authenticate/start", {
-                email: email || undefined
+            const res = await api.post("/auth/login", {
+                email: form.getValues().email,
+                password: form.getValues().password
             });
 
-            if (!startRes) {
-                setError(t('passkeyAuthError'));
+            if (res.data.twoFactorEnabled) {
+                router.push("/auth/2fa");
                 return;
             }
 
-            const { tempSessionId, ...options } = startRes.data.data;
+            await login(res.data.token);
 
-            // Perform passkey authentication
-            const credential = await startAuthentication(options);
-
-            // Verify authentication
-            const verifyRes = await api.post(
-                "/auth/passkey/authenticate/verify",
-                { credential },
-                {
-                    headers: {
-                        'X-Temp-Session-Id': tempSessionId
-                    }
-                }
-            );
-
-            if (verifyRes) {
-                if (onLogin) {
-                    await onLogin();
-                }
+            const redirectTo = searchParams.get("redirectTo");
+            if (redirectTo) {
+                router.push(redirectTo);
+            } else {
+                router.push("/");
             }
         } catch (e) {
-            console.error(e);
-            setError(formatAxiosError(e, t('passkeyAuthError')));
-        } finally {
+            setError(formatAxiosError(e, t("loginError")));
             setLoading(false);
         }
     }
@@ -218,7 +207,7 @@ export default function LoginForm({ redirect, onLogin, idps }: LoginFormProps) {
                 <>
                     <Form {...form}>
                         <form
-                            onSubmit={form.handleSubmit(onSubmit)}
+                            onSubmit={handleSubmit}
                             className="space-y-4"
                             id="form"
                         >
@@ -366,18 +355,6 @@ export default function LoginForm({ redirect, onLogin, idps }: LoginFormProps) {
                         >
                             <LockIcon className="w-4 h-4 mr-2" />
                             {t('login')}
-                        </Button>
-
-                        <Button
-                            type="button"
-                            variant="outline"
-                            className="w-full"
-                            onClick={loginWithPasskey}
-                            loading={loading}
-                            disabled={loading}
-                        >
-                            <FingerprintIcon className="w-4 h-4 mr-2" />
-                            {t('passkeyLogin')}
                         </Button>
 
                         {hasIdp && (

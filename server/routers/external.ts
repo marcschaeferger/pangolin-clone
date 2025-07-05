@@ -815,36 +815,3 @@ authRouter.post("/idp/:idpId/oidc/validate-callback", idp.validateOidcCallback);
 
 authRouter.put("/set-server-admin", auth.setServerAdmin);
 authRouter.get("/initial-setup-complete", auth.initialSetupComplete);
-
-// Passkey routes
-authRouter.post(
-    "/passkey/register/start", 
-    rateLimit({
-        windowMs: 15 * 60 * 1000, // 15 minutes
-        max: 5, // Allow 5 passkey registrations per 15 minutes per IP
-        keyGenerator: (req) => `passkeyRegister:${req.ip}:${req.user?.userId}`,
-        handler: (req, res, next) => {
-            const message = `You can only register ${5} passkeys every ${15} minutes. Please try again later.`;
-            return next(createHttpError(HttpCode.TOO_MANY_REQUESTS, message));
-        }
-    }),
-    verifySessionUserMiddleware, 
-    auth.startRegistration
-);
-authRouter.post("/passkey/register/verify", verifySessionUserMiddleware, auth.verifyRegistration);
-authRouter.post(
-    "/passkey/authenticate/start",
-    rateLimit({
-        windowMs: 15 * 60 * 1000, // 15 minutes
-        max: 10, // Allow 10 authentication attempts per 15 minutes per IP
-        keyGenerator: (req) => `passkeyAuth:${req.ip}`,
-        handler: (req, res, next) => {
-            const message = `You can only attempt passkey authentication ${10} times every ${15} minutes. Please try again later.`;
-            return next(createHttpError(HttpCode.TOO_MANY_REQUESTS, message));
-        }
-    }),
-    auth.startAuthentication
-);
-authRouter.post("/passkey/authenticate/verify", auth.verifyAuthentication);
-authRouter.get("/passkey/list", verifySessionUserMiddleware, auth.listPasskeys);
-authRouter.delete("/passkey/:credentialId", verifySessionUserMiddleware, auth.deletePasskey);

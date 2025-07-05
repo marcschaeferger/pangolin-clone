@@ -12,4 +12,3 @@ export * from "./resetPassword";
 export * from "./checkResourceSession";
 export * from "./setServerAdmin";
 export * from "./initialSetupComplete";
-export * from "./passkey";
