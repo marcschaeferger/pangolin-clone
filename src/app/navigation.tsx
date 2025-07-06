@@ -106,10 +106,5 @@ export const adminNavItems: SidebarNavItem[] = [
         title: "sidebarLicense",
         href: "/admin/license",
         icon: <TicketCheck className="h-4 w-4" />
-    },
-    {
-        title: "sidebarSecurity",
-        href: "/admin/security",
-        icon: <Shield className="h-4 w-4" />
     }
 ];
