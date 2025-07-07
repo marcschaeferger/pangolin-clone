@@ -22,17 +22,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { formatAxiosError } from "@app/lib/api";
-import { AlertTriangle, Trash2 } from "lucide-react";
-import {
-    Card,
-    CardContent,
-    CardFooter,
-    CardHeader,
-    CardTitle
-} from "@/components/ui/card";
-import { AxiosResponse } from "axios";
-import { DeleteOrgResponse, ListUserOrgsResponse } from "@server/routers/org";
-import { redirect, useRouter } from "next/navigation";
 import {
     SettingsContainer,
     SettingsSection,
@@ -45,6 +34,9 @@ import {
 } from "@app/components/Settings";
 import { useUserContext } from "@app/hooks/useUserContext";
 import { useTranslations } from 'next-intl';
+import { AxiosResponse } from "axios";
+import { DeleteOrgResponse, ListUserOrgsResponse } from "@server/routers/org";
+import { useRouter } from "next/navigation";
 
 const GeneralFormSchema = z.object({
     name: z.string()
@@ -109,10 +101,8 @@ export default function GeneralPage() {
             if (res.status === 200) {
                 if (res.data.data.orgs.length > 0) {
                     const orgId = res.data.data.orgs[0].orgId;
-                    // go to `/${orgId}/settings`);
                     router.push(`/${orgId}/settings`);
                 } else {
-                    // go to `/setup`
                     router.push("/setup");
                 }
             }

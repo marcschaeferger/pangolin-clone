@@ -44,7 +44,7 @@ export default function ProfileIcon() {
     const t = useTranslations();
 
     function getInitials() {
-        return (user.email || user.name || user.username)
+        return (user.name || user.email || user.username)
             .substring(0, 1)
             .toUpperCase();
     }
@@ -76,7 +76,7 @@ export default function ProfileIcon() {
 
             <div className="flex items-center md:gap-2 grow min-w-0 gap-2 md:gap-0">
                 <span className="truncate max-w-full font-medium min-w-0">
-                    {user.email || user.name || user.username}
+                    {user.name || user.email || user.username}
                 </span>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -100,7 +100,7 @@ export default function ProfileIcon() {
                                     {t('signingAs')}
                                 </p>
                                 <p className="text-xs leading-none text-muted-foreground">
-                                    {user.email || user.name || user.username}
+                                    {user.name || user.email || user.username}
                                 </p>
                             </div>
                             {user.serverAdmin ? (

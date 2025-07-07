@@ -11,7 +11,8 @@ import m1 from "./scriptsPg/1.6.0";
 
 // Define the migration list with versions and their corresponding functions
 const migrations = [
-    { version: "1.6.0", run: m1 }
+    { version: "1.6.0", run: m1 },
+    { version: "1.7.0", run: m2 }
     // Add new migrations here as they are created
 ] as {
     version: string;

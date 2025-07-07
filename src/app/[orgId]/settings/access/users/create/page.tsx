@@ -639,11 +639,11 @@ export default function Page() {
                                                         control={
                                                             externalForm.control
                                                         }
-                                                        name="email"
+                                                        name="name"
                                                         render={({ field }) => (
                                                             <FormItem>
                                                                 <FormLabel>
-                                                                    {t('emailOptional')}
+                                                                    {t('nameOptional')}
                                                                 </FormLabel>
                                                                 <FormControl>
                                                                     <Input
@@ -659,11 +659,11 @@ export default function Page() {
                                                         control={
                                                             externalForm.control
                                                         }
-                                                        name="name"
+                                                        name="email"
                                                         render={({ field }) => (
                                                             <FormItem>
                                                                 <FormLabel>
-                                                                    {t('nameOptional')}
+                                                                    {t('emailOptional')}
                                                                 </FormLabel>
                                                                 <FormControl>
                                                                     <Input

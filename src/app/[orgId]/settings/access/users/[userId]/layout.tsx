@@ -45,8 +45,12 @@ export default async function UserLayoutProps(props: UserLayoutProps) {
 
     const navItems = [
         {
+            title: t('userDetails'),
+            href: `/${params.orgId}/settings/access/users/${params.userId}/details`
+        },
+        {
             title: t('accessControls'),
-            href: "/{orgId}/settings/access/users/{userId}/access-controls"
+            href: `/${params.orgId}/settings/access/users/${params.userId}/access-controls`
         }
     ];
 
