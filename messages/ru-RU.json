@@ -12,7 +12,7 @@
     "componentsErrorNoMember": "Вы пока не состоите ни в одной организации.",
     "welcome": "Добро пожаловать в Pangolin",
     "componentsCreateOrg": "Создать организацию",
-    "componentsMember": "You're a member of {count, plural, =0 {no organization} one {one organization} other {# organizations}}.",
+    "componentsMember": "Вы состоите в {count, plural, =0 {0 организациях} one {# организации} few {# организациях} many {# организациях} other {# организациях}}.",
     "componentsInvalidKey": "Обнаружены недействительные или просроченные лицензионные ключи. Соблюдайте условия лицензии для использования всех функций.",
     "dismiss": "Отменить",
     "componentsLicenseViolation": "Нарушение лицензии: Сервер использует {usedSites} сайтов, что превышает лицензионный лимит в {maxSites} сайтов. Соблюдайте условия лицензии для использования всех функций.",
