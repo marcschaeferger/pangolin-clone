@@ -187,8 +187,6 @@ export default function LoginForm({ redirect, onLogin, idps }: LoginFormProps) {
                 return;
             }
 
-            await login(res.data.token);
-
             const redirectTo = searchParams.get("redirectTo");
             if (redirectTo) {
                 router.push(redirectTo);
