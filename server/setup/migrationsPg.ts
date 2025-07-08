@@ -5,6 +5,7 @@ import { versionMigrations } from "../db/pg";
 import { __DIRNAME, APP_VERSION } from "@server/lib/consts";
 import path from "path";
 import m1 from "./scriptsPg/1.6.0";
+import m2 from "./scriptsPg/1.7.0";
 
 // THIS CANNOT IMPORT ANYTHING FROM THE SERVER
 // EXCEPT FOR THE DATABASE AND THE SCHEMA
