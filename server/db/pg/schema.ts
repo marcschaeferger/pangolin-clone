@@ -18,7 +18,9 @@ export const domains = pgTable("domains", {
 export const orgs = pgTable("orgs", {
     orgId: varchar("orgId").primaryKey(),
     name: varchar("name").notNull(),
-    passwordResetTokenExpiryHours: integer("passwordResetTokenExpiryHours").notNull().default(1)
+    description: varchar("description"),
+    dateCreated: varchar("dateCreated").notNull(),
+    passwordResetTokenExpiryHours: integer("passwordResetTokenExpiryHours").notNull().default(24)
 });
 
 export const orgDomains = pgTable("orgDomains", {
