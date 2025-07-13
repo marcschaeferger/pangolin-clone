@@ -13,3 +13,4 @@ export * from "./createOrgUser";
 export { updateUser } from "./updateUser";
 export { adminResetUserPassword } from "./adminResetUserPassword";
 export type { AdminResetUserPasswordBody, AdminResetUserPasswordResponse } from "./adminResetUserPassword";
+export * from "./updateUser2FA";
