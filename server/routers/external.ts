@@ -503,6 +503,13 @@ authenticated.put(
 );
 
 authenticated.get("/org/:orgId/user/:userId", verifyOrgAccess, user.getOrgUser);
+authenticated.patch(
+    "/org/:orgId/user/:userId/2fa",
+    verifyOrgAccess,
+    verifyUserAccess,
+    verifyUserHasAction(ActionsEnum.getOrgUser),
+    user.updateUser2FA
+);
 
 authenticated.post(
     "/org/:orgId/user/:userId",
@@ -745,6 +752,8 @@ authRouter.post(
     verifySessionUserMiddleware,
     auth.requestTotpSecret
 );
+authRouter.post("/2fa/setup", auth.setupTotpSecret);
+authRouter.post("/2fa/complete-setup", auth.completeTotpSetup);
 authRouter.post("/2fa/disable", verifySessionUserMiddleware, auth.disable2fa);
 authRouter.post("/verify-email", verifySessionMiddleware, auth.verifyEmail);
 

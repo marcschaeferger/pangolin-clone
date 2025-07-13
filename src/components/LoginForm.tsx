@@ -140,6 +140,12 @@ export default function LoginForm({ redirect, onLogin, idps }: LoginFormProps) {
                 return;
             }
 
+            if (data?.twoFactorSetupRequired) {
+                const setupUrl = `/auth/2fa/setup?email=${encodeURIComponent(email)}${redirect ? `&redirect=${encodeURIComponent(redirect)}` : ''}`;
+                router.push(setupUrl);
+                return;
+            }
+
             if (onLogin) {
                 await onLogin();
             }

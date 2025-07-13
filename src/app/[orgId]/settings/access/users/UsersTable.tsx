@@ -34,6 +34,7 @@ export type UserRow = {
     status: string;
     role: string;
     isOwner: boolean;
+    isTwoFactorEnabled: boolean;
 };
 
 type UsersTableProps = {
@@ -188,6 +189,39 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                             <Crown className="w-4 h-4 text-yellow-600" />
                         )}
                         <span>{userRow.role}</span>
+                    </div>
+                );
+            }
+        },
+        {
+            accessorKey: "isTwoFactorEnabled",
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() =>
+                            column.toggleSorting(column.getIsSorted() === "asc")
+                        }
+                    >
+                        2FA Enabled
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                );
+            },
+            cell: ({ row }) => {
+                const userRow = row.original;
+
+                return (
+                    <div className="flex flex-row items-center gap-2">
+                        <span>{userRow.isTwoFactorEnabled && (
+                            <span className="text-green-500">
+                                {t('enabled')}
+                            </span>
+                        ) || (
+                            <span className="text-white/50">
+                                {t('disabled')}
+                            </span>
+                        )}</span>
                     </div>
                 );
             }

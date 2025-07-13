@@ -27,6 +27,7 @@ import { ListRolesResponse } from "@server/routers/role";
 import { userOrgUserContext } from "@app/hooks/useOrgUserContext";
 import { useParams } from "next/navigation";
 import { Button } from "@app/components/ui/button";
+import { Checkbox } from "@app/components/ui/checkbox";
 import {
     SettingsContainer,
     SettingsSection,
@@ -43,14 +44,14 @@ import { useEnvContext } from "@app/hooks/useEnvContext";
 import { useTranslations } from "next-intl";
 
 export default function AccessControlsPage() {
-    const { orgUser: user } = userOrgUserContext();
-
+    const { orgUser: user, updateOrgUser } = userOrgUserContext();
     const api = createApiClient(useEnvContext());
 
     const { orgId } = useParams();
 
     const [loading, setLoading] = useState(false);
     const [roles, setRoles] = useState<{ roleId: number; name: string }[]>([]);
+    const [enable2FA, setEnable2FA] = useState(user.twoFactorEnabled || false);
 
     const t = useTranslations();
 
@@ -96,7 +97,8 @@ export default function AccessControlsPage() {
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setLoading(true);
 
-        const res = await api
+        // Update user role
+        const roleRes = await api
             .post<
                 AxiosResponse<InviteUserResponse>
             >(`/role/${values.roleId}/add/${user.userId}`)
@@ -109,9 +111,34 @@ export default function AccessControlsPage() {
                         t('accessRoleErrorAddDescription')
                     )
                 });
+                return null;
             });
 
-        if (res && res.status === 200) {
+        // Update 2FA status if it changed
+        if (enable2FA !== user.twoFactorEnabled) {
+            const twoFARes = await api
+                .patch(`/org/${orgId}/user/${user.userId}/2fa`, {
+                    twoFactorEnabled: enable2FA
+                })
+                .catch((e) => {
+                    toast({
+                        variant: "destructive",
+                        title: "Error updating 2FA",
+                        description: formatAxiosError(
+                            e,
+                            "Failed to update 2FA status"
+                        )
+                    });
+                    return null;
+                });
+
+            if (twoFARes && twoFARes.status === 200) {
+                // Update the user context with the new 2FA status
+                updateOrgUser({ twoFactorEnabled: enable2FA });
+            }
+        }
+
+        if (roleRes && roleRes.status === 200) {
             toast({
                 variant: "default",
                 title: t('userSaved'),
@@ -170,6 +197,36 @@ export default function AccessControlsPage() {
                                         </FormItem>
                                     )}
                                 />
+
+                                <div className="space-y-2">
+                                    <div className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id="enable-2fa"
+                                            checked={enable2FA}
+                                            onCheckedChange={(
+                                                e
+                                            ) =>
+                                                setEnable2FA(
+                                                    e as boolean
+                                                )
+                                            }
+                                        />
+                                        <label
+                                            htmlFor="enable-2fa"
+                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                        >
+                                            Enable 2FA for this user
+                                        </label>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground ml-6">
+                                        When enabled, the user will be required to set up their authenticator app on their next login.
+                                        {user.twoFactorEnabled && (
+                                            <span className="text-primary"> This user currently has 2FA enabled.</span>
+                                        )}
+                                    </p>
+                                </div>
+
+
                             </form>
                         </Form>
                     </SettingsSectionForm>
@@ -186,6 +243,8 @@ export default function AccessControlsPage() {
                     </Button>
                 </SettingsSectionFooter>
             </SettingsSection>
+
+
         </SettingsContainer>
     );
 }
