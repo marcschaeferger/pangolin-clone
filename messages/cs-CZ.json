@@ -958,6 +958,8 @@
     "licenseTierProfessionalRequiredDescription": "This feature is only available in the Professional Edition.",
     "actionGetOrg": "Get Organization",
     "actionUpdateOrg": "Update Organization",
+    "actionUpdateUser": "Update User",
+    "actionGetUser": "Get User",
     "actionGetOrgUser": "Get Organization User",
     "actionListOrgDomains": "List Organization Domains",
     "actionCreateSite": "Create Site",
@@ -1132,5 +1134,8 @@
     "initialSetupTitle": "Initial Server Setup",
     "initialSetupDescription": "Create the intial server admin account. Only one server admin can exist. You can always change these credentials later.",
     "createAdminAccount": "Create Admin Account",
-    "setupErrorCreateAdmin": "An error occurred while creating the server admin account."
+    "setupErrorCreateAdmin": "An error occurred while creating the server admin account.",
+    "twoFactor": "Two-Factor Authentication",
+    "adminEnabled2FaOnYourAccount": "Your administrator has enabled two-factor authentication for {email}. Please complete the setup process to continue.",
+    "continueToApplication": "Continue to Application"
 }
