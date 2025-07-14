@@ -1175,7 +1175,7 @@
     "saveSecuritySettings": "Save Security Settings",
     "sendEmailNotification": "Send Email Notification",
     "linkCopied": "Link Copied",
-    "linkCopiedDescription": "The reset link has been copied to your clipboard"
+    "linkCopiedDescription": "The reset link has been copied to your clipboard",
     "securityKeyManage": "Manage Security Keys",
     "securityKeyDescription": "Add or remove security keys for passwordless authentication",
     "securityKeyRegister": "Register New Security Key",

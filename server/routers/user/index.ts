@@ -15,6 +15,4 @@ export { updateUser } from "./updateUser";
 export { adminUpdateUser } from "./adminUpdateUser";
 export { adminResetUserPassword } from "./adminResetUserPassword";
 export type { AdminResetUserPasswordBody, AdminResetUserPasswordResponse } from "./adminResetUserPassword";
-export * from "./updateUser2FA";
 export * from "./adminUpdateUser2FA";
-export * from "./adminGetUser";

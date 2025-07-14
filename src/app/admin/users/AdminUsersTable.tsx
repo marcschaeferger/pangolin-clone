@@ -186,52 +186,48 @@ export default function UsersTable({ users }: Props) {
             cell: ({ row }) => {
                 const r = row.original;
                 return (
-                    <>
-                        <div className="flex items-center justify-end gap-2">
-                            <AdminUserManagement
-                                userId={r.id}
-                                userEmail={r.email || ""}
-                                userName={r.name || r.username}
-                                userType={r.type}
-                                userUsername={r.username}
-                            />
-                            <Button
-                                variant={"outlinePrimary"}
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button
-                                        variant="ghost"
-                                        className="h-8 w-8 p-0"
-                                    >
-                                        <span className="sr-only">
-                                            Open menu
-                                        </span>
-                                        <MoreHorizontal className="h-4 w-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuItem
-                                        onClick={() => {
-                                            setSelected(r);
-                                            setIsDeleteModalOpen(true);
-                                        }}
-                                    >
-                                        {t("delete")}
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                            <Button
-                                variant={"secondary"}
-                                size="sm"
-                                onClick={() => {
-                                    router.push(`/admin/users/${r.id}`);
-                                }}
-                            >
-                                {t("edit")}
-                                <ArrowRight className="ml-2 w-4 h-4" />
-                            </Button>
-                        </div>
-                    </>
+                    <div className="flex items-center justify-end gap-2">
+                        <AdminUserManagement
+                            userId={r.id}
+                            userEmail={r.email || ""}
+                            userName={r.name || r.username}
+                            userType={r.type}
+                            userUsername={r.username}
+                        />
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    className="h-8 w-8 p-0"
+                                >
+                                    <span className="sr-only">
+                                        Open menu
+                                    </span>
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem
+                                    onClick={() => {
+                                        setSelected(r);
+                                        setIsDeleteModalOpen(true);
+                                    }}
+                                >
+                                    {t("delete")}
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => {
+                                router.push(`/admin/users/${r.id}`);
+                            }}
+                        >
+                            {t("edit")}
+                            <ArrowRight className="ml-2 w-4 h-4" />
+                        </Button>
+                    </div>
                 );
             }
         }
