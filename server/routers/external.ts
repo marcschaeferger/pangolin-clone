@@ -493,6 +493,17 @@ authenticated.delete(
     verifyUserIsServerAdmin,
     user.adminRemoveUser
 );
+authenticated.post(
+    "/admin/user/:userId/password",
+    verifyUserIsServerAdmin,
+    user.adminResetUserPassword
+);
+
+authenticated.post(
+    "/admin/user/:userId",
+    verifyUserIsServerAdmin,
+    user.adminUpdateUser
+);
 
 authenticated.put(
     "/org/:orgId/user",
@@ -517,12 +528,7 @@ authenticated.post(
     user.updateUser
 );
 
-authenticated.post(
-    "/org/:orgId/user/:userId/reset-password",
-    verifyOrgAccess,
-    verifyUserHasAction(ActionsEnum.getOrgUser),
-    user.adminResetUserPassword
-);
+
 
 authenticated.get(
     "/org/:orgId/users",

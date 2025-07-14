@@ -11,6 +11,7 @@ export * from "./listInvitations";
 export * from "./removeInvitation";
 export * from "./createOrgUser";
 export { updateUser } from "./updateUser";
+export { adminUpdateUser } from "./adminUpdateUser";
 export { adminResetUserPassword } from "./adminResetUserPassword";
 export type { AdminResetUserPasswordBody, AdminResetUserPasswordResponse } from "./adminResetUserPassword";
 export * from "./updateUser2FA";

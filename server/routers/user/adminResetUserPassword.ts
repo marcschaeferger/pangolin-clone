@@ -3,8 +3,8 @@ import { z } from "zod";
 import { fromError } from "zod-validation-error";
 import createHttpError from "http-errors";
 import { db } from "@server/db";
-import { passwordResetTokens, users, orgs } from "@server/db";
-import { eq, and } from "drizzle-orm";
+import { passwordResetTokens, users } from "@server/db";
+import { eq } from "drizzle-orm";
 import { alphabet, generateRandomString } from "oslo/crypto";
 import { createDate, TimeSpan } from "oslo";
 import { hashPassword } from "@server/auth/password";
@@ -15,19 +15,18 @@ import logger from "@server/logger";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import { OpenAPITags, registry } from "@server/openApi";
-import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
 import { UserType } from "@server/types/UserTypes";
 
 const adminResetUserPasswordParamsSchema = z
     .object({
-        orgId: z.string(),
         userId: z.string()
     })
     .strict();
 
 const adminResetUserPasswordBodySchema = z
     .object({
-        sendEmail: z.boolean().optional().default(true)
+        sendEmail: z.boolean().optional().default(true),
+        expirationHours: z.number().int().positive().optional().default(24)
     })
     .strict();
 
@@ -39,8 +38,8 @@ export type AdminResetUserPasswordResponse = {
 
 registry.registerPath({
     method: "post",
-    path: "/org/{orgId}/user/{userId}/reset-password",
-    description: "Generate a password reset link for a user (admin only).",
+    path: "/admin/user/{userId}/password",
+    description: "Generate a password reset link for a user (server admin only).",
     tags: [OpenAPITags.User],
     request: {
         params: adminResetUserPasswordParamsSchema,
@@ -82,40 +81,10 @@ export async function adminResetUserPassword(
         );
     }
 
-    const { orgId, userId } = parsedParams.data;
-    const { sendEmail: shouldSendEmail } = parsedBody.data;
-
-    // Check if the requesting user has permission to manage users in this org
-    const hasPermission = await checkUserActionPermission(ActionsEnum.getOrgUser, req);
-
-    if (!hasPermission) {
-        return next(
-            createHttpError(
-                HttpCode.FORBIDDEN,
-                "Insufficient permissions to reset user passwords"
-            )
-        );
-    }
+    const { userId } = parsedParams.data;
+    const { sendEmail: shouldSendEmail, expirationHours } = parsedBody.data;
 
     try {
-        // Get the organization settings
-        const orgResult = await db
-            .select()
-            .from(orgs)
-            .where(eq(orgs.orgId, orgId))
-            .limit(1);
-
-        if (!orgResult || !orgResult.length) {
-            return next(
-                createHttpError(
-                    HttpCode.NOT_FOUND,
-                    "Organization not found"
-                )
-            );
-        }
-
-        const org = orgResult[0];
-
         // Get the target user
         const targetUser = await db
             .select()
@@ -156,9 +125,6 @@ export async function adminResetUserPassword(
         const token = generateRandomString(16, alphabet("0-9", "A-Z", "a-z"));
         const tokenHash = await hashPassword(token);
 
-        // Use organization's password reset token expiry setting
-        const expiryHours = org.passwordResetTokenExpiryHours || 1;
-
         // Store reset token in database
         await db.transaction(async (trx) => {
             // Delete any existing reset tokens for this user
@@ -171,7 +137,7 @@ export async function adminResetUserPassword(
                 userId: userId,
                 email: user.email!,
                 tokenHash,
-                expiresAt: createDate(new TimeSpan(expiryHours, "h")).getTime()
+                expiresAt: createDate(new TimeSpan(expirationHours, "h")).getTime()
             });
         });
 
@@ -181,31 +147,40 @@ export async function adminResetUserPassword(
 
         // Send email if requested
         if (shouldSendEmail) {
-            try {
-                await sendEmail(
-                    ResetPasswordCode({
-                        email: user.email!,
-                        code: token,
-                        link: resetUrl
-                    }),
-                    {
-                        from: config.getNoReplyEmail(),
-                        to: user.email!,
-                        subject: "Password Reset - Initiated by Administrator"
-                    }
-                );
-                emailSent = true;
-
+            // Check if email is configured
+            if (!config.getRawConfig().email) {
                 logger.info(
-                    `Admin ${req.user!.userId} initiated password reset for user ${userId} in org ${orgId}. Email sent to ${user.email}. Token expires in ${expiryHours} hours.`
+                    `Server admin ${req.user!.userId} generated password reset link for user ${userId}. Email not configured, no email sent. Token expires in ${expirationHours} hours.`
                 );
-            } catch (e) {
-                logger.error("Failed to send admin-initiated password reset email", e);
-                // Don't fail the request if email fails, just log it
+                emailSent = false;
+            } else {
+                try {
+                    await sendEmail(
+                        ResetPasswordCode({
+                            email: user.email!,
+                            code: token,
+                            link: resetUrl
+                        }),
+                        {
+                            from: config.getNoReplyEmail(),
+                            to: user.email!,
+                            subject: "Password Reset - Initiated by Server Administrator"
+                        }
+                    );
+                    emailSent = true;
+
+                    logger.info(
+                        `Server admin ${req.user!.userId} initiated password reset for user ${userId}. Email sent to ${user.email}. Token expires in ${expirationHours} hours.`
+                    );
+                } catch (e) {
+                    logger.error("Failed to send server admin-initiated password reset email", e);
+                    // Don't fail the request if email fails, just log it
+                    emailSent = false;
+                }
             }
         } else {
             logger.info(
-                `Admin ${req.user!.userId} generated password reset link for user ${userId} in org ${orgId}. No email sent. Token expires in ${expiryHours} hours.`
+                `Server admin ${req.user!.userId} generated password reset link for user ${userId}. No email sent. Token expires in ${expirationHours} hours.`
             );
         }
 
@@ -223,7 +198,7 @@ export async function adminResetUserPassword(
         });
 
     } catch (e) {
-        logger.error("Failed to generate admin password reset", e);
+        logger.error("Failed to generate server admin password reset", e);
         return next(
             createHttpError(
                 HttpCode.INTERNAL_SERVER_ERROR,

@@ -711,6 +711,7 @@
     "accessRoleRemovedDescription": "The role has been successfully removed.",
     "accessRoleRequiredRemove": "Before deleting this role, please select a new role to transfer existing members to.",
     "manage": "Manage",
+    "manageUser": "Manage User",
     "sitesNotFound": "No sites found.",
     "pangolinServerAdmin": "Server Admin - Pangolin",
     "licenseTierProfessional": "Professional License",
@@ -875,7 +876,7 @@
     "pincodeInvalid": "Invalid code",
     "passwordErrorRequestReset": "Failed to request reset:",
     "passwordErrorReset": "Failed to reset password:",
-    "passwordResetSuccess": "Password reset successfully! Back to log in...",
+    "passwordResetSuccess": "Password reset successfully!",
     "passwordReset": "Reset Password",
     "passwordResetDescription": "Follow the steps to reset your password",
     "passwordResetSent": "We'll send a password reset code to this email address.",
@@ -1147,7 +1148,6 @@
     "createAdminAccount": "Create Admin Account",
     "setupErrorCreateAdmin": "An error occurred while creating the server admin account.",
     "passwordReset": "Password Reset",
-    "passwordResetAdminDescription": "Generate a password reset link for this user.",
     "passwordResetAdminInstructions": "Clicking the button below will send a password reset email to the user. They will be able to set a new password using the link provided.",
     "passwordResetSent": "Password Reset Sent",
     "passwordResetSentDescription": "A password reset email has been sent to {email}.",
@@ -1170,5 +1170,8 @@
     "securitySettingsUpdated": "Security Settings Updated",
     "securitySettingsUpdatedDescription": "Your security settings have been updated successfully",
     "securitySettingsError": "Security Settings Error",
-    "saveSecuritySettings": "Save Security Settings"
+    "saveSecuritySettings": "Save Security Settings",
+    "sendEmailNotification": "Send Email Notification",
+    "linkCopied": "Link Copied",
+    "linkCopiedDescription": "The reset link has been copied to your clipboard"
 }
