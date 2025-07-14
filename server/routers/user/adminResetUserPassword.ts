@@ -145,12 +145,15 @@ export async function adminResetUserPassword(
 
         let emailSent = false;
 
+        // Get the admin identifier (either user ID or API key ID)
+        const adminId = req.user?.userId || req.apiKey?.apiKeyId || 'unknown';
+
         // Send email if requested
         if (shouldSendEmail) {
             // Check if email is configured
             if (!config.getRawConfig().email) {
                 logger.info(
-                    `Server admin ${req.user!.userId} generated password reset link for user ${userId}. Email not configured, no email sent. Token expires in ${expirationHours} hours.`
+                    `Server admin ${adminId} generated password reset link for user ${userId}. Email not configured, no email sent. Token expires in ${expirationHours} hours.`
                 );
                 emailSent = false;
             } else {
@@ -170,7 +173,7 @@ export async function adminResetUserPassword(
                     emailSent = true;
 
                     logger.info(
-                        `Server admin ${req.user!.userId} initiated password reset for user ${userId}. Email sent to ${user.email}. Token expires in ${expirationHours} hours.`
+                        `Server admin ${adminId} initiated password reset for user ${userId}. Email sent to ${user.email}. Token expires in ${expirationHours} hours.`
                     );
                 } catch (e) {
                     logger.error("Failed to send server admin-initiated password reset email", e);
@@ -180,7 +183,7 @@ export async function adminResetUserPassword(
             }
         } else {
             logger.info(
-                `Server admin ${req.user!.userId} generated password reset link for user ${userId}. No email sent. Token expires in ${expirationHours} hours.`
+                `Server admin ${adminId} generated password reset link for user ${userId}. No email sent. Token expires in ${expirationHours} hours.`
             );
         }
 

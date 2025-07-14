@@ -12,7 +12,7 @@ import { formatAxiosError } from "@app/lib/api";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { useTranslations } from "next-intl";
-import AdminUserManagement from "./AdminUserManagement";
+
 import {
     DropdownMenu,
     DropdownMenuItem,
@@ -187,13 +187,7 @@ export default function UsersTable({ users }: Props) {
                 const r = row.original;
                 return (
                     <div className="flex items-center justify-end gap-2">
-                        <AdminUserManagement
-                            userId={r.id}
-                            userEmail={r.email || ""}
-                            userName={r.name || r.username}
-                            userType={r.type}
-                            userUsername={r.username}
-                        />
+
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button

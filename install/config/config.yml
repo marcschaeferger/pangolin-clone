@@ -2,37 +2,35 @@
 # https://docs.fossorial.io/Pangolin/Configuration/config
 
 app:
-    dashboard_url: "https://{{.DashboardDomain}}"
+    dashboard_url: "https://localhost:3002"
     log_level: "info"
 
 domains:
     domain1:
-        base_domain: "{{.BaseDomain}}"
+        base_domain: "localhost"
         cert_resolver: "letsencrypt"
 
 server:
-    secret: "{{.Secret}}"
+    secret: "your_secret_key_here"
     cors:
-        origins: ["https://{{.DashboardDomain}}"]
+        origins: ["https://localhost:3002"]
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
         allowed_headers: ["X-CSRF-Token", "Content-Type"]
         credentials: false
 
 gerbil:
     start_port: 51820
-    base_endpoint: "{{.DashboardDomain}}"
+    base_endpoint: "localhost"
 
-{{if .EnableEmail}}
 email:
-    smtp_host: "{{.EmailSMTPHost}}"
-    smtp_port: {{.EmailSMTPPort}}
-    smtp_user: "{{.EmailSMTPUser}}"
-    smtp_pass: "{{.EmailSMTPPass}}"
-    no_reply: "{{.EmailNoReply}}"
-{{end}}
+    smtp_host: "sandbox.smtp.mailtrap.io"
+    smtp_port: 587
+    smtp_user: "4eeaed7a73e4cd"
+    smtp_pass: "c214cff4be2633"
+    no_reply: "noreply@example.com"
 
 flags:
-    require_email_verification: {{.EnableEmail}}
+    require_email_verification: true
     disable_signup_without_invite: true
     disable_user_create_org: false
     allow_raw_resources: true

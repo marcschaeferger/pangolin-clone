@@ -973,6 +973,7 @@
     "actionUpdateOrg": "Update Organization",
     "actionUpdateUser": "Update User",
     "actionGetUser": "Get User",
+    "actionResetUserPassword": "Reset User Password",
     "actionGetOrgUser": "Get Organization User",
     "actionListOrgDomains": "List Organization Domains",
     "actionCreateSite": "Create Site",
