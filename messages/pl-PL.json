@@ -958,6 +958,8 @@
     "licenseTierProfessionalRequiredDescription": "Ta funkcja jest dostępna tylko w edycji Professional.",
     "actionGetOrg": "Pobierz organizację",
     "actionUpdateOrg": "Aktualizuj organizację",
+    "actionUpdateUser": "Update User",
+    "actionGetUser": "Get User",
     "actionGetOrgUser": "Pobierz użytkownika organizacji",
     "actionListOrgDomains": "Lista domen organizacji",
     "actionCreateSite": "Utwórz witrynę",
@@ -1132,5 +1134,8 @@
     "initialSetupTitle": "Wstępna konfiguracja serwera",
     "initialSetupDescription": "Utwórz początkowe konto administratora serwera. Może istnieć tylko jeden administrator serwera. Zawsze można zmienić te dane uwierzytelniające.",
     "createAdminAccount": "Utwórz konto administratora",
-    "setupErrorCreateAdmin": "Wystąpił błąd podczas tworzenia konta administratora serwera."
+    "setupErrorCreateAdmin": "Wystąpił błąd podczas tworzenia konta administratora serwera.",
+    "twoFactor": "Two-Factor Authentication",
+    "adminEnabled2FaOnYourAccount": "Your administrator has enabled two-factor authentication for {email}. Please complete the setup process to continue.",
+    "continueToApplication": "Continue to Application"
 }
