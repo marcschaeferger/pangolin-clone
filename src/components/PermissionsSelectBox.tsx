@@ -23,7 +23,10 @@ function getActionsCategories(root: boolean) {
             [t('actionGetOrg')]: "getOrg",
             [t('actionUpdateOrg')]: "updateOrg",
             [t('actionGetOrgUser')]: "getOrgUser",
-            [t('actionListOrgDomains')]: "listOrgDomains",
+            [t('actionInviteUser')]: "inviteUser",
+            [t('actionRemoveUser')]: "removeUser",
+            [t('actionListUsers')]: "listUsers",
+            [t('actionListOrgDomains')]: "listOrgDomains"
         },
 
         Site: {
@@ -65,16 +68,9 @@ function getActionsCategories(root: boolean) {
             [t('actionGetRole')]: "getRole",
             [t('actionListRole')]: "listRoles",
             [t('actionUpdateRole')]: "updateRole",
-            [t('actionListAllowedRoleResources')]: "listRoleResources"
-        },
-
-        User: {
-            [t('actionInviteUser')]: "inviteUser",
-            [t('actionRemoveUser')]: "removeUser",
-            [t('actionListUsers')]: "listUsers",
+            [t('actionListAllowedRoleResources')]: "listRoleResources",
             [t('actionAddUserRole')]: "addUserRole"
         },
-
         "Access Token": {
             [t('actionGenerateAccessToken')]: "generateAccessToken",
             [t('actionDeleteAccessToken')]: "deleteAcessToken",
@@ -113,6 +109,11 @@ function getActionsCategories(root: boolean) {
             [t('actionDeleteIdpOrg')]: "deleteIdpOrg",
             [t('actionListIdpOrgs')]: "listIdpOrgs",
             [t('actionUpdateIdpOrg')]: "updateIdpOrg"
+        };
+
+        actionsByCategory["User"] = {
+            [t('actionUpdateUser')]: "updateUser",
+            [t('actionGetUser')]: "getUser"
         };
     }
 

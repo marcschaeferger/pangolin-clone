@@ -6,6 +6,7 @@ interface SwitchComponentProps {
     id: string;
     label: string;
     description?: string;
+    checked?: boolean;
     defaultChecked?: boolean;
     disabled?: boolean;
     onCheckedChange: (checked: boolean) => void;
@@ -16,6 +17,7 @@ export function SwitchInput({
     label,
     description,
     disabled,
+    checked,
     defaultChecked = false,
     onCheckedChange
 }: SwitchComponentProps) {
@@ -24,6 +26,7 @@ export function SwitchInput({
             <div className="flex items-center space-x-2 mb-2">
                 <Switch
                     id={id}
+                    checked={checked}
                     defaultChecked={defaultChecked}
                     onCheckedChange={onCheckedChange}
                     disabled={disabled}

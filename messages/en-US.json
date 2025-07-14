@@ -971,6 +971,8 @@
     "licenseTierProfessionalRequiredDescription": "This feature is only available in the Professional Edition.",
     "actionGetOrg": "Get Organization",
     "actionUpdateOrg": "Update Organization",
+    "actionUpdateUser": "Update User",
+    "actionGetUser": "Get User",
     "actionGetOrgUser": "Get Organization User",
     "actionListOrgDomains": "List Organization Domains",
     "actionCreateSite": "Create Site",
@@ -1174,4 +1176,8 @@
     "sendEmailNotification": "Send Email Notification",
     "linkCopied": "Link Copied",
     "linkCopiedDescription": "The reset link has been copied to your clipboard"
+    "twoFactor": "Two-Factor Authentication",
+    "otpSetupDescription": "Secure your account with an extra layer of protection",
+    "adminEnabled2FaOnYourAccount": "Your administrator has enabled two-factor authentication for {email}. Please complete the setup process to continue.",
+    "continueToApplication": "Continue to Application"
 }

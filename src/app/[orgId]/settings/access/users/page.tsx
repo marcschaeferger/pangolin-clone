@@ -81,8 +81,7 @@ export default async function UsersPage(props: UsersPageProps) {
             idpName: user.idpName || t('idpNameInternal'),
             status: t('userConfirmed'),
             role: user.isOwner ? t('accessRoleOwner') : user.roleName || t('accessRoleMember'),
-            isOwner: user.isOwner || false,
-            isTwoFactorEnabled: user.twoFactorEnabled || false,
+            isOwner: user.isOwner || false
         };
     });
 

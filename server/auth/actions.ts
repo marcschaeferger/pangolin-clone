@@ -56,6 +56,8 @@ export enum ActionsEnum {
     // removeUserAction = "removeUserAction",
     // removeUserSite = "removeUserSite",
     getOrgUser = "getOrgUser",
+    updateUser = "updateUser",
+    getUser = "getUser",
     setResourcePassword = "setResourcePassword",
     setResourcePincode = "setResourcePincode",
     setResourceWhitelist = "setResourceWhitelist",

@@ -3,8 +3,6 @@ export * from "./signup";
 export * from "./logout";
 export * from "./verifyTotp";
 export * from "./requestTotpSecret";
-export * from "./setupTotpSecret";
-export * from "./completeTotpSetup";
 export * from "./disable2fa";
 export * from "./verifyEmail";
 export * from "./requestEmailVerificationCode";

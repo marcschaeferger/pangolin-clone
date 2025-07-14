@@ -8,32 +8,30 @@ import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
-import { ActionsEnum, checkUserActionPermission } from "@server/auth/actions";
 import { OpenAPITags, registry } from "@server/openApi";
 
 const updateUser2FAParamsSchema = z
     .object({
-        userId: z.string(),
-        orgId: z.string()
+        userId: z.string()
     })
     .strict();
 
 const updateUser2FABodySchema = z
     .object({
-        twoFactorEnabled: z.boolean()
+        twoFactorSetupRequested: z.boolean()
     })
     .strict();
 
 export type UpdateUser2FAResponse = {
     userId: string;
-    twoFactorEnabled: boolean;
+    twoFactorRequested: boolean;
 };
 
 registry.registerPath({
-    method: "patch",
-    path: "/org/{orgId}/user/{userId}/2fa",
-    description: "Update a user's 2FA status within an organization.",
-    tags: [OpenAPITags.Org, OpenAPITags.User],
+    method: "post",
+    path: "/user/{userId}/2fa",
+    description: "Update a user's 2FA status.",
+    tags: [OpenAPITags.User],
     request: {
         params: updateUser2FAParamsSchema,
         body: {
@@ -73,73 +71,57 @@ export async function updateUser2FA(
             );
         }
 
-        const { userId, orgId } = parsedParams.data;
-        const { twoFactorEnabled } = parsedBody.data;
-
-        if (!req.userOrg) {
-            return next(
-                createHttpError(
-                    HttpCode.FORBIDDEN,
-                    "You do not have access to this organization"
-                )
-            );
-        }
-
-        // Check if user has permission to update other users' 2FA
-        const hasPermission = await checkUserActionPermission(
-            ActionsEnum.getOrgUser,
-            req
-        );
-        if (!hasPermission) {
-            return next(
-                createHttpError(
-                    HttpCode.FORBIDDEN,
-                    "User does not have permission to update other users' 2FA settings"
-                )
-            );
-        }
+        const { userId } = parsedParams.data;
+        const { twoFactorSetupRequested } = parsedBody.data;
 
         // Verify the user exists in the organization
         const existingUser = await db
             .select()
-            .from(userOrgs)
-            .where(and(eq(userOrgs.userId, userId), eq(userOrgs.orgId, orgId)))
+            .from(users)
+            .where(eq(users.userId, userId))
             .limit(1);
 
         if (existingUser.length === 0) {
+            return next(createHttpError(HttpCode.NOT_FOUND, "User not found"));
+        }
+
+        if (existingUser[0].type !== "internal") {
             return next(
                 createHttpError(
-                    HttpCode.NOT_FOUND,
-                    "User not found or does not belong to the specified organization"
+                    HttpCode.BAD_REQUEST,
+                    "Two-factor authentication is not supported for external users"
                 )
             );
         }
 
-        // Update the user's 2FA status
-        const updatedUser = await db
-            .update(users)
-            .set({ 
-                twoFactorEnabled,
-                // If disabling 2FA, also clear the secret
-                twoFactorSecret: twoFactorEnabled ? undefined : null
-            })
-            .where(eq(users.userId, userId))
-            .returning({ userId: users.userId, twoFactorEnabled: users.twoFactorEnabled });
+        logger.debug(`Updating 2FA for user ${userId} to ${twoFactorSetupRequested}`);
 
-        if (updatedUser.length === 0) {
-            return next(
-                createHttpError(
-                    HttpCode.NOT_FOUND,
-                    "User not found"
-                )
-            );
+        if (twoFactorSetupRequested) {
+            await db
+                .update(users)
+                .set({
+                    twoFactorSetupRequested: true,
+                })
+                .where(eq(users.userId, userId));
+        } else {
+            await db
+                .update(users)
+                .set({
+                    twoFactorSetupRequested: false,
+                    twoFactorEnabled: false,
+                    twoFactorSecret: null
+                })
+                .where(eq(users.userId, userId));
         }
 
         return response<UpdateUser2FAResponse>(res, {
-            data: updatedUser[0],
+            data: {
+                userId: existingUser[0].userId,
+                twoFactorRequested: twoFactorSetupRequested
+            },
             success: true,
             error: false,
-            message: `2FA ${twoFactorEnabled ? 'enabled' : 'disabled'} for user successfully`,
+            message: `2FA ${twoFactorSetupRequested ? "enabled" : "disabled"} for user successfully`,
             status: HttpCode.OK
         });
     } catch (error) {

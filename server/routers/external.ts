@@ -488,6 +488,7 @@ unauthenticated.get("/resource/:resourceId/auth", resource.getResourceAuthInfo);
 unauthenticated.get("/user", verifySessionMiddleware, user.getUser);
 
 authenticated.get("/users", verifyUserIsServerAdmin, user.adminListUsers);
+authenticated.get("/user/:userId", verifyUserIsServerAdmin, user.adminGetUser);
 authenticated.delete(
     "/user/:userId",
     verifyUserIsServerAdmin,
@@ -513,11 +514,10 @@ authenticated.put(
 );
 
 authenticated.get("/org/:orgId/user/:userId", verifyOrgAccess, user.getOrgUser);
-authenticated.patch(
-    "/org/:orgId/user/:userId/2fa",
-    verifyOrgAccess,
-    verifyUserAccess,
-    verifyUserHasAction(ActionsEnum.getOrgUser),
+
+authenticated.post(
+    "/user/:userId/2fa",
+    verifyUserIsServerAdmin,
     user.updateUser2FA
 );
 
@@ -751,14 +751,8 @@ authRouter.post("/login", auth.login);
 authRouter.post("/logout", auth.logout);
 authRouter.post("/newt/get-token", getToken);
 
-authRouter.post("/2fa/enable", verifySessionUserMiddleware, auth.verifyTotp);
-authRouter.post(
-    "/2fa/request",
-    verifySessionUserMiddleware,
-    auth.requestTotpSecret
-);
-authRouter.post("/2fa/setup", auth.setupTotpSecret);
-authRouter.post("/2fa/complete-setup", auth.completeTotpSetup);
+authRouter.post("/2fa/enable", auth.verifyTotp);
+authRouter.post("/2fa/request", auth.requestTotpSecret);
 authRouter.post("/2fa/disable", verifySessionUserMiddleware, auth.disable2fa);
 authRouter.post("/verify-email", verifySessionMiddleware, auth.verifyEmail);
 

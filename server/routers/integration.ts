@@ -381,6 +381,20 @@ authenticated.get(
     user.getOrgUser
 );
 
+authenticated.post(
+    "/user/:userId/2fa",
+    verifyApiKeyIsRoot,
+    verifyApiKeyHasAction(ActionsEnum.updateUser),
+    user.updateUser2FA
+);
+
+authenticated.get(
+    "/user/:userId",
+    verifyApiKeyIsRoot,
+    verifyApiKeyHasAction(ActionsEnum.getUser),
+    user.adminGetUser
+);
+
 authenticated.get(
     "/org/:orgId/users",
     verifyApiKeyOrgAccess,

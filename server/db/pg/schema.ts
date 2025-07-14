@@ -122,6 +122,7 @@ export const users = pgTable("user", {
     }),
     passwordHash: varchar("passwordHash"),
     twoFactorEnabled: boolean("twoFactorEnabled").notNull().default(false),
+    twoFactorSetupRequested: boolean("twoFactorSetupRequested").default(false),
     twoFactorSecret: varchar("twoFactorSecret"),
     emailVerified: boolean("emailVerified").notNull().default(false),
     dateCreated: varchar("dateCreated").notNull(),

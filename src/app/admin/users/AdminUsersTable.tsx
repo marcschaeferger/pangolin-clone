@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { UsersDataTable } from "./AdminUsersDataTable";
 import { Button } from "@app/components/ui/button";
-import { ArrowRight, ArrowUpDown } from "lucide-react";
+import { ArrowRight, ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ConfirmDeleteDialog from "@app/components/ConfirmDeleteDialog";
@@ -13,6 +13,12 @@ import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { useTranslations } from "next-intl";
 import AdminUserManagement from "./AdminUserManagement";
+import {
+    DropdownMenu,
+    DropdownMenuItem,
+    DropdownMenuContent,
+    DropdownMenuTrigger
+} from "@app/components/ui/dropdown-menu";
 
 export type GlobalUserRow = {
     id: string;
@@ -23,6 +29,8 @@ export type GlobalUserRow = {
     idpId: number | null;
     idpName: string;
     dateCreated: string;
+    twoFactorEnabled: boolean | null;
+    twoFactorSetupRequested: boolean | null;
 };
 
 type Props = {
@@ -42,11 +50,11 @@ export default function UsersTable({ users }: Props) {
     const deleteUser = (id: string) => {
         api.delete(`/user/${id}`)
             .catch((e) => {
-                console.error(t('userErrorDelete'), e);
+                console.error(t("userErrorDelete"), e);
                 toast({
                     variant: "destructive",
-                    title: t('userErrorDelete'),
-                    description: formatAxiosError(e, t('userErrorDelete'))
+                    title: t("userErrorDelete"),
+                    description: formatAxiosError(e, t("userErrorDelete"))
                 });
             })
             .then(() => {
@@ -85,7 +93,7 @@ export default function UsersTable({ users }: Props) {
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        {t('username')}
+                        {t("username")}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
@@ -101,7 +109,7 @@ export default function UsersTable({ users }: Props) {
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        {t('email')}
+                        {t("email")}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
@@ -117,7 +125,7 @@ export default function UsersTable({ users }: Props) {
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        {t('name')}
+                        {t("name")}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
@@ -133,9 +141,43 @@ export default function UsersTable({ users }: Props) {
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        {t('identityProvider')}
+                        {t("identityProvider")}
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
+                );
+            }
+        },
+        {
+            accessorKey: "twoFactorEnabled",
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() =>
+                            column.toggleSorting(column.getIsSorted() === "asc")
+                        }
+                    >
+                        {t("twoFactor")}
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                );
+            },
+            cell: ({ row }) => {
+                const userRow = row.original;
+
+                return (
+                    <div className="flex flex-row items-center gap-2">
+                        <span>
+                            {userRow.twoFactorEnabled ||
+                            userRow.twoFactorSetupRequested ? (
+                                <span className="text-green-500">
+                                    {t("enabled")}
+                                </span>
+                            ) : (
+                                <span>{t("disabled")}</span>
+                            )}
+                        </span>
+                    </div>
                 );
             }
         },
@@ -155,12 +197,38 @@ export default function UsersTable({ users }: Props) {
                             />
                             <Button
                                 variant={"outlinePrimary"}
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        variant="ghost"
+                                        className="h-8 w-8 p-0"
+                                    >
+                                        <span className="sr-only">
+                                            Open menu
+                                        </span>
+                                        <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem
+                                        onClick={() => {
+                                            setSelected(r);
+                                            setIsDeleteModalOpen(true);
+                                        }}
+                                    >
+                                        {t("delete")}
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                            <Button
+                                variant={"secondary"}
+                                size="sm"
                                 onClick={() => {
-                                    setSelected(r);
-                                    setIsDeleteModalOpen(true);
+                                    router.push(`/admin/users/${r.id}`);
                                 }}
                             >
-                                {t('delete')}
+                                {t("edit")}
+                                <ArrowRight className="ml-2 w-4 h-4" />
                             </Button>
                         </div>
                     </>
@@ -181,26 +249,27 @@ export default function UsersTable({ users }: Props) {
                     dialog={
                         <div className="space-y-4">
                             <p>
-                                {t('userQuestionRemove', {selectedUser: selected?.email || selected?.name || selected?.username})}
+                                {t("userQuestionRemove", {
+                                    selectedUser:
+                                        selected?.email ||
+                                        selected?.name ||
+                                        selected?.username
+                                })}
                             </p>
 
                             <p>
-                                <b>
-                                    {t('userMessageRemove')}
-                                </b>
+                                <b>{t("userMessageRemove")}</b>
                             </p>
 
-                            <p>
-                                {t('userMessageConfirm')}
-                            </p>
+                            <p>{t("userMessageConfirm")}</p>
                         </div>
                     }
-                    buttonText={t('userDeleteConfirm')}
+                    buttonText={t("userDeleteConfirm")}
                     onConfirm={async () => deleteUser(selected!.id)}
                     string={
                         selected.email || selected.name || selected.username
                     }
-                    title={t('userDeleteServer')}
+                    title={t("userDeleteServer")}
                 />
             )}
 

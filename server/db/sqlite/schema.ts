@@ -126,6 +126,9 @@ export const users = sqliteTable("user", {
     twoFactorEnabled: integer("twoFactorEnabled", { mode: "boolean" })
         .notNull()
         .default(false),
+    twoFactorSetupRequested: integer("twoFactorSetupRequested", {
+        mode: "boolean"
+    }).default(false),
     twoFactorSecret: text("twoFactorSecret"),
     emailVerified: integer("emailVerified", { mode: "boolean" })
         .notNull()
