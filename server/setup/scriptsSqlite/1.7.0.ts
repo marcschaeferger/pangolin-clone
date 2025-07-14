@@ -23,6 +23,25 @@ export default async function migration() {
     } catch (e) {
         console.log("Error adding passwordResetTokenExpiryHours column to orgs table:");
         console.log(e);
+            db.exec(`
+                CREATE TABLE IF NOT EXISTS securityKey (
+                    credentialId TEXT PRIMARY KEY,
+                    userId TEXT NOT NULL,
+                    publicKey TEXT NOT NULL,
+                    signCount INTEGER NOT NULL,
+                    transports TEXT,
+                    name TEXT,
+                    lastUsed TEXT NOT NULL,
+                    dateCreated TEXT NOT NULL,
+                    FOREIGN KEY (userId) REFERENCES user(id) ON DELETE CASCADE
+                );
+            `);
+        })(); // executes the transaction immediately
+        db.pragma("foreign_keys = ON");
+        console.log(`Created securityKey table`);
+    } catch (e) {
+        console.error("Unable to create securityKey table");
+        console.error(e);
         throw e;
     }
 

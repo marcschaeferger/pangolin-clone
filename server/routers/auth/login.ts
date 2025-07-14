@@ -4,7 +4,7 @@ import {
     serializeSessionCookie
 } from "@server/auth/sessions/app";
 import { db } from "@server/db";
-import { users } from "@server/db";
+import { users, securityKeys } from "@server/db";
 import HttpCode from "@server/types/HttpCode";
 import response from "@server/lib/response";
 import { eq, and } from "drizzle-orm";
@@ -32,6 +32,7 @@ export type LoginBody = z.infer<typeof loginBodySchema>;
 export type LoginResponse = {
     codeRequested?: boolean;
     emailVerificationRequired?: boolean;
+    useSecurityKey?: boolean;
     twoFactorSetupRequired?: boolean;
 };
 
@@ -103,6 +104,22 @@ export async function login(
                     "Username or password is incorrect"
                 )
             );
+        }
+
+        // Check if user has security keys registered
+        const userSecurityKeys = await db
+            .select()
+            .from(securityKeys)
+            .where(eq(securityKeys.userId, existingUser.userId));
+
+        if (userSecurityKeys.length > 0) {
+            return response<LoginResponse>(res, {
+                data: { useSecurityKey: true },
+                success: true,
+                error: false,
+                message: "Security key authentication required",
+                status: HttpCode.OK
+            });
         }
 
         if (

@@ -823,3 +823,36 @@ authRouter.post("/idp/:idpId/oidc/validate-callback", idp.validateOidcCallback);
 
 authRouter.put("/set-server-admin", auth.setServerAdmin);
 authRouter.get("/initial-setup-complete", auth.initialSetupComplete);
+
+// Security Key routes
+authRouter.post(
+    "/security-key/register/start", 
+    rateLimit({
+        windowMs: 15 * 60 * 1000, // 15 minutes
+        max: 5, // Allow 5 security key registrations per 15 minutes per IP
+        keyGenerator: (req) => `securityKeyRegister:${req.ip}:${req.user?.userId}`,
+        handler: (req, res, next) => {
+            const message = `You can only register ${5} security keys every ${15} minutes. Please try again later.`;
+            return next(createHttpError(HttpCode.TOO_MANY_REQUESTS, message));
+        }
+    }),
+    verifySessionUserMiddleware, 
+    auth.startRegistration
+);
+authRouter.post("/security-key/register/verify", verifySessionUserMiddleware, auth.verifyRegistration);
+authRouter.post(
+    "/security-key/authenticate/start",
+    rateLimit({
+        windowMs: 15 * 60 * 1000, // 15 minutes
+        max: 10, // Allow 10 authentication attempts per 15 minutes per IP
+        keyGenerator: (req) => `securityKeyAuth:${req.ip}`,
+        handler: (req, res, next) => {
+            const message = `You can only attempt security key authentication ${10} times every ${15} minutes. Please try again later.`;
+            return next(createHttpError(HttpCode.TOO_MANY_REQUESTS, message));
+        }
+    }),
+    auth.startAuthentication
+);
+authRouter.post("/security-key/authenticate/verify", auth.verifyAuthentication);
+authRouter.get("/security-key/list", verifySessionUserMiddleware, auth.listSecurityKeys);
+authRouter.delete("/security-key/:credentialId", verifySessionUserMiddleware, auth.deleteSecurityKey);

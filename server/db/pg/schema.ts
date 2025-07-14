@@ -493,6 +493,30 @@ export const idpOrg = pgTable("idpOrg", {
     orgMapping: varchar("orgMapping")
 });
 
+export const securityKeys = pgTable("webauthnCredentials", {
+    credentialId: varchar("credentialId").primaryKey(),
+    userId: varchar("userId").notNull().references(() => users.userId, {
+        onDelete: "cascade"
+    }),
+    publicKey: varchar("publicKey").notNull(),
+    signCount: integer("signCount").notNull(),
+    transports: varchar("transports"),
+    name: varchar("name"),
+    lastUsed: varchar("lastUsed").notNull(),
+    dateCreated: varchar("dateCreated").notNull(),
+    securityKeyName: varchar("securityKeyName")
+});
+
+export const webauthnChallenge = pgTable("webauthnChallenge", {
+    sessionId: varchar("sessionId").primaryKey(),
+    challenge: varchar("challenge").notNull(),
+    securityKeyName: varchar("securityKeyName"),
+    userId: varchar("userId").references(() => users.userId, {
+        onDelete: "cascade"
+    }),
+    expiresAt: bigint("expiresAt", { mode: "number" }).notNull() // Unix timestamp
+});
+
 export type Org = InferSelectModel<typeof orgs>;
 export type User = InferSelectModel<typeof users>;
 export type Site = InferSelectModel<typeof sites>;

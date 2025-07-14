@@ -20,12 +20,12 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useUserContext } from "@app/hooks/useUserContext";
 import Disable2FaForm from "./Disable2FaForm";
+import SecurityKeyForm from "./SecurityKeyForm";
 import Enable2FaDialog from "./Enable2FaDialog";
 import SupporterStatus from "./SupporterStatus";
 import { UserType } from "@server/types/UserTypes";
 import LocaleSwitcher from '@app/components/LocaleSwitcher';
 import { useTranslations } from "next-intl";
-
 
 export default function ProfileIcon() {
     const { setTheme, theme } = useTheme();
@@ -40,6 +40,7 @@ export default function ProfileIcon() {
 
     const [openEnable2fa, setOpenEnable2fa] = useState(false);
     const [openDisable2fa, setOpenDisable2fa] = useState(false);
+    const [openSecurityKey, setOpenSecurityKey] = useState(false);
 
     const t = useTranslations();
 
@@ -73,6 +74,7 @@ export default function ProfileIcon() {
         <>
             <Enable2FaDialog open={openEnable2fa} setOpen={setOpenEnable2fa} />
             <Disable2FaForm open={openDisable2fa} setOpen={setOpenDisable2fa} />
+            <SecurityKeyForm open={openSecurityKey} setOpen={setOpenSecurityKey} />
 
             <div className="flex items-center md:gap-2 grow min-w-0 gap-2 md:gap-0">
                 <span className="truncate max-w-full font-medium min-w-0">
@@ -130,6 +132,11 @@ export default function ProfileIcon() {
                                         <span>{t('otpDisable')}</span>
                                     </DropdownMenuItem>
                                 )}
+                                <DropdownMenuItem
+                                    onClick={() => setOpenSecurityKey(true)}
+                                >
+                                    <span>{t('securityKeyManage')}</span>
+                                </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                             </>
                         )}
