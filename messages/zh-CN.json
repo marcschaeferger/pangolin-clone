@@ -1255,5 +1255,20 @@
     "securityKeyRemoveTitle": "Remove Security Key",
     "securityKeyRemoveDescription": "Enter your password to remove the security key \"{name}\"",
     "securityKeyNoKeysRegistered": "No security keys registered",
-    "securityKeyNoKeysDescription": "Add a security key to enhance your account security"
+    "securityKeyNoKeysDescription": "Add a security key to enhance your account security",
+    "createDomainRequired": "Domain is required",
+    "createDomainAddDnsRecords": "Add DNS Records",
+    "createDomainAddDnsRecordsDescription": "Add the following DNS records to your domain provider to complete the setup.",
+    "createDomainNsRecords": "NS Records",
+    "createDomainRecord": "Record",
+    "createDomainType": "Type:",
+    "createDomainName": "Name:",
+    "createDomainValue": "Value:",
+    "createDomainCnameRecords": "CNAME Records",
+    "createDomainRecordNumber": "Record {number}",
+    "createDomainTxtRecords": "TXT Records",
+    "createDomainSaveTheseRecords": "Save These Records",
+    "createDomainSaveTheseRecordsDescription": "Make sure to save these DNS records as you will not see them again.",
+    "createDomainDnsPropagation": "DNS Propagation",
+    "createDomainDnsPropagationDescription": "DNS changes may take some time to propagate across the internet. This can take anywhere from a few minutes to 48 hours, depending on your DNS provider and TTL settings."
 }
