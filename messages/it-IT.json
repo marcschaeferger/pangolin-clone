@@ -1161,7 +1161,7 @@
     "selectDomainTypeNsDescription": "This domain and all its subdomains. Use this when you want to control an entire domain zone.",
     "selectDomainTypeCnameName": "Single Domain (CNAME)",
     "selectDomainTypeCnameDescription": "Just this specific domain. Use this for individual subdomains or specific domain entries.",
-    "selectDomainTypeWildcardName": "Wildcard Domain (CNAME)",
+    "selectDomainTypeWildcardName": "Wildcard Domain",
     "selectDomainTypeWildcardDescription": "This domain and its first level of subdomains.",
     "domainDelegation": "Single Domain",
     "selectType": "Select a type",
