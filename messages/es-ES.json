@@ -1270,5 +1270,7 @@
     "createDomainSaveTheseRecords": "Save These Records",
     "createDomainSaveTheseRecordsDescription": "Make sure to save these DNS records as you will not see them again.",
     "createDomainDnsPropagation": "DNS Propagation",
-    "createDomainDnsPropagationDescription": "DNS changes may take some time to propagate across the internet. This can take anywhere from a few minutes to 48 hours, depending on your DNS provider and TTL settings."
+    "createDomainDnsPropagationDescription": "DNS changes may take some time to propagate across the internet. This can take anywhere from a few minutes to 48 hours, depending on your DNS provider and TTL settings.",
+    "resourcePortRequired": "Port number is required for non-HTTP resources",
+    "resourcePortNotAllowed": "Port number should not be set for HTTP resources"
 }
