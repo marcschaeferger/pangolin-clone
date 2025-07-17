@@ -1266,6 +1266,7 @@
     "createDomainName": "Naam:",
     "createDomainValue": "Waarde:",
     "createDomainCnameRecords": "CNAME-records",
+    "createDomainARecords": "A Records",
     "createDomainRecordNumber": "Record {number}",
     "createDomainTxtRecords": "TXT-records",
     "createDomainSaveTheseRecords": "Deze records opslaan",
