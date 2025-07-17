@@ -1266,6 +1266,7 @@
     "createDomainName": "이름:",
     "createDomainValue": "값:",
     "createDomainCnameRecords": "CNAME 레코드",
+    "createDomainARecords": "A Records",
     "createDomainRecordNumber": "레코드 {number}",
     "createDomainTxtRecords": "TXT 레코드",
     "createDomainSaveTheseRecords": "이 레코드 저장",
