@@ -1266,6 +1266,7 @@
     "createDomainName": "名称:",
     "createDomainValue": "值:",
     "createDomainCnameRecords": "CNAME 记录",
+    "createDomainARecords": "A Records",
     "createDomainRecordNumber": "记录 {number}",
     "createDomainTxtRecords": "TXT 记录",
     "createDomainSaveTheseRecords": "保存这些记录",
