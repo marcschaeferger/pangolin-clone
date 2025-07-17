@@ -1266,6 +1266,7 @@
     "createDomainName": "Ad:",
     "createDomainValue": "Değer:",
     "createDomainCnameRecords": "CNAME Kayıtları",
+    "createDomainARecords": "A Records",
     "createDomainRecordNumber": "Kayıt {number}",
     "createDomainTxtRecords": "TXT Kayıtları",
     "createDomainSaveTheseRecords": "Bu Kayıtları Kaydet",
