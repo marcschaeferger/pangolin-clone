@@ -676,9 +676,7 @@ export default function Page() {
                                                         render={({ field }) => (
                                                             <FormItem>
                                                                 <FormLabel>
-                                                                    {t(
-                                                                        "emailOptional"
-                                                                    )}
+                                                                    {t("nameOptional")}
                                                                 </FormLabel>
                                                                 <FormControl>
                                                                     <Input
@@ -698,8 +696,7 @@ export default function Page() {
                                                         render={({ field }) => (
                                                             <FormItem>
                                                                 <FormLabel>
-                                                                        "nameOptional"
-                                                                    )}
+                                                                    {t("nameOptional")}
                                                                 </FormLabel>
                                                                 <FormControl>
                                                                     <Input

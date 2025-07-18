@@ -12,6 +12,7 @@ import { Layout } from "@app/components/Layout";
 import { ListUserOrgsResponse } from "@server/routers/org";
 import { pullEnv } from "@app/lib/pullEnv";
 import EnvProvider from "@app/providers/EnvProvider";
+import { orgLangingNavItems } from "@app/app/navigation";
 
 type OrgPageProps = {
     params: Promise<{ orgId: string }>;
@@ -38,48 +39,9 @@ export default async function OrgPage(props: OrgPageProps) {
         overview = res.data.data;
     } catch (e) {}
 
-    // If user is admin or owner, show the admin landing card and potentially redirect
+    // If user is admin or owner, redirect to settings
     if (overview?.isAdmin || overview?.isOwner) {
-        let orgs: ListUserOrgsResponse["orgs"] = [];
-        try {
-            const getOrgs = cache(async () =>
-                internal.get<AxiosResponse<ListUserOrgsResponse>>(
-                    `/user/${user.userId}/orgs`,
-                    await authCookieHeader()
-                )
-            );
-            const res = await getOrgs();
-            if (res && res.data.data.orgs) {
-                orgs = res.data.data.orgs;
-            }
-        } catch (e) {}
-
-        return (
-            <UserProvider user={user}>
-                <EnvProvider env={env}>
-                    <Layout orgId={orgId} navItems={orgLangingNavItems} orgs={orgs}>
-                        {overview && (
-                            <div className="w-full max-w-4xl mx-auto md:mt-32 mt-4">
-                                <OrganizationLandingCard
-                                    overview={{
-                                        orgId: overview.orgId,
-                                        orgName: overview.orgName,
-                                        stats: {
-                                            users: overview.numUsers,
-                                            sites: overview.numSites,
-                                            resources: overview.numResources
-                                        },
-                                        isAdmin: overview.isAdmin,
-                                        isOwner: overview.isOwner,
-                                        userRole: overview.userRoleName
-                                    }}
-                                />
-                            </div>
-                        )}
-                    </Layout>
-                </EnvProvider>
-            </UserProvider>
-        );
+        redirect(`/${orgId}/settings`);
     }
 
     // For non-admin users, show the member resources portal
@@ -101,21 +63,8 @@ export default async function OrgPage(props: OrgPageProps) {
         <UserProvider user={user}>
             <Layout orgId={orgId} navItems={[]} orgs={orgs}>
                 {overview && (
-                    <div className="w-full max-w-4xl mx-auto md:mt-32 mt-4">
-                        <OrganizationLandingCard
-                            overview={{
-                                orgId: overview.orgId,
-                                orgName: overview.orgName,
-                                stats: {
-                                    users: overview.numUsers,
-                                    sites: overview.numSites,
-                                    resources: overview.numResources
-                                },
-                                isAdmin: overview.isAdmin,
-                                isOwner: overview.isOwner,
-                                userRole: overview.userRoleName
-                            }}
-                        />
+                    <div className="w-full px-4 py-6">
+                        <MemberResourcesPortal orgId={orgId} />
                     </div>
                 )}
             </Layout>

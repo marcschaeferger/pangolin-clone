@@ -1,4 +1,3 @@
-import { db } from "@server/db/pg";
 import { db } from "@server/db/pg/driver";
 import { sql } from "drizzle-orm";
 const version = "1.7.0";

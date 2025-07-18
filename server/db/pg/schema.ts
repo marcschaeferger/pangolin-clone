@@ -22,7 +22,7 @@ export const domains = pgTable("domains", {
 export const orgs = pgTable("orgs", {
     orgId: varchar("orgId").primaryKey(),
     name: varchar("name").notNull(),
-    passwordResetTokenExpiryHours: integer("passwordResetTokenExpiryHours").notNull().default(1)
+    passwordResetTokenExpiryHours: integer("passwordResetTokenExpiryHours").notNull().default(1),
     subnet: varchar("subnet")
 });
 

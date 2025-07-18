@@ -20,6 +20,8 @@ export type SidebarNavItem = {
     title: string;
     icon?: React.ReactNode;
     showProfessional?: boolean;
+    autoExpand?: boolean;
+    children?: SidebarNavItem[];
 };
 
 export type SidebarNavSection = {
@@ -76,44 +78,60 @@ export function SidebarNav({
                 : t(item.title);
 
         const itemContent = (
-            <Link
-                href={isDisabled ? "#" : hydratedHref}
-                className={cn(
-                    "flex items-center rounded transition-colors hover:bg-secondary/50 dark:hover:bg-secondary/20 rounded-md",
-                    isCollapsed ? "px-2 py-2 justify-center" : "px-3 py-1.5",
-                    isActive
-                        ? "text-primary font-medium"
-                        : "text-muted-foreground hover:text-foreground",
-                    isDisabled && "cursor-not-allowed opacity-60"
+            <>
+                <Link
+                    href={isDisabled ? "#" : hydratedHref}
+                    className={cn(
+                        "flex items-center rounded transition-colors hover:bg-secondary/50 dark:hover:bg-secondary/20 rounded-md",
+                        isCollapsed ? "px-2 py-2 justify-center" : "px-3 py-1.5",
+                        isActive
+                            ? "text-primary font-medium"
+                            : "text-muted-foreground hover:text-foreground",
+                        isDisabled && "cursor-not-allowed opacity-60"
+                    )}
+                    onClick={(e) => {
+                        if (isDisabled) {
+                            e.preventDefault();
+                        } else if (onItemClick) {
+                            onItemClick();
+                        }
+                    }}
+                    tabIndex={isDisabled ? -1 : undefined}
+                    aria-disabled={isDisabled}
+                >
+                    {item.icon && (
+                        <span
+                            className={cn("flex-shrink-0", !isCollapsed && "mr-2")}
+                        >
+                            {item.icon}
+                        </span>
+                    )}
+                    {!isCollapsed && (
+                        <>
+                            <span>{t(item.title)}</span>
+                            {item.showProfessional && !isUnlocked() && (
+                                <Badge variant="outlinePrimary" className="ml-2">
+                                    {t("licenseBadge")}
+                                </Badge>
+                            )}
+                        </>
+                    )}
+                </Link>
+                {!isCollapsed && item.children && (item.autoExpand || isActive) && (
+                    <div className="ml-4 mt-1 flex flex-col gap-1">
+                        {item.children.map((child) => {
+                            const childHref = hydrateHref(child.href);
+                            const isChildActive = pathname.startsWith(childHref);
+                            return renderNavItem(
+                                child,
+                                childHref,
+                                isChildActive,
+                                isDisabled
+                            );
+                        })}
+                    </div>
                 )}
-                onClick={(e) => {
-                    if (isDisabled) {
-                        e.preventDefault();
-                    } else if (onItemClick) {
-                        onItemClick();
-                    }
-                }}
-                tabIndex={isDisabled ? -1 : undefined}
-                aria-disabled={isDisabled}
-            >
-                {item.icon && (
-                    <span
-                        className={cn("flex-shrink-0", !isCollapsed && "mr-2")}
-                    >
-                        {item.icon}
-                    </span>
-                )}
-                {!isCollapsed && (
-                    <>
-                        <span>{t(item.title)}</span>
-                        {item.showProfessional && !isUnlocked() && (
-                            <Badge variant="outlinePrimary" className="ml-2">
-                                {t("licenseBadge")}
-                            </Badge>
-                        )}
-                    </>
-                )}
-            </Link>
+            </>
         );
 
         if (isCollapsed) {

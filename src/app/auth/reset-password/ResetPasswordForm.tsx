@@ -158,66 +158,74 @@ export default function ResetPasswordForm({
         const { password, email, token } = form.getValues();
         const { code } = mfaForm.getValues();
 
-        const res = await api
-            .post<AxiosResponse<ResetPasswordResponse>>(
-                "/auth/reset-password",
-                {
-                    email,
-                    token,
-                    newPassword: password,
-                    code
-                } as ResetPasswordBody
-            )
-            .catch((e) => {
-                setError(formatAxiosError(e, t('errorOccurred')));
-                console.error(t('passwordErrorReset'), e);
-                setIsSubmitting(false);
-            });
+        try {
+            const res = await api
+                .post<AxiosResponse<ResetPasswordResponse>>(
+                    "/auth/reset-password",
+                    {
+                        email,
+                        token,
+                        newPassword: password,
+                        code
+                    } as ResetPasswordBody
+                );
 
-        console.log(res);
+            if (res) {
+                setError(null);
 
-        if (res) {
-            setError(null);
-
-            if (res.data.data?.codeRequested) {
-                setState("mfa");
-                setIsSubmitting(false);
-                mfaForm.reset();
-                return;
-            }
-
-            setSuccessMessage(quickstart ? t('accountSetupSuccess') : t('passwordResetSuccess'));
-
-            // Auto-login after successful password reset
-            try {
-                const loginRes = await api.post("/auth/login", {
-                    email: form.getValues("email"),
-                    password: form.getValues("password")
-                });
-
-                if (loginRes.data.data?.codeRequested) {
-                    if (redirect) {
-                        router.push(`/auth/login?redirect=${redirect}`);
-                    } else {
-                        router.push("/auth/login");
-                    }
+                if (res.data.data?.codeRequested) {
+                    setState("mfa");
+                    setIsSubmitting(false);
+                    mfaForm.reset();
                     return;
                 }
 
-if (loginRes.data.data?.emailVerificationRequired) {
-                    try {
-                        await api.post("/auth/verify-email/request");
-                    } catch (verificationError) {
-                        console.error("Failed to send verification code:", verificationError);
+                setSuccessMessage(quickstart ? t('accountSetupSuccess') : t('passwordResetSuccess'));
+
+                // Auto-login after successful password reset
+                try {
+                    const loginRes = await api.post("/auth/login", {
+                        email: form.getValues("email"),
+                        password: form.getValues("password")
+                    });
+
+                    if (loginRes.data.data?.codeRequested) {
+                        if (redirect) {
+                            router.push(`/auth/login?redirect=${redirect}`);
+                        } else {
+                            router.push("/auth/login");
+                        }
+                        return;
                     }
 
-                    if (redirect) {
-                        router.push(`/auth/verify-email?redirect=${redirect}`);
-                    } else {
-                        router.push("/auth/verify-email");
+                    if (loginRes.data.data?.emailVerificationRequired) {
+                        try {
+                            await api.post("/auth/verify-email/request");
+                        } catch (verificationError) {
+                            console.error("Failed to send verification code:", verificationError);
+                        }
+
+                        if (redirect) {
+                            router.push(`/auth/verify-email?redirect=${redirect}`);
+                        } else {
+                            router.push("/auth/verify-email");
+                        }
+                        return;
                     }
-                    return;
-                } else {
+
+                    // Login successful, redirect
+                    setTimeout(() => {
+                        if (redirect) {
+                            const safe = cleanRedirect(redirect);
+                            router.push(safe);
+                        } else {
+                            router.push("/");
+                        }
+                        setIsSubmitting(false);
+                    }, 1500);
+                } catch (loginError) {
+                    // Auto-login failed, but password reset was successful
+                    console.error("Auto-login failed:", loginError);
                     setTimeout(() => {
                         if (redirect) {
                             const safe = cleanRedirect(redirect);
@@ -225,34 +233,14 @@ if (loginRes.data.data?.emailVerificationRequired) {
                         } else {
                             router.push("/auth/login");
                         }
-                    }, 0);
+                        setIsSubmitting(false);
+                    }, 1500);
                 }
-                }
-
-                // Login successful, redirect
-                setTimeout(() => {
-                    if (redirect) {
-                        const safe = cleanRedirect(redirect);
-                        router.push(safe);
-                    } else {
-                        router.push("/");
-                    }
-                    setIsSubmitting(false);
-                }, 1500);
-
-            } catch (loginError) {
-                // Auto-login failed, but password reset was successful
-                console.error("Auto-login failed:", loginError);
-                setTimeout(() => {
-                    if (redirect) {
-                        const safe = cleanRedirect(redirect);
-                        router.push(safe);
-                    } else {
-                        router.push("/login");
-                    }
-                    setIsSubmitting(false);
-                }, 1500);
             }
+        } catch (e) {
+            setError(formatAxiosError(e, t('errorOccurred')));
+            console.error(t('passwordErrorReset'), e);
+            setIsSubmitting(false);
         }
     }
 
