@@ -1162,7 +1162,7 @@
     "selectDomainTypeCnameName": "Domaine unique (CNAME)",
     "selectDomainTypeCnameDescription": "Juste ce domaine spécifique. Utilisez ce paramètre pour des sous-domaines individuels ou des entrées de domaine spécifiques.",
     "selectDomainTypeWildcardName": "Domaine Générique",
-    "selectDomainTypeWildcardDescription": "Ce domaine et son premier niveau de sous-domaines.",
+    "selectDomainTypeWildcardDescription": "This domain and its subdomains.",
     "domainDelegation": "Domaine Unique",
     "selectType": "Sélectionnez un type",
     "actions": "Actions",
