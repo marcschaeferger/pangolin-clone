@@ -1162,7 +1162,7 @@
     "selectDomainTypeCnameName": "Dominio único (CNAME)",
     "selectDomainTypeCnameDescription": "Solo este dominio específico. Úsalo para subdominios individuales o entradas específicas de dominio.",
     "selectDomainTypeWildcardName": "Dominio comodín",
-    "selectDomainTypeWildcardDescription": "Este dominio y su primer nivel de subdominios.",
+    "selectDomainTypeWildcardDescription": "This domain and its subdomains.",
     "domainDelegation": "Dominio único",
     "selectType": "Selecciona un tipo",
     "actions": "Acciones",
