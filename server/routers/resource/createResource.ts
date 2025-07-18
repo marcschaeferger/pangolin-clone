@@ -51,7 +51,7 @@ const createHttpResourceSchema = z
             return true;
         },
         { message: "Invalid subdomain" }
-    )
+    );
 
 const createRawResourceSchema = z
     .object({
