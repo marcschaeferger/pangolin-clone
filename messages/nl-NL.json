@@ -1162,7 +1162,7 @@
     "selectDomainTypeCnameName": "Enkel domein (CNAME)",
     "selectDomainTypeCnameDescription": "Alleen dit specifieke domein. Gebruik dit voor individuele subdomeinen of specifieke domeinvermeldingen.",
     "selectDomainTypeWildcardName": "Wildcard Domein",
-    "selectDomainTypeWildcardDescription": "Dit domein en zijn eerste niveau van subdomeinen.",
+    "selectDomainTypeWildcardDescription": "This domain and its subdomains.",
     "domainDelegation": "Enkel domein",
     "selectType": "Selecteer een type",
     "actions": "acties",
