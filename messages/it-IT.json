@@ -1162,7 +1162,7 @@
     "selectDomainTypeCnameName": "Dominio Singolo (CNAME)",
     "selectDomainTypeCnameDescription": "Solo questo dominio specifico. Usa questo per sottodomini individuali o specifiche voci di dominio.",
     "selectDomainTypeWildcardName": "Dominio Jolly",
-    "selectDomainTypeWildcardDescription": "Questo dominio e il suo primo livello di sottodomini.",
+    "selectDomainTypeWildcardDescription": "This domain and its subdomains.",
     "domainDelegation": "Dominio Singolo",
     "selectType": "Seleziona un tipo",
     "actions": "Azioni",
