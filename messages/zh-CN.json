@@ -1162,7 +1162,7 @@
     "selectDomainTypeCnameName": "单个域（CNAME）",
     "selectDomainTypeCnameDescription": "仅此特定域。用于单个子域或特定域条目。",
     "selectDomainTypeWildcardName": "通配符域",
-    "selectDomainTypeWildcardDescription": "此域及其第一级子域。",
+    "selectDomainTypeWildcardDescription": "This domain and its subdomains.",
     "domainDelegation": "单个域",
     "selectType": "选择一个类型",
     "actions": "操作",
