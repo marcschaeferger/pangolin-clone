@@ -9,7 +9,8 @@ import {
     roles,
     resourcePassword,
     resourcePincode,
-    resourceWhitelist
+    resourceWhitelist,
+    sites
 } from "@server/db";
 import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
@@ -94,9 +95,11 @@ export async function getUserResources(
                 enabled: resources.enabled,
                 sso: resources.sso,
                 protocol: resources.protocol,
-                emailWhitelistEnabled: resources.emailWhitelistEnabled
+                emailWhitelistEnabled: resources.emailWhitelistEnabled,
+                siteName: sites.name
             })
             .from(resources)
+            .leftJoin(sites, eq(sites.siteId, resources.siteId))
             .where(
                 and(
                     inArray(resources.resourceId, accessibleResourceIds),
@@ -124,7 +127,12 @@ export async function getUserResources(
                     domain: `${resource.ssl ? "https://" : "http://"}${resource.fullDomain}`,
                     enabled: resource.enabled,
                     protected: !!(resource.sso || hasPassword || hasPincode || hasWhitelist),
-                    protocol: resource.protocol
+                    protocol: resource.protocol,
+                    sso: resource.sso,
+                    password: hasPassword,
+                    pincode: hasPincode,
+                    whitelist: hasWhitelist,
+                    siteName: resource.siteName
                 };
             })
         );

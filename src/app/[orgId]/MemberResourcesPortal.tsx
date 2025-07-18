@@ -7,12 +7,20 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ExternalLink, Globe, ShieldCheck, Search, RefreshCw, AlertCircle, Plus, Shield, ShieldOff, ChevronLeft, ChevronRight } from "lucide-react";
+import { ExternalLink, Globe, ShieldCheck, Search, RefreshCw, AlertCircle, Plus, Shield, ShieldOff, ChevronLeft, ChevronRight, Building2, Key, KeyRound, Fingerprint, AtSign, Copy, InfoIcon } from "lucide-react";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { GetUserResourcesResponse } from "@server/routers/resource/getUserResources";
 import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
+import { useToast } from "@app/hooks/useToast";
 
+// Update Resource type to include site information
 type Resource = {
     resourceId: number;
     name: string;
@@ -20,6 +28,13 @@ type Resource = {
     enabled: boolean;
     protected: boolean;
     protocol: string;
+    // Auth method fields
+    sso?: boolean;
+    password?: boolean;
+    pincode?: boolean;
+    whitelist?: boolean;
+    // Site information
+    siteName?: string | null;
 };
 
 type MemberResourcesPortalProps = {
@@ -66,30 +81,184 @@ const ResourceFavicon = ({ domain, enabled }: { domain: string; enabled: boolean
 };
 
 // Enhanced status badge component
-const StatusBadge = ({ enabled, protected: isProtected }: { enabled: boolean; protected: boolean }) => {
+const StatusBadge = ({ enabled, protected: isProtected, resource }: { enabled: boolean; protected: boolean; resource: Resource }) => {
     if (!enabled) {
         return (
-            <Badge variant="secondary" className="gap-1.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700">
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger>
+                        <div className="h-7 w-7 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
                 <div className="h-2 w-2 bg-gray-400 dark:bg-gray-500 rounded-full"></div>
-                Disabled
-            </Badge>
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Resource Disabled</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
         );
     }
 
     if (isProtected) {
         return (
-            <Badge variant="secondary" className="gap-1.5 bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800">
-                <ShieldCheck className="h-3 w-3" />
-                Protected
-            </Badge>
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger>
+                        <div className="h-7 w-7 rounded-full flex items-center justify-center bg-green-50 dark:bg-green-950">
+                            <ShieldCheck className="h-3.5 w-3.5 text-green-700 dark:text-green-300" />
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent className="flex flex-col gap-2">
+                        <p className="font-medium">Protected Resource</p>
+                        <div className="space-y-1">
+                            <p className="text-sm font-medium text-muted-foreground">Authentication Methods:</p>
+                            <div className="flex flex-col gap-1.5">
+                                {resource.sso && (
+                                    <div className="flex items-center gap-1.5 text-sm">
+                                        <div className="h-6 w-6 rounded-full flex items-center justify-center bg-blue-50 dark:bg-blue-950">
+                                            <Key className="h-3 w-3 text-blue-700 dark:text-blue-300" />
+                                        </div>
+                                        <span>Single Sign-On (SSO)</span>
+                                    </div>
+                                )}
+                                {resource.password && (
+                                    <div className="flex items-center gap-1.5 text-sm">
+                                        <div className="h-6 w-6 rounded-full flex items-center justify-center bg-purple-50 dark:bg-purple-950">
+                                            <KeyRound className="h-3 w-3 text-purple-700 dark:text-purple-300" />
+                                        </div>
+                                        <span>Password Protected</span>
+                                    </div>
+                                )}
+                                {resource.pincode && (
+                                    <div className="flex items-center gap-1.5 text-sm">
+                                        <div className="h-6 w-6 rounded-full flex items-center justify-center bg-emerald-50 dark:bg-emerald-950">
+                                            <Fingerprint className="h-3 w-3 text-emerald-700 dark:text-emerald-300" />
+                                        </div>
+                                        <span>PIN Code</span>
+                                    </div>
+                                )}
+                                {resource.whitelist && (
+                                    <div className="flex items-center gap-1.5 text-sm">
+                                        <div className="h-6 w-6 rounded-full flex items-center justify-center bg-amber-50 dark:bg-amber-950">
+                                            <AtSign className="h-3 w-3 text-amber-700 dark:text-amber-300" />
+                                        </div>
+                                        <span>Email Whitelist</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
         );
     }
 
     return (
-        <Badge variant="secondary" className="gap-1.5 bg-orange-50 dark:bg-orange-950 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800">
-            <ShieldOff className="h-3 w-3" />
-            Unprotected
-        </Badge>
+        <div className="h-7 w-7 rounded-full flex items-center justify-center bg-orange-50 dark:bg-orange-950">
+            <ShieldOff className="h-3.5 w-3.5 text-orange-700 dark:text-orange-300" />
+        </div>
+    );
+};
+
+// Resource Info component
+const ResourceInfo = ({ resource }: { resource: Resource }) => {
+    const hasAuthMethods = resource.sso || resource.password || resource.pincode || resource.whitelist;
+    
+    return (
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger>
+                    <div className="h-7 w-7 rounded-full flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors">
+                        <InfoIcon className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                </TooltipTrigger>
+                <TooltipContent className="flex flex-col gap-3 w-[280px] p-3 bg-card border-2">
+                    {/* Site Information */}
+                    {resource.siteName && (
+                        <div>
+                            <div className="text-xs font-medium mb-1.5">Site</div>
+                            <div className="flex items-center gap-2">
+                                <Building2 className="h-4 w-4 text-foreground shrink-0" />
+                                <span className="text-sm">{resource.siteName}</span>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Authentication Methods */}
+                    {hasAuthMethods && (
+                        <div className={resource.siteName ? "border-t border-border pt-2" : ""}>
+                            <div className="text-xs font-medium mb-1.5">Authentication Methods</div>
+                            <div className="flex flex-col gap-1.5">
+                                {resource.sso && (
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-5 w-5 rounded-full flex items-center justify-center bg-blue-50/50 dark:bg-blue-950/50">
+                                            <Key className="h-3 w-3 text-blue-700 dark:text-blue-300" />
+                                        </div>
+                                        <span className="text-sm">Single Sign-On (SSO)</span>
+                                    </div>
+                                )}
+                                {resource.password && (
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-5 w-5 rounded-full flex items-center justify-center bg-purple-50/50 dark:bg-purple-950/50">
+                                            <KeyRound className="h-3 w-3 text-purple-700 dark:text-purple-300" />
+                                        </div>
+                                        <span className="text-sm">Password Protected</span>
+                                    </div>
+                                )}
+                                {resource.pincode && (
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-5 w-5 rounded-full flex items-center justify-center bg-emerald-50/50 dark:bg-emerald-950/50">
+                                            <Fingerprint className="h-3 w-3 text-emerald-700 dark:text-emerald-300" />
+                                        </div>
+                                        <span className="text-sm">PIN Code</span>
+                                    </div>
+                                )}
+                                {resource.whitelist && (
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-5 w-5 rounded-full flex items-center justify-center bg-amber-50/50 dark:bg-amber-950/50">
+                                            <AtSign className="h-3 w-3 text-amber-700 dark:text-amber-300" />
+                                        </div>
+                                        <span className="text-sm">Email Whitelist</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Resource Status - if disabled */}
+                    {!resource.enabled && (
+                        <div className={`${(resource.siteName || hasAuthMethods) ? "border-t border-border pt-2" : ""}`}>
+                            <div className="flex items-center gap-2">
+                                <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
+                                <span className="text-sm text-destructive">Resource Disabled</span>
+                            </div>
+                        </div>
+                    )}
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
+    );
+};
+
+// Site badge component
+const SiteBadge = ({ resource }: { resource: Resource }) => {
+    if (!resource.siteName) {
+        return null;
+    }
+    
+    return (
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger>
+                    <div className="h-7 w-7 rounded-full flex items-center justify-center bg-muted/60 dark:bg-muted/80">
+                        <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                    </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                    <p>{resource.siteName}</p>
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
     );
 };
 
@@ -212,6 +381,7 @@ export default function MemberResourcesPortal({ orgId }: MemberResourcesPortalPr
     const t = useTranslations();
     const { env } = useEnvContext();
     const api = createApiClient({ env });
+    const { toast } = useToast();
     
     const [resources, setResources] = useState<Resource[]>([]);
     const [filteredResources, setFilteredResources] = useState<Resource[]>([]);
@@ -477,53 +647,72 @@ export default function MemberResourcesPortal({ orgId }: MemberResourcesPortalPr
             ) : (
                 <>
                     {/* Resources Grid */}
-                    <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-cols-fr">
+                    <div className="grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 auto-cols-fr">
                         {paginatedResources.map((resource) => (
-                            <Card key={resource.resourceId} className="rounded-lg bg-card text-card-foreground hover:shadow-lg transition-all duration-200 border-2 hover:border-primary/20 dark:hover:border-primary/30 flex flex-col w-full group">
-                                <CardHeader className="pb-3">
-                                    <div className="flex items-start justify-between">
-                                        <CardTitle className="text-lg font-bold text-foreground truncate mr-2 group-hover:text-primary transition-colors">
-                                            {resource.name}
-                                        </CardTitle>
-                                        <Badge variant="secondary" className="text-xs shrink-0 bg-muted/60 dark:bg-muted/80 text-muted-foreground">
-                                            Your Site
-                                        </Badge>
-                                    </div>
-                                </CardHeader>
-                                <CardContent className="px-6 pb-6 flex-1 flex flex-col justify-between">
-                                    <div className="space-y-4">
-                                        {/* Resource URL with Favicon */}
-                                        <div className="flex items-center space-x-2">
-                                            <ResourceFavicon domain={resource.domain} enabled={resource.enabled} />
-                                            <button
-                                                onClick={() => handleOpenResource(resource)}
-                                                className="text-sm text-blue-500 dark:text-blue-400 font-medium hover:underline text-left truncate transition-colors hover:text-blue-600 dark:hover:text-blue-300"
-                                                disabled={!resource.enabled}
-                                            >
-                                                {resource.domain.replace(/^https?:\/\//, '')}
-                                            </button>
+                            <Card key={resource.resourceId} className="rounded-lg bg-card text-card-foreground hover:shadow-lg transition-all duration-200 border-2 hover:border-primary/20 dark:hover:border-primary/30 flex flex-col w-full group min-h-[200px]">
+                                <div className="p-6">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div className="flex items-center min-w-0 flex-1 gap-3 overflow-hidden">
+                                            <div className="flex-shrink-0">
+                                                <ResourceFavicon domain={resource.domain} enabled={resource.enabled} />
+                                            </div>
+                                            <TooltipProvider>
+                                                <Tooltip>
+                                                    <TooltipTrigger className="min-w-0 max-w-full">
+                                                        <CardTitle className="text-lg font-bold text-foreground truncate group-hover:text-primary transition-colors">
+                                                            {resource.name}
+                                                        </CardTitle>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p className="max-w-xs break-words">{resource.name}</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
                                         </div>
-
-                                        {/* Enhanced Status Badge */}
-                                        <div className="flex items-center">
-                                            <StatusBadge enabled={resource.enabled} protected={resource.protected} />
+                                        
+                                        <div className="flex-shrink-0">
+                                            <ResourceInfo resource={resource} />
                                         </div>
                                     </div>
 
-                                    {/* Open Resource Button */}
-                                    <div className="mt-4">
-                                        <Button 
+                                    <div className="flex items-center gap-2 mt-3">
+                                        <button
                                             onClick={() => handleOpenResource(resource)}
-                                            className="w-full h-8 transition-all group-hover:shadow-sm"
-                                            variant="outline"
-                                            size="sm"
+                                            className="text-sm text-muted-foreground font-medium text-left truncate flex-1"
                                             disabled={!resource.enabled}
                                         >
-                                            <ExternalLink className="h-3 w-3 mr-2" />
-                                            Open Resource
+                                            {resource.domain.replace(/^https?:\/\//, '')}
+                                        </button>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8"
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(resource.domain);
+                                                toast({
+                                                    title: "Copied to clipboard",
+                                                    description: "Resource URL has been copied to your clipboard.",
+                                                    duration: 2000
+                                                });
+                                            }}
+                                        >
+                                            <Copy className="h-4 w-4" />
                                         </Button>
                                     </div>
-                                </CardContent>
+                                </div>
+
+                                <div className="p-6 pt-0 mt-auto">
+                                    <Button 
+                                        onClick={() => handleOpenResource(resource)}
+                                        className="w-full h-9 transition-all group-hover:shadow-sm"
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={!resource.enabled}
+                                    >
+                                        <ExternalLink className="h-3.5 w-3.5 mr-2" />
+                                        Open Resource
+                                    </Button>
+                                </div>
                             </Card>
                         ))}
                     </div>
