@@ -1162,7 +1162,7 @@
     "selectDomainTypeCnameName": "Pojedyncza domena (CNAME)",
     "selectDomainTypeCnameDescription": "Tylko ta pojedyncza domena. Użyj tego dla poszczególnych subdomen lub wpisów specyficznych dla domeny.",
     "selectDomainTypeWildcardName": "Domena wieloznaczna",
-    "selectDomainTypeWildcardDescription": "Ta domena i jej pierwsza warstwa subdomen.",
+    "selectDomainTypeWildcardDescription": "This domain and its subdomains.",
     "domainDelegation": "Pojedyncza domena",
     "selectType": "Wybierz typ",
     "actions": "Akcje",
