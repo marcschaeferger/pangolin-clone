@@ -1162,7 +1162,7 @@
     "selectDomainTypeCnameName": "Einzelne Domain (CNAME)",
     "selectDomainTypeCnameDescription": "Nur diese spezifische Domain. Verwenden Sie dies für einzelne Subdomains oder spezifische Domaineinträge.",
     "selectDomainTypeWildcardName": "Wildcard-Domain",
-    "selectDomainTypeWildcardDescription": "Diese Domain und ihre erste Ebene der Subdomains.",
+    "selectDomainTypeWildcardDescription": "This domain and its subdomains.",
     "domainDelegation": "Einzelne Domain",
     "selectType": "Typ auswählen",
     "actions": "Aktionen",
