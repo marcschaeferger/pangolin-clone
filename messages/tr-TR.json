@@ -1162,7 +1162,7 @@
     "selectDomainTypeCnameName": "Tekil Alan Adı (CNAME)",
     "selectDomainTypeCnameDescription": "Sadece bu belirli alan adı. Bireysel alt alan adları veya belirli alan adı girişleri için bunu kullanın.",
     "selectDomainTypeWildcardName": "Wildcard Alan Adı",
-    "selectDomainTypeWildcardDescription": "Bu alan adı ve onun ilk alt alan düzeyi.",
+    "selectDomainTypeWildcardDescription": "This domain and its subdomains.",
     "domainDelegation": "Tekil Alan Adı",
     "selectType": "Bir tür seçin",
     "actions": "İşlemler",
