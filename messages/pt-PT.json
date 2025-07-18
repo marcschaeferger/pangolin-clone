@@ -1162,7 +1162,7 @@
     "selectDomainTypeCnameName": "Domínio Único (CNAME)",
     "selectDomainTypeCnameDescription": "Apenas este domínio específico. Use isso para subdomínios individuais ou entradas de domínio específicas.",
     "selectDomainTypeWildcardName": "Domínio Coringa",
-    "selectDomainTypeWildcardDescription": "Este domínio e seu primeiro nível de subdomínios.",
+    "selectDomainTypeWildcardDescription": "This domain and its subdomains.",
     "domainDelegation": "Domínio Único",
     "selectType": "Selecione um tipo",
     "actions": "Ações",
