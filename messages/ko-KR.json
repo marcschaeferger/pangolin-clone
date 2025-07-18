@@ -1162,7 +1162,7 @@
     "selectDomainTypeCnameName": "단일 도메인 (CNAME)",
     "selectDomainTypeCnameDescription": "단일 하위 도메인 또는 특정 도메인 항목에 사용됩니다.",
     "selectDomainTypeWildcardName": "와일드카드 도메인",
-    "selectDomainTypeWildcardDescription": "이 도메인과 그 첫 번째 레벨의 하위 도메인입니다.",
+    "selectDomainTypeWildcardDescription": "This domain and its subdomains.",
     "domainDelegation": "단일 도메인",
     "selectType": "유형 선택",
     "actions": "작업",
