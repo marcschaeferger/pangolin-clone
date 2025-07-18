@@ -1,4 +1,4 @@
-name: captcha_remediation
+iame: captcha_remediation
 filters:
   - Alert.Remediation == true && Alert.GetScope() == "Ip" && Alert.GetScenario() contains "http"
 decisions:

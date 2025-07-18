@@ -15,23 +15,25 @@ import {
     FormField,
     FormItem,
     FormLabel,
-    FormMessage,
+    FormMessage
 } from "@app/components/ui/form";
 import { Input } from "@app/components/ui/input";
 import { Alert, AlertDescription } from "@app/components/ui/alert";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@app/components/ui/dialog";
+    Credenza,
+    CredenzaBody,
+    CredenzaClose,
+    CredenzaContent,
+    CredenzaDescription,
+    CredenzaFooter,
+    CredenzaHeader,
+    CredenzaTitle
+} from "@app/components/Credenza";
 import { startRegistration } from "@simplewebauthn/browser";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { Card, CardContent } from "@app/components/ui/card";
 import { Badge } from "@app/components/ui/badge";
-import { Loader2, KeyRound, Trash2, Plus, Shield } from "lucide-react";
+import { Loader2, KeyRound, Trash2, Plus, Shield, Info } from "lucide-react";
 import { cn } from "@app/lib/cn";
 
 type SecurityKeyFormProps = {
@@ -53,6 +55,7 @@ type DeleteSecurityKeyData = {
 type RegisterFormValues = {
     name: string;
     password: string;
+    code?: string;
 };
 
 type DeleteFormValues = {
@@ -70,30 +73,47 @@ type FieldProps = {
     };
 };
 
-export default function SecurityKeyForm({ open, setOpen }: SecurityKeyFormProps) {
+export default function SecurityKeyForm({
+    open,
+    setOpen
+}: SecurityKeyFormProps) {
     const t = useTranslations();
     const { env } = useEnvContext();
     const api = createApiClient({ env });
     const [securityKeys, setSecurityKeys] = useState<SecurityKey[]>([]);
     const [isRegistering, setIsRegistering] = useState(false);
-    const [showRegisterDialog, setShowRegisterDialog] = useState(false);
-    const [selectedSecurityKey, setSelectedSecurityKey] = useState<DeleteSecurityKeyData | null>(null);
-    const [show2FADialog, setShow2FADialog] = useState(false);
+    const [dialogState, setDialogState] = useState<
+        "list" | "register" | "register2fa" | "delete" | "delete2fa"
+    >("list");
+    const [selectedSecurityKey, setSelectedSecurityKey] =
+        useState<DeleteSecurityKeyData | null>(null);
     const [deleteInProgress, setDeleteInProgress] = useState(false);
-    const [pendingDeleteCredentialId, setPendingDeleteCredentialId] = useState<string | null>(null);
-    const [pendingDeletePassword, setPendingDeletePassword] = useState<string | null>(null);
+    const [pendingDeleteCredentialId, setPendingDeleteCredentialId] = useState<
+        string | null
+    >(null);
+    const [pendingDeletePassword, setPendingDeletePassword] = useState<
+        string | null
+    >(null);
+    const [pendingRegisterData, setPendingRegisterData] = useState<{
+        name: string;
+        password: string;
+    } | null>(null);
+    const [register2FAForm, setRegister2FAForm] = useState<{ code: string }>({
+        code: ""
+    });
 
     useEffect(() => {
         loadSecurityKeys();
     }, []);
 
     const registerSchema = z.object({
-        name: z.string().min(1, { message: t('securityKeyNameRequired') }),
-        password: z.string().min(1, { message: t('passwordRequired') }),
+        name: z.string().min(1, { message: t("securityKeyNameRequired") }),
+        password: z.string().min(1, { message: t("passwordRequired") }),
+        code: z.string().optional()
     });
 
     const deleteSchema = z.object({
-        password: z.string().min(1, { message: t('passwordRequired') }),
+        password: z.string().min(1, { message: t("passwordRequired") }),
         code: z.string().optional()
     });
 
@@ -102,7 +122,8 @@ export default function SecurityKeyForm({ open, setOpen }: SecurityKeyFormProps)
         defaultValues: {
             name: "",
             password: "",
-        },
+            code: ""
+        }
     });
 
     const deleteForm = useForm<DeleteFormValues>({
@@ -110,7 +131,7 @@ export default function SecurityKeyForm({ open, setOpen }: SecurityKeyFormProps)
         defaultValues: {
             password: "",
             code: ""
-        },
+        }
     });
 
     const loadSecurityKeys = async () => {
@@ -120,7 +141,7 @@ export default function SecurityKeyForm({ open, setOpen }: SecurityKeyFormProps)
         } catch (error) {
             toast({
                 variant: "destructive",
-                description: formatAxiosError(error, t('securityKeyLoadError')),
+                description: formatAxiosError(error, t("securityKeyLoadError"))
             });
         }
     };
@@ -131,88 +152,101 @@ export default function SecurityKeyForm({ open, setOpen }: SecurityKeyFormProps)
             if (!window.PublicKeyCredential) {
                 toast({
                     variant: "destructive",
-                    description: t('securityKeyBrowserNotSupported', {
-                        defaultValue: "Your browser doesn't support security keys. Please use a modern browser like Chrome, Firefox, or Safari."
+                    description: t("securityKeyBrowserNotSupported", {
+                        defaultValue:
+                            "Your browser doesn't support security keys. Please use a modern browser like Chrome, Firefox, or Safari."
                     })
                 });
                 return;
             }
 
             setIsRegistering(true);
-            const startRes = await api.post("/auth/security-key/register/start", {
-                name: values.name,
-                password: values.password,
-            });
+            const startRes = await api.post(
+                "/auth/security-key/register/start",
+                {
+                    name: values.name,
+                    password: values.password,
+                    code: values.code
+                }
+            );
 
-            if (startRes.status === 202) {
-                toast({
-                    variant: "destructive",
-                    description: t('twoFactorRequired', {
-                        defaultValue: "Two-factor authentication is required to register a security key."
-                    })
+            // If 2FA is required
+            if (startRes.status === 202 && startRes.data.data?.codeRequested) {
+                setPendingRegisterData({
+                    name: values.name,
+                    password: values.password
                 });
+                setDialogState("register2fa");
+                setIsRegistering(false);
                 return;
             }
 
             const options = startRes.data.data;
-            
+
             try {
                 const credential = await startRegistration(options);
 
                 await api.post("/auth/security-key/register/verify", {
-                    credential,
+                    credential
                 });
 
                 toast({
-                    description: t('securityKeyRegisterSuccess', {
+                    description: t("securityKeyRegisterSuccess", {
                         defaultValue: "Security key registered successfully"
                     })
                 });
 
                 registerForm.reset();
-                setShowRegisterDialog(false);
+                setDialogState("list");
                 await loadSecurityKeys();
             } catch (error: any) {
-                if (error.name === 'NotAllowedError') {
-                    if (error.message.includes('denied permission')) {
+                if (error.name === "NotAllowedError") {
+                    if (error.message.includes("denied permission")) {
                         toast({
                             variant: "destructive",
-                            description: t('securityKeyPermissionDenied', {
-                                defaultValue: "Please allow access to your security key to continue registration."
+                            description: t("securityKeyPermissionDenied", {
+                                defaultValue:
+                                    "Please allow access to your security key to continue registration."
                             })
                         });
                     } else {
                         toast({
                             variant: "destructive",
-                            description: t('securityKeyRemovedTooQuickly', {
-                                defaultValue: "Please keep your security key connected until the registration process completes."
+                            description: t("securityKeyRemovedTooQuickly", {
+                                defaultValue:
+                                    "Please keep your security key connected until the registration process completes."
                             })
                         });
                     }
-                } else if (error.name === 'NotSupportedError') {
+                } else if (error.name === "NotSupportedError") {
                     toast({
                         variant: "destructive",
-                        description: t('securityKeyNotSupported', {
-                            defaultValue: "Your security key may not be compatible. Please try a different security key."
+                        description: t("securityKeyNotSupported", {
+                            defaultValue:
+                                "Your security key may not be compatible. Please try a different security key."
                         })
                     });
                 } else {
                     toast({
                         variant: "destructive",
-                        description: t('securityKeyUnknownError', {
-                            defaultValue: "There was a problem registering your security key. Please try again."
+                        description: t("securityKeyUnknownError", {
+                            defaultValue:
+                                "There was a problem registering your security key. Please try again."
                         })
                     });
                 }
                 throw error; // Re-throw to be caught by outer catch
             }
         } catch (error) {
-            console.error('Security key registration error:', error);
+            console.error("Security key registration error:", error);
             toast({
                 variant: "destructive",
-                description: formatAxiosError(error, t('securityKeyRegisterError', {
-                    defaultValue: "Failed to register security key"
-                }))
+                description: formatAxiosError(
+                    error,
+                    t("securityKeyRegisterError", {
+                        defaultValue: "Failed to register security key"
+                    })
+                )
             });
         } finally {
             setIsRegistering(false);
@@ -224,33 +258,42 @@ export default function SecurityKeyForm({ open, setOpen }: SecurityKeyFormProps)
 
         try {
             setDeleteInProgress(true);
-            const encodedCredentialId = encodeURIComponent(selectedSecurityKey.credentialId);
-            const response = await api.delete(`/auth/security-key/${encodedCredentialId}`, {
-                data: {
-                    password: values.password,
-                    code: values.code
+            const encodedCredentialId = encodeURIComponent(
+                selectedSecurityKey.credentialId
+            );
+            const response = await api.delete(
+                `/auth/security-key/${encodedCredentialId}`,
+                {
+                    data: {
+                        password: values.password,
+                        code: values.code
+                    }
                 }
-            });
+            );
 
             // If 2FA is required
             if (response.status === 202 && response.data.data.codeRequested) {
                 setPendingDeleteCredentialId(encodedCredentialId);
                 setPendingDeletePassword(values.password);
-                setShow2FADialog(true);
+                setDialogState("delete2fa");
                 return;
             }
 
             toast({
-                description: t('securityKeyRemoveSuccess')
+                description: t("securityKeyRemoveSuccess")
             });
 
             deleteForm.reset();
             setSelectedSecurityKey(null);
+            setDialogState("list");
             await loadSecurityKeys();
         } catch (error) {
             toast({
                 variant: "destructive",
-                description: formatAxiosError(error, t('securityKeyRemoveError')),
+                description: formatAxiosError(
+                    error,
+                    t("securityKeyRemoveError")
+                )
             });
         } finally {
             setDeleteInProgress(false);
@@ -262,30 +305,125 @@ export default function SecurityKeyForm({ open, setOpen }: SecurityKeyFormProps)
 
         try {
             setDeleteInProgress(true);
-            await api.delete(`/auth/security-key/${pendingDeleteCredentialId}`, {
-                data: {
-                    password: pendingDeletePassword,
-                    code: values.code
+            await api.delete(
+                `/auth/security-key/${pendingDeleteCredentialId}`,
+                {
+                    data: {
+                        password: pendingDeletePassword,
+                        code: values.code
+                    }
                 }
-            });
+            );
 
             toast({
-                description: t('securityKeyRemoveSuccess')
+                description: t("securityKeyRemoveSuccess")
             });
 
             deleteForm.reset();
             setSelectedSecurityKey(null);
-            setShow2FADialog(false);
+            setDialogState("list");
             setPendingDeleteCredentialId(null);
             setPendingDeletePassword(null);
             await loadSecurityKeys();
         } catch (error) {
             toast({
                 variant: "destructive",
-                description: formatAxiosError(error, t('securityKeyRemoveError')),
+                description: formatAxiosError(
+                    error,
+                    t("securityKeyRemoveError")
+                )
             });
         } finally {
             setDeleteInProgress(false);
+        }
+    };
+
+    const handleRegister2FASubmit = async (values: { code: string }) => {
+        if (!pendingRegisterData) return;
+
+        try {
+            setIsRegistering(true);
+            const startRes = await api.post(
+                "/auth/security-key/register/start",
+                {
+                    name: pendingRegisterData.name,
+                    password: pendingRegisterData.password,
+                    code: values.code
+                }
+            );
+
+            const options = startRes.data.data;
+
+            try {
+                const credential = await startRegistration(options);
+
+                await api.post("/auth/security-key/register/verify", {
+                    credential
+                });
+
+                toast({
+                    description: t("securityKeyRegisterSuccess", {
+                        defaultValue: "Security key registered successfully"
+                    })
+                });
+
+                registerForm.reset();
+                setDialogState("list");
+                setPendingRegisterData(null);
+                setRegister2FAForm({ code: "" });
+                await loadSecurityKeys();
+            } catch (error: any) {
+                if (error.name === "NotAllowedError") {
+                    if (error.message.includes("denied permission")) {
+                        toast({
+                            variant: "destructive",
+                            description: t("securityKeyPermissionDenied", {
+                                defaultValue:
+                                    "Please allow access to your security key to continue registration."
+                            })
+                        });
+                    } else {
+                        toast({
+                            variant: "destructive",
+                            description: t("securityKeyRemovedTooQuickly", {
+                                defaultValue:
+                                    "Please keep your security key connected until the registration process completes."
+                            })
+                        });
+                    }
+                } else if (error.name === "NotSupportedError") {
+                    toast({
+                        variant: "destructive",
+                        description: t("securityKeyNotSupported", {
+                            defaultValue:
+                                "Your security key may not be compatible. Please try a different security key."
+                        })
+                    });
+                } else {
+                    toast({
+                        variant: "destructive",
+                        description: t("securityKeyUnknownError", {
+                            defaultValue:
+                                "There was a problem registering your security key. Please try again."
+                        })
+                    });
+                }
+                throw error; // Re-throw to be caught by outer catch
+            }
+        } catch (error) {
+            console.error("Security key registration error:", error);
+            toast({
+                variant: "destructive",
+                description: formatAxiosError(
+                    error,
+                    t("securityKeyRegisterError", {
+                        defaultValue: "Failed to register security key"
+                    })
+                )
+            });
+            setRegister2FAForm({ code: "" });
+        } finally {
+            setIsRegistering(false);
         }
     };
 
@@ -296,292 +434,423 @@ export default function SecurityKeyForm({ open, setOpen }: SecurityKeyFormProps)
             registerForm.reset();
             deleteForm.reset();
             setSelectedSecurityKey(null);
-            setShowRegisterDialog(false);
+            setDialogState("list");
+            setPendingRegisterData(null);
+            setRegister2FAForm({ code: "" });
         }
         setOpen(open);
     };
 
     return (
         <>
-            <Dialog open={open} onOpenChange={onOpenChange}>
-                <DialogContent className="sm:max-w-[500px]">
-                    <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <Shield className="h-5 w-5" />
-                            {t('securityKeyManage')}
-                        </DialogTitle>
-                        <DialogDescription>
-                            {t('securityKeyDescription')}
-                        </DialogDescription>
-                    </DialogHeader>
+            <Credenza open={open} onOpenChange={onOpenChange}>
+                <CredenzaContent>
+                    {dialogState === "list" && (
+                        <>
+                            <CredenzaHeader>
+                                <CredenzaTitle className="flex items-center gap-2">
+                                    {t("securityKeyManage")}
+                                </CredenzaTitle>
+                                <CredenzaDescription>
+                                    {t("securityKeyDescription")}
+                                </CredenzaDescription>
+                            </CredenzaHeader>
+                            <CredenzaBody>
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-sm font-medium text-muted-foreground">
+                                            {t("securityKeyList")}
+                                        </h3>
+                                        <Button
+                                            onClick={() =>
+                                                setDialogState("register")
+                                            }
+                                            className="gap-2"
+                                        >
+                                            <Plus className="h-4 w-4" />
+                                            {t("securityKeyAdd")}
+                                        </Button>
+                                    </div>
 
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-sm font-medium text-muted-foreground">{t('securityKeyList')}</h3>
-                            <Button
-                                className="h-8 w-8 p-0"
-                                onClick={() => setShowRegisterDialog(true)}
-                            >
-                                <Plus className="h-4 w-4" />
-                            </Button>
-                        </div>
+                                    {securityKeys.length > 0 ? (
+                                        <div className="space-y-2">
+                                            {securityKeys.map((securityKey) => (
+                                                <Card
+                                                    key={
+                                                        securityKey.credentialId
+                                                    }
+                                                >
+                                                    <CardContent className="flex items-center justify-between p-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary">
+                                                                <KeyRound className="h-4 w-4 text-secondary-foreground" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="font-medium">
+                                                                    {
+                                                                        securityKey.name
+                                                                    }
+                                                                </p>
+                                                                <p className="text-xs text-muted-foreground">
+                                                                    {t(
+                                                                        "securityKeyLastUsed",
+                                                                        {
+                                                                            date: new Date(
+                                                                                securityKey.lastUsed
+                                                                            ).toLocaleDateString()
+                                                                        }
+                                                                    )}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <Button
+                                                            className="h-8 w-8 p-0 text-white hover:text-white/80"
+                                                            onClick={() => {
+                                                                setSelectedSecurityKey(
+                                                                    {
+                                                                        credentialId:
+                                                                            securityKey.credentialId,
+                                                                        name: securityKey.name
+                                                                    }
+                                                                );
+                                                                setDialogState(
+                                                                    "delete"
+                                                                );
+                                                            }}
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </CardContent>
+                                                </Card>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center py-8 text-center">
+                                            <Shield className="mb-2 h-12 w-12 text-muted-foreground" />
+                                            <p className="text-sm text-muted-foreground">
+                                                {t("securityKeyNoKeysRegistered")}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {t("securityKeyNoKeysDescription")}
+                                            </p>
+                                        </div>
+                                    )}
 
-                        {securityKeys.length > 0 ? (
-                            <div className="space-y-2">
-                                {securityKeys.map((securityKey) => (
-                                    <Card key={securityKey.credentialId}>
-                                        <CardContent className="flex items-center justify-between p-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary">
-                                                    <KeyRound className="h-4 w-4 text-secondary-foreground" />
-                                                </div>
-                                                <div>
-                                                    <p className="font-medium">{securityKey.name}</p>
-                                                    <p className="text-xs text-muted-foreground">
-                                                        {t('securityKeyLastUsed', {
-                                                            date: new Date(securityKey.lastUsed).toLocaleDateString()
-                                                        })}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <Button
-                                                className="h-8 w-8 p-0 text-white hover:text-white/80"
-                                                onClick={() => setSelectedSecurityKey({
-                                                    credentialId: securityKey.credentialId,
-                                                    name: securityKey.name
-                                                })}
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </CardContent>
-                                    </Card>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center py-8 text-center">
-                                <Shield className="mb-2 h-12 w-12 text-muted-foreground" />
-                                <p className="text-sm text-muted-foreground">No security keys registered</p>
-                                <p className="text-xs text-muted-foreground">Add a security key to enhance your account security</p>
-                            </div>
-                        )}
+                                    {securityKeys.length === 1 && (
+                                        <Alert variant="default">
+                                            <Info className="h-4 w-4" />
+                                            <AlertDescription>
+                                                {t("securityKeyRecommendation")}
+                                            </AlertDescription>
+                                        </Alert>
+                                    )}
+                                </div>
+                            </CredenzaBody>
+                        </>
+                    )}
 
-                        {securityKeys.length === 1 && (
-                            <Alert variant="default">
-                                <AlertDescription>{t('securityKeyRecommendation')}</AlertDescription>
-                            </Alert>
-                        )}
-                    </div>
-                </DialogContent>
-            </Dialog>
-
-            <Dialog open={showRegisterDialog} onOpenChange={setShowRegisterDialog}>
-                <DialogContent className="sm:max-w-[400px]">
-                    <DialogHeader>
-                        <DialogTitle>Register New Security Key</DialogTitle>
-                        <DialogDescription>
-                            Connect your security key and enter a name to identify it
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <Form {...registerForm}>
-                        <form onSubmit={registerForm.handleSubmit(handleRegisterSecurityKey)} className="space-y-4">
-                            <FormField
-                                control={registerForm.control}
-                                name="name"
-                                render={({ field }: FieldProps) => (
-                                    <FormItem>
-                                        <FormLabel>{t('securityKeyNameLabel')}</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                {...field}
-                                                placeholder={t('securityKeyNamePlaceholder')}
-                                                disabled={isRegistering}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={registerForm.control}
-                                name="password"
-                                render={({ field }: FieldProps) => (
-                                    <FormItem>
-                                        <FormLabel>{t('password')}</FormLabel>
-                                        <FormControl>
-                                            <Input 
-                                                {...field} 
-                                                type="password" 
-                                                disabled={isRegistering}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <DialogFooter>
+                    {dialogState === "register" && (
+                        <>
+                            <CredenzaHeader>
+                                <CredenzaTitle>
+                                    {t("securityKeyRegisterTitle")}
+                                </CredenzaTitle>
+                                <CredenzaDescription>
+                                    {t("securityKeyRegisterDescription")}
+                                </CredenzaDescription>
+                            </CredenzaHeader>
+                            <CredenzaBody>
+                                <Form {...registerForm}>
+                                    <form
+                                        onSubmit={registerForm.handleSubmit(
+                                            handleRegisterSecurityKey
+                                        )}
+                                        className="space-y-4"
+                                        id="form"
+                                    >
+                                        <FormField
+                                            control={registerForm.control}
+                                            name="name"
+                                            render={({ field }: FieldProps) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        {t(
+                                                            "securityKeyNameLabel"
+                                                        )}
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            {...field}
+                                                            disabled={
+                                                                isRegistering
+                                                            }
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={registerForm.control}
+                                            name="password"
+                                            render={({ field }: FieldProps) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        {t("password")}
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            {...field}
+                                                            type="password"
+                                                            disabled={
+                                                                isRegistering
+                                                            }
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </form>
+                                </Form>
+                            </CredenzaBody>
+                            <CredenzaFooter>
+                                <CredenzaClose asChild>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                            registerForm.reset();
+                                            setDialogState("list");
+                                        }}
+                                        disabled={isRegistering}
+                                    >
+                                        {t("cancel")}
+                                    </Button>
+                                </CredenzaClose>
                                 <Button
-                                    type="button"
-                                    className="border border-input bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground"
-                                    onClick={() => {
-                                        registerForm.reset();
-                                        setShowRegisterDialog(false);
-                                    }}
-                                    disabled={isRegistering}
-                                >
-                                    {t('cancel')}
-                                </Button>
-                                <Button 
-                                    type="submit" 
+                                    type="submit"
+                                    form="form"
                                     disabled={isRegistering}
                                     className={cn(
                                         "min-w-[100px]",
-                                        isRegistering && "cursor-not-allowed opacity-50"
+                                        isRegistering &&
+                                            "cursor-not-allowed opacity-50"
                                     )}
+                                    loading={isRegistering}
                                 >
-                                    {isRegistering ? (
-                                        <>
-                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            {t('registering')}
-                                        </>
-                                    ) : (
-                                        t('securityKeyRegister')
-                                    )}
+                                    {t("securityKeyRegister")}
                                 </Button>
-                            </DialogFooter>
-                        </form>
-                    </Form>
-                </DialogContent>
-            </Dialog>
+                            </CredenzaFooter>
+                        </>
+                    )}
 
-            <Dialog open={!!selectedSecurityKey} onOpenChange={(open) => !open && setSelectedSecurityKey(null)}>
-                <DialogContent className="sm:max-w-[400px]">
-                    <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 text-destructive">
-                            <Trash2 className="h-4 w-4" />
-                            Remove Security Key
-                        </DialogTitle>
-                        <DialogDescription>
-                            Enter your password to remove the security key "{selectedSecurityKey?.name}"
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <Form {...deleteForm}>
-                        <form onSubmit={deleteForm.handleSubmit(handleDeleteSecurityKey)} className="space-y-4">
-                            <FormField
-                                control={deleteForm.control}
-                                name="password"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{t('password')}</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                {...field}
-                                                type="password"
-                                                disabled={deleteInProgress}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <DialogFooter>
+                    {dialogState === "register2fa" && (
+                        <>
+                            <CredenzaHeader>
+                                <CredenzaTitle>
+                                    {t("securityKeyTwoFactorRequired")}
+                                </CredenzaTitle>
+                                <CredenzaDescription>
+                                    {t("securityKeyTwoFactorDescription")}
+                                </CredenzaDescription>
+                            </CredenzaHeader>
+                            <CredenzaBody>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="text-sm font-medium">
+                                            {t("securityKeyTwoFactorCode")}
+                                        </label>
+                                        <Input
+                                            type="text"
+                                            value={register2FAForm.code}
+                                            onChange={(e) =>
+                                                setRegister2FAForm({
+                                                    code: e.target.value
+                                                })
+                                            }
+                                            maxLength={6}
+                                            disabled={isRegistering}
+                                        />
+                                    </div>
+                                </div>
+                            </CredenzaBody>
+                            <CredenzaFooter>
+                                <CredenzaClose asChild>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                            setRegister2FAForm({ code: "" });
+                                            setDialogState("list");
+                                            setPendingRegisterData(null);
+                                        }}
+                                        disabled={isRegistering}
+                                    >
+                                        {t("cancel")}
+                                    </Button>
+                                </CredenzaClose>
                                 <Button
                                     type="button"
-                                    className="border border-input bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground"
-                                    onClick={() => {
-                                        deleteForm.reset();
-                                        setSelectedSecurityKey(null);
-                                    }}
-                                    disabled={deleteInProgress}
+                                    className="min-w-[100px]"
+                                    disabled={
+                                        isRegistering ||
+                                        register2FAForm.code.length !== 6
+                                    }
+                                    loading={isRegistering}
+                                    onClick={() =>
+                                        handleRegister2FASubmit({
+                                            code: register2FAForm.code
+                                        })
+                                    }
                                 >
-                                    {t('cancel')}
+                                    {t("securityKeyRegister")}
                                 </Button>
+                            </CredenzaFooter>
+                        </>
+                    )}
+
+                    {dialogState === "delete" && (
+                        <>
+                            <CredenzaHeader>
+                                <CredenzaTitle className="flex items-center gap-2">
+                                    {t("securityKeyRemoveTitle")}
+                                </CredenzaTitle>
+                                <CredenzaDescription>
+                                    {t("securityKeyRemoveDescription", { name: selectedSecurityKey!.name! })}
+                                </CredenzaDescription>
+                            </CredenzaHeader>
+                            <CredenzaBody>
+                                <Form {...deleteForm}>
+                                    <form
+                                        onSubmit={deleteForm.handleSubmit(
+                                            handleDeleteSecurityKey
+                                        )}
+                                        className="space-y-4"
+                                        id="delete-form"
+                                    >
+                                        <FormField
+                                            control={deleteForm.control}
+                                            name="password"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        {t("password")}
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            {...field}
+                                                            type="password"
+                                                            disabled={
+                                                                deleteInProgress
+                                                            }
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </form>
+                                </Form>
+                            </CredenzaBody>
+                            <CredenzaFooter>
+                                <CredenzaClose asChild>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                            deleteForm.reset();
+                                            setSelectedSecurityKey(null);
+                                            setDialogState("list");
+                                        }}
+                                        disabled={deleteInProgress}
+                                    >
+                                        {t("cancel")}
+                                    </Button>
+                                </CredenzaClose>
                                 <Button
                                     type="submit"
+                                    form="delete-form"
                                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                     disabled={deleteInProgress}
+                                    loading={deleteInProgress}
                                 >
-                                    {deleteInProgress ? (
-                                        <>
-                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            {t('securityKeyRemoving')}
-                                        </>
-                                    ) : (
-                                        t('securityKeyRemove')
-                                    )}
+                                    {t("securityKeyRemove")}
                                 </Button>
-                            </DialogFooter>
-                        </form>
-                    </Form>
-                </DialogContent>
-            </Dialog>
+                            </CredenzaFooter>
+                        </>
+                    )}
 
-            <Dialog open={show2FADialog} onOpenChange={(open) => !open && setShow2FADialog(false)}>
-                <DialogContent className="sm:max-w-[400px]">
-                    <DialogHeader>
-                        <DialogTitle>Two-Factor Authentication Required</DialogTitle>
-                        <DialogDescription>
-                            Please enter your two-factor authentication code to remove the security key
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <Form {...deleteForm}>
-                        <form onSubmit={deleteForm.handleSubmit(handle2FASubmit)} className="space-y-4">
-                            <FormField
-                                control={deleteForm.control}
-                                name="code"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Two-Factor Code</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                {...field}
-                                                type="text"
-                                                placeholder="Enter your 6-digit code"
-                                                disabled={deleteInProgress}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <DialogFooter>
-                                <Button
-                                    type="button"
-                                    className="border border-input bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground"
-                                    onClick={() => {
-                                        deleteForm.reset();
-                                        setShow2FADialog(false);
-                                        setPendingDeleteCredentialId(null);
-                                        setPendingDeletePassword(null);
-                                    }}
-                                    disabled={deleteInProgress}
-                                >
-                                    {t('cancel')}
-                                </Button>
+                    {dialogState === "delete2fa" && (
+                        <>
+                            <CredenzaHeader>
+                                <CredenzaTitle>
+                                    {t("securityKeyTwoFactorRequired")}
+                                </CredenzaTitle>
+                                <CredenzaDescription>
+                                    {t("securityKeyTwoFactorRemoveDescription")}
+                                </CredenzaDescription>
+                            </CredenzaHeader>
+                            <CredenzaBody>
+                                <Form {...deleteForm}>
+                                    <form
+                                        onSubmit={deleteForm.handleSubmit(
+                                            handle2FASubmit
+                                        )}
+                                        className="space-y-4"
+                                        id="delete2fa-form"
+                                    >
+                                        <FormField
+                                            control={deleteForm.control}
+                                            name="code"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        {t("securityKeyTwoFactorCode")}
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            {...field}
+                                                            type="text"
+                                                            maxLength={6}
+                                                            disabled={
+                                                                deleteInProgress
+                                                            }
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </form>
+                                </Form>
+                            </CredenzaBody>
+                            <CredenzaFooter>
+                                <CredenzaClose asChild>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                            deleteForm.reset();
+                                            setDialogState("list");
+                                            setPendingDeleteCredentialId(null);
+                                            setPendingDeletePassword(null);
+                                        }}
+                                        disabled={deleteInProgress}
+                                    >
+                                        {t("cancel")}
+                                    </Button>
+                                </CredenzaClose>
                                 <Button
                                     type="submit"
+                                    form="delete2fa-form"
                                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                     disabled={deleteInProgress}
+                                    loading={deleteInProgress}
                                 >
-                                    {deleteInProgress ? (
-                                        <>
-                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            {t('securityKeyRemoving')}
-                                        </>
-                                    ) : (
-                                        t('securityKeyRemove')
-                                    )}
+                                    {t("securityKeyRemove")}
                                 </Button>
-                            </DialogFooter>
-                        </form>
-                    </Form>
-                </DialogContent>
-            </Dialog>
+                            </CredenzaFooter>
+                        </>
+                    )}
+                </CredenzaContent>
+            </Credenza>
         </>
     );
-} 
+}

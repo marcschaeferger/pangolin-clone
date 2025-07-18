@@ -63,6 +63,7 @@ export default function LoginForm({ redirect, onLogin, idps }: LoginFormProps) {
 
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [securityKeyLoading, setSecurityKeyLoading] = useState(false);
     const hasIdp = idps && idps.length > 0;
 
     const [mfaRequested, setMfaRequested] = useState(false);
@@ -98,7 +99,7 @@ export default function LoginForm({ redirect, onLogin, idps }: LoginFormProps) {
 
     async function initiateSecurityKeyAuth() {
         setShowSecurityKeyPrompt(true);
-        setLoading(true);
+        setSecurityKeyLoading(true);
         setError(null);
 
         try {
@@ -117,7 +118,7 @@ export default function LoginForm({ redirect, onLogin, idps }: LoginFormProps) {
             // Perform WebAuthn authentication
             try {
                 const credential = await startAuthentication(options);
-                
+
                 // Verify authentication
                 const verifyRes = await api.post(
                     "/auth/security-key/authenticate/verify",
@@ -167,7 +168,7 @@ export default function LoginForm({ redirect, onLogin, idps }: LoginFormProps) {
                 }));
             }
         } finally {
-            setLoading(false);
+            setSecurityKeyLoading(false);
             setShowSecurityKeyPrompt(false);
         }
     }
@@ -432,8 +433,8 @@ export default function LoginForm({ redirect, onLogin, idps }: LoginFormProps) {
                             variant="outline"
                             className="w-full"
                             onClick={initiateSecurityKeyAuth}
-                            loading={loading}
-                            disabled={loading || showSecurityKeyPrompt}
+                            loading={securityKeyLoading}
+                            disabled={securityKeyLoading || showSecurityKeyPrompt}
                         >
                             <FingerprintIcon className="w-4 h-4 mr-2" />
                             {t('securityKeyLogin', {

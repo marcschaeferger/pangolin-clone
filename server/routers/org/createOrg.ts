@@ -23,15 +23,15 @@ import config from "@server/lib/config";
 import { fromError } from "zod-validation-error";
 import { defaultRoleAllowedActions } from "../role";
 import { OpenAPITags, registry } from "@server/openApi";
+import { isValidCIDR } from "@server/lib/validators";
 
 const createOrgSchema = z
     .object({
         orgId: z.string(),
-        name: z.string().min(1).max(255)
+        name: z.string().min(1).max(255),
+        subnet: z.string()
     })
     .strict();
-
-// const MAX_ORGS = 5;
 
 registry.registerPath({
     method: "put",
@@ -78,7 +78,33 @@ export async function createOrg(
             );
         }
 
-        const { orgId, name } = parsedBody.data;
+        const { orgId, name, subnet } = parsedBody.data;
+
+        if (!isValidCIDR(subnet)) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    "Invalid subnet format. Please provide a valid CIDR notation."
+                )
+            );
+        }
+
+        // TODO: for now we are making all of the orgs the same subnet
+        // make sure the subnet is unique
+        // const subnetExists = await db
+        //     .select()
+        //     .from(orgs)
+        //     .where(eq(orgs.subnet, subnet))
+        //     .limit(1);
+
+        // if (subnetExists.length > 0) {
+        //     return next(
+        //         createHttpError(
+        //             HttpCode.CONFLICT,
+        //             `Subnet ${subnet} already exists`
+        //         )
+        //     );
+        // }
 
         // make sure the orgId is unique
         const orgExists = await db
@@ -109,7 +135,8 @@ export async function createOrg(
                 .insert(orgs)
                 .values({
                     orgId,
-                    name
+                    name,
+                    subnet
                 })
                 .returning();
 
@@ -142,25 +169,25 @@ export async function createOrg(
 
             // Get all actions and create role actions
             const actionIds = await trx.select().from(actions).execute();
-            
+
             if (actionIds.length > 0) {
-                await trx
-                    .insert(roleActions)
-                    .values(
-                        actionIds.map((action) => ({
-                            roleId,
-                            actionId: action.actionId,
-                            orgId: newOrg[0].orgId
-                        }))
-                    );
+                await trx.insert(roleActions).values(
+                    actionIds.map((action) => ({
+                        roleId,
+                        actionId: action.actionId,
+                        orgId: newOrg[0].orgId
+                    }))
+                );
             }
 
-            await trx.insert(orgDomains).values(
-                allDomains.map((domain) => ({
-                    orgId: newOrg[0].orgId,
-                    domainId: domain.domainId
-                }))
-            );
+            if (allDomains.length) {
+                await trx.insert(orgDomains).values(
+                    allDomains.map((domain) => ({
+                        orgId: newOrg[0].orgId,
+                        domainId: domain.domainId
+                    }))
+                );
+            }
 
             if (req.user) {
                 await trx.insert(userOrgs).values({
@@ -187,7 +214,7 @@ export async function createOrg(
                     orgId: newOrg[0].orgId,
                     roleId: roleId,
                     isOwner: true
-                });
+                }); 
             }
 
             const memberRole = await trx

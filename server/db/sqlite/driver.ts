@@ -2,28 +2,26 @@ import { drizzle as DrizzleSqlite } from "drizzle-orm/better-sqlite3";
 import Database from "better-sqlite3";
 import * as schema from "./schema";
 import path from "path";
-import fs from "fs/promises";
+import fs from "fs";
 import { APP_PATH } from "@server/lib/consts";
 import { existsSync, mkdirSync } from "fs";
 
 export const location = path.join(APP_PATH, "db", "db.sqlite");
-export const exists = await checkFileExists(location);
+export const exists = checkFileExists(location);
 
 bootstrapVolume();
 
 function createDb() {
     const sqlite = new Database(location);
-    sqlite.pragma('foreign_keys = ON');
-    sqlite.exec('VACUUM;'); // This will initialize the database file with a valid SQLite header
     return DrizzleSqlite(sqlite, { schema });
 }
 
 export const db = createDb();
 export default db;
 
-async function checkFileExists(filePath: string): Promise<boolean> {
+function checkFileExists(filePath: string): boolean {
     try {
-        await fs.access(filePath);
+        fs.accessSync(filePath);
         return true;
     } catch {
         return false;

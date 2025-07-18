@@ -4,7 +4,7 @@ import { Label } from "./ui/label";
 
 interface SwitchComponentProps {
     id: string;
-    label: string;
+    label?: string;
     description?: string;
     checked?: boolean;
     defaultChecked?: boolean;
@@ -31,7 +31,7 @@ export function SwitchInput({
                     onCheckedChange={onCheckedChange}
                     disabled={disabled}
                 />
-                <Label htmlFor={id}>{label}</Label>
+                {label && <Label htmlFor={id}>{label}</Label>}
             </div>
             {description && (
                 <span className="text-muted-foreground text-sm">

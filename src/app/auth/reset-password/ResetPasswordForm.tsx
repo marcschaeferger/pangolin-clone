@@ -54,12 +54,14 @@ export type ResetPasswordFormProps = {
     emailParam?: string;
     tokenParam?: string;
     redirect?: string;
+    quickstart?: boolean;
 };
 
 export default function ResetPasswordForm({
     emailParam,
     tokenParam,
-    redirect
+    redirect,
+    quickstart
 }: ResetPasswordFormProps) {
     const router = useRouter();
 
@@ -184,17 +186,73 @@ export default function ResetPasswordForm({
                 return;
             }
 
-            setSuccessMessage(t('passwordResetSuccess'));
+            setSuccessMessage(quickstart ? t('accountSetupSuccess') : t('passwordResetSuccess'));
 
-            setTimeout(() => {
-                if (redirect) {
-                    const safe = cleanRedirect(redirect);
-                    router.push(safe);
-                } else {
-                    router.push("/auth/login");
+            // Auto-login after successful password reset
+            try {
+                const loginRes = await api.post("/auth/login", {
+                    email: form.getValues("email"),
+                    password: form.getValues("password")
+                });
+
+                if (loginRes.data.data?.codeRequested) {
+                    if (redirect) {
+                        router.push(`/auth/login?redirect=${redirect}`);
+                    } else {
+                        router.push("/auth/login");
+                    }
+                    return;
                 }
-                setIsSubmitting(false);
-            }, 1500);
+
+if (loginRes.data.data?.emailVerificationRequired) {
+                    try {
+                        await api.post("/auth/verify-email/request");
+                    } catch (verificationError) {
+                        console.error("Failed to send verification code:", verificationError);
+                    }
+
+                    if (redirect) {
+                        router.push(`/auth/verify-email?redirect=${redirect}`);
+                    } else {
+                        router.push("/auth/verify-email");
+                    }
+                    return;
+                } else {
+                    setTimeout(() => {
+                        if (redirect) {
+                            const safe = cleanRedirect(redirect);
+                            router.push(safe);
+                        } else {
+                            router.push("/auth/login");
+                        }
+                    }, 0);
+                }
+                }
+
+                // Login successful, redirect
+                setTimeout(() => {
+                    if (redirect) {
+                        const safe = cleanRedirect(redirect);
+                        router.push(safe);
+                    } else {
+                        router.push("/");
+                    }
+                    setIsSubmitting(false);
+                }, 1500);
+
+            } catch (loginError) {
+                // Auto-login failed, but password reset was successful
+                console.error("Auto-login failed:", loginError);
+                setTimeout(() => {
+                    if (redirect) {
+                        const safe = cleanRedirect(redirect);
+                        router.push(safe);
+                    } else {
+                        router.push("/login");
+                    }
+                    setIsSubmitting(false);
+                }, 1500);
+            }
         }
     }
 
@@ -202,9 +260,14 @@ export default function ResetPasswordForm({
         <div>
             <Card className="w-full max-w-md">
                 <CardHeader>
-                    <CardTitle>{t('passwordReset')}</CardTitle>
+                    <CardTitle>
+                        {quickstart ? t('completeAccountSetup') : t('passwordReset')}
+                    </CardTitle>
                     <CardDescription>
-                        {t('passwordResetDescription')}
+                        {quickstart 
+                            ? t('completeAccountSetupDescription') 
+                            : t('passwordResetDescription')
+                        }
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -229,7 +292,10 @@ export default function ResetPasswordForm({
                                                 </FormControl>
                                                 <FormMessage />
                                                 <FormDescription>
-                                                    {t('passwordResetSent')}
+                                                    {quickstart 
+                                                        ? t('accountSetupSent') 
+                                                        : t('passwordResetSent')
+                                                    }
                                                 </FormDescription>
                                             </FormItem>
                                         )}
@@ -269,7 +335,10 @@ export default function ResetPasswordForm({
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>
-                                                        {t('passwordResetCode')}
+                                                        {quickstart 
+                                                            ? t('accountSetupCode') 
+                                                            : t('passwordResetCode')
+                                                        }
                                                     </FormLabel>
                                                     <FormControl>
                                                         <Input
@@ -279,7 +348,10 @@ export default function ResetPasswordForm({
                                                     </FormControl>
                                                     <FormMessage />
                                                     <FormDescription>
-                                                        {t('passwordResetCodeDescription')}
+                                                        {quickstart 
+                                                            ? t('accountSetupCodeDescription') 
+                                                            : t('passwordResetCodeDescription')
+                                                        }
                                                     </FormDescription>
                                                 </FormItem>
                                             )}
@@ -292,7 +364,10 @@ export default function ResetPasswordForm({
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
-                                                    {t('passwordNew')}
+                                                    {quickstart 
+                                                        ? t('passwordCreate') 
+                                                        : t('passwordNew')
+                                                    }
                                                 </FormLabel>
                                                 <FormControl>
                                                     <Input
@@ -310,7 +385,10 @@ export default function ResetPasswordForm({
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
-                                                    {t('passwordNewConfirm')}
+                                                    {quickstart 
+                                                        ? t('passwordCreateConfirm') 
+                                                        : t('passwordNewConfirm')
+                                                    }
                                                 </FormLabel>
                                                 <FormControl>
                                                     <Input
@@ -407,7 +485,7 @@ export default function ResetPasswordForm({
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     )}
                                     {state === "reset"
-                                        ? t('passwordReset')
+                                        ? (quickstart ? t('completeSetup') : t('passwordReset'))
                                         : t('pincodeSubmit2')}
                                 </Button>
                             )}
@@ -422,7 +500,10 @@ export default function ResetPasswordForm({
                                     {isSubmitting && (
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     )}
-                                    {t('passwordResetSubmit')}
+                                    {quickstart 
+                                        ? t('accountSetupSubmit') 
+                                        : t('passwordResetSubmit')
+                                    }
                                 </Button>
                             )}
 

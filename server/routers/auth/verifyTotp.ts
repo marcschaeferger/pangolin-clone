@@ -75,6 +75,14 @@ export async function verifyTotp(
                     )
                 );
             user = res;
+
+            const validPassword = await verifyPassword(
+                password,
+                user.passwordHash!
+            );
+            if (!validPassword) {
+                return next(unauthorized());
+            }
         }
 
         if (!user) {
@@ -90,25 +98,6 @@ export async function verifyTotp(
                 )
             );
         }
-
-        // Add type guard to ensure password is defined
-        if (!password) {
-            return next(
-                createHttpError(
-                    HttpCode.BAD_REQUEST,
-                    "Password is required for two-factor authentication"
-                )
-            );
-        }
-
-        const validPassword = await verifyPassword(
-            password,
-            user.passwordHash!
-        );
-        if (!validPassword) {
-            return next(unauthorized());
-        }
-
         if (user.type !== UserType.Internal) {
             return next(
                 createHttpError(

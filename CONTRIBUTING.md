@@ -6,10 +6,6 @@ Please see the contribution and local development guide on the docs page before 
 
 https://docs.fossorial.io/development
 
-For ideas about what features to work on and our future plans, please see the roadmap:
-
-https://docs.fossorial.io/roadmap
-
 ### Licensing Considerations
 
 Please note that your contributions will be distributed under the AGPLv3 and the Fossorial Commercial license. For inquiries about commercial licensing, please contact us.

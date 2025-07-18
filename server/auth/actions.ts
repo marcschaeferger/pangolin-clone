@@ -69,6 +69,11 @@ export enum ActionsEnum {
     deleteResourceRule = "deleteResourceRule",
     listResourceRules = "listResourceRules",
     updateResourceRule = "updateResourceRule",
+    createClient = "createClient",
+    deleteClient = "deleteClient",
+    updateClient = "updateClient",
+    listClients = "listClients",
+    getClient = "getClient",
     listOrgDomains = "listOrgDomains",
     createNewt = "createNewt",
     createIdp = "createIdp",
@@ -88,7 +93,10 @@ export enum ActionsEnum {
     listApiKeyActions = "listApiKeyActions",
     listApiKeys = "listApiKeys",
     getApiKey = "getApiKey",
-    resetUserPassword = "resetUserPassword"
+    resetUserPassword = "resetUserPassword",
+    createOrgDomain = "createOrgDomain",
+    deleteOrgDomain = "deleteOrgDomain",
+    restartOrgDomain = "restartOrgDomain"
 }
 
 export async function checkUserActionPermission(

@@ -10,10 +10,14 @@ import {
     InfoSections,
     InfoSectionTitle
 } from "@app/components/InfoSection";
-import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { useDockerSocket } from "@app/hooks/useDockerSocket";
 import { useTranslations } from "next-intl";
+import { AxiosResponse } from "axios";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { RotateCw } from "lucide-react";
+import { createApiClient } from "@app/lib/api";
 
 type ResourceInfoBoxType = {};
 

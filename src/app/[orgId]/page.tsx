@@ -9,7 +9,6 @@ import { AxiosResponse } from "axios";
 import { authCookieHeader } from "@app/lib/api/cookies";
 import { redirect } from "next/navigation";
 import { Layout } from "@app/components/Layout";
-import { orgLangingNavItems, orgNavItems, rootNavItems } from "../navigation";
 import { ListUserOrgsResponse } from "@server/routers/org";
 import { pullEnv } from "@app/lib/pullEnv";
 import EnvProvider from "@app/providers/EnvProvider";
@@ -100,11 +99,26 @@ export default async function OrgPage(props: OrgPageProps) {
 
     return (
         <UserProvider user={user}>
-            <EnvProvider env={env}>
-                <Layout orgId={orgId} navItems={orgLangingNavItems} orgs={orgs}>
-                    <MemberResourcesPortal orgId={orgId} />
-                </Layout>
-            </EnvProvider>
+            <Layout orgId={orgId} navItems={[]} orgs={orgs}>
+                {overview && (
+                    <div className="w-full max-w-4xl mx-auto md:mt-32 mt-4">
+                        <OrganizationLandingCard
+                            overview={{
+                                orgId: overview.orgId,
+                                orgName: overview.orgName,
+                                stats: {
+                                    users: overview.numUsers,
+                                    sites: overview.numSites,
+                                    resources: overview.numResources
+                                },
+                                isAdmin: overview.isAdmin,
+                                isOwner: overview.isOwner,
+                                userRole: overview.userRoleName
+                            }}
+                        />
+                    </div>
+                )}
+            </Layout>
         </UserProvider>
     );
 }

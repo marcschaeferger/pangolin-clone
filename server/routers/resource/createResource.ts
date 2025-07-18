@@ -21,6 +21,7 @@ import logger from "@server/logger";
 import { subdomainSchema } from "@server/lib/schemas";
 import config from "@server/lib/config";
 import { OpenAPITags, registry } from "@server/openApi";
+import { build } from "@server/build";
 
 const createResourceParamsSchema = z
     .object({
@@ -34,9 +35,8 @@ const createHttpResourceSchema = z
         name: z.string().min(1).max(255),
         subdomain: z
             .string()
-            .optional()
-            .transform((val) => val?.toLowerCase()),
-        isBaseDomain: z.boolean().optional(),
+            .nullable()
+            .optional(),
         siteId: z.number(),
         http: z.boolean(),
         protocol: z.enum(["tcp", "udp"]),
@@ -52,19 +52,6 @@ const createHttpResourceSchema = z
         },
         { message: "Invalid subdomain" }
     )
-    .refine(
-        (data) => {
-            if (!config.getRawConfig().flags?.allow_base_domain_resources) {
-                if (data.isBaseDomain) {
-                    return false;
-                }
-            }
-            return true;
-        },
-        {
-            message: "Base domain resources are not allowed"
-        }
-    );
 
 const createRawResourceSchema = z
     .object({
@@ -101,9 +88,12 @@ registry.registerPath({
         body: {
             content: {
                 "application/json": {
-                    schema: createHttpResourceSchema.or(
-                        createRawResourceSchema
-                    )
+                    schema:
+                        build == "oss"
+                            ? createHttpResourceSchema.or(
+                                  createRawResourceSchema
+                              )
+                            : createHttpResourceSchema
                 }
             }
         }
@@ -166,6 +156,14 @@ export async function createResource(
                 { siteId, orgId }
             );
         } else {
+            if (!config.getRawConfig().flags?.allow_raw_resources && build == "oss") {
+                return next(
+                    createHttpError(
+                        HttpCode.BAD_REQUEST,
+                        "Raw resources are not allowed"
+                    )
+                );
+            }
             return await createRawResource(
                 { req, res, next },
                 { siteId, orgId }
@@ -203,34 +201,85 @@ async function createHttpResource(
         );
     }
 
-    const { name, subdomain, isBaseDomain, http, protocol, domainId } =
-        parsedBody.data;
+    const { name, domainId } = parsedBody.data;
+    let subdomain = parsedBody.data.subdomain;
 
-    const [orgDomain] = await db
+    const [domainRes] = await db
         .select()
-        .from(orgDomains)
-        .where(
+        .from(domains)
+        .where(eq(domains.domainId, domainId))
+        .leftJoin(
+            orgDomains,
             and(eq(orgDomains.orgId, orgId), eq(orgDomains.domainId, domainId))
-        )
-        .leftJoin(domains, eq(orgDomains.domainId, domains.domainId));
+        );
 
-    if (!orgDomain || !orgDomain.domains) {
+    if (!domainRes || !domainRes.domains) {
         return next(
             createHttpError(
                 HttpCode.NOT_FOUND,
-                `Domain with ID ${parsedBody.data.domainId} not found`
+                `Domain with ID ${domainId} not found`
             )
         );
     }
 
-    const domain = orgDomain.domains;
+    if (domainRes.orgDomains && domainRes.orgDomains.orgId !== orgId) {
+        return next(
+            createHttpError(
+                HttpCode.FORBIDDEN,
+                `Organization does not have access to domain with ID ${domainId}`
+            )
+        );
+    }
+
+    if (!domainRes.domains.verified) {
+        return next(
+            createHttpError(
+                HttpCode.BAD_REQUEST,
+                `Domain with ID ${domainRes.domains.domainId} is not verified`
+            )
+        );
+    }
 
     let fullDomain = "";
-    if (isBaseDomain) {
-        fullDomain = domain.baseDomain;
-    } else {
-        fullDomain = `${subdomain}.${domain.baseDomain}`;
+    if (domainRes.domains.type == "ns") {
+        if (subdomain) {
+            fullDomain = `${subdomain}.${domainRes.domains.baseDomain}`;
+        } else {
+            fullDomain = domainRes.domains.baseDomain;
+        }
+    } else if (domainRes.domains.type == "cname") {
+        fullDomain = domainRes.domains.baseDomain;
+    } else if (domainRes.domains.type == "wildcard") {
+        if (subdomain) {
+            // the subdomain cant have a dot in it
+            const parsedSubdomain = subdomainSchema.safeParse(subdomain);
+            if (!parsedSubdomain.success) {
+                return next(
+                    createHttpError(
+                        HttpCode.BAD_REQUEST,
+                        fromError(parsedSubdomain.error).toString()
+                    )
+                );
+            }
+            if (parsedSubdomain.data.includes(".")) {
+                return next(
+                    createHttpError(
+                        HttpCode.BAD_REQUEST,
+                        "Subdomain cannot contain a dot when using wildcard domains"
+                    )
+                );
+            }
+            fullDomain = `${subdomain}.${domainRes.domains.baseDomain}`;
+        } else {
+            fullDomain = domainRes.domains.baseDomain;
+        }
     }
+
+    if (fullDomain === domainRes.domains.baseDomain) {
+        subdomain = null;
+    }
+
+    fullDomain = fullDomain.toLowerCase();
 
     logger.debug(`Full domain: ${fullDomain}`);
 
@@ -261,10 +310,9 @@ async function createHttpResource(
                 orgId,
                 name,
                 subdomain,
-                http,
-                protocol,
-                ssl: true,
-                isBaseDomain
+                http: true,
+                protocol: "tcp",
+                ssl: true
             })
             .returning();
 

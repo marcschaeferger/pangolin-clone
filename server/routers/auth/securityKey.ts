@@ -107,7 +107,8 @@ async function clearChallenge(sessionId: string) {
 
 export const registerSecurityKeyBody = z.object({
     name: z.string().min(1),
-    password: z.string().min(1)
+    password: z.string().min(1),
+    code: z.string().optional()
 }).strict();
 
 export const verifyRegistrationBody = z.object({
@@ -143,7 +144,7 @@ export async function startRegistration(
         );
     }
 
-    const { name, password } = parsedBody.data;
+    const { name, password, code } = parsedBody.data;
     const user = req.user as User;
 
     // Only allow internal users to use security keys
@@ -161,6 +162,39 @@ export async function startRegistration(
         const validPassword = await verifyPassword(password, user.passwordHash!);
         if (!validPassword) {
             return next(unauthorized());
+        }
+
+        // If user has 2FA enabled, require and verify the code
+        if (user.twoFactorEnabled) {
+            if (!code) {
+                return response<{ codeRequested: boolean }>(res, {
+                    data: { codeRequested: true },
+                    success: true,
+                    error: false,
+                    message: "Two-factor authentication required",
+                    status: HttpCode.ACCEPTED
+                });
+            }
+
+            const validOTP = await verifyTotpCode(
+                code,
+                user.twoFactorSecret!,
+                user.userId
+            );
+
+            if (!validOTP) {
+                if (config.getRawConfig().app.log_failed_attempts) {
+                    logger.info(
+                        `Two-factor code incorrect. Email: ${user.email}. IP: ${req.ip}.`
+                    );
+                }
+                return next(
+                    createHttpError(
+                        HttpCode.UNAUTHORIZED,
+                        "The two-factor code you entered is incorrect"
+                    )
+                );
+            }
         }
 
         // Get existing security keys for user

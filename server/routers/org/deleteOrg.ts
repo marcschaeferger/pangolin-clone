@@ -89,6 +89,8 @@ export async function deleteOrg(
             .where(eq(sites.orgId, orgId))
             .limit(1);
 
+        const deletedNewtIds: string[] = [];
+
         await db.transaction(async (trx) => {
             if (sites) {
                 for (const site of orgSites) {
@@ -102,11 +104,7 @@ export async function deleteOrg(
                                 .where(eq(newts.siteId, site.siteId))
                                 .returning();
                             if (deletedNewt) {
-                                const payload = {
-                                    type: `newt/terminate`,
-                                    data: {}
-                                };
-                                sendToClient(deletedNewt.newtId, payload);
+                                deletedNewtIds.push(deletedNewt.newtId);
 
                                 // delete all of the sessions for the newt
                                 await trx
@@ -130,6 +128,18 @@ export async function deleteOrg(
 
             await trx.delete(orgs).where(eq(orgs.orgId, orgId));
         });
+
+        // Send termination messages outside of transaction to prevent blocking
+        for (const newtId of deletedNewtIds) {
+            const payload = {
+                type: `newt/terminate`,
+                data: {}
+            };
+            // Don't await this to prevent blocking the response
+            sendToClient(newtId, payload).catch(error => {
+                logger.error("Failed to send termination message to newt:", error);
+            });
+        }
 
         return response(res, {
             data: null,

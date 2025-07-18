@@ -1,5 +1,5 @@
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
-import db from "./driver";
+import { db } from "./driver";
 import path from "path";
 
 const migrationsFolder = path.join("server/migrations");
@@ -7,7 +7,7 @@ const migrationsFolder = path.join("server/migrations");
 const runMigrations = async () => {
     console.log("Running migrations...");
     try {
-        await migrate(db as any, {
+        migrate(db as any, {
             migrationsFolder: migrationsFolder,
         });
         console.log("Migrations completed successfully.");

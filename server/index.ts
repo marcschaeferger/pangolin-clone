@@ -9,6 +9,7 @@ import { createIntegrationApiServer } from "./integrationApiServer";
 import config from "@server/lib/config";
 
 async function startServers() {
+    await config.initServer();
     await runSetupFunctions();
 
     // Start all servers

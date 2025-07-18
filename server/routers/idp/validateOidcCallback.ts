@@ -11,6 +11,7 @@ import {
     idpOidcConfig,
     idpOrg,
     orgs,
+    Role,
     roles,
     userOrgs,
     users
@@ -307,6 +308,8 @@ export async function validateOidcCallback(
 
             let existingUserId = existingUser?.userId;
 
+            let orgUserCounts: { orgId: string; userCount: number }[] = [];
+
             // sync the user with the orgs and roles
             await db.transaction(async (trx) => {
                 let userId = existingUser?.userId;
@@ -409,6 +412,19 @@ export async function validateOidcCallback(
                             dateCreated: new Date().toISOString()
                         }))
                     );
+                }
+
+                // Loop through all the orgs and get the total number of users from the userOrgs table
+                for (const org of currentUserOrgs) {
+                    const userCount = await trx
+                        .select()
+                        .from(userOrgs)
+                        .where(eq(userOrgs.orgId, org.orgId));
+
+                    orgUserCounts.push({
+                        orgId: org.orgId,
+                        userCount: userCount.length
+                    });
                 }
             });
 

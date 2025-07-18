@@ -49,6 +49,7 @@
         "@radix-ui/react-switch": "1.2.5",
         "@radix-ui/react-tabs": "1.1.12",
         "@radix-ui/react-toast": "1.2.14",
+        "@radix-ui/react-tooltip": "^1.2.7",
         "@react-email/components": "0.3.1",
         "@react-email/render": "^1.1.2",
         "@simplewebauthn/browser": "^13.1.0",
@@ -113,7 +114,7 @@
         "yargs": "18.0.0"
     },
     "devDependencies": {
-        "@dotenvx/dotenvx": "1.47.3",
+        "@dotenvx/dotenvx": "1.47.6",
         "@esbuild-plugins/tsconfig-paths": "0.1.2",
         "@tailwindcss/postcss": "^4.1.10",
         "@types/better-sqlite3": "7.6.12",
@@ -127,6 +128,7 @@
         "@types/jsonwebtoken": "^9.0.10",
         "@types/node": "^24",
         "@types/nodemailer": "6.4.17",
+        "@types/pg": "8.15.4",
         "@types/react": "19.1.8",
         "@types/react-dom": "19.1.6",
         "@types/semver": "^7.7.0",
