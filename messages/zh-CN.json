@@ -1274,5 +1274,11 @@
     "createDomainDnsPropagation": "DNS 传播",
     "createDomainDnsPropagationDescription": "DNS 更改可能需要一些时间才能在互联网上传播。这可能需要从几分钟到 48 小时，具体取决于您的 DNS 提供商和 TTL 设置。",
     "resourcePortRequired": "非 HTTP 资源必须输入端口号",
-    "resourcePortNotAllowed": "HTTP 资源不应设置端口号"
+    "resourcePortNotAllowed": "HTTP 资源不应设置端口号",
+    "signUpTerms": {
+        "IAgreeToThe": "I agree to the",
+        "termsOfService": "terms of service",
+        "and": "and",
+        "privacyPolicy": "privacy policy"
+    }
 }
