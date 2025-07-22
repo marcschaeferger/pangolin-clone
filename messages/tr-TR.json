@@ -1274,5 +1274,11 @@
     "createDomainDnsPropagation": "DNS Yayılması",
     "createDomainDnsPropagationDescription": "DNS değişikliklerinin internet genelinde yayılması zaman alabilir. DNS sağlayıcınız ve TTL ayarlarına bağlı olarak bu birkaç dakika ile 48 saat arasında değişebilir.",
     "resourcePortRequired": "HTTP dışı kaynaklar için bağlantı noktası numarası gereklidir",
-    "resourcePortNotAllowed": "HTTP kaynakları için bağlantı noktası numarası ayarlanmamalı"
+    "resourcePortNotAllowed": "HTTP kaynakları için bağlantı noktası numarası ayarlanmamalı",
+    "signUpTerms": {
+        "IAgreeToThe": "I agree to the",
+        "termsOfService": "terms of service",
+        "and": "and",
+        "privacyPolicy": "privacy policy"
+    }
 }
