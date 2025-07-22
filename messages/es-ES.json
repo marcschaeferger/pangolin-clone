@@ -1274,5 +1274,11 @@
     "createDomainDnsPropagation": "Propagación DNS",
     "createDomainDnsPropagationDescription": "Los cambios de DNS pueden tardar un tiempo en propagarse a través de internet. Esto puede tardar desde unos pocos minutos hasta 48 horas, dependiendo de tu proveedor de DNS y la configuración de TTL.",
     "resourcePortRequired": "Se requiere número de puerto para recursos no HTTP",
-    "resourcePortNotAllowed": "El número de puerto no debe establecerse para recursos HTTP"
+    "resourcePortNotAllowed": "El número de puerto no debe establecerse para recursos HTTP",
+    "signUpTerms": {
+        "IAgreeToThe": "I agree to the",
+        "termsOfService": "terms of service",
+        "and": "and",
+        "privacyPolicy": "privacy policy"
+    }
 }
