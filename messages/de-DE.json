@@ -1274,5 +1274,11 @@
     "createDomainDnsPropagation": "DNS-Verbreitung",
     "createDomainDnsPropagationDescription": "Es kann einige Zeit dauern, bis DNS-Änderungen im Internet verbreitet werden. Dies kann je nach Ihrem DNS-Provider und den TTL-Einstellungen von einigen Minuten bis zu 48 Stunden dauern.",
     "resourcePortRequired": "Portnummer ist für nicht-HTTP-Ressourcen erforderlich",
-    "resourcePortNotAllowed": "Portnummer sollte für HTTP-Ressourcen nicht gesetzt werden"
+    "resourcePortNotAllowed": "Portnummer sollte für HTTP-Ressourcen nicht gesetzt werden",
+    "signUpTerms": {
+        "IAgreeToThe": "I agree to the",
+        "termsOfService": "terms of service",
+        "and": "and",
+        "privacyPolicy": "privacy policy"
+    }
 }
