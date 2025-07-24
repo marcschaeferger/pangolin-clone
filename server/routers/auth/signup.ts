@@ -23,7 +23,6 @@ import { passwordSchema } from "@server/auth/passwordSchema";
 import { UserType } from "@server/types/UserTypes";
 
 export const signupBodySchema = z.object({
-    name: z.string().optional(),
     email: z
         .string()
         .toLowerCase()
@@ -55,7 +54,7 @@ export async function signup(
         );
     }
 
-    const { name, email, password, inviteToken, inviteId } = parsedBody.data;
+    const { email, password, inviteToken, inviteId } = parsedBody.data;
     const passwordHash = await hashPassword(password);
     const userId = generateId(15);
 
@@ -165,7 +164,6 @@ export async function signup(
             userId: userId,
             type: UserType.Internal,
             username: email,
-            name: name,
             email: email,
             passwordHash,
             dateCreated: moment().toISOString()

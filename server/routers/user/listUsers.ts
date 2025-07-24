@@ -43,7 +43,6 @@ async function queryUsers(orgId: string, limit: number, offset: number) {
             dateCreated: users.dateCreated,
             orgId: userOrgs.orgId,
             username: users.username,
-            name: users.name,
             type: users.type,
             roleId: userOrgs.roleId,
             roleName: roles.name,

@@ -32,7 +32,6 @@ async function queryUsers(limit: number, offset: number) {
             id: users.userId,
             email: users.email,
             username: users.username,
-            name: users.name,
             dateCreated: users.dateCreated,
             serverAdmin: users.serverAdmin,
             type: users.type,

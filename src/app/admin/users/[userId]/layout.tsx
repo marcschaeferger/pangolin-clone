@@ -44,7 +44,7 @@ export default async function UserLayoutProps(props: UserLayoutProps) {
     return (
         <>
             <SettingsSectionTitle
-                title={`${user?.email || user?.name || user?.username}`}
+                title={`${user?.email || user?.username}`}
                 description={t('userDescription2')}
             />
             <HorizontalTabs items={navItems}>

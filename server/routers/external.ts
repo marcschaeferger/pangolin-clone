@@ -552,11 +552,6 @@ authenticated.delete(
     verifyUserIsServerAdmin,
     user.adminRemoveUser
 );
-authenticated.post(
-    "/admin/user/:userId/password",
-    verifyUserIsServerAdmin,
-    user.adminResetUserPassword
-);
 
 authenticated.post(
     "/admin/user/:userId",

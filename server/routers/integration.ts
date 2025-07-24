@@ -388,13 +388,6 @@ authenticated.post(
     user.updateUser2FA
 );
 
-authenticated.post(
-    "/user/:userId/password",
-    verifyApiKeyIsRoot,
-    verifyApiKeyHasAction(ActionsEnum.resetUserPassword),
-    user.adminResetUserPassword
-);
-
 authenticated.get(
     "/user/:userId",
     verifyApiKeyIsRoot,

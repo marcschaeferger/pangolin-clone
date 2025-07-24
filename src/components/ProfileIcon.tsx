@@ -45,7 +45,7 @@ export default function ProfileIcon() {
     const t = useTranslations();
 
     function getInitials() {
-        return (user.name || user.email || user.username)
+        return (user.email || user.username)
             .substring(0, 1)
             .toUpperCase();
     }
@@ -96,7 +96,7 @@ export default function ProfileIcon() {
                                 {t("signingAs")}
                             </p>
                             <p className="text-xs leading-none text-muted-foreground">
-                                {user.email || user.name || user.username}
+                                {user.email || user.username}
                             </p>
                         </div>
                         {user.serverAdmin ? (

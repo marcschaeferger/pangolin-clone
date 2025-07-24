@@ -18,7 +18,6 @@ async function queryUser(orgId: string, userId: string) {
             userId: users.userId,
             email: users.email,
             username: users.username,
-            name: users.name,
             type: users.type,
             roleId: userOrgs.roleId,
             roleName: roles.name,

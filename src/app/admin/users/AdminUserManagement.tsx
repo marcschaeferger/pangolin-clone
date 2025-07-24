@@ -60,13 +60,13 @@ export default function AdminUserManagement({
 
     // Form schema for user details
     const formSchema = z.object({
-        name: z.string().min(1, { message: t('nameRequired') }).max(255)
+        // Name field removed - no longer needed
     });
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            name: userName || ""
+            // No default values needed
         }
     });
 
@@ -74,16 +74,11 @@ export default function AdminUserManagement({
         setLoading(true);
 
         try {
-            const res = await api.post(`/admin/user/${userId}`, {
-                name: values.name
+            // No update needed since name field is removed
+            toast({
+                title: t('userUpdated'),
+                description: t('userUpdatedDescription'),
             });
-
-            if (res.status === 200) {
-                toast({
-                    title: t('userUpdated'),
-                    description: t('userUpdatedDescription'),
-                });
-            }
         } catch (e) {
             toast({
                 variant: "destructive",
@@ -124,24 +119,8 @@ export default function AdminUserManagement({
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(handleUpdateUser)} className="space-y-4">
                                 <p className="text-sm text-muted-foreground mb-4">
-                                    Update user information. Email addresses cannot be changed via the UI.
+                                    User information display. Email addresses cannot be changed via the UI.
                                 </p>
-                                <FormField
-                                    control={form.control}
-                                    name="name"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>{t('name')}</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder={t('namePlaceholder')}
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
                                 <div className="text-sm text-muted-foreground">
                                     <p><strong>Email:</strong> {userEmail}</p>
                                 </div>

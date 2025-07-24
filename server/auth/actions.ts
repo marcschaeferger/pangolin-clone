@@ -93,7 +93,6 @@ export enum ActionsEnum {
     listApiKeyActions = "listApiKeyActions",
     listApiKeys = "listApiKeys",
     getApiKey = "getApiKey",
-    resetUserPassword = "resetUserPassword",
     createOrgDomain = "createOrgDomain",
     deleteOrgDomain = "deleteOrgDomain",
     restartOrgDomain = "restartOrgDomain"

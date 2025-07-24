@@ -19,7 +19,7 @@ import {
     SettingsSectionForm
 } from "@app/components/Settings";
 import { UserType } from "@server/types/UserTypes";
-import AdminPasswordReset from "@app/components/AdminPasswordReset";
+
 
 export default function GeneralPage() {
     const { userId } = useParams();
@@ -31,7 +31,6 @@ export default function GeneralPage() {
     const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
     const [userType, setUserType] = useState<UserType | null>(null);
     const [userEmail, setUserEmail] = useState<string>("");
-    const [userName, setUserName] = useState<string>("");
 
     useEffect(() => {
         // Fetch current user 2FA status
@@ -47,7 +46,6 @@ export default function GeneralPage() {
                     );
                     setUserType(userData.type);
                     setUserEmail(userData.email || "");
-                    setUserName(userData.name || userData.username || "");
                 }
             } catch (error) {
                 console.error("Failed to fetch user data:", error);
@@ -123,29 +121,7 @@ export default function GeneralPage() {
                     </SettingsSectionBody>
                 </SettingsSection>
 
-                <SettingsSection>
-                    <SettingsSectionHeader>
-                        <SettingsSectionTitle>
-                            {t("passwordReset")}
-                        </SettingsSectionTitle>
-                        <SettingsSectionDescription>
-                            {t("passwordResetAdminInstructions")}
-                        </SettingsSectionDescription>
-                    </SettingsSectionHeader>
 
-                    <SettingsSectionBody>
-                        <SettingsSectionForm>
-                            <div className="space-y-6">
-                                <AdminPasswordReset
-                                    userId={userId as string}
-                                    userEmail={userEmail}
-                                    userName={userName}
-                                    userType={userType || ""}
-                                />
-                            </div>
-                        </SettingsSectionForm>
-                    </SettingsSectionBody>
-                </SettingsSection>
             </SettingsContainer>
 
             <div className="flex justify-end mt-6">

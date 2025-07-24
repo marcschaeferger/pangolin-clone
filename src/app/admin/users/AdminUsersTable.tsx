@@ -22,7 +22,6 @@ import {
 
 export type GlobalUserRow = {
     id: string;
-    name: string | null;
     username: string;
     email: string | null;
     type: string;
@@ -242,7 +241,6 @@ export default function UsersTable({ users }: Props) {
                                 {t("userQuestionRemove", {
                                     selectedUser:
                                         selected?.email ||
-                                        selected?.name ||
                                         selected?.username
                                 })}
                             </p>
@@ -257,7 +255,7 @@ export default function UsersTable({ users }: Props) {
                     buttonText={t("userDeleteConfirm")}
                     onConfirm={async () => deleteUser(selected!.id)}
                     string={
-                        selected.email || selected.name || selected.username
+                        selected.email || selected.username
                     }
                     title={t("userDeleteServer")}
                 />

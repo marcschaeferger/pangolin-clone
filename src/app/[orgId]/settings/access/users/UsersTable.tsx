@@ -27,7 +27,6 @@ export type UserRow = {
     email: string | null;
     displayUsername: string | null;
     username: string;
-    name: string | null;
     idpId: number | null;
     idpName: string;
     type: string;
@@ -248,7 +247,6 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                             {t("userQuestionOrgRemove", {
                                 email:
                                     selectedUser?.email ||
-                                    selectedUser?.name ||
                                     selectedUser?.username ||
                                     ""
                             })}
@@ -263,7 +261,6 @@ export default function UsersTable({ users: u }: UsersTableProps) {
                 onConfirm={removeUser}
                 string={
                     selectedUser?.email ||
-                    selectedUser?.name ||
                     selectedUser?.username ||
                     ""
                 }

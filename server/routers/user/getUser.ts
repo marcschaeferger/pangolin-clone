@@ -14,7 +14,6 @@ async function queryUser(userId: string) {
             userId: users.userId,
             email: users.email,
             username: users.username,
-            name: users.name,
             type: users.type,
             twoFactorEnabled: users.twoFactorEnabled,
             emailVerified: users.emailVerified,

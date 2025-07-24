@@ -20,7 +20,6 @@ const updateUserParamsSchema = z
 
 const updateUserBodySchema = z
     .object({
-        name: z.string().min(1).max(255).optional(),
         email: z.string().email().optional()
     })
     .strict()
@@ -30,7 +29,6 @@ const updateUserBodySchema = z
 
 export type UpdateUserResponse = {
     userId: string;
-    name: string | null;
     email: string | null;
     username: string;
 };
@@ -129,7 +127,6 @@ export async function updateUser(
             .where(eq(users.userId, userId))
             .returning({
                 userId: users.userId,
-                name: users.name,
                 email: users.email,
                 username: users.username
             });
