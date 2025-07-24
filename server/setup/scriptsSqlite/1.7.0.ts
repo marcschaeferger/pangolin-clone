@@ -14,21 +14,6 @@ export default async function migration() {
         db.pragma("foreign_keys = OFF");
 
         db.transaction(() => {
-            // Add passwordResetTokenExpiryHours column to orgs table with default value of 1
-            db.exec(`
-                ALTER TABLE orgs ADD COLUMN passwordResetTokenExpiryHours INTEGER NOT NULL DEFAULT 1;
-            `);
-        })(); // executes the transaction immediately
-        db.pragma("foreign_keys = ON");
-        console.log(`Added passwordResetTokenExpiryHours column to orgs table`);
-    } catch (e) {
-        console.log("Error adding passwordResetTokenExpiryHours column to orgs table:");
-        console.log(e);
-    }
-
-    try {
-        db.pragma("foreign_keys = OFF");
-        db.transaction(() => {
             db.exec(`
                 CREATE TABLE 'clientSites' (
                     'clientId' integer NOT NULL,
