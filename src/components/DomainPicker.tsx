@@ -179,7 +179,7 @@ export default function DomainPicker({
                     });
                 }
             } else if (orgDomain.type === "wildcard") {
-                // For wildcard domains, allow the base domain or one level up
+                // For wildcard domains, allow the base domain or multiple levels up
                 const userInputLower = userInput.toLowerCase();
                 const baseDomainLower = orgDomain.baseDomain.toLowerCase();
 
@@ -194,24 +194,22 @@ export default function DomainPicker({
                         domainId: orgDomain.domainId
                     });
                 }
-                // Check if user input is one level up (subdomain.baseDomain)
+                // Check if user input ends with the base domain (allows multiple level subdomains)
                 else if (userInputLower.endsWith(`.${baseDomainLower}`)) {
                     const subdomain = userInputLower.slice(
                         0,
                         -(baseDomainLower.length + 1)
                     );
-                    // Only allow one level up (no dots in subdomain)
-                    if (!subdomain.includes(".")) {
-                        options.push({
-                            id: `org-${orgDomain.domainId}`,
-                            domain: userInput,
-                            type: "organization",
-                            verified: orgDomain.verified,
-                            domainType: "wildcard",
-                            domainId: orgDomain.domainId,
-                            subdomain: subdomain
-                        });
-                    }
+                    // Allow multiple levels (subdomain can contain dots)
+                    options.push({
+                        id: `org-${orgDomain.domainId}`,
+                        domain: userInput,
+                        type: "organization",
+                        verified: orgDomain.verified,
+                        domainType: "wildcard",
+                        domainId: orgDomain.domainId,
+                        subdomain: subdomain
+                    });
                 }
             }
         });
@@ -320,7 +318,7 @@ export default function DomainPicker({
                         setUserInput(validInput);
                     }}
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                     {build === "saas"
                         ? t("domainPickerDescriptionSaas")
                         : t("domainPickerDescription")}
@@ -328,42 +326,44 @@ export default function DomainPicker({
             </div>
 
             {/* Tabs and Sort Toggle */}
-            <div className="flex justify-between items-center">
-                <Tabs
-                    value={activeTab}
-                    onValueChange={(value) =>
-                        setActiveTab(
-                            value as "all" | "organization" | "provided"
-                        )
-                    }
-                >
-                    <TabsList>
-                        <TabsTrigger value="all">
-                            {t("domainPickerTabAll")}
-                        </TabsTrigger>
-                        <TabsTrigger value="organization">
-                            {t("domainPickerTabOrganization")}
-                        </TabsTrigger>
-                        {build == "saas" && (
-                            <TabsTrigger value="provided">
-                                {t("domainPickerTabProvided")}
+            {build === "saas" && (
+                <div className="flex justify-between items-center">
+                    <Tabs
+                        value={activeTab}
+                        onValueChange={(value) =>
+                            setActiveTab(
+                                value as "all" | "organization" | "provided"
+                            )
+                        }
+                    >
+                        <TabsList>
+                            <TabsTrigger value="all">
+                                {t("domainPickerTabAll")}
                             </TabsTrigger>
-                        )}
-                    </TabsList>
-                </Tabs>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                        setSortOrder(sortOrder === "asc" ? "desc" : "asc")
-                    }
-                >
-                    <ArrowUpDown className="h-4 w-4 mr-2" />
-                    {sortOrder === "asc"
-                        ? t("domainPickerSortAsc")
-                        : t("domainPickerSortDesc")}
-                </Button>
-            </div>
+                            <TabsTrigger value="organization">
+                                {t("domainPickerTabOrganization")}
+                            </TabsTrigger>
+                            {build == "saas" && (
+                                <TabsTrigger value="provided">
+                                    {t("domainPickerTabProvided")}
+                                </TabsTrigger>
+                            )}
+                        </TabsList>
+                    </Tabs>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                            setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+                        }
+                    >
+                        <ArrowUpDown className="h-4 w-4 mr-2" />
+                        {sortOrder === "asc"
+                            ? t("domainPickerSortAsc")
+                            : t("domainPickerSortDesc")}
+                    </Button>
+                </div>
+            )}
 
             {/* Loading State */}
             {isChecking && (
@@ -382,7 +382,7 @@ export default function DomainPicker({
                     <Alert>
                         <AlertCircle className="h-4 w-4" />
                         <AlertDescription>
-                            {t("domainPickerNoMatchingDomains", { userInput })}
+                            {t("domainPickerNoMatchingDomains")}
                         </AlertDescription>
                     </Alert>
                 )}

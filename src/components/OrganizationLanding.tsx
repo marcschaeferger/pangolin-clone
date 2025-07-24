@@ -41,35 +41,31 @@ export default function OrganizationLanding({
     function getDescriptionText() {
         if (organizations.length === 0) {
             if (!disableCreateOrg) {
-                return t('componentsErrorNoMemberCreate');
+                return t("componentsErrorNoMemberCreate");
             } else {
-                return t('componentsErrorNoMember');
+                return t("componentsErrorNoMember");
             }
         }
 
-        return t('componentsMember', {count: organizations.length});
+        return t("componentsMember", { count: organizations.length });
     }
 
     return (
         <Card>
             <CardHeader>
-                <CardTitle>{t('welcome')}</CardTitle>
+                <CardTitle>{t("welcome")}</CardTitle>
                 <CardDescription>{getDescriptionText()}</CardDescription>
             </CardHeader>
             <CardContent>
                 {organizations.length === 0 ? (
-                    disableCreateOrg ? (
-                        <p className="text-center text-muted-foreground">
-                            t('componentsErrorNoMember')
-                        </p>
-                    ) : (
+                    !disableCreateOrg && (
                         <Link href="/setup">
                             <Button
                                 className="w-full h-auto py-3 text-lg"
                                 size="lg"
                             >
                                 <Plus className="mr-2 h-5 w-5" />
-                                {t('componentsCreateOrg')}
+                                {t("componentsCreateOrg")}
                             </Button>
                         </Link>
                     )

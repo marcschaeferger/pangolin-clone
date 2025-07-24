@@ -12,6 +12,7 @@ import { cleanRedirect } from "@app/lib/cleanRedirect";
 import { Layout } from "@app/components/Layout";
 import { InitialSetupCompleteResponse } from "@server/routers/auth";
 import { cookies } from "next/headers";
+import { build } from "@server/build";
 
 export const dynamic = "force-dynamic";
 
@@ -83,25 +84,27 @@ export default async function Page(props: {
         if (ownedOrg) {
             redirect(`/${ownedOrg.orgId}`);
         } else {
-            redirect("/setup");
+            if (!env.flags.disableUserCreateOrg || user.serverAdmin) {
+                redirect("/setup");
+            }
         }
     }
 
-    // return (
-    //     <UserProvider user={user}>
-    //         <Layout orgs={orgs} navItems={[]}>
-    //             <div className="w-full max-w-md mx-auto md:mt-32 mt-4">
-    //                 <OrganizationLanding
-    //                     disableCreateOrg={
-    //                         env.flags.disableUserCreateOrg && !user.serverAdmin
-    //                     }
-    //                     organizations={orgs.map((org) => ({
-    //                         name: org.name,
-    //                         id: org.orgId
-    //                     }))}
-    //                 />
-    //             </div>
-    //         </Layout>
-    //     </UserProvider>
-    // );
+    return (
+        <UserProvider user={user}>
+            <Layout orgs={orgs} navItems={[]}>
+                <div className="w-full max-w-md mx-auto md:mt-32 mt-4">
+                    <OrganizationLanding
+                        disableCreateOrg={
+                            env.flags.disableUserCreateOrg && !user.serverAdmin
+                        }
+                        organizations={orgs.map((org) => ({
+                            name: org.name,
+                            id: org.orgId
+                        }))}
+                    />
+                </div>
+            </Layout>
+        </UserProvider>
+    );
 }

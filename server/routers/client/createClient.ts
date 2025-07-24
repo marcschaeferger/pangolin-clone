@@ -144,14 +144,16 @@ export async function createClient(
         const subnetExistsClients = await db
             .select()
             .from(clients)
-            .where(eq(clients.subnet, updatedSubnet))
+            .where(
+                and(eq(clients.subnet, updatedSubnet), eq(clients.orgId, orgId))
+            )
             .limit(1);
 
         if (subnetExistsClients.length > 0) {
             return next(
                 createHttpError(
                     HttpCode.CONFLICT,
-                    `Subnet ${subnet} already exists`
+                    `Subnet ${updatedSubnet} already exists in clients`
                 )
             );
         }
@@ -159,14 +161,16 @@ export async function createClient(
         const subnetExistsSites = await db
             .select()
             .from(sites)
-            .where(eq(sites.address, updatedSubnet))
+            .where(
+                and(eq(sites.address, updatedSubnet), eq(sites.orgId, orgId))
+            )
             .limit(1);
 
         if (subnetExistsSites.length > 0) {
             return next(
                 createHttpError(
                     HttpCode.CONFLICT,
-                    `Subnet ${subnet} already exists`
+                    `Subnet ${updatedSubnet} already exists in sites`
                 )
             );
         }

@@ -49,7 +49,7 @@ jobs:
           exit 1
 
       - name: Build Docker image sqlite
-        run: make build
+        run: make build-sqlite
 
       - name: Build Docker image pg
         run: make build-pg

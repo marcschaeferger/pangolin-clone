@@ -162,6 +162,12 @@ export async function validateOidcCallback(
             );
         }
 
+        logger.debug("State verified", {
+            urL: ensureTrailingSlash(existingIdp.idpOidcConfig.tokenUrl),
+            expectedState,
+            state
+        });
+
         const tokens = await client.validateAuthorizationCode(
             ensureTrailingSlash(existingIdp.idpOidcConfig.tokenUrl),
             code,

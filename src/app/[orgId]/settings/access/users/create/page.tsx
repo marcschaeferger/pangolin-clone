@@ -9,7 +9,7 @@ import {
     SettingsSectionHeader,
     SettingsSectionTitle
 } from "@app/components/Settings";
-import { StrategySelect } from "@app/components/StrategySelect";
+import { StrategyOption, StrategySelect } from "@app/components/StrategySelect";
 import HeaderTitle from "@app/components/SettingsSectionTitle";
 import { Button } from "@app/components/ui/button";
 import { useParams, useRouter } from "next/navigation";
@@ -45,14 +45,9 @@ import { createApiClient } from "@app/lib/api";
 import { Checkbox } from "@app/components/ui/checkbox";
 import { ListIdpsResponse } from "@server/routers/idp";
 import { useTranslations } from "next-intl";
+import { build } from "@server/build";
 
 type UserType = "internal" | "oidc";
-
-interface UserTypeOption {
-    id: UserType;
-    title: string;
-    description: string;
-}
 
 interface IdpOption {
     idpId: number;
@@ -147,13 +142,20 @@ export default function Page() {
         }
     }, [userType, env.email.emailEnabled, internalForm, externalForm]);
 
-    const userTypes: UserTypeOption[] = [
+    const [userTypes, setUserTypes] = useState<StrategyOption<string>[]>([
         {
             id: "internal",
             title: t("userTypeInternal"),
-            description: t("userTypeInternalDescription")
+            description: t("userTypeInternalDescription"),
+            disabled: false
+        },
+        {
+            id: "oidc",
+            title: t("userTypeExternal"),
+            description: t("userTypeExternalDescription"),
+            disabled: true
         }
-    ];
+    ]);
 
     useEffect(() => {
         if (!userType) {
@@ -177,9 +179,6 @@ export default function Page() {
 
             if (res?.status === 200) {
                 setRoles(res.data.data.roles);
-                if (userType === "internal") {
-                    setDataLoaded(true);
-                }
             }
         }
 
@@ -200,24 +199,32 @@ export default function Page() {
 
             if (res?.status === 200) {
                 setIdps(res.data.data.idps);
-                setDataLoaded(true);
 
                 if (res.data.data.idps.length) {
-                    userTypes.push({
-                        id: "oidc",
-                        title: t("userTypeExternal"),
-                        description: t("userTypeExternalDescription")
-                    });
+                    setUserTypes((prev) =>
+                        prev.map((type) => {
+                            if (type.id === "oidc") {
+                                return {
+                                    ...type,
+                                    disabled: false
+                                };
+                            }
+                            return type;
+                        })
+                    );
                 }
             }
         }
 
-        setDataLoaded(false);
-        fetchRoles();
-        if (userType !== "internal") {
-            fetchIdps();
+        async function fetchInitialData() {
+            setDataLoaded(false);
+            await fetchRoles();
+            await fetchIdps();
+            setDataLoaded(true);
         }
-    }, [userType]);
+
+        fetchInitialData();
+    }, []);
 
     async function onSubmitInternal(
         values: z.infer<typeof internalFormSchema>
@@ -323,7 +330,7 @@ export default function Page() {
 
             <div>
                 <SettingsContainer>
-                    {!inviteLink && userTypes.length > 1 ? (
+                    {!inviteLink && build !== "saas" ? (
                         <SettingsSection>
                             <SettingsSectionHeader>
                                 <SettingsSectionTitle>
@@ -610,7 +617,7 @@ export default function Page() {
                                                                     idp || null
                                                                 );
                                                             }}
-                                                            cols={3}
+                                                            cols={2}
                                                         />
                                                         <FormMessage />
                                                     </FormItem>

@@ -38,9 +38,12 @@ _Pangolin tunnels your services to the internet so you can access anything from 
 
 <p align="center">
     <strong>
-    Start testing Pangolin at <a href="https://pangolin.fossorial.io/auth/signup">pangolin.fossorial.io</a>
-    <br/>
-</strong>
+        Start testing Pangolin at <a href="https://pangolin.fossorial.io/auth/signup">pangolin.fossorial.io</a>
+    </strong>
+</p>
+
+<p align="center">
+    <a href='https://www.ycombinator.com/launches/O0B-pangolin-open-source-secure-gateway-to-private-networks' target="_blank"><img src='https://www.ycombinator.com/launches/O0B-pangolin-open-source-secure-gateway-to-private-networks/upvote_embed.svg' alt='Launch YC: Pangolin – Open-source secure gateway to private networks'/ ></a>
 </p>
 
 Pangolin is a self-hosted tunneled reverse proxy server with identity and access control, designed to securely expose private resources on distributed networks. Acting as a central hub, it connects isolated networks — even those behind restrictive firewalls — through encrypted tunnels, enabling easy access to remote services without opening ports.
@@ -111,7 +114,7 @@ Host the full application on your own server or on the cloud with a VPS. Take a 
 
 ### Pangolin Cloud
 
-Easy to use with simple [pay as you go pricing](https://digpangolin.io/pricing). [Check it out here](https://pangolin.fossorial.io/auth/signup). 
+Easy to use with simple [pay as you go pricing](https://digpangolin.com/pricing). [Check it out here](https://pangolin.fossorial.io/auth/signup). 
 
 - Everything you get with self hosted Pangolin, but fully managed for you.
 

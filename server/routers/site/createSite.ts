@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
-import { db } from "@server/db";
+import { clients, db } from "@server/db";
 import { roles, userSites, sites, roleSites, Site, orgs } from "@server/db";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
@@ -129,17 +129,17 @@ export async function createSite(
             );
         }
 
-        if (!org.subnet) {
-            return next(
-                createHttpError(
-                    HttpCode.BAD_REQUEST,
-                    `Organization with ID ${orgId} has no subnet defined`
-                )
-            );
-        }
-
         let updatedAddress = null;
         if (address) {
+            if (!org.subnet) {
+                return next(
+                    createHttpError(
+                        HttpCode.BAD_REQUEST,
+                        `Organization with ID ${orgId} has no subnet defined`
+                    )
+                );
+            }
+
             if (!isValidIP(address)) {
                 return next(
                     createHttpError(
@@ -148,7 +148,7 @@ export async function createSite(
                     )
                 );
             }
-        
+
             if (!isIpInCidr(address, org.subnet)) {
                 return next(
                     createHttpError(
@@ -157,35 +157,45 @@ export async function createSite(
                     )
                 );
             }
-        
+
             updatedAddress = `${address}/${org.subnet.split("/")[1]}`; // we want the block size of the whole org
-        
+
             // make sure the subnet is unique
             const addressExistsSites = await db
                 .select()
                 .from(sites)
-                .where(eq(sites.address, updatedAddress))
+                .where(
+                    and(
+                        eq(sites.address, updatedAddress),
+                        eq(sites.orgId, orgId)
+                    )
+                )
                 .limit(1);
-        
+
             if (addressExistsSites.length > 0) {
                 return next(
                     createHttpError(
                         HttpCode.CONFLICT,
-                        `Subnet ${subnet} already exists`
+                        `Subnet ${updatedAddress} already exists in sites`
                     )
                 );
             }
-        
+
             const addressExistsClients = await db
                 .select()
-                .from(sites)
-                .where(eq(sites.subnet, updatedAddress))
+                .from(clients)
+                .where(
+                    and(
+                        eq(clients.subnet, updatedAddress),
+                        eq(clients.orgId, orgId)
+                    )
+                )
                 .limit(1);
             if (addressExistsClients.length > 0) {
                 return next(
                     createHttpError(
                         HttpCode.CONFLICT,
-                        `Subnet ${subnet} already exists`
+                        `Subnet ${updatedAddress} already exists in clients`
                     )
                 );
             }

@@ -297,14 +297,6 @@ async function updateHttpResource(
                         )
                     );
                 }
-                if (parsedSubdomain.data.includes(".")) {
-                    return next(
-                        createHttpError(
-                            HttpCode.BAD_REQUEST,
-                            "Subdomain cannot contain a dot when using wildcard domains"
-                        )
-                    );
-                }
                 fullDomain = `${updateData.subdomain}.${domainRes.domains.baseDomain}`;
             } else {
                 fullDomain = domainRes.domains.baseDomain;

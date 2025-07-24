@@ -103,8 +103,10 @@ export default function SecurityKeyForm({
     });
 
     useEffect(() => {
-        loadSecurityKeys();
-    }, []);
+        if (open) {
+            loadSecurityKeys();
+        }
+    }, [open]);
 
     const registerSchema = z.object({
         name: z.string().min(1, { message: t("securityKeyNameRequired") }),

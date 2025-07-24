@@ -58,7 +58,8 @@ export const handleOlmRegisterMessage: MessageHandler = async (context) => {
         sendToClient(olm.olmId, {
             type: "olm/wg/holepunch",
             data: {
-                serverPubKey: exitNode.publicKey
+                serverPubKey: exitNode.publicKey,
+                endpoint: exitNode.endpoint,
             }
         });
     }
