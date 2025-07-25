@@ -540,6 +540,11 @@ authenticated.delete(
     verifyUserIsServerAdmin,
     user.adminRemoveUser
 );
+authenticated.post(
+    "/admin/user/:userId/password",
+    verifyUserIsServerAdmin,
+    user.adminResetUserPassword
+);
 
 authenticated.put(
     "/org/:orgId/user",
