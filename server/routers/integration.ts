@@ -410,6 +410,13 @@ authenticated.delete(
     user.removeUserOrg
 );
 
+authenticated.post(
+    "/user/:userId/password",
+    verifyApiKeyIsRoot,
+    verifyApiKeyHasAction(ActionsEnum.resetUserPassword),
+    user.adminResetUserPassword
+);
+
 // authenticated.put(
 //     "/newt",
 //     verifyApiKeyHasAction(ActionsEnum.createNewt),

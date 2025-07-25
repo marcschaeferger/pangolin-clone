@@ -113,6 +113,7 @@ function getActionsCategories(root: boolean) {
 
         actionsByCategory["User"] = {
             [t('actionUpdateUser')]: "updateUser",
+            [t('actionResetUserPassword')]: "resetUserPassword",
             [t('actionGetUser')]: "getUser"
         };
     }

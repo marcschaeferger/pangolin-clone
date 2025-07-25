@@ -961,6 +961,7 @@
     "actionGetOrg": "Get Organization",
     "actionUpdateOrg": "Update Organization",
     "actionUpdateUser": "Update User",
+    "actionResetUserPassword": "Reset User Password",
     "actionGetUser": "Get User",
     "actionGetOrgUser": "Get Organization User",
     "actionListOrgDomains": "List Organization Domains",
