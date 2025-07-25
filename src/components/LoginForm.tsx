@@ -26,7 +26,7 @@ import { LoginResponse } from "@server/routers/auth";
 import { useRouter } from "next/navigation";
 import { AxiosResponse } from "axios";
 import { formatAxiosError } from "@app/lib/api";
-import { LockIcon, FingerprintIcon } from "lucide-react";
+import { LockIcon, FingerprintIcon, User, Key, Mail } from "lucide-react";
 import { createApiClient } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import {
@@ -42,6 +42,7 @@ import { GenerateOidcUrlResponse } from "@server/routers/idp";
 import { Separator } from "./ui/separator";
 import { useTranslations } from "next-intl";
 import { startAuthentication } from "@simplewebauthn/browser";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 export type LoginFormIDP = {
     idpId: number;
@@ -56,19 +57,26 @@ type LoginFormProps = {
 
 export default function LoginForm({ redirect, onLogin, idps }: LoginFormProps) {
     const router = useRouter();
-
     const { env } = useEnvContext();
-
     const api = createApiClient({ env });
+    const t = useTranslations();
+
+    const hasIdp = idps && idps.length > 0;
 
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-    const hasIdp = idps && idps.length > 0;
-
     const [mfaRequested, setMfaRequested] = useState(false);
     const [showSecurityKeyPrompt, setShowSecurityKeyPrompt] = useState(false);
+    const [activeTab, setActiveTab] = useState<string>(hasIdp ? "oidc" : "password");
 
-    const t = useTranslations();
+    // Calculate available methods
+    const availableMethods = {
+        oidc: hasIdp, // SSO first when available
+        password: true, // Always available
+        passkey: true,  // Always available (user can try)
+    };
+
+    const numMethods = Object.values(availableMethods).filter(Boolean).length;
 
     const formSchema = z.object({
         email: z.string().email({ message: t("emailInvalid") }),
@@ -296,6 +304,95 @@ export default function LoginForm({ redirect, onLogin, idps }: LoginFormProps) {
         }
     }
 
+    // If MFA is requested, show the MFA form
+    if (mfaRequested) {
+        return (
+            <div className="space-y-4">
+                <div className="text-center">
+                    <h3 className="text-lg font-medium">{t("otpAuth")}</h3>
+                    <p className="text-sm text-muted-foreground">
+                        {t("otpAuthDescription")}
+                    </p>
+                </div>
+                <Form {...mfaForm}>
+                    <form
+                        onSubmit={mfaForm.handleSubmit(onSubmit)}
+                        className="space-y-4"
+                        id="form"
+                    >
+                        <FormField
+                            control={mfaForm.control}
+                            name="code"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormControl>
+                                        <div className="flex justify-center">
+                                            <InputOTP
+                                                maxLength={6}
+                                                {...field}
+                                                pattern={
+                                                    REGEXP_ONLY_DIGITS_AND_CHARS
+                                                }
+                                                onChange={(value: string) => {
+                                                    field.onChange(value);
+                                                    if (value.length === 6) {
+                                                        mfaForm.handleSubmit(
+                                                            onSubmit
+                                                        )();
+                                                    }
+                                                }}
+                                            >
+                                                <InputOTPGroup>
+                                                    <InputOTPSlot index={0} />
+                                                    <InputOTPSlot index={1} />
+                                                    <InputOTPSlot index={2} />
+                                                    <InputOTPSlot index={3} />
+                                                    <InputOTPSlot index={4} />
+                                                    <InputOTPSlot index={5} />
+                                                </InputOTPGroup>
+                                            </InputOTP>
+                                        </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </form>
+                </Form>
+
+                {error && (
+                    <Alert variant="destructive">
+                        <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                )}
+
+                <div className="space-y-4">
+                    <Button
+                        type="submit"
+                        form="form"
+                        className="w-full"
+                        loading={loading}
+                        disabled={loading}
+                    >
+                        {t("otpAuthSubmit")}
+                    </Button>
+
+                    <Button
+                        type="button"
+                        className="w-full"
+                        variant="outline"
+                        onClick={() => {
+                            setMfaRequested(false);
+                            mfaForm.reset();
+                        }}
+                    >
+                        {t("otpAuthBack")}
+                    </Button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-4">
             {showSecurityKeyPrompt && (
@@ -310,29 +407,100 @@ export default function LoginForm({ redirect, onLogin, idps }: LoginFormProps) {
                 </Alert>
             )}
 
-            {!mfaRequested && (
-                <>
-                    <Form {...form}>
-                        <form
-                            onSubmit={form.handleSubmit(onSubmit)}
-                            className="space-y-4"
-                            id="form"
-                        >
-                            <FormField
-                                control={form.control}
-                                name="email"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{t("email")}</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+            <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                orientation="horizontal"
+            >
+                {numMethods > 1 && (
+                    <TabsList
+                        className={`grid w-full ${
+                            numMethods === 1
+                                ? "grid-cols-1"
+                                : numMethods === 2
+                                  ? "grid-cols-2"
+                                  : "grid-cols-3"
+                        }`}
+                    >
+                        {availableMethods.oidc && (
+                            <TabsTrigger value="oidc">
+                                <User className="w-4 h-4 mr-1" />
+                                SSO
+                            </TabsTrigger>
+                        )}
+                        {availableMethods.password && (
+                            <TabsTrigger value="password">
+                                <Key className="w-4 h-4 mr-1" />
+                                {t("password")}
+                            </TabsTrigger>
+                        )}
+                        {availableMethods.passkey && (
+                            <TabsTrigger value="passkey">
+                                <FingerprintIcon className="w-4 h-4 mr-1" />
+                                Passkey
+                            </TabsTrigger>
+                        )}
+                    </TabsList>
+                )}
 
-                            <div className="space-y-4">
+                {availableMethods.oidc && (
+                    <TabsContent
+                        value="oidc"
+                        className={`${numMethods <= 1 ? "mt-0" : ""}`}
+                    >
+                        <div className="space-y-4">
+                            <div className="text-center">
+                                <User className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                                <h3 className="text-lg font-medium">
+                                    Continue with SSO
+                                </h3>
+                                <p className="text-sm text-muted-foreground">
+                                    Sign in using your organization's single sign-on provider
+                                </p>
+                            </div>
+
+                            {idps?.map((idp) => (
+                                <Button
+                                    key={idp.idpId}
+                                    type="button"
+                                    variant="outline"
+                                    className="w-full"
+                                    onClick={() => {
+                                        loginWithIdp(idp.idpId);
+                                    }}
+                                >
+                                    {idp.name}
+                                </Button>
+                            ))}
+                        </div>
+                    </TabsContent>
+                )}
+
+                {availableMethods.password && (
+                    <TabsContent
+                        value="password"
+                        className={`${numMethods <= 1 ? "mt-0" : ""}`}
+                    >
+                        <Form {...form}>
+                            <form
+                                onSubmit={form.handleSubmit(onSubmit)}
+                                className="space-y-4"
+                                id="password-form"
+                            >
+                                <FormField
+                                    control={form.control}
+                                    name="email"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>{t("email")}</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
                                 <FormField
                                     control={form.control}
                                     name="password"
@@ -360,174 +528,56 @@ export default function LoginForm({ redirect, onLogin, idps }: LoginFormProps) {
                                         {t("passwordForgot")}
                                     </Link>
                                 </div>
-                            </div>
 
-                            <div className="flex flex-col space-y-2">
                                 <Button
                                     type="submit"
+                                    className="w-full"
                                     disabled={loading}
                                     loading={loading}
                                 >
                                     {t("login")}
                                 </Button>
-                            </div>
-                        </form>
-                    </Form>
-                </>
-            )}
+                            </form>
+                        </Form>
+                    </TabsContent>
+                )}
 
-            {mfaRequested && (
-                <>
-                    <div className="text-center">
-                        <h3 className="text-lg font-medium">{t("otpAuth")}</h3>
-                        <p className="text-sm text-muted-foreground">
-                            {t("otpAuthDescription")}
-                        </p>
-                    </div>
-                    <Form {...mfaForm}>
-                        <form
-                            onSubmit={mfaForm.handleSubmit(onSubmit)}
-                            className="space-y-4"
-                            id="form"
-                        >
-                            <FormField
-                                control={mfaForm.control}
-                                name="code"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormControl>
-                                            <div className="flex justify-center">
-                                                <InputOTP
-                                                    maxLength={6}
-                                                    {...field}
-                                                    pattern={
-                                                        REGEXP_ONLY_DIGITS_AND_CHARS
-                                                    }
-                                                    onChange={(
-                                                        value: string
-                                                    ) => {
-                                                        field.onChange(value);
-                                                        if (
-                                                            value.length === 6
-                                                        ) {
-                                                            mfaForm.handleSubmit(
-                                                                onSubmit
-                                                            )();
-                                                        }
-                                                    }}
-                                                >
-                                                    <InputOTPGroup>
-                                                        <InputOTPSlot
-                                                            index={0}
-                                                        />
-                                                        <InputOTPSlot
-                                                            index={1}
-                                                        />
-                                                        <InputOTPSlot
-                                                            index={2}
-                                                        />
-                                                        <InputOTPSlot
-                                                            index={3}
-                                                        />
-                                                        <InputOTPSlot
-                                                            index={4}
-                                                        />
-                                                        <InputOTPSlot
-                                                            index={5}
-                                                        />
-                                                    </InputOTPGroup>
-                                                </InputOTP>
-                                            </div>
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </form>
-                    </Form>
-                </>
-            )}
+                {availableMethods.passkey && (
+                    <TabsContent
+                        value="passkey"
+                        className={`${numMethods <= 1 ? "mt-0" : ""}`}
+                    >
+                        <div className="space-y-4">
+                            <div className="text-center">
+                                <FingerprintIcon className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                                <h3 className="text-lg font-medium">
+                                    Sign in with Passkey
+                                </h3>
+                                <p className="text-sm text-muted-foreground">
+                                    Use your security key or biometric authentication
+                                </p>
+                            </div>
+
+                            <Button
+                                type="button"
+                                className="w-full"
+                                onClick={initiateSecurityKeyAuth}
+                                loading={loading}
+                                disabled={loading || showSecurityKeyPrompt}
+                            >
+                                <FingerprintIcon className="w-4 h-4 mr-2" />
+                                Sign in with Passkey
+                            </Button>
+                        </div>
+                    </TabsContent>
+                )}
+            </Tabs>
 
             {error && (
                 <Alert variant="destructive">
                     <AlertDescription>{error}</AlertDescription>
                 </Alert>
             )}
-
-            <div className="space-y-4">
-                {mfaRequested && (
-                    <Button
-                        type="submit"
-                        form="form"
-                        className="w-full"
-                        loading={loading}
-                        disabled={loading}
-                    >
-                        {t("otpAuthSubmit")}
-                    </Button>
-                )}
-
-                {!mfaRequested && (
-                    <>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            className="w-full"
-                            onClick={initiateSecurityKeyAuth}
-                            loading={loading}
-                            disabled={loading || showSecurityKeyPrompt}
-                        >
-                            <FingerprintIcon className="w-4 h-4 mr-2" />
-                            {t("securityKeyLogin", {
-                                defaultValue: "Sign in with security key"
-                            })}
-                        </Button>
-
-                        {hasIdp && (
-                            <>
-                                <div className="relative my-4">
-                                    <div className="absolute inset-0 flex items-center">
-                                        <Separator />
-                                    </div>
-                                    <div className="relative flex justify-center text-xs uppercase">
-                                        <span className="px-2 bg-card text-muted-foreground">
-                                            {t("idpContinue")}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                {idps.map((idp) => (
-                                    <Button
-                                        key={idp.idpId}
-                                        type="button"
-                                        variant="outline"
-                                        className="w-full"
-                                        onClick={() => {
-                                            loginWithIdp(idp.idpId);
-                                        }}
-                                    >
-                                        {idp.name}
-                                    </Button>
-                                ))}
-                            </>
-                        )}
-                    </>
-                )}
-
-                {mfaRequested && (
-                    <Button
-                        type="button"
-                        className="w-full"
-                        variant="outline"
-                        onClick={() => {
-                            setMfaRequested(false);
-                            mfaForm.reset();
-                        }}
-                    >
-                        {t("otpAuthBack")}
-                    </Button>
-                )}
-            </div>
         </div>
     );
 }
