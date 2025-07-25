@@ -57,7 +57,7 @@ export default function AdminPasswordReset({
         try {
             const response = await api.post(`/admin/user/${userId}/password`, {
                 sendEmail,
-                expirationHours: 24
+                expirationHours: 2 // Change from 24 to 2
             });
 
             const data = response.data.data;

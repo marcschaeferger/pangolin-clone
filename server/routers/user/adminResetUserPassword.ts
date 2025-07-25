@@ -26,7 +26,7 @@ const adminResetUserPasswordParamsSchema = z
 const adminResetUserPasswordBodySchema = z
     .object({
         sendEmail: z.boolean().optional().default(true),
-        expirationHours: z.number().int().positive().optional().default(24)
+        expirationHours: z.number().int().positive().optional().default(2) // Change from 24 to 2
     })
     .strict();
 
