@@ -142,12 +142,12 @@ export default function AdminPasswordReset({
                         )}
                         
                         {env.email.emailEnabled && (
-                            <div className="space-y-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <div className="space-y-3 p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
                                 <div className="flex items-center gap-2">
-                                    <Mail className="h-5 w-5 text-blue-600" />
-                                    <h4 className="font-medium text-blue-900">Email Notification</h4>
+                                    <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                    <h4 className="font-medium text-blue-900 dark:text-blue-100">Email Notification</h4>
                                 </div>
-                                <p className="text-sm text-blue-700">
+                                <p className="text-sm text-blue-700 dark:text-blue-300">
                                     Send a password reset email to the user with a secure reset link.
                                 </p>
                                 <div className="flex items-center space-x-2">
@@ -156,7 +156,7 @@ export default function AdminPasswordReset({
                                         checked={sendEmail}
                                         onCheckedChange={(checked) => setSendEmail(checked as boolean)}
                                     />
-                                    <Label htmlFor="sendEmail" className="text-sm font-medium text-blue-900">
+                                    <Label htmlFor="sendEmail" className="text-sm font-medium text-blue-900 dark:text-blue-100">
                                         {t('sendEmailNotification')}
                                     </Label>
                                 </div>
@@ -164,13 +164,13 @@ export default function AdminPasswordReset({
                         )}
 
                         {resetLink && (!sendEmail || !env.email.emailEnabled) && (
-                            <Alert className="border-green-200 bg-green-50">
-                                <Link className="h-4 w-4 text-green-600" />
-                                <AlertTitle className="text-green-800">Reset Link Generated</AlertTitle>
-                                <AlertDescription className="text-green-700">
+                            <Alert className="border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950">
+                                <Link className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                <AlertTitle className="text-green-800 dark:text-green-200">Reset Link Generated</AlertTitle>
+                                <AlertDescription className="text-green-700 dark:text-green-300">
                                     <div className="mt-2 space-y-2">
                                         <p className="text-sm">Share this link with the user:</p>
-                                        <div className="flex items-center gap-2 p-2 bg-white border rounded border-green-200">
+                                        <div className="flex items-center gap-2 p-2 bg-white dark:bg-gray-800 border rounded border-green-200 dark:border-green-700">
                                             <Input
                                                 value={resetLink}
                                                 readOnly
@@ -185,7 +185,7 @@ export default function AdminPasswordReset({
                                                 <Copy className="h-3 w-3" />
                                             </Button>
                                         </div>
-                                        <p className="text-xs text-green-600">
+                                        <p className="text-xs text-green-600 dark:text-green-400">
                                             This link expires in 24 hours.
                                         </p>
                                     </div>
