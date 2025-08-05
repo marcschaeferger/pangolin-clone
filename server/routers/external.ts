@@ -14,6 +14,7 @@ import * as accessToken from "./accessToken";
 import * as idp from "./idp";
 import * as license from "./license";
 import * as apiKeys from "./apiKeys";
+import * as session from "./session";
 import HttpCode from "@server/types/HttpCode";
 import {
     verifyAccessTokenAccess,
@@ -783,6 +784,14 @@ authenticated.delete(
     verifyUserHasAction(ActionsEnum.deleteOrgDomain),
     domain.deleteAccountDomain
 );
+
+// Session management routes (admin only)
+authenticated.get("/sessions/users", verifyUserIsServerAdmin, session.listUserSessions);
+authenticated.get("/sessions/resources", verifyUserIsServerAdmin, session.listResourceSessions);
+authenticated.delete("/session/user/:sessionId", verifyUserIsServerAdmin, session.invalidateUserSession);
+authenticated.delete("/session/resource/:sessionId", verifyUserIsServerAdmin, session.invalidateResourceSession);
+authenticated.delete("/sessions/user/:userId", verifyUserIsServerAdmin, session.invalidateAllUserSessions);
+authenticated.get("/sessions/stats", verifyUserIsServerAdmin, session.getSessionStats);
 
 // Auth routes
 export const authRouter = Router();

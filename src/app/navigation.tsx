@@ -13,7 +13,8 @@ import {
     TicketCheck,
     User,
     Globe, // Added from 'dev' branch
-    MonitorUp // Added from 'dev' branch
+    MonitorUp, // Added from 'dev' branch
+    Activity
 } from "lucide-react";
 
 export type SidebarNavSection = { // Added from 'dev' branch
@@ -112,6 +113,11 @@ export const adminNavSections: SidebarNavSection[] = [
                 title: "sidebarAllUsers",
                 href: "/admin/users",
                 icon: <Users className="h-4 w-4" />
+            },
+            {
+                title: "sidebarSessions",
+                href: "/admin/sessions",
+                icon: <Activity className="h-4 w-4" />
             },
             {
                 title: "sidebarApiKeys",
