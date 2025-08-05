@@ -115,7 +115,7 @@ export const adminNavSections: SidebarNavSection[] = [
                 icon: <Users className="h-4 w-4" />
             },
             {
-                title: "sidebarSessions",
+                title: "Session Mgmt.",
                 href: "/admin/sessions",
                 icon: <Activity className="h-4 w-4" />
             },
