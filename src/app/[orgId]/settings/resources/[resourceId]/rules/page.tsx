@@ -73,6 +73,7 @@ import {
 import { Switch } from "@app/components/ui/switch";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { ResourceRulesManager } from "@app/components/ruleTemplate/ResourceRulesManager";
 
 // Schema for rule validation
 const addRuleSchema = z.object({
@@ -122,29 +123,30 @@ export default function ResourceRules(props: {
         }
     });
 
-    useEffect(() => {
-        const fetchRules = async () => {
-            try {
-                const res = await api.get<
-                    AxiosResponse<ListResourceRulesResponse>
-                >(`/resource/${params.resourceId}/rules`);
-                if (res.status === 200) {
-                    setRules(res.data.data.rules);
-                }
-            } catch (err) {
-                console.error(err);
-                toast({
-                    variant: "destructive",
-                    title: t('rulesErrorFetch'),
-                    description: formatAxiosError(
-                        err,
-                        t('rulesErrorFetchDescription')
-                    )
-                });
-            } finally {
-                setPageLoading(false);
+    const fetchRules = async () => {
+        try {
+            const res = await api.get<
+                AxiosResponse<ListResourceRulesResponse>
+            >(`/resource/${params.resourceId}/rules`);
+            if (res.status === 200) {
+                setRules(res.data.data.rules);
             }
-        };
+        } catch (err) {
+            console.error(err);
+            toast({
+                variant: "destructive",
+                title: t('rulesErrorFetch'),
+                description: formatAxiosError(
+                    err,
+                    t('rulesErrorFetchDescription')
+                )
+            });
+        } finally {
+            setPageLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchRules();
     }, []);
 
@@ -208,6 +210,7 @@ export default function ResourceRules(props: {
             ruleId: new Date().getTime(),
             new: true,
             resourceId: resource.resourceId,
+            templateRuleId: null,
             priority,
             enabled: true
         };
@@ -434,85 +437,116 @@ export default function ResourceRules(props: {
         {
             accessorKey: "action",
             header: t('rulesAction'),
-            cell: ({ row }) => (
-                <Select
-                    defaultValue={row.original.action}
-                    onValueChange={(value: "ACCEPT" | "DROP") =>
-                        updateRule(row.original.ruleId, { action: value })
-                    }
-                >
-                    <SelectTrigger className="min-w-[150px]">
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="ACCEPT">
-                            {RuleAction.ACCEPT}
-                        </SelectItem>
-                        <SelectItem value="DROP">{RuleAction.DROP}</SelectItem>
-                    </SelectContent>
-                </Select>
-            )
+            cell: ({ row }) => {
+                const isTemplateRule = row.original.templateRuleId !== null;
+                return (
+                    <Select
+                        defaultValue={row.original.action}
+                        onValueChange={(value: "ACCEPT" | "DROP") =>
+                            updateRule(row.original.ruleId, { action: value })
+                        }
+                        disabled={isTemplateRule}
+                    >
+                        <SelectTrigger className={`min-w-[150px] ${isTemplateRule ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="ACCEPT">
+                                {RuleAction.ACCEPT}
+                            </SelectItem>
+                            <SelectItem value="DROP">{RuleAction.DROP}</SelectItem>
+                        </SelectContent>
+                    </Select>
+                );
+            }
         },
         {
             accessorKey: "match",
             header: t('rulesMatchType'),
-            cell: ({ row }) => (
-                <Select
-                    defaultValue={row.original.match}
-                    onValueChange={(value: "CIDR" | "IP" | "PATH") =>
-                        updateRule(row.original.ruleId, { match: value })
-                    }
-                >
-                    <SelectTrigger className="min-w-[125px]">
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="PATH">{RuleMatch.PATH}</SelectItem>
-                        <SelectItem value="IP">{RuleMatch.IP}</SelectItem>
-                        <SelectItem value="CIDR">{RuleMatch.CIDR}</SelectItem>
-                    </SelectContent>
-                </Select>
-            )
+            cell: ({ row }) => {
+                const isTemplateRule = row.original.templateRuleId !== null;
+                return (
+                    <Select
+                        defaultValue={row.original.match}
+                        onValueChange={(value: "CIDR" | "IP" | "PATH") =>
+                            updateRule(row.original.ruleId, { match: value })
+                        }
+                        disabled={isTemplateRule}
+                    >
+                        <SelectTrigger className={`min-w-[125px] ${isTemplateRule ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="PATH">{RuleMatch.PATH}</SelectItem>
+                            <SelectItem value="IP">{RuleMatch.IP}</SelectItem>
+                            <SelectItem value="CIDR">{RuleMatch.CIDR}</SelectItem>
+                        </SelectContent>
+                    </Select>
+                );
+            }
         },
         {
             accessorKey: "value",
             header: t('value'),
-            cell: ({ row }) => (
-                <Input
-                    defaultValue={row.original.value}
-                    className="min-w-[200px]"
-                    onBlur={(e) =>
-                        updateRule(row.original.ruleId, {
-                            value: e.target.value
-                        })
-                    }
-                />
-            )
+            cell: ({ row }) => {
+                const isTemplateRule = row.original.templateRuleId !== null;
+                return (
+                    <Input
+                        defaultValue={row.original.value}
+                        className={`min-w-[200px] ${isTemplateRule ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        onBlur={(e) =>
+                            updateRule(row.original.ruleId, {
+                                value: e.target.value
+                            })
+                        }
+                        disabled={isTemplateRule}
+                    />
+                );
+            }
         },
         {
             accessorKey: "enabled",
             header: t('enabled'),
-            cell: ({ row }) => (
-                <Switch
-                    defaultChecked={row.original.enabled}
-                    onCheckedChange={(val) =>
-                        updateRule(row.original.ruleId, { enabled: val })
-                    }
-                />
-            )
+            cell: ({ row }) => {
+                const isTemplateRule = row.original.templateRuleId !== null;
+                return (
+                    <Switch
+                        defaultChecked={row.original.enabled}
+                        onCheckedChange={(val) =>
+                            updateRule(row.original.ruleId, { enabled: val })
+                        }
+                        disabled={isTemplateRule}
+                        className={isTemplateRule ? 'opacity-50' : ''}
+                    />
+                );
+            }
         },
         {
             id: "actions",
-            cell: ({ row }) => (
-                <div className="flex items-center justify-end space-x-2">
-                    <Button
-                        variant="outline"
-                        onClick={() => removeRule(row.original.ruleId)}
-                    >
-                        {t('delete')}
-                    </Button>
-                </div>
-            )
+            cell: ({ row }) => {
+                const isTemplateRule = row.original.templateRuleId !== null;
+                return (
+                    <div className="flex items-center justify-end space-x-2">
+                        {isTemplateRule ? (
+                            <div className="text-xs text-muted-foreground bg-muted px-1 py-0.5 rounded">
+                                Template
+                            </div>
+                        ) : (
+                            <div className="text-xs text-blue-600 bg-blue-100 px-1 py-0.5 rounded">
+                                Manual
+                            </div>
+                        )}
+                        <Button
+                            variant="outline"
+                            onClick={() => removeRule(row.original.ruleId)}
+                            disabled={isTemplateRule}
+                            className={isTemplateRule ? 'opacity-50 cursor-not-allowed' : ''}
+                        >
+                            {t('delete')}
+                        </Button>
+                    </div>
+                );
+            }
         }
     ];
 
@@ -753,6 +787,27 @@ export default function ResourceRules(props: {
                     </div>
                 </SettingsSectionBody>
             </SettingsSection>
+
+            {/* Template Assignment Section */}
+            {rulesEnabled && (
+                <SettingsSection>
+                    <SettingsSectionHeader>
+                        <SettingsSectionTitle>
+                            {t('ruleTemplates')}
+                        </SettingsSectionTitle>
+                        <SettingsSectionDescription>
+                            {t('ruleTemplatesDescription')}
+                        </SettingsSectionDescription>
+                    </SettingsSectionHeader>
+                    <SettingsSectionBody>
+                        <ResourceRulesManager 
+                            resourceId={params.resourceId.toString()} 
+                            orgId={resource.orgId} 
+                            onUpdate={fetchRules}
+                        />
+                    </SettingsSectionBody>
+                </SettingsSection>
+            )}
 
             <div className="flex justify-end">
                 <Button

@@ -13,7 +13,8 @@ import {
     TicketCheck,
     User,
     Globe, // Added from 'dev' branch
-    MonitorUp // Added from 'dev' branch
+    MonitorUp, // Added from 'dev' branch
+    Shield
 } from "lucide-react";
 
 export type SidebarNavSection = { // Added from 'dev' branch
@@ -84,6 +85,11 @@ export const orgNavSections = (
                 title: "sidebarShareableLinks",
                 href: "/{orgId}/settings/share-links",
                 icon: <LinkIcon className="h-4 w-4" />
+            },
+            {
+                title: "sidebarRuleTemplates",
+                href: "/{orgId}/settings/rule-templates",
+                icon: <Shield className="h-4 w-4" />
             }
         ]
     },

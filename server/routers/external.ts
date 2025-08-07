@@ -14,6 +14,7 @@ import * as accessToken from "./accessToken";
 import * as idp from "./idp";
 import * as license from "./license";
 import * as apiKeys from "./apiKeys";
+import * as ruleTemplate from "./ruleTemplate";
 import HttpCode from "@server/types/HttpCode";
 import {
     verifyAccessTokenAccess,
@@ -337,6 +338,80 @@ authenticated.delete(
     verifyResourceAccess,
     verifyUserHasAction(ActionsEnum.deleteResourceRule),
     resource.deleteResourceRule
+);
+
+// Rule template routes
+authenticated.post(
+    "/org/:orgId/rule-templates",
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.createResourceRule),
+    ruleTemplate.createRuleTemplate
+);
+authenticated.get(
+    "/org/:orgId/rule-templates",
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.listResourceRules),
+    ruleTemplate.listRuleTemplates
+);
+authenticated.get(
+    "/org/:orgId/rule-templates/:templateId",
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.listResourceRules),
+    ruleTemplate.getRuleTemplate
+);
+authenticated.put(
+    "/org/:orgId/rule-templates/:templateId",
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.createResourceRule),
+    ruleTemplate.updateRuleTemplate
+);
+authenticated.get(
+    "/org/:orgId/rule-templates/:templateId/rules",
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.listResourceRules),
+    ruleTemplate.listTemplateRules
+);
+authenticated.post(
+    "/org/:orgId/rule-templates/:templateId/rules",
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.createResourceRule),
+    ruleTemplate.addTemplateRule
+);
+authenticated.put(
+    "/org/:orgId/rule-templates/:templateId/rules/:ruleId",
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.createResourceRule),
+    ruleTemplate.updateTemplateRule
+);
+authenticated.delete(
+    "/org/:orgId/rule-templates/:templateId/rules/:ruleId",
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.deleteResourceRule),
+    ruleTemplate.deleteTemplateRule
+);
+authenticated.delete(
+    "/org/:orgId/rule-templates/:templateId",
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.deleteResourceRule),
+    ruleTemplate.deleteRuleTemplate
+);
+authenticated.put(
+    "/resource/:resourceId/templates/:templateId",
+    verifyResourceAccess,
+    verifyUserHasAction(ActionsEnum.createResourceRule),
+    ruleTemplate.assignTemplateToResource
+);
+authenticated.delete(
+    "/resource/:resourceId/templates/:templateId",
+    verifyResourceAccess,
+    verifyUserHasAction(ActionsEnum.deleteResourceRule),
+    ruleTemplate.unassignTemplateFromResource
+);
+authenticated.get(
+    "/resource/:resourceId/templates",
+    verifyResourceAccess,
+    verifyUserHasAction(ActionsEnum.listResourceRules),
+    ruleTemplate.listResourceTemplates
 );
 
 authenticated.get(
