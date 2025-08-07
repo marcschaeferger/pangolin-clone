@@ -9,6 +9,14 @@ import createHttpError from "http-errors";
 import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 
+export type GetRuleTemplateResponse = {
+    templateId: string;
+    orgId: string;
+    name: string;
+    description: string | null;
+    createdAt: number;
+};
+
 const getRuleTemplateParamsSchema = z
     .object({
         orgId: z.string().min(1),

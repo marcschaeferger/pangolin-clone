@@ -31,7 +31,26 @@ export async function deleteRuleTemplate(req: any, res: any) {
             });
         }
 
-        // Delete template rules first (due to foreign key constraint)
+        // Get all template rules for this template
+        const templateRulesToDelete = await db
+            .select({ ruleId: templateRules.ruleId })
+            .from(templateRules)
+            .where(eq(templateRules.templateId, templateId));
+
+        // Delete resource rules that reference these template rules first
+        if (templateRulesToDelete.length > 0) {
+            const { resourceRules } = await import("@server/db");
+            const templateRuleIds = templateRulesToDelete.map(rule => rule.ruleId);
+            
+            // Delete all resource rules that reference any of the template rules
+            for (const ruleId of templateRuleIds) {
+                await db
+                    .delete(resourceRules)
+                    .where(eq(resourceRules.templateRuleId, ruleId));
+            }
+        }
+
+        // Delete template rules
         await db
             .delete(templateRules)
             .where(eq(templateRules.templateId, templateId));

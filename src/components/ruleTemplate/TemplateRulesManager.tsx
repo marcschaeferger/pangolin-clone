@@ -46,6 +46,7 @@ import {
 } from "@app/components/ui/table";
 import { isValidCIDR, isValidIP, isValidUrlGlobPattern } from "@server/lib/validators";
 import { ArrowUpDown, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { ConfirmationDialog } from "@app/components/ConfirmationDialog";
 
 const addRuleSchema = z.object({
     action: z.enum(["ACCEPT", "DROP"]),
@@ -79,6 +80,9 @@ export function TemplateRulesManager({ templateId, orgId }: TemplateRulesManager
         pageIndex: 0,
         pageSize: 25
     });
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [ruleToDelete, setRuleToDelete] = useState<number | null>(null);
+    const [deletingRule, setDeletingRule] = useState(false);
 
     const RuleAction = {
         ACCEPT: t('alwaysAllow'),
@@ -151,18 +155,19 @@ export function TemplateRulesManager({ templateId, orgId }: TemplateRulesManager
                 return;
             }
 
-            await api.post(`/org/${orgId}/rule-templates/${templateId}/rules`, data);
+            const response = await api.post(`/org/${orgId}/rule-templates/${templateId}/rules`, data);
             toast({
-                title: "Success",
-                description: "Rule added successfully"
+                title: "Template Rule Added",
+                description: "A new rule has been added to the template. It will be available for assignment to resources.",
+                variant: "default"
             });
             form.reset();
             fetchRules();
         } catch (error) {
             toast({
                 variant: "destructive",
-                title: "Error",
-                description: formatAxiosError(error, "Failed to add rule")
+                title: "Add Rule Failed",
+                description: formatAxiosError(error, "Failed to add rule. Please check your input and try again.")
             });
         } finally {
             setAddingRule(false);
@@ -170,28 +175,54 @@ export function TemplateRulesManager({ templateId, orgId }: TemplateRulesManager
     };
 
     const removeRule = async (ruleId: number) => {
+        setRuleToDelete(ruleId);
+        setDeleteDialogOpen(true);
+    };
+
+    const confirmDeleteRule = async () => {
+        if (!ruleToDelete) return;
+        
+        setDeletingRule(true);
         try {
-            await api.delete(`/org/${orgId}/rule-templates/${templateId}/rules/${ruleId}`);
+            await api.delete(`/org/${orgId}/rule-templates/${templateId}/rules/${ruleToDelete}`);
             toast({
-                title: "Success",
-                description: "Rule removed successfully"
+                title: "Template Rule Removed",
+                description: "The rule has been removed from the template and from all assigned resources.",
+                variant: "default"
             });
             fetchRules();
         } catch (error) {
             toast({
                 variant: "destructive",
-                title: "Error",
-                description: formatAxiosError(error, "Failed to remove rule")
+                title: "Removal Failed",
+                description: formatAxiosError(error, "Failed to remove template rule")
             });
+        } finally {
+            setDeletingRule(false);
+            setRuleToDelete(null);
         }
     };
 
     const updateRule = async (ruleId: number, data: Partial<TemplateRule>) => {
         try {
-            await api.put(`/org/${orgId}/rule-templates/${templateId}/rules/${ruleId}`, data);
+            const response = await api.put(`/org/${orgId}/rule-templates/${templateId}/rules/${ruleId}`, data);
+            
+            // Show success notification with propagation info if available
+            const message = response.data?.message || "The template rule has been updated and changes have been propagated to all assigned resources.";
+            toast({
+                title: "Template Rule Updated",
+                description: message,
+                variant: "default"
+            });
+            
             fetchRules();
         } catch (error) {
             console.error("Failed to update rule:", error);
+            toast({
+                title: "Update Failed",
+                description: formatAxiosError(error, "Failed to update template rule. Please try again."),
+                variant: "destructive"
+            });
         }
     };
 
@@ -348,7 +379,7 @@ export function TemplateRulesManager({ templateId, orgId }: TemplateRulesManager
                             name="action"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Action</FormLabel>
+                                    <FormLabel>{t('rulesAction')}</FormLabel>
                                     <FormControl>
                                         <Select
                                             value={field.value}
@@ -358,8 +389,10 @@ export function TemplateRulesManager({ templateId, orgId }: TemplateRulesManager
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="ACCEPT">Accept</SelectItem>
-                                                <SelectItem value="DROP">Drop</SelectItem>
+                                                <SelectItem value="ACCEPT">
+                                                    {RuleAction.ACCEPT}
+                                                </SelectItem>
+                                                <SelectItem value="DROP">{RuleAction.DROP}</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </FormControl>
@@ -373,7 +406,7 @@ export function TemplateRulesManager({ templateId, orgId }: TemplateRulesManager
                             name="match"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Match</FormLabel>
+                                    <FormLabel>{t('rulesMatchType')}</FormLabel>
                                     <FormControl>
                                         <Select
                                             value={field.value}
@@ -383,9 +416,9 @@ export function TemplateRulesManager({ templateId, orgId }: TemplateRulesManager
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="IP">IP</SelectItem>
-                                                <SelectItem value="CIDR">CIDR</SelectItem>
-                                                <SelectItem value="PATH">Path</SelectItem>
+                                                <SelectItem value="PATH">{RuleMatch.PATH}</SelectItem>
+                                                <SelectItem value="IP">{RuleMatch.IP}</SelectItem>
+                                                <SelectItem value="CIDR">{RuleMatch.CIDR}</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </FormControl>
@@ -399,7 +432,7 @@ export function TemplateRulesManager({ templateId, orgId }: TemplateRulesManager
                             name="value"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Value</FormLabel>
+                                    <FormLabel>{t('value')}</FormLabel>
                                     <FormControl>
                                         <Input placeholder="Enter value" {...field} />
                                     </FormControl>
@@ -413,7 +446,7 @@ export function TemplateRulesManager({ templateId, orgId }: TemplateRulesManager
                             name="priority"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Priority (optional)</FormLabel>
+                                    <FormLabel>{t('rulesPriority')} (optional)</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="number"
@@ -556,6 +589,19 @@ export function TemplateRulesManager({ templateId, orgId }: TemplateRulesManager
                     </div>
                 </div>
             )}
+
+            {/* Confirmation Dialog */}
+            <ConfirmationDialog
+                open={deleteDialogOpen}
+                onOpenChange={setDeleteDialogOpen}
+                title="Delete Template Rule"
+                description="Are you sure you want to delete this rule? This action will remove the rule from the template and from all assigned resources. This action cannot be undone."
+                confirmText="Delete Rule"
+                cancelText="Cancel"
+                variant="destructive"
+                onConfirm={confirmDeleteRule}
+                loading={deletingRule}
+            />
         </div>
     );
 }

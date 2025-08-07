@@ -8,6 +8,7 @@ import { useToast } from "@app/hooks/useToast";
 import { Trash2 } from "lucide-react";
 import { createApiClient, formatAxiosError } from "@app/lib/api";
 import { useEnvContext } from "@app/hooks/useEnvContext";
+import { ConfirmationDialog } from "@app/components/ConfirmationDialog";
 
 interface RuleTemplate {
     templateId: string;
@@ -38,6 +39,9 @@ export function ResourceRulesManager({
     const [resourceTemplates, setResourceTemplates] = useState<ResourceTemplate[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedTemplate, setSelectedTemplate] = useState<string>("");
+    const [unassignDialogOpen, setUnassignDialogOpen] = useState(false);
+    const [templateToUnassign, setTemplateToUnassign] = useState<string | null>(null);
+    const [unassigning, setUnassigning] = useState(false);
     const { toast } = useToast();
     const { env } = useEnvContext();
     const api = createApiClient({ env });
@@ -79,8 +83,9 @@ export function ResourceRulesManager({
 
             if (response.status === 200 || response.status === 201) {
                 toast({
-                    title: "Success",
-                    description: "Template assigned successfully"
+                    title: "Template Assigned",
+                    description: "Template has been assigned to this resource. All template rules have been applied and will be automatically updated when the template changes.",
+                    variant: "default"
                 });
                 
                 setSelectedTemplate("");
@@ -105,17 +110,22 @@ export function ResourceRulesManager({
     };
 
     const handleUnassignTemplate = async (templateId: string) => {
-        if (!confirm("Are you sure you want to unassign this template?")) {
-            return;
-        }
+        setTemplateToUnassign(templateId);
+        setUnassignDialogOpen(true);
+    };
 
+    const confirmUnassignTemplate = async () => {
+        if (!templateToUnassign) return;
+        
+        setUnassigning(true);
         try {
-            const response = await api.delete(`/resource/${resourceId}/templates/${templateId}`);
+            const response = await api.delete(`/resource/${resourceId}/templates/${templateToUnassign}`);
 
             if (response.status === 200 || response.status === 201) {
                 toast({
-                    title: "Success",
-                    description: "Template unassigned successfully"
+                    title: "Template Unassigned",
+                    description: "Template has been unassigned from this resource. All template-managed rules have been removed from this resource.",
+                    variant: "default"
                 });
                 
                 await fetchData();
@@ -124,17 +134,20 @@ export function ResourceRulesManager({
                 }
             } else {
                 toast({
-                    title: "Error",
-                    description: response.data.message || "Failed to unassign template",
+                    title: "Unassign Failed",
+                    description: response.data.message || "Failed to unassign template. Please try again.",
                     variant: "destructive"
                 });
             }
         } catch (error) {
             toast({
-                title: "Error",
-                description: formatAxiosError(error, "Failed to unassign template"),
+                title: "Unassign Failed",
+                description: formatAxiosError(error, "Failed to unassign template. Please try again."),
                 variant: "destructive"
             });
+        } finally {
+            setUnassigning(false);
+            setTemplateToUnassign(null);
         }
     };
 
@@ -199,6 +212,18 @@ export function ResourceRulesManager({
                     )}
                 </CardContent>
             </Card>
+
+            <ConfirmationDialog
+                open={unassignDialogOpen}
+                onOpenChange={setUnassignDialogOpen}
+                title="Unassign Template"
+                description="Are you sure you want to unassign this template? This will remove all template-managed rules from this resource. This action cannot be undone."
+                confirmText="Unassign Template"
+                cancelText="Cancel"
+                variant="destructive"
+                onConfirm={confirmUnassignTemplate}
+                loading={unassigning}
+            />
         </div>
     );
 }

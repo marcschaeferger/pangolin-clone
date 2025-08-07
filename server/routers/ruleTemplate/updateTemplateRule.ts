@@ -144,8 +144,8 @@ export async function updateTemplateRule(
                 
                 // Remove undefined values
                 Object.keys(propagationData).forEach(key => {
-                    if (propagationData[key] === undefined) {
-                        delete propagationData[key];
+                    if ((propagationData as any)[key] === undefined) {
+                        delete (propagationData as any)[key];
                     }
                 });
 
@@ -161,11 +161,28 @@ export async function updateTemplateRule(
             // Don't fail the template rule update if propagation fails, just log it
         }
 
+        // Count affected resources for the response message
+        let affectedResourcesCount = 0;
+        try {
+            const { resourceTemplates } = await import("@server/db");
+            const affectedResources = await db
+                .select()
+                .from(resourceTemplates)
+                .where(eq(resourceTemplates.templateId, templateId));
+            affectedResourcesCount = affectedResources.length;
+        } catch (error) {
+            logger.error("Error counting affected resources:", error);
+        }
+
+        const message = affectedResourcesCount > 0 
+            ? `Template rule updated successfully. Changes propagated to ${affectedResourcesCount} assigned resource${affectedResourcesCount > 1 ? 's' : ''}.`
+            : "Template rule updated successfully.";
+
         return response(res, {
             data: updatedRule,
             success: true,
             error: false,
-            message: "Template rule updated successfully",
+            message,
             status: HttpCode.OK
         });
     } catch (error) {

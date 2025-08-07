@@ -4,9 +4,9 @@ import { useParams } from "next/navigation";
 import {
     SettingsContainer,
     SettingsSection,
-    SettingsSectionHeader,
-    SettingsSectionTitle
+    SettingsSectionHeader
 } from "@app/components/Settings";
+import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { TemplateRulesManager } from "@app/components/ruleTemplate/TemplateRulesManager";
 
 export default function RulesPage() {

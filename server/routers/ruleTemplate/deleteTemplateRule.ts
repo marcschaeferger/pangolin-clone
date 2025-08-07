@@ -67,15 +67,20 @@ export async function deleteTemplateRule(
             );
         }
 
-        // Delete the rule
-        await db
-            .delete(templateRules)
-            .where(and(eq(templateRules.templateId, templateId), eq(templateRules.ruleId, parseInt(ruleId))));
-
-        // Also delete all resource rules that were created from this template rule
+        // Count affected resources for the response message
+        let affectedResourcesCount = 0;
         try {
             const { resourceRules } = await import("@server/db");
             
+            // Get affected resource rules before deletion for counting
+            const affectedResourceRules = await db
+                .select()
+                .from(resourceRules)
+                .where(eq(resourceRules.templateRuleId, parseInt(ruleId)));
+            
+            affectedResourcesCount = affectedResourceRules.length;
+
+            // Delete the resource rules first (due to foreign key constraint)
             await db
                 .delete(resourceRules)
                 .where(eq(resourceRules.templateRuleId, parseInt(ruleId)));
@@ -84,11 +89,20 @@ export async function deleteTemplateRule(
             // Don't fail the template rule deletion if resource rule deletion fails, just log it
         }
 
+        // Delete the template rule after resource rules are deleted
+        await db
+            .delete(templateRules)
+            .where(and(eq(templateRules.templateId, templateId), eq(templateRules.ruleId, parseInt(ruleId))));
+
+        const message = affectedResourcesCount > 0 
+            ? `Template rule deleted successfully. Removed from ${affectedResourcesCount} assigned resource${affectedResourcesCount > 1 ? 's' : ''}.`
+            : "Template rule deleted successfully.";
+
         return response(res, {
             data: null,
             success: true,
             error: false,
-            message: "Template rule deleted successfully",
+            message,
             status: HttpCode.OK
         });
     } catch (error) {

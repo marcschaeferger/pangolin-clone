@@ -12,9 +12,9 @@ import { useEnvContext } from "@app/hooks/useEnvContext";
 import {
     SettingsContainer,
     SettingsSection,
-    SettingsSectionHeader,
-    SettingsSectionTitle
+    SettingsSectionHeader
 } from "@app/components/Settings";
+import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { Button } from "@app/components/ui/button";
 import { Input } from "@app/components/ui/input";
 import { Textarea } from "@app/components/ui/textarea";
@@ -79,8 +79,9 @@ export default function GeneralPage() {
                 data
             );
             toast({
-                title: t("ruleTemplateUpdated"),
-                description: t("ruleTemplateUpdatedDescription")
+                title: "Template Updated",
+                description: "Template details have been updated successfully. Changes to template rules will automatically propagate to all assigned resources.",
+                variant: "default"
             });
         } catch (error) {
             toast({
