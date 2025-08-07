@@ -76,6 +76,17 @@ export function TemplateRulesManager({ templateId, orgId }: TemplateRulesManager
     const [loading, setLoading] = useState(true);
     const [addingRule, setAddingRule] = useState(false);
 
+    const RuleAction = {
+        ACCEPT: t('alwaysAllow'),
+        DROP: t('alwaysDeny')
+    } as const;
+
+    const RuleMatch = {
+        PATH: t('path'),
+        IP: "IP",
+        CIDR: t('ipAddressRange')
+    } as const;
+
     const form = useForm<z.infer<typeof addRuleSchema>>({
         resolver: zodResolver(addRuleSchema),
         defaultValues: {
@@ -183,72 +194,93 @@ export function TemplateRulesManager({ templateId, orgId }: TemplateRulesManager
     const columns: ColumnDef<TemplateRule>[] = [
         {
             accessorKey: "priority",
-            header: ({ column }) => (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                >
-                    Priority
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-            ),
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() =>
+                            column.toggleSorting(column.getIsSorted() === "asc")
+                        }
+                    >
+                        {t('rulesPriority')}
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                );
+            },
             cell: ({ row }) => (
                 <Input
-                    type="number"
                     defaultValue={row.original.priority}
-                    className="w-20"
-                    onBlur={(e) =>
+                    className="w-[75px]"
+                    type="number"
+                    onBlur={(e) => {
+                        const parsed = z.coerce
+                            .number()
+                            .int()
+                            .optional()
+                            .safeParse(e.target.value);
+
+                        if (!parsed.data) {
+                            toast({
+                                variant: "destructive",
+                                title: t('rulesErrorInvalidIpAddress'),
+                                description: t('rulesErrorInvalidPriorityDescription')
+                            });
+                            return;
+                        }
+
                         updateRule(row.original.ruleId, {
-                            priority: parseInt(e.target.value, 10)
-                        })
-                    }
+                            priority: parsed.data
+                        });
+                    }}
                 />
             )
         },
         {
             accessorKey: "action",
-            header: "Action",
+            header: t('rulesAction'),
             cell: ({ row }) => (
                 <Select
                     defaultValue={row.original.action}
-                    onValueChange={(value) =>
+                    onValueChange={(value: "ACCEPT" | "DROP") =>
                         updateRule(row.original.ruleId, { action: value })
                     }
                 >
-                    <SelectTrigger className="w-24">
+                    <SelectTrigger className="min-w-[150px]">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="ACCEPT">Accept</SelectItem>
-                        <SelectItem value="DROP">Drop</SelectItem>
+                        <SelectItem value="ACCEPT">
+                            {RuleAction.ACCEPT}
+                        </SelectItem>
+                        <SelectItem value="DROP">{RuleAction.DROP}</SelectItem>
                     </SelectContent>
                 </Select>
             )
         },
         {
             accessorKey: "match",
-            header: "Match",
+            header: t('rulesMatchType'),
             cell: ({ row }) => (
                 <Select
                     defaultValue={row.original.match}
-                    onValueChange={(value) =>
+                    onValueChange={(value: "CIDR" | "IP" | "PATH") =>
                         updateRule(row.original.ruleId, { match: value })
                     }
                 >
-                    <SelectTrigger className="w-24">
+                    <SelectTrigger className="min-w-[125px]">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="IP">IP</SelectItem>
-                        <SelectItem value="CIDR">CIDR</SelectItem>
-                        <SelectItem value="PATH">Path</SelectItem>
+                        <SelectItem value="PATH">{RuleMatch.PATH}</SelectItem>
+                        <SelectItem value="IP">{RuleMatch.IP}</SelectItem>
+                        <SelectItem value="CIDR">{RuleMatch.CIDR}</SelectItem>
                     </SelectContent>
                 </Select>
             )
         },
         {
             accessorKey: "value",
-            header: "Value",
+            header: t('value'),
             cell: ({ row }) => (
                 <Input
                     defaultValue={row.original.value}
@@ -261,7 +293,7 @@ export function TemplateRulesManager({ templateId, orgId }: TemplateRulesManager
         },
         {
             accessorKey: "enabled",
-            header: "Enabled",
+            header: t('enabled'),
             cell: ({ row }) => (
                 <Switch
                     defaultChecked={row.original.enabled}
@@ -276,10 +308,9 @@ export function TemplateRulesManager({ templateId, orgId }: TemplateRulesManager
             cell: ({ row }) => (
                 <Button
                     variant="outline"
-                    size="sm"
                     onClick={() => removeRule(row.original.ruleId)}
                 >
-                    <Trash2 className="h-4 w-4" />
+                    {t('delete')}
                 </Button>
             )
         }
