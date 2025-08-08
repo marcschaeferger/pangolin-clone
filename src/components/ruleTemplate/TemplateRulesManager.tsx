@@ -47,6 +47,15 @@ import {
 import { isValidCIDR, isValidIP, isValidUrlGlobPattern } from "@server/lib/validators";
 import { ArrowUpDown, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { ConfirmationDialog } from "@app/components/ConfirmationDialog";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger
+} from "@app/components/ui/dialog";
 
 const addRuleSchema = z.object({
     action: z.enum(["ACCEPT", "DROP"]),
@@ -76,6 +85,7 @@ export function TemplateRulesManager({ templateId, orgId }: TemplateRulesManager
     const [rules, setRules] = useState<TemplateRule[]>([]);
     const [loading, setLoading] = useState(true);
     const [addingRule, setAddingRule] = useState(false);
+    const [createDialogOpen, setCreateDialogOpen] = useState(false);
     const [pagination, setPagination] = useState({
         pageIndex: 0,
         pageSize: 25
@@ -366,107 +376,116 @@ export function TemplateRulesManager({ templateId, orgId }: TemplateRulesManager
     });
 
     if (loading) {
-        return <div>Loading rules...</div>;
+        return <div className="text-muted-foreground">Loading...</div>;
     }
 
     return (
         <div className="space-y-6">
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(addRule)} className="space-y-4">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-end">
-                        <FormField
-                            control={form.control}
-                            name="action"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t('rulesAction')}</FormLabel>
-                                    <FormControl>
-                                        <Select
-                                            value={field.value}
-                                            onValueChange={field.onChange}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="ACCEPT">
-                                                    {RuleAction.ACCEPT}
-                                                </SelectItem>
-                                                <SelectItem value="DROP">{RuleAction.DROP}</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+            <div className="flex justify-end">
+                <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+                    <DialogTrigger asChild>
+                        <Button variant="secondary" disabled={addingRule}>
+                            {addingRule ? "Adding Rule..." : t('ruleSubmit')}
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>{t('ruleSubmit')}</DialogTitle>
+                            <DialogDescription>
+                                {t('rulesResourceDescription')}
+                            </DialogDescription>
+                        </DialogHeader>
+                        <Form {...form}>
+                            <form
+                                onSubmit={form.handleSubmit(async (data) => {
+                                    await addRule(data);
+                                    setCreateDialogOpen(false);
+                                })}
+                                className="space-y-4"
+                            >
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="action"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>{t('rulesAction')}</FormLabel>
+                                                <FormControl>
+                                                    <Select value={field.value} onValueChange={field.onChange}>
+                                                        <SelectTrigger>
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="ACCEPT">{RuleAction.ACCEPT}</SelectItem>
+                                                            <SelectItem value="DROP">{RuleAction.DROP}</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="match"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>{t('rulesMatchType')}</FormLabel>
+                                                <FormControl>
+                                                    <Select value={field.value} onValueChange={field.onChange}>
+                                                        <SelectTrigger>
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="PATH">{RuleMatch.PATH}</SelectItem>
+                                                            <SelectItem value="IP">{RuleMatch.IP}</SelectItem>
+                                                            <SelectItem value="CIDR">{RuleMatch.CIDR}</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="value"
+                                        render={({ field }) => (
+                                            <FormItem className="md:col-span-2">
+                                                <FormLabel>{t('value')}</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="Enter value" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="priority"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>{t('rulesPriority')} (optional)</FormLabel>
+                                                <FormControl>
+                                                    <Input type="number" placeholder="Auto" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <DialogFooter>
+                                    <Button type="submit" variant="secondary" disabled={addingRule}>
+                                        {addingRule ? "Adding Rule..." : t('ruleSubmit')}
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </Form>
+                    </DialogContent>
+                </Dialog>
+            </div>
 
-                        <FormField
-                            control={form.control}
-                            name="match"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t('rulesMatchType')}</FormLabel>
-                                    <FormControl>
-                                        <Select
-                                            value={field.value}
-                                            onValueChange={field.onChange}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="PATH">{RuleMatch.PATH}</SelectItem>
-                                                <SelectItem value="IP">{RuleMatch.IP}</SelectItem>
-                                                <SelectItem value="CIDR">{RuleMatch.CIDR}</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
-                            name="value"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t('value')}</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Enter value" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
-                            name="priority"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t('rulesPriority')} (optional)</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            type="number"
-                                            placeholder="Auto"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
-
-                    <Button type="submit" variant="secondary" disabled={addingRule}>
-                        {addingRule ? "Adding Rule..." : "Add Rule"}
-                    </Button>
-                </form>
-            </Form>
-
-            <div className="rounded-md border">
+            <div>
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (

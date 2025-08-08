@@ -12,9 +12,13 @@ import { useEnvContext } from "@app/hooks/useEnvContext";
 import {
     SettingsContainer,
     SettingsSection,
-    SettingsSectionHeader
+    SettingsSectionHeader,
+    SettingsSectionTitle,
+    SettingsSectionDescription,
+    SettingsSectionBody,
+    SettingsSectionFooter,
+    SettingsSectionForm
 } from "@app/components/Settings";
-import SettingsSectionTitle from "@app/components/SettingsSectionTitle";
 import { Button } from "@app/components/ui/button";
 import { Input } from "@app/components/ui/input";
 import { Textarea } from "@app/components/ui/textarea";
@@ -118,37 +122,44 @@ export default function GeneralPage() {
         <SettingsContainer>
             <SettingsSection>
                 <SettingsSectionHeader>
-                    <SettingsSectionTitle title={t("templateDetails")} />
+                    <SettingsSectionTitle>
+                        {t("templateDetails")}
+                    </SettingsSectionTitle>
+                    <SettingsSectionDescription>
+                        Update the name and description for this rule template.
+                    </SettingsSectionDescription>
                 </SettingsSectionHeader>
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                    <div>
-                        <label htmlFor="name" className="block text-sm font-medium mb-2">
-                            {t("name")}
-                        </label>
-                        <Input
-                            id="name"
-                            {...register("name")}
-                            className={errors.name ? "border-red-500" : ""}
-                        />
-                        {errors.name && (
-                            <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
-                        )}
-                    </div>
-                    <div>
-                        <label htmlFor="description" className="block text-sm font-medium mb-2">
-                            {t("description")}
-                        </label>
-                        <Textarea
-                            id="description"
-                            {...register("description")}
-                            rows={3}
-                        />
-                    </div>
-                    <Button type="submit" disabled={saving}>
+                <SettingsSectionBody>
+                    <SettingsSectionForm>
+                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" id="template-general-form">
+                            <div>
+                                <label htmlFor="name" className="block text-sm font-medium mb-2">
+                                    {t("name")}
+                                </label>
+                                <Input
+                                    id="name"
+                                    {...register("name")}
+                                    className={errors.name ? "border-red-500" : ""}
+                                />
+                                {errors.name && (
+                                    <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+                                )}
+                            </div>
+                            <div>
+                                <label htmlFor="description" className="block text-sm font-medium mb-2">
+                                    {t("description")}
+                                </label>
+                                <Textarea id="description" {...register("description")} rows={3} />
+                            </div>
+                        </form>
+                    </SettingsSectionForm>
+                </SettingsSectionBody>
+                <SettingsSectionFooter>
+                    <Button type="submit" form="template-general-form" disabled={saving}>
                         <Save className="w-4 h-4 mr-2" />
                         {saving ? t("saving") : t("save")}
                     </Button>
-                </form>
+                </SettingsSectionFooter>
             </SettingsSection>
         </SettingsContainer>
     );
