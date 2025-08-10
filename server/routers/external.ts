@@ -3,6 +3,7 @@ import config from "@server/lib/config";
 import * as site from "./site";
 import * as org from "./org";
 import * as resource from "./resource";
+import * as ipsets from "./ipSets"
 import * as domain from "./domain";
 import * as target from "./target";
 import * as user from "./user";
@@ -36,7 +37,8 @@ import {
     verifyClientsEnabled,
     verifyUserHasAction,
     verifyUserIsOrgOwner,
-    verifySiteResourceAccess
+    verifySiteResourceAccess,
+    verifyIPSetAccess
 } from "@server/middlewares";
 import { createStore } from "@server/lib/rateLimitStore";
 import { ActionsEnum } from "@server/auth/actions";
@@ -390,6 +392,40 @@ authenticated.delete(
     verifyResourceAccess,
     verifyUserHasAction(ActionsEnum.deleteResourceRule),
     resource.deleteResourceRule
+);
+
+
+authenticated.post(
+    "/org/:orgId/ip-sets", 
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.createIPSet),
+    ipsets.createIPSet 
+);
+
+// Update IP Set - scoped to organization
+authenticated.put(
+    "/org/:orgId/ip-sets/:ipSetId", 
+    verifyOrgAccess,
+    verifyIPSetAccess,
+    verifyUserHasAction(ActionsEnum.updateIPSet),
+    ipsets.updateIPSet 
+);
+
+// List IP Sets - scoped to organization  
+authenticated.get(
+    "/org/:orgId/ip-sets", 
+    verifyOrgAccess,
+    verifyUserHasAction(ActionsEnum.listIPSets),
+    ipsets.listIPSets
+);
+
+// Delete IP Set - scoped to organization
+authenticated.delete(
+    "/org/:orgId/ip-sets/:ipSetId", 
+    verifyOrgAccess,
+    verifyIPSetAccess,
+    verifyUserHasAction(ActionsEnum.deleteIPSet),
+    ipsets.deleteIPSet 
 );
 
 authenticated.get(
