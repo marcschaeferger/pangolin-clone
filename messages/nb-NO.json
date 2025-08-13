@@ -1344,5 +1344,10 @@
     "remoteSubnetsDescription": "Legg til CIDR-områder som kan få fjerntilgang til dette området. Bruk format som 10.0.0.0/24 eller 192.168.1.0/24.",
     "resourceEnableProxy": "Aktiver offentlig proxy",
     "resourceEnableProxyDescription": "Aktiver offentlig proxying til denne ressursen. Dette gir tilgang til ressursen fra utsiden av nettverket gjennom skyen på en åpen port. Krever Traefik-konfigurasjon.",
-    "externalProxyEnabled": "Ekstern proxy aktivert"
+    "externalProxyEnabled": "Ekstern proxy aktivert",
+    "siteConfiguration": "Configuration",
+    "siteAcceptClientConnections": "Accept Client Connections",
+    "siteAcceptClientConnectionsDescription": "Allow other devices to connect through this Newt instance as a gateway using clients.",
+    "siteAddress": "Site Address",
+    "siteAddressDescription": "Specify the IP address of the host for clients to connect to."
 }
