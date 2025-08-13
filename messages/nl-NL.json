@@ -1344,5 +1344,10 @@
     "remoteSubnetsDescription": "Add CIDR ranges that can be accessed from this site remotely using clients. Use format like 10.0.0.0/24. This ONLY applies to VPN client connectivity.",
     "resourceEnableProxy": "Openbare proxy inschakelen",
     "resourceEnableProxyDescription": "Schakel publieke proxy in voor deze resource. Dit maakt toegang tot de resource mogelijk vanuit het netwerk via de cloud met een open poort. Vereist Traefik-configuratie.",
-    "externalProxyEnabled": "Externe Proxy Ingeschakeld"
+    "externalProxyEnabled": "Externe Proxy Ingeschakeld",
+    "siteConfiguration": "Configuration",
+    "siteAcceptClientConnections": "Accept Client Connections",
+    "siteAcceptClientConnectionsDescription": "Allow other devices to connect through this Newt instance as a gateway using clients.",
+    "siteAddress": "Site Address",
+    "siteAddressDescription": "Specify the IP address of the host for clients to connect to."
 }
