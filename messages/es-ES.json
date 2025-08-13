@@ -1344,5 +1344,10 @@
     "remoteSubnetsDescription": "Add CIDR ranges that can be accessed from this site remotely using clients. Use format like 10.0.0.0/24. This ONLY applies to VPN client connectivity.",
     "resourceEnableProxy": "Habilitar proxy público",
     "resourceEnableProxyDescription": "Habilite el proxy público para este recurso. Esto permite el acceso al recurso desde fuera de la red a través de la nube en un puerto abierto. Requiere configuración de Traefik.",
-    "externalProxyEnabled": "Proxy externo habilitado"
+    "externalProxyEnabled": "Proxy externo habilitado",
+    "siteConfiguration": "Configuration",
+    "siteAcceptClientConnections": "Accept Client Connections",
+    "siteAcceptClientConnectionsDescription": "Allow other devices to connect through this Newt instance as a gateway using clients.",
+    "siteAddress": "Site Address",
+    "siteAddressDescription": "Specify the IP address of the host for clients to connect to."
 }
