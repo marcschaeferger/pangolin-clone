@@ -3,7 +3,9 @@ export class NavigationGuard {
   private hasUnsavedChanges = false;
   private warningMessage = "You have unsaved changes. Are you sure you want to leave?";
 
-  private constructor() {}
+  private constructor() { }
+
+
 
   static getInstance(): NavigationGuard {
     if (!NavigationGuard.instance) {
@@ -26,9 +28,18 @@ export class NavigationGuard {
 
   getWarningMessage(): string {
     return this.warningMessage;
+
+  }
+
+  confirmNavigation(): boolean {
+    if (this.hasUnsavedChanges) {
+      return window.confirm(this.warningMessage);
+    }
+    return true;
   }
 
   clearUnsavedChanges() {
     this.hasUnsavedChanges = false;
   }
+
 }
