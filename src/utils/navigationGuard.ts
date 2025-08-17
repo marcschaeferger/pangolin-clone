@@ -1,4 +1,3 @@
-
 export class NavigationGuard {
   private static instance: NavigationGuard;
   private hasUnsavedChanges = false;
@@ -27,13 +26,6 @@ export class NavigationGuard {
 
   getWarningMessage(): string {
     return this.warningMessage;
-  }
-
-  confirmNavigation(): boolean {
-    if (this.hasUnsavedChanges) {
-      return window.confirm(this.warningMessage);
-    }
-    return true;
   }
 
   clearUnsavedChanges() {

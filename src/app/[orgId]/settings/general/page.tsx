@@ -77,7 +77,7 @@ export default function GeneralPage() {
         clearPersistence,
     } = useFormWithUnsavedChanges({
         form,
-        storageKey: `org-general-settings-${org?.org.orgId}`, // unique per org
+        storageKey: `org-general-settings-${org?.org.orgId}`,
         excludeFields: [],
         warningMessage: t("unsavedChangesWarning")
     });
