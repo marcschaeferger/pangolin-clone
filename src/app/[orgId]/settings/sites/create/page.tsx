@@ -60,6 +60,8 @@ import { QRCodeCanvas } from "qrcode.react";
 
 import { useTranslations } from "next-intl";
 import { build } from "@server/build";
+import { UnsavedChangesIndicator } from "@app/components/navigation-protection/unsaved-changes-indicator";
+import { useFormWithUnsavedChanges } from "@app/hooks/useFormWithUnsavedChanges";
 
 type SiteType = "newt" | "wireguard" | "local";
 
@@ -413,6 +415,17 @@ WantedBy=default.target`
         }
     });
 
+    const {
+        hasUnsavedChanges,
+        handleFormSubmit,
+        clearPersistence,
+    } = useFormWithUnsavedChanges({
+        form,
+        storageKey: `org-site-create-${orgId}`,
+        excludeFields: [],
+        warningMessage: t("unsavedChangesWarning")
+    });
+
     async function onSubmit(data: CreateSiteFormValues) {
         setCreateLoading(true);
 
@@ -475,6 +488,7 @@ WantedBy=default.target`
         if (res && res.status === 201) {
             const data = res.data.data;
 
+            clearPersistence();
             router.push(`/${orgId}/settings/sites/${data.niceId}`);
         }
 
@@ -535,8 +549,10 @@ WantedBy=default.target`
             await api
                 .get(`/org/${orgId}/pick-site-defaults`)
                 .catch((e) => {
-                    // update the default value of the form to be local method
-                    form.setValue("method", "local");
+                    // Wait for next tick to ensure form is initialized
+                    setTimeout(() => {
+                        form.setValue("method", "local");
+                    }, 0);
                 })
                 .then((res) => {
                     if (res && res.status === 200) {
@@ -585,11 +601,6 @@ WantedBy=default.target`
         load();
     }, []);
 
-    // Sync form acceptClients value with local state
-    useEffect(() => {
-        form.setValue("acceptClients", acceptClients);
-    }, [acceptClients, form]);
-
     return (
         <>
             <div className="flex justify-between">
@@ -617,6 +628,12 @@ WantedBy=default.target`
                                 </SettingsSectionTitle>
                             </SettingsSectionHeader>
                             <SettingsSectionBody>
+                                {hasUnsavedChanges && (
+                                    <UnsavedChangesIndicator
+                                        hasUnsavedChanges={hasUnsavedChanges}
+                                        variant="alert"
+                                    />
+                                )}
                                 <SettingsSectionForm>
                                     <Form {...form}>
                                         <form
@@ -643,7 +660,7 @@ WantedBy=default.target`
                                             />
                                             {env.flags.enableClients &&
                                                 form.watch("method") ===
-                                                    "newt" && (
+                                                "newt" && (
                                                     <FormField
                                                         control={form.control}
                                                         name="clientAddress"
@@ -868,7 +885,7 @@ WantedBy=default.target`
                                                             key={arch}
                                                             variant={
                                                                 architecture ===
-                                                                arch
+                                                                    arch
                                                                     ? "squareOutlinePrimary"
                                                                     : "squareOutline"
                                                             }
@@ -892,7 +909,7 @@ WantedBy=default.target`
                                                 <div className="flex items-center space-x-2 mb-2">
                                                     <CheckboxWithLabel
                                                         id="acceptClients"
-                                                         aria-describedby="acceptClients-desc"
+                                                        aria-describedby="acceptClients-desc"
                                                         checked={acceptClients}
                                                         onCheckedChange={(
                                                             checked
@@ -1012,7 +1029,7 @@ WantedBy=default.target`
                             loading={createLoading}
                             disabled={createLoading}
                             onClick={() => {
-                                form.handleSubmit(onSubmit)();
+                                handleFormSubmit(onSubmit)();
                             }}
                         >
                             {t("siteCreate")}

@@ -1,6 +1,7 @@
 import { UseFormReturn, FieldValues } from 'react-hook-form';
-import { useUnsavedChanges } from './useUnsavedChanges';
+import { useEffect } from 'react';
 import { useFormPersistence } from './useFormPersistence';
+import { useUnsavedChanges } from './useUnsavedChanges'; // The new hook
 
 interface UseFormWithUnsavedChangesOptions<T extends FieldValues> {
   form: UseFormReturn<T>;
@@ -15,23 +16,38 @@ export function useFormWithUnsavedChanges<T extends FieldValues>({
   excludeFields = [],
   warningMessage
 }: UseFormWithUnsavedChangesOptions<T>) {
-  const { clearPersistence, hasChanges } = useFormPersistence(
+  // Call useFormPersistence directly at the top level
+  const { clearPersistence, hasChanges, checkForUnsavedChanges, tabId } = useFormPersistence(
     form,
     storageKey,
     excludeFields
   );
 
-  const { safeNavigate, setIsNavigating } = useUnsavedChanges({
-    hasUnsavedChanges: hasChanges(),
+  // Get the current state once to avoid multiple function calls
+  const currentHasChanges = hasChanges();
+
+  // This hook now manages the `beforeunload` event and the singleton state
+  const { setIsNavigating } = useUnsavedChanges({
+    hasUnsavedChanges: currentHasChanges,
     message: warningMessage
   });
+
+  // Check for unsaved changes on mount (useful for page reload scenarios)
+  useEffect(() => {
+    // Small delay to ensure form is fully initialized
+    const timer = setTimeout(() => {
+      checkForUnsavedChanges();
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, [checkForUnsavedChanges]);
 
   const handleFormSubmit = (onSubmit: (data: T) => Promise<void> | void) => {
     return form.handleSubmit(async (data: T) => {
       try {
         setIsNavigating(true);
         await onSubmit(data);
-        clearPersistence(); // Clear saved data on successful submit
+        clearPersistence();
       } catch (error) {
         setIsNavigating(false);
         throw error;
@@ -40,9 +56,10 @@ export function useFormWithUnsavedChanges<T extends FieldValues>({
   };
 
   return {
-    hasUnsavedChanges: hasChanges(),
-    safeNavigate,
+    hasUnsavedChanges: currentHasChanges,
     clearPersistence,
-    handleFormSubmit
+    handleFormSubmit,
+    checkForUnsavedChanges,
+    tabId
   };
 }

@@ -5,6 +5,7 @@ import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { cn } from "@app/lib/cn";
 import { NavigationGuard } from "@/utils/navigationGuard";
 import { UnsavedChangesIndicator } from "./unsaved-changes-indicator";
+import { clearTabSpecificStorage } from "@/utils/formHelpers";
 
 const TabsRoot = TabsPrimitive.Root;
 
@@ -27,12 +28,13 @@ interface TabsTriggerProps
   extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger> {
   hasUnsavedChanges?: boolean;
   onValueChange?: (value: string) => void;
+  storageKey?: string; // Add storage key for tab-specific handling
 }
 
 const TabsTrigger = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Trigger>,
   TabsTriggerProps
->(({ className, children, hasUnsavedChanges, onValueChange, ...props }, ref) => {
+>(({ className, children, hasUnsavedChanges, onValueChange, storageKey, ...props }, ref) => {
   const navigationGuard = NavigationGuard.getInstance();
 
   const handleTabClick = (e: React.MouseEvent) => {
@@ -42,7 +44,15 @@ const TabsTrigger = React.forwardRef<
       if (confirmed) {
         // Clear state only after confirmation
         navigationGuard.clearUnsavedChanges();
-        sessionStorage.clear(); // ensure form state is removed
+        
+        // Clear tab-specific storage if storageKey is provided
+        if (storageKey) {
+          clearTabSpecificStorage(storageKey);
+        } else {
+          // Fallback: clear all session storage
+          sessionStorage.clear();
+        }
+        
         if (props.value && onValueChange) {
           onValueChange(props.value);
         }

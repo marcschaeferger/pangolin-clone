@@ -1,4 +1,3 @@
-"use client";
 
 export class NavigationGuard {
   private static instance: NavigationGuard;
@@ -14,20 +13,20 @@ export class NavigationGuard {
     return NavigationGuard.instance;
   }
 
-  setUnsavedChanges(hasChanges: boolean, message?: string) {
-    this.hasUnsavedChanges = hasChanges;
-    if (message) {
-      this.warningMessage = message;
-    }
-  }
-
-  
-  public setHasUnsavedChanges(state: boolean) {
+  setHasUnsavedChanges(state: boolean) {
     this.hasUnsavedChanges = state;
   }
 
   getHasUnsavedChanges(): boolean {
     return this.hasUnsavedChanges;
+  }
+
+  setWarningMessage(message: string) {
+    this.warningMessage = message;
+  }
+
+  getWarningMessage(): string {
+    return this.warningMessage;
   }
 
   confirmNavigation(): boolean {
