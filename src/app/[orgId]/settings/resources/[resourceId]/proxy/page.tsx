@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState, use, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -94,6 +94,9 @@ import {
     CommandList
 } from "@app/components/ui/command";
 import { Badge } from "@app/components/ui/badge";
+import { useFormWithUnsavedChanges } from "@app/hooks/useFormWithUnsavedChanges";
+import { useUnsavedChanges } from "@app/hooks/useUnsavedChanges";
+import { UnsavedChangesIndicator } from "@app/components/navigation-protection/unsaved-changes-indicator";
 
 const addTargetSchema = z.object({
     ip: z.string().refine(isTargetValid),
@@ -251,6 +254,56 @@ export default function ReverseProxyTargets(props: {
         }
     });
 
+    // Track local target changes separately from form changes
+    const hasLocalTargetChanges = useMemo(() => {
+        return (
+            targets.some(target => target.new || target.updated) ||
+            targetsToRemove.length > 0
+        );
+    }, [targets, targetsToRemove]);
+
+    // Add navigation protection for local target changes
+    const { setIsNavigating: setTargetNavigating } = useUnsavedChanges({
+        hasUnsavedChanges: hasLocalTargetChanges,
+        message: "You have unsaved target changes that will be lost if you leave this page."
+    });
+
+    const tlsFormTracking = useFormWithUnsavedChanges({
+        form: tlsSettingsForm,
+        storageKey: 'resource-proxy-tls',
+        excludeFields: [],
+        warningMessage: "You have unsaved TLS settings."
+    });
+
+    const proxyFormTracking = useFormWithUnsavedChanges({
+        form: proxySettingsForm,
+        storageKey: 'resource-proxy-settings',
+        excludeFields: [],
+        warningMessage: "You have unsaved proxy settings."
+    });
+
+    const targetsFormTracking = useFormWithUnsavedChanges({
+        form: targetsSettingsForm,
+        storageKey: 'resource-proxy-targets',
+        excludeFields: [],
+        warningMessage: "You have unsaved target settings."
+    });
+
+    // Combined unsaved changes logic
+    const hasAnyUnsavedChanges = useMemo(() => {
+        return (
+            hasLocalTargetChanges ||
+            tlsFormTracking.hasUnsavedChanges ||
+            proxyFormTracking.hasUnsavedChanges ||
+            targetsFormTracking.hasUnsavedChanges
+        );
+    }, [
+        hasLocalTargetChanges,
+        tlsFormTracking.hasUnsavedChanges,
+        proxyFormTracking.hasUnsavedChanges,
+        targetsFormTracking.hasUnsavedChanges
+    ]);
+
     useEffect(() => {
         const fetchTargets = async () => {
             try {
@@ -402,11 +455,14 @@ export default function ReverseProxyTargets(props: {
     }
 
     const removeTarget = (targetId: number) => {
+        const targetToRemove = targets.find((target) => target.targetId === targetId);
+        
         setTargets([
             ...targets.filter((target) => target.targetId !== targetId)
         ]);
 
-        if (!targets.find((target) => target.targetId === targetId)?.new) {
+        // Only add to removal list if it's not a new target (exists in backend)
+        if (targetToRemove && !targetToRemove.new) {
             setTargetsToRemove([...targetsToRemove, targetId]);
         }
     };
@@ -417,11 +473,11 @@ export default function ReverseProxyTargets(props: {
             targets.map((target) =>
                 target.targetId === targetId
                     ? {
-                          ...target,
-                          ...data,
-                          updated: true,
-                          siteType: site?.type || null
-                      }
+                        ...target,
+                        ...data,
+                        updated: !target.new, // Only mark as updated if it's not a new target
+                        siteType: site?.type || null
+                    }
                     : target
             )
         );
@@ -434,7 +490,9 @@ export default function ReverseProxyTargets(props: {
             setProxySettingsLoading(true);
 
             // Save targets
-            for (const target of targets) {
+            const updatedTargets = [...targets];
+            for (let i = 0; i < updatedTargets.length; i++) {
+                const target = updatedTargets[i];
                 const data = {
                     ip: target.ip,
                     port: target.port,
@@ -447,13 +505,22 @@ export default function ReverseProxyTargets(props: {
                     const res = await api.put<
                         AxiosResponse<CreateTargetResponse>
                     >(`/resource/${params.resourceId}/target`, data);
-                    target.targetId = res.data.data.targetId;
-                    target.new = false;
+                    updatedTargets[i] = {
+                        ...target,
+                        targetId: res.data.data.targetId,
+                        new: false
+                    };
                 } else if (target.updated) {
                     await api.post(`/target/${target.targetId}`, data);
-                    target.updated = false;
+                    updatedTargets[i] = {
+                        ...target,
+                        updated: false
+                    };
                 }
             }
+
+            // Update the targets state with cleared flags
+            setTargets(updatedTargets);
 
             for (const targetId of targetsToRemove) {
                 await api.delete(`/target/${targetId}`);
@@ -491,7 +558,14 @@ export default function ReverseProxyTargets(props: {
                 description: t("settingsUpdatedDescription")
             });
 
+            // Clear form persistence
+            tlsFormTracking.clearPersistence();
+            proxyFormTracking.clearPersistence();
+            targetsFormTracking.clearPersistence();
+
+            // Clear local state changes
             setTargetsToRemove([]);
+
             router.refresh();
         } catch (err) {
             console.error(err);
@@ -509,6 +583,56 @@ export default function ReverseProxyTargets(props: {
             setProxySettingsLoading(false);
         }
     }
+
+    const handleSaveAllSettings = async () => {
+        try {
+            setTargetNavigating(true); // Allow navigation during save
+            await saveAllSettings();
+            tlsFormTracking.clearPersistence();
+            proxyFormTracking.clearPersistence();
+            targetsFormTracking.clearPersistence();
+        } catch (error) {
+            console.error('Save failed:', error);
+            setTargetNavigating(false); // Restore navigation protection on failure
+            // Don't clear persistence on failure
+        }
+    };
+
+    const handleDiscardAllChanges = () => {
+        // Temporarily allow navigation
+        setTargetNavigating(true);
+        
+        // Reset all forms
+        addTargetForm.reset();
+        tlsSettingsForm.reset({
+            ssl: resource.ssl,
+            tlsServerName: resource.tlsServerName || ""
+        });
+        proxySettingsForm.reset({
+            setHostHeader: resource.setHostHeader || ""
+        });
+        targetsSettingsForm.reset({
+            stickySession: resource.stickySession
+        });
+
+        // Clear form persistence
+        tlsFormTracking.clearPersistence();
+        proxyFormTracking.clearPersistence();
+        targetsFormTracking.clearPersistence();
+
+        // Reset local target changes
+        setTargets(prev => prev
+            .filter(target => !target.new) // Remove new targets
+            .map(target => ({
+                ...target,
+                updated: false // Clear updated flags
+            }))
+        );
+        setTargetsToRemove([]);
+        
+        // Re-enable navigation protection after state updates
+        setTimeout(() => setTargetNavigating(false), 0);
+    };
 
     const columns: ColumnDef<LocalTarget>[] = [
         {
@@ -545,7 +669,7 @@ export default function ReverseProxyTargets(props: {
                                     className={cn(
                                         "justify-between flex-1",
                                         !row.original.siteId &&
-                                            "text-muted-foreground"
+                                        "text-muted-foreground"
                                     )}
                                 >
                                     {row.original.siteId
@@ -614,31 +738,31 @@ export default function ReverseProxyTargets(props: {
         },
         ...(resource.http
             ? [
-                  {
-                      accessorKey: "method",
-                      header: t("method"),
-                      cell: ({ row }: { row: Row<LocalTarget> }) => (
-                          <Select
-                              defaultValue={row.original.method ?? ""}
-                              onValueChange={(value) =>
-                                  updateTarget(row.original.targetId, {
-                                      ...row.original,
-                                      method: value
-                                  })
-                              }
-                          >
-                              <SelectTrigger>
-                                  {row.original.method}
-                              </SelectTrigger>
-                              <SelectContent>
-                                  <SelectItem value="http">http</SelectItem>
-                                  <SelectItem value="https">https</SelectItem>
-                                  <SelectItem value="h2c">h2c</SelectItem>
-                              </SelectContent>
-                          </Select>
-                      )
-                  }
-              ]
+                {
+                    accessorKey: "method",
+                    header: t("method"),
+                    cell: ({ row }: { row: Row<LocalTarget> }) => (
+                        <Select
+                            defaultValue={row.original.method ?? ""}
+                            onValueChange={(value) =>
+                                updateTarget(row.original.targetId, {
+                                    ...row.original,
+                                    method: value
+                                })
+                            }
+                        >
+                            <SelectTrigger>
+                                {row.original.method}
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="http">http</SelectItem>
+                                <SelectItem value="https">https</SelectItem>
+                                <SelectItem value="h2c">h2c</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    )
+                }
+            ]
             : []),
         {
             accessorKey: "ip",
@@ -760,6 +884,14 @@ export default function ReverseProxyTargets(props: {
                     </SettingsSectionDescription>
                 </SettingsSectionHeader>
                 <SettingsSectionBody>
+
+                    {hasAnyUnsavedChanges && (
+                        <UnsavedChangesIndicator
+                            hasUnsavedChanges={hasAnyUnsavedChanges}
+                            variant="alert"
+                        />
+                    )}
+
                     <div className="p-4 border rounded-md">
                         <Form {...addTargetForm}>
                             <form
@@ -785,21 +917,21 @@ export default function ReverseProxyTargets(props: {
                                                                     className={cn(
                                                                         "justify-between flex-1",
                                                                         !field.value &&
-                                                                            "text-muted-foreground"
+                                                                        "text-muted-foreground"
                                                                     )}
                                                                 >
                                                                     {field.value
                                                                         ? sites.find(
-                                                                              (
-                                                                                  site
-                                                                              ) =>
-                                                                                  site.siteId ===
-                                                                                  field.value
-                                                                          )
-                                                                              ?.name
+                                                                            (
+                                                                                site
+                                                                            ) =>
+                                                                                site.siteId ===
+                                                                                field.value
+                                                                        )
+                                                                            ?.name
                                                                         : t(
-                                                                              "siteSelect"
-                                                                          )}
+                                                                            "siteSelect"
+                                                                        )}
                                                                     <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                                                 </Button>
                                                             </FormControl>
@@ -865,18 +997,18 @@ export default function ReverseProxyTargets(props: {
                                                                 );
                                                             return selectedSite &&
                                                                 selectedSite.type ===
-                                                                    "newt" ? (() => {
-                                                                const dockerState = getDockerStateForSite(selectedSite.siteId);
-                                                                return (
-                                                                    <ContainersSelector
-                                                                        site={selectedSite}
-                                                                        containers={dockerState.containers}
-                                                                        isAvailable={dockerState.isAvailable}
-                                                                        onContainerSelect={handleContainerSelect}
-                                                                        onRefresh={() => refreshContainersForSite(selectedSite.siteId)}
-                                                                    />
-                                                                );
-                                                            })() : null;
+                                                                "newt" ? (() => {
+                                                                    const dockerState = getDockerStateForSite(selectedSite.siteId);
+                                                                    return (
+                                                                        <ContainersSelector
+                                                                            site={selectedSite}
+                                                                            containers={dockerState.containers}
+                                                                            isAvailable={dockerState.isAvailable}
+                                                                            onContainerSelect={handleContainerSelect}
+                                                                            onRefresh={() => refreshContainersForSite(selectedSite.siteId)}
+                                                                        />
+                                                                    );
+                                                                })() : null;
                                                         })()}
                                                 </div>
                                                 <FormMessage />
@@ -1048,12 +1180,12 @@ export default function ReverseProxyTargets(props: {
                                                                 {header.isPlaceholder
                                                                     ? null
                                                                     : flexRender(
-                                                                          header
-                                                                              .column
-                                                                              .columnDef
-                                                                              .header,
-                                                                          header.getContext()
-                                                                      )}
+                                                                        header
+                                                                            .column
+                                                                            .columnDef
+                                                                            .header,
+                                                                        header.getContext()
+                                                                    )}
                                                             </TableHead>
                                                         )
                                                     )}
@@ -1220,9 +1352,17 @@ export default function ReverseProxyTargets(props: {
                 </SettingsSection>
             )}
 
-            <div className="flex justify-end mt-6">
+            <div className="flex justify-end mt-6 gap-4">
+                {hasAnyUnsavedChanges && (
+                    <Button
+                        variant="outline"
+                        onClick={handleDiscardAllChanges}
+                    >
+                        Discard All Changes
+                    </Button>
+                )}
                 <Button
-                    onClick={saveAllSettings}
+                    onClick={handleSaveAllSettings}
                     loading={
                         targetsLoading ||
                         httpsTlsLoading ||

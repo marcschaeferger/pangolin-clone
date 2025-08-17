@@ -77,22 +77,26 @@ export default async function ResourceLayout(props: ResourceLayoutProps) {
     const navItems = [
         {
             title: t('general'),
-            href: `/{orgId}/settings/resources/{resourceId}/general`
+            href: `/{orgId}/settings/resources/{resourceId}/general`,
+            storageKey: 'resource-general'
         },
         {
             title: t('proxy'),
-            href: `/{orgId}/settings/resources/{resourceId}/proxy`
+            href: `/{orgId}/settings/resources/{resourceId}/proxy`,
+            storageKey: 'resource-proxy'
         }
     ];
 
     if (resource.http) {
         navItems.push({
             title: t('authentication'),
-            href: `/{orgId}/settings/resources/{resourceId}/authentication`
+            href: `/{orgId}/settings/resources/{resourceId}/authentication`,
+            storageKey: 'resource-authentication'
         });
         navItems.push({
             title: t('rules'),
-            href: `/{orgId}/settings/resources/{resourceId}/rules`
+            href: `/{orgId}/settings/resources/{resourceId}/rules`,
+            storageKey: 'resource-rules'
         });
     }
 

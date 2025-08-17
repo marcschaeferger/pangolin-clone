@@ -194,7 +194,7 @@ export default function GeneralPage() {
                     </SettingsSectionDescription>
                 </SettingsSectionHeader>
                 <SettingsSectionBody>
-                    {/* Optional: Show unsaved changes alert */}
+                    {/*Show unsaved changes alert */}
                     {hasUnsavedChanges && (
                         <UnsavedChangesIndicator
                             hasUnsavedChanges={hasUnsavedChanges}
@@ -205,7 +205,7 @@ export default function GeneralPage() {
                     <SettingsSectionForm>
                         <Form {...form}>
                             <form
-                                onSubmit={handleFormSubmit(onSubmit)} // ✅ wrapped submit
+                                onSubmit={handleFormSubmit(onSubmit)}
                                 className="space-y-4"
                                 id="org-settings-form"
                             >

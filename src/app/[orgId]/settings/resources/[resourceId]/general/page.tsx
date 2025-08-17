@@ -53,6 +53,8 @@ import {
 import DomainPicker from "@app/components/DomainPicker";
 import { Globe } from "lucide-react";
 import { build } from "@server/build";
+import { useFormWithUnsavedChanges } from "@app/hooks/useFormWithUnsavedChanges";
+import { UnsavedChangesIndicator } from "@app/components/navigation-protection/unsaved-changes-indicator";
 
 export default function GeneralForm() {
     const [formKey, setFormKey] = useState(0);
@@ -126,6 +128,17 @@ export default function GeneralForm() {
             // enableProxy: resource.enableProxy || false
         },
         mode: "onChange"
+    });
+
+    const {
+        hasUnsavedChanges,
+        handleFormSubmit,
+        clearPersistence,
+    } = useFormWithUnsavedChanges({
+        form,
+        storageKey: `org-resource-general-${org?.org.orgId}`,
+        excludeFields: [],
+        warningMessage: t("unsavedChangesWarning")
     });
 
     useEffect(() => {
@@ -202,6 +215,7 @@ export default function GeneralForm() {
                 title: t("resourceUpdated"),
                 description: t("resourceUpdatedDescription")
             });
+            clearPersistence();
 
             const resource = res.data.data;
 
@@ -236,10 +250,16 @@ export default function GeneralForm() {
                         </SettingsSectionHeader>
 
                         <SettingsSectionBody>
+                            {hasUnsavedChanges && (
+                                <UnsavedChangesIndicator
+                                    hasUnsavedChanges={hasUnsavedChanges}
+                                    variant="alert"
+                                />
+                            )}
                             <SettingsSectionForm>
                                 <Form {...form} key={formKey}>
                                     <form
-                                        onSubmit={form.handleSubmit(onSubmit)}
+                                        onSubmit={handleFormSubmit(onSubmit)}
                                         className="space-y-4"
                                         id="general-settings-form"
                                     >
@@ -317,10 +337,10 @@ export default function GeneralForm() {
                                                                                 .target
                                                                                 .value
                                                                                 ? parseInt(
-                                                                                      e
-                                                                                          .target
-                                                                                          .value
-                                                                                  )
+                                                                                    e
+                                                                                        .target
+                                                                                        .value
+                                                                                )
                                                                                 : undefined
                                                                         )
                                                                     }
