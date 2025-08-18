@@ -107,28 +107,19 @@ export default function DomainPicker2({
     const [providedDomainsShown, setProvidedDomainsShown] = useState(3);
     const [selectedProvidedDomain, setSelectedProvidedDomain] =
         useState<AvailableOption | null>(null);
-
     useEffect(() => {
         const loadOrganizationDomains = async () => {
             setLoadingDomains(true);
             try {
-                const response = await api.get<
-                    AxiosResponse<ListDomainsResponse>
-                >(`/org/${orgId}/domains`);
+                const response = await api.get<AxiosResponse<ListDomainsResponse>>(`/org/${orgId}/domains`);
                 if (response.status === 200) {
                     const domains = response.data.data.domains
-                        .filter(
-                            (domain) =>
-                                domain.type === "ns" ||
-                                domain.type === "cname" ||
-                                domain.type === "wildcard"
-                        )
-                        .map((domain) => ({
-                            ...domain,
-                            type: domain.type as "ns" | "cname" | "wildcard"
-                        }));
+                        .filter(domain => domain.type === "ns" || domain.type === "cname" || domain.type === "wildcard")
+                        .map(domain => ({ ...domain, type: domain.type as "ns" | "cname" | "wildcard" }));
+
                     setOrganizationDomains(domains);
 
+                    // Initialize state based on value prop, but DON'T call onDomainChange here
                     if (value?.domainId) {
                         const matchingDomain = domains.find(d => d.domainId === value.domainId);
                         if (matchingDomain) {
@@ -140,23 +131,13 @@ export default function DomainPicker2({
                                 domainType: matchingDomain.type,
                                 domainId: matchingDomain.domainId
                             });
-
                             setSubdomainInput(value.subdomain || "");
-
-                            onDomainChange?.({
-                                domainId: matchingDomain.domainId,
-                                type: "organization",
-                                subdomain: value.subdomain,
-                                fullDomain: matchingDomain.baseDomain,
-                                baseDomain: matchingDomain.baseDomain
-                            });
                             return; // exit early
                         }
                     }
 
-                    // Auto-select first available domain
+                    // Auto-select first available domain but DON'T call onDomainChange
                     if (domains.length > 0) {
-                        // Select the first organization domain
                         const firstOrgDomain = domains[0];
                         const domainOption: DomainOption = {
                             id: `org-${firstOrgDomain.domainId}`,
@@ -167,23 +148,10 @@ export default function DomainPicker2({
                             domainId: firstOrgDomain.domainId
                         };
                         setSelectedBaseDomain(domainOption);
-
-                        onDomainChange?.({
-                            domainId: firstOrgDomain.domainId,
-                            type: "organization",
-                            subdomain: undefined,
-                            fullDomain: firstOrgDomain.baseDomain,
-                            baseDomain: firstOrgDomain.baseDomain
-                        });
                     } else if (build === "saas" || build === "enterprise") {
-                        // If no organization domains, select the provided domain option
-                        const domainOptionText =
-                            build === "enterprise"
-                                ? "Provided Domain"
-                                : "Free Provided Domain";
                         const freeDomainOption: DomainOption = {
                             id: "provided-search",
-                            domain: domainOptionText,
+                            domain: build === "enterprise" ? "Provided Domain" : "Free Provided Domain",
                             type: "provided-search"
                         };
                         setSelectedBaseDomain(freeDomainOption);
@@ -202,7 +170,30 @@ export default function DomainPicker2({
         };
 
         loadOrganizationDomains();
-    }, [orgId, api, value]);
+    }, [orgId, api]); // Remove 'value' and 'onDomainChange' from dependencies
+
+    // Separate effect to handle external value changes
+    useEffect(() => {
+        if (value?.domainId && organizationDomains.length > 0) {
+            const matchingDomain = organizationDomains.find(d => d.domainId === value.domainId);
+            if (matchingDomain) {
+                const domainOption: DomainOption = {
+                    id: `org-${matchingDomain.domainId}`,
+                    domain: matchingDomain.baseDomain,
+                    type: "organization",
+                    verified: matchingDomain.verified,
+                    domainType: matchingDomain.type,
+                    domainId: matchingDomain.domainId
+                };
+
+                // Only update if different from current selection
+                if (selectedBaseDomain?.id !== domainOption.id || subdomainInput !== (value.subdomain || "")) {
+                    setSelectedBaseDomain(domainOption);
+                    setSubdomainInput(value.subdomain || "");
+                }
+            }
+        }
+    }, [value?.domainId, value?.subdomain, organizationDomains]); // Don't include selectedBaseDomain or subdomainInput
 
     const checkAvailability = useCallback(
         async (input: string) => {

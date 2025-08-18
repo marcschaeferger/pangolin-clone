@@ -13,6 +13,7 @@ export interface StrategyOption<TValue extends string> {
 interface StrategySelectProps<TValue extends string> {
     options: ReadonlyArray<StrategyOption<TValue>>;
     value?: TValue;
+    defaultValue?: TValue;
     onChange?: (value: TValue) => void;
     cols?: number;
 }
@@ -20,12 +21,14 @@ interface StrategySelectProps<TValue extends string> {
 export function StrategySelect<TValue extends string>({
     options,
     value,
+    defaultValue,
     onChange,
     cols
 }: StrategySelectProps<TValue>) {
     return (
         <RadioGroup
             value={value}
+            defaultValue={defaultValue}
             onValueChange={(newValue: string) => {
                 const typedValue = newValue as TValue;
                 onChange?.(typedValue);

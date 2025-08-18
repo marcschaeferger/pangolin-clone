@@ -20,8 +20,8 @@ import {
 } from "@app/components/ui/form";
 import HeaderTitle from "@app/components/SettingsSectionTitle";
 import { z } from "zod";
-import { useEffect, useState, useMemo } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useEffect, useState, useMemo, useCallback } from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@app/components/ui/input";
 import { Button } from "@app/components/ui/button";
@@ -299,6 +299,17 @@ export default function Page() {
 
         setTimeout(() => setTargetNavigating(false), 0);
     };
+
+    const handleDomainChange = useCallback((domainInfo: any) => {
+        httpForm.setValue("domainId", domainInfo.domainId, {
+            shouldDirty: true,
+            shouldTouch: true,
+        });
+        httpForm.setValue("subdomain", domainInfo.subdomain || "", {
+            shouldDirty: true,
+            shouldTouch: true,
+        });
+    }, []); // Empty dependencies since httpForm.setValue is stable
 
 
 
@@ -589,7 +600,7 @@ export default function Page() {
                     // }
                     if (domains.length) {
                         httpForm.setValue("domainId", domains[0].domainId);
-                   }
+                    }
                 }
             };
 
@@ -923,34 +934,25 @@ export default function Page() {
                                                 <Controller
                                                     control={httpForm.control}
                                                     name="domainId"
-                                                    render={() => {
-                                                        const data = httpForm.getValues()
-                                                        const unsavedDomainChanges = data
-                                                            ? data.domainId !== "" || data.subdomain !== ""
-                                                            : false;
-                                                        const domainPickerValue = unsavedDomainChanges
-                                                            ? {
-                                                                domainId: data?.domainId || "",
-                                                                subdomain: data?.subdomain || "",
-                                                            }
-                                                            : undefined; // undefined → uncontrolled with default values
+                                                    render={({ field }) => {
+                                                        const currentDomainId = httpForm.getValues("domainId");
+                                                        const currentSubdomain = httpForm.getValues("subdomain");
 
                                                         return (
                                                             <DomainPicker2
+                                                                key={domainPickerKey}
                                                                 orgId={orgId as string}
-                                                                {...(domainPickerValue ? { value: domainPickerValue } : {})}
-                                                                onDomainChange={(res) => {
-                                                                    httpForm.setValue("domainId", res.domainId, { shouldDirty: true });
-                                                                    httpForm.setValue("subdomain", res.subdomain, { shouldDirty: true });
-                                                                }}
-                                                                key={domainPickerKey} // force remount on discard
+                                                                value={currentDomainId ? {
+                                                                    domainId: currentDomainId,
+                                                                    subdomain: currentSubdomain
+                                                                } : undefined}
+                                                                onDomainChange={handleDomainChange}
                                                             />
                                                         );
                                                     }}
                                                 />
                                             </form>
                                         </Form>
-
                                     </SettingsSectionBody>
                                 </SettingsSection>
                             ) : (
