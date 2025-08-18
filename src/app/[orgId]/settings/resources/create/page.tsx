@@ -20,7 +20,7 @@ import {
 } from "@app/components/ui/form";
 import HeaderTitle from "@app/components/SettingsSectionTitle";
 import { z } from "zod";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@app/components/ui/input";
@@ -62,7 +62,7 @@ import { SquareArrowOutUpRight } from "lucide-react";
 import CopyTextBox from "@app/components/CopyTextBox";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import DomainPicker from "@app/components/DomainPicker";
+import DomainPicker2 from "@app/components/DomainPicker";
 import { build } from "@server/build";
 import { ContainersSelector } from "@app/components/ContainersSelector";
 import {
@@ -88,6 +88,9 @@ import { ArrayElement } from "@server/types/ArrayElement";
 import { isTargetValid } from "@server/lib/validators";
 import { ListTargetsResponse } from "@server/routers/target";
 import { DockerManager, DockerState } from "@app/lib/docker";
+import { useFormWithUnsavedChanges } from "@app/hooks/useFormWithUnsavedChanges";
+import { useUnsavedChanges } from "@app/hooks/useUnsavedChanges";
+import { UnsavedChangesIndicator } from "@app/components/navigation-protection/unsaved-changes-indicator";
 
 const baseResourceFormSchema = z.object({
     name: z.string().min(1).max(255),
@@ -149,6 +152,7 @@ export default function Page() {
     const [createLoading, setCreateLoading] = useState(false);
     const [showSnippets, setShowSnippets] = useState(false);
     const [resourceId, setResourceId] = useState<number | null>(null);
+    const [domainPickerKey, setDomainPickerKey] = useState(0);
 
     // Target management state
     const [targets, setTargets] = useState<LocalTarget[]>([]);
@@ -164,12 +168,12 @@ export default function Page() {
         ...(!env.flags.allowRawResources
             ? []
             : [
-                  {
-                      id: "raw" as ResourceType,
-                      title: t("resourceRaw"),
-                      description: t("resourceRawDescription")
-                  }
-              ])
+                {
+                    id: "raw" as ResourceType,
+                    title: t("resourceRaw"),
+                    description: t("resourceRawDescription")
+                }
+            ])
     ];
 
     const baseForm = useForm<BaseResourceFormValues>({
@@ -182,7 +186,10 @@ export default function Page() {
 
     const httpForm = useForm<HttpResourceFormValues>({
         resolver: zodResolver(httpResourceFormSchema),
-        defaultValues: {}
+        defaultValues: {
+            domainId: baseDomains[0]?.domainId || "",
+            subdomain: ""
+        }
     });
 
     const tcpUdpForm = useForm<TcpUdpResourceFormValues>({
@@ -213,6 +220,88 @@ export default function Page() {
             addTargetForm.setValue("port", port);
         }
     };
+
+    // Track local target changes separately from form changes
+    const hasLocalTargetChanges = useMemo(() => {
+        return (
+            targets.some(target => target.new || target.updated) ||
+            targetsToRemove.length > 0
+        );
+    }, [targets, targetsToRemove]);
+
+    // Add navigation protection for local target changes
+    const { setIsNavigating: setTargetNavigating } = useUnsavedChanges({
+        hasUnsavedChanges: hasLocalTargetChanges,
+        message: "You have unsaved target changes that will be lost if you leave this page."
+    });
+
+    // Form tracking for unsaved changes
+    const baseFormTracking = useFormWithUnsavedChanges({
+        form: baseForm,
+        storageKey: 'resource-create-base',
+        excludeFields: [],
+        warningMessage: "You have unsaved resource information."
+    });
+
+    const httpFormTracking = useFormWithUnsavedChanges({
+        form: httpForm,
+        storageKey: 'resource-create-http',
+        excludeFields: [],
+        warningMessage: "You have unsaved HTTP settings."
+    });
+
+    const tcpUdpFormTracking = useFormWithUnsavedChanges({
+        form: tcpUdpForm,
+        storageKey: 'resource-create-tcpudp',
+        excludeFields: [],
+        warningMessage: "You have unsaved TCP/UDP settings."
+    });
+
+    // Combined unsaved changes logic
+    const hasAnyUnsavedChanges = useMemo(() => {
+        const isHttp = baseForm.watch("http");
+        return (
+            hasLocalTargetChanges ||
+            baseFormTracking.hasUnsavedChanges ||
+            (isHttp ? httpFormTracking.hasUnsavedChanges : tcpUdpFormTracking.hasUnsavedChanges)
+        );
+    }, [
+        hasLocalTargetChanges,
+        baseFormTracking.hasUnsavedChanges,
+        httpFormTracking.hasUnsavedChanges,
+        tcpUdpFormTracking.hasUnsavedChanges,
+        baseForm.watch("http")
+    ]);
+
+    const handleDiscardAllChanges = () => {
+        setTargetNavigating(true);
+
+        baseForm.reset({ name: "", http: true });
+        httpForm.reset({
+            domainId: baseDomains[0]?.domainId || "",
+            subdomain: ""
+        });
+        tcpUdpForm.reset({ protocol: "tcp", proxyPort: undefined });
+        addTargetForm.reset({
+            ip: "",
+            method: "http",
+            port: "" as any as number,
+        });
+
+        baseFormTracking.clearPersistence();
+        httpFormTracking.clearPersistence();
+        tcpUdpFormTracking.clearPersistence();
+
+        setTargets([]);
+        setTargetsToRemove([]);
+
+        setDomainPickerKey(prev => prev + 1);
+
+        setTimeout(() => setTargetNavigating(false), 0);
+    };
+
+
+
 
     const initializeDockerForSite = async (siteId: number) => {
         if (dockerStates.has(siteId)) {
@@ -301,23 +390,24 @@ export default function Page() {
             targets.map((target) =>
                 target.targetId === targetId
                     ? {
-                          ...target,
-                          ...data,
-                          updated: true,
-                          siteType: site?.type || null
-                      }
+                        ...target,
+                        ...data,
+                        updated: true,
+                        siteType: site?.type || null
+                    }
                     : target
             )
         );
     }
 
     async function onSubmit() {
-        setCreateLoading(true);
-
-        const baseData = baseForm.getValues();
-        const isHttp = baseData.http;
-
         try {
+            setCreateLoading(true);
+            setTargetNavigating(true); // Allow navigation during creation
+
+            const baseData = baseForm.getValues();
+            const isHttp = baseData.http;
+
             const payload = {
                 name: baseData.name,
                 http: baseData.http
@@ -385,6 +475,11 @@ export default function Page() {
                     }
                 }
 
+                // Clear form persistence on successful creation
+                baseFormTracking.clearPersistence();
+                httpFormTracking.clearPersistence();
+                tcpUdpFormTracking.clearPersistence();
+
                 if (isHttp) {
                     router.push(`/${orgId}/settings/resources/${id}`);
                 } else {
@@ -406,10 +501,29 @@ export default function Page() {
                 title: t("resourceErrorCreate"),
                 description: t("resourceErrorCreateMessageDescription")
             });
+            setTargetNavigating(false); // Restore navigation protection on failure
+        } finally {
+            setCreateLoading(false);
         }
-
-        setCreateLoading(false);
     }
+
+    const handleCancel = () => {
+        if (hasAnyUnsavedChanges) {
+            // Let the unsaved changes hook handle the warning
+            router.push(`/${orgId}/settings/resources`);
+        } else {
+            router.push(`/${orgId}/settings/resources`);
+        }
+    };
+
+    const handleResourceBack = () => {
+        if (hasAnyUnsavedChanges) {
+            // Let the unsaved changes hook handle the warning
+            router.push(`/${orgId}/settings/resources`);
+        } else {
+            router.push(`/${orgId}/settings/resources`);
+        }
+    };
 
     useEffect(() => {
         const load = async () => {
@@ -473,6 +587,9 @@ export default function Page() {
                     // if (domains.length) {
                     //     httpForm.setValue("domainId", domains[0].domainId);
                     // }
+                    if (domains.length) {
+                        httpForm.setValue("domainId", domains[0].domainId);
+                   }
                 }
             };
 
@@ -520,7 +637,7 @@ export default function Page() {
                                     className={cn(
                                         "justify-between flex-1",
                                         !row.original.siteId &&
-                                            "text-muted-foreground"
+                                        "text-muted-foreground"
                                     )}
                                 >
                                     {row.original.siteId
@@ -589,31 +706,31 @@ export default function Page() {
         },
         ...(baseForm.watch("http")
             ? [
-                  {
-                      accessorKey: "method",
-                      header: t("method"),
-                      cell: ({ row }: { row: Row<LocalTarget> }) => (
-                          <Select
-                              defaultValue={row.original.method ?? ""}
-                              onValueChange={(value) =>
-                                  updateTarget(row.original.targetId, {
-                                      ...row.original,
-                                      method: value
-                                  })
-                              }
-                          >
-                              <SelectTrigger>
-                                  {row.original.method}
-                              </SelectTrigger>
-                              <SelectContent>
-                                  <SelectItem value="http">http</SelectItem>
-                                  <SelectItem value="https">https</SelectItem>
-                                  <SelectItem value="h2c">h2c</SelectItem>
-                              </SelectContent>
-                          </Select>
-                      )
-                  }
-              ]
+                {
+                    accessorKey: "method",
+                    header: t("method"),
+                    cell: ({ row }: { row: Row<LocalTarget> }) => (
+                        <Select
+                            defaultValue={row.original.method ?? ""}
+                            onValueChange={(value) =>
+                                updateTarget(row.original.targetId, {
+                                    ...row.original,
+                                    method: value
+                                })
+                            }
+                        >
+                            <SelectTrigger>
+                                {row.original.method}
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="http">http</SelectItem>
+                                <SelectItem value="https">https</SelectItem>
+                                <SelectItem value="h2c">h2c</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    )
+                }
+            ]
             : []),
         {
             accessorKey: "ip",
@@ -716,6 +833,13 @@ export default function Page() {
                 <div>
                     {!showSnippets ? (
                         <SettingsContainer>
+                            {hasAnyUnsavedChanges && (
+                                <UnsavedChangesIndicator
+                                    hasUnsavedChanges={hasAnyUnsavedChanges}
+                                    variant="alert"
+                                />
+                            )}
+
                             <SettingsSection>
                                 <SettingsSectionHeader>
                                     <SettingsSectionTitle>
@@ -770,19 +894,10 @@ export default function Page() {
                                     <SettingsSectionBody>
                                         <StrategySelect
                                             options={resourceTypes}
-                                            defaultValue="http"
+                                            value={baseForm.watch("http") ? "http" : "raw"} // Use value prop to control the component
                                             onChange={(value) => {
-                                                baseForm.setValue(
-                                                    "http",
-                                                    value === "http"
-                                                );
-                                                // Update method default when switching resource type
-                                                addTargetForm.setValue(
-                                                    "method",
-                                                    value === "http"
-                                                        ? "http"
-                                                        : null
-                                                );
+                                                baseForm.setValue("http", value === "http");
+                                                addTargetForm.setValue("method", value === "http" ? "http" : null);
                                             }}
                                             cols={2}
                                         />
@@ -803,23 +918,39 @@ export default function Page() {
                                         </SettingsSectionDescription>
                                     </SettingsSectionHeader>
                                     <SettingsSectionBody>
-                                        <DomainPicker
-                                            orgId={orgId as string}
-                                            onDomainChange={(res) => {
-                                                httpForm.setValue(
-                                                    "subdomain",
-                                                    res.subdomain
-                                                );
-                                                httpForm.setValue(
-                                                    "domainId",
-                                                    res.domainId
-                                                );
-                                                console.log(
-                                                    "Domain changed:",
-                                                    res
-                                                );
-                                            }}
-                                        />
+                                        <Form {...httpForm}>
+                                            <form id="http-settings-form" className="space-y-4">
+                                                <Controller
+                                                    control={httpForm.control}
+                                                    name="domainId"
+                                                    render={() => {
+                                                        const data = httpForm.getValues()
+                                                        const unsavedDomainChanges = data
+                                                            ? data.domainId !== "" || data.subdomain !== ""
+                                                            : false;
+                                                        const domainPickerValue = unsavedDomainChanges
+                                                            ? {
+                                                                domainId: data?.domainId || "",
+                                                                subdomain: data?.subdomain || "",
+                                                            }
+                                                            : undefined; // undefined → uncontrolled with default values
+
+                                                        return (
+                                                            <DomainPicker2
+                                                                orgId={orgId as string}
+                                                                {...(domainPickerValue ? { value: domainPickerValue } : {})}
+                                                                onDomainChange={(res) => {
+                                                                    httpForm.setValue("domainId", res.domainId, { shouldDirty: true });
+                                                                    httpForm.setValue("subdomain", res.subdomain, { shouldDirty: true });
+                                                                }}
+                                                                key={domainPickerKey} // force remount on discard
+                                                            />
+                                                        );
+                                                    }}
+                                                />
+                                            </form>
+                                        </Form>
+
                                     </SettingsSectionBody>
                                 </SettingsSection>
                             ) : (
@@ -854,10 +985,8 @@ export default function Page() {
                                                                     )}
                                                                 </FormLabel>
                                                                 <Select
-                                                                    onValueChange={
-                                                                        field.onChange
-                                                                    }
-                                                                    {...field}
+                                                                    onValueChange={field.onChange}
+                                                                    value={field.value}
                                                                 >
                                                                     <FormControl>
                                                                         <SelectTrigger>
@@ -897,23 +1026,10 @@ export default function Page() {
                                                                 <FormControl>
                                                                     <Input
                                                                         type="number"
-                                                                        value={
-                                                                            field.value ??
-                                                                            ""
-                                                                        }
-                                                                        onChange={(
-                                                                            e
-                                                                        ) =>
+                                                                        value={field.value ?? ""}
+                                                                        onChange={(e) =>
                                                                             field.onChange(
-                                                                                e
-                                                                                    .target
-                                                                                    .value
-                                                                                    ? parseInt(
-                                                                                          e
-                                                                                              .target
-                                                                                              .value
-                                                                                      )
-                                                                                    : undefined
+                                                                                e.target.value ? parseInt(e.target.value, 10) : undefined
                                                                             )
                                                                         }
                                                                     />
@@ -1015,21 +1131,21 @@ export default function Page() {
                                                                                     className={cn(
                                                                                         "justify-between flex-1",
                                                                                         !field.value &&
-                                                                                            "text-muted-foreground"
+                                                                                        "text-muted-foreground"
                                                                                     )}
                                                                                 >
                                                                                     {field.value
                                                                                         ? sites.find(
-                                                                                              (
-                                                                                                  site
-                                                                                              ) =>
-                                                                                                  site.siteId ===
-                                                                                                  field.value
-                                                                                          )
-                                                                                              ?.name
+                                                                                            (
+                                                                                                site
+                                                                                            ) =>
+                                                                                                site.siteId ===
+                                                                                                field.value
+                                                                                        )
+                                                                                            ?.name
                                                                                         : t(
-                                                                                              "siteSelect"
-                                                                                          )}
+                                                                                            "siteSelect"
+                                                                                        )}
                                                                                     <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                                                                 </Button>
                                                                             </FormControl>
@@ -1097,18 +1213,18 @@ export default function Page() {
                                                                                 );
                                                                             return selectedSite &&
                                                                                 selectedSite.type ===
-                                                                                    "newt" ? (() => {
-                                                                                const dockerState = getDockerStateForSite(selectedSite.siteId);
-                                                                                return (
-                                                                                    <ContainersSelector
-                                                                                        site={selectedSite}
-                                                                                        containers={dockerState.containers}
-                                                                                        isAvailable={dockerState.isAvailable}
-                                                                                        onContainerSelect={handleContainerSelect}
-                                                                                        onRefresh={() => refreshContainersForSite(selectedSite.siteId)}
-                                                                                    />
-                                                                                );
-                                                                            })() : null;
+                                                                                "newt" ? (() => {
+                                                                                    const dockerState = getDockerStateForSite(selectedSite.siteId);
+                                                                                    return (
+                                                                                        <ContainersSelector
+                                                                                            site={selectedSite}
+                                                                                            containers={dockerState.containers}
+                                                                                            isAvailable={dockerState.isAvailable}
+                                                                                            onContainerSelect={handleContainerSelect}
+                                                                                            onRefresh={() => refreshContainersForSite(selectedSite.siteId)}
+                                                                                        />
+                                                                                    );
+                                                                                })() : null;
                                                                         })()}
                                                                 </div>
                                                                 <FormMessage />
@@ -1270,12 +1386,12 @@ export default function Page() {
                                                                                     {header.isPlaceholder
                                                                                         ? null
                                                                                         : flexRender(
-                                                                                              header
-                                                                                                  .column
-                                                                                                  .columnDef
-                                                                                                  .header,
-                                                                                              header.getContext()
-                                                                                          )}
+                                                                                            header
+                                                                                                .column
+                                                                                                .columnDef
+                                                                                                .header,
+                                                                                            header.getContext()
+                                                                                        )}
                                                                                 </TableHead>
                                                                             )
                                                                         )}
@@ -1348,14 +1464,18 @@ export default function Page() {
                             </SettingsSection>
 
                             <div className="flex justify-end space-x-2 mt-8">
+                                {hasAnyUnsavedChanges && (
+                                    <Button
+                                        variant="outline"
+                                        onClick={handleDiscardAllChanges}
+                                    >
+                                        Discard All Changes
+                                    </Button>
+                                )}
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={() =>
-                                        router.push(
-                                            `/${orgId}/settings/resources`
-                                        )
-                                    }
+                                    onClick={handleCancel}
                                 >
                                     {t("cancel")}
                                 </Button>
@@ -1434,11 +1554,7 @@ export default function Page() {
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={() =>
-                                        router.push(
-                                            `/${orgId}/settings/resources`
-                                        )
-                                    }
+                                    onClick={handleResourceBack}
                                 >
                                     {t("resourceBack")}
                                 </Button>

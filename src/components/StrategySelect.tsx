@@ -2,7 +2,6 @@
 
 import { cn } from "@app/lib/cn";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
-import { useState } from "react";
 
 export interface StrategyOption<TValue extends string> {
     id: TValue;
@@ -13,25 +12,22 @@ export interface StrategyOption<TValue extends string> {
 
 interface StrategySelectProps<TValue extends string> {
     options: ReadonlyArray<StrategyOption<TValue>>;
-    defaultValue?: TValue;
+    value?: TValue;
     onChange?: (value: TValue) => void;
     cols?: number;
 }
 
 export function StrategySelect<TValue extends string>({
     options,
-    defaultValue,
+    value,
     onChange,
     cols
 }: StrategySelectProps<TValue>) {
-    const [selected, setSelected] = useState<TValue | undefined>(defaultValue);
-
     return (
         <RadioGroup
-            defaultValue={defaultValue}
-            onValueChange={(value: string) => {
-                const typedValue = value as TValue;
-                setSelected(typedValue);
+            value={value}
+            onValueChange={(newValue: string) => {
+                const typedValue = newValue as TValue;
                 onChange?.(typedValue);
             }}
             className={`grid md:grid-cols-${cols ? cols : 1} gap-4`}
@@ -41,15 +37,15 @@ export function StrategySelect<TValue extends string>({
                     key={option.id}
                     htmlFor={option.id}
                     data-state={
-                        selected === option.id ? "checked" : "unchecked"
+                        value === option.id ? "checked" : "unchecked"
                     }
                     className={cn(
                         "relative flex rounded-lg border p-4 transition-colors cursor-pointer",
                         option.disabled
                             ? "border-input text-muted-foreground cursor-not-allowed opacity-50"
-                            : selected === option.id
-                              ? "border-primary bg-primary/10 text-primary"
-                              : "border-input hover:bg-accent"
+                            : value === option.id
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-input hover:bg-accent"
                     )}
                 >
                     <RadioGroupItem

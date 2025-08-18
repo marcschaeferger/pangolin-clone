@@ -85,7 +85,7 @@ export function useFormPersistence<T extends Record<string, any>>(
         const isDirty = form.formState.isDirty;
         setHasChanges(isDirty);
         updateGlobalStorage(isDirty, dataToSave);
-      }, 300);
+      },100);
     });
     
     return () => {
