@@ -17,6 +17,7 @@ export function useFormPersistence<T extends Record<string, any>>(
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const tabId = useRef<string>(generateTabId());
   const isInitialized = useRef(false);
+  const originalValuesRef = useRef<T | null>(null);
 
   const updateGlobalStorage = useCallback((hasChanges: boolean, data?: any) => {
     try {
@@ -32,6 +33,22 @@ export function useFormPersistence<T extends Record<string, any>>(
       console.warn("Failed to update global storage:", error);
     }
   }, [storageKey]);
+
+  // Helper function to compare objects deeply, excluding specified fields
+  const hasActualChanges = useCallback((currentData: T): boolean => {
+    if (!originalValuesRef.current) return false;
+
+    const cleanCurrentData = { ...currentData };
+    const cleanOriginalData = { ...originalValuesRef.current };
+
+    // Remove excluded fields from comparison
+    excludeFields.forEach((field) => {
+      delete (cleanCurrentData as any)[field];
+      delete (cleanOriginalData as any)[field];
+    });
+
+    return JSON.stringify(cleanCurrentData) !== JSON.stringify(cleanOriginalData);
+  }, [excludeFields]);
 
   // Initialize form data from storage
   useEffect(() => {
@@ -53,16 +70,24 @@ export function useFormPersistence<T extends Record<string, any>>(
         });
         
         if (Object.keys(parsedData).length > 0) {
-          setHasChanges(true);
-          updateGlobalStorage(true);
+          // Set original values after loading from storage
+          originalValuesRef.current = form.getValues();
+          const actuallyHasChanges = hasActualChanges(form.getValues());
+          setHasChanges(actuallyHasChanges);
+          updateGlobalStorage(actuallyHasChanges);
         }
       } catch (error) {
         console.warn("Failed to parse saved form data:", error);
       }
     }
 
+    // Set original values if no saved data
+    if (!originalValuesRef.current) {
+      originalValuesRef.current = form.getValues();
+    }
+
     isInitialized.current = true;
-  }, [form, storageKey, excludeFields, updateGlobalStorage]);
+  }, [form, storageKey, excludeFields, updateGlobalStorage, hasActualChanges]);
 
   // Watch for form changes
   useEffect(() => {
@@ -74,7 +99,8 @@ export function useFormPersistence<T extends Record<string, any>>(
       }
 
       saveTimeoutRef.current = setTimeout(() => {
-        const dataToSave = { ...data };
+        const currentData = data as T;
+        const dataToSave = { ...currentData };
         excludeFields.forEach((field) => {
           delete (dataToSave as any)[field];
         });
@@ -82,10 +108,11 @@ export function useFormPersistence<T extends Record<string, any>>(
         const tabStorageKey = getTabStorageKey(storageKey, tabId.current);
         sessionStorage.setItem(tabStorageKey, JSON.stringify(dataToSave));
 
-        const isDirty = form.formState.isDirty;
-        setHasChanges(isDirty);
-        updateGlobalStorage(isDirty, dataToSave);
-      },100);
+        // Use our custom change detection instead of isDirty
+        const actuallyHasChanges = hasActualChanges(currentData);
+        setHasChanges(actuallyHasChanges);
+        updateGlobalStorage(actuallyHasChanges, dataToSave);
+      }, 100);
     });
     
     return () => {
@@ -94,7 +121,7 @@ export function useFormPersistence<T extends Record<string, any>>(
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [form, excludeFields, storageKey, updateGlobalStorage]);
+  }, [form, excludeFields, storageKey, updateGlobalStorage, hasActualChanges]);
 
   // Cleanup
   useEffect(() => {
@@ -109,7 +136,11 @@ export function useFormPersistence<T extends Record<string, any>>(
     clearTabSpecificStorage(storageKey);
     setHasChanges(false);
     updateGlobalStorage(false);
-  }, [storageKey, updateGlobalStorage]);
+    // Reset original values to current values after successful save
+    if (form?.getValues) {
+      originalValuesRef.current = form.getValues();
+    }
+  }, [storageKey, updateGlobalStorage, form]);
 
   return { 
     clearPersistence, 

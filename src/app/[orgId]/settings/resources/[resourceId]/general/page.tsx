@@ -141,6 +141,17 @@ export default function GeneralForm() {
         warningMessage: t("unsavedChangesWarning")
     });
 
+    const handleDiscardAllChanges = () => {
+        form.reset({
+            enabled: resource.enabled,
+            name: resource.name,
+            subdomain: resource.subdomain ? resource.subdomain : undefined,
+            domainId: resource.domainId || undefined,
+            proxyPort: resource.proxyPort || undefined,
+        })
+        clearPersistence();
+    }
+
     useEffect(() => {
         const fetchSites = async () => {
             const res = await api.get<AxiosResponse<ListSitesResponse>>(
@@ -253,7 +264,7 @@ export default function GeneralForm() {
                             {hasUnsavedChanges && (
                                 <UnsavedChangesIndicator
                                     hasUnsavedChanges={hasUnsavedChanges}
-                                    variant="alert"
+                                    variant="badge"
                                 />
                             )}
                             <SettingsSectionForm>
@@ -427,17 +438,27 @@ export default function GeneralForm() {
                         </SettingsSectionBody>
 
                         <SettingsSectionFooter>
-                            <Button
-                                type="submit"
-                                onClick={() => {
-                                    console.log(form.getValues());
-                                }}
-                                loading={saveLoading}
-                                disabled={saveLoading}
-                                form="general-settings-form"
-                            >
-                                {t("saveSettings")}
-                            </Button>
+                            <div className="flex justify-end gap-4">
+                                <Button
+                                    type="submit"
+                                    onClick={() => {
+                                        console.log(form.getValues());
+                                    }}
+                                    loading={saveLoading}
+                                    disabled={saveLoading}
+                                    form="general-settings-form"
+                                >
+                                    {t("saveSettings")}
+                                </Button>
+                                {hasUnsavedChanges && (
+                                    <Button
+                                        variant="outline"
+                                        onClick={handleDiscardAllChanges}
+                                    >
+                                        Discard All Changes
+                                    </Button>
+                                )}
+                            </div>
                         </SettingsSectionFooter>
                     </SettingsSection>
                 </SettingsContainer>

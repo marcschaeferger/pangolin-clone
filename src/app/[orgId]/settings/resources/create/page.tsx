@@ -847,7 +847,7 @@ export default function Page() {
                             {hasAnyUnsavedChanges && (
                                 <UnsavedChangesIndicator
                                     hasUnsavedChanges={hasAnyUnsavedChanges}
-                                    variant="alert"
+                                    variant="badge"
                                 />
                             )}
 
@@ -1466,14 +1466,6 @@ export default function Page() {
                             </SettingsSection>
 
                             <div className="flex justify-end space-x-2 mt-8">
-                                {hasAnyUnsavedChanges && (
-                                    <Button
-                                        variant="outline"
-                                        onClick={handleDiscardAllChanges}
-                                    >
-                                        Discard All Changes
-                                    </Button>
-                                )}
                                 <Button
                                     type="button"
                                     variant="outline"
@@ -1501,6 +1493,14 @@ export default function Page() {
                                 >
                                     {t("resourceCreate")}
                                 </Button>
+                                {hasAnyUnsavedChanges && (
+                                    <Button
+                                        variant="outline"
+                                        onClick={handleDiscardAllChanges}
+                                    >
+                                        Discard All Changes
+                                    </Button>
+                                )}
                             </div>
                         </SettingsContainer>
                     ) : (

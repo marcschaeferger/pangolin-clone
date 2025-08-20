@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState, use, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -73,6 +73,8 @@ import {
 import { Switch } from "@app/components/ui/switch";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useUnsavedChanges } from "@app/hooks/useUnsavedChanges";
+import { UnsavedChangesIndicator } from "@app/components/navigation-protection/unsaved-changes-indicator";
 
 // Schema for rule validation
 const addRuleSchema = z.object({
@@ -121,6 +123,42 @@ export default function ResourceRules(props: {
             value: ""
         }
     });
+
+    const hasLocalTargetChanges = useMemo(() => {
+        return (
+            rules.some(rule => rule.new || rule.updated) ||
+            rulesToRemove.length > 0
+        );
+    }, [rules, rulesToRemove]);
+
+    // Add navigation protection for local target changes
+    const { setIsNavigating: setTargetNavigating } = useUnsavedChanges({
+        hasUnsavedChanges: hasLocalTargetChanges,
+        message: "You have unsaved Rules changes that will be lost if you leave this page."
+    });
+
+    const handleDiscardAllChanges = () => {
+        setTargetNavigating(true);
+
+        setRules(prev => prev
+            .filter(rule => !rule.new)
+            .map(rule => ({
+                ...rule,
+                updated: false
+            }))
+        );
+        setRulesToRemove([]);
+        setTimeout(() => setTargetNavigating(false), 0);
+    };
+
+    const hasAnyUnsavedChanges = useMemo(() => {
+        return (
+            hasLocalTargetChanges
+        );
+    }, [
+        hasLocalTargetChanges,
+    ]);
+
 
     useEffect(() => {
         const fetchRules = async () => {
@@ -247,6 +285,7 @@ export default function ResourceRules(props: {
     async function saveAllSettings() {
         try {
             setLoading(true);
+            setTargetNavigating(true);
 
             // Save rules enabled state
             const res = await api
@@ -374,6 +413,7 @@ export default function ResourceRules(props: {
             router.refresh();
         } catch (err) {
             console.error(err);
+            setTargetNavigating(false);
             toast({
                 variant: "destructive",
                 title: t('ruleErrorUpdate'),
@@ -590,6 +630,12 @@ export default function ResourceRules(props: {
                     </SettingsSectionDescription>
                 </SettingsSectionHeader>
                 <SettingsSectionBody>
+                    {hasAnyUnsavedChanges && (
+                        <UnsavedChangesIndicator
+                            hasUnsavedChanges={hasAnyUnsavedChanges}
+                            variant="badge"
+                        />
+                    )}
                     <div className="space-y-6">
                         <div className="flex items-center space-x-2">
                             <SwitchInput
@@ -687,7 +733,7 @@ export default function ResourceRules(props: {
                                                     }
                                                 />
                                                 <FormControl>
-                                                    <Input {...field}/>
+                                                    <Input {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -712,10 +758,10 @@ export default function ResourceRules(props: {
                                                 {header.isPlaceholder
                                                     ? null
                                                     : flexRender(
-                                                          header.column.columnDef
-                                                              .header,
-                                                          header.getContext()
-                                                      )}
+                                                        header.column.columnDef
+                                                            .header,
+                                                        header.getContext()
+                                                    )}
                                             </TableHead>
                                         ))}
                                     </TableRow>
@@ -754,7 +800,7 @@ export default function ResourceRules(props: {
                 </SettingsSectionBody>
             </SettingsSection>
 
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-4">
                 <Button
                     onClick={saveAllSettings}
                     loading={loading}
@@ -762,6 +808,14 @@ export default function ResourceRules(props: {
                 >
                     {t('saveAllSettings')}
                 </Button>
+                {hasAnyUnsavedChanges && (
+                    <Button
+                        variant="outline"
+                        onClick={handleDiscardAllChanges}
+                    >
+                        Discard All Changes
+                    </Button>
+                )}
             </div>
         </SettingsContainer>
     );

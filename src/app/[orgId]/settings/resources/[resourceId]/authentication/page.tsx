@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ListRolesResponse } from "@server/routers/role";
 import { toast } from "@app/hooks/useToast";
 import { useOrgContext } from "@app/hooks/useOrgContext";
@@ -58,6 +58,8 @@ import {
     SelectValue
 } from "@app/components/ui/select";
 import { Separator } from "@app/components/ui/separator";
+import { useUnsavedChanges } from "@app/hooks/useUnsavedChanges";
+import { UnsavedChangesIndicator } from "@app/components/navigation-protection/unsaved-changes-indicator";
 
 const UsersRolesFormSchema = z.object({
     roles: z.array(
@@ -147,6 +149,48 @@ export default function ResourceAuthenticationPage() {
         resolver: zodResolver(whitelistSchema),
         defaultValues: { emails: [] }
     });
+
+
+    const hasLocalUsersRolesChanges = useMemo(() => {
+        const { roles, users } = usersRolesForm.getValues();
+        return roles.length > 0 || users.length > 0;
+    }, [usersRolesForm.watch("roles"), usersRolesForm.watch("users")]);
+
+    const hasLocalWhitelistChanges = useMemo(() => {
+        const { emails } = whitelistForm.getValues();
+        return emails.length > 0 || whitelistEnabled !== resource.emailWhitelistEnabled;
+    }, [whitelistForm.watch("emails"), whitelistEnabled, resource.emailWhitelistEnabled]);
+
+    const { setIsNavigating: setUsersRolesNavigating } = useUnsavedChanges({
+        hasUnsavedChanges: hasLocalUsersRolesChanges,
+        message: "You have unsaved user/role changes that will be lost if you leave this page."
+    });
+
+    const { setIsNavigating: setWhitelistNavigating } = useUnsavedChanges({
+        hasUnsavedChanges: hasLocalWhitelistChanges,
+        message: "You have unsaved whitelist changes that will be lost if you leave this page."
+    });
+
+    const handleDiscardUsersRolesChanges = () => {
+        setUsersRolesNavigating(true);
+        usersRolesForm.reset({ roles: [], users: [] });
+        setTimeout(() => setUsersRolesNavigating(false), 0);
+    };
+
+    const handleDiscardWhitelistChanges = () => {
+        setWhitelistNavigating(true);
+        whitelistForm.reset({ emails: [] });
+        setWhitelistEnabled(resource.emailWhitelistEnabled);
+        setTimeout(() => setWhitelistNavigating(false), 0);
+    };
+
+    // Aggregate unsaved check
+    const hasAnyUnsavedChanges = useMemo(() => {
+        return hasLocalUsersRolesChanges || hasLocalWhitelistChanges;
+    }, [hasLocalUsersRolesChanges, hasLocalWhitelistChanges]);
+
+
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -457,6 +501,12 @@ export default function ResourceAuthenticationPage() {
                         </SettingsSectionDescription>
                     </SettingsSectionHeader>
                     <SettingsSectionBody>
+                        {hasLocalUsersRolesChanges && (
+                            <UnsavedChangesIndicator
+                                hasUnsavedChanges={hasLocalUsersRolesChanges}
+                                variant="badge"
+                            />
+                        )}
                         <SettingsSectionForm>
                             <SwitchInput
                                 id="sso-toggle"
@@ -680,14 +730,24 @@ export default function ResourceAuthenticationPage() {
                         </SettingsSectionForm>
                     </SettingsSectionBody>
                     <SettingsSectionFooter>
-                        <Button
-                            type="submit"
-                            loading={loadingSaveUsersRoles}
-                            disabled={loadingSaveUsersRoles}
-                            form="users-roles-form"
-                        >
-                            {t("resourceUsersRolesSubmit")}
-                        </Button>
+                        <div className="flex justify-end gap-4">
+                            <Button
+                                type="submit"
+                                loading={loadingSaveUsersRoles}
+                                disabled={loadingSaveUsersRoles}
+                                form="users-roles-form"
+                            >
+                                {t("resourceUsersRolesSubmit")}
+                            </Button>
+                            {hasAnyUnsavedChanges && (
+                                <Button
+                                    variant="outline"
+                                    onClick={handleDiscardUsersRolesChanges}
+                                >
+                                    Discard All Changes
+                                </Button>
+                            )}
+                        </div>
                     </SettingsSectionFooter>
                 </SettingsSection>
 
@@ -775,6 +835,12 @@ export default function ResourceAuthenticationPage() {
                         </SettingsSectionDescription>
                     </SettingsSectionHeader>
                     <SettingsSectionBody>
+                        {hasLocalWhitelistChanges && (
+                            <UnsavedChangesIndicator
+                                hasUnsavedChanges={hasLocalWhitelistChanges}
+                                variant="badge"
+                            />
+                        )}
                         <SettingsSectionForm>
                             {!env.email.emailEnabled && (
                                 <Alert variant="neutral" className="mb-4">
@@ -885,14 +951,24 @@ export default function ResourceAuthenticationPage() {
                         </SettingsSectionForm>
                     </SettingsSectionBody>
                     <SettingsSectionFooter>
-                        <Button
-                            onClick={saveWhitelist}
-                            form="whitelist-form"
-                            loading={loadingSaveWhitelist}
-                            disabled={loadingSaveWhitelist}
-                        >
-                            {t("otpEmailWhitelistSave")}
-                        </Button>
+                        <div className="flex justify-end gap-4">
+                            <Button
+                                onClick={saveWhitelist}
+                                form="whitelist-form"
+                                loading={loadingSaveWhitelist}
+                                disabled={loadingSaveWhitelist}
+                            >
+                                {t("otpEmailWhitelistSave")}
+                            </Button>
+                            {hasAnyUnsavedChanges && (
+                                <Button
+                                    variant="outline"
+                                    onClick={handleDiscardWhitelistChanges}
+                                >
+                                    Discard All Changes
+                                </Button>
+                            )}
+                        </div>
                     </SettingsSectionFooter>
                 </SettingsSection>
             </SettingsContainer>

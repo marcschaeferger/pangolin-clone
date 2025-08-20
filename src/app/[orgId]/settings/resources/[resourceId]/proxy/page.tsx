@@ -304,6 +304,13 @@ export default function ReverseProxyTargets(props: {
         targetsFormTracking.hasUnsavedChanges
     ]);
 
+    const hasUnsavedSetting = useMemo(() => {
+        return tlsFormTracking.hasUnsavedChanges || proxyFormTracking.hasUnsavedChanges;
+    }, [
+        tlsFormTracking.hasUnsavedChanges,
+        proxyFormTracking.hasUnsavedChanges
+    ]);
+
     useEffect(() => {
         const fetchTargets = async () => {
             try {
@@ -456,7 +463,7 @@ export default function ReverseProxyTargets(props: {
 
     const removeTarget = (targetId: number) => {
         const targetToRemove = targets.find((target) => target.targetId === targetId);
-        
+
         setTargets([
             ...targets.filter((target) => target.targetId !== targetId)
         ]);
@@ -601,7 +608,7 @@ export default function ReverseProxyTargets(props: {
     const handleDiscardAllChanges = () => {
         // Temporarily allow navigation
         setTargetNavigating(true);
-        
+
         // Reset all forms
         addTargetForm.reset();
         tlsSettingsForm.reset({
@@ -629,7 +636,7 @@ export default function ReverseProxyTargets(props: {
             }))
         );
         setTargetsToRemove([]);
-        
+
         // Re-enable navigation protection after state updates
         setTimeout(() => setTargetNavigating(false), 0);
     };
@@ -885,10 +892,10 @@ export default function ReverseProxyTargets(props: {
                 </SettingsSectionHeader>
                 <SettingsSectionBody>
 
-                    {hasAnyUnsavedChanges && (
+                    {hasLocalTargetChanges && (
                         <UnsavedChangesIndicator
-                            hasUnsavedChanges={hasAnyUnsavedChanges}
-                            variant="alert"
+                            hasUnsavedChanges={hasLocalTargetChanges}
+                            variant="badge"
                         />
                     )}
 
@@ -1255,6 +1262,12 @@ export default function ReverseProxyTargets(props: {
                         </SettingsSectionDescription>
                     </SettingsSectionHeader>
                     <SettingsSectionBody>
+                        {hasUnsavedSetting && (
+                            <UnsavedChangesIndicator
+                                hasUnsavedChanges={hasUnsavedSetting}
+                                variant="badge"
+                            />
+                        )}
                         <SettingsSectionForm>
                             <Form {...tlsSettingsForm}>
                                 <form
@@ -1353,14 +1366,6 @@ export default function ReverseProxyTargets(props: {
             )}
 
             <div className="flex justify-end mt-6 gap-4">
-                {hasAnyUnsavedChanges && (
-                    <Button
-                        variant="outline"
-                        onClick={handleDiscardAllChanges}
-                    >
-                        Discard All Changes
-                    </Button>
-                )}
                 <Button
                     onClick={handleSaveAllSettings}
                     loading={
@@ -1376,6 +1381,14 @@ export default function ReverseProxyTargets(props: {
                 >
                     {t("saveSettings")}
                 </Button>
+                {hasAnyUnsavedChanges && (
+                    <Button
+                        variant="outline"
+                        onClick={handleDiscardAllChanges}
+                    >
+                        Discard All Changes
+                    </Button>
+                )}
             </div>
         </SettingsContainer>
     );
