@@ -17,11 +17,12 @@ export function PolicyDataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
 
     const t = useTranslations();
-    
+
     return (
         <DataTable
             columns={columns}
             data={data}
+            persistPageSize="orgPolicies-table"
             title={t('orgPolicies')}
             searchPlaceholder={t('orgPoliciesSearch')}
             searchColumn="orgId"

@@ -42,11 +42,12 @@ export function ApiKeysDataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
 
     const t = useTranslations();
-    
+
     return (
         <DataTable
             columns={columns}
             data={data}
+            persistPageSize="apiKeys-table"
             title={t('apiKeys')}
             searchPlaceholder={t('searchApiKeys')}
             searchColumn="name"
