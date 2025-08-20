@@ -1,13 +1,13 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { cn } from "@app/lib/cn";
 import { useUserContext } from "@app/hooks/useUserContext";
 import { Badge } from "@app/components/ui/badge";
 import { useLicenseStatusContext } from "@app/hooks/useLicenseStatusContext";
 import { useTranslations } from "next-intl";
+import { ProtectedLink } from "./ProtectedLink";
 import {
     Tooltip,
     TooltipContent,
@@ -76,7 +76,7 @@ export function SidebarNav({
                 : t(item.title);
 
         const itemContent = (
-            <Link
+            <ProtectedLink
                 href={isDisabled ? "#" : hydratedHref}
                 className={cn(
                     "flex items-center rounded transition-colors hover:bg-secondary/50 dark:hover:bg-secondary/20 rounded-md",
@@ -113,7 +113,7 @@ export function SidebarNav({
                         )}
                     </>
                 )}
-            </Link>
+            </ProtectedLink>
         );
 
         if (isCollapsed) {

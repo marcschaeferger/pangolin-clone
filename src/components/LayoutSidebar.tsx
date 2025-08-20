@@ -8,12 +8,13 @@ import { ListUserOrgsResponse } from "@server/routers/org";
 import SupporterStatus from "@app/components/SupporterStatus";
 import { ExternalLink, Server, BookOpenText, Zap } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useUserContext } from "@app/hooks/useUserContext";
 import { useLicenseStatusContext } from "@app/hooks/useLicenseStatusContext";
 import { useEnvContext } from "@app/hooks/useEnvContext";
 import { useTranslations } from "next-intl";
 import type { SidebarNavSection } from "@app/app/navigation";
+import { NavigationGuard } from "@/utils/navigationGuard";
 import {
     Tooltip,
     TooltipContent,
@@ -27,6 +28,48 @@ interface LayoutSidebarProps {
     orgs?: ListUserOrgsResponse["orgs"];
     navItems: SidebarNavSection[];
     defaultSidebarCollapsed: boolean;
+}
+
+function ProtectedAdminLink({ 
+    href, 
+    children, 
+    className, 
+    title 
+}: { 
+    href: string; 
+    children: React.ReactNode; 
+    className?: string; 
+    title?: string; 
+}) {
+    const router = useRouter();
+    const pathname = usePathname();
+    const navigationGuard = NavigationGuard.getInstance();
+    const isActive = pathname === href;
+
+    const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+        if (isActive) return;
+
+        if (navigationGuard.getHasUnsavedChanges()) {
+            e.preventDefault();
+            
+            const confirmed = navigationGuard.confirmNavigation();
+            if (confirmed) {
+                navigationGuard.clearUnsavedChanges();
+                router.push(href);
+            }
+        }
+    };
+
+    return (
+        <Link
+            href={href}
+            className={className}
+            title={title}
+            onClick={handleClick}
+        >
+            {children}
+        </Link>
+    );
 }
 
 export function LayoutSidebar({
@@ -75,7 +118,7 @@ export function LayoutSidebar({
                     {!isAdminPage && user.serverAdmin && (
                         <div className="pb-4">
                             {build === "oss" && (
-                                <Link
+                                <ProtectedAdminLink
                                     href="/admin/managed"
                                     className={cn(
                                         "flex items-center rounded transition-colors text-muted-foreground hover:text-foreground text-sm w-full hover:bg-secondary/50 dark:hover:bg-secondary/20 rounded-md",
@@ -100,10 +143,10 @@ export function LayoutSidebar({
                                     {!isSidebarCollapsed && (
                                         <span>{t("managedSelfhosted")}</span>
                                     )}
-                                </Link>
+                                </ProtectedAdminLink>
                             )}
 
-                            <Link
+                            <ProtectedAdminLink
                                 href="/admin"
                                 className={cn(
                                     "flex items-center rounded transition-colors text-muted-foreground hover:text-foreground text-sm w-full hover:bg-secondary/50 dark:hover:bg-secondary/20 rounded-md",
@@ -128,7 +171,7 @@ export function LayoutSidebar({
                                 {!isSidebarCollapsed && (
                                     <span>{t("serverAdmin")}</span>
                                 )}
-                            </Link>
+                            </ProtectedAdminLink>
                         </div>
                     )}
                     <SidebarNav
