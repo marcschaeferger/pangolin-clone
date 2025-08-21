@@ -232,7 +232,7 @@ export default function Page() {
     // Add navigation protection for local target changes
     const { setIsNavigating: setTargetNavigating } = useUnsavedChanges({
         hasUnsavedChanges: hasLocalTargetChanges,
-        message: "You have unsaved target changes that will be lost if you leave this page."
+        message: t("unsavedChangesWarning")
     });
 
     // Form tracking for unsaved changes
@@ -1498,7 +1498,7 @@ export default function Page() {
                                         variant="outline"
                                         onClick={handleDiscardAllChanges}
                                     >
-                                        Discard All Changes
+                                        {t("discardAllChanges")}
                                     </Button>
                                 )}
                             </div>

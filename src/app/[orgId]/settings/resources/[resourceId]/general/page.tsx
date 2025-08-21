@@ -148,9 +148,9 @@ export default function GeneralForm() {
             subdomain: resource.subdomain ? resource.subdomain : undefined,
             domainId: resource.domainId || undefined,
             proxyPort: resource.proxyPort || undefined,
-        })
+        }),
         clearPersistence();
-    }
+    };
 
     useEffect(() => {
         const fetchSites = async () => {
@@ -455,7 +455,7 @@ export default function GeneralForm() {
                                         variant="outline"
                                         onClick={handleDiscardAllChanges}
                                     >
-                                        Discard All Changes
+                                        {t("discardAllChanges")}
                                     </Button>
                                 )}
                             </div>

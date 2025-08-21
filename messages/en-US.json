@@ -1451,5 +1451,6 @@
     "autoLoginError": "Auto Login Error",
     "autoLoginErrorNoRedirectUrl": "No redirect URL received from the identity provider.",
     "autoLoginErrorGeneratingUrl": "Failed to generate authentication URL.",
-    "unsavedChangesWarning": "You have unsaved changes. Are you sure you want to leave?"
+    "unsavedChangesWarning": "You have unsaved changes. Are you sure you want to leave?",
+    "discardAllChanges": "Discard All Changes"
 }

@@ -198,7 +198,7 @@ export default function GeneralPage() {
                     {hasUnsavedChanges && (
                         <UnsavedChangesIndicator
                             hasUnsavedChanges={hasUnsavedChanges}
-                            variant="alert"
+                            variant="badge"
                         />
                     )}
 

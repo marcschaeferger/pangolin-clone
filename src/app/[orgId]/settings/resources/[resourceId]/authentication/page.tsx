@@ -163,12 +163,12 @@ export default function ResourceAuthenticationPage() {
 
     const { setIsNavigating: setUsersRolesNavigating } = useUnsavedChanges({
         hasUnsavedChanges: hasLocalUsersRolesChanges,
-        message: "You have unsaved user/role changes that will be lost if you leave this page."
+        message: t("unsavedChangesWarning")
     });
 
     const { setIsNavigating: setWhitelistNavigating } = useUnsavedChanges({
         hasUnsavedChanges: hasLocalWhitelistChanges,
-        message: "You have unsaved whitelist changes that will be lost if you leave this page."
+        message: t("unsavedChangesWarning")
     });
 
     const handleDiscardUsersRolesChanges = () => {
@@ -744,7 +744,7 @@ export default function ResourceAuthenticationPage() {
                                     variant="outline"
                                     onClick={handleDiscardUsersRolesChanges}
                                 >
-                                    Discard All Changes
+                                    {t("discardAllChanges")}
                                 </Button>
                             )}
                         </div>
@@ -965,7 +965,7 @@ export default function ResourceAuthenticationPage() {
                                     variant="outline"
                                     onClick={handleDiscardWhitelistChanges}
                                 >
-                                    Discard All Changes
+                                  {t("discardAllChanges")}
                                 </Button>
                             )}
                         </div>

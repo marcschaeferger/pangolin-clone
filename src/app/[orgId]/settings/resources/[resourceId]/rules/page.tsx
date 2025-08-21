@@ -134,7 +134,7 @@ export default function ResourceRules(props: {
     // Add navigation protection for local target changes
     const { setIsNavigating: setTargetNavigating } = useUnsavedChanges({
         hasUnsavedChanges: hasLocalTargetChanges,
-        message: "You have unsaved Rules changes that will be lost if you leave this page."
+        message: t("unsavedChangesWarning")
     });
 
     const handleDiscardAllChanges = () => {
@@ -813,7 +813,7 @@ export default function ResourceRules(props: {
                         variant="outline"
                         onClick={handleDiscardAllChanges}
                     >
-                        Discard All Changes
+                        {t("discardAllChanges")}
                     </Button>
                 )}
             </div>

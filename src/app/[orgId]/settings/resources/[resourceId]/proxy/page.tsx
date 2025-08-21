@@ -265,7 +265,7 @@ export default function ReverseProxyTargets(props: {
     // Add navigation protection for local target changes
     const { setIsNavigating: setTargetNavigating } = useUnsavedChanges({
         hasUnsavedChanges: hasLocalTargetChanges,
-        message: "You have unsaved target changes that will be lost if you leave this page."
+        message: t("unsavedChangesWarning")
     });
 
     const tlsFormTracking = useFormWithUnsavedChanges({
@@ -1386,7 +1386,7 @@ export default function ReverseProxyTargets(props: {
                         variant="outline"
                         onClick={handleDiscardAllChanges}
                     >
-                        Discard All Changes
+                        {t("discardAllChanges")}
                     </Button>
                 )}
             </div>

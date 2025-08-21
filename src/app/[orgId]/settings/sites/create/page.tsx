@@ -631,7 +631,7 @@ WantedBy=default.target`
                                 {hasUnsavedChanges && (
                                     <UnsavedChangesIndicator
                                         hasUnsavedChanges={hasUnsavedChanges}
-                                        variant="alert"
+                                        variant="badge"
                                     />
                                 )}
                                 <SettingsSectionForm>
