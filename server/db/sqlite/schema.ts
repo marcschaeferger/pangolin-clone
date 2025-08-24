@@ -565,7 +565,7 @@ export const versionMigrations = sqliteTable("versionMigrations", {
 
 export const ipSets = sqliteTable("ip_sets", {
     id: text("id").primaryKey(),
-    name: text("name").notNull(),
+    name: text("name").notNull().unique(),
     description: text("description"),
     ips: text("ips").notNull(),
     orgId: text("orgId")
