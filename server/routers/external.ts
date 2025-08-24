@@ -3,7 +3,7 @@ import config from "@server/lib/config";
 import * as site from "./site";
 import * as org from "./org";
 import * as resource from "./resource";
-import * as ipsets from "./ipSets"
+import * as ipsets from "./ipSets";
 import * as domain from "./domain";
 import * as target from "./target";
 import * as user from "./user";
