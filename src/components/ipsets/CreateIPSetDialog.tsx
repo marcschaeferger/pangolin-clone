@@ -54,13 +54,17 @@ export default function CreateIPSetDialog({
     });
 
     const handleSubmit = async (data: z.infer<typeof createIPSetSchema>) => {
-        // Filter out empty IPs
         const filteredIPs = data.ips.filter(ip => ip.trim()).map(ip => ip.trim());
-        await onCreate({
-            ...data,
-            ips: filteredIPs
-        });
-        form.reset();
+
+        try {
+            await onCreate({
+                ...data,
+                ips: filteredIPs
+            });
+            form.reset();
+            onOpenChange(false);
+        } catch {
+        }
     };
 
     const handleCancel = () => {
