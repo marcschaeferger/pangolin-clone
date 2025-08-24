@@ -221,7 +221,7 @@ export default function Page() {
         }
     };
 
-    // Track local target changes separately from form changes
+
     const hasLocalTargetChanges = useMemo(() => {
         return (
             targets.some(target => target.new || target.updated) ||
@@ -229,13 +229,12 @@ export default function Page() {
         );
     }, [targets, targetsToRemove]);
 
-    // Add navigation protection for local target changes
     const { setIsNavigating: setTargetNavigating } = useUnsavedChanges({
         hasUnsavedChanges: hasLocalTargetChanges,
         message: t("unsavedChangesWarning")
     });
 
-    // Form tracking for unsaved changes
+  
     const baseFormTracking = useFormWithUnsavedChanges({
         form: baseForm,
         storageKey: 'resource-create-base',
@@ -257,7 +256,7 @@ export default function Page() {
         warningMessage: "You have unsaved TCP/UDP settings."
     });
 
-    // Combined unsaved changes logic
+
     const hasAnyUnsavedChanges = useMemo(() => {
         const isHttp = baseForm.watch("http");
         return (
@@ -309,7 +308,7 @@ export default function Page() {
             shouldDirty: true,
             shouldTouch: true,
         });
-    }, []); // Empty dependencies since httpForm.setValue is stable
+    }, []); // empty dependencies since httpForm.setValue is stable
 
 
 
@@ -414,7 +413,7 @@ export default function Page() {
     async function onSubmit() {
         try {
             setCreateLoading(true);
-            setTargetNavigating(true); // Allow navigation during creation
+            setTargetNavigating(true);
 
             const baseData = baseForm.getValues();
             const isHttp = baseData.http;
@@ -486,7 +485,6 @@ export default function Page() {
                     }
                 }
 
-                // Clear form persistence on successful creation
                 baseFormTracking.clearPersistence();
                 httpFormTracking.clearPersistence();
                 tcpUdpFormTracking.clearPersistence();
@@ -512,7 +510,7 @@ export default function Page() {
                 title: t("resourceErrorCreate"),
                 description: t("resourceErrorCreateMessageDescription")
             });
-            setTargetNavigating(false); // Restore navigation protection on failure
+            setTargetNavigating(false); 
         } finally {
             setCreateLoading(false);
         }
@@ -520,7 +518,6 @@ export default function Page() {
 
     const handleCancel = () => {
         if (hasAnyUnsavedChanges) {
-            // Let the unsaved changes hook handle the warning
             router.push(`/${orgId}/settings/resources`);
         } else {
             router.push(`/${orgId}/settings/resources`);
@@ -529,7 +526,6 @@ export default function Page() {
 
     const handleResourceBack = () => {
         if (hasAnyUnsavedChanges) {
-            // Let the unsaved changes hook handle the warning
             router.push(`/${orgId}/settings/resources`);
         } else {
             router.push(`/${orgId}/settings/resources`);

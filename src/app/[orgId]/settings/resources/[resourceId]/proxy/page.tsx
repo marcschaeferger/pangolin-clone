@@ -254,7 +254,6 @@ export default function ReverseProxyTargets(props: {
         }
     });
 
-    // Track local target changes separately from form changes
     const hasLocalTargetChanges = useMemo(() => {
         return (
             targets.some(target => target.new || target.updated) ||
@@ -289,7 +288,6 @@ export default function ReverseProxyTargets(props: {
         warningMessage: "You have unsaved target settings."
     });
 
-    // Combined unsaved changes logic
     const hasAnyUnsavedChanges = useMemo(() => {
         return (
             hasLocalTargetChanges ||
@@ -482,7 +480,7 @@ export default function ReverseProxyTargets(props: {
                     ? {
                         ...target,
                         ...data,
-                        updated: !target.new, // Only mark as updated if it's not a new target
+                        updated: !target.new,
                         siteType: site?.type || null
                     }
                     : target
@@ -526,7 +524,6 @@ export default function ReverseProxyTargets(props: {
                 }
             }
 
-            // Update the targets state with cleared flags
             setTargets(updatedTargets);
 
             for (const targetId of targetsToRemove) {
@@ -593,23 +590,20 @@ export default function ReverseProxyTargets(props: {
 
     const handleSaveAllSettings = async () => {
         try {
-            setTargetNavigating(true); // Allow navigation during save
+            setTargetNavigating(true); 
             await saveAllSettings();
             tlsFormTracking.clearPersistence();
             proxyFormTracking.clearPersistence();
             targetsFormTracking.clearPersistence();
         } catch (error) {
             console.error('Save failed:', error);
-            setTargetNavigating(false); // Restore navigation protection on failure
-            // Don't clear persistence on failure
+            setTargetNavigating(false); 
         }
     };
 
     const handleDiscardAllChanges = () => {
-        // Temporarily allow navigation
         setTargetNavigating(true);
 
-        // Reset all forms
         addTargetForm.reset();
         tlsSettingsForm.reset({
             ssl: resource.ssl,
@@ -622,22 +616,19 @@ export default function ReverseProxyTargets(props: {
             stickySession: resource.stickySession
         });
 
-        // Clear form persistence
         tlsFormTracking.clearPersistence();
         proxyFormTracking.clearPersistence();
         targetsFormTracking.clearPersistence();
 
-        // Reset local target changes
         setTargets(prev => prev
-            .filter(target => !target.new) // Remove new targets
+            .filter(target => !target.new)
             .map(target => ({
                 ...target,
-                updated: false // Clear updated flags
+                updated: false 
             }))
         );
         setTargetsToRemove([]);
 
-        // Re-enable navigation protection after state updates
         setTimeout(() => setTargetNavigating(false), 0);
     };
 

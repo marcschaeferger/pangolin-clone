@@ -131,7 +131,6 @@ export default function ResourceRules(props: {
         );
     }, [rules, rulesToRemove]);
 
-    // Add navigation protection for local target changes
     const { setIsNavigating: setTargetNavigating } = useUnsavedChanges({
         hasUnsavedChanges: hasLocalTargetChanges,
         message: t("unsavedChangesWarning")

@@ -70,7 +70,6 @@ export default function GeneralPage() {
         mode: "onChange"
     });
 
-    // Add unsaved changes + persistence protection
     const {
         hasUnsavedChanges,
         handleFormSubmit,
@@ -146,7 +145,7 @@ export default function GeneralPage() {
                     title: t("orgUpdated"),
                     description: t("orgUpdatedDescription")
                 });
-                clearPersistence(); //  clear unsaved changes on successful save
+                clearPersistence();
                 router.refresh();
             })
             .catch((e) => {
@@ -194,7 +193,7 @@ export default function GeneralPage() {
                     </SettingsSectionDescription>
                 </SettingsSectionHeader>
                 <SettingsSectionBody>
-                    {/*Show unsaved changes alert */}
+
                     {hasUnsavedChanges && (
                         <UnsavedChangesIndicator
                             hasUnsavedChanges={hasUnsavedChanges}
