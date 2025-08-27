@@ -301,23 +301,31 @@ export default function DomainPicker2({
         }
 
         if (option.type === "organization") {
-            if (option.domainType === "cname") {
-                onDomainChange?.({
-                    domainId: option.domainId!,
-                    type: "organization",
-                    subdomain: undefined,
-                    fullDomain: option.domain,
-                    baseDomain: option.domain
-                });
-            } else {
-                onDomainChange?.({
-                    domainId: option.domainId!,
-                    type: "organization",
-                    subdomain: undefined,
-                    fullDomain: option.domain,
-                    baseDomain: option.domain
-                });
+            // Preserve the current subdomain if it's valid for the new domain type
+            let preservedSubdomain = undefined;
+            let fullDomain = option.domain;
+
+            if (option.domainType !== "cname" && subdomainInput) {
+                const isValid = validateSubdomain(subdomainInput, option);
+                if (isValid) {
+                    preservedSubdomain = subdomainInput;
+                    fullDomain = `${subdomainInput}.${option.domain}`;
+                } else {
+                    // Clear invalid subdomain
+                    setSubdomainInput("");
+                }
+            } else if (option.domainType === "cname") {
+                // Clear subdomain for CNAME domains
+                setSubdomainInput("");
             }
+
+            onDomainChange?.({
+                domainId: option.domainId!,
+                type: "organization",
+                subdomain: preservedSubdomain,
+                fullDomain: fullDomain,
+                baseDomain: option.domain
+            });
         }
     };
 
