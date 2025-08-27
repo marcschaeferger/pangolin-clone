@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "@server/db";
-import { Resource, resources, sites } from "@server/db";
+import { Resource, resources, resourceHostnames } from "@server/db";
 import { eq, and } from "drizzle-orm";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
@@ -42,8 +42,16 @@ async function query(resourceId?: number, niceId?: string, orgId?: string) {
     }
 }
 
-export type GetResourceResponse = Omit<NonNullable<Awaited<ReturnType<typeof query>>>, 'headers'> & {
+export type GetResourceResponse = Omit<NonNullable<Awaited<ReturnType<typeof query>>>, 'headers'> & Resource & {
     headers: { name: string; value: string }[] | null;
+    hostnames: Array<{
+        hostnameId: number; 
+        domainId: string;
+        subdomain?: string;
+        fullDomain: string;
+        baseDomain: string;
+        primary: boolean;
+    }>;
 };
 
 registry.registerPath({
@@ -100,11 +108,33 @@ export async function getResource(
             );
         }
 
-        return response<GetResourceResponse>(res, {
-            data: {
-                ...resource,
-                headers: resource.headers ? JSON.parse(resource.headers) : resource.headers
-            },
+
+        // Get hostnames for HTTP resources
+        let hostnames: GetResourceResponse["hostnames"] = [];
+        if (resource.http) {
+            const hostnameResults = await db
+                .select()
+                .from(resourceHostnames)
+                .where(eq(resourceHostnames.resourceId, resourceId));
+
+            hostnames = hostnameResults.map(h => ({
+                hostnameId: h.hostnameId!,
+                domainId: h.domainId,
+                subdomain: h.subdomain || undefined,
+                fullDomain: h.fullDomain!,
+                baseDomain: h.baseDomain!,
+                primary: h.primary
+            }));
+        }
+
+        const responseData: GetResourceResponse = {
+            ...resource,
+            headers: resource.headers ? JSON.parse(resource.headers) : resource.headers,
+            hostnames,
+        };
+
+        return response(res, {
+            data: responseData,
             success: true,
             error: false,
             message: "Resource retrieved successfully",
