@@ -440,7 +440,6 @@ async function updateResourceHostnames(
                     fullDomain: processedHostname.data!.fullDomain,
                     baseDomain: processedHostname.data!.baseDomain,
                     primary: processedHostname.data!.primary,
-                    createdAt: new Date().toISOString()
                 });
             }
         });
