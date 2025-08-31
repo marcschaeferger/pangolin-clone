@@ -1059,6 +1059,7 @@
     "actionGetSiteResource": "Ottieni Risorsa del Sito",
     "actionListSiteResources": "Elenca Risorse del Sito",
     "actionUpdateSiteResource": "Aggiorna Risorsa del Sito",
+    "actionListInvitations": "List Invitations",
     "noneSelected": "Nessuna selezione",
     "orgNotFound2": "Nessuna organizzazione trovata.",
     "searchProgress": "Ricerca...",
