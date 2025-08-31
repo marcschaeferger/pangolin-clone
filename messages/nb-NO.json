@@ -1059,6 +1059,7 @@
     "actionGetSiteResource": "Hent Stedsressurs",
     "actionListSiteResources": "List opp Stedsressurser",
     "actionUpdateSiteResource": "Oppdater Stedsressurs",
+    "actionListInvitations": "List Invitations",
     "noneSelected": "Ingen valgt",
     "orgNotFound2": "Ingen organisasjoner funnet.",
     "searchProgress": "Søker...",
