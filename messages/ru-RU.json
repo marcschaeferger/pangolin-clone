@@ -1059,6 +1059,7 @@
     "actionGetSiteResource": "Получить ресурс сайта",
     "actionListSiteResources": "Список ресурсов сайта",
     "actionUpdateSiteResource": "Обновить ресурс сайта",
+    "actionListInvitations": "List Invitations",
     "noneSelected": "Ничего не выбрано",
     "orgNotFound2": "Организации не найдены.",
     "searchProgress": "Поиск...",
