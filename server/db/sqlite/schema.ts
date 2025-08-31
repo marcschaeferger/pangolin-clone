@@ -120,8 +120,7 @@ export const targets = sqliteTable("targets", {
     siteId: integer("siteId")
         .references(() => sites.siteId, {
             onDelete: "cascade"
-        })
-        .notNull(),
+        }),
     ip: text("ip").notNull(),
     method: text("method"),
     port: integer("port").notNull(),

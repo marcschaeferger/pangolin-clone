@@ -12,14 +12,14 @@ export default async function migration() {
     const db = new Database(location);
 
     const resourceSiteMap = new Map<number, number>();
-	const firstSiteId: number = 1;
+    const firstSiteId: number = 1;
 
     try {
-		const resources = db
-			.prepare(
-				"SELECT resourceId FROM resources WHERE siteId IS NOT NULL"
-			)
-			.all() as Array<{ resourceId: number; }>;
+        const resources = db
+            .prepare(
+                "SELECT resourceId FROM resources WHERE siteId IS NOT NULL"
+            )
+            .all() as Array<{ resourceId: number; }>;
 
         db.transaction(() => {
             db.exec(`
@@ -70,7 +70,7 @@ export const names = JSON.parse(readFileSync(file, "utf-8"));
 export function generateName(): string {
     const name = (
         names.descriptors[
-            Math.floor(Math.random() * names.descriptors.length)
+        Math.floor(Math.random() * names.descriptors.length)
         ] +
         "-" +
         names.animals[Math.floor(Math.random() * names.animals.length)]
