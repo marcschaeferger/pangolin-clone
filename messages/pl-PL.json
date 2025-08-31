@@ -1059,6 +1059,7 @@
     "actionGetSiteResource": "Pobierz zasób strony",
     "actionListSiteResources": "Lista zasobów strony",
     "actionUpdateSiteResource": "Aktualizuj zasób strony",
+    "actionListInvitations": "List Invitations",
     "noneSelected": "Nie wybrano",
     "orgNotFound2": "Nie znaleziono organizacji.",
     "searchProgress": "Szukaj...",
