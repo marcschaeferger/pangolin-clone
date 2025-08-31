@@ -1059,6 +1059,7 @@
     "actionGetSiteResource": "Bron van site ophalen",
     "actionListSiteResources": "Bronnen van site weergeven",
     "actionUpdateSiteResource": "Document bijwerken van site",
+    "actionListInvitations": "List Invitations",
     "noneSelected": "Niet geselecteerd",
     "orgNotFound2": "Geen organisaties gevonden.",
     "searchProgress": "Zoeken...",
