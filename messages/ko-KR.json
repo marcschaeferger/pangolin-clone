@@ -1059,6 +1059,7 @@
     "actionGetSiteResource": "사이트 리소스 가져오기",
     "actionListSiteResources": "사이트 리소스 목록",
     "actionUpdateSiteResource": "사이트 리소스 업데이트",
+    "actionListInvitations": "List Invitations",
     "noneSelected": "선택된 항목 없음",
     "orgNotFound2": "조직이 없습니다.",
     "searchProgress": "검색...",
