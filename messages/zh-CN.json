@@ -1059,6 +1059,7 @@
     "actionGetSiteResource": "获取站点资源",
     "actionListSiteResources": "列出站点资源",
     "actionUpdateSiteResource": "更新站点资源",
+    "actionListInvitations": "List Invitations",
     "noneSelected": "未选择",
     "orgNotFound2": "未找到组织。",
     "searchProgress": "搜索中...",
