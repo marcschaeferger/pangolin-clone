@@ -1059,6 +1059,7 @@
     "actionGetSiteResource": "Site Kaynağını Al",
     "actionListSiteResources": "Site Kaynaklarını Listele",
     "actionUpdateSiteResource": "Site Kaynağını Güncelle",
+    "actionListInvitations": "List Invitations",
     "noneSelected": "Hiçbiri seçili değil",
     "orgNotFound2": "Hiçbir organizasyon bulunamadı.",
     "searchProgress": "Ara...",
