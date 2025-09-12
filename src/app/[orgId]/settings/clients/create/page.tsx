@@ -178,7 +178,7 @@ export default function Page() {
             },
             windows: {
                 x64: [
-                    `curl -o olm.exe -L "https://github.com/fosrl/olm/releases/download/${version}/olm_windows_installer.exe"`,
+                    `curl -o olm.exe -L "https://github.com/fosrl/olm/releases/download/${version}/olm_windows_amd64.exe"`,
                     `# Run the installer to install olm and wintun`,
                     `olm.exe --id ${id} --secret ${secret} --endpoint ${endpoint}`
                 ]
