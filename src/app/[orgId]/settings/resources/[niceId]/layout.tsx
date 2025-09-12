@@ -15,7 +15,7 @@ import { cache } from "react";
 import ResourceInfoBox from "../../../../../components/ResourceInfoBox";
 import { GetSiteResponse } from "@server/routers/site";
 import { getTranslations } from 'next-intl/server';
-import ResourceInfoBox from "./ResourceInfoBox";
+
 
 interface ResourceLayoutProps {
     children: React.ReactNode;

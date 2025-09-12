@@ -64,7 +64,7 @@ import {
 } from "lucide-react";
 import { build } from "@server/build";
 import { finalizeSubdomainSanitize } from "@app/lib/subdomain-utils";
-import { DomainRow } from "../../../domains/DomainsTable";
+import { DomainRow } from "@app/components/DomainsTable";
 import { InfoSection, InfoSectionContent } from "@app/components/InfoSection";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@app/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@app/components/ui/accordion";
@@ -930,15 +930,11 @@ export default function GeneralForm({ fetchedOrgs }: GeneralFormProps) {
                                             ? `${sanitizedSubdomain}.${selectedDomain.baseDomain}`
                                             : selectedDomain.baseDomain;
 
-                                        setResourceFullDomain(sanitizedFullDomain);
+                                        setResourceFullDomain(`${resource.ssl ? "https" : "http"}://${sanitizedFullDomain}`);
                                         form.setValue("domainId", selectedDomain.domainId);
                                         form.setValue("subdomain", sanitizedSubdomain);
 
                                         setEditDomainOpen(false);
-
-                                        toast({
-                                            description: `Final domain: ${sanitizedFullDomain}`,
-                                        });
                                     }
                                 }}
                             >
