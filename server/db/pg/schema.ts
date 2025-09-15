@@ -96,6 +96,7 @@ export const resources = pgTable("resources", {
     skipToIdpId: integer("skipToIdpId").references(() => idp.idpId, {
         onDelete: "cascade"
     }),
+    headers: text("headers"), // comma-separated list of headers to add to the request
 });
 
 export const targets = pgTable("targets", {
@@ -114,7 +115,9 @@ export const targets = pgTable("targets", {
     method: varchar("method"),
     port: integer("port").notNull(),
     internalPort: integer("internalPort"),
-    enabled: boolean("enabled").notNull().default(true)
+    enabled: boolean("enabled").notNull().default(true),
+    path: text("path"),
+    pathMatchType: text("pathMatchType"), // exact, prefix, regex
 });
 
 export const exitNodes = pgTable("exitNodes", {
@@ -140,6 +143,7 @@ export const siteResources = pgTable("siteResources", { // this is for the clien
     orgId: varchar("orgId")
         .notNull()
         .references(() => orgs.orgId, { onDelete: "cascade" }),
+    niceId: varchar("niceId").notNull(),
     name: varchar("name").notNull(),
     protocol: varchar("protocol").notNull(),
     proxyPort: integer("proxyPort").notNull(),
