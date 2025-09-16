@@ -21,7 +21,7 @@ import { tlsNameSchema } from "@server/lib/schemas";
 import { subdomainSchema } from "@server/lib/schemas";
 import { registry } from "@server/openApi";
 import { OpenAPITags } from "@server/openApi";
-import { validateAndConstructDomain } from "@server/lib/domainUtils";
+import { DomainValidationResult, validateAndConstructDomain } from "@server/lib/domainUtils";
 import { validateHeaders } from "@server/lib/validators";
 
 const updateResourceParamsSchema = z
@@ -110,6 +110,7 @@ const updateHttpResourceBodySchema = z
             return true;
         },
         { message: "Exactly one hostname must be marked as primary" }
+
     );
 
 export type UpdateResourceResponse = Resource & {
@@ -263,20 +264,24 @@ async function updateHttpResource(
                 )
             );
         }
-
         const updateData = parsedBody.data;
+        const hostnamesResult: DomainValidationResult[] = [];
 
         if (updateData.hostnames) {
             for (const h of updateData.hostnames) {
-                const hostnamesResult = await validateAndConstructDomain(h, resource.orgId);
-                if (!hostnamesResult.success) { 
-                    return;
+                const result = await validateAndConstructDomain(h, resource.orgId);
+                hostnamesResult.push(result);
+                if (!result.success) {
+                    return next(
+                        createHttpError(
+                            HttpCode.BAD_REQUEST,
+                            fromError(result.error).toString()
+                        )
+                    );
                 }
             }
         }
 
-
-        // update legacy domain if provided for backward compatibility
         if (updateData.domainId && !updateData.hostnames) {
             const legacyResult = await updateLegacyDomain(updateData, resource, next);
             if (!legacyResult.success) {
@@ -284,8 +289,17 @@ async function updateHttpResource(
             }
         }
 
+        const validatedHostnames = hostnamesResult.length > 0
+            ? hostnamesResult.map(r => r.data!)
+            : updateData.hostnames ?? [];
+
         const { hostnames, domainId, subdomain, hostMode, ...otherUpdates } = updateData;
-        const resourceUpdateData: Partial<Resource> = { ...otherUpdates };
+
+        const resourceUpdateData: Partial<Resource> = {
+            ...otherUpdates,
+            headers: updateData.headers ? JSON.stringify(updateData.headers) : null
+        };
+
 
         if (hostMode) {
             resourceUpdateData.hostMode = hostMode;
