@@ -23,7 +23,7 @@ const getResourceHostnamesParamsSchema = z
         orgId: z.string().optional()
     })
     .strict();
-    
+
 
 async function query(resourceId?: number, niceId?: string, orgId?: string) {
     if (resourceId) {
@@ -57,6 +57,8 @@ export type GetResourceResponse = Omit<NonNullable<Awaited<ReturnType<typeof que
     }>;
 };
 
+
+
 registry.registerPath({
     method: "get",
     path: "/org/{orgId}/resource/{niceId}",
@@ -85,31 +87,31 @@ registry.registerPath({
     responses: {}
 });
 export async function getResource(
-  req: Request,
-  res: Response,
-  next: NextFunction
+    req: Request,
+    res: Response,
+    next: NextFunction
 ): Promise<any> {
-  try {
-    const parsedParams = getResourceHostnamesParamsSchema.safeParse(req.params);
-    if (!parsedParams.success) {
-      return next(
-        createHttpError(
-          HttpCode.BAD_REQUEST,
-          fromError(parsedParams.error).toString()
-        )
-      );
-    }
+    try {
+        const parsedParams = getResourceHostnamesParamsSchema.safeParse(req.params);
+        if (!parsedParams.success) {
+            return next(
+                createHttpError(
+                    HttpCode.BAD_REQUEST,
+                    fromError(parsedParams.error).toString()
+                )
+            );
+        }
 
         const { resourceId, niceId, orgId } = parsedParams.data;
 
-    // Use new query helper
-    const resource = await query(resourceId, niceId, orgId);
+        // Use new query helper
+        const resource = await query(resourceId, niceId, orgId);
 
-    if (!resource) {
-      return next(
-        createHttpError(HttpCode.NOT_FOUND, `Resource with ID ${resourceId} not found`)
-      );
-    }
+        if (!resource) {
+            return next(
+                createHttpError(HttpCode.NOT_FOUND, `Resource with ID ${resourceId} not found`)
+            );
+        }
 
 
         // Get hostnames for the resource
