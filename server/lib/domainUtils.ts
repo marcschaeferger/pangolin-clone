@@ -13,14 +13,14 @@ type ValidatedHostname = {
 };
 
 export type DomainValidationResult =
-    | {
-        success: true;
-        data: ValidatedHostname;
+  | {
+      success: true;
+      data: ValidatedHostname;
     }
-    | {
-        success: false;
-        error: string;
-        data?: ValidatedHostname;
+  | {
+      success: false;
+      error: string;
+      data?: ValidatedHostname;
     };
 
 /**
