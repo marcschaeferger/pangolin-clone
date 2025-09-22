@@ -24,7 +24,6 @@ const getResourceHostnamesParamsSchema = z
     })
     .strict();
 
-
 async function query(resourceId?: number, niceId?: string, orgId?: string) {
     if (resourceId) {
         const [res] = await db
@@ -58,7 +57,6 @@ export type GetResourceResponse = Omit<NonNullable<Awaited<ReturnType<typeof que
 };
 
 
-
 registry.registerPath({
     method: "get",
     path: "/org/{orgId}/resource/{niceId}",
@@ -86,6 +84,7 @@ registry.registerPath({
     },
     responses: {}
 });
+
 export async function getResource(
     req: Request,
     res: Response,
@@ -104,7 +103,6 @@ export async function getResource(
 
         const { resourceId, niceId, orgId } = parsedParams.data;
 
-        // Use new query helper
         const resource = await query(resourceId, niceId, orgId);
 
         if (!resource) {
@@ -114,7 +112,6 @@ export async function getResource(
         }
 
 
-        // Get hostnames for the resource
         const hostnames = await db
             .select({
                 hostnameId: resourceHostnames.hostnameId,
@@ -144,8 +141,8 @@ export async function getResource(
             },
             success: true,
             error: false,
-            message: "Resource hostnames retrieved successfully",
-            status: HttpCode.OK
+            message: "Resource retrieved successfully",
+            status: HttpCode.OK,
         });
     } catch (error) {
         logger.error(error);

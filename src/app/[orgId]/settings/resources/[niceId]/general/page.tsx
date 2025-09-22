@@ -371,11 +371,13 @@ export default function GeneralForm() {
             ? `${sanitizedSubdomain}.${pendingDomain.baseDomain}`
             : pendingDomain.baseDomain;
 
+        setResourceFullDomain(`${resource.ssl ? "https" : "http"}://${sanitizedFullDomain}`);
+
 
         const updatedHostname: HostnameEntry = {
             ...currentHostname,
             domainId: pendingDomain.domainId,
-            subdomain: sanitizedSubdomain || undefined,
+            subdomain: pendingDomain.subdomain,
             baseDomain: pendingDomain.baseDomain,
             fullDomain: sanitizedFullDomain
         };
@@ -644,7 +646,7 @@ export default function GeneralForm() {
                                                     <div className="border p-2 rounded-md flex items-center justify-between">
                                                         <span className="text-sm text-muted-foreground flex items-center gap-2">
                                                             <Globe size="14" />
-                                                            {resourceFullDomain}
+                                                            {toUnicode(resourceFullDomain || "")}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -757,13 +759,7 @@ export default function GeneralForm() {
                                                                 >
                                                                     <div className="min-w-0">
                                                                         <div className="font-mono text-sm truncate">
-                                                                            {h.fullDomain}
-                                                                        </div>
-                                                                        <div className="text-[11px] text-muted-foreground">
-                                                                            {h.subdomain
-                                                                                ? `${h.subdomain}.`
-                                                                                : ""}
-                                                                            {h.baseDomain}
+                                                                            {toUnicode(h.fullDomain || "")}
                                                                         </div>
                                                                     </div>
 
@@ -902,10 +898,12 @@ export default function GeneralForm() {
                                         const sanitizedSubdomain = pendingDomain.subdomain
                                             ? finalizeSubdomainSanitize(pendingDomain.subdomain)
                                             : "";
-
+                                            
                                         const sanitizedFullDomain = sanitizedSubdomain
                                             ? `${sanitizedSubdomain}.${pendingDomain.baseDomain}`
                                             : pendingDomain.baseDomain;
+                                        
+                                        setResourceFullDomain(`${resource.ssl ? "https" : "http"}://${sanitizedFullDomain}`);
 
                                         upsertHostname({
                                             domainId: pendingDomain.domainId,
