@@ -4,7 +4,7 @@ import { and, eq, inArray, or, isNull, ne, isNotNull } from "drizzle-orm";
 import logger from "@server/logger";
 import HttpCode from "@server/types/HttpCode";
 import config from "@server/lib/config";
-import { orgs, resources, sites, Target, targets } from "@server/db";
+import { orgs, resources, sites, Target, targets, resourceHostnames } from "@server/db";
 import { build } from "@server/build";
 
 let currentExitNodeId: number;
@@ -105,6 +105,16 @@ export async function getTraefikConfig(
         };
     };
 
+    // Define hostname type
+    type ResourceHostname = {
+        hostnameId: number;
+        domainId: string;
+        subdomain?: string | null;
+        fullDomain: string;
+        baseDomain: string;
+        primary: boolean;
+    };
+
     // Get resources with their targets and sites in a single optimized query
     // Start from sites on this exit node, then join to targets and resources
     const resourcesWithTargetsAndSites = await db
@@ -124,6 +134,7 @@ export async function getTraefikConfig(
             setHostHeader: resources.setHostHeader,
             enableProxy: resources.enableProxy,
             headers: resources.headers,
+            hostMode: resources.hostMode,
             // Target fields
             targetId: targets.targetId,
             targetEnabled: targets.enabled,
@@ -156,6 +167,30 @@ export async function getTraefikConfig(
             )
         );
 
+    // Get all hostnames for the resources
+    const resourceIds = [...new Set(resourcesWithTargetsAndSites.map(row => row.resourceId))];
+    const hostnamesData = resourceIds.length > 0 ? await db
+        .select({
+            resourceId: resourceHostnames.resourceId,
+            hostnameId: resourceHostnames.hostnameId,
+            domainId: resourceHostnames.domainId,
+            subdomain: resourceHostnames.subdomain,
+            fullDomain: resourceHostnames.fullDomain,
+            baseDomain: resourceHostnames.baseDomain,
+            primary: resourceHostnames.primary
+        })
+        .from(resourceHostnames)
+        .where(inArray(resourceHostnames.resourceId, resourceIds)) : [];
+
+    // Create hostname lookup map
+    const hostnamesMap = new Map<number, ResourceHostname[]>();
+    hostnamesData.forEach(hostname => {
+        if (!hostnamesMap.has(hostname.resourceId)) {
+            hostnamesMap.set(hostname.resourceId, []);
+        }
+        hostnamesMap.get(hostname.resourceId)!.push(hostname);
+    });
+
     // Group by resource and include targets with their unique site data
     const resourcesMap = new Map();
 
@@ -183,10 +218,12 @@ export async function getTraefikConfig(
                 tlsServerName: row.tlsServerName,
                 setHostHeader: row.setHostHeader,
                 enableProxy: row.enableProxy,
+                hostMode: row.hostMode || "multi",
                 targets: [],
                 headers: row.headers,
                 path: row.path, // the targets will all have the same path
-                pathMatchType: row.pathMatchType // the targets will all have the same pathMatchType
+                pathMatchType: row.pathMatchType, // the targets will all have the same pathMatchType
+                hostnames: hostnamesMap.get(row.resourceId) || []
             });
         }
 
@@ -230,24 +267,40 @@ export async function getTraefikConfig(
     for (const [key, resource] of resourcesMap.entries()) {
         const targets = resource.targets;
 
-        const routerName = `${key}-router`;
-        const serviceName = `${key}-service`;
-        const fullDomain = `${resource.fullDomain}`;
-        const transportName = `${key}-transport`;
-        const headersMiddlewareName = `${key}-headers-middleware`;
-
         if (!resource.enabled) {
             continue;
         }
 
         if (resource.http) {
-            if (!resource.domainId) {
+            // For HTTP resources, handle multiple hostnames
+            const hostnames = resource.hostnames;
+            const domains = [];
+
+            // If we have hostnames in the new format, use them
+            if (hostnames && hostnames.length > 0) {
+                domains.push(...hostnames.map((h: ResourceHostname) => h.fullDomain));
+            } else if (resource.fullDomain) {
+                // Fall back to legacy single domain
+                domains.push(resource.fullDomain);
+            }
+
+            if (domains.length === 0) {
                 continue;
             }
 
-            if (!resource.fullDomain) {
+            // Determine primary domain for redirect mode
+            const primaryDomain = hostnames && hostnames.length > 0 
+                ? hostnames.find((h: ResourceHostname) => h.primary)?.fullDomain || hostnames[0].fullDomain
+                : resource.fullDomain;
+
+            if (!primaryDomain) {
                 continue;
             }
+
+            const routerName = `${key}-router`;
+            const serviceName = `${key}-service`;
+            const transportName = `${key}-transport`;
+            const headersMiddlewareName = `${key}-headers-middleware`;
 
             // add routers and services empty objects if they don't exist
             if (!config_output.http.routers) {
@@ -258,7 +311,99 @@ export async function getTraefikConfig(
                 config_output.http.services = {};
             }
 
-            const domainParts = fullDomain.split(".");
+            // Handle hostMode logic
+            if (resource.hostMode === "redirect" && domains.length > 1) {
+                // Create redirect routers for non-primary domains
+                const nonPrimaryDomains = domains.filter(domain => domain !== primaryDomain);
+                
+                for (const domain of nonPrimaryDomains) {
+                    const redirectRouterName = `${key}-${sanitizePath(domain)}-redirect`;
+                    const redirectMiddlewareName = `${key}-${sanitizePath(domain)}-redirect-middleware`;
+
+                    // Create redirect middleware
+                    if (!config_output.http.middlewares) {
+                        config_output.http.middlewares = {};
+                    }
+                    config_output.http.middlewares[redirectMiddlewareName] = {
+                        redirectRegex: {
+                            regex: `^https?://${domain.replace(/\./g, '\\.')}(.*)`,
+                            replacement: `${resource.ssl ? 'https' : 'http'}://${primaryDomain}$1`,
+                            permanent: true
+                        }
+                    };
+
+                    // Create redirect router
+                    const redirectRule = `Host(\`${domain}\`)`;
+                    
+                    // Get TLS config for this specific domain
+                    let redirectTls = {};
+                    if (resource.ssl && build == "oss") {
+                        const domainParts = domain.split(".");
+                        let domainWildCard;
+                        if (domainParts.length <= 2) {
+                            domainWildCard = `*.${domainParts.join(".")}`;
+                        } else {
+                            domainWildCard = `*.${domainParts.slice(1).join(".")}`;
+                        }
+
+                        const domainConfig = config.getDomain(resource.domainId || (hostnames && hostnames.length > 0 ? hostnames[0].domainId : ''));
+                        let domainCertResolver: string, domainPreferWildcard: boolean;
+                        
+                        if (!domainConfig) {
+                            domainCertResolver = config.getRawConfig().traefik.cert_resolver;
+                            domainPreferWildcard = config.getRawConfig().traefik.prefer_wildcard_cert;
+                        } else {
+                            domainCertResolver = domainConfig.cert_resolver;
+                            domainPreferWildcard = domainConfig.prefer_wildcard_cert;
+                        }
+
+                        redirectTls = {
+                            certResolver: domainCertResolver,
+                            ...(domainPreferWildcard
+                                ? {
+                                      domains: [
+                                          {
+                                              main: domainWildCard
+                                          }
+                                      ]
+                                  }
+                                : {})
+                        };
+                    }
+                    
+                    config_output.http.routers[redirectRouterName] = {
+                        entryPoints: [
+                            resource.ssl
+                                ? config.getRawConfig().traefik.https_entrypoint
+                                : config.getRawConfig().traefik.http_entrypoint
+                        ],
+                        middlewares: [redirectMiddlewareName],
+                        service: serviceName, // Still needs a service even for redirects
+                        rule: redirectRule,
+                        priority: 90, // Lower priority than main router
+                        ...(resource.ssl ? { tls: redirectTls } : {})
+                    };
+
+                    // HTTP to HTTPS redirect for non-primary domains
+                    if (resource.ssl) {
+                        config_output.http.routers[redirectRouterName + "-http"] = {
+                            entryPoints: [
+                                config.getRawConfig().traefik.http_entrypoint
+                            ],
+                            middlewares: [redirectHttpsMiddlewareName],
+                            service: serviceName,
+                            rule: redirectRule,
+                            priority: 90
+                        };
+                    }
+                }
+
+                // Use only primary domain for the main router
+                domains.splice(0, domains.length, primaryDomain);
+            }
+
+            // Create main router for primary domain (or all domains in multi mode)
+            const domainParts = primaryDomain.split(".");
             let wildCard;
             if (domainParts.length <= 2) {
                 wildCard = `*.${domainParts.join(".")}`;
@@ -266,11 +411,16 @@ export async function getTraefikConfig(
                 wildCard = `*.${domainParts.slice(1).join(".")}`;
             }
 
-            if (!resource.subdomain) {
-                wildCard = resource.fullDomain;
+            // Use wildcard only if we have a subdomain
+            const hasSubdomain = hostnames && hostnames.length > 0
+                ? hostnames.some((h: ResourceHostname) => h.subdomain)
+                : resource.subdomain;
+
+            if (!hasSubdomain) {
+                wildCard = primaryDomain;
             }
 
-            const configDomain = config.getDomain(resource.domainId);
+            const configDomain = config.getDomain(resource.domainId || (hostnames && hostnames.length > 0 ? hostnames[0].domainId : ''));
 
             let certResolver: string, preferWildcardCert: boolean;
             if (!configDomain) {
@@ -347,7 +497,14 @@ export async function getTraefikConfig(
                 }
             }
 
-            let rule = `Host(\`${fullDomain}\`)`;
+            // Create rule for multiple domains in multi mode, or just primary domain in redirect mode
+            let rule;
+            if (resource.hostMode === "multi" && domains.length > 1) {
+                rule = `Host(${domains.map(d => `\`${d}\``).join(', ')})`;
+            } else {
+                rule = `Host(\`${primaryDomain}\`)`;
+            }
+
             let priority = 100;
             if (resource.path && resource.pathMatchType) {
                 priority += 1;
@@ -488,13 +645,15 @@ export async function getTraefikConfig(
                 ].loadBalancer.serversTransport = transportName;
             }
         } else {
-            // Non-HTTP (TCP/UDP) configuration
+            // Non-HTTP (TCP/UDP) configuration - unchanged from original
             if (!resource.enableProxy) {
                 continue;
             }
 
             const protocol = resource.protocol.toLowerCase();
             const port = resource.proxyPort;
+            const routerName = `${key}-router`;
+            const serviceName = `${key}-service`;
 
             if (!port) {
                 continue;
