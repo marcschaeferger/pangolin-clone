@@ -42,19 +42,23 @@ async function query(resourceId?: number, niceId?: string, orgId?: string) {
     }
 }
 
-export type GetResourceResponse = Omit<NonNullable<Awaited<ReturnType<typeof query>>>, 'headers'> & Resource & {
-    headers: { name: string; value: string }[] | null;
-    resourceId: number;
-    hostMode: string;
-    hostnames: Array<{
-        hostnameId: number;
-        domainId: string;
-        subdomain?: string;
-        fullDomain: string;
-        baseDomain: string;
-        primary: boolean;
-    }>;
-};
+export type GetResourceResponse = Omit<
+    NonNullable<Awaited<ReturnType<typeof query>>>,
+    "headers"
+> &
+    Omit<Resource, "headers"> & {
+        headers: { name: string; value: string }[] | null;
+        resourceId: number;
+        hostMode: string;
+        hostnames: Array<{
+            hostnameId: number;
+            domainId: string;
+            subdomain?: string | null;
+            fullDomain: string;
+            baseDomain: string;
+            primary: boolean;
+        }>;
+    };
 
 
 registry.registerPath({
@@ -125,6 +129,10 @@ export async function getResource(
             .where(eq(resourceHostnames.resourceId, resource.resourceId))
             .orderBy(resourceHostnames.primary, resourceHostnames.createdAt);
 
+        const parsedHeaders = resource.headers
+            ? (JSON.parse(resource.headers) as { name: string; value: string }[])
+            : null;
+
         return response<GetResourceResponse>(res, {
             data: {
                 ...resource,
@@ -132,12 +140,12 @@ export async function getResource(
                 hostnames: hostnames.map(h => ({
                     hostnameId: h.hostnameId,
                     domainId: h.domainId,
-                    subdomain: h.subdomain || undefined,
+                    subdomain: h.subdomain || null,
                     fullDomain: h.fullDomain,
                     baseDomain: h.baseDomain,
-                    primary: h.primary,
+                    primary: h.primary
                 })),
-                headers: resource.headers ? JSON.parse(resource.headers) : resource.headers
+                headers: parsedHeaders
             },
             success: true,
             error: false,
