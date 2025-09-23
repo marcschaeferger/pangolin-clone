@@ -265,47 +265,75 @@ async function updateHttpResource(
             );
         }
         const updateData = parsedBody.data;
-        const hostnamesResult: DomainValidationResult[] = [];
 
-        if (updateData.hostnames) {
-            for (const h of updateData.hostnames) {
-                const result = await validateAndConstructDomain(h, resource.orgId);
-                hostnamesResult.push(result);
-                if (!result.success) {
-                    return next(
-                        createHttpError(
-                            HttpCode.BAD_REQUEST,
-                            fromError(result.error).toString()
-                        )
-                    );
-                }
-            }
-        }
-
+        // Handle legacy single domain update
         if (updateData.domainId && !updateData.hostnames) {
-            const legacyResult = await updateLegacyDomain(updateData, resource, next);
+            const legacyHostname = {
+                domainId: updateData.domainId,
+                subdomain: updateData.subdomain,
+                primary: true
+            };
+            
+            const legacyValidation = await validateAndConstructDomain(legacyHostname, resource.orgId);
+            if (!legacyValidation.success) {
+                return next(
+                    createHttpError(
+                        HttpCode.BAD_REQUEST,
+                        legacyValidation.error
+                    )
+                );
+            }
+
+            const legacyResult = await updateLegacyDomain(updateData, resource, legacyValidation.data!, next);
             if (!legacyResult.success) {
                 return;
             }
         }
 
-        const validatedHostnames = hostnamesResult.length > 0
-            ? hostnamesResult.map(r => r.data!)
-            : updateData.hostnames ?? [];
+        // Handle multiple hostnames update
+        if (updateData.hostnames) {
+            // Validate all hostnames first using the proper validation function
+            const validationResults: DomainValidationResult[] = [];
+            for (const hostname of updateData.hostnames) {
+                if (!hostname._delete) {
+                    const result = await validateAndConstructDomain(hostname, resource.orgId);
+                    validationResults.push(result);
+                    if (!result.success) {
+                        return next(
+                            createHttpError(
+                                HttpCode.BAD_REQUEST,
+                                result.error
+                            )
+                        );
+                    }
+                }
+            }
 
+            const hostnamesResult = await updateResourceHostnames(
+                resource.resourceId,
+                updateData.hostnames,
+                validationResults,
+                resource.orgId,
+                next
+            );
+            if (!hostnamesResult.success) {
+                return;
+            }
+        }
+
+        // Prepare resource update data
         const { hostnames, domainId, subdomain, hostMode, ...otherUpdates } = updateData;
 
         const resourceUpdateData: Partial<Resource> = {
             ...otherUpdates,
-            headers: updateData.headers ? JSON.stringify(updateData.headers) : null
+            headers: updateData.headers ? JSON.stringify(updateData.headers) : undefined
         };
-
 
         if (hostMode) {
             resourceUpdateData.hostMode = hostMode;
         }
 
-        // If hostnames were updated, pick primary hostname for backward compatibility
+        // If hostnames were updated, update primary hostname for backward compatibility
         if (updateData.hostnames) {
             const currentHostnames = await db
                 .select()
@@ -320,7 +348,7 @@ async function updateHttpResource(
             }
         }
 
-        // update the resource record only if there are updates
+        // Update the resource record only if there are updates
         let updatedResource = resource;
         if (Object.keys(resourceUpdateData).length > 0) {
             const updatedResources = await db
@@ -340,6 +368,7 @@ async function updateHttpResource(
             updatedResource = updatedResources[0];
         }
 
+        // Get current hostnames for response
         const currentHostnames = await db
             .select()
             .from(resourceHostnames)
@@ -385,6 +414,7 @@ async function updateResourceHostnames(
         primary: boolean;
         _delete?: boolean;
     }>,
+    validationResults: DomainValidationResult[],
     orgId: string,
     next: NextFunction
 ): Promise<{ success: boolean }> {
@@ -394,44 +424,60 @@ async function updateResourceHostnames(
         const toUpdate = hostnames.filter(h => h.hostnameId && !h._delete);
         const toCreate = hostnames.filter(h => !h.hostnameId && !h._delete);
 
+        // Create a map of validation results by domain info
+        const validationMap = new Map<string, DomainValidationResult>();
+        let validationIndex = 0;
+        for (const hostname of hostnames) {
+            if (!hostname._delete) {
+                const key = `${hostname.domainId}-${hostname.subdomain || ''}`;
+                validationMap.set(key, validationResults[validationIndex++]);
+            }
+        }
+
         await db.transaction(async (trx) => {
-            // delete hostnames marked for deletion
+            // Delete hostnames marked for deletion
             for (const hostname of toDelete) {
                 await trx.delete(resourceHostnames).where(eq(resourceHostnames.hostnameId, hostname.hostnameId!));
             }
 
-            // update existing hostnames
+            // Update existing hostnames
             for (const hostname of toUpdate) {
-                const processedHostname = await processHostname(hostname, orgId, resourceId);
-                if (!processedHostname.success) {
-                    throw new Error(processedHostname.error);
+                const key = `${hostname.domainId}-${hostname.subdomain || ''}`;
+                const validationResult = validationMap.get(key);
+                if (!validationResult || !validationResult.success) {
+                    throw new Error(`Validation failed for hostname: ${hostname.domainId}`);
                 }
+
+                const validatedData = validationResult.data!;
 
                 await trx
                     .update(resourceHostnames)
                     .set({
-                        domainId: processedHostname.data!.domainId,
-                        subdomain: processedHostname.data!.subdomain,
-                        fullDomain: processedHostname.data!.fullDomain,
-                        baseDomain: processedHostname.data!.baseDomain,
-                        primary: processedHostname.data!.primary
+                        domainId: validatedData.domainId,
+                        subdomain: validatedData.subdomain,
+                        fullDomain: validatedData.fullDomain,
+                        baseDomain: validatedData.baseDomain,
+                        primary: validatedData.primary
                     })
                     .where(eq(resourceHostnames.hostnameId, hostname.hostnameId!));
             }
 
-            // create new hostnames
+            // Create new hostnames
             for (const hostname of toCreate) {
-                const processedHostname = await processHostname(hostname, orgId, resourceId);
-                if (!processedHostname.success) {
-                    throw new Error(processedHostname.error);
+                const key = `${hostname.domainId}-${hostname.subdomain || ''}`;
+                const validationResult = validationMap.get(key);
+                if (!validationResult || !validationResult.success) {
+                    throw new Error(`Validation failed for hostname: ${hostname.domainId}`);
                 }
 
-                // check for conflicts ---> exclude current resource and its hostnames
+                const validatedData = validationResult.data!;
+
+                // Check for conflicts - exclude current resource and its hostnames
                 const existingResource = await db
                     .select()
                     .from(resources)
                     .where(and(
-                        eq(resources.fullDomain, processedHostname.data!.fullDomain),
+                        eq(resources.fullDomain, validatedData.fullDomain),
                         ne(resources.resourceId, resourceId)
                     ));
 
@@ -439,21 +485,21 @@ async function updateResourceHostnames(
                     .select()
                     .from(resourceHostnames)
                     .where(and(
-                        eq(resourceHostnames.fullDomain, processedHostname.data!.fullDomain),
+                        eq(resourceHostnames.fullDomain, validatedData.fullDomain),
                         ne(resourceHostnames.resourceId, resourceId)
                     ));
 
                 if (existingResource.length > 0 || existingHostname.length > 0) {
-                    throw new Error(`Resource with domain ${processedHostname.data!.fullDomain} already exists`);
+                    throw new Error(`Resource with domain ${validatedData.fullDomain} already exists`);
                 }
 
                 await trx.insert(resourceHostnames).values({
                     resourceId,
-                    domainId: processedHostname.data!.domainId,
-                    subdomain: processedHostname.data!.subdomain,
-                    fullDomain: processedHostname.data!.fullDomain,
-                    baseDomain: processedHostname.data!.baseDomain,
-                    primary: processedHostname.data!.primary,
+                    domainId: validatedData.domainId,
+                    subdomain: validatedData.subdomain,
+                    fullDomain: validatedData.fullDomain,
+                    baseDomain: validatedData.baseDomain,
+                    primary: validatedData.primary,
                 });
             }
         });
@@ -466,139 +512,25 @@ async function updateResourceHostnames(
     }
 }
 
-async function processHostname(
-    hostname: {
-        domainId: string;
-        subdomain?: string;
-        baseDomain?: string;
-        fullDomain?: string;
-        primary: boolean;
-    },
-    orgId: string,
-    resourceId?: number
-): Promise<{
-    success: boolean;
-    data?: {
-        domainId: string;
-        subdomain?: string;
-        fullDomain: string;
-        baseDomain: string;
-        primary: boolean;
-    };
-    error?: string;
-}> {
-    try {
-        const [domainRes] = await db
-            .select()
-            .from(domains)
-            .where(eq(domains.domainId, hostname.domainId))
-            .leftJoin(
-                orgDomains,
-                and(eq(orgDomains.orgId, orgId), eq(orgDomains.domainId, hostname.domainId))
-            );
-
-        if (!domainRes || !domainRes.domains) {
-            return {
-                success: false,
-                error: `Domain with ID ${hostname.domainId} not found`
-            };
-        }
-
-        if (domainRes.orgDomains && domainRes.orgDomains.orgId !== orgId) {
-            return {
-                success: false,
-                error: `Organization does not have access to domain with ID ${hostname.domainId}`
-            };
-        }
-
-        if (!domainRes.domains.verified) {
-            return {
-                success: false,
-                error: `Domain with ID ${domainRes.domains.domainId} is not verified`
-            };
-        }
-
-        let fullDomain = "";
-        let subdomain = hostname.subdomain;
-
-        if (domainRes.domains.type == "ns") {
-            if (subdomain) {
-                fullDomain = `${subdomain}.${domainRes.domains.baseDomain}`;
-            } else {
-                fullDomain = domainRes.domains.baseDomain;
-            }
-        } else if (domainRes.domains.type == "cname") {
-            fullDomain = domainRes.domains.baseDomain;
-        } else if (domainRes.domains.type == "wildcard") {
-            if (subdomain) {
-                const parsedSubdomain = subdomainSchema.safeParse(subdomain);
-                if (!parsedSubdomain.success) {
-                    return {
-                        success: false,
-                        error: fromError(parsedSubdomain.error).toString()
-                    };
-                }
-                fullDomain = `${subdomain}.${domainRes.domains.baseDomain}`;
-            } else {
-                fullDomain = domainRes.domains.baseDomain;
-            }
-        }
-
-        if (fullDomain === domainRes.domains.baseDomain) {
-            subdomain = undefined;
-        }
-
-        fullDomain = fullDomain.toLowerCase();
-
-        return {
-            success: true,
-            data: {
-                domainId: hostname.domainId,
-                subdomain,
-                fullDomain,
-                baseDomain: domainRes.domains.baseDomain,
-                primary: hostname.primary
-            }
-        };
-    } catch (error) {
-        logger.error('Error processing hostname:', error);
-        return {
-            success: false,
-            error: 'Failed to process hostname'
-        };
-    }
-}
-
-
-
 async function updateLegacyDomain(
     updateData: any,
     resource: Resource,
+    validatedData: {
+        domainId: string;
+        subdomain?: string | null;
+        fullDomain: string;
+        baseDomain: string;
+        primary: boolean;
+    },
     next: NextFunction
 ): Promise<{ success: boolean }> {
     try {
-        const hostnames = updateData.hostnames;
-
-        // Validate domain and construct full domain
-        const domainResult = await validateAndConstructDomain(hostnames, resource.orgId);
-
-        if (!domainResult.success) {
-            return next(
-                createHttpError(
-                    HttpCode.BAD_REQUEST,
-                    domainResult.error
-                )
-            ) as unknown as { success: boolean };
-        }
-
-        const {
-            data: { fullDomain, subdomain: finalSubdomain },
-        } = domainResult;
+        const { fullDomain, subdomain: finalSubdomain } = validatedData;
 
         logger.debug(`Full domain: ${fullDomain}`);
 
         if (fullDomain) {
-            // exclude current resource from conflict check
+            // Exclude current resource from conflict check
             const [existingDomain] = await db
                 .select()
                 .from(resources)
@@ -619,7 +551,7 @@ async function updateLegacyDomain(
                 return { success: false };
             }
 
-            // update the full domain if it has changed
+            // Update the full domain if it has changed
             await db
                 .update(resources)
                 .set({ fullDomain })
@@ -640,8 +572,6 @@ async function updateLegacyDomain(
         return { success: false };
     }
 }
-
-
 
 async function updateRawResource(
     route: {

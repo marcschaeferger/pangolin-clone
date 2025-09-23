@@ -11,7 +11,7 @@ import logger from "@server/logger";
 import stoi from "@server/lib/stoi";
 import { OpenAPITags, registry } from "@server/openApi";
 
-const getResourceHostnamesParamsSchema = z
+const getResourceParamsSchema = z
     .object({
         resourceId: z
             .string()
@@ -91,7 +91,7 @@ export async function getResource(
     next: NextFunction
 ): Promise<any> {
     try {
-        const parsedParams = getResourceHostnamesParamsSchema.safeParse(req.params);
+        const parsedParams = getResourceParamsSchema.safeParse(req.params);
         if (!parsedParams.success) {
             return next(
                 createHttpError(
