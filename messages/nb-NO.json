@@ -1519,5 +1519,7 @@
     "domainPickerSubdomainSanitized": "Underdomenet som ble sanivert",
     "domainPickerSubdomainCorrected": "\"{sub}\" var korrigert til \"{sanitized}\"",
     "resourceAddEntrypointsEditFile": "Rediger fil: config/traefik/traefik_config.yml",
-    "resourceExposePortsEditFile": "Rediger fil: docker-compose.yml"
+    "resourceExposePortsEditFile": "Rediger fil: docker-compose.yml",
+    "emailVerificationRequired": "E-postbekreftelse er nødvendig. Logg inn på nytt via {dashboardUrl}/auth/login og fullfør dette trinnet. Kom deretter tilbake her.",
+    "twoFactorSetupRequired": "To-faktor autentiseringsoppsett er nødvendig. Vennligst logg inn igjen via {dashboardUrl}/auth/login og fullfør dette steget. Kom deretter tilbake her."
 }

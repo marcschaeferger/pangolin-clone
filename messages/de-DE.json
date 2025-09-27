@@ -513,7 +513,7 @@
     "ipAddressErrorInvalidFormat": "Ungültiges IP-Adressformat",
     "ipAddressErrorInvalidOctet": "Ungültiges IP-Adress-Oktett",
     "path": "Pfad",
-    "matchPath": "Unterverzeichnis",
+    "matchPath": "Spielpfad",
     "ipAddressRange": "IP-Bereich",
     "rulesErrorFetch": "Fehler beim Abrufen der Regeln",
     "rulesErrorFetchDescription": "Beim Abrufen der Regeln ist ein Fehler aufgetreten",
@@ -1519,5 +1519,7 @@
     "domainPickerSubdomainSanitized": "Subdomain bereinigt",
     "domainPickerSubdomainCorrected": "\"{sub}\" wurde korrigiert zu \"{sanitized}\"",
     "resourceAddEntrypointsEditFile": "Datei bearbeiten: config/traefik/traefik_config.yml",
-    "resourceExposePortsEditFile": "Datei bearbeiten: docker-compose.yml"
+    "resourceExposePortsEditFile": "Datei bearbeiten: docker-compose.yml",
+    "emailVerificationRequired": "E-Mail-Verifizierung ist erforderlich. Bitte melden Sie sich erneut über {dashboardUrl}/auth/login an. Kommen Sie dann wieder hierher.",
+    "twoFactorSetupRequired": "Die Zwei-Faktor-Authentifizierung ist erforderlich. Bitte melden Sie sich erneut über {dashboardUrl}/auth/login an. Dann kommen Sie hierher zurück."
 }

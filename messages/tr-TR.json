@@ -1519,5 +1519,7 @@
     "domainPickerSubdomainSanitized": "Alt alan adı temizlendi",
     "domainPickerSubdomainCorrected": "\"{sub}\" \"{sanitized}\" olarak düzeltildi",
     "resourceAddEntrypointsEditFile": "Dosyayı düzenle: config/traefik/traefik_config.yml",
-    "resourceExposePortsEditFile": "Dosyayı düzenle: docker-compose.yml"
+    "resourceExposePortsEditFile": "Dosyayı düzenle: docker-compose.yml",
+    "emailVerificationRequired": "E-posta doğrulaması gereklidir. Bu adımı tamamlamak için lütfen tekrar {dashboardUrl}/auth/login üzerinden oturum açın. Sonra buraya geri dönün.",
+    "twoFactorSetupRequired": "İki faktörlü kimlik doğrulama ayarı gereklidir. Bu adımı tamamlamak için lütfen tekrar {dashboardUrl}/auth/login üzerinden oturum açın. Sonra buraya geri dönün."
 }
