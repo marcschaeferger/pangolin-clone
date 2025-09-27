@@ -77,41 +77,35 @@ export const ResourceSchema = z
             error: "Resource must either be targets-only (only 'targets' field) or have both 'name' and 'protocol' fields at a minimum"
         }
     )
-    .refine(
-        (resource) => {
-            if (isTargetsOnlyResource(resource)) {
-                return true;
-            }
+    .superRefine((resource, ctx) => {
+        if (isTargetsOnlyResource(resource)) return;
 
-            // If protocol is http, all targets must have method field
-            if (resource.protocol === "http") {
-                return resource.targets.every(
-                    (target) => target == null || target.method !== undefined
-                );
+        const targets = resource.targets ?? [];
+
+        if (resource.protocol === "http") {
+            for (const [i, target] of targets.entries()) {
+                if (target && target.method === undefined) {
+                    ctx.addIssue({
+                        code: "custom",
+                        message: "Target is missing 'method' for HTTP protocol",
+                        path: ["targets", i, "method"]
+                    });
+                }
             }
-            // If protocol is tcp or udp, no target should have method field
-            if (resource.protocol === "tcp" || resource.protocol === "udp") {
-                return resource.targets.every(
-                    (target) => target == null || target.method === undefined
-                );
-            }
-            return true;
-        },
-        (resource) => {
-            if (resource.protocol === "http") {
-                return {
-                    message:
-                        "When protocol is 'http', all targets must have a 'method' field",
-                    path: ["targets"]
-                };
-            }
-            return {
-                message:
-                    "When protocol is 'tcp' or 'udp', targets must not have a 'method' field",
-                path: ["targets"]
-            };
         }
-    )
+
+        if (resource.protocol === "tcp" || resource.protocol === "udp") {
+            for (const [i, target] of targets.entries()) {
+                if (target && target.method !== undefined) {
+                    ctx.addIssue({
+                        code: "custom",
+                        message: "Target must not have 'method' for TCP/UDP protocol",
+                        path: ["targets", i, "method"]
+                    });
+                }
+            }
+        }
+    })
     .refine(
         (resource) => {
             if (isTargetsOnlyResource(resource)) {
