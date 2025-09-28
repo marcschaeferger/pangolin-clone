@@ -28,7 +28,7 @@ export const configSchema = z
                     anonymous_usage: z.boolean().optional().default(true)
                 })
                 .optional()
-                .default({})
+                .prefault({})
         }).optional().default({
             log_level: "info",
             save_logs: false,
