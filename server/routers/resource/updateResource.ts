@@ -44,7 +44,7 @@ const updateHttpResourceBodySchema = z.strictObject({
         tlsServerName: z.string().nullable().optional(),
         setHostHeader: z.string().nullable().optional(),
         skipToIdpId: z.int().positive().nullable().optional(),
-        headers: z.array(z.strictObject({ name: z.string(), value: z.string() })).optional(),
+        headers: z.array(z.strictObject({ name: z.string(), value: z.string() })).nullable().optional(),
     })
     .refine((data) => Object.keys(data).length > 0, {
         error: "At least one field must be provided for update"
