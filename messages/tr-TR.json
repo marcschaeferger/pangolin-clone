@@ -1333,7 +1333,7 @@
     "twoFactorRequired": "Güvenlik anahtarını kaydetmek için iki faktörlü kimlik doğrulama gereklidir.",
     "twoFactor": "İki Faktörlü Kimlik Doğrulama",
     "adminEnabled2FaOnYourAccount": "Yöneticiniz {email} için iki faktörlü kimlik doğrulamayı etkinleştirdi. Devam etmek için kurulum işlemini tamamlayın.",
-    "continueToApplication": "Uygulamaya Devam Et",
+    "continueToApplication": "Continue to application",
     "securityKeyAdd": "Güvenlik Anahtarı Ekle",
     "securityKeyRegisterTitle": "Yeni Güvenlik Anahtarı Kaydet",
     "securityKeyRegisterDescription": "Güvenlik anahtarınızı bağlayın ve tanımlamak için bir ad girin",
