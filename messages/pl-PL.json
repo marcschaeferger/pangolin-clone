@@ -1333,7 +1333,7 @@
     "twoFactorRequired": "Uwierzytelnianie dwuskładnikowe jest wymagane do zarejestrowania klucza bezpieczeństwa.",
     "twoFactor": "Uwierzytelnianie dwuskładnikowe",
     "adminEnabled2FaOnYourAccount": "Twój administrator włączył uwierzytelnianie dwuskładnikowe dla {email}. Proszę ukończyć proces konfiguracji, aby kontynuować.",
-    "continueToApplication": "Kontynuuj do aplikacji",
+    "continueToApplication": "Continue to application",
     "securityKeyAdd": "Dodaj klucz bezpieczeństwa",
     "securityKeyRegisterTitle": "Zarejestruj nowy klucz bezpieczeństwa",
     "securityKeyRegisterDescription": "Podłącz swój klucz bezpieczeństwa i wprowadź nazwę, aby go zidentyfikować",
