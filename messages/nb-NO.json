@@ -1333,7 +1333,7 @@
     "twoFactorRequired": "Tofaktorautentisering er påkrevd for å registrere en sikkerhetsnøkkel.",
     "twoFactor": "Tofaktorautentisering",
     "adminEnabled2FaOnYourAccount": "Din administrator har aktivert tofaktorautentisering for {email}. Vennligst fullfør oppsettsprosessen for å fortsette.",
-    "continueToApplication": "Fortsett til applikasjonen",
+    "continueToApplication": "Continue to application",
     "securityKeyAdd": "Legg til sikkerhetsnøkkel",
     "securityKeyRegisterTitle": "Registrer ny sikkerhetsnøkkel",
     "securityKeyRegisterDescription": "Koble til sikkerhetsnøkkelen og skriv inn et navn for å identifisere den",
