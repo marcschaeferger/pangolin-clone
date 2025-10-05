@@ -1333,7 +1333,7 @@
     "twoFactorRequired": "Zur Registrierung eines Sicherheitsschlüssels ist eine Zwei-Faktor-Authentifizierung erforderlich.",
     "twoFactor": "Zwei-Faktor-Authentifizierung",
     "adminEnabled2FaOnYourAccount": "Ihr Administrator hat die Zwei-Faktor-Authentifizierung für {email} aktiviert. Bitte schließen Sie den Einrichtungsprozess ab, um fortzufahren.",
-    "continueToApplication": "Weiter zur Anwendung",
+    "continueToApplication": "Continue to application",
     "securityKeyAdd": "Sicherheitsschlüssel hinzufügen",
     "securityKeyRegisterTitle": "Neuen Sicherheitsschlüssel registrieren",
     "securityKeyRegisterDescription": "Verbinden Sie Ihren Sicherheitsschlüssel und geben Sie einen Namen ein, um ihn zu identifizieren",
