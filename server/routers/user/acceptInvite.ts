@@ -10,6 +10,8 @@ import logger from "@server/logger";
 import { fromError } from "zod-validation-error";
 import { checkValidInvite } from "@server/auth/checkValidInvite";
 import { verifySession } from "@server/auth/sessions/verifySession";
+import { usageService } from "@server/lib/private/billing/usageService";
+import { FeatureId } from "@server/lib/private/billing";
 
 const acceptInviteBodySchema = z.strictObject({
         token: z.string(),
@@ -128,6 +130,14 @@ export async function acceptInvite(
                 .from(userOrgs)
                 .where(eq(userOrgs.orgId, existingInvite.orgId));
         });
+
+        if (totalUsers) {
+            await usageService.updateDaily(
+                existingInvite.orgId,
+                FeatureId.USERS,
+                totalUsers.length
+            );
+        }
 
         return response<AcceptInviteResponse>(res, {
             data: { accepted: true, orgId: existingInvite.orgId },

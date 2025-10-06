@@ -7,9 +7,22 @@ function createDb() {
     const config = readConfigFile();
 
     if (!config.postgres) {
-        throw new Error(
-            "Postgres configuration is missing in the configuration file."
-        );
+        // check the environment variables for postgres config
+        if (process.env.POSTGRES_CONNECTION_STRING) {
+            config.postgres = {
+                connection_string: process.env.POSTGRES_CONNECTION_STRING
+            };
+            if (process.env.POSTGRES_REPLICA_CONNECTION_STRINGS) {
+                const replicas = process.env.POSTGRES_REPLICA_CONNECTION_STRINGS.split(",").map((conn) => ({
+                    connection_string: conn.trim()
+                }));
+                config.postgres.replicas = replicas;
+            }
+        } else {
+            throw new Error(
+                "Postgres configuration is missing in the configuration file."
+            );
+        }
     }
 
     const connectionString = config.postgres?.connection_string;
@@ -26,7 +39,7 @@ function createDb() {
         connectionString,
         max: 20,
         idleTimeoutMillis: 30000,
-        connectionTimeoutMillis: 2000,
+        connectionTimeoutMillis: 5000,
     });
 
     const replicas = [];
@@ -39,7 +52,7 @@ function createDb() {
                 connectionString: conn.connection_string,
                 max: 10,
                 idleTimeoutMillis: 30000,
-                connectionTimeoutMillis: 2000,
+                connectionTimeoutMillis: 5000,
             });
             replicas.push(DrizzlePostgres(replicaPool));
         }

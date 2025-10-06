@@ -62,7 +62,7 @@ export const configSchema = z
         server: z.object({
             integration_port: portSchema
                 .optional()
-                .default(3004)
+                .default(3003)
                 .transform(stoi)
                 .pipe(portSchema.optional()),
             external_port: portSchema
@@ -128,7 +128,8 @@ export const configSchema = z
             secret: z
                 .string()
                 .pipe(z.string().min(8))
-                .optional()
+                .optional(),
+            maxmind_db_path: z.string().optional()
         }).optional().default({
             integration_port: 3003,
             external_port: 3000,
@@ -148,7 +149,7 @@ export const configSchema = z
         }),
         postgres: z
             .object({
-                connection_string: z.string(),
+                connection_string: z.string().optional(),
                 replicas: z
                     .array(
                         z.object({

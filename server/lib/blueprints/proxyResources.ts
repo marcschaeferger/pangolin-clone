@@ -8,6 +8,8 @@ import {
     roleResources,
     roles,
     Target,
+    TargetHealthCheck,
+    targetHealthCheck,
     Transaction,
     userOrgs,
     userResources,
@@ -22,6 +24,7 @@ import {
     TargetData
 } from "./types";
 import logger from "@server/logger";
+import { createCertificate } from "@server/routers/private/certificates/createCertificate";
 import { pickPort } from "@server/routers/target/helpers";
 import { resourcePassword } from "@server/db";
 import { hashPassword } from "@server/auth/password";
@@ -30,6 +33,7 @@ import { isValidCIDR, isValidIP, isValidUrlGlobPattern } from "../validators";
 export type ProxyResourcesResults = {
     proxyResource: Resource;
     targetsToUpdate: Target[];
+    healthchecksToUpdate: TargetHealthCheck[];
 }[];
 
 export async function updateProxyResources(
@@ -44,6 +48,7 @@ export async function updateProxyResources(
         config["proxy-resources"]
     )) {
         const targetsToUpdate: Target[] = [];
+        const healthchecksToUpdate: TargetHealthCheck[] = [];
         let resource: Resource;
 
         async function createTarget( // reusable function to create a target
@@ -107,11 +112,41 @@ export async function updateProxyResources(
                     enabled: targetData.enabled,
                     internalPort: internalPortToCreate,
                     path: targetData.path,
-                    pathMatchType: targetData["path-match"]
+                    pathMatchType: targetData["path-match"],
+                    rewritePath: targetData.rewritePath,
+                    rewritePathType: targetData["rewrite-match"],
+                    priority: targetData.priority
                 })
                 .returning();
 
             targetsToUpdate.push(newTarget);
+
+            const healthcheckData = targetData.healthcheck;
+
+            const hcHeaders = healthcheckData?.headers ? JSON.stringify(healthcheckData.headers) : null;
+
+            const [newHealthcheck] = await trx
+                .insert(targetHealthCheck)
+                .values({
+                    targetId: newTarget.targetId,
+                    hcEnabled: healthcheckData?.enabled || false,
+                    hcPath: healthcheckData?.path,
+                    hcScheme: healthcheckData?.scheme,
+                    hcMode: healthcheckData?.mode,
+                    hcHostname: healthcheckData?.hostname,
+                    hcPort: healthcheckData?.port,
+                    hcInterval: healthcheckData?.interval,
+                    hcUnhealthyInterval: healthcheckData?.unhealthyInterval,
+                    hcTimeout: healthcheckData?.timeout,
+                    hcHeaders: hcHeaders,
+                    hcFollowRedirects: healthcheckData?.followRedirects,
+                    hcMethod: healthcheckData?.method,
+                    hcStatus: healthcheckData?.status,
+                    hcHealth: "unknown"
+                })
+                .returning();
+
+            healthchecksToUpdate.push(newHealthcheck);
         }
 
         // Find existing resource by niceId and orgId
@@ -327,7 +362,10 @@ export async function updateProxyResources(
                             port: targetData.port,
                             enabled: targetData.enabled,
                             path: targetData.path,
-                            pathMatchType: targetData["path-match"]
+                            pathMatchType: targetData["path-match"],
+                            rewritePath: targetData.rewritePath,
+                            rewritePathType: targetData["rewrite-match"],
+                            priority: targetData.priority
                         })
                         .where(eq(targets.targetId, existingTarget.targetId))
                         .returning();
@@ -355,6 +393,64 @@ export async function updateProxyResources(
                             .returning();
 
                         targetsToUpdate.push(finalUpdatedTarget);
+                    }
+
+                    const healthcheckData = targetData.healthcheck;
+
+                    const [oldHealthcheck] = await trx
+                        .select()
+                        .from(targetHealthCheck)
+                        .where(
+                            eq(
+                                targetHealthCheck.targetId,
+                                existingTarget.targetId
+                            )
+                        )
+                        .limit(1);
+
+                    const hcHeaders = healthcheckData?.headers ? JSON.stringify(healthcheckData.headers) : null;
+
+                    const [newHealthcheck] = await trx
+                        .update(targetHealthCheck)
+                        .set({
+                            hcEnabled: healthcheckData?.enabled || false,
+                            hcPath: healthcheckData?.path,
+                            hcScheme: healthcheckData?.scheme,
+                            hcMode: healthcheckData?.mode,
+                            hcHostname: healthcheckData?.hostname,
+                            hcPort: healthcheckData?.port,
+                            hcInterval: healthcheckData?.interval,
+                            hcUnhealthyInterval:
+                                healthcheckData?.unhealthyInterval,
+                            hcTimeout: healthcheckData?.timeout,
+                            hcHeaders: hcHeaders,
+                            hcFollowRedirects: healthcheckData?.followRedirects,
+                            hcMethod: healthcheckData?.method,
+                            hcStatus: healthcheckData?.status
+                        })
+                        .where(
+                            eq(
+                                targetHealthCheck.targetId,
+                                existingTarget.targetId
+                            )
+                        )
+                        .returning();
+
+                    if (
+                        checkIfHealthcheckChanged(
+                            oldHealthcheck,
+                            newHealthcheck
+                        )
+                    ) {
+                        healthchecksToUpdate.push(newHealthcheck);
+                        // if the target is not already in the targetsToUpdate array, add it
+                        if (
+                            !targetsToUpdate.find(
+                                (t) => t.targetId === updatedTarget.targetId
+                            )
+                        ) {
+                            targetsToUpdate.push(updatedTarget);
+                        }
                     }
                 } else {
                     await createTarget(existingResource.resourceId, targetData);
@@ -569,7 +665,8 @@ export async function updateProxyResources(
 
         results.push({
             proxyResource: resource,
-            targetsToUpdate
+            targetsToUpdate,
+            healthchecksToUpdate
         });
     }
 
@@ -779,6 +876,36 @@ async function syncWhitelistUsers(
     }
 }
 
+function checkIfHealthcheckChanged(
+    existing: TargetHealthCheck | undefined,
+    incoming: TargetHealthCheck | undefined
+) {
+    if (!existing && incoming) return true;
+    if (existing && !incoming) return true;
+    if (!existing || !incoming) return false;
+
+    if (existing.hcEnabled !== incoming.hcEnabled) return true;
+    if (existing.hcPath !== incoming.hcPath) return true;
+    if (existing.hcScheme !== incoming.hcScheme) return true;
+    if (existing.hcMode !== incoming.hcMode) return true;
+    if (existing.hcHostname !== incoming.hcHostname) return true;
+    if (existing.hcPort !== incoming.hcPort) return true;
+    if (existing.hcInterval !== incoming.hcInterval) return true;
+    if (existing.hcUnhealthyInterval !== incoming.hcUnhealthyInterval)
+        return true;
+    if (existing.hcTimeout !== incoming.hcTimeout) return true;
+    if (existing.hcFollowRedirects !== incoming.hcFollowRedirects) return true;
+    if (existing.hcMethod !== incoming.hcMethod) return true;
+    if (existing.hcStatus !== incoming.hcStatus) return true;
+    if (
+        JSON.stringify(existing.hcHeaders) !==
+        JSON.stringify(incoming.hcHeaders)
+    )
+        return true;
+
+    return false;
+}
+
 function checkIfTargetChanged(
     existing: Target | undefined,
     incoming: Target | undefined
@@ -827,6 +954,8 @@ async function getDomain(
             `Domain not found for full-domain: ${fullDomain} in org ${orgId}`
         );
     }
+
+    await createCertificate(domain.domainId, fullDomain, trx);
 
     return domain;
 }

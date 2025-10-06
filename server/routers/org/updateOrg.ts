@@ -14,8 +14,11 @@ const updateOrgParamsSchema = z.strictObject({
         orgId: z.string()
     });
 
-const updateOrgBodySchema = z.strictObject({
-        name: z.string().min(1).max(255).optional()
+const updateOrgBodySchema = z
+    .object({
+        name: z.string().min(1).max(255).optional(),
+        settings: z.object({
+        }).optional(),
     })
     .refine((data) => Object.keys(data).length > 0, {
         error: "At least one field must be provided for update"
@@ -66,11 +69,15 @@ export async function updateOrg(
         }
 
         const { orgId } = parsedParams.data;
-        const updateData = parsedBody.data;
+
+        const settings = parsedBody.data.settings ? JSON.stringify(parsedBody.data.settings) : undefined;
 
         const updatedOrg = await db
             .update(orgs)
-            .set(updateData)
+            .set({
+                name: parsedBody.data.name,
+                settings: settings
+            })
             .where(eq(orgs.orgId, orgId))
             .returning();
 

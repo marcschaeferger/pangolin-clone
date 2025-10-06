@@ -27,7 +27,7 @@ const updateResourceRuleParamsSchema = z.strictObject({
 // Define Zod schema for request body validation
 const updateResourceRuleSchema = z.strictObject({
         action: z.enum(["ACCEPT", "DROP", "PASS"]).optional(),
-        match: z.enum(["CIDR", "IP", "PATH"]).optional(),
+        match: z.enum(["CIDR", "IP", "PATH", "GEOIP"]).optional(),
         value: z.string().min(1).optional(),
         priority: z.int(),
         enabled: z.boolean().optional()
