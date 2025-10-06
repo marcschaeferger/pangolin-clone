@@ -45,7 +45,7 @@ const updateHttpResourceBodySchema = z.strictObject({
         stickySession: z.boolean().optional(),
         tlsServerName: z.string().nullable().optional(),
         setHostHeader: z.string().nullable().optional(),
-        skipToIdpId: z.number().int().positive().nullable().optional(),
+        skipToIdpId: z.int().positive().nullable().optional(),
         headers: z
             .array(z.object({ name: z.string(), value: z.string() }))
             .nullable()

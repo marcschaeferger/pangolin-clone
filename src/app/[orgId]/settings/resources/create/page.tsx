@@ -121,7 +121,7 @@ const addTargetSchema = z.object({
     pathMatchType: z.enum(["exact", "prefix", "regex"]).optional().nullable(),
     rewritePath: z.string().optional().nullable(),
     rewritePathType: z.enum(["exact", "prefix", "regex", "stripPrefix"]).optional().nullable(),
-    priority: z.number().int().min(1).max(1000)
+    priority: z.int().min(1).max(1000)
 }).refine(
     (data) => {
         // If path is provided, pathMatchType must be provided
@@ -168,7 +168,7 @@ const addTargetSchema = z.object({
             return true;
         },
         {
-            message: "Invalid rewrite path configuration"
+            error: "Invalid rewrite path configuration"
         }
     );
 

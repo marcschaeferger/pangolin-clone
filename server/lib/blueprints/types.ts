@@ -7,18 +7,18 @@ export const SiteSchema = z.object({
 
 export const TargetHealthCheckSchema = z.object({
     hostname: z.string(),
-    port: z.number().int().min(1).max(65535),
+    port: z.int().min(1).max(65535),
     enabled: z.boolean().optional().default(true),
     path: z.string().optional(),
     scheme: z.string().optional(),
     mode: z.string().default("http"),
-    interval: z.number().int().default(30),
-    unhealthyInterval: z.number().int().default(30),
-    timeout: z.number().int().default(5),
+    interval: z.int().default(30),
+    unhealthyInterval: z.int().default(30),
+    timeout: z.int().default(5),
     headers: z.array(z.object({ name: z.string(), value: z.string() })).nullable().optional().default(null),
     followRedirects: z.boolean().default(true),
     method: z.string().default("GET"),
-    status: z.number().int().optional()
+    status: z.int().optional()
 });
 
 // Schema for individual target within a resource
@@ -34,7 +34,7 @@ export const TargetSchema = z.object({
     healthcheck: TargetHealthCheckSchema.optional(),
     rewritePath: z.string().optional(),
     "rewrite-match": z.enum(["exact", "prefix", "regex", "stripPrefix"]).optional().nullable(),
-    priority: z.number().int().min(1).max(1000).optional().default(100)
+    priority: z.int().min(1).max(1000).optional().default(100)
 });
 export type TargetData = z.infer<typeof TargetSchema>;
 

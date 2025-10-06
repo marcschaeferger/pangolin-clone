@@ -30,25 +30,23 @@ const updateTargetBodySchema = z.strictObject({
         hcScheme: z.string().optional().nullable(),
         hcMode: z.string().optional().nullable(),
         hcHostname: z.string().optional().nullable(),
-        hcPort: z.number().int().positive().optional().nullable(),
-        hcInterval: z.number().int().positive().min(5).optional().nullable(),
-        hcUnhealthyInterval: z
-            .number()
-            .int()
+        hcPort: z.int().positive().optional().nullable(),
+        hcInterval: z.int().positive().min(5).optional().nullable(),
+        hcUnhealthyInterval: z.int()
             .positive()
             .min(5)
             .optional()
             .nullable(),
-        hcTimeout: z.number().int().positive().min(1).optional().nullable(),
+        hcTimeout: z.int().positive().min(1).optional().nullable(),
         hcHeaders: z.array(z.object({ name: z.string(), value: z.string() })).nullable().optional(),
         hcFollowRedirects: z.boolean().optional().nullable(),
         hcMethod: z.string().min(1).optional().nullable(),
-        hcStatus: z.number().int().optional().nullable(),
+        hcStatus: z.int().optional().nullable(),
         path: z.string().optional().nullable(),
         pathMatchType: z.enum(["exact", "prefix", "regex"]).optional().nullable(),
         rewritePath: z.string().optional().nullable(),
         rewritePathType: z.enum(["exact", "prefix", "regex", "stripPrefix"]).optional().nullable(),
-        priority: z.number().int().min(1).max(1000).optional(),
+        priority: z.int().min(1).max(1000).optional(),
     })
     .refine((data) => Object.keys(data).length > 0, {
         error: "At least one field must be provided for update"
