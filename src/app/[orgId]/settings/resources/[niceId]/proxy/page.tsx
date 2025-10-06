@@ -115,7 +115,7 @@ const addTargetSchema = z
     .object({
         ip: z.string().refine(isTargetValid),
         method: z.string().nullable(),
-        port: z.coerce.number().int().positive(),
+        port: z.coerce.number<number>().int().positive(),
         siteId: z.int().positive(),
         path: z.string().optional().nullable(),
         pathMatchType: z

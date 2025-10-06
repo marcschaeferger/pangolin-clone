@@ -70,7 +70,7 @@ export const privateConfigSchema = z
                 local_exit_node_reachable_at: z.string().optional().default("http://gerbil:3003")
             })
             .optional()
-            .default({}),
+            .prefault({}),
         flags: z
             .object({
                 enable_redis: z.boolean().optional(),
