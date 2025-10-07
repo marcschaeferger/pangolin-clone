@@ -466,11 +466,47 @@ export const resourceRules = pgTable("resourceRules", {
     resourceId: integer("resourceId")
         .notNull()
         .references(() => resources.resourceId, { onDelete: "cascade" }),
+    templateRuleId: integer("templateRuleId")
+        .references(() => templateRules.ruleId, { onDelete: "cascade" }),
     enabled: boolean("enabled").notNull().default(true),
     priority: integer("priority").notNull(),
     action: varchar("action").notNull(), // ACCEPT, DROP, PASS
     match: varchar("match").notNull(), // CIDR, PATH, IP
     value: varchar("value").notNull()
+});
+
+// Rule templates (reusable rule sets)
+export const ruleTemplates = pgTable("ruleTemplates", {
+    templateId: varchar("templateId").primaryKey(),
+    orgId: varchar("orgId")
+        .notNull()
+        .references(() => orgs.orgId, { onDelete: "cascade" }),
+    name: varchar("name").notNull(),
+    description: varchar("description"),
+    createdAt: bigint("createdAt", { mode: "number" }).notNull()
+});
+
+// Rules within templates
+export const templateRules = pgTable("templateRules", {
+    ruleId: serial("ruleId").primaryKey(),
+    templateId: varchar("templateId")
+        .notNull()
+        .references(() => ruleTemplates.templateId, { onDelete: "cascade" }),
+    enabled: boolean("enabled").notNull().default(true),
+    priority: integer("priority").notNull(),
+    action: varchar("action").notNull(), // ACCEPT, DROP
+    match: varchar("match").notNull(), // CIDR, IP, PATH
+    value: varchar("value").notNull()
+});
+
+// Template assignments to resources
+export const resourceTemplates = pgTable("resourceTemplates", {
+    resourceId: integer("resourceId")
+        .notNull()
+        .references(() => resources.resourceId, { onDelete: "cascade" }),
+    templateId: varchar("templateId")
+        .notNull()
+        .references(() => ruleTemplates.templateId, { onDelete: "cascade" })
 });
 
 export const supporterKey = pgTable("supporterKey", {
@@ -712,3 +748,6 @@ export type SiteResource = InferSelectModel<typeof siteResources>;
 export type SetupToken = InferSelectModel<typeof setupTokens>;
 export type HostMeta = InferSelectModel<typeof hostMeta>;
 export type TargetHealthCheck = InferSelectModel<typeof targetHealthCheck>;
+export type RuleTemplate = InferSelectModel<typeof ruleTemplates>;
+export type TemplateRule = InferSelectModel<typeof templateRules>;
+export type ResourceTemplate = InferSelectModel<typeof resourceTemplates>;

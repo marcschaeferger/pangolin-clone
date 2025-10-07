@@ -600,11 +600,47 @@ export const resourceRules = sqliteTable("resourceRules", {
     resourceId: integer("resourceId")
         .notNull()
         .references(() => resources.resourceId, { onDelete: "cascade" }),
+    templateRuleId: integer("templateRuleId")
+        .references(() => templateRules.ruleId, { onDelete: "cascade" }),
     enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
     priority: integer("priority").notNull(),
     action: text("action").notNull(), // ACCEPT, DROP, PASS
     match: text("match").notNull(), // CIDR, PATH, IP
     value: text("value").notNull()
+});
+
+// Rule templates (reusable rule sets)
+export const ruleTemplates = sqliteTable("ruleTemplates", {
+    templateId: text("templateId").primaryKey(),
+    orgId: text("orgId")
+        .notNull()
+        .references(() => orgs.orgId, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    description: text("description"),
+    createdAt: integer("createdAt").notNull()
+});
+
+// Rules within templates
+export const templateRules = sqliteTable("templateRules", {
+    ruleId: integer("ruleId").primaryKey({ autoIncrement: true }),
+    templateId: text("templateId")
+        .notNull()
+        .references(() => ruleTemplates.templateId, { onDelete: "cascade" }),
+    enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
+    priority: integer("priority").notNull(),
+    action: text("action").notNull(), // ACCEPT, DROP
+    match: text("match").notNull(), // CIDR, IP, PATH
+    value: text("value").notNull()
+});
+
+// Template assignments to resources
+export const resourceTemplates = sqliteTable("resourceTemplates", {
+    resourceId: integer("resourceId")
+        .notNull()
+        .references(() => resources.resourceId, { onDelete: "cascade" }),
+    templateId: text("templateId")
+        .notNull()
+        .references(() => ruleTemplates.templateId, { onDelete: "cascade" })
 });
 
 export const supporterKey = sqliteTable("supporterKey", {
@@ -749,3 +785,6 @@ export type OrgDomains = InferSelectModel<typeof orgDomains>;
 export type SetupToken = InferSelectModel<typeof setupTokens>;
 export type HostMeta = InferSelectModel<typeof hostMeta>;
 export type TargetHealthCheck = InferSelectModel<typeof targetHealthCheck>;
+export type RuleTemplate = InferSelectModel<typeof ruleTemplates>;
+export type TemplateRule = InferSelectModel<typeof templateRules>;
+export type ResourceTemplate = InferSelectModel<typeof resourceTemplates>;

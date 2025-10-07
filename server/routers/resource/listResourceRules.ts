@@ -39,6 +39,7 @@ function queryResourceRules(resourceId: number) {
         .select({
             ruleId: resourceRules.ruleId,
             resourceId: resourceRules.resourceId,
+            templateRuleId: resourceRules.templateRuleId,
             action: resourceRules.action,
             match: resourceRules.match,
             value: resourceRules.value,

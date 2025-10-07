@@ -15,7 +15,8 @@ import {
     Globe, // Added from 'dev' branch
     MonitorUp, // Added from 'dev' branch
     Server,
-    Zap
+    Zap,
+    Shield
 } from "lucide-react";
 
 export type SidebarNavSection = {
@@ -105,6 +106,11 @@ export const orgNavSections = (
                 title: "sidebarShareableLinks",
                 href: "/{orgId}/settings/share-links",
                 icon: <LinkIcon className="h-4 w-4" />
+            },
+            {
+                title: "sidebarRuleTemplates",
+                href: "/{orgId}/settings/rule-templates",
+                icon: <Shield className="h-4 w-4" />
             }
         ]
     },
