@@ -98,7 +98,7 @@
         "node-cache": "5.1.2",
         "node-fetch": "3.3.2",
         "nodemailer": "7.0.9",
-        "npm": "^11.6.1",
+        "npm": "^11.6.2",
         "oslo": "1.2.1",
         "pg": "^8.16.2",
         "posthog-node": "^5.9.3",
