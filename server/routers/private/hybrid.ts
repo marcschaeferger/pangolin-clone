@@ -33,7 +33,9 @@ import {
     targets,
     loginPage,
     loginPageOrg,
-    LoginPage
+    LoginPage,
+    resourceHeaderAuth,
+    ResourceHeaderAuth
 } from "@server/db";
 import {
     resources,
@@ -174,6 +176,7 @@ export type ResourceWithAuth = {
     resource: Resource | null;
     pincode: ResourcePincode | null;
     password: ResourcePassword | null;
+    headerAuth: ResourceHeaderAuth | null;
 };
 
 export type UserSessionWithUser = {
@@ -452,6 +455,10 @@ hybridRouter.get(
                     resourcePassword,
                     eq(resourcePassword.resourceId, resources.resourceId)
                 )
+                .leftJoin(
+                    resourceHeaderAuth,
+                    eq(resourceHeaderAuth.resourceId, resources.resourceId)
+                )
                 .where(eq(resources.fullDomain, domain))
                 .limit(1);
 
@@ -483,7 +490,8 @@ hybridRouter.get(
             const resourceWithAuth: ResourceWithAuth = {
                 resource: result.resources,
                 pincode: result.resourcePincode,
-                password: result.resourcePassword
+                password: result.resourcePassword,
+                headerAuth: result.resourceHeaderAuth
             };
 
             return response<ResourceWithAuth>(res, {

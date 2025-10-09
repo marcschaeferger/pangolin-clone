@@ -1,7 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
-import { db } from "@server/db";
-import { resourcePassword, resourcePincode, resources } from "@server/db";
+import {
+    db,
+    resourceHeaderAuth,
+    resourcePassword,
+    resourcePincode,
+    resources
+} from "@server/db";
 import { eq } from "drizzle-orm";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
@@ -21,6 +26,7 @@ export type GetResourceAuthInfoResponse = {
     niceId: string;
     password: boolean;
     pincode: boolean;
+    headerAuth: boolean;
     sso: boolean;
     blockAccess: boolean;
     url: string;
@@ -62,6 +68,14 @@ export async function getResourceAuthInfo(
                           resourcePassword,
                           eq(resourcePassword.resourceId, resources.resourceId)
                       )
+
+                      .leftJoin(
+                          resourceHeaderAuth,
+                          eq(
+                              resourceHeaderAuth.resourceId,
+                              resources.resourceId
+                          )
+                      )
                       .where(eq(resources.resourceId, Number(resourceGuid)))
                       .limit(1)
                 : await db
@@ -75,20 +89,29 @@ export async function getResourceAuthInfo(
                           resourcePassword,
                           eq(resourcePassword.resourceId, resources.resourceId)
                       )
+
+                      .leftJoin(
+                          resourceHeaderAuth,
+                          eq(
+                              resourceHeaderAuth.resourceId,
+                              resources.resourceId
+                          )
+                      )
                       .where(eq(resources.resourceGuid, resourceGuid))
                       .limit(1);
 
         const resource = result?.resources;
-        const pincode = result?.resourcePincode;
-        const password = result?.resourcePassword;
-
-        const url = `${resource.ssl ? "https" : "http"}://${resource.fullDomain}`;
-
         if (!resource) {
             return next(
                 createHttpError(HttpCode.NOT_FOUND, "Resource not found")
             );
         }
+
+        const pincode = result?.resourcePincode;
+        const password = result?.resourcePassword;
+        const headerAuth = result?.resourceHeaderAuth;
+
+        const url = `${resource.ssl ? "https" : "http"}://${resource.fullDomain}`;
 
         return response<GetResourceAuthInfoResponse>(res, {
             data: {
@@ -98,6 +121,7 @@ export async function getResourceAuthInfo(
                 resourceName: resource.name,
                 password: password !== null,
                 pincode: pincode !== null,
+                headerAuth: headerAuth !== null,
                 sso: resource.sso,
                 blockAccess: resource.blockAccess,
                 url,
