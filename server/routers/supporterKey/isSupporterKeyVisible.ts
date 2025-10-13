@@ -45,7 +45,7 @@ export async function isSupporterKeyVisible(
             }
         }
 
-        if (config.getRawPrivateConfig().flags?.hide_supporter_key && build != "oss") {
+        if (build != "oss") {
             visible = false;
         }
 

@@ -15,13 +15,13 @@ import AccessToken from "@app/components/AccessToken";
 import { pullEnv } from "@app/lib/pullEnv";
 import { LoginFormIDP } from "@app/components/LoginForm";
 import { ListIdpsResponse } from "@server/routers/idp";
-import { ListOrgIdpsResponse } from "@server/routers/private/orgIdp";
+import { ListOrgIdpsResponse } from "@server/routers/orgIdp/types";
 import AutoLoginHandler from "@app/components/AutoLoginHandler";
 import { build } from "@server/build";
 import { headers } from "next/headers";
-import { GetLoginPageResponse } from "@server/routers/private/loginPage";
-import { GetOrgTierResponse } from "@server/routers/private/billing";
-import { TierId } from "@server/lib/private/billing/tiers";
+import { GetLoginPageResponse } from "@server/routers/loginPage/types";
+import { GetOrgTierResponse } from "@server/routers/billing/types";
+import { TierId } from "@server/lib/billing/tiers";
 
 export const dynamic = "force-dynamic";
 
