@@ -69,22 +69,33 @@ export default async function OrgAuthPage(props: {
         } catch (e) {}
 
         if (!loginPage) {
+            console.debug(
+                `No login page found for host ${host}, redirecting to dashboard`
+            );
             redirect(env.app.dashboardUrl);
         }
 
         let subscriptionStatus: GetOrgTierResponse | null = null;
-        try {
-            const getSubscription = cache(() =>
-                priv.get<AxiosResponse<GetOrgTierResponse>>(
-                    `/org/${loginPage!.orgId}/billing/tier`
-                )
-            );
-            const subRes = await getSubscription();
-            subscriptionStatus = subRes.data.data;
-        } catch {}
-        const subscribed = subscriptionStatus?.tier === TierId.STANDARD;
+        if (build === "saas") {
+            try {
+                const getSubscription = cache(() =>
+                    priv.get<AxiosResponse<GetOrgTierResponse>>(
+                        `/org/${loginPage!.orgId}/billing/tier`
+                    )
+                );
+                const subRes = await getSubscription();
+                subscriptionStatus = subRes.data.data;
+            } catch {}
+        }
+        const subscribed =
+            build === "enterprise"
+                ? true
+                : subscriptionStatus?.tier === TierId.STANDARD;
 
         if (build === "saas" && !subscribed) {
+            console.log(
+                `Org ${loginPage.orgId} is not subscribed, redirecting to dashboard`
+            );
             redirect(env.app.dashboardUrl);
         }
 
@@ -111,6 +122,7 @@ export default async function OrgAuthPage(props: {
             }
         }
     } else {
+        console.log(`Host ${host} is the same`);
         redirect(env.app.dashboardUrl);
     }
 

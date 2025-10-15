@@ -33,9 +33,7 @@ import createHttpError from "http-errors";
 import NodeCache from "node-cache";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
-import {
-    getCountryCodeForIp,
-} from "@server/lib/geoip";
+import { getCountryCodeForIp } from "@server/lib/geoip";
 import { getOrgTierData } from "#dynamic/lib/billing";
 import { TierId } from "@server/lib/billing/tiers";
 import { verifyPassword } from "@server/auth/password";
@@ -196,11 +194,13 @@ export async function verifyResourceSession(
             // otherwise its undefined and we pass
         }
 
+        // IMPORTANT: ADD NEW AUTH CHECKS HERE OR WHEN TURNING OFF ALL OTHER AUTH METHODS IT WILL JUST PASS
         if (
-            !resource.sso &&
+            !sso &&
             !pincode &&
             !password &&
-            !resource.emailWhitelistEnabled
+            !resource.emailWhitelistEnabled &&
+            !headerAuth
         ) {
             logger.debug("Resource allowed because no auth");
             return allowed(res);
@@ -295,8 +295,9 @@ export async function verifyResourceSession(
         }
 
         // check for HTTP Basic Auth header
+        const clientHeaderAuthKey = `headerAuth:${clientHeaderAuth}`;
         if (headerAuth && clientHeaderAuth) {
-            if (cache.get(clientHeaderAuth)) {
+            if (cache.get(clientHeaderAuthKey)) {
                 logger.debug(
                     "Resource allowed because header auth is valid (cached)"
                 );
@@ -307,9 +308,28 @@ export async function verifyResourceSession(
                     headerAuth.headerAuthHash
                 )
             ) {
-                cache.set(clientHeaderAuth, clientHeaderAuth);
+                cache.set(clientHeaderAuthKey, clientHeaderAuth);
                 logger.debug("Resource allowed because header auth is valid");
                 return allowed(res);
+            }
+
+            if ( // we dont want to redirect if this is the only auth method and we did not pass here
+                !sso &&
+                !pincode &&
+                !password &&
+                !resource.emailWhitelistEnabled
+            ) {
+                return notAllowed(res);
+            }
+        } else if (headerAuth) {
+            // if there are no other auth methods we need to return unauthorized if nothing is provided
+            if (
+                !sso &&
+                !pincode &&
+                !password &&
+                !resource.emailWhitelistEnabled
+            ) {
+                return notAllowed(res);
             }
         }
 
@@ -538,39 +558,6 @@ function allowed(res: Response, userData?: BasicUserData) {
         status: HttpCode.OK
     };
     return response<VerifyUserResponse>(res, data);
-}
-
-async function createAccessTokenSession(
-    res: Response,
-    resource: Resource,
-    tokenItem: ResourceAccessToken
-) {
-    const token = generateSessionToken();
-    const sess = await createResourceSession({
-        resourceId: resource.resourceId,
-        token,
-        accessTokenId: tokenItem.accessTokenId,
-        sessionLength: tokenItem.sessionLength,
-        expiresAt: tokenItem.expiresAt,
-        doNotExtend: tokenItem.expiresAt ? true : false
-    });
-    const cookieName = `${config.getRawConfig().server.session_cookie_name}`;
-    const cookie = serializeResourceSessionCookie(
-        cookieName,
-        resource.fullDomain!,
-        token,
-        !resource.ssl,
-        new Date(sess.expiresAt)
-    );
-    res.appendHeader("Set-Cookie", cookie);
-    logger.debug("Access token is valid, creating new session");
-    return response<VerifyUserResponse>(res, {
-        data: { valid: true },
-        success: true,
-        error: false,
-        message: "Access allowed",
-        status: HttpCode.OK
-    });
 }
 
 async function isUserAllowedToAccessResource(

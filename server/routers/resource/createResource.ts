@@ -34,7 +34,8 @@ const createHttpResourceSchema = z.strictObject({
         subdomain: z.string().nullable().optional(),
         http: z.boolean(),
         protocol: z.enum(["tcp", "udp"]),
-        domainId: z.string()
+        domainId: z.string(),
+        stickySession: z.boolean().optional(),
     })
     .refine(
         (data) => {
@@ -187,6 +188,7 @@ async function createHttpResource(
 
     const { name, domainId } = parsedBody.data;
     const subdomain = parsedBody.data.subdomain;
+    const stickySession=parsedBody.data.stickySession;
 
     // Validate domain and construct full domain
     const domainResult = await validateAndConstructDomain(
@@ -250,7 +252,8 @@ async function createHttpResource(
                 subdomain: finalSubdomain,
                 http: true,
                 protocol: "tcp",
-                ssl: true
+                ssl: true,
+                stickySession: stickySession
             })
             .returning();
 

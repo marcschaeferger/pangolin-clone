@@ -150,18 +150,29 @@ export const configSchema = z
                     .optional(),
                 pool: z
                     .object({
-                        max_connections: z.number().positive().optional().default(20),
-                        max_replica_connections: z.number().positive().optional().default(10),
-                        idle_timeout_ms: z.number().positive().optional().default(30000),
-                        connection_timeout_ms: z.number().positive().optional().default(5000)
+                        max_connections: z
+                            .number()
+                            .positive()
+                            .optional()
+                            .default(20),
+                        max_replica_connections: z
+                            .number()
+                            .positive()
+                            .optional()
+                            .default(10),
+                        idle_timeout_ms: z
+                            .number()
+                            .positive()
+                            .optional()
+                            .default(30000),
+                        connection_timeout_ms: z
+                            .number()
+                            .positive()
+                            .optional()
+                            .default(5000)
                     })
                     .optional()
-                    .default({
-                        max_connections: 20,
-                        max_replica_connections: 10,
-                        idle_timeout_ms: 30000,
-                        connection_timeout_ms: 5000
-                    })
+                    .default({})
             })
             .optional(),
         traefik: z
@@ -182,7 +193,10 @@ export const configSchema = z
                     .optional()
                     .default("/var/dynamic/router_config.yml"),
                 static_domains: z.array(z.string()).optional().default([]),
-                site_types: z.array(z.string()).optional().default(["newt", "wireguard", "local"]),
+                site_types: z
+                    .array(z.string())
+                    .optional()
+                    .default(["newt", "wireguard", "local"]),
                 allow_raw_resources: z.boolean().optional().default(true),
                 file_mode: z.boolean().optional().default(false)
             })
@@ -325,7 +339,10 @@ export const configSchema = z
             if (data.server?.secret === undefined) {
                 data.server.secret = process.env.SERVER_SECRET;
             }
-            return data.server?.secret !== undefined && data.server.secret.length > 0;
+            return (
+                data.server?.secret !== undefined &&
+                data.server.secret.length > 0
+            );
         },
         {
             error: "Server secret must be defined"
@@ -334,7 +351,10 @@ export const configSchema = z
     .refine(
         (data) => {
             // If hybrid is not defined, dashboard_url must be defined
-            return data.app.dashboard_url !== undefined && data.app.dashboard_url.length > 0;
+            return (
+                data.app.dashboard_url !== undefined &&
+                data.app.dashboard_url.length > 0
+            );
         },
         {
             error: "Dashboard URL must be defined"

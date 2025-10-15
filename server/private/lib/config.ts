@@ -12,11 +12,8 @@
  */
 
 import { z } from "zod";
-import { __DIRNAME, APP_VERSION } from "@server/lib/consts";
-import { db } from "@server/db";
-import { SupporterKey, supporterKey } from "@server/db";
-import { eq } from "drizzle-orm";
-import { license } from "@server/license/license";
+import { __DIRNAME } from "@server/lib/consts";
+import { SupporterKey } from "@server/db";
 import { fromError } from "zod-validation-error";
 import {
     privateConfigSchema,
@@ -143,10 +140,15 @@ export class PrivateConfig {
                 process.env.S3_BUCKET = parsedPrivateConfig.stripe.s3Bucket;
             }
             if (parsedPrivateConfig.stripe?.localFilePath) {
-                process.env.LOCAL_FILE_PATH = parsedPrivateConfig.stripe.localFilePath;
+                process.env.LOCAL_FILE_PATH =
+                    parsedPrivateConfig.stripe.localFilePath;
             }
             if (parsedPrivateConfig.stripe?.s3Region) {
                 process.env.S3_REGION = parsedPrivateConfig.stripe.s3Region;
+            }
+            if (parsedPrivateConfig.flags.use_pangolin_dns) {
+                process.env.USE_PANGOLIN_DNS =
+                    parsedPrivateConfig.flags.use_pangolin_dns.toString();
             }
         }
 

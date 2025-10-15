@@ -21,11 +21,11 @@ import {
 } from "@server/db";
 import { and, eq, inArray, or, isNull, ne, isNotNull, desc } from "drizzle-orm";
 import logger from "@server/logger";
-import HttpCode from "@server/types/HttpCode";
 import config from "@server/lib/config";
 import { orgs, resources, sites, Target, targets } from "@server/db";
-import { build } from "@server/build";
-import { sanitize } from "@server/lib/traefik/utils";
+import { sanitize, validatePathRewriteConfig } from "@server/lib/traefik/utils";
+import privateConfig from "#private/lib/config";
+import createPathRewriteMiddleware from "@server/lib/traefik/middleware";
 
 const redirectHttpsMiddlewareName = "redirect-to-https";
 const redirectToRootMiddlewareName = "redirect-to-root";
@@ -78,8 +78,10 @@ export async function getTraefikConfig(
             hcHealth: targetHealthCheck.hcHealth,
             path: targets.path,
             pathMatchType: targets.pathMatchType,
+            rewritePath: targets.rewritePath,
+            rewritePathType: targets.rewritePathType,
             priority: targets.priority,
-            
+
             // Site fields
             siteId: sites.siteId,
             siteType: sites.type,
@@ -131,18 +133,41 @@ export async function getTraefikConfig(
         const resourceName = sanitize(row.resourceName) || "";
         const targetPath = sanitize(row.path) || ""; // Handle null/undefined paths
         const pathMatchType = row.pathMatchType || "";
+        const rewritePath = row.rewritePath || "";
+        const rewritePathType = row.rewritePathType || "";
         const priority = row.priority ?? 100;
 
         if (filterOutNamespaceDomains && row.domainNamespaceId) {
             return;
         }
 
-        // Create a unique key combining resourceId and path+pathMatchType
-        const pathKey = [targetPath, pathMatchType].filter(Boolean).join("-");
+        // Create a unique key combining resourceId, path config, and rewrite config
+        const pathKey = [
+            targetPath,
+            pathMatchType,
+            rewritePath,
+            rewritePathType
+        ]
+            .filter(Boolean)
+            .join("-");
         const mapKey = [resourceId, pathKey].filter(Boolean).join("-");
         const key = sanitize(mapKey);
 
         if (!resourcesMap.has(key)) {
+            const validation = validatePathRewriteConfig(
+                row.path,
+                row.pathMatchType,
+                row.rewritePath,
+                row.rewritePathType
+            );
+
+            if (!validation.isValid) {
+                logger.error(
+                    `Invalid path rewrite configuration for resource ${resourceId}: ${validation.error}`
+                );
+                return;
+            }
+
             resourcesMap.set(key, {
                 resourceId: row.resourceId,
                 name: resourceName,
@@ -163,6 +188,8 @@ export async function getTraefikConfig(
                 headers: row.headers,
                 path: row.path, // the targets will all have the same path
                 pathMatchType: row.pathMatchType, // the targets will all have the same pathMatchType
+                rewritePath: row.rewritePath,
+                rewritePathType: row.rewritePathType,
                 priority: priority // may be null, we fallback later
             });
         }
@@ -176,7 +203,6 @@ export async function getTraefikConfig(
             port: row.port,
             internalPort: row.internalPort,
             enabled: row.targetEnabled,
-            priority: row.priority,
             site: {
                 siteId: row.siteId,
                 type: row.siteType,
@@ -186,11 +212,6 @@ export async function getTraefikConfig(
             }
         });
     });
-
-    // make sure we have at least one resource
-    if (resourcesMap.size === 0) {
-        return {};
-    }
 
     const config_output: any = {
         http: {
@@ -234,12 +255,13 @@ export async function getTraefikConfig(
                 continue;
             }
 
-            if (resource.certificateStatus !== "valid") {
-                logger.debug(
-                    `Resource ${resource.resourceId} has certificate stats ${resource.certificateStats}`
-                );
-                continue;
-            }
+            // TODO: for now dont filter it out because if you have multiple domain ids and one is failed it causes all of them to fail
+            // if (resource.certificateStatus !== "valid" && privateConfig.getRawPrivateConfig().flags.use_pangolin_dns) {
+            //     logger.debug(
+            //         `Resource ${resource.resourceId} has certificate stats ${resource.certificateStats}`
+            //     );
+            //     continue;
+            // }
 
             // add routers and services empty objects if they don't exist
             if (!config_output.http.routers) {
@@ -264,18 +286,18 @@ export async function getTraefikConfig(
 
             const configDomain = config.getDomain(resource.domainId);
 
-            let certResolver: string, preferWildcardCert: boolean;
-            if (!configDomain) {
-                certResolver = config.getRawConfig().traefik.cert_resolver;
-                preferWildcardCert =
-                    config.getRawConfig().traefik.prefer_wildcard_cert;
-            } else {
-                certResolver = configDomain.cert_resolver;
-                preferWildcardCert = configDomain.prefer_wildcard_cert;
-            }
-
             let tls = {};
-            if (build == "oss") {
+            if (!privateConfig.getRawPrivateConfig().flags.use_pangolin_dns) {
+                let certResolver: string, preferWildcardCert: boolean;
+                if (!configDomain) {
+                    certResolver = config.getRawConfig().traefik.cert_resolver;
+                    preferWildcardCert =
+                        config.getRawConfig().traefik.prefer_wildcard_cert;
+                } else {
+                    certResolver = configDomain.cert_resolver;
+                    preferWildcardCert = configDomain.prefer_wildcard_cert;
+                }
+
                 tls = {
                     certResolver: certResolver,
                     ...(preferWildcardCert
@@ -297,6 +319,55 @@ export async function getTraefikConfig(
                 badgerMiddlewareName,
                 ...additionalMiddlewares
             ];
+
+            // Handle path rewriting middleware
+            if (
+                resource.rewritePath !== null &&
+                resource.path !== null &&
+                resource.pathMatchType &&
+                resource.rewritePathType
+            ) {
+                // Create a unique middleware name
+                const rewriteMiddlewareName = `rewrite-r${resource.resourceId}-${key}`;
+
+                try {
+                    const rewriteResult = createPathRewriteMiddleware(
+                        rewriteMiddlewareName,
+                        resource.path,
+                        resource.pathMatchType,
+                        resource.rewritePath,
+                        resource.rewritePathType
+                    );
+
+                    // Initialize middlewares object if it doesn't exist
+                    if (!config_output.http.middlewares) {
+                        config_output.http.middlewares = {};
+                    }
+
+                    // the middleware to the config
+                    Object.assign(
+                        config_output.http.middlewares,
+                        rewriteResult.middlewares
+                    );
+
+                    // middlewares to the router middleware chain
+                    if (rewriteResult.chain) {
+                        // For chained middlewares (like stripPrefix + addPrefix)
+                        routerMiddlewares.push(...rewriteResult.chain);
+                    } else {
+                        // Single middleware
+                        routerMiddlewares.push(rewriteMiddlewareName);
+                    }
+
+                    logger.debug(
+                        `Created path rewrite middleware ${rewriteMiddlewareName}: ${resource.pathMatchType}(${resource.path}) -> ${resource.rewritePathType}(${resource.rewritePath})`
+                    );
+                } catch (error) {
+                    logger.error(
+                        `Failed to create path rewrite middleware for resource ${resource.resourceId}: ${error}`
+                    );
+                }
+            }
 
             if (resource.headers || resource.setHostHeader) {
                 // if there are headers, parse them into an object
@@ -419,7 +490,7 @@ export async function getTraefikConfig(
 
                         return (
                             (targets as TargetWithSite[])
-                            .filter((target: TargetWithSite) => {
+                                .filter((target: TargetWithSite) => {
                                     if (!target.enabled) {
                                         return false;
                                     }
@@ -440,7 +511,7 @@ export async function getTraefikConfig(
                                         ) {
                                             return false;
                                         }
-                                } else if (target.site.type === "newt") {
+                                    } else if (target.site.type === "newt") {
                                         if (
                                             !target.internalPort ||
                                             !target.method ||
@@ -448,10 +519,10 @@ export async function getTraefikConfig(
                                         ) {
                                             return false;
                                         }
-                                }
-                                return true;
-                            })
-                            .map((target: TargetWithSite) => {
+                                    }
+                                    return true;
+                                })
+                                .map((target: TargetWithSite) => {
                                     if (
                                         target.site.type === "local" ||
                                         target.site.type === "wireguard"
@@ -459,14 +530,14 @@ export async function getTraefikConfig(
                                         return {
                                             url: `${target.method}://${target.ip}:${target.port}`
                                         };
-                                } else if (target.site.type === "newt") {
+                                    } else if (target.site.type === "newt") {
                                         const ip =
                                             target.site.subnet!.split("/")[0];
                                         return {
                                             url: `${target.method}://${ip}:${target.internalPort}`
                                         };
-                                }
-                            })
+                                    }
+                                })
                                 // filter out duplicates
                                 .filter(
                                     (v, i, a) =>

@@ -78,7 +78,7 @@ export async function createOrgDomain(
                     )
                 );
             }
-        } else if (build == "enterprise" || build == "saas") {
+        } else if (build == "saas") {
             if (type !== "ns" && type !== "cname") {
                 return next(
                     createHttpError(
@@ -88,6 +88,7 @@ export async function createOrgDomain(
                 );
             }
         }
+        // allow wildacard, cname, and ns in enterprise
 
         // Validate organization exists
         if (!isValidDomain(baseDomain)) {
@@ -100,7 +101,7 @@ export async function createOrgDomain(
             // many providers dont allow cname for this. Lets prevent it for the user for now
             return next(
                 createHttpError(
-                    HttpCode.BAD_REQUEST, 
+                    HttpCode.BAD_REQUEST,
                     "You cannot create a CNAME record on a root domain. RFC 1912 § 2.4 prohibits CNAME records at the zone apex. Please use a subdomain."
                 )
             );
@@ -249,7 +250,7 @@ export async function createOrgDomain(
                     domainId,
                     baseDomain,
                     type,
-                    verified: build == "oss" ? true : false
+                    verified: type === "wildcard" ? true : false
                 })
                 .returning();
 

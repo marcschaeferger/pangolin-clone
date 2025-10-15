@@ -19,9 +19,16 @@ import * as loginPage from "#private/routers/loginPage";
 import * as orgIdp from "#private/routers/orgIdp";
 import * as domain from "#private/routers/domain";
 import * as auth from "#private/routers/auth";
+import * as license from "#private/routers/license";
+import * as generateLicense from "./generatedLicense";
 
 import { Router } from "express";
-import { verifyOrgAccess, verifySessionUserMiddleware, verifyUserHasAction } from "@server/middlewares";
+import {
+    verifyOrgAccess,
+    verifyUserHasAction,
+    verifyUserIsOrgOwner,
+    verifyUserIsServerAdmin
+} from "@server/middlewares";
 import { ActionsEnum } from "@server/auth/actions";
 import {
     verifyCertificateAccess,
@@ -32,30 +39,21 @@ import {
 import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import createHttpError from "http-errors";
 import HttpCode from "@server/types/HttpCode";
-
-import { unauthenticated as ua, authenticated as a, authRouter as aa } from "@server/routers/external";
+import { verifyValidLicense } from "../middlewares/verifyValidLicense";
+import { build } from "@server/build";
+import {
+    unauthenticated as ua,
+    authenticated as a,
+    authRouter as aa
+} from "@server/routers/external";
 
 export const authenticated = a;
 export const unauthenticated = ua;
 export const authRouter = aa;
 
 unauthenticated.post(
-    "/quick-start",
-    rateLimit({
-        windowMs: 15 * 60 * 1000,
-        max: 100,
-        keyGenerator: (req) => req.path,
-        handler: (req, res, next) => {
-            const message = `We're too busy right now. Please try again later.`;
-            return next(createHttpError(HttpCode.TOO_MANY_REQUESTS, message));
-        },
-        store: createStore()
-    }),
-    auth.quickStart
-);
-
-unauthenticated.post(
     "/remote-exit-node/quick-start",
+    verifyValidLicense,
     rateLimit({
         windowMs: 60 * 60 * 1000,
         max: 5,
@@ -69,9 +67,9 @@ unauthenticated.post(
     remoteExitNode.quickStartRemoteExitNode
 );
 
-
 authenticated.put(
     "/org/:orgId/idp/oidc",
+    verifyValidLicense,
     verifyOrgAccess,
     verifyUserHasAction(ActionsEnum.createIdp),
     orgIdp.createOrgOidcIdp
@@ -79,6 +77,7 @@ authenticated.put(
 
 authenticated.post(
     "/org/:orgId/idp/:idpId/oidc",
+    verifyValidLicense,
     verifyOrgAccess,
     verifyIdpAccess,
     verifyUserHasAction(ActionsEnum.updateIdp),
@@ -87,6 +86,7 @@ authenticated.post(
 
 authenticated.delete(
     "/org/:orgId/idp/:idpId",
+    verifyValidLicense,
     verifyOrgAccess,
     verifyIdpAccess,
     verifyUserHasAction(ActionsEnum.deleteIdp),
@@ -95,6 +95,7 @@ authenticated.delete(
 
 authenticated.get(
     "/org/:orgId/idp/:idpId",
+    verifyValidLicense,
     verifyOrgAccess,
     verifyIdpAccess,
     verifyUserHasAction(ActionsEnum.getIdp),
@@ -103,6 +104,7 @@ authenticated.get(
 
 authenticated.get(
     "/org/:orgId/idp",
+    verifyValidLicense,
     verifyOrgAccess,
     verifyUserHasAction(ActionsEnum.listIdps),
     orgIdp.listOrgIdps
@@ -112,6 +114,7 @@ authenticated.get("/org/:orgId/idp", orgIdp.listOrgIdps); // anyone can see this
 
 authenticated.get(
     "/org/:orgId/certificate/:domainId/:domain",
+    verifyValidLicense,
     verifyOrgAccess,
     verifyCertificateAccess,
     verifyUserHasAction(ActionsEnum.getCertificate),
@@ -120,49 +123,87 @@ authenticated.get(
 
 authenticated.post(
     "/org/:orgId/certificate/:certId/restart",
+    verifyValidLicense,
     verifyOrgAccess,
     verifyCertificateAccess,
     verifyUserHasAction(ActionsEnum.restartCertificate),
     certificates.restartCertificate
 );
 
-authenticated.post(
-    "/org/:orgId/billing/create-checkout-session",
-    verifyOrgAccess,
-    verifyUserHasAction(ActionsEnum.billing),
-    billing.createCheckoutSession
-);
+if (build === "saas") {
+    unauthenticated.post(
+        "/quick-start",
+        rateLimit({
+            windowMs: 15 * 60 * 1000,
+            max: 100,
+            keyGenerator: (req) => req.path,
+            handler: (req, res, next) => {
+                const message = `We're too busy right now. Please try again later.`;
+                return next(
+                    createHttpError(HttpCode.TOO_MANY_REQUESTS, message)
+                );
+            },
+            store: createStore()
+        }),
+        auth.quickStart
+    );
 
-authenticated.post(
-    "/org/:orgId/billing/create-portal-session",
-    verifyOrgAccess,
-    verifyUserHasAction(ActionsEnum.billing),
-    billing.createPortalSession
-);
+    authenticated.post(
+        "/org/:orgId/billing/create-checkout-session",
+        verifyOrgAccess,
+        verifyUserHasAction(ActionsEnum.billing),
+        billing.createCheckoutSession
+    );
+
+    authenticated.post(
+        "/org/:orgId/billing/create-portal-session",
+        verifyOrgAccess,
+        verifyUserHasAction(ActionsEnum.billing),
+        billing.createPortalSession
+    );
+
+    authenticated.get(
+        "/org/:orgId/billing/subscription",
+        verifyOrgAccess,
+        verifyUserHasAction(ActionsEnum.billing),
+        billing.getOrgSubscription
+    );
+
+    authenticated.get(
+        "/org/:orgId/billing/usage",
+        verifyOrgAccess,
+        verifyUserHasAction(ActionsEnum.billing),
+        billing.getOrgUsage
+    );
+
+    authenticated.get(
+        "/org/:orgId/license",
+        verifyOrgAccess,
+        generateLicense.listSaasLicenseKeys
+    );
+
+    authenticated.put(
+        "/org/:orgId/license",
+        verifyOrgAccess,
+        generateLicense.generateNewLicense
+    );
+}
 
 authenticated.get(
-    "/org/:orgId/billing/subscription",
-    verifyOrgAccess,
-    verifyUserHasAction(ActionsEnum.billing),
-    billing.getOrgSubscription
+    "/domain/namespaces",
+    verifyValidLicense,
+    domain.listDomainNamespaces
 );
-
-authenticated.get(
-    "/org/:orgId/billing/usage",
-    verifyOrgAccess,
-    verifyUserHasAction(ActionsEnum.billing),
-    billing.getOrgUsage
-);
-
-authenticated.get("/domain/namespaces", domain.listDomainNamespaces);
 
 authenticated.get(
     "/domain/check-namespace-availability",
+    verifyValidLicense,
     domain.checkDomainNamespaceAvailability
 );
 
 authenticated.put(
     "/org/:orgId/remote-exit-node",
+    verifyValidLicense,
     verifyOrgAccess,
     verifyUserHasAction(ActionsEnum.createRemoteExitNode),
     remoteExitNode.createRemoteExitNode
@@ -170,6 +211,7 @@ authenticated.put(
 
 authenticated.get(
     "/org/:orgId/remote-exit-nodes",
+    verifyValidLicense,
     verifyOrgAccess,
     verifyUserHasAction(ActionsEnum.listRemoteExitNode),
     remoteExitNode.listRemoteExitNodes
@@ -177,6 +219,7 @@ authenticated.get(
 
 authenticated.get(
     "/org/:orgId/remote-exit-node/:remoteExitNodeId",
+    verifyValidLicense,
     verifyOrgAccess,
     verifyRemoteExitNodeAccess,
     verifyUserHasAction(ActionsEnum.getRemoteExitNode),
@@ -185,6 +228,7 @@ authenticated.get(
 
 authenticated.get(
     "/org/:orgId/pick-remote-exit-node-defaults",
+    verifyValidLicense,
     verifyOrgAccess,
     verifyUserHasAction(ActionsEnum.createRemoteExitNode),
     remoteExitNode.pickRemoteExitNodeDefaults
@@ -192,6 +236,7 @@ authenticated.get(
 
 authenticated.delete(
     "/org/:orgId/remote-exit-node/:remoteExitNodeId",
+    verifyValidLicense,
     verifyOrgAccess,
     verifyRemoteExitNodeAccess,
     verifyUserHasAction(ActionsEnum.deleteRemoteExitNode),
@@ -200,6 +245,7 @@ authenticated.delete(
 
 authenticated.put(
     "/org/:orgId/login-page",
+    verifyValidLicense,
     verifyOrgAccess,
     verifyUserHasAction(ActionsEnum.createLoginPage),
     loginPage.createLoginPage
@@ -207,6 +253,7 @@ authenticated.put(
 
 authenticated.post(
     "/org/:orgId/login-page/:loginPageId",
+    verifyValidLicense,
     verifyOrgAccess,
     verifyLoginPageAccess,
     verifyUserHasAction(ActionsEnum.updateLoginPage),
@@ -215,6 +262,7 @@ authenticated.post(
 
 authenticated.delete(
     "/org/:orgId/login-page/:loginPageId",
+    verifyValidLicense,
     verifyOrgAccess,
     verifyLoginPageAccess,
     verifyUserHasAction(ActionsEnum.deleteLoginPage),
@@ -223,6 +271,7 @@ authenticated.delete(
 
 authenticated.get(
     "/org/:orgId/login-page",
+    verifyValidLicense,
     verifyOrgAccess,
     verifyUserHasAction(ActionsEnum.getLoginPage),
     loginPage.getLoginPage
@@ -230,6 +279,7 @@ authenticated.get(
 
 authRouter.post(
     "/remoteExitNode/get-token",
+    verifyValidLicense,
     rateLimit({
         windowMs: 15 * 60 * 1000,
         max: 900,
@@ -246,6 +296,7 @@ authRouter.post(
 
 authRouter.post(
     "/transfer-session-token",
+    verifyValidLicense,
     rateLimit({
         windowMs: 1 * 60 * 1000,
         max: 60,
@@ -258,4 +309,28 @@ authRouter.post(
         store: createStore()
     }),
     auth.transferSession
+);
+
+authenticated.post(
+    "/license/activate",
+    verifyUserIsServerAdmin,
+    license.activateLicense
+);
+
+authenticated.get(
+    "/license/keys",
+    verifyUserIsServerAdmin,
+    license.listLicenseKeys
+);
+
+authenticated.delete(
+    "/license/:licenseKey",
+    verifyUserIsServerAdmin,
+    license.deleteLicenseKey
+);
+
+authenticated.post(
+    "/license/recheck",
+    verifyUserIsServerAdmin,
+    license.recheckStatus
 );

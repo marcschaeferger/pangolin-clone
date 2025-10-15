@@ -103,7 +103,7 @@ export default function HealthCheckDialog({
 
     useEffect(() => {
         if (!open) return;
-        
+
         // Determine default scheme from target method
         const getDefaultScheme = () => {
             if (initialConfig?.hcScheme) {
@@ -173,7 +173,7 @@ export default function HealthCheckDialog({
                                 render={({ field }) => (
                                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                                         <div className="space-y-0.5">
-                                            <FormLabel className="text-base font-semibold">
+                                            <FormLabel>
                                                 {t("enableHealthChecks")}
                                             </FormLabel>
                                             <FormDescription>
@@ -206,7 +206,7 @@ export default function HealthCheckDialog({
                                             name="hcScheme"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel className="text-base font-semibold">
+                                                    <FormLabel>
                                                         {t("healthScheme")}
                                                     </FormLabel>
                                                     <Select
@@ -246,7 +246,7 @@ export default function HealthCheckDialog({
                                             name="hcHostname"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel className="text-base font-semibold">
+                                                    <FormLabel>
                                                         {t("healthHostname")}
                                                     </FormLabel>
                                                     <FormControl>
@@ -273,7 +273,7 @@ export default function HealthCheckDialog({
                                             name="hcPort"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel className="text-base font-semibold">
+                                                    <FormLabel>
                                                         {t("healthPort")}
                                                     </FormLabel>
                                                     <FormControl>
@@ -304,7 +304,7 @@ export default function HealthCheckDialog({
                                             name="hcPath"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel className="text-base font-semibold">
+                                                    <FormLabel>
                                                         {t("healthCheckPath")}
                                                     </FormLabel>
                                                     <FormControl>
@@ -334,7 +334,7 @@ export default function HealthCheckDialog({
                                         name="hcMethod"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel className="text-base font-semibold">
+                                                <FormLabel>
                                                     {t("httpMethod")}
                                                 </FormLabel>
                                                 <Select
@@ -386,7 +386,7 @@ export default function HealthCheckDialog({
                                             name="hcInterval"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel className="text-base font-semibold">
+                                                    <FormLabel>
                                                         {t(
                                                             "healthyIntervalSeconds"
                                                         )}
@@ -421,7 +421,7 @@ export default function HealthCheckDialog({
                                             name="hcUnhealthyInterval"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel className="text-base font-semibold">
+                                                    <FormLabel>
                                                         {t(
                                                             "unhealthyIntervalSeconds"
                                                         )}
@@ -456,7 +456,7 @@ export default function HealthCheckDialog({
                                             name="hcTimeout"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel className="text-base font-semibold">
+                                                    <FormLabel>
                                                         {t("timeoutSeconds")}
                                                     </FormLabel>
                                                     <FormControl>
@@ -495,7 +495,7 @@ export default function HealthCheckDialog({
                                         name="hcStatus"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel className="text-base font-semibold">
+                                                <FormLabel>
                                                     {t("expectedResponseCodes")}
                                                 </FormLabel>
                                                 <FormControl>
@@ -537,7 +537,7 @@ export default function HealthCheckDialog({
                                         name="hcHeaders"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel className="text-base font-semibold">
+                                                <FormLabel>
                                                     {t("customHeaders")}
                                                 </FormLabel>
                                                 <FormControl>

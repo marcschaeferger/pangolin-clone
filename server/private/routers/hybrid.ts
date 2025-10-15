@@ -243,8 +243,10 @@ hybridRouter.get(
             const traefikConfig = await getTraefikConfig(
                 remoteExitNode.exitNodeId,
                 ["newt", "local", "wireguard"], // Allow them to use all the site types
-                true // But don't allow domain namespace resources
+                true, // But don't allow domain namespace resources
+                false // Dont include login pages
             );
+
             return response(res, {
                 data: traefikConfig,
                 success: true,

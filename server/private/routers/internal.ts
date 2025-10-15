@@ -15,8 +15,8 @@ import * as loginPage from "#private/routers/loginPage";
 import * as auth from "#private/routers/auth";
 import * as orgIdp from "#private/routers/orgIdp";
 import * as billing from "#private/routers/billing";
+import * as license from "#private/routers/license";
 
-import { Router } from "express";
 import { verifySessionUserMiddleware } from "@server/middlewares";
 
 import { internalRouter as ir } from "@server/routers/internal";
@@ -34,3 +34,5 @@ internalRouter.post(
     verifySessionUserMiddleware,
     auth.getSessionTransferToken
 );
+
+internalRouter.get(`/license/status`, license.getLicenseStatus);

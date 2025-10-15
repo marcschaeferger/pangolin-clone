@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
-import { db } from "@server/db";
+import { db, resourceHeaderAuth } from "@server/db";
 import {
     resources,
     userResources,
@@ -54,7 +54,8 @@ function queryResources(accessibleResourceIds: number[], orgId: string) {
             proxyPort: resources.proxyPort,
             enabled: resources.enabled,
             domainId: resources.domainId,
-            niceId: resources.niceId
+            niceId: resources.niceId,
+            headerAuthId: resourceHeaderAuth.headerAuthId
         })
         .from(resources)
         .leftJoin(
@@ -64,6 +65,10 @@ function queryResources(accessibleResourceIds: number[], orgId: string) {
         .leftJoin(
             resourcePincode,
             eq(resourcePincode.resourceId, resources.resourceId)
+        )
+        .leftJoin(
+            resourceHeaderAuth,
+            eq(resourceHeaderAuth.resourceId, resources.resourceId)
         )
         .where(
             and(

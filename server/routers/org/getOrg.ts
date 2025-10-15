@@ -73,10 +73,6 @@ export async function getOrg(
             }
         }
 
-        logger.info(
-            `returning data: ${JSON.stringify({ ...org[0], settings: parsedSettings })}`
-        );
-
         return response<GetOrgResponse>(res, {
             data: {
                 org: {
