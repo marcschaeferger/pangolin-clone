@@ -2,13 +2,13 @@
 
 major_tag := $(shell echo $(tag) | cut -d. -f1)
 minor_tag := $(shell echo $(tag) | cut -d. -f1,2)
-build-release-arm:
+build-release:
 	@if [ -z "$(tag)" ]; then \
 		echo "Error: tag is required. Usage: make build-release tag=<tag>"; \
 		exit 1; \
 	fi
 	docker buildx build \
-		--build-arg BUILD=oss
+		--build-arg BUILD=oss \
 		--build-arg DATABASE=sqlite \
 		--platform linux/arm64,linux/amd64 \
 		--tag fosrl/pangolin:latest \
@@ -17,7 +17,7 @@ build-release-arm:
 		--tag fosrl/pangolin:$(tag) \
 		--push .
 	docker buildx build \
-		--build-arg BUILD=oss
+		--build-arg BUILD=oss \
 		--build-arg DATABASE=pg \
 		--platform linux/arm64,linux/amd64 \
 		--tag fosrl/pangolin:postgresql-latest \
@@ -26,7 +26,7 @@ build-release-arm:
 		--tag fosrl/pangolin:postgresql-$(tag) \
 		--push .
 	docker buildx build \
-		--build-arg BUILD=enterprise
+		--build-arg BUILD=enterprise \
 		--build-arg DATABASE=sqlite \
 		--platform linux/arm64,linux/amd64 \
 		--tag fosrl/pangolin:ee-latest \
@@ -35,7 +35,7 @@ build-release-arm:
 		--tag fosrl/pangolin:ee-$(tag) \
 		--push .
 	docker buildx build \
-		--build-arg BUILD=enterprise
+		--build-arg BUILD=enterprise \
 		--build-arg DATABASE=pg \
 		--platform linux/arm64,linux/amd64 \
 		--tag fosrl/pangolin:ee-postgresql-latest \
