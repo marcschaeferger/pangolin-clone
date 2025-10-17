@@ -19,13 +19,27 @@ import {
     loginPage,
     targetHealthCheck
 } from "@server/db";
-import { and, eq, inArray, or, isNull, ne, isNotNull, desc } from "drizzle-orm";
+import {
+    and,
+    eq,
+    inArray,
+    or,
+    isNull,
+    ne,
+    isNotNull,
+    desc,
+    sql
+} from "drizzle-orm";
 import logger from "@server/logger";
 import config from "@server/lib/config";
 import { orgs, resources, sites, Target, targets } from "@server/db";
 import { sanitize, validatePathRewriteConfig } from "@server/lib/traefik/utils";
 import privateConfig from "#private/lib/config";
 import createPathRewriteMiddleware from "@server/lib/traefik/middleware";
+import {
+    CertificateResult,
+    getValidCertificatesForDomains
+} from "#private/lib/certificates";
 
 const redirectHttpsMiddlewareName = "redirect-to-https";
 const redirectToRootMiddlewareName = "redirect-to-root";
@@ -89,14 +103,11 @@ export async function getTraefikConfig(
             subnet: sites.subnet,
             exitNodeId: sites.exitNodeId,
             // Namespace
-            domainNamespaceId: domainNamespaces.domainNamespaceId,
-            // Certificate
-            certificateStatus: certificates.status
+            domainNamespaceId: domainNamespaces.domainNamespaceId
         })
         .from(sites)
         .innerJoin(targets, eq(targets.siteId, sites.siteId))
         .innerJoin(resources, eq(resources.resourceId, targets.resourceId))
-        .leftJoin(certificates, eq(certificates.domainId, resources.domainId))
         .leftJoin(
             targetHealthCheck,
             eq(targetHealthCheck.targetId, targets.targetId)
@@ -109,15 +120,19 @@ export async function getTraefikConfig(
             and(
                 eq(targets.enabled, true),
                 eq(resources.enabled, true),
-                // or(
-                eq(sites.exitNodeId, exitNodeId),
-                //     isNull(sites.exitNodeId)
-                // ),
+                or(
+                    eq(sites.exitNodeId, exitNodeId),
+                    and(
+                        isNull(sites.exitNodeId),
+                        sql`(${siteTypes.includes("local") ? 1 : 0} = 1)` // only allow local sites if "local" is in siteTypes
+                    )
+                ),
                 or(
                     ne(targetHealthCheck.hcHealth, "unhealthy"), // Exclude unhealthy targets
                     isNull(targetHealthCheck.hcHealth) // Include targets with no health check record
                 ),
                 inArray(sites.type, siteTypes),
+                // lets rewrite this using sql
                 config.getRawConfig().traefik.allow_raw_resources
                     ? isNotNull(resources.http) // ignore the http check if allow_raw_resources is true
                     : eq(resources.http, true)
@@ -183,7 +198,6 @@ export async function getTraefikConfig(
                 tlsServerName: row.tlsServerName,
                 setHostHeader: row.setHostHeader,
                 enableProxy: row.enableProxy,
-                certificateStatus: row.certificateStatus,
                 targets: [],
                 headers: row.headers,
                 path: row.path, // the targets will all have the same path
@@ -212,6 +226,20 @@ export async function getTraefikConfig(
             }
         });
     });
+
+    let validCerts: CertificateResult[] = [];
+    if (privateConfig.getRawPrivateConfig().flags.use_pangolin_dns) {
+        // create a list of all domains to get certs for
+        const domains = new Set<string>();
+        for (const resource of resourcesMap.values()) {
+            if (resource.enabled && resource.ssl && resource.fullDomain) {
+                domains.add(resource.fullDomain);
+            }
+        }
+        // get the valid certs for these domains
+        validCerts = await getValidCertificatesForDomains(domains, true); // we are caching here because this is called often
+        logger.debug(`Valid certs for domains: ${JSON.stringify(validCerts)}`);
+    }
 
     const config_output: any = {
         http: {
@@ -255,14 +283,6 @@ export async function getTraefikConfig(
                 continue;
             }
 
-            // TODO: for now dont filter it out because if you have multiple domain ids and one is failed it causes all of them to fail
-            // if (resource.certificateStatus !== "valid" && privateConfig.getRawPrivateConfig().flags.use_pangolin_dns) {
-            //     logger.debug(
-            //         `Resource ${resource.resourceId} has certificate stats ${resource.certificateStats}`
-            //     );
-            //     continue;
-            // }
-
             // add routers and services empty objects if they don't exist
             if (!config_output.http.routers) {
                 config_output.http.routers = {};
@@ -272,22 +292,22 @@ export async function getTraefikConfig(
                 config_output.http.services = {};
             }
 
-            const domainParts = fullDomain.split(".");
-            let wildCard;
-            if (domainParts.length <= 2) {
-                wildCard = `*.${domainParts.join(".")}`;
-            } else {
-                wildCard = `*.${domainParts.slice(1).join(".")}`;
-            }
-
-            if (!resource.subdomain) {
-                wildCard = resource.fullDomain;
-            }
-
-            const configDomain = config.getDomain(resource.domainId);
-
             let tls = {};
             if (!privateConfig.getRawPrivateConfig().flags.use_pangolin_dns) {
+                const domainParts = fullDomain.split(".");
+                let wildCard;
+                if (domainParts.length <= 2) {
+                    wildCard = `*.${domainParts.join(".")}`;
+                } else {
+                    wildCard = `*.${domainParts.slice(1).join(".")}`;
+                }
+
+                if (!resource.subdomain) {
+                    wildCard = resource.fullDomain;
+                }
+
+                const configDomain = config.getDomain(resource.domainId);
+
                 let certResolver: string, preferWildcardCert: boolean;
                 if (!configDomain) {
                     certResolver = config.getRawConfig().traefik.cert_resolver;
@@ -310,6 +330,17 @@ export async function getTraefikConfig(
                           }
                         : {})
                 };
+            } else {
+                // find a cert that matches the full domain, if not continue
+                const matchingCert = validCerts.find(
+                    (cert) => cert.queriedDomain === resource.fullDomain
+                );
+                if (!matchingCert) {
+                    logger.warn(
+                        `No matching certificate found for domain: ${resource.fullDomain}`
+                    );
+                    continue;
+                }
             }
 
             const additionalMiddlewares =
@@ -676,19 +707,30 @@ export async function getTraefikConfig(
                 loginPageId: loginPage.loginPageId,
                 fullDomain: loginPage.fullDomain,
                 exitNodeId: exitNodes.exitNodeId,
-                domainId: loginPage.domainId,
-                certificateStatus: certificates.status
+                domainId: loginPage.domainId
             })
             .from(loginPage)
             .innerJoin(
                 exitNodes,
                 eq(exitNodes.exitNodeId, loginPage.exitNodeId)
             )
-            .leftJoin(
-                certificates,
-                eq(certificates.domainId, loginPage.domainId)
-            )
             .where(eq(exitNodes.exitNodeId, exitNodeId));
+
+        let validCertsLoginPages: CertificateResult[] = [];
+        if (privateConfig.getRawPrivateConfig().flags.use_pangolin_dns) {
+            // create a list of all domains to get certs for
+            const domains = new Set<string>();
+            for (const lp of exitNodeLoginPages) {
+                if (lp.fullDomain) {
+                    domains.add(lp.fullDomain);
+                }
+            }
+            // get the valid certs for these domains
+            validCertsLoginPages = await getValidCertificatesForDomains(
+                domains,
+                true
+            ); // we are caching here because this is called often
+        }
 
         if (exitNodeLoginPages.length > 0) {
             if (!config_output.http.services) {
@@ -719,8 +761,22 @@ export async function getTraefikConfig(
                     continue;
                 }
 
-                if (lp.certificateStatus !== "valid") {
-                    continue;
+                let tls = {};
+                if (
+                    !privateConfig.getRawPrivateConfig().flags.use_pangolin_dns
+                ) {
+                    // TODO: we need to add the wildcard logic here too
+                } else {
+                    // find a cert that matches the full domain, if not continue
+                    const matchingCert = validCertsLoginPages.find(
+                        (cert) => cert.queriedDomain === lp.fullDomain
+                    );
+                    if (!matchingCert) {
+                        logger.warn(
+                            `No matching certificate found for login page domain: ${lp.fullDomain}`
+                        );
+                        continue;
+                    }
                 }
 
                 // auth-allowed:
@@ -743,7 +799,7 @@ export async function getTraefikConfig(
                     service: "landing-service",
                     rule: `Host(\`${fullDomain}\`) && (PathRegexp(\`^/auth/resource/[^/]+$\`) || PathRegexp(\`^/auth/idp/[0-9]+/oidc/callback\`) || PathPrefix(\`/_next\`) || Path(\`/auth/org\`) || PathRegexp(\`^/__nextjs*\`))`,
                     priority: 203,
-                    tls: {}
+                    tls: tls
                 };
 
                 // auth-catchall:
@@ -762,7 +818,7 @@ export async function getTraefikConfig(
                     service: "landing-service",
                     rule: `Host(\`${fullDomain}\`)`,
                     priority: 202,
-                    tls: {}
+                    tls: tls
                 };
 
                 // we need to add a redirect from http to https too
