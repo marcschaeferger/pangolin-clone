@@ -172,7 +172,7 @@ export const configSchema = z
                             .default(5000)
                     })
                     .optional()
-                    .default({})
+                    .prefault({})
             })
             .optional(),
         traefik: z

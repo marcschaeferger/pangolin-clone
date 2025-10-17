@@ -212,9 +212,9 @@ export const ClientResourceSchema = z.object({
 // Schema for the entire configuration object
 export const ConfigSchema = z
     .object({
-        "proxy-resources": z.record(z.string(), ResourceSchema).optional().default({}),
-        "client-resources": z.record(z.string(), ClientResourceSchema).optional().default({}),
-        sites: z.record(z.string(), SiteSchema).optional().default({})
+        "proxy-resources": z.record(z.string(), ResourceSchema).optional().prefault({}),
+        "client-resources": z.record(z.string(), ClientResourceSchema).optional().prefault({}),
+        sites: z.record(z.string(), SiteSchema).optional().prefault({})
     })
     .superRefine(
         // Enforce the full-domain uniqueness across resources in the same stack

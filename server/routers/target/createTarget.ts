@@ -59,8 +59,7 @@ const createTargetSchema = z.strictObject({
             .optional()
             .nullable(),
         priority: z.int().min(1).max(1000).optional().nullable()
-    })
-    .strict();
+    });
 
 export type CreateTargetResponse = Target & TargetHealthCheck;
 
