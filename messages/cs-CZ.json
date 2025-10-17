@@ -1154,7 +1154,7 @@
     "sidebarAllUsers": "Všichni uživatelé",
     "sidebarIdentityProviders": "Poskytovatelé identity",
     "sidebarLicense": "Licence",
-    "sidebarClients": "Clients",
+    "sidebarClients": "Klienti",
     "sidebarDomains": "Domény",
     "enableDockerSocket": "Povolit Docker plán",
     "enableDockerSocketDescription": "Povolte seškrábání štítků na Docker Socket pro popisky plánů. Nová cesta musí být k dispozici.",
@@ -1558,7 +1558,7 @@
     "autoLoginErrorNoRedirectUrl": "Od poskytovatele identity nebyla obdržena žádná adresa URL.",
     "autoLoginErrorGeneratingUrl": "Nepodařilo se vygenerovat ověřovací URL.",
     "remoteExitNodeManageRemoteExitNodes": "Vzdálené uzly",
-    "remoteExitNodeDescription": "Self-host one or more remote nodes to extend your network connectivity and reduce reliance on the cloud",
+    "remoteExitNodeDescription": "Hostujte jeden nebo více vlastních vzdálených uzlů, abyste rozšířili síťová připojení a snížili závislost na cloudu",
     "remoteExitNodes": "Uzly",
     "searchRemoteExitNodes": "Hledat uzly...",
     "remoteExitNodeAdd": "Přidat uzel",
@@ -1745,134 +1745,134 @@
     "resourceHeaderAuthRemoveDescription": "Úspěšně odstraněna autentizace záhlaví.",
     "resourceErrorHeaderAuthRemove": "Nepodařilo se odstranit Autentizaci Záhlaví",
     "resourceErrorHeaderAuthRemoveDescription": "Nepodařilo se odstranit autentizaci záhlaví ze zdroje.",
-    "resourceHeaderAuthProtectionEnabled": "Header Authentication Enabled",
-    "resourceHeaderAuthProtectionDisabled": "Header Authentication Disabled",
-    "headerAuthRemove": "Remove Header Auth",
-    "headerAuthAdd": "Add Header Auth",
+    "resourceHeaderAuthProtectionEnabled": "Ověřování pomocí hlaviček zapnuto",
+    "resourceHeaderAuthProtectionDisabled": "Ověřování pomocí hlaviček vypnuto",
+    "headerAuthRemove": "Odstranit ověřování pomocí hlaviček",
+    "headerAuthAdd": "Přidat ověřování pomocí hlaviček",
     "resourceErrorHeaderAuthSetup": "Nepodařilo se nastavit Autentizaci Záhlaví",
     "resourceErrorHeaderAuthSetupDescription": "Nepodařilo se nastavit autentizaci záhlaví ze zdroje.",
     "resourceHeaderAuthSetup": "Úspěšně nastavena Autentizace Záhlaví",
     "resourceHeaderAuthSetupDescription": "Autentizace záhlaví byla úspěšně nastavena.",
     "resourceHeaderAuthSetupTitle": "Nastavit Autentizaci Záhlaví",
-    "resourceHeaderAuthSetupTitleDescription": "Set the basic auth credentials (username and password) to protect this resource with HTTP Header Authentication. Access it using the format https://username:password@resource.example.com",
+    "resourceHeaderAuthSetupTitleDescription": "Nastavte přihlašovací údaje basic auth (uživatelské jméno a heslo) abyste tento zdroj chránili ověřováním pomocí HTTP hlaviček. Pro přístup použijte adresu ve formátu https://username:password@resource.example.com",
     "resourceHeaderAuthSubmit": "Nastavit Autentizaci Záhlaví",
     "actionSetResourceHeaderAuth": "Nastavit Autentizaci Záhlaví",
     "enterpriseEdition": "Podniková edice",
-    "unlicensed": "Unlicensed",
+    "unlicensed": "Nelicencováno",
     "beta": "Beta",
-    "manageClients": "Manage Clients",
-    "manageClientsDescription": "Clients are devices that can connect to your sites",
-    "licenseTableValidUntil": "Valid Until",
+    "manageClients": "Spravovat klienty",
+    "manageClientsDescription": "Klienti jsou zařízení, která se mohou připojit k vašim lokalitám",
+    "licenseTableValidUntil": "Platná do",
     "saasLicenseKeysSettingsTitle": "Podniková licence",
     "saasLicenseKeysSettingsDescription": "Vygenerovat a spravovat podnikové licence pro instance Pangolin na vlastním hostingu",
     "sidebarEnterpriseLicenses": "Licence",
-    "generateLicenseKey": "Generate License Key",
+    "generateLicenseKey": "Vygenerovat licenční klíč",
     "generateLicenseKeyForm": {
         "validation": {
-            "emailRequired": "Please enter a valid email address",
-            "useCaseTypeRequired": "Please select a use case type",
-            "firstNameRequired": "First name is required",
-            "lastNameRequired": "Last name is required",
-            "primaryUseRequired": "Please describe your primary use",
-            "jobTitleRequiredBusiness": "Job title is required for business use",
-            "industryRequiredBusiness": "Industry is required for business use",
-            "stateProvinceRegionRequired": "State/Province/Region is required",
-            "postalZipCodeRequired": "Postal/ZIP Code is required",
-            "companyNameRequiredBusiness": "Company name is required for business use",
-            "countryOfResidenceRequiredBusiness": "Country of residence is required for business use",
-            "countryRequiredPersonal": "Country is required for personal use",
-            "agreeToTermsRequired": "You must agree to the terms",
-            "complianceConfirmationRequired": "You must confirm compliance with the Fossorial Commercial License"
+            "emailRequired": "Prosím zadejte platnou emailovou adresu",
+            "useCaseTypeRequired": "Vyberte prosím typ použití",
+            "firstNameRequired": "Zadejte křestní jméno",
+            "lastNameRequired": "Zadejte příjmení",
+            "primaryUseRequired": "Popište prosím účel použití",
+            "jobTitleRequiredBusiness": "Pro komerční využití zadejte název pracovní pozice",
+            "industryRequiredBusiness": "Pro komerční využití zadejte odvětví společnosti",
+            "stateProvinceRegionRequired": "Zadejte stát/provincii/oblast",
+            "postalZipCodeRequired": "Zadejte PSČ",
+            "companyNameRequiredBusiness": "Pro komerční využití zadejte název společnosti",
+            "countryOfResidenceRequiredBusiness": "Pro komerční využití zadejte zemi sídla společnosti",
+            "countryRequiredPersonal": "Pro osobní využití zadejte zemi",
+            "agreeToTermsRequired": "Musíte souhlasit s podmínkami",
+            "complianceConfirmationRequired": "Musíte potvrdit dodržování Fossorial Commercial Licence"
         },
         "useCaseOptions": {
             "personal": {
-                "title": "Personal Use",
-                "description": "For individual, non-commercial use such as learning, personal projects, or experimentation."
+                "title": "Osobní využití",
+                "description": "Pro osobní nekomerční využití jako je vzdělávání, osobní projekty nebo experimentování."
             },
             "business": {
-                "title": "Business Use",
-                "description": "For use within organizations, companies, or commercial or revenue-generating activities."
+                "title": "Podnikové využití",
+                "description": "Pro použití v organizacích, společnostech nebo při činnostech generujících zisk."
             }
         },
         "steps": {
             "emailLicenseType": {
-                "title": "Email & License Type",
-                "description": "Enter your email and choose your license type"
+                "title": "Email a typ licence",
+                "description": "Zadejte svůj email a vyberte typ licence"
             },
             "personalInformation": {
-                "title": "Personal Information",
-                "description": "Tell us about yourself"
+                "title": "Osobní údaje",
+                "description": "Povězte nám něco o sobě"
             },
             "contactInformation": {
-                "title": "Contact Information",
-                "description": "Your contact details"
+                "title": "Kontaktní údaje",
+                "description": "Vaše kontaktní údaje"
             },
             "termsGenerate": {
-                "title": "Terms & Generate",
-                "description": "Review and accept terms to generate your license"
+                "title": "Podmínky a vygenerovat",
+                "description": "Zkontrolujte a přijměte podmínky pro vygenerování vaší licence"
             }
         },
         "alerts": {
             "commercialUseDisclosure": {
-                "title": "Usage Disclosure",
-                "description": "Select the license tier that accurately reflects your intended use. The Personal License permits free use of the Software for individual, non-commercial or small-scale commercial activities with annual gross revenue under $100,000 USD. Any use beyond these limits — including use within a business, organization, or other revenue-generating environment — requires a valid Enterprise License and payment of the applicable licensing fee. All users, whether Personal or Enterprise, must comply with the Fossorial Commercial License Terms."
+                "title": "Poskytnutí využití",
+                "description": "Vyberte si typ licence který odráží způsob využití. Osobní licence dovoluje používat aplikaci pro osobní využití, nekomerční využití nebo v malých organizacích do ročního obratu pod 100 000 USD. Jakékoliv jiné využití včetně využití pro podnikání, organizace nebo jiná prostředí generující zisk vyžaduje platnou podnikovou licenci a platbu licenčních poplatků. Všichni uživatelé, ať už osobních nebo podnikových licencí, musí souhlasit s Fossorial Commercial License Terms."
             },
             "trialPeriodInformation": {
-                "title": "Trial Period Information",
-                "description": "This License Key enables Enterprise features for a 7-day evaluation period. Continued access to Paid Features beyond the evaluation period requires activation under a valid Personal or Enterprise License. For Enterprise licensing, contact sales@fossorial.io."
+                "title": "Informace o zkušební době",
+                "description": "Tento licenční klíč umožňuje používat podnikové funkce po dobu sedmidenní zkušební doby. Abyste zachovali přístup k placeným funkcím po skončení zkušební doby, musíte aktivovat platnou osobní nebo podnikovou licenci. Pro podnikové licence kontaktujte sales@fossorial.io."
             }
         },
         "form": {
-            "useCaseQuestion": "Are you using Pangolin for personal or business use?",
-            "firstName": "First Name",
-            "lastName": "Last Name",
-            "jobTitle": "Job Title",
-            "primaryUseQuestion": "What do you primarily plan to use Pangolin for?",
-            "industryQuestion": "What is your industry?",
-            "prospectiveUsersQuestion": "How many prospective users do you expect to have?",
-            "prospectiveSitesQuestion": "How many prospective sites (tunnels) do you expect to have?",
-            "companyName": "Company name",
-            "countryOfResidence": "Country of residence",
-            "stateProvinceRegion": "State / Province / Region",
-            "postalZipCode": "Postal / ZIP Code",
-            "companyWebsite": "Company website",
-            "companyPhoneNumber": "Company phone number",
-            "country": "Country",
-            "phoneNumberOptional": "Phone number (optional)",
-            "complianceConfirmation": "I confirm that the information I provided is accurate and that I am in compliance with the Fossorial Commercial License. Reporting inaccurate information or misidentifying use of the product is a violation of the license and may result in your key getting revoked."
+            "useCaseQuestion": "Používáte Pangolin pro osobní nebo obchodní účely?",
+            "firstName": "Křestní jméno",
+            "lastName": "Příjmení",
+            "jobTitle": "Pracovní pozice",
+            "primaryUseQuestion": "Na co budete především používat Pangolin?",
+            "industryQuestion": "Jaké je vaše odvětví?",
+            "prospectiveUsersQuestion": "Kolik potenciálních uživatelů předpokládáte?",
+            "prospectiveSitesQuestion": "Kolik předpokládáte lokalit (tunelů)?",
+            "companyName": "Název společnosti",
+            "countryOfResidence": "Země sídla společnosti",
+            "stateProvinceRegion": "Stát / kraj / oblast",
+            "postalZipCode": "PSČ",
+            "companyWebsite": "Stránky společnosti",
+            "companyPhoneNumber": "Telefonní číslo společnosti",
+            "country": "Země",
+            "phoneNumberOptional": "Telefonní číslo (nepovinné)",
+            "complianceConfirmation": "Potvrzuji, že informace které jsem poskytl jsou přesné a že jsem v souladu s licencí Fossorial Commercial License. Poskutnutí nepřesných informací nebo nesprávné určení použití produktu je porušením licence a může vést ke zrušení platnosti klíče."
         },
         "buttons": {
-            "close": "Close",
-            "previous": "Previous",
-            "next": "Next",
-            "generateLicenseKey": "Generate License Key"
+            "close": "Zavřít",
+            "previous": "Předchozí",
+            "next": "Následující",
+            "generateLicenseKey": "Vygenerovat licenční klíč"
         },
         "toasts": {
             "success": {
-                "title": "License key generated successfully",
-                "description": "Your license key has been generated and is ready to use."
+                "title": "Licenční klíč byl úspěšně vytvořen",
+                "description": "Váš licenční klíč byl vytvořen a je připraven k použití."
             },
             "error": {
-                "title": "Failed to generate license key",
-                "description": "An error occurred while generating the license key."
+                "title": "Nepodařilo se vytvořit licenční klíč",
+                "description": "Při generování licenčního klíče došlo k chybě."
             }
         }
     },
     "priority": "Priorita",
     "priorityDescription": "Vyšší priorita je vyhodnocena jako první. Priorita = 100 znamená automatické řazení (rozhodnutí systému). Pro vynucení manuální priority použijte jiné číslo.",
-    "instanceName": "Instance Name",
-    "pathMatchModalTitle": "Configure Path Matching",
-    "pathMatchModalDescription": "Set up how incoming requests should be matched based on their path.",
-    "pathMatchType": "Match Type",
+    "instanceName": "Název instance",
+    "pathMatchModalTitle": "Nastavit porovnávání cest",
+    "pathMatchModalDescription": "Nastavte jak se bude ověřovat, ze cesty příchozích požadavků odpovídají.",
+    "pathMatchType": "Type ověření",
     "pathMatchPrefix": "Prefix",
-    "pathMatchExact": "Exact",
+    "pathMatchExact": "Presně",
     "pathMatchRegex": "Regex",
-    "pathMatchValue": "Path Value",
-    "clear": "Clear",
-    "saveChanges": "Save Changes",
+    "pathMatchValue": "Hodnota cesty",
+    "clear": "Smazat",
+    "saveChanges": "Uložit změny",
     "pathMatchRegexPlaceholder": "^/api/.*",
-    "pathMatchDefaultPlaceholder": "/path",
-    "pathMatchPrefixHelp": "Example: /api matches /api, /api/users, etc.",
+    "pathMatchDefaultPlaceholder": "/cesta",
+    "pathMatchPrefixHelp": "Příklad: /api odpovídá /api, /api/users atd.",
     "pathMatchExactHelp": "Example: /api matches only /api",
     "pathMatchRegexHelp": "Example: ^/api/.* matches /api/anything",
     "pathRewriteModalTitle": "Configure Path Rewriting",
@@ -1894,5 +1894,5 @@
     "pathRewriteRegex": "Regex",
     "pathRewriteStrip": "Strip",
     "pathRewriteStripLabel": "strip",
-    "sidebarEnableEnterpriseLicense": "Enable Enterprise License"
+    "sidebarEnableEnterpriseLicense": "Použít podnikovou licenci"
 }
