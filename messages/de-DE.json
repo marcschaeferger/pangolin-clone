@@ -531,7 +531,7 @@
     "ipAddressErrorInvalidFormat": "Ungültiges IP-Adressformat",
     "ipAddressErrorInvalidOctet": "Ungültiges IP-Adress-Oktett",
     "path": "Pfad",
-    "matchPath": "Spielpfad",
+    "matchPath": "URL-Pfad",
     "ipAddressRange": "IP-Bereich",
     "rulesErrorFetch": "Fehler beim Abrufen der Regeln",
     "rulesErrorFetchDescription": "Beim Abrufen der Regeln ist ein Fehler aufgetreten",
@@ -728,9 +728,9 @@
     "manage": "Verwalten",
     "sitesNotFound": "Keine Standorte gefunden.",
     "pangolinServerAdmin": "Server-Admin - Pangolin",
-    "licenseTierProfessional": "Professional Lizenz",
-    "licenseTierEnterprise": "Enterprise Lizenz",
-    "licenseTierPersonal": "Personal License",
+    "licenseTierProfessional": "Professional-Lizenz",
+    "licenseTierEnterprise": "Enterprise-Lizenz",
+    "licenseTierPersonal": "Persönliche Lizenz",
     "licensed": "Lizenziert",
     "yes": "Ja",
     "no": "Nein",
@@ -1760,13 +1760,14 @@
     "enterpriseEdition": "Enterprise Edition",
     "unlicensed": "Unlicensed",
     "beta": "Beta",
-    "manageClients": "Manage Clients",
-    "manageClientsDescription": "Clients are devices that can connect to your sites",
-    "licenseTableValidUntil": "Valid Until",
-    "saasLicenseKeysSettingsTitle": "Enterprise Licenses",
-    "saasLicenseKeysSettingsDescription": "Generate and manage Enterprise license keys for self-hosted Pangolin instances",
-    "sidebarEnterpriseLicenses": "Licenses",
-    "generateLicenseKey": "Generate License Key",
+    "manageClients": "Clients verwalten",
+    "manageClientsDescription": "Clients sind Geräte, die sich zu deinen Sites verbinden können",
+    "licenseTableValidUntil": "Gültig bis",
+    "saasLicenseKeysSettingsTitle": "Enterprise-Lizenzen",
+    "saasLicenseKeysSettingsDescription": "Enterprise-Lizenzen für selbst gehostete Pangolin-Instanzen erstellen und verwalten",
+    "sidebarEnterpriseLicenses": "Lizenzen",
+    "sidebarEnableEnterpriseLicense": "Enterprise-Lizenz erhalten"
+    "generateLicenseKey": "Lizenzschlüssel erstellen",
     "generateLicenseKeyForm": {
         "validation": {
             "emailRequired": "Please enter a valid email address",
@@ -1786,30 +1787,30 @@
         },
         "useCaseOptions": {
             "personal": {
-                "title": "Personal Use",
-                "description": "For individual, non-commercial use such as learning, personal projects, or experimentation."
+                "title": "Persönliche Nutzung",
+                "description": "Für nichtkommerzielle, individuelle Nutzung - zum Lernen, für persönliche Projekte oder Experimente."
             },
             "business": {
-                "title": "Business Use",
-                "description": "For use within organizations, companies, or commercial or revenue-generating activities."
+                "title": "Geschäftliche Nutzung",
+                "description": "Zur Nutzung in Organisationen, Unternehmen oder für gewerbliche oder umsatzgenerierende Aktivitäten."
             }
         },
         "steps": {
             "emailLicenseType": {
-                "title": "Email & License Type",
-                "description": "Enter your email and choose your license type"
+                "title": "E-Mail angeben und Lizenztyp auswählen",
+                "description": "Bitte geben Sie ihre E-Mail an und wählen den Lizenztyp."
             },
             "personalInformation": {
-                "title": "Personal Information",
-                "description": "Tell us about yourself"
+                "title": "Persönliche Daten",
+                "description": "Erzählen Sie uns etwas über sich"
             },
             "contactInformation": {
-                "title": "Contact Information",
-                "description": "Your contact details"
+                "title": "Kontaktdaten",
+                "description": "Ihre Kontaktinformationen"
             },
             "termsGenerate": {
-                "title": "Terms & Generate",
-                "description": "Review and accept terms to generate your license"
+                "title": "Bedingungen & generieren",
+                "description": "Überprüfen Sie unsere Lizenzbedingungen und generieren Sie ihre Lizenz."
             }
         },
         "alerts": {
