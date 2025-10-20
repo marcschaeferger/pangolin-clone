@@ -100,6 +100,10 @@ type ResourcesTableProps = {
     internalResources: InternalResourceRow[];
     orgId: string;
     defaultView?: "proxy" | "internal";
+    defaultSort?: {
+        id: string;
+        desc: boolean;
+    };
 };
 
 
@@ -143,7 +147,8 @@ export default function ResourcesTable({
     resources,
     internalResources,
     orgId,
-    defaultView = "proxy"
+    defaultView = "proxy",
+    defaultSort
 }: ResourcesTableProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -171,12 +176,16 @@ export default function ResourcesTable({
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
     const [sites, setSites] = useState<Site[]>([]);
 
-    const [proxySorting, setProxySorting] = useState<SortingState>([]);
+    const [proxySorting, setProxySorting] = useState<SortingState>(
+        defaultSort ? [defaultSort] : []
+    );
     const [proxyColumnFilters, setProxyColumnFilters] =
         useState<ColumnFiltersState>([]);
     const [proxyGlobalFilter, setProxyGlobalFilter] = useState<any>([]);
 
-    const [internalSorting, setInternalSorting] = useState<SortingState>([]);
+    const [internalSorting, setInternalSorting] = useState<SortingState>(
+        defaultSort ? [defaultSort] : []
+    );
     const [internalColumnFilters, setInternalColumnFilters] =
         useState<ColumnFiltersState>([]);
     const [internalGlobalFilter, setInternalGlobalFilter] = useState<any>([]);
@@ -695,17 +704,12 @@ export default function ResourcesTable({
                     }}
                     dialog={
                         <div>
-                            <p className="mb-2">
-                                {t("resourceQuestionRemove", {
-                                    selectedResource:
-                                        selectedResource?.name ||
-                                        selectedResource?.id
-                                })}
+                            <p>
+                                {t("resourceQuestionRemove")}
                             </p>
-
-                            <p className="mb-2">{t("resourceMessageRemove")}</p>
-
-                            <p>{t("resourceMessageConfirm")}</p>
+                            <p>
+                                {t("resourceMessageRemove")}
+                            </p>
                         </div>
                     }
                     buttonText={t("resourceDeleteConfirm")}
@@ -724,17 +728,12 @@ export default function ResourcesTable({
                     }}
                     dialog={
                         <div>
-                            <p className="mb-2">
-                                {t("resourceQuestionRemove", {
-                                    selectedResource:
-                                        selectedInternalResource?.name ||
-                                        selectedInternalResource?.id
-                                })}
+                            <p>
+                                {t("resourceQuestionRemove")}
                             </p>
-
-                            <p className="mb-2">{t("resourceMessageRemove")}</p>
-
-                            <p>{t("resourceMessageConfirm")}</p>
+                            <p>
+                                {t("resourceMessageRemove")}
+                            </p>
                         </div>
                     }
                     buttonText={t("resourceDeleteConfirm")}

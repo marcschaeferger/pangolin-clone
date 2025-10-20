@@ -120,19 +120,12 @@ export async function getTraefikConfig(
             and(
                 eq(targets.enabled, true),
                 eq(resources.enabled, true),
-                or(
-                    eq(sites.exitNodeId, exitNodeId),
-                    and(
-                        isNull(sites.exitNodeId),
-                        sql`(${siteTypes.includes("local") ? 1 : 0} = 1)` // only allow local sites if "local" is in siteTypes
-                    )
-                ),
+                eq(sites.exitNodeId, exitNodeId),
                 or(
                     ne(targetHealthCheck.hcHealth, "unhealthy"), // Exclude unhealthy targets
                     isNull(targetHealthCheck.hcHealth) // Include targets with no health check record
                 ),
                 inArray(sites.type, siteTypes),
-                // lets rewrite this using sql
                 config.getRawConfig().traefik.allow_raw_resources
                     ? isNotNull(resources.http) // ignore the http check if allow_raw_resources is true
                     : eq(resources.http, true)
@@ -238,7 +231,7 @@ export async function getTraefikConfig(
         }
         // get the valid certs for these domains
         validCerts = await getValidCertificatesForDomains(domains, true); // we are caching here because this is called often
-        logger.debug(`Valid certs for domains: ${JSON.stringify(validCerts)}`);
+        // logger.debug(`Valid certs for domains: ${JSON.stringify(validCerts)}`);
     }
 
     const config_output: any = {
