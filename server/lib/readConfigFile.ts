@@ -312,7 +312,7 @@ export const configSchema = z
                 cname_extension: z.string().optional().default("cname.pangolin.net")
             })
             .optional()
-            .default({})
+            .prefault({})
     })
     .refine(
         (data) => {
