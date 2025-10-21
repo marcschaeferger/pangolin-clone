@@ -61,3 +61,10 @@ test:
 
 clean:
 	docker rmi pangolin
+
+test-local:
+	npm run set:oss
+	npm run set:sqlite
+	npx tsc --noEmit -p tsconfig.oss.json
+	docker build --build-arg DATABASE=pg -t fosrl/pangolin:postgresql-latest .
+	docker build --build-arg DATABASE=sqlite -t fosrl/pangolin:latest .
