@@ -85,7 +85,7 @@ export async function runMigrations() {
 
 async function executeScripts() {
     try {
-        const requriedPreviousVersion = "1.11.1";
+        const requriedPreviousVersion = "1.11.2";
         // Get the last executed version from the database
         const lastExecuted = await db.select().from(versionMigrations);
 
