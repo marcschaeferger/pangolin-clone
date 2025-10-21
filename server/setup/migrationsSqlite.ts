@@ -96,6 +96,11 @@ async function executeScripts() {
         const startVersion = pendingMigrations[0]?.version ?? APP_VERSION;
         const lastVersion = pendingMigrations[pendingMigrations.length - 1].version;
 
+        console.log(`Current App Version ${APP_VERSION}`);
+        console.log(`Latest migration version ${lastVersion}`);
+        console.log(`Starting migrations from version ${startVersion}`);
+        console.log(`Required version ${requriedPreviousVersion}`);
+
         if (!semver.eq(lastVersion, requriedPreviousVersion)) {
             console.error(
                 `Starting App not allowed. Your previous version is: ${lastVersion}. ` +
