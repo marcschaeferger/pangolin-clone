@@ -98,10 +98,10 @@ async function executeScripts() {
 
         if (!semver.eq(lastVersion, requriedPreviousVersion)) {
             console.error(
-            `Starting App not allowed. Your previous version is: ${lastVersion}. ` +
-            `Please update first to version ${requriedPreviousVersion} due to breaking changes in version 2.0.0.`
-        );
-        process.exit(1);
+                `Starting App not allowed. Your previous version is: ${lastVersion}. ` +
+                `Please update first to version ${requriedPreviousVersion} due to breaking changes in version 2.0.0.`
+            );
+            process.exit(1);
         }
 
         console.log(`Starting migrations from version ${startVersion}`);
