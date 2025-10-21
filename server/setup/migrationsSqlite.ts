@@ -85,7 +85,7 @@ export async function runMigrations() {
 
 async function executeScripts() {
     try {
-        const requriedPreviousVersion = "1.11.2";
+        const requriedPreviousVersion = "1.11.1";
         // Get the last executed version from the database
         const lastExecuted = await db.select().from(versionMigrations);
 
@@ -94,18 +94,10 @@ async function executeScripts() {
             .map((m) => m)
             .sort((a, b) => semver.compare(b.version, a.version));
         const startVersion = pendingMigrations[0]?.version ?? APP_VERSION;
-        const lastVersion = pendingMigrations[pendingMigrations.length - 1].version;
 
-        console.log(`Current App Version ${APP_VERSION}`);
-        console.log(`Latest migration version ${lastVersion}`);
-        console.log(`Starting migrations from version ${startVersion}`);
-        console.log(`Required version ${requriedPreviousVersion}`);
-
-        if (!semver.eq(lastVersion, requriedPreviousVersion)) {
-            console.error(
-                `Starting App not allowed. Your previous version is: ${lastVersion}. ` +
-                `Please update first to version ${requriedPreviousVersion} due to breaking changes in version 2.0.0.`
-            );
+        if (!semver.eq(startVersion, requriedPreviousVersion)) {
+            console.error(`Starting App not allowed. Your previous version is: ${startVersion}.`);
+            console.error(`Please update first to version ${requriedPreviousVersion} due to breaking changes in version 2.0.0.`);
             process.exit(1);
         }
 
