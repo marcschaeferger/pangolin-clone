@@ -60,7 +60,7 @@ export const AuthSchema = z.object({
 
 export const RuleSchema = z.object({
     action: z.enum(["allow", "deny", "pass"]),
-    match: z.enum(["cidr", "path", "ip", "country"]),
+    match: z.enum(["cidr", "path", "ip", "geoip"]),
     value: z.string()
 });
 
