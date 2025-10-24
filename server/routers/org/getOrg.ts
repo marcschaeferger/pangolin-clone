@@ -15,7 +15,7 @@ const getOrgSchema = z.strictObject({
     });
 
 export type GetOrgResponse = {
-    org: Org & { settings: { } | null };
+    org: Org;
 };
 
 registry.registerPath({
@@ -62,23 +62,9 @@ export async function getOrg(
             );
         }
 
-        // Parse settings from JSON string back to object
-        let parsedSettings = null;
-        if (org[0].settings) {
-            try {
-                parsedSettings = JSON.parse(org[0].settings);
-            } catch (error) {
-                // If parsing fails, keep as string for backward compatibility
-                parsedSettings = org[0].settings;
-            }
-        }
-
         return response<GetOrgResponse>(res, {
             data: {
-                org: {
-                    ...org[0],
-                    settings: parsedSettings
-                }
+                org: org[0]
             },
             success: true,
             error: false,
