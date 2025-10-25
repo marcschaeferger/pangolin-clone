@@ -12,9 +12,9 @@ import stoi from "@server/lib/stoi";
 import { sendToClient } from "#dynamic/routers/ws";
 import {
     fetchContainers,
-    dockerSocketCache,
     dockerSocket
 } from "../newt/dockerSocket";
+import cache from "@server/lib/cache";
 
 export interface ContainerNetwork {
     networkId: string;
@@ -153,7 +153,7 @@ async function triggerFetch(siteId: number) {
 
     // clear the cache for this Newt ID so that the site has to keep asking for the containers
     // this is to ensure that the site always gets the latest data
-    dockerSocketCache.del(`${newt.newtId}:dockerContainers`);
+    cache.del(`${newt.newtId}:dockerContainers`);
 
     return { siteId, newtId: newt.newtId };
 }
@@ -161,7 +161,7 @@ async function triggerFetch(siteId: number) {
 async function queryContainers(siteId: number) {
     const { newt } = await getSiteAndNewt(siteId);
 
-    const result = dockerSocketCache.get(
+    const result = cache.get(
         `${newt.newtId}:dockerContainers`
     ) as Container[];
     if (!result) {
@@ -178,7 +178,7 @@ async function isDockerAvailable(siteId: number): Promise<boolean> {
     const { newt } = await getSiteAndNewt(siteId);
 
     const key = `${newt.newtId}:isAvailable`;
-    const isAvailable = dockerSocketCache.get(key);
+    const isAvailable = cache.get(key);
 
     return !!isAvailable;
 }
@@ -192,8 +192,8 @@ async function getDockerStatus(
     const mappedKeys = keys.map((x) => `${newt.newtId}:${x}`);
 
     const result = {
-        isAvailable: dockerSocketCache.get(mappedKeys[0]) as boolean,
-        socketPath: dockerSocketCache.get(mappedKeys[1]) as string | undefined
+        isAvailable: cache.get(mappedKeys[0]) as boolean,
+        socketPath: cache.get(mappedKeys[1]) as string | undefined
     };
 
     return result;
