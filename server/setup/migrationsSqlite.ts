@@ -7,14 +7,14 @@ import { versionMigrations } from "../db/sqlite";
 import { __DIRNAME, APP_PATH, APP_VERSION } from "@server/lib/consts";
 import { LibsqlError } from "@libsql/client";
 import fs from "fs";
-import m31 from "./scriptsSqlite/2.0.0";
+import m31 from "./scriptsSqlite/1.12.0";
 
 // THIS CANNOT IMPORT ANYTHING FROM THE SERVER
 // EXCEPT FOR THE DATABASE AND THE SCHEMA
 
 // Define the migration list with versions and their corresponding functions
 const migrations = [
-    { version: "2.0.0", run: m31 },
+    { version: "1.12.0", run: m31 },
     // Add new migrations here as they are created
 ] as const;
 
