@@ -177,6 +177,14 @@ authenticated.post(
     client.updateClient,
 );
 
+authenticated.post(
+    "/client/:clientId/regenerate-secret",
+    verifyClientsEnabled,
+    verifyClientAccess,
+    verifyUserHasAction(ActionsEnum.reGenerateSecret),
+    client.reGenerateClientSecret
+);
+
 // authenticated.get(
 //     "/site/:siteId/roles",
 //     verifySiteAccess,
@@ -189,6 +197,13 @@ authenticated.post(
     verifyUserHasAction(ActionsEnum.updateSite),
     logActionAudit(ActionsEnum.updateSite),
     site.updateSite,
+);
+
+authenticated.post(
+    "/site/:siteId/regenerate-secret",
+    verifySiteAccess,
+    verifyUserHasAction(ActionsEnum.reGenerateSecret),
+    site.reGenerateSiteSecret
 );
 authenticated.delete(
     "/site/:siteId",
