@@ -67,7 +67,7 @@ export function IdpCreateWizard({ onSubmit, defaultValues, loading = false }: Id
         emailPath: z.string().optional(),
         namePath: z.string().optional(),
         scopes: z.string().min(1, { message: t('idpScopeRequired') }),
-        autoProvision: z.boolean().prefault(false)
+        autoProvision: z.boolean().default(false)
     });
 
     interface ProviderTypeOption {

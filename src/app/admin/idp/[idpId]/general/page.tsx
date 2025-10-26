@@ -69,7 +69,7 @@ export default function GeneralPage() {
         emailPath: z.string().optional(),
         namePath: z.string().optional(),
         scopes: z.string().min(1, { message: t('idpScopeRequired') }),
-        autoProvision: z.boolean().prefault(false)
+        autoProvision: z.boolean().default(false)
     });
 
     type GeneralFormValues = z.infer<typeof GeneralFormSchema>;

@@ -139,13 +139,11 @@ const validateResourceSessionTokenBodySchema = z.strictObject({
         token: z.string().min(1, "Token is required")
     });
 
-const validateResourceAccessTokenBodySchema = z
-    .object({
+const validateResourceAccessTokenBodySchema = z.strictObject({
         accessTokenId: z.string().optional(),
         resourceId: z.number().optional(),
         accessToken: z.string()
-    })
-    .strict();
+    });
 
 // Certificates by domains query validation
 const getCertificatesByDomainsQuerySchema = z.strictObject({
