@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
-import { db, Domain, domains, OrgDomains, orgDomains } from "@server/db";
+import { db, Domain, domains, OrgDomains, orgDomains, dnsRecords } from "@server/db";
 import response from "@server/lib/response";
 import HttpCode from "@server/types/HttpCode";
 import createHttpError from "http-errors";
@@ -21,8 +21,11 @@ const paramsSchema = z.strictObject({
 
 const bodySchema = z.strictObject({
         type: z.enum(["ns", "cname", "wildcard"]),
-        baseDomain: subdomainSchema
+        baseDomain: subdomainSchema,
+        certResolver: z.string().optional().nullable(),
+        preferWildcardCert: z.boolean().optional().nullable() // optional, only for wildcard
     });
+
 
 export type CreateDomainResponse = {
     domainId: string;
@@ -30,6 +33,8 @@ export type CreateDomainResponse = {
     cnameRecords?: { baseDomain: string; value: string }[];
     aRecords?: { baseDomain: string; value: string }[];
     txtRecords?: { baseDomain: string; value: string }[];
+    certResolver?: string | null;
+    preferWildcardCert?: boolean | null;
 };
 
 // Helper to check if a domain is a subdomain or equal to another domain
@@ -67,7 +72,7 @@ export async function createOrgDomain(
         }
 
         const { orgId } = parsedParams.data;
-        const { type, baseDomain } = parsedBody.data;
+        const { type, baseDomain, certResolver, preferWildcardCert } = parsedBody.data;
 
         if (build == "oss") {
             if (type !== "wildcard") {
@@ -250,7 +255,9 @@ export async function createOrgDomain(
                     domainId,
                     baseDomain,
                     type,
-                    verified: type === "wildcard" ? true : false
+                    verified: type === "wildcard" ? true : false,
+                    certResolver: certResolver || null,
+                    preferWildcardCert: preferWildcardCert || false
                 })
                 .returning();
 
@@ -265,9 +272,24 @@ export async function createOrgDomain(
                 })
                 .returning();
 
+            // Prepare DNS records to insert
+            const recordsToInsert = [];
+
             // TODO: This needs to be cross region and not hardcoded
             if (type === "ns") {
                 nsRecords = config.getRawConfig().dns.nameservers as string[];
+                
+                // Save NS records to database
+                for (const nsValue of nsRecords) {
+                    recordsToInsert.push({
+                        id: generateId(15),
+                        domainId,
+                        recordType: "NS",
+                        baseDomain: baseDomain,
+                        value: nsValue,
+                        verified: false
+                    });
+                }
             } else if (type === "cname") {
                 cnameRecords = [
                     {
@@ -279,6 +301,18 @@ export async function createOrgDomain(
                         baseDomain: `_acme-challenge.${baseDomain}`
                     }
                 ];
+                
+                // Save CNAME records to database
+                for (const cnameRecord of cnameRecords) {
+                    recordsToInsert.push({
+                        id: generateId(15),
+                        domainId,
+                        recordType: "CNAME",
+                        baseDomain: cnameRecord.baseDomain,
+                        value: cnameRecord.value,
+                        verified: false
+                    });
+                }
             } else if (type === "wildcard") {
                 aRecords = [
                     {
@@ -290,6 +324,23 @@ export async function createOrgDomain(
                         baseDomain: `${baseDomain}`
                     }
                 ];
+                
+                // Save A records to database
+                for (const aRecord of aRecords) {
+                    recordsToInsert.push({
+                        id: generateId(15),
+                        domainId,
+                        recordType: "A",
+                        baseDomain: aRecord.baseDomain,
+                        value: aRecord.value,
+                        verified: true
+                    });
+                }
+            }
+
+            // Insert all DNS records in batch
+            if (recordsToInsert.length > 0) {
+                await trx.insert(dnsRecords).values(recordsToInsert);
             }
 
             numOrgDomains = await trx
@@ -321,7 +372,9 @@ export async function createOrgDomain(
                 cnameRecords,
                 txtRecords,
                 nsRecords,
-                aRecords
+                aRecords,
+                certResolver: returned.certResolver,
+                preferWildcardCert: returned.preferWildcardCert
             },
             success: true,
             error: false,

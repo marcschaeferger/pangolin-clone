@@ -17,7 +17,7 @@ import { OpenAPITags, registry } from "@server/openApi";
 
 const createResourceRuleSchema = z.strictObject({
         action: z.enum(["ACCEPT", "DROP", "PASS"]),
-        match: z.enum(["CIDR", "IP", "PATH", "GEOIP"]),
+        match: z.enum(["CIDR", "IP", "PATH", "COUNTRY"]),
         value: z.string().min(1),
         priority: z.int(),
         enabled: z.boolean().optional()
