@@ -1744,7 +1744,6 @@
     "orgAuthNoIdpConfigured": "Esta organización no tiene ningún proveedor de identidad configurado. En su lugar puedes iniciar sesión con tu identidad de Pangolin.",
     "orgAuthSignInWithPangolin": "Iniciar sesión con Pangolin",
     "subscriptionRequiredToUse": "Se requiere una suscripción para utilizar esta función.",
-    "licenseRequiredToUse": "An Enterprise license is required to use this feature.",
     "idpDisabled": "Los proveedores de identidad están deshabilitados.",
     "orgAuthPageDisabled": "La página de autenticación de la organización está deshabilitada.",
     "domainRestartedDescription": "Verificación de dominio reiniciada con éxito",
@@ -2010,6 +2009,7 @@
     "logRetentionForever": "Forever",
     "actionLogsDescription": "View a history of actions performed in this organization",
     "accessLogsDescription": "View access auth requests for resources in this organization",
+    "licenseRequiredToUse": "An Enterprise license is required to use this feature.",
     "certResolver": "Resolver certificado",
     "certResolverDescription": "Seleccione la resolución de certificados a utilizar para este recurso.",
     "selectCertResolver": "Seleccionar Resolver Certificado",
@@ -2039,5 +2039,7 @@
     "version2": "Versión 2",
     "versionDescription": "La versión 1 está basada en texto y es ampliamente soportada. La versión 2 es binaria y más eficiente pero menos compatible.",
     "warning": "Advertencia",
-    "proxyProtocolWarning": "Su aplicación de backend debe estar configurada para aceptar conexiones Proxy Protocol. Si su backend no soporta Proxy Protocol, habilitando esto romperá todas las conexiones. Asegúrese de configurar su backend para que confíe en las cabeceras del protocolo Proxy de Traefik."
+    "proxyProtocolWarning": "Su aplicación de backend debe estar configurada para aceptar conexiones Proxy Protocol. Si su backend no soporta Proxy Protocol, habilitando esto romperá todas las conexiones. Asegúrese de configurar su backend para que confíe en las cabeceras del protocolo Proxy de Traefik.",
+    "restarting": "Restarting...",
+    "manual": "Manual"
 }
