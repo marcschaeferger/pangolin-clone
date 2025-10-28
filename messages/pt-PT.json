@@ -1744,7 +1744,6 @@
     "orgAuthNoIdpConfigured": "Esta organização não tem nenhum provedor de identidade configurado. Você pode entrar com a identidade do seu Pangolin.",
     "orgAuthSignInWithPangolin": "Entrar com o Pangolin",
     "subscriptionRequiredToUse": "Uma assinatura é necessária para usar esse recurso.",
-    "licenseRequiredToUse": "An Enterprise license is required to use this feature.",
     "idpDisabled": "Provedores de identidade estão desabilitados.",
     "orgAuthPageDisabled": "A página de autenticação da organização está desativada.",
     "domainRestartedDescription": "Verificação de domínio reiniciado com sucesso",
@@ -2010,6 +2009,7 @@
     "logRetentionForever": "Forever",
     "actionLogsDescription": "View a history of actions performed in this organization",
     "accessLogsDescription": "View access auth requests for resources in this organization",
+    "licenseRequiredToUse": "An Enterprise license is required to use this feature.",
     "certResolver": "Resolvedor de Certificado",
     "certResolverDescription": "Selecione o resolvedor de certificados para este recurso.",
     "selectCertResolver": "Selecionar solucionador de certificado",
@@ -2039,5 +2039,7 @@
     "version2": "Versão 2",
     "versionDescription": "A versão 1 é baseada em texto e amplamente suportada. A versão 2 é binária e mais eficiente, mas menos compatível.",
     "warning": "ATENÇÃO",
-    "proxyProtocolWarning": "Seu aplicativo de backend deve ser configurado para aceitar conexões de protocolo de proxy. Se o seu backend não suportar o protocolo de protocolo, habilitando isso quebrará todas as conexões. Certifique-se de configurar seu backend para confiar nos cabeçalhos do protocolo proxy no Traefik."
+    "proxyProtocolWarning": "Seu aplicativo de backend deve ser configurado para aceitar conexões de protocolo de proxy. Se o seu backend não suportar o protocolo de protocolo, habilitando isso quebrará todas as conexões. Certifique-se de configurar seu backend para confiar nos cabeçalhos do protocolo proxy no Traefik.",
+    "restarting": "Restarting...",
+    "manual": "Manual"
 }
