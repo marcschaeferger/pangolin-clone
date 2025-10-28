@@ -1744,7 +1744,6 @@
     "orgAuthNoIdpConfigured": "Denne organisasjonen har ikke noen identitetstjeneste konfigurert. Du kan i stedet logge inn med Pangolin identiteten din.",
     "orgAuthSignInWithPangolin": "Logg inn med Pangolin",
     "subscriptionRequiredToUse": "Et abonnement er påkrevd for å bruke denne funksjonen.",
-    "licenseRequiredToUse": "An Enterprise license is required to use this feature.",
     "idpDisabled": "Identitetsleverandører er deaktivert.",
     "orgAuthPageDisabled": "Informasjons-siden for organisasjon er deaktivert.",
     "domainRestartedDescription": "Domene-verifiseringen ble startet på nytt",
@@ -2010,6 +2009,7 @@
     "logRetentionForever": "Forever",
     "actionLogsDescription": "View a history of actions performed in this organization",
     "accessLogsDescription": "View access auth requests for resources in this organization",
+    "licenseRequiredToUse": "An Enterprise license is required to use this feature.",
     "certResolver": "Sertifikat løser",
     "certResolverDescription": "Velg sertifikatløser som skal brukes for denne ressursen.",
     "selectCertResolver": "Velg sertifikatløser",
@@ -2039,5 +2039,7 @@
     "version2": "Versjon 2",
     "versionDescription": "Versjon 1 er tekstbasert og støttet. Versjon 2 er binært og mer effektivt, men mindre kompatibel.",
     "warning": "Advarsel",
-    "proxyProtocolWarning": "Din backend applikasjon må være konfigurert for å godta Proxy Protokoller. Hvis din backend ikke støtter Proxy Protocol, vil aktivering av dette bryte alle tilkoblinger. Sørg for å konfigurere backend til å stole på Proxy Protokoll overskrifter fra Traefik."
+    "proxyProtocolWarning": "Din backend applikasjon må være konfigurert for å godta Proxy Protokoller. Hvis din backend ikke støtter Proxy Protocol, vil aktivering av dette bryte alle tilkoblinger. Sørg for å konfigurere backend til å stole på Proxy Protokoll overskrifter fra Traefik.",
+    "restarting": "Restarting...",
+    "manual": "Manual"
 }
