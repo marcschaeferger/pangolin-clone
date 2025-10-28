@@ -1744,7 +1744,6 @@
     "orgAuthNoIdpConfigured": "Questa organizzazione non ha nessun provider di identità configurato. Puoi accedere con la tua identità Pangolin.",
     "orgAuthSignInWithPangolin": "Accedi con Pangolino",
     "subscriptionRequiredToUse": "Per utilizzare questa funzionalità è necessario un abbonamento.",
-    "licenseRequiredToUse": "An Enterprise license is required to use this feature.",
     "idpDisabled": "I provider di identità sono disabilitati.",
     "orgAuthPageDisabled": "La pagina di autenticazione dell'organizzazione è disabilitata.",
     "domainRestartedDescription": "Verifica del dominio riavviata con successo",
@@ -2010,6 +2009,7 @@
     "logRetentionForever": "Forever",
     "actionLogsDescription": "View a history of actions performed in this organization",
     "accessLogsDescription": "View access auth requests for resources in this organization",
+    "licenseRequiredToUse": "An Enterprise license is required to use this feature.",
     "certResolver": "Risolutore Di Certificato",
     "certResolverDescription": "Selezionare il risolutore di certificati da usare per questa risorsa.",
     "selectCertResolver": "Seleziona Risolutore Di Certificato",
@@ -2039,5 +2039,7 @@
     "version2": "Versione 2",
     "versionDescription": "La versione 1 è testuale e ampiamente supportata. La versione 2 è binaria e più efficiente, ma meno compatibile.",
     "warning": "Attenzione",
-    "proxyProtocolWarning": "La tua applicazione backend deve essere configurata per accettare le connessioni del protocollo proxy. Se il tuo backend non supporta il protocollo proxy, abilitando questa opzione si interromperanno tutte le connessioni. Assicurati di configurare il tuo backend per fidarti delle intestazioni del protocollo proxy da Traefik."
+    "proxyProtocolWarning": "La tua applicazione backend deve essere configurata per accettare le connessioni del protocollo proxy. Se il tuo backend non supporta il protocollo proxy, abilitando questa opzione si interromperanno tutte le connessioni. Assicurati di configurare il tuo backend per fidarti delle intestazioni del protocollo proxy da Traefik.",
+    "restarting": "Restarting...",
+    "manual": "Manual"
 }
