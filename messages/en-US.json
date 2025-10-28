@@ -2061,5 +2061,6 @@
     "supportSending": "Sending...",
     "supportSend": "Send",
     "supportMessageSent": "Message Sent!",
-    "supportWillContact": "We'll be in touch shortly!"
+    "supportWillContact": "We'll be in touch shortly!",
+    "niceId": "Nice ID"
 }
