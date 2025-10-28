@@ -1744,7 +1744,6 @@
     "orgAuthNoIdpConfigured": "此机构没有配置任何身份提供者。您可以使用您的 Pangolin 身份登录。",
     "orgAuthSignInWithPangolin": "使用 Pangolin 登录",
     "subscriptionRequiredToUse": "需要订阅才能使用此功能。",
-    "licenseRequiredToUse": "An Enterprise license is required to use this feature.",
     "idpDisabled": "身份提供者已禁用。",
     "orgAuthPageDisabled": "组织认证页面已禁用。",
     "domainRestartedDescription": "域验证重新启动成功",
@@ -2010,6 +2009,7 @@
     "logRetentionForever": "Forever",
     "actionLogsDescription": "View a history of actions performed in this organization",
     "accessLogsDescription": "View access auth requests for resources in this organization",
+    "licenseRequiredToUse": "An Enterprise license is required to use this feature.",
     "certResolver": "证书解决器",
     "certResolverDescription": "选择用于此资源的证书解析器。",
     "selectCertResolver": "选择证书解析",
@@ -2039,5 +2039,7 @@
     "version2": "版本 2",
     "versionDescription": "版本 1 是基于文本和广泛支持的版本。版本 2 是二进制和更有效率但不那么兼容。",
     "warning": "警告",
-    "proxyProtocolWarning": "您的后端应用程序必须配置为接受代理协议连接。如果您的后端不支持代理协议，启用这将会中断所有连接。 请务必从Traefik配置您的后端到信任代理协议标题。"
+    "proxyProtocolWarning": "您的后端应用程序必须配置为接受代理协议连接。如果您的后端不支持代理协议，启用这将会中断所有连接。 请务必从Traefik配置您的后端到信任代理协议标题。",
+    "restarting": "Restarting...",
+    "manual": "Manual"
 }
