@@ -1744,7 +1744,6 @@
     "orgAuthNoIdpConfigured": "Cette organisation n'a aucun fournisseur d'identité configuré. Vous pouvez vous connecter avec votre identité Pangolin à la place.",
     "orgAuthSignInWithPangolin": "Se connecter avec Pangolin",
     "subscriptionRequiredToUse": "Un abonnement est requis pour utiliser cette fonctionnalité.",
-    "licenseRequiredToUse": "An Enterprise license is required to use this feature.",
     "idpDisabled": "Les fournisseurs d'identité sont désactivés.",
     "orgAuthPageDisabled": "La page d'authentification de l'organisation est désactivée.",
     "domainRestartedDescription": "La vérification du domaine a été redémarrée avec succès",
@@ -2010,6 +2009,7 @@
     "logRetentionForever": "Forever",
     "actionLogsDescription": "View a history of actions performed in this organization",
     "accessLogsDescription": "View access auth requests for resources in this organization",
+    "licenseRequiredToUse": "An Enterprise license is required to use this feature.",
     "certResolver": "Résolveur de certificat",
     "certResolverDescription": "Sélectionnez le solveur de certificat à utiliser pour cette ressource.",
     "selectCertResolver": "Sélectionnez le résolveur de certificat",
@@ -2039,5 +2039,7 @@
     "version2": "Version 2",
     "versionDescription": "La version 1 est basée sur du texte et est largement supportée. La version 2 est binaire et plus efficace mais moins compatible.",
     "warning": "Avertissement",
-    "proxyProtocolWarning": "Votre application backend doit être configurée pour accepter les connexions Proxy Protocol. Si votre backend ne prend pas en charge le protocole Proxy, activer ceci va casser toutes les connexions. Assurez-vous de configurer votre backend pour faire confiance aux en-têtes du protocole Proxy de Traefik."
+    "proxyProtocolWarning": "Votre application backend doit être configurée pour accepter les connexions Proxy Protocol. Si votre backend ne prend pas en charge le protocole Proxy, activer ceci va casser toutes les connexions. Assurez-vous de configurer votre backend pour faire confiance aux en-têtes du protocole Proxy de Traefik.",
+    "restarting": "Restarting...",
+    "manual": "Manual"
 }
