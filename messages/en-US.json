@@ -2061,5 +2061,11 @@
     "supportSending": "Sending...",
     "supportSend": "Send",
     "supportMessageSent": "Message Sent!",
-    "supportWillContact": "We'll be in touch shortly!"
+    "supportWillContact": "We'll be in touch shortly!",
+    "niceId": "Nice ID",
+    "niceIdUpdated": "Nice ID Updated",
+    "niceIdUpdatedSuccessfully": "Nice ID Updated Successfully",
+    "niceIdUpdateError": "Error updating Nice ID",
+    "niceIdUpdateErrorDescription": "An error occurred while updating the Nice ID.",
+    "niceIdCannotBeEmpty": "Nice ID cannot be empty"
 }
