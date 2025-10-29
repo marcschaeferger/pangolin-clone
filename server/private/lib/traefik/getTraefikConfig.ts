@@ -332,7 +332,7 @@ export async function getTraefikConfig(
 
                 const configDomain = config.getDomain(resource.domainId);
 
-                let certResolver: string, preferWildcardCert: boolean;
+                let certResolver: string | undefined, preferWildcardCert: boolean;
                 if (!configDomain) {
                     certResolver = config.getRawConfig().traefik.cert_resolver;
                     preferWildcardCert =
