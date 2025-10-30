@@ -7,6 +7,7 @@ import ClientInfoCard from "../../../../../components/ClientInfoCard";
 import ClientProvider from "@app/providers/ClientProvider";
 import { redirect } from "next/navigation";
 import { HorizontalTabs } from "@app/components/HorizontalTabs";
+import { getTranslations } from "next-intl/server";
 
 type SettingsLayoutProps = {
     children: React.ReactNode;
@@ -30,10 +31,16 @@ export default async function SettingsLayout(props: SettingsLayoutProps) {
         redirect(`/${params.orgId}/settings/clients`);
     }
 
+    const t = await getTranslations();
+
     const navItems = [
         {
-            title: "General",
+            title: t('general'),
             href: `/{orgId}/settings/clients/{clientId}/general`
+        },
+        {
+            title: t('credentials'),
+            href: `/{orgId}/settings/clients/{clientId}/credentials`
         }
     ];
 
