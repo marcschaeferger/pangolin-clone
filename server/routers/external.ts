@@ -601,9 +601,14 @@ authenticated.get(`/org/:orgId/overview`, verifyOrgAccess, org.getOrgOverview);
 
 authenticated.post(
     `/supporter-key/validate`,
+    verifyUserIsServerAdmin,
     supporterKey.validateSupporterKey
 );
-authenticated.post(`/supporter-key/hide`, supporterKey.hideSupporterKey);
+authenticated.post(
+    `/supporter-key/hide`,
+    verifyUserIsServerAdmin,
+    supporterKey.hideSupporterKey
+);
 
 unauthenticated.get(
     "/resource/:resourceGuid/auth",
